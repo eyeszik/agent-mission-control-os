@@ -1,0 +1,34 @@
+openapi: 3.0.3
+info:
+  title: Agent Mission Control API
+  version: 0.1.0
+  description: API for managing LangGraph runs, artifacts, events, and approvals.
+paths:
+  /runs:
+    post:
+      summary: Create a new run
+      responses:
+        '201':
+          description: Run created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentRun'
+  /runs/{run_id}/events:
+    get:
+      summary: Stream events for a run (SSE)
+      parameters:
+        - in: path
+          name: run_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: SSE stream of RunEvents
+components:
+  schemas:
+    AgentRun:
+      type: object
+      # Scaffold, fully defined in Zod/Pydantic

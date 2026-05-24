@@ -1,0 +1,25 @@
+name = "agent-mission-control-os-worker"
+main = "worker.ts"
+compatibility_date = "2023-10-30"
+
+# Do not include real Account IDs or Zone IDs here.
+# account_id = "[VOID_DETECTED]"
+
+[vars]
+ENVIRONMENT = "dev"
+
+# [[kv_namespaces]]
+# binding = "KV_CACHE"
+# id = "[VOID_DETECTED]"
+
+# [[r2_buckets]]
+# binding = "R2_ARTIFACTS"
+# bucket_name = "[VOID_DETECTED]"
+
+# [[durable_objects.bindings]]
+# name = "PROJECT_COORDINATOR"
+# class_name = "ProjectCoordinatorDO"
+
+# [[migrations]]
+# tag = "v1"
+# new_classes = ["ProjectCoordinatorDO"]
