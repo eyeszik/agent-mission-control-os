@@ -1,0 +1,188 @@
+{
+  "bundle": "agent_spec_bundle",
+  "created_at": "2026-05-22T00:00:00-07:00",
+  "status": "complete_requires_review",
+  "recommended_next_action": "Push to GitHub, connect repo to Codex, run Phase 0 audit only.",
+  "files": [
+    {
+      "path": ".codex/config.toml",
+      "sha256": "608b478345e9a058a879b1c791d29d88e59aad3a59ff40f9ad5f2f8b47af32ce",
+      "bytes": 493
+    },
+    {
+      "path": ".env.example",
+      "sha256": "abca7dd10681ded2164731ebc6bd679a0b0a2777f679d880d5cc95baa722b258",
+      "bytes": 247
+    },
+    {
+      "path": ".github/pull_request_template.md",
+      "sha256": "b50a874bb51aa4a4bb412067c605671d8972883729380ac069a3d1afbacd05c3",
+      "bytes": 458
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "915a9a0dd32609c8b14805dddcff54db651861ed9bb7b87616e897a3db3dd6f6",
+      "bytes": 256
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "cb8d8ad54b2b0f534d44eab677f0d99a5df91cb74038813e3e05b35c5d5a7f76",
+      "bytes": 981
+    },
+    {
+      "path": "README.md",
+      "sha256": "20cc39efdfb1207f191ef672b015c37cbe30762e3908fd0eca781de5a322b168",
+      "bytes": 2223
+    },
+    {
+      "path": "STEP_BY_STEP_GITHUB_CODEX_GUIDE.md",
+      "sha256": "5757345f6240364630a5c718ea01c1c69d679a8ba78166a7eadc8cd6130c4ef9",
+      "bytes": 6478
+    },
+    {
+      "path": "WORKING_DRAFT.json",
+      "sha256": "c86b5b24e0d7a05ff617c2830b718ebd3aebfe759873de0d0c9039047f8ae886",
+      "bytes": 2930
+    },
+    {
+      "path": "approval_decision.json",
+      "sha256": "c05edf4427a225a74b5b766af01b1af01c1de3ec73c191fc647ecaa49e56809e",
+      "bytes": 1807
+    },
+    {
+      "path": "assumption_ledger.json",
+      "sha256": "fb28acfdeae41550337db748a5c40514addcd7c9ec281a5048a6711ced0422b9",
+      "bytes": 2039
+    },
+    {
+      "path": "claim_registry.json",
+      "sha256": "61b1b81e03bc0bc3304d27ab254d89aa3bd81f2b6b413b7b922af4516b7cf519",
+      "bytes": 6458
+    },
+    {
+      "path": "codex/codex_file_handoff_matrix.md",
+      "sha256": "989d3d4c8f2f03bba1eef6f2d26b02bf0acadf595bb5ab6e9a91cebb2ca8f1b1",
+      "bytes": 1470
+    },
+    {
+      "path": "codex/codex_implementation_prompt.md",
+      "sha256": "b72ef927d618729bdef0cdf5d3aa301aee129b4532b8e7c62d58c78a75041d86",
+      "bytes": 4401
+    },
+    {
+      "path": "codex/codex_phase_plan.md",
+      "sha256": "3c2af754e2c5032cb21fb098efc7939c9c9ba4f152e4f5ee3acfb9e5211bd413",
+      "bytes": 1839
+    },
+    {
+      "path": "constraint_ledger.yaml",
+      "sha256": "fcabf86d9b3423d8c35fe202bdf8737749e0973c5c229f0e6430ee2be5059404",
+      "bytes": 2470
+    },
+    {
+      "path": "contract_architecture.json",
+      "sha256": "87ddf66ca6ecbc416d9f8ae135702a871974afd721c71c802c59d8bad3f67d18",
+      "bytes": 3665
+    },
+    {
+      "path": "execution_blueprint.json",
+      "sha256": "a5df2764cc2e03ed48084c644b7914a3066bbaed99f27676374026773859f994",
+      "bytes": 3344
+    },
+    {
+      "path": "execution_flow.json",
+      "sha256": "6e8b360a7611395e1e86c495a79152c0ee9fe68470c8108023492fccf5623838",
+      "bytes": 7862
+    },
+    {
+      "path": "execution_trace.schema.json",
+      "sha256": "d9bdc488e4bfbfbbe9a8406f35eb871b04559971312e98f6c303c459badc4e8d",
+      "bytes": 2723
+    },
+    {
+      "path": "final_artifact_bundle.json",
+      "sha256": "9b1689ee1c3796d335a415e34015d2461f8c500d897990e1a4c9c8057c673611",
+      "bytes": 5285
+    },
+    {
+      "path": "fsm_spec.json",
+      "sha256": "3b7005e0aab469279685b757af0f80207631f0650152c51ec8facc390e670ab6",
+      "bytes": 4818
+    },
+    {
+      "path": "github/github_setup_guide.md",
+      "sha256": "28d01843e5fb079ee5735625a7cdf850544231267920823c3e4c345880f115f4",
+      "bytes": 687
+    },
+    {
+      "path": "github/repo_bootstrap_commands.sh",
+      "sha256": "237503d63f8a3e012687e2ce55c1eed7971212c956a592027f3552406be27614",
+      "bytes": 454
+    },
+    {
+      "path": "governance_decisions.json",
+      "sha256": "0e46d53527e968a611697d11a5eff4779545c9e187cc2bc214db562360551a42",
+      "bytes": 4249
+    },
+    {
+      "path": "mcp_integration_spec.json",
+      "sha256": "52e80acd7d893e229fa7f943437354d2d4f2ac0bd078392b7c2c7c472d265bea",
+      "bytes": 2255
+    },
+    {
+      "path": "observability_hooks.yaml",
+      "sha256": "19557b738af964eaa704162e3a3decd55d9f4f97d88d6b853e3abaeaf818d80c",
+      "bytes": 2969
+    },
+    {
+      "path": "requirements_extract.json",
+      "sha256": "41046252a547c02326e9bd93f7e4d78f5033781de435c0def098e401b894cff8",
+      "bytes": 5325
+    },
+    {
+      "path": "risk_matrix.csv",
+      "sha256": "024f1b68a940c857f3e74450459dee698220a3e97c2f23f759570627cda19102",
+      "bytes": 2444
+    },
+    {
+      "path": "risk_register.json",
+      "sha256": "5ad85697cf4358b44d0cbaefbd3371dcde5ceea1ee913243dbafe34edd9edb2c",
+      "bytes": 7014
+    },
+    {
+      "path": "role_orchestration.json",
+      "sha256": "cd2fa467dca98a15640d92e81474a8bad9a3e16c4248d429ebff390c1e61c6a2",
+      "bytes": 7571
+    },
+    {
+      "path": "runtime_topology.yaml",
+      "sha256": "98aca4e3ee3b2dc4459e1fc53db64d9550e5e7144766ba110d0bff85c14fdbc5",
+      "bytes": 3177
+    },
+    {
+      "path": "streaming_resilience_spec.json",
+      "sha256": "deb333bbd67129e496745923f0da608a96ebda0d01d739a1c2c2281bfb511e86",
+      "bytes": 1653
+    },
+    {
+      "path": "system_layers.json",
+      "sha256": "9d55f9625c3c799547b13546d68c00d61b94b3004967c44d302eb6dd763ec407",
+      "bytes": 8192
+    },
+    {
+      "path": "task_dag.json",
+      "sha256": "6e3134ef0bb248e301d14f96dfd121ebd6cde86387e181baeabed35723f90024",
+      "bytes": 13034
+    },
+    {
+      "path": "tool_proof_log.json",
+      "sha256": "50e75fd8a41fd981d3a58f58331377bf4dcd40e7a9bc0796d9e76c322c9b2534",
+      "bytes": 3157
+    },
+    {
+      "path": "validation_report.json",
+      "sha256": "f0f182a44181cfd3397094062a98df97e686e7e5bddd0d173c13251e2f19ad6b",
+      "bytes": 1974
+    }
+  ]
+}

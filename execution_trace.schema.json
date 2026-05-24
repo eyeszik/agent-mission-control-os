@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "execution_trace.schema.json",
+  "title": "ExecutionTrace",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "timestamp_utc",
+    "agent_runtime",
+    "task_id",
+    "role_id",
+    "action",
+    "input_refs",
+    "output_refs",
+    "tool_proof_refs",
+    "claim_refs",
+    "validation_status",
+    "risk_ids",
+    "confidence",
+    "decision",
+    "next_action",
+    "redactions_applied"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "agent_runtime": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^T[0-9]{2}$"
+    },
+    "role_id": {
+      "type": "string",
+      "pattern": "^[A-P]$"
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "output_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tool_proof_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^TP-[0-9]{3}$"
+      }
+    },
+    "claim_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^C-[0-9]{3}$"
+      }
+    },
+    "validation_status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "warning",
+        "blocked"
+      ]
+    },
+    "risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^R-[0-9]{3}$"
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "continue",
+        "retry",
+        "escalate",
+        "block",
+        "complete"
+      ]
+    },
+    "next_action": {
+      "type": "string"
+    },
+    "redactions_applied": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "schema_version": {
+      "type": "string",
+      "default": "1.0.0"
+    },
+    "artifact_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "handoff_hash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "idempotency_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "retry_safe",
+        "guarded_retry",
+        "non_retryable",
+        null
+      ]
+    },
+    "stop_continue_rule": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

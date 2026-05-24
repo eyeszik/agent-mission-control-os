@@ -1,0 +1,196 @@
+{
+  "fsm_spec": {
+    "states": [
+      "draft",
+      "preflight",
+      "requirements_extracted",
+      "assumptions_constrained",
+      "dag_compiled",
+      "architecture_compiled",
+      "contracts_compiled",
+      "fsm_compiled",
+      "tool_protocol_compiled",
+      "streaming_compiled",
+      "runtime_topology_compiled",
+      "governance_pending",
+      "governance_passed",
+      "governance_failed",
+      "validation_pending",
+      "validated",
+      "requires_review",
+      "blocked",
+      "complete"
+    ],
+    "events": [
+      "START",
+      "PARSE_INPUT",
+      "EXTRACT_REQUIREMENTS",
+      "WRITE_ASSUMPTIONS",
+      "WRITE_CONSTRAINTS",
+      "BUILD_DAG",
+      "COMPILE_ARCHITECTURE",
+      "COMPILE_CONTRACTS",
+      "COMPILE_FSM",
+      "COMPILE_TOOL_PROTOCOL",
+      "COMPILE_STREAMING",
+      "COMPILE_RUNTIME_TOPOLOGY",
+      "RUN_GOVERNANCE",
+      "RUN_VALIDATION",
+      "USER_CONTINUE",
+      "USER_STOP",
+      "VOID_DETECTED",
+      "SCHEMA_MISMATCH",
+      "AUDITOR_FAIL",
+      "LOW_CONFIDENCE",
+      "BLOCK",
+      "COMPLETE"
+    ],
+    "guards": [
+      {
+        "guard_id": "G01",
+        "name": "input_present",
+        "condition": "RAW_PROMPT is non-empty",
+        "on_fail": "blocked"
+      },
+      {
+        "guard_id": "G02",
+        "name": "allowed_task",
+        "condition": "task does not require prohibited action",
+        "on_fail": "requires_review"
+      },
+      {
+        "guard_id": "G03",
+        "name": "source_claims_classified",
+        "condition": "all factual claims have status",
+        "on_fail": "requires_review"
+      },
+      {
+        "guard_id": "G04",
+        "name": "contracts_before_runtime",
+        "condition": "contracts exist before runtime implementation",
+        "on_fail": "blocked"
+      },
+      {
+        "guard_id": "G05",
+        "name": "idempotency_classified",
+        "condition": "every task has idempotency class",
+        "on_fail": "blocked"
+      },
+      {
+        "guard_id": "G06",
+        "name": "governance_threshold_met",
+        "condition": "auditors pass or escalate",
+        "on_fail": "requires_review"
+      }
+    ],
+    "actions": [
+      "initialize_working_draft",
+      "append_changelog_entry",
+      "append_claim_registry_entry",
+      "append_tool_proof",
+      "emit_void_detected",
+      "block_or_escalate",
+      "validate_artifact_schema"
+    ],
+    "terminal_states": [
+      "complete",
+      "blocked"
+    ],
+    "failure_states": [
+      "governance_failed",
+      "blocked",
+      "requires_review"
+    ],
+    "recovery_states": [
+      "requires_review",
+      "preflight",
+      "architecture_compiled",
+      "contracts_compiled",
+      "validation_pending"
+    ],
+    "transition_matrix": [
+      {
+        "from": "draft",
+        "event": "START",
+        "to": "preflight"
+      },
+      {
+        "from": "preflight",
+        "event": "EXTRACT_REQUIREMENTS",
+        "to": "requirements_extracted"
+      },
+      {
+        "from": "requirements_extracted",
+        "event": "WRITE_ASSUMPTIONS",
+        "to": "assumptions_constrained"
+      },
+      {
+        "from": "assumptions_constrained",
+        "event": "BUILD_DAG",
+        "to": "dag_compiled"
+      },
+      {
+        "from": "dag_compiled",
+        "event": "USER_CONTINUE",
+        "to": "architecture_compiled"
+      },
+      {
+        "from": "architecture_compiled",
+        "event": "COMPILE_CONTRACTS",
+        "to": "contracts_compiled"
+      },
+      {
+        "from": "contracts_compiled",
+        "event": "COMPILE_FSM",
+        "to": "fsm_compiled"
+      },
+      {
+        "from": "fsm_compiled",
+        "event": "COMPILE_TOOL_PROTOCOL",
+        "to": "tool_protocol_compiled"
+      },
+      {
+        "from": "tool_protocol_compiled",
+        "event": "COMPILE_STREAMING",
+        "to": "streaming_compiled"
+      },
+      {
+        "from": "streaming_compiled",
+        "event": "COMPILE_RUNTIME_TOPOLOGY",
+        "to": "runtime_topology_compiled"
+      },
+      {
+        "from": "runtime_topology_compiled",
+        "event": "USER_CONTINUE",
+        "to": "governance_pending"
+      },
+      {
+        "from": "governance_pending",
+        "event": "RUN_GOVERNANCE",
+        "to": "governance_passed"
+      },
+      {
+        "from": "governance_passed",
+        "event": "RUN_VALIDATION",
+        "to": "validation_pending"
+      },
+      {
+        "from": "validation_pending",
+        "event": "COMPLETE",
+        "to": "complete"
+      },
+      {
+        "from": "*",
+        "event": "VOID_DETECTED",
+        "to": "requires_review"
+      },
+      {
+        "from": "*",
+        "event": "SCHEMA_MISMATCH",
+        "to": "blocked"
+      }
+    ],
+    "invalid_transition_policy": "reject_and_log",
+    "exhaustiveness_strategy": "compile_time_where_supported_runtime_otherwise"
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "final_artifact_bundle": {
+    "bundle_id": "agent_spec_bundle_001",
+    "version": "1.0.0",
+    "status": "complete_requires_review",
+    "routing": "ESCALATE",
+    "overall_confidence": 0.79,
+    "artifacts": [
+      {
+        "filename": "execution_blueprint.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "README.md",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "requirements_extract.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "assumption_ledger.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "constraint_ledger.yaml",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "task_dag.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "system_layers.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "contract_architecture.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "fsm_spec.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "mcp_integration_spec.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "streaming_resilience_spec.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "runtime_topology.yaml",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass_with_notes"
+      },
+      {
+        "filename": "governance_decisions.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass_with_notes"
+      },
+      {
+        "filename": "risk_register.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "execution_flow.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "risk_matrix.csv",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "role_orchestration.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "claim_registry.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "tool_proof_log.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "validation_report.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass_with_notes"
+      },
+      {
+        "filename": "approval_decision.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "observability_hooks.yaml",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "execution_trace.schema.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "WORKING_DRAFT.json",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      },
+      {
+        "filename": "CHANGELOG.md",
+        "status": "emitted",
+        "stage": "multi_stage",
+        "validation_status": "pass"
+      }
+    ],
+    "open_flags": [
+      "FLAG-REPO-NOT-PROVIDED",
+      "FLAG-VERSIONS-NULL-UNTIL-REPO-AUDIT",
+      "FLAG-CLOUDFLARE-BINDINGS-UNVERIFIED",
+      "FLAG-OBSERVABILITY-ADAPTERS-UNVERIFIED",
+      "FLAG-MCP-TRANSPORTS-UNVERIFIED",
+      "FLAG-SEC-DISSENT-BLOCKS-PRODUCTION",
+      "FLAG-RUNTIME-SCHEMA-VALIDATION-NOT-EXECUTED"
+    ],
+    "blocked_actions": [
+      "production_deployment",
+      "infrastructure_mutation",
+      "external_write_execution",
+      "irreversible_action_execution",
+      "credential_handling",
+      "unverified_tool_execution",
+      "provider_specific_adapter_claims_without_docs",
+      "production_readiness_claim"
+    ],
+    "safe_actions": [
+      "architecture_review",
+      "prompt refinement",
+      "mock-only scaffold planning",
+      "schema export",
+      "test plan expansion",
+      "repo audit"
+    ],
+    "approval_required_before": [
+      "implementation",
+      "deployment",
+      "credentialed integration",
+      "external write",
+      "production adapter generation",
+      "regulated data handling"
+    ]
+  }
+}

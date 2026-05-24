@@ -1,0 +1,55 @@
+{
+  "approval_decision": {
+    "routing": "ESCALATE",
+    "overall_confidence": 0.79,
+    "governance_status": "PASS_WITH_NOTES",
+    "human_review_required": true,
+    "reasons": [
+      "SEC dissent exists and escalates regardless of majority.",
+      "No repository was provided for implementation-specific validation.",
+      "Cloudflare bindings and deployment topology remain unverified.",
+      "External observability and tool integration contracts remain unverified.",
+      "Runtime schema validation was not executed."
+    ],
+    "blocking_issues": [
+      {
+        "id": "BLOCK-001",
+        "issue": "Repository context unavailable."
+      },
+      {
+        "id": "BLOCK-002",
+        "issue": "Cloudflare bindings unverified."
+      },
+      {
+        "id": "BLOCK-003",
+        "issue": "External API/tool contracts unverified."
+      },
+      {
+        "id": "BLOCK-004",
+        "issue": "SEC dissent blocks release."
+      }
+    ],
+    "safe_next_steps": [
+      "Review the architecture bundle.",
+      "Provide repository access if implementation is desired.",
+      "Run repo audit for package versions/scripts/paths.",
+      "Verify Cloudflare bindings before edge deployment.",
+      "Verify optional provider API contracts before adapter generation.",
+      "Run machine schema validation and hash generation if artifacts are exported as files."
+    ],
+    "allowed_next_actions_without_additional_review": [
+      "architecture_review",
+      "mock-only scaffold planning",
+      "schema export",
+      "test plan expansion",
+      "repo audit"
+    ],
+    "disallowed_next_actions_without_additional_review": [
+      "deploy infrastructure",
+      "handle secrets",
+      "perform external writes",
+      "run irreversible actions",
+      "claim production readiness"
+    ]
+  }
+}

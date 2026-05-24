@@ -1,0 +1,266 @@
+{
+  "execution_flow": {
+    "task_risk_map": [
+      {
+        "task_id": "T01",
+        "failure_modes": [
+          "FP1",
+          "FP4",
+          "FP6",
+          "HFM5"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Continue if requirements are structured and prohibited actions are blocked.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T02",
+        "failure_modes": [
+          "FP2",
+          "HFM6",
+          "HFM8"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Continue if every claim is categorized and unsupported claims are flagged.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T03",
+        "failure_modes": [
+          "FP1",
+          "FP3",
+          "FP6",
+          "HFM9"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Continue if every major target maps to a layer or is flagged.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T04",
+        "failure_modes": [
+          "FP5",
+          "HFM7",
+          "HFM9"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Continue if contracts exist before runtime or UI implementation.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T05",
+        "failure_modes": [
+          "FP7",
+          "HFM1",
+          "HFM4",
+          "HFM10"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Continue if all transitions have guards and invalid transition policy.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T06",
+        "failure_modes": [
+          "FP2",
+          "FP5",
+          "HFM6",
+          "HFM7"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Continue if unverified tools are blocked and mocked, not fabricated.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T07",
+        "failure_modes": [
+          "FP7",
+          "HFM1",
+          "HFM10"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Continue if replay, dedupe, abort, and fallback rules exist.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T08",
+        "failure_modes": [
+          "FP6",
+          "HFM7",
+          "HFM8"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Continue as architecture; block deployment until repo/bindings verified.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T09",
+        "failure_modes": [
+          "FP2",
+          "FP5",
+          "HFM6",
+          "HFM8"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Emit after governance/risk artifacts exist.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T10",
+        "failure_modes": [
+          "FP1",
+          "HFM5",
+          "HFM6"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Continue only if FAIL findings are handled or escalated.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T11",
+        "failure_modes": [
+          "FP1",
+          "FP5",
+          "FP7",
+          "HFM9",
+          "HFM10"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Complete only if validation passes or blocked items are explicit.",
+        "residual_risk": "MEDIUM"
+      },
+      {
+        "task_id": "T12",
+        "failure_modes": [
+          "FP1",
+          "FP3",
+          "FP5",
+          "FP7"
+        ],
+        "mitigations": [
+          "Validate expected schema.",
+          "Log conflicts and unsupported claims.",
+          "Apply stop/continue rule."
+        ],
+        "detection_signals": [
+          "schema_validation_failure",
+          "unsupported_claim_detected",
+          "blocked_action_detected"
+        ],
+        "owner_role": "See role_orchestration.json",
+        "stop_continue_rule": "Complete only when final bundle and approval decision exist.",
+        "residual_risk": "MEDIUM"
+      }
+    ]
+  }
+}

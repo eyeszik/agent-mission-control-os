@@ -1,0 +1,13 @@
+risk_id,task_id,failure_mode,severity,likelihood,mitigation,detection_signal,owner_role,confidence,stop_condition
+R-001,T08,HFM7,MEDIUM,HIGH,Require repo audit before coding.,missing_repo_tree_or_lockfile,B,0.9,Block or escalate if unresolved before implementation/release
+R-002,T08,HFM7,MEDIUM,MEDIUM,Scaffold conditional Cloudflare layer; mark verification [VOID_DETECTED].,missing_wrangler_config_or_binding_types,O,0.86,Block or escalate if unresolved before implementation/release
+R-003,T09,HFM8,MEDIUM,MEDIUM,Use local evaluator first; create stubs until verified.,adapter_without_verified_contract,H,0.82,Block or escalate if unresolved before implementation/release
+R-004,T08,FP6,LOW,MEDIUM,Require analyzer proof after implementation.,bundle_analyzer_missing_or_budget_exceeded,E,0.76,Block or escalate if unresolved before implementation/release
+R-005,T12,FP3,MEDIUM,MEDIUM,Preserve staged execution.,artifact_count_exceeds_stage_scope,A,0.84,Block or escalate if unresolved before implementation/release
+R-006,T06,HFM6,MEDIUM,MEDIUM,Use typed [VOID_DETECTED] stubs and mocks.,tool_descriptor_missing_verified_schema,C,0.84,Block or escalate if unresolved before implementation/release
+R-007,T05,HFM4,MEDIUM,MEDIUM,Constrain determinism to contracts/FSM/checkpoints/validation.,unscored_model_output_or_missing_confidence,G,0.82,Block or escalate if unresolved before implementation/release
+R-008,T10,HFM5,HIGH,MEDIUM,Apply redaction/safe_payload filtering/secret scanning/SEC veto.,secret_detected_or_pii_in_frontend_payload,N,0.82,Block or escalate if unresolved before implementation/release
+R-009,T07,HFM1,MEDIUM,MEDIUM,"Use offsets, Last-Event-ID, event_id dedupe, checkpoint hydration.",event_gap_detected_or_duplicate_hash_mismatch,P,0.8,Block or escalate if unresolved before implementation/release
+R-010,T08,HFM10,MEDIUM,MEDIUM,Shard by tenant/project/run hash; keep canonical state outside DO memory.,coordination_hotspot_or_cross_run_leakage,O,0.84,Block or escalate if unresolved before implementation/release
+R-011,T10,HFM6,HIGH,LOW,"Require approval gates, confirmation, and audit entries.",irreversible_action_without_approval,I,0.83,Block or escalate if unresolved before implementation/release
+R-012,T02,HFM8,MEDIUM,MEDIUM,Maintain claim registry and verify time-sensitive claims.,unsupported_version_api_platform_or_performance_claim,K,0.81,Block or escalate if unresolved before implementation/release

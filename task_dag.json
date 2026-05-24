@@ -1,0 +1,514 @@
+{
+  "tasks": [
+    {
+      "task_id": "T01",
+      "title": "intake_normalization",
+      "objective": "Parse RAW_PROMPT, CONTEXT, tools, non-goals, and staged rules into normalized requirements.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "requirements_extract.json"
+      ],
+      "dependencies": [],
+      "expected_output_schema": "requirements_extract",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [
+        "web",
+        "files_uploaded_in_conversation"
+      ],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP1",
+        "FP4",
+        "FP6",
+        "HFM5"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Continue if requirements are structured and prohibited actions are blocked."
+    },
+    {
+      "task_id": "T02",
+      "title": "source_freshness_planning",
+      "objective": "Classify claims requiring current verification and map each to source, tool proof, or assumption.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "claim_registry.json"
+      ],
+      "dependencies": [
+        "T01"
+      ],
+      "expected_output_schema": "claim_registry",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [
+        "web",
+        "files_uploaded_in_conversation"
+      ],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP2",
+        "HFM6",
+        "HFM8"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Continue if every claim is categorized and unsupported claims are flagged."
+    },
+    {
+      "task_id": "T03",
+      "title": "system_layer_mapping",
+      "objective": "Map source guide into system layers for frontend, backend, edge, contracts, orchestration, observability, and governance.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "system_layers.json"
+      ],
+      "dependencies": [
+        "T01",
+        "T02"
+      ],
+      "expected_output_schema": "system_layers",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP1",
+        "FP3",
+        "FP6",
+        "HFM9"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Continue if every major target maps to a layer or is flagged."
+    },
+    {
+      "task_id": "T04",
+      "title": "contract_architecture",
+      "objective": "Define OpenAPI-or-equivalent contracts, schema generation flow, runtime validation, and drift detection.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "contract_architecture.json"
+      ],
+      "dependencies": [
+        "T03"
+      ],
+      "expected_output_schema": "contract_architecture",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP5",
+        "HFM7",
+        "HFM9"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Continue if contracts exist before runtime or UI implementation."
+    },
+    {
+      "task_id": "T05",
+      "title": "fsm_orchestration",
+      "objective": "Compile deterministic orchestration states, events, guards, actions, and recovery transitions.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "fsm_spec.json"
+      ],
+      "dependencies": [
+        "T03",
+        "T04"
+      ],
+      "expected_output_schema": "fsm_spec",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP7",
+        "HFM1",
+        "HFM4",
+        "HFM10"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Continue if all transitions have guards and invalid transition policy."
+    },
+    {
+      "task_id": "T06",
+      "title": "tool_protocol_mapping",
+      "objective": "Define MCP-style tool discovery, auth boundaries, schema validation, least-privilege rules, and failure recovery.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "mcp_integration_spec.json"
+      ],
+      "dependencies": [
+        "T04"
+      ],
+      "expected_output_schema": "mcp_integration_spec",
+      "idempotency_class": "guarded_retry",
+      "authorized_tools": [],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP2",
+        "FP5",
+        "HFM6",
+        "HFM7"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Continue if unverified tools are blocked and mocked, not fabricated."
+    },
+    {
+      "task_id": "T07",
+      "title": "streaming_resilience",
+      "objective": "Define resumable SSE or equivalent streaming with event envelopes, offsets, replay, dedupe, abort, and retention policies.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "streaming_resilience_spec.json"
+      ],
+      "dependencies": [
+        "T04",
+        "T05"
+      ],
+      "expected_output_schema": "streaming_resilience_spec",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP7",
+        "HFM1",
+        "HFM10"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Continue if replay, dedupe, abort, and fallback rules exist."
+    },
+    {
+      "task_id": "T08",
+      "title": "runtime_topology",
+      "objective": "Define edge runtime, backend, frontend, persistence, replay buffer, audit log, and optional local inference topology.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "runtime_topology.yaml"
+      ],
+      "dependencies": [
+        "T03"
+      ],
+      "expected_output_schema": "runtime_topology",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP6",
+        "HFM7",
+        "HFM8"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Continue as architecture; block deployment until repo/bindings verified."
+    },
+    {
+      "task_id": "T09",
+      "title": "observability_mapping",
+      "objective": "Define diagnostics, tracing, telemetry, quality scoring, claim proof, tool proof, and execution trace schema.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "observability_hooks.yaml"
+      ],
+      "dependencies": [
+        "T05",
+        "T07"
+      ],
+      "expected_output_schema": "observability_hooks",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP2",
+        "FP5",
+        "HFM6",
+        "HFM8"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Emit after governance/risk artifacts exist."
+    },
+    {
+      "task_id": "T10",
+      "title": "governance_review",
+      "objective": "Run LEG, ETH, SEC, and RG auditors with confidence thresholds, veto rules, dissent escalation, and human review triggers.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "governance_decisions.json"
+      ],
+      "dependencies": [
+        "T01",
+        "T02",
+        "T08"
+      ],
+      "expected_output_schema": "governance_decisions",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP1",
+        "HFM5",
+        "HFM6"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Continue only if FAIL findings are handled or escalated."
+    },
+    {
+      "task_id": "T11",
+      "title": "validation",
+      "objective": "Run completeness, format, consistency, evidence, security, governance, and loop checks.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "validation_report.json"
+      ],
+      "dependencies": [
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T07",
+        "T08",
+        "T09",
+        "T10"
+      ],
+      "expected_output_schema": "validation_report",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP1",
+        "FP5",
+        "FP7",
+        "HFM9",
+        "HFM10"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Complete only if validation passes or blocked items are explicit."
+    },
+    {
+      "task_id": "T12",
+      "title": "final_artifact_emission",
+      "objective": "Emit final deterministic artifact bundle with README, approval decision, WORKING_DRAFT, and CHANGELOG.",
+      "inputs": [
+        "prior_artifacts"
+      ],
+      "method": "Compile according to AGENT-SPEC and source constraints.",
+      "outputs": [
+        "final_artifact_bundle.json"
+      ],
+      "dependencies": [
+        "T11"
+      ],
+      "expected_output_schema": "final_artifact_bundle",
+      "idempotency_class": "retry_safe",
+      "authorized_tools": [],
+      "acceptance_checks": [
+        "Schema is explicit.",
+        "Unsupported claims are flagged.",
+        "No prohibited action occurs."
+      ],
+      "failure_modes": [
+        "FP1",
+        "FP3",
+        "FP5",
+        "FP7"
+      ],
+      "risk_level": "MEDIUM",
+      "confidence_target": 0.8,
+      "stop_continue_rule": "Complete only when final bundle and approval decision exist."
+    }
+  ],
+  "edges": [
+    [
+      "T01",
+      "T02"
+    ],
+    [
+      "T01",
+      "T03"
+    ],
+    [
+      "T02",
+      "T03"
+    ],
+    [
+      "T03",
+      "T04"
+    ],
+    [
+      "T03",
+      "T05"
+    ],
+    [
+      "T04",
+      "T05"
+    ],
+    [
+      "T04",
+      "T06"
+    ],
+    [
+      "T04",
+      "T07"
+    ],
+    [
+      "T05",
+      "T07"
+    ],
+    [
+      "T03",
+      "T08"
+    ],
+    [
+      "T05",
+      "T09"
+    ],
+    [
+      "T07",
+      "T09"
+    ],
+    [
+      "T01",
+      "T10"
+    ],
+    [
+      "T02",
+      "T10"
+    ],
+    [
+      "T08",
+      "T10"
+    ],
+    [
+      "T01",
+      "T11"
+    ],
+    [
+      "T02",
+      "T11"
+    ],
+    [
+      "T03",
+      "T11"
+    ],
+    [
+      "T04",
+      "T11"
+    ],
+    [
+      "T05",
+      "T11"
+    ],
+    [
+      "T06",
+      "T11"
+    ],
+    [
+      "T07",
+      "T11"
+    ],
+    [
+      "T08",
+      "T11"
+    ],
+    [
+      "T09",
+      "T11"
+    ],
+    [
+      "T10",
+      "T11"
+    ],
+    [
+      "T11",
+      "T12"
+    ]
+  ],
+  "dag_validation": {
+    "acyclic": true,
+    "orphan_tasks": [],
+    "missing_dependencies": []
+  }
+}

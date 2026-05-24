@@ -1,0 +1,124 @@
+{
+  "contract_architecture": {
+    "contract_source_of_truth": "OpenAPI_or_equivalent",
+    "contract_status": "draft_until_repository_and_runtime_verified",
+    "design_time_contracts": [
+      {
+        "contract_id": "CONTRACT-001",
+        "name": "AgentRunState",
+        "purpose": "Canonical graph/runtime state.",
+        "required_fields": [
+          "tenant_id",
+          "project_id",
+          "user_id",
+          "run_id",
+          "status",
+          "checkpoint_log",
+          "event_log",
+          "artifacts",
+          "approvals",
+          "quality_scores",
+          "errors"
+        ],
+        "generates": [
+          "Pydantic model",
+          "TypeScript type",
+          "Zod schema",
+          "JSON Schema"
+        ],
+        "drift_policy": "block_on_field_mismatch"
+      },
+      {
+        "contract_id": "CONTRACT-002",
+        "name": "RunEvent",
+        "purpose": "Streaming event envelope.",
+        "required_fields": [
+          "event_id",
+          "run_id",
+          "tenant_id",
+          "project_id",
+          "offset",
+          "timestamp_utc",
+          "safe_payload"
+        ],
+        "generates": [
+          "SSE event schema",
+          "frontend event parser"
+        ],
+        "drift_policy": "reject_event_and_log_schema_validation_failure"
+      },
+      {
+        "contract_id": "CONTRACT-003",
+        "name": "ToolDescriptor",
+        "purpose": "External tool discovery/auth/schema/fallback metadata.",
+        "required_fields": [
+          "tool_id",
+          "transport",
+          "input_schema",
+          "output_schema",
+          "permission_scope",
+          "idempotency_class",
+          "verification_status"
+        ],
+        "generates": [
+          "tool registry",
+          "tool validation guard",
+          "mock adapter"
+        ],
+        "drift_policy": "block_tool_execution_until_verified"
+      },
+      {
+        "contract_id": "CONTRACT-004",
+        "name": "ArtifactBundle",
+        "purpose": "Deterministic output artifact structure.",
+        "required_fields": [
+          "artifact_id",
+          "filename",
+          "artifact_type",
+          "schema_version",
+          "content_ref",
+          "confidence",
+          "validation_status",
+          "hash"
+        ],
+        "generates": [
+          "artifact manifest",
+          "README table"
+        ],
+        "drift_policy": "block_final_bundle_if_required_artifact_missing"
+      }
+    ],
+    "runtime_validation": [
+      "Validate API input server-side.",
+      "Validate API output against schema.",
+      "Validate frontend payloads with Zod or equivalent.",
+      "Validate tool input/output.",
+      "Validate stream events.",
+      "Validate artifacts."
+    ],
+    "compile_time_guards": [
+      "Fail CI on contract drift.",
+      "Fail CI on untyped API boundary.",
+      "Fail CI on missing state-transition handling where supported."
+    ],
+    "schema_generation_flow": [
+      "Define canonical contract.",
+      "Generate/mirror backend models.",
+      "Generate/mirror frontend schemas.",
+      "Generate typed clients/stubs.",
+      "Validate request/response/event/artifact payloads.",
+      "Compare schema hashes."
+    ],
+    "breaking_change_policy": [
+      "Increment schema version when required fields, enums, endpoints, event fields, or artifact contracts change.",
+      "Reject breaking changes without migration notes.",
+      "Require governance review for PII/auth/approval/external-write changes."
+    ],
+    "compatibility_flags": [
+      "COMPAT-SSE-CURSOR-V1",
+      "COMPAT-VOID-STUB-V1",
+      "COMPAT-IDEMPOTENCY-V1",
+      "COMPAT-GOVERNANCE-V1"
+    ]
+  }
+}

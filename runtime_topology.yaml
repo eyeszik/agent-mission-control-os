@@ -1,0 +1,68 @@
+runtime_topology:
+  topology:
+    edge_runtime:
+      responsibilities:
+        - "Terminate edge requests where platform bindings are verified."
+        - "Coordinate per-run event fanout through sharded Durable Objects or equivalent runtime."
+        - "Avoid canonical state ownership unless explicitly verified and durable."
+      verification_status: "unverified_until_repo_and_cloudflare_bindings_checked"
+      void_policy: "If bindings are missing, emit [VOID_DETECTED: Cloudflare bindings not verified] and keep local backend runnable."
+    backend_service:
+      responsibilities:
+        - "Own canonical contract validation."
+        - "Own graph orchestration or delegate verified durable steps."
+        - "Own checkpoint persistence."
+        - "Own idempotency ledger."
+        - "Own PII redaction and safe payload filtering."
+      verification_status: "unverified_until_repo_checked"
+      preferred_stack:
+        - "Python"
+        - "FastAPI or equivalent"
+        - "Pydantic or equivalent"
+        - "LangGraph if implementation requested and installed"
+    frontend_client:
+      responsibilities:
+        - "Render Mission Control UI."
+        - "Maintain domain-sharded state."
+        - "Consume typed clients only."
+        - "Subscribe to SSE or verified equivalent streaming."
+        - "Never store raw PII in persistent client storage."
+      verification_status: "unverified_until_repo_checked"
+    persistence:
+      durable_state:
+        preferred: "database_or_langgraph_checkpointer_where_verified"
+        local_default: "SQLite_or_equivalent_only_if_implementation_requested"
+        production_default: "Postgres_or_equivalent_durable_database_after_repo_check"
+      replay_buffer:
+        preferred: "database_table_or_durable_event_store"
+        fallback: "checkpoint_snapshot_refresh"
+      audit_log:
+        preferred: "append_only_log_with_hash_chain"
+        redaction_required: true
+  sharding:
+    durable_object_policy:
+      enabled_when: "Cloudflare layer implemented"
+      shard_key_inputs:
+        - "tenant_id"
+        - "project_id"
+        - "run_id"
+      shard_key_formula: "hash(tenant_id + ':' + project_id + ':' + run_id) modulo configurable_shard_count"
+      anti_bottleneck_rules:
+        - "Never use one global Durable Object for all runs."
+        - "Use one Durable Object or Agent instance per run or bounded run group."
+        - "Store large artifacts outside Durable Object memory."
+        - "Backpressure high-volume event fanout."
+  execution:
+    default_mode: "staged_by_default"
+    implementation_mode: "only_if_explicitly_requested"
+    retry_policy:
+      retry_safe: "retry_with_exponential_jitter_up_to_cap"
+      guarded_retry: "retry_only_with_idempotency_key_and_duplicate_detection"
+      non_retryable: "do_not_retry_without_human_review"
+    worker_crash_recovery:
+      - "Persist checkpoint before and after each node."
+      - "Record completed task IDs and output hashes."
+      - "Load latest checkpoint on resume."
+      - "Skip completed tasks."
+      - "Return cached mutation results for duplicate idempotency keys."
+      - "Pause irreversible actions awaiting approval."

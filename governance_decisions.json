@@ -1,0 +1,122 @@
+{
+  "governance_decisions": {
+    "decisions": [
+      {
+        "auditor": "LEG",
+        "decision": "PASS_WITH_NOTES",
+        "confidence": 0.74,
+        "findings": [
+          {
+            "finding_id": "LEG-F001",
+            "severity": "MEDIUM",
+            "summary": "PII, file, memory/capsule, audit-log, and export concerns require explicit policies."
+          }
+        ],
+        "required_actions": [
+          "Keep secrets_allowed_in_output=false.",
+          "Keep frontend_raw_pii_allowed=false.",
+          "Require third-party export approval.",
+          "Require retention policy before production."
+        ],
+        "human_review_required": true,
+        "dissent": {
+          "exists": false,
+          "reason": null,
+          "escalate_even_if_majority_passes": false
+        }
+      },
+      {
+        "auditor": "ETH",
+        "decision": "PASS_WITH_NOTES",
+        "confidence": 0.76,
+        "findings": [
+          {
+            "finding_id": "ETH-F001",
+            "severity": "MEDIUM",
+            "summary": "AI delegation must preserve user agency and inspectability."
+          }
+        ],
+        "required_actions": [
+          "Avoid dark patterns.",
+          "Show reject/cancel paths.",
+          "Explain uncertainty and [VOID_DETECTED] gaps plainly.",
+          "Prevent background refiners from mutating canonical artifacts without approval."
+        ],
+        "human_review_required": true,
+        "dissent": {
+          "exists": false,
+          "reason": null,
+          "escalate_even_if_majority_passes": false
+        }
+      },
+      {
+        "auditor": "SEC",
+        "decision": "PASS_WITH_NOTES",
+        "confidence": 0.71,
+        "findings": [
+          {
+            "finding_id": "SEC-F001",
+            "severity": "HIGH",
+            "summary": "External tools, retrieved docs, generated content, and file uploads create injection, SSRF, schema poisoning, and data leakage risks."
+          },
+          {
+            "finding_id": "SEC-F002",
+            "severity": "HIGH",
+            "summary": "Cloudflare/runtime bindings are unverified; deployment and credential handling remain blocked."
+          }
+        ],
+        "required_actions": [
+          "Block real external writes until auth/schema/permissions are verified.",
+          "Require server-side URL allowlists.",
+          "Require typed tool descriptors and schema validation.",
+          "Require no raw PII in frontend payloads."
+        ],
+        "human_review_required": true,
+        "dissent": {
+          "exists": true,
+          "reason": "SEC permits architecture continuation but blocks production deployment and unverified tool execution.",
+          "escalate_even_if_majority_passes": true
+        }
+      },
+      {
+        "auditor": "RG",
+        "decision": "PASS_WITH_NOTES",
+        "confidence": 0.72,
+        "findings": [
+          {
+            "finding_id": "RG-F001",
+            "severity": "MEDIUM",
+            "summary": "The artifact set is large and requires staged execution."
+          }
+        ],
+        "required_actions": [
+          "Preserve staged execution.",
+          "Require repository audit before implementation.",
+          "Treat bundle budget as target until analyzer output exists."
+        ],
+        "human_review_required": true,
+        "dissent": {
+          "exists": false,
+          "reason": null,
+          "escalate_even_if_majority_passes": false
+        }
+      }
+    ],
+    "mandatory_human_reviews": [
+      "production_deployment_or_infrastructure_mutation",
+      "external_write_or_irreversible_action",
+      "credential_or_secret_handling",
+      "regulated_or_sensitive_PII_processing",
+      "confidence_below_threshold_or_auditor_dissent"
+    ],
+    "veto_rules": [
+      "Any SEC critical finding blocks release.",
+      "Any regulated-domain trigger requires human review.",
+      "Any non_retryable failed task requires human review before retry.",
+      "Any fake citation, fake tool proof, or fabricated endpoint blocks final approval."
+    ],
+    "overall_governance_status": "PASS_WITH_NOTES",
+    "overall_confidence": 0.73,
+    "release_readiness": "not_release_ready_without_repo_audit_and_stage_4_validation"
+  }
+}

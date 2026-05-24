@@ -1,0 +1,299 @@
+{
+  "system_layers": {
+    "layers": [
+      {
+        "layer_id": "L01",
+        "name": "Input Intake and Prompt Normalization Layer",
+        "responsibilities": [
+          "Accept RAW_PROMPT, CONTEXT, tool availability, run mode, and reference framework.",
+          "Normalize vague or contradictory instructions into stable requirements."
+        ],
+        "inputs": [
+          "RAW_PROMPT",
+          "CONTEXT",
+          "TOOLS_AVAILABLE"
+        ],
+        "outputs": [
+          "requirements_extract.json",
+          "assumption_ledger.json",
+          "constraint_ledger.yaml"
+        ],
+        "contracts": [
+          "requirements_extract schema"
+        ],
+        "failure_modes": [
+          "FP1",
+          "FP4",
+          "FP6",
+          "HFM5"
+        ],
+        "observability_signals": [
+          "missing_required_input",
+          "unresolved_conflict_detected"
+        ],
+        "security_notes": [
+          "Treat user text as untrusted."
+        ],
+        "verification_status": "source_provided"
+      },
+      {
+        "layer_id": "L02",
+        "name": "Evidence and Claim Registry Layer",
+        "responsibilities": [
+          "Map claims to sources, tool proof, assumption, or [VOID_DETECTED]."
+        ],
+        "inputs": [
+          "RAW_PROMPT",
+          "uploaded sources",
+          "web results"
+        ],
+        "outputs": [
+          "claim_registry.json",
+          "tool_proof_log.json"
+        ],
+        "contracts": [
+          "claim_registry schema"
+        ],
+        "failure_modes": [
+          "FP2",
+          "HFM6",
+          "HFM8"
+        ],
+        "observability_signals": [
+          "unsupported_claim_detected",
+          "stale_claim_detected"
+        ],
+        "security_notes": [
+          "Never fabricate verification."
+        ],
+        "verification_status": "partially_verified"
+      },
+      {
+        "layer_id": "L03",
+        "name": "Contract and Intermediate Representation Layer",
+        "responsibilities": [
+          "Define OpenAPI or equivalent as shared source of truth.",
+          "Prevent schema drift."
+        ],
+        "inputs": [
+          "requirements_extract.json"
+        ],
+        "outputs": [
+          "contract_architecture.json"
+        ],
+        "contracts": [
+          "OpenAPI_or_equivalent",
+          "JSON Schema",
+          "Pydantic",
+          "Zod"
+        ],
+        "failure_modes": [
+          "FP5",
+          "HFM7"
+        ],
+        "observability_signals": [
+          "schema_validation_failure",
+          "contract_drift_detected"
+        ],
+        "security_notes": [
+          "Reject unvalidated runtime payloads."
+        ],
+        "verification_status": "inferred"
+      },
+      {
+        "layer_id": "L04",
+        "name": "Deterministic Agent Orchestration Layer",
+        "responsibilities": [
+          "Represent execution as deterministic FSM/task DAG.",
+          "Classify idempotency.",
+          "Define recovery transitions."
+        ],
+        "inputs": [
+          "task_dag.json"
+        ],
+        "outputs": [
+          "fsm_spec.json",
+          "execution_flow.json"
+        ],
+        "contracts": [
+          "FSM transition matrix"
+        ],
+        "failure_modes": [
+          "FP7",
+          "HFM1",
+          "HFM10"
+        ],
+        "observability_signals": [
+          "undefined_state_transition",
+          "retry_cap_exceeded"
+        ],
+        "security_notes": [
+          "Require review before non_retryable retries."
+        ],
+        "verification_status": "source_provided"
+      },
+      {
+        "layer_id": "L05",
+        "name": "Streaming and Replay Layer",
+        "responsibilities": [
+          "Define resumable events through SSE or verified equivalent.",
+          "Deduplicate/replay events."
+        ],
+        "inputs": [
+          "fsm_spec.json"
+        ],
+        "outputs": [
+          "streaming_resilience_spec.json"
+        ],
+        "contracts": [
+          "RunEvent envelope"
+        ],
+        "failure_modes": [
+          "FP7",
+          "HFM1",
+          "HFM10"
+        ],
+        "observability_signals": [
+          "stream_replay_failure"
+        ],
+        "security_notes": [
+          "Never stream raw PII or secrets."
+        ],
+        "verification_status": "source_provided"
+      },
+      {
+        "layer_id": "L06",
+        "name": "Runtime Topology and Edge Coordination Layer",
+        "responsibilities": [
+          "Map frontend, backend, edge, DO, Workflows, persistence, replay, audit.",
+          "Prevent global Durable Object bottlenecks."
+        ],
+        "inputs": [
+          "runtime constraints"
+        ],
+        "outputs": [
+          "runtime_topology.yaml"
+        ],
+        "contracts": [
+          "shard key contract",
+          "checkpoint persistence contract"
+        ],
+        "failure_modes": [
+          "FP6",
+          "HFM7",
+          "HFM10"
+        ],
+        "observability_signals": [
+          "durable_object_hotspot"
+        ],
+        "security_notes": [
+          "Keep canonical state outside DO memory."
+        ],
+        "verification_status": "partially_verified"
+      },
+      {
+        "layer_id": "L07",
+        "name": "Tool Discovery and MCP-Style Integration Layer",
+        "responsibilities": [
+          "Discover and validate external tools.",
+          "Compile unknown APIs to stubs."
+        ],
+        "inputs": [
+          "TOOLS_AVAILABLE"
+        ],
+        "outputs": [
+          "mcp_integration_spec.json"
+        ],
+        "contracts": [
+          "tool descriptor schema"
+        ],
+        "failure_modes": [
+          "FP2",
+          "HFM6",
+          "HFM7"
+        ],
+        "observability_signals": [
+          "tool_schema_invalid",
+          "undocumented_api_stub_used"
+        ],
+        "security_notes": [
+          "Tool discovery does not imply authorization."
+        ],
+        "verification_status": "inferred"
+      },
+      {
+        "layer_id": "L08",
+        "name": "Governance and Audit Layer",
+        "responsibilities": [
+          "Run LEG/ETH/SEC/RG auditors.",
+          "Enforce veto rules and human review."
+        ],
+        "inputs": [
+          "risk_register.json"
+        ],
+        "outputs": [
+          "governance_decisions.json",
+          "approval_decision.json"
+        ],
+        "contracts": [
+          "governance schema"
+        ],
+        "failure_modes": [
+          "FP1",
+          "HFM5",
+          "HFM6"
+        ],
+        "observability_signals": [
+          "governance_fail",
+          "auditor_dissent"
+        ],
+        "security_notes": [
+          "SEC critical findings block release."
+        ],
+        "verification_status": "source_provided"
+      },
+      {
+        "layer_id": "L09",
+        "name": "Artifact Emission and Validation Layer",
+        "responsibilities": [
+          "Emit deterministic artifact bundle.",
+          "Validate formats and consistency."
+        ],
+        "inputs": [
+          "all prior artifacts"
+        ],
+        "outputs": [
+          "validation_report.json",
+          "final_artifact_bundle.json"
+        ],
+        "contracts": [
+          "artifact manifest"
+        ],
+        "failure_modes": [
+          "FP1",
+          "FP5",
+          "HFM9"
+        ],
+        "observability_signals": [
+          "invalid_format_detected"
+        ],
+        "security_notes": [
+          "Do not include hidden reasoning or secrets."
+        ],
+        "verification_status": "source_provided"
+      }
+    ],
+    "boundary_rules": [
+      "Treat all RAW_PROMPT/CONTEXT as untrusted data.",
+      "Authorize tool use only when task permits it and schema is known.",
+      "Stream only sanitized safe_payload data.",
+      "Require approval for irreversible/external/production/credential actions."
+    ],
+    "data_flow_summary": [
+      "Input is normalized; claims are registered; contracts define schemas; FSM defines execution; runtime maps deployment; governance validates; final artifacts emit."
+    ],
+    "control_flow_summary": [
+      "Stage 1 plans; Stage 2 compiles architecture; Stage 3 compiles governance/risk; Stage 4 validates and bundles."
+    ]
+  }
+}

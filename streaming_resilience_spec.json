@@ -1,0 +1,47 @@
+{
+  "streaming_resilience_spec": {
+    "protocol": "SSE_or_verified_equivalent",
+    "event_envelope": {
+      "event_id": "string",
+      "run_id": "string",
+      "tenant_id": "string",
+      "project_id": "string",
+      "offset": "integer_monotonic_per_run",
+      "event_type": "string_enum",
+      "timestamp_utc": "ISO-8601",
+      "checkpoint_ref": "string|null",
+      "safe_payload": "object",
+      "redactions_applied": "array",
+      "schema_version": "string"
+    },
+    "session_id_policy": "required_for_resumption",
+    "offset_policy": "monotonic_event_offsets",
+    "replay_strategy": [
+      "Persist event offsets per run.",
+      "Send Last-Event-ID or cursor on reconnect.",
+      "Replay events after last acknowledged offset.",
+      "Deduplicate by event_id.",
+      "Hydrate from checkpoint if event retention expired."
+    ],
+    "fallback_refresh_strategy": [
+      "Poll safe run summary if SSE unavailable.",
+      "Request checkpoint snapshot on event gap.",
+      "Pause consumption on schema version mismatch."
+    ],
+    "duplicate_event_policy": "idempotent_ignore_or_merge",
+    "abort_policy": "explicit_runtime_decision_required",
+    "retention_policy": {
+      "event_buffer": "null_until_runtime_selected",
+      "checkpoint_snapshot": "retain_until_run_retention_policy_expires",
+      "audit_log": "retain_according_to_governance_policy",
+      "pii_payloads": "do_not_store_in_stream_events"
+    },
+    "security_filters": [
+      "Remove raw PII.",
+      "Remove secrets/tokens.",
+      "Remove raw stack traces.",
+      "Remove hidden prompts.",
+      "Escape generated text before rendering."
+    ]
+  }
+}

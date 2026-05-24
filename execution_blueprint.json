@@ -1,0 +1,63 @@
+{
+  "execution_blueprint": {
+    "name": "deterministic_agent_operating_spec_compiler",
+    "version": "1.0.0",
+    "status": "architecture_bundle_complete_requires_review",
+    "purpose": "Transform a raw prompt into an agent-runnable operational specification for deterministic AI orchestration.",
+    "source_prompt_intent": "Compile the LangGraph + Cloudflare + Next.js Mission Control OS prompt into an executable architecture/specification bundle without fabricated verification, APIs, tool calls, or production readiness.",
+    "runtime_positioning": {
+      "deterministic_scope": [
+        "schemas",
+        "contracts",
+        "FSM transitions",
+        "checkpoint rules",
+        "idempotency rules",
+        "artifact validation",
+        "governance routing",
+        "audit logs"
+      ],
+      "probabilistic_scope": [
+        "LLM synthesis",
+        "semantic interpretation",
+        "quality scoring explanations",
+        "architecture recommendations"
+      ],
+      "rule": "Treat orchestration as deterministic and model outputs as confidence-scored artifacts."
+    },
+    "core_operating_rules": [
+      "Preserve source intent.",
+      "Bind claims to evidence or mark them unverified.",
+      "Define contracts before runtime implementation.",
+      "Classify every task as retry_safe, guarded_retry, or non_retryable.",
+      "Require human approval for irreversible, production, credential, external-write, regulated, or low-confidence actions.",
+      "Use [VOID_DETECTED] for missing docs, unknown APIs, absent repo context, and unavailable verification.",
+      "Never fabricate tool proof, citations, endpoints, SDKs, package versions, logs, benchmarks, or release readiness."
+    ],
+    "minimum_executable_architecture": {
+      "contract_layer": "OpenAPI_or_equivalent",
+      "backend_layer": "Python/FastAPI/Pydantic or equivalent; LangGraph after repo/runtime verification",
+      "frontend_layer": "Next.js/TypeScript/Zod after repo/runtime verification",
+      "orchestration_layer": "FSM/XState-style state machine plus task DAG",
+      "streaming_layer": "SSE or verified equivalent with monotonic offsets and replay",
+      "edge_layer": "Cloudflare Workers/Durable Objects/Workflows only if bindings are verified",
+      "governance_layer": "LEG/ETH/SEC/RG auditors with veto rules",
+      "observability_layer": "execution trace schema, claim registry, tool proof log, failure-mode signals"
+    },
+    "blocking_conditions": [
+      "No repository was provided for implementation-specific validation.",
+      "Cloudflare bindings remain unverified.",
+      "External observability adapters remain unverified.",
+      "MCP/tool transports remain unverified.",
+      "SEC dissent blocks production deployment and unverified tool execution.",
+      "Manual schema validity was structured but not executed through a runtime validator."
+    ],
+    "safe_next_steps": [
+      "Provide repository access for implementation planning.",
+      "Run package/version audit.",
+      "Verify Cloudflare bindings and deployment topology.",
+      "Verify optional external provider APIs before adapter generation.",
+      "Run schema validation with code execution if a machine-readable bundle is exported.",
+      "Request implementation bundle explicitly if production code generation is desired."
+    ]
+  }
+}

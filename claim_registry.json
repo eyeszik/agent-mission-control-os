@@ -1,0 +1,156 @@
+[
+  {
+    "claim_id": "C-001",
+    "claim": "Codex can inspect/edit code and run validation commands in its coding environment.",
+    "claim_type": "platform",
+    "status": "verified",
+    "source_ref": "SRC-WEB-001",
+    "tool_proof_ref": "TP-001",
+    "confidence": 0.86,
+    "risk_if_wrong": "The prompt would overdelegate repository mutation and validation to Codex.",
+    "required_action": "retain_as_verified_but_recheck_at_implementation_time"
+  },
+  {
+    "claim_id": "C-002",
+    "claim": "LangGraph supports persistence/checkpointing of graph state when compiled with a checkpointer.",
+    "claim_type": "platform",
+    "status": "verified",
+    "source_ref": "SRC-WEB-002",
+    "tool_proof_ref": "TP-001",
+    "confidence": 0.9,
+    "risk_if_wrong": "Crash recovery architecture would need a custom persistence mechanism.",
+    "required_action": "retain_as_verified_but_check_installed_langgraph_version"
+  },
+  {
+    "claim_id": "C-003",
+    "claim": "Cloudflare Durable Objects are stateful coordination primitives, but an individual Object can become a bottleneck if used globally.",
+    "claim_type": "platform",
+    "status": "verified",
+    "source_ref": "SRC-WEB-003",
+    "tool_proof_ref": "TP-001",
+    "confidence": 0.88,
+    "risk_if_wrong": "The sharding strategy could be unnecessary or insufficient.",
+    "required_action": "retain_as_verified_and_verify_runtime_limits_before_release"
+  },
+  {
+    "claim_id": "C-004",
+    "claim": "Cloudflare Workflows support durable step execution, retries, and waiting for external events.",
+    "claim_type": "platform",
+    "status": "verified",
+    "source_ref": "SRC-WEB-004",
+    "tool_proof_ref": "TP-001",
+    "confidence": 0.86,
+    "risk_if_wrong": "Long-running workflow design might require alternate runtime such as Temporal, Inngest, or Trigger.dev.",
+    "required_action": "retain_as_verified_and_verify_bindings_before_implementation"
+  },
+  {
+    "claim_id": "C-005",
+    "claim": "Next.js App Router supports React Server Components, Suspense, and Server Functions.",
+    "claim_type": "platform",
+    "status": "verified",
+    "source_ref": "SRC-WEB-005",
+    "tool_proof_ref": "TP-002",
+    "confidence": 0.88,
+    "risk_if_wrong": "Frontend component boundary plan would need adjustment.",
+    "required_action": "retain_as_verified_but_check_repo_next_version"
+  },
+  {
+    "claim_id": "C-006",
+    "claim": "Motion layoutId supports shared layout animations.",
+    "claim_type": "api",
+    "status": "verified",
+    "source_ref": "SRC-WEB-006",
+    "tool_proof_ref": "TP-002",
+    "confidence": 0.87,
+    "risk_if_wrong": "Real-time list reordering animation plan would need replacement.",
+    "required_action": "retain_as_verified_but_check_installed_motion_package"
+  },
+  {
+    "claim_id": "C-007",
+    "claim": "Zod provides TypeScript-first runtime schema validation.",
+    "claim_type": "api",
+    "status": "verified",
+    "source_ref": "SRC-WEB-007",
+    "tool_proof_ref": "TP-002",
+    "confidence": 0.88,
+    "risk_if_wrong": "Runtime validation plan would need another validator.",
+    "required_action": "retain_as_verified_but_check_repo_dependency"
+  },
+  {
+    "claim_id": "C-008",
+    "claim": "Prompt Cascade OS defines N0-N9 graph stages, L0-L3 capsule layers, Cloudflare infrastructure, PII quarantine, deterministic idempotency, and Mission Control UI.",
+    "claim_type": "architecture",
+    "status": "source_provided",
+    "source_ref": "SRC-FILE-001",
+    "tool_proof_ref": "TP-003",
+    "confidence": 0.92,
+    "risk_if_wrong": "Compiled architecture may drift from source intent.",
+    "required_action": "retain_as_source_intent"
+  },
+  {
+    "claim_id": "C-009",
+    "claim": "The frontend skill requires dependency audit, crash-safety tagging, parallelism scan, undocumented API inventory, typed clients before components, sharded state, and governance audit.",
+    "claim_type": "architecture",
+    "status": "source_provided",
+    "source_ref": "SRC-FILE-002",
+    "tool_proof_ref": "TP-003",
+    "confidence": 0.94,
+    "risk_if_wrong": "Generated architecture could skip required build-order constraints.",
+    "required_action": "retain_as_source_intent"
+  },
+  {
+    "claim_id": "C-010",
+    "claim": "A 50KB gzipped initial route bundle delta is an implementation target, not a verified result.",
+    "claim_type": "performance",
+    "status": "inferred",
+    "source_ref": "RAW_PROMPT",
+    "tool_proof_ref": null,
+    "confidence": 0.72,
+    "risk_if_wrong": "Could create unrealistic acceptance criteria before bundle analysis.",
+    "required_action": "retain_as_assumption_and_verify_after_implementation"
+  },
+  {
+    "claim_id": "C-011",
+    "claim": "External observability adapters for LangSmith, DeepEval/Confident AI, and Phoenix can be implemented safely only after current provider contracts and credentials are verified.",
+    "claim_type": "api",
+    "status": "inferred",
+    "source_ref": "RAW_PROMPT",
+    "tool_proof_ref": null,
+    "confidence": 0.8,
+    "risk_if_wrong": "Adapters may be fabricated or insecure.",
+    "required_action": "verify_or_emit_VOID_DETECTED_in_later_stage"
+  },
+  {
+    "claim_id": "C-012",
+    "claim": "No connected repository is currently available for implementation-specific commands, package versions, or file diffs.",
+    "claim_type": "inference",
+    "status": "inferred",
+    "source_ref": "conversation_context",
+    "tool_proof_ref": null,
+    "confidence": 0.9,
+    "risk_if_wrong": "Stage 1 may underuse available repo context.",
+    "required_action": "ask_user_to_provide_repo_or_continue_with_architecture_artifacts"
+  },
+  {
+    "claim_id": "C-013",
+    "claim": "The Stage 3 artifact bundle does not prove release readiness.",
+    "claim_type": "governance",
+    "status": "inferred",
+    "source_ref": "governance_decisions.json",
+    "tool_proof_ref": null,
+    "confidence": 0.86,
+    "risk_if_wrong": "User may interpret planning artifacts as production approval.",
+    "required_action": "retain_as_governance_constraint"
+  },
+  {
+    "claim_id": "C-014",
+    "claim": "SEC permits architecture continuation but blocks production deployment and unverified tool execution.",
+    "claim_type": "security",
+    "status": "inferred",
+    "source_ref": "governance_decisions.json",
+    "tool_proof_ref": null,
+    "confidence": 0.82,
+    "risk_if_wrong": "Unsafe actions could be interpreted as approved.",
+    "required_action": "retain_as_veto_constraint"
+  }
+]

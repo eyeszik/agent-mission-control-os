@@ -1,0 +1,162 @@
+{
+  "risk_register": {
+    "risks": [
+      {
+        "risk_id": "R-001",
+        "category": "runtime_verification",
+        "summary": "Repository-specific versions, packages, routes, commands, and build setup are unverified.",
+        "severity": "MEDIUM",
+        "likelihood": "HIGH",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Require repo audit before coding.",
+        "detection_signal": "missing_repo_tree_or_lockfile",
+        "owner_role": "B",
+        "confidence": 0.9,
+        "status": "open"
+      },
+      {
+        "risk_id": "R-002",
+        "category": "cloudflare_topology",
+        "summary": "Cloudflare bindings and runtime topology are unverified.",
+        "severity": "MEDIUM",
+        "likelihood": "MEDIUM",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Scaffold conditional Cloudflare layer; mark verification [VOID_DETECTED].",
+        "detection_signal": "missing_wrangler_config_or_binding_types",
+        "owner_role": "O",
+        "confidence": 0.86,
+        "status": "open"
+      },
+      {
+        "risk_id": "R-003",
+        "category": "observability_integrations",
+        "summary": "Optional provider adapter contracts are unverified.",
+        "severity": "MEDIUM",
+        "likelihood": "MEDIUM",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Use local evaluator first; create stubs until verified.",
+        "detection_signal": "adapter_without_verified_contract",
+        "owner_role": "H",
+        "confidence": 0.82,
+        "status": "open"
+      },
+      {
+        "risk_id": "R-004",
+        "category": "performance_budget",
+        "summary": "Initial route bundle delta under 50KB is target, not proof.",
+        "severity": "LOW",
+        "likelihood": "MEDIUM",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Require analyzer proof after implementation.",
+        "detection_signal": "bundle_analyzer_missing_or_budget_exceeded",
+        "owner_role": "E",
+        "confidence": 0.76,
+        "status": "open"
+      },
+      {
+        "risk_id": "R-005",
+        "category": "scope_control",
+        "summary": "Large bundle may overproduce irrelevant files.",
+        "severity": "MEDIUM",
+        "likelihood": "MEDIUM",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Preserve staged execution.",
+        "detection_signal": "artifact_count_exceeds_stage_scope",
+        "owner_role": "A",
+        "confidence": 0.84,
+        "status": "mitigated_by_staging"
+      },
+      {
+        "risk_id": "R-006",
+        "category": "tool_contracts",
+        "summary": "Tool/API contracts may be undocumented or raw-HTTP-only.",
+        "severity": "MEDIUM",
+        "likelihood": "MEDIUM",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Use typed [VOID_DETECTED] stubs and mocks.",
+        "detection_signal": "tool_descriptor_missing_verified_schema",
+        "owner_role": "C",
+        "confidence": 0.84,
+        "status": "open"
+      },
+      {
+        "risk_id": "R-007",
+        "category": "determinism",
+        "summary": "LLM outputs are probabilistic despite deterministic orchestration target.",
+        "severity": "MEDIUM",
+        "likelihood": "MEDIUM",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Constrain determinism to contracts/FSM/checkpoints/validation.",
+        "detection_signal": "unscored_model_output_or_missing_confidence",
+        "owner_role": "G",
+        "confidence": 0.82,
+        "status": "mitigated_by_design"
+      },
+      {
+        "risk_id": "R-008",
+        "category": "pii_and_secrets",
+        "summary": "Prompts/files/logs/streams/artifacts may contain PII or secrets.",
+        "severity": "HIGH",
+        "likelihood": "MEDIUM",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Apply redaction/safe_payload filtering/secret scanning/SEC veto.",
+        "detection_signal": "secret_detected_or_pii_in_frontend_payload",
+        "owner_role": "N",
+        "confidence": 0.82,
+        "status": "open_until_validation"
+      },
+      {
+        "risk_id": "R-009",
+        "category": "streaming_replay",
+        "summary": "Event replay can lose, duplicate, reorder, or corrupt events.",
+        "severity": "MEDIUM",
+        "likelihood": "MEDIUM",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Use offsets, Last-Event-ID, event_id dedupe, checkpoint hydration.",
+        "detection_signal": "event_gap_detected_or_duplicate_hash_mismatch",
+        "owner_role": "P",
+        "confidence": 0.8,
+        "status": "mitigated_by_spec"
+      },
+      {
+        "risk_id": "R-010",
+        "category": "durable_object_bottleneck",
+        "summary": "A singleton coordinator can serialize all parallel runs.",
+        "severity": "MEDIUM",
+        "likelihood": "MEDIUM",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Shard by tenant/project/run hash; keep canonical state outside DO memory.",
+        "detection_signal": "coordination_hotspot_or_cross_run_leakage",
+        "owner_role": "O",
+        "confidence": 0.84,
+        "status": "mitigated_by_spec"
+      },
+      {
+        "risk_id": "R-011",
+        "category": "governance_bypass",
+        "summary": "Irreversible actions/external writes could bypass review.",
+        "severity": "HIGH",
+        "likelihood": "LOW",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Require approval gates, confirmation, and audit entries.",
+        "detection_signal": "irreversible_action_without_approval",
+        "owner_role": "I",
+        "confidence": 0.83,
+        "status": "open_until_validation"
+      },
+      {
+        "risk_id": "R-012",
+        "category": "source_integrity",
+        "summary": "Claims may be stale, inferred, duplicated, or unsupported.",
+        "severity": "MEDIUM",
+        "likelihood": "MEDIUM",
+        "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
+        "mitigation": "Maintain claim registry and verify time-sensitive claims.",
+        "detection_signal": "unsupported_version_api_platform_or_performance_claim",
+        "owner_role": "K",
+        "confidence": 0.81,
+        "status": "open"
+      }
+    ]
+  }
+}

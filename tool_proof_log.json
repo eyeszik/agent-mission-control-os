@@ -1,0 +1,67 @@
+[
+  {
+    "tool_proof_id": "TP-001",
+    "tool_name": "web.search_query",
+    "operation": "search current official platform docs",
+    "endpoint_or_resource": "OpenAI Codex, LangGraph persistence, Cloudflare Durable Objects, Cloudflare Workflows",
+    "timestamp_utc": "2026-05-22T00:00:00Z",
+    "input_summary": "Queried Codex cloud, LangGraph checkpointing, Cloudflare Durable Objects single-object bottleneck risk, and Cloudflare Workflows durable execution.",
+    "output_summary": "Found docs supporting Codex repo environment behavior, LangGraph checkpoint persistence, Durable Object stateful coordination and bottleneck risk, and Workflows durable step execution/retries.",
+    "http_code_or_status": "search_results_returned",
+    "is_actual_call": true,
+    "confidence": 0.86,
+    "limitations": [
+      "Exact timestamp second unavailable.",
+      "Search result snippets are not full compatibility checks.",
+      "Repo-installed versions remain unverified."
+    ]
+  },
+  {
+    "tool_proof_id": "TP-002",
+    "tool_name": "web.search_query",
+    "operation": "search frontend/runtime docs",
+    "endpoint_or_resource": "Next.js App Router, Motion layoutId, Zod",
+    "timestamp_utc": "2026-05-22T00:00:00Z",
+    "input_summary": "Queried App Router features, Motion layoutId layout animation, and Zod validation.",
+    "output_summary": "Found official docs supporting App Router feature set, Motion layoutId shared layout animation, and Zod TypeScript-first validation.",
+    "http_code_or_status": "search_results_returned",
+    "is_actual_call": true,
+    "confidence": 0.86,
+    "limitations": [
+      "Exact installed package versions remain unverified.",
+      "Search results do not validate bundle budget or repo integration."
+    ]
+  },
+  {
+    "tool_proof_id": "TP-003",
+    "tool_name": "file_search.msearch",
+    "operation": "search uploaded prompt/design sources",
+    "endpoint_or_resource": "files_uploaded_in_conversation",
+    "timestamp_utc": "2026-05-22T00:00:00Z",
+    "input_summary": "Searched uploaded Prompt Cascade OS and design-taste-frontend-v3 materials.",
+    "output_summary": "Found source snippets confirming graph/capsule architecture, crash-safety, sharding, raw HTTP synthesis, Bento UI, and governance.",
+    "http_code_or_status": "search_results_returned",
+    "is_actual_call": true,
+    "confidence": 0.9,
+    "limitations": [
+      "Some manifest-referenced documents were not available as full accessible files.",
+      "File metadata freshness is lower confidence than content."
+    ]
+  },
+  {
+    "tool_proof_id": "TP-004",
+    "tool_name": "code_exec",
+    "operation": "schema validation",
+    "endpoint_or_resource": null,
+    "timestamp_utc": "2026-05-22T00:00:00Z",
+    "input_summary": "No schema validation execution performed during planning stages.",
+    "output_summary": "Manual structural validation only.",
+    "http_code_or_status": "not_called",
+    "is_actual_call": false,
+    "confidence": 1.0,
+    "limitations": [
+      "JSON/YAML/CSV validity must be machine-validated after export if strict ingestion is required."
+    ],
+    "reason": "not_needed_for_planning_bundle"
+  }
+]

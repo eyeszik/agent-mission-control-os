@@ -1,0 +1,78 @@
+{
+  "mcp_integration_spec": {
+    "transport_states": [
+      "idle",
+      "connecting",
+      "authenticating",
+      "connected",
+      "discovering",
+      "ready",
+      "degraded",
+      "failed",
+      "closed"
+    ],
+    "transport_methods": [
+      {
+        "method": "stdio",
+        "status": "optional",
+        "use_when": "local trusted tool server configured"
+      },
+      {
+        "method": "http",
+        "status": "optional",
+        "use_when": "remote endpoint has verified docs and auth contract"
+      },
+      {
+        "method": "sse",
+        "status": "optional",
+        "use_when": "tool needs event session lifecycle"
+      },
+      {
+        "method": "websocket",
+        "status": "optional",
+        "use_when": "bidirectional streaming is verified and required"
+      }
+    ],
+    "auth_boundary": [
+      "Never place secrets in prompts/client bundles.",
+      "Keep credentials server-side or platform-secret-bound.",
+      "Require explicit approval before production external-write permissions."
+    ],
+    "tool_discovery_flow": [
+      "Load configured registry.",
+      "Validate transport and auth.",
+      "Load tool schema if permitted.",
+      "Validate input/output schema and idempotency.",
+      "Classify permission.",
+      "Register ready tool or VOID stub."
+    ],
+    "tool_schema_validation": [
+      "input_schema_present",
+      "output_schema_present",
+      "idempotency_class_present",
+      "permission_scope_present",
+      "auth_boundary_known",
+      "SSRF_allowlist_passed_for_URLs"
+    ],
+    "least_privilege_rules": [
+      "Prefer read-only scopes.",
+      "Require guarded_write for mutations.",
+      "Require human approval for irreversible tools.",
+      "Quarantine tool output until schema-validated."
+    ],
+    "failure_recovery": [
+      {
+        "failure": "undocumented_api",
+        "recovery": "emit [VOID_DETECTED], create interface and mock, block production call"
+      },
+      {
+        "failure": "auth_failure",
+        "recovery": "emit [BLOCKED] with required secret binding name; do not request secrets"
+      },
+      {
+        "failure": "schema_validation_failure",
+        "recovery": "quarantine output and request updated contract"
+      }
+    ]
+  }
+}

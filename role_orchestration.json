@@ -1,0 +1,301 @@
+{
+  "role_orchestration": {
+    "roles": [
+      {
+        "role_id": "A",
+        "name": "Strategy Lead",
+        "responsibilities": [
+          "Preserve source intent.",
+          "Control scope and staging.",
+          "Resolve conflicts."
+        ],
+        "inputs": [
+          "RAW_PROMPT"
+        ],
+        "outputs": [
+          "execution_blueprint.json",
+          "README.md"
+        ],
+        "quality_gates": [
+          "no_unresolved_conflict",
+          "stage_scope_preserved"
+        ],
+        "confidence_threshold": 0.75
+      },
+      {
+        "role_id": "B",
+        "name": "System Architect",
+        "responsibilities": [
+          "Define system layers.",
+          "Map runtime boundaries."
+        ],
+        "inputs": [
+          "requirements_extract.json"
+        ],
+        "outputs": [
+          "system_layers.json",
+          "runtime_topology.yaml"
+        ],
+        "quality_gates": [
+          "layer_responsibilities_complete"
+        ],
+        "confidence_threshold": 0.78
+      },
+      {
+        "role_id": "C",
+        "name": "Contract/API Architect",
+        "responsibilities": [
+          "Define contracts.",
+          "Prevent untyped boundaries.",
+          "Convert undocumented APIs to VOID stubs."
+        ],
+        "inputs": [
+          "system_layers.json"
+        ],
+        "outputs": [
+          "contract_architecture.json",
+          "mcp_integration_spec.json"
+        ],
+        "quality_gates": [
+          "contract_source_defined"
+        ],
+        "confidence_threshold": 0.78
+      },
+      {
+        "role_id": "D",
+        "name": "Backend Engineer",
+        "responsibilities": [
+          "Define backend responsibilities when implementation is requested."
+        ],
+        "inputs": [
+          "contract_architecture.json"
+        ],
+        "outputs": [
+          "backend_plan_optional"
+        ],
+        "quality_gates": [
+          "server_validation_required"
+        ],
+        "confidence_threshold": 0.75
+      },
+      {
+        "role_id": "E",
+        "name": "Frontend Engineer",
+        "responsibilities": [
+          "Map Mission Control UI and state architecture."
+        ],
+        "inputs": [
+          "streaming_resilience_spec.json"
+        ],
+        "outputs": [
+          "frontend_plan_optional"
+        ],
+        "quality_gates": [
+          "no_bare_fetch",
+          "domain_stores_defined"
+        ],
+        "confidence_threshold": 0.75
+      },
+      {
+        "role_id": "F",
+        "name": "QA/Test Engineer",
+        "responsibilities": [
+          "Define validation checks and block invalid bundles."
+        ],
+        "inputs": [
+          "all_artifacts"
+        ],
+        "outputs": [
+          "validation_report.json"
+        ],
+        "quality_gates": [
+          "completeness_check",
+          "format_check"
+        ],
+        "confidence_threshold": 0.8
+      },
+      {
+        "role_id": "G",
+        "name": "Agent Orchestrator",
+        "responsibilities": [
+          "Define FSM behavior and idempotency rules."
+        ],
+        "inputs": [
+          "task_dag.json"
+        ],
+        "outputs": [
+          "fsm_spec.json",
+          "execution_flow.json"
+        ],
+        "quality_gates": [
+          "idempotency_classified"
+        ],
+        "confidence_threshold": 0.8
+      },
+      {
+        "role_id": "H",
+        "name": "Observability Engineer",
+        "responsibilities": [
+          "Map telemetry signals to FP/HFM failures."
+        ],
+        "inputs": [
+          "execution_flow.json"
+        ],
+        "outputs": [
+          "observability_hooks.yaml"
+        ],
+        "quality_gates": [
+          "critical_failures_have_signals"
+        ],
+        "confidence_threshold": 0.78
+      },
+      {
+        "role_id": "I",
+        "name": "Governance/Risk Lead",
+        "responsibilities": [
+          "Run governance and approval routing."
+        ],
+        "inputs": [
+          "risk_register.json"
+        ],
+        "outputs": [
+          "approval_decision.json"
+        ],
+        "quality_gates": [
+          "veto_rules_applied"
+        ],
+        "confidence_threshold": 0.8
+      },
+      {
+        "role_id": "J",
+        "name": "Product Discovery Lead",
+        "responsibilities": [
+          "Preserve user-facing Mission Control intent."
+        ],
+        "inputs": [
+          "RAW_PROMPT"
+        ],
+        "outputs": [
+          "product_notes"
+        ],
+        "quality_gates": [
+          "user_flow_preserved"
+        ],
+        "confidence_threshold": 0.72
+      },
+      {
+        "role_id": "K",
+        "name": "Research Analyst",
+        "responsibilities": [
+          "Verify time-sensitive claims."
+        ],
+        "inputs": [
+          "web_results",
+          "uploaded_files"
+        ],
+        "outputs": [
+          "claim_registry.json"
+        ],
+        "quality_gates": [
+          "no_fake_citations"
+        ],
+        "confidence_threshold": 0.78
+      },
+      {
+        "role_id": "L",
+        "name": "UX/Adoption Analyst",
+        "responsibilities": [
+          "Maintain progressive disclosure and human legibility."
+        ],
+        "inputs": [
+          "requirements_extract.json"
+        ],
+        "outputs": [
+          "ux_notes"
+        ],
+        "quality_gates": [
+          "status_not_color_only"
+        ],
+        "confidence_threshold": 0.72
+      },
+      {
+        "role_id": "M",
+        "name": "Data/Schema Architect",
+        "responsibilities": [
+          "Maintain schemas, versions, hashes."
+        ],
+        "inputs": [
+          "contract_architecture.json"
+        ],
+        "outputs": [
+          "execution_trace.schema.json"
+        ],
+        "quality_gates": [
+          "schema_version_required"
+        ],
+        "confidence_threshold": 0.78
+      },
+      {
+        "role_id": "N",
+        "name": "Security Architect",
+        "responsibilities": [
+          "Detect PII, secrets, injection, SSRF, and tool permission risks."
+        ],
+        "inputs": [
+          "constraint_ledger.yaml"
+        ],
+        "outputs": [
+          "SEC governance findings"
+        ],
+        "quality_gates": [
+          "no_secret_output"
+        ],
+        "confidence_threshold": 0.82
+      },
+      {
+        "role_id": "O",
+        "name": "DevOps/Platform Engineer",
+        "responsibilities": [
+          "Map runtime topology and Cloudflare bindings."
+        ],
+        "inputs": [
+          "runtime_topology.yaml"
+        ],
+        "outputs": [
+          "deployment_readiness_optional"
+        ],
+        "quality_gates": [
+          "bindings_not_assumed"
+        ],
+        "confidence_threshold": 0.78
+      },
+      {
+        "role_id": "P",
+        "name": "Runtime Operations Lead",
+        "responsibilities": [
+          "Define replay, checkpoint, incident, rollback, and monitoring behavior."
+        ],
+        "inputs": [
+          "streaming_resilience_spec.json"
+        ],
+        "outputs": [
+          "operations_runbook_optional"
+        ],
+        "quality_gates": [
+          "replay_strategy_defined"
+        ],
+        "confidence_threshold": 0.78
+      }
+    ],
+    "handoff_rules": {
+      "hash_required": true,
+      "schema_version_required": true,
+      "timestamp_required": true,
+      "halt_on_schema_mismatch": true,
+      "claim_refs_required_for_external_claims": true,
+      "tool_proof_required_for_actual_tool_claims": true,
+      "redaction_status_required_for_sensitive_artifacts": true,
+      "confidence_required_for_each_major_artifact": true
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Project-scoped Codex starter config.
+# Verify against current Codex docs before depending on specific options.
+
+[project]
+name = "agent-mission-control-os"
+
+[guidance]
+read_first = [
+  "README.md",
+  "execution_blueprint.json",
+  "approval_decision.json",
+  "validation_report.json",
+  "codex/codex_implementation_prompt.md",
+  "codex/codex_phase_plan.md"
+]
+
+[policy]
+no_secrets = true
+no_deploy_without_approval = true
+no_external_writes_without_approval = true
+prefer_small_patches = true

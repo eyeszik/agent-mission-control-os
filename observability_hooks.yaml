@@ -1,0 +1,66 @@
+observability_hooks:
+  version: "1.0.0"
+  status: "architecture_ready_requires_runtime_binding"
+  signals:
+    schema_validation_failure:
+      maps_to: [FP5, FP6, HFM7]
+      severity: HIGH
+      escalation: "QA/Test Engineer + Contract/API Architect"
+      action: "block affected artifact or payload; log validation failure; request contract correction"
+    undefined_state_transition:
+      maps_to: [FP7, HFM4, HFM9]
+      severity: HIGH
+      escalation: "Agent Orchestrator + System Architect"
+      action: "reject transition; append audit event; require FSM update"
+    stale_claim_detected:
+      maps_to: [FP2, HFM8]
+      severity: MEDIUM
+      escalation: "Research Analyst"
+      action: "mark claim unverified or [VOID_DETECTED]; require re-verification"
+    fake_or_missing_tool_proof:
+      maps_to: [HFM6]
+      severity: HIGH
+      escalation: "Governance/Risk Lead"
+      action: "block final approval; correct claim registry"
+    stream_replay_failure:
+      maps_to: [HFM1, HFM10]
+      severity: HIGH
+      escalation: "Runtime Operations Lead"
+      action: "pause run display; fetch canonical checkpoint; require reconciliation"
+    secret_detected:
+      maps_to: [HFM5, HFM6]
+      severity: CRITICAL
+      escalation: "Security Architect"
+      action: "immediate_block"
+    pii_in_frontend_payload:
+      maps_to: [HFM5, HFM6]
+      severity: CRITICAL
+      escalation: "Security Architect + Legal/PII Reviewer"
+      action: "block release; redact; rotate affected logs if applicable"
+    irreversible_action_without_approval:
+      maps_to: [FP7, HFM5]
+      severity: CRITICAL
+      escalation: "Governance/Risk Lead + Security Architect"
+      action: "immediate_block"
+    durable_object_hotspot:
+      maps_to: [FP7, HFM10]
+      severity: MEDIUM
+      escalation: "DevOps/Platform Engineer"
+      action: "increase shard count; rebalance keying; move canonical state to durable persistence"
+    tool_schema_invalid:
+      maps_to: [FP5, HFM7]
+      severity: HIGH
+      escalation: "Contract/API Architect + Security Architect"
+      action: "compile [VOID_DETECTED] stub; block production call"
+    source_conflict_detected:
+      maps_to: [FP3, HFM9]
+      severity: MEDIUM
+      escalation: "Research Analyst + System Architect"
+      action: "tag [SOURCE_CONFLICT]; prefer current primary source where verified; otherwise escalate"
+  telemetry_dimensions:
+    required: [run_id, task_id, role_id, artifact_id, schema_version, validation_status, confidence, risk_ids, claim_refs, tool_proof_refs]
+    prohibited: [raw_secret, raw_token, raw_pii, hidden_prompt, unsafe_html, full_unredacted_uploaded_file_content]
+  escalation_policy:
+    immediate_block: [secret_detected, pii_in_frontend_payload, irreversible_action_without_approval, fake_or_missing_tool_proof]
+    human_review: [stale_claim_detected, source_conflict_detected, durable_object_hotspot, stream_replay_failure]
+    continue_with_notes: [bundle_budget_unverified]

@@ -1,0 +1,63 @@
+{
+  "validation_report": {
+    "version": "1.0.0",
+    "status": "pass_with_escalations",
+    "validation_mode": "manual_structural_validation",
+    "runtime_schema_validation_executed": false,
+    "runtime_schema_validation_reason": "No repository or executable schema validation harness was provided for this staged architecture run.",
+    "overall_confidence": 0.79,
+    "checks": {
+      "completeness_check": {
+        "status": "pass",
+        "confidence": 0.86
+      },
+      "format_check": {
+        "status": "pass_with_notes",
+        "confidence": 0.78
+      },
+      "consistency_check": {
+        "status": "pass",
+        "confidence": 0.82
+      },
+      "evidence_check": {
+        "status": "pass_with_notes",
+        "confidence": 0.8
+      },
+      "security_check": {
+        "status": "pass_with_escalation",
+        "confidence": 0.74
+      },
+      "governance_check": {
+        "status": "pass_with_escalation",
+        "confidence": 0.73
+      },
+      "loop_check": {
+        "status": "pass",
+        "confidence": 0.84
+      }
+    },
+    "blocking_issues": [
+      {
+        "id": "BLOCK-001",
+        "summary": "No repository was provided.",
+        "effect": "Implementation/package versions/file diffs/bundle verification are blocked."
+      },
+      {
+        "id": "BLOCK-002",
+        "summary": "Cloudflare bindings are unverified.",
+        "effect": "Deployment and edge-runtime implementation claims are blocked."
+      },
+      {
+        "id": "BLOCK-003",
+        "summary": "External tool/provider contracts are unverified.",
+        "effect": "Production adapters must remain [VOID_DETECTED] stubs until verified."
+      },
+      {
+        "id": "BLOCK-004",
+        "summary": "SEC dissent exists.",
+        "effect": "Production release and unverified tool execution require human review."
+      }
+    ],
+    "final_validation_decision": "valid_architecture_bundle_requires_human_review_before_implementation_or_release"
+  }
+}

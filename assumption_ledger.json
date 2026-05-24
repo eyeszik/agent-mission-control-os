@@ -1,0 +1,44 @@
+{
+  "assumptions": [
+    {
+      "id": "A-001",
+      "statement": "The artifact bundle is a planning/specification bundle, not production code.",
+      "rationale": "RUN_MODE was staged and non-goals prohibit production code unless requested.",
+      "confidence": 0.86,
+      "risk_if_wrong": "User may expect immediate implementation.",
+      "validation_method": "User explicitly requests implementation or provides repository."
+    },
+    {
+      "id": "A-002",
+      "statement": "No actual repository is attached for code inspection.",
+      "rationale": "Conversation contains prompt/design files but no repo tree.",
+      "confidence": 0.95,
+      "risk_if_wrong": "Repo-specific commands and paths may be omitted.",
+      "validation_method": "Provide GitHub repo or uploaded source tree."
+    },
+    {
+      "id": "A-003",
+      "statement": "OpenAPI or equivalent should be the contract source of truth.",
+      "rationale": "Architecture target names OpenAPI as shared contract/intermediate representation.",
+      "confidence": 0.89,
+      "risk_if_wrong": "Alternative IR may be preferred.",
+      "validation_method": "Confirm contract strategy before implementation."
+    },
+    {
+      "id": "A-004",
+      "statement": "SSE is the default streaming protocol unless bidirectional transport is required.",
+      "rationale": "Prompt emphasizes SSE/resumable streaming and live status.",
+      "confidence": 0.9,
+      "risk_if_wrong": "Realtime strategy may need WebSockets.",
+      "validation_method": "Check implementation needs and hosting runtime."
+    },
+    {
+      "id": "A-005",
+      "statement": "Durable Objects coordinate bounded per-run state rather than storing canonical graph state or large artifacts.",
+      "rationale": "Sharding and anti-bottleneck constraints require DOs not be global state stores.",
+      "confidence": 0.88,
+      "risk_if_wrong": "Over-sharding or under-sharding could impair runtime operations.",
+      "validation_method": "Load test and review Cloudflare limits."
+    }
+  ]
+}
