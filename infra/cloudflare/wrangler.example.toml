@@ -3,18 +3,18 @@ main = "worker.ts"
 compatibility_date = "2023-10-30"
 
 # Do not include real Account IDs or Zone IDs here.
-# account_id = "[VOID_DETECTED]"
+# account_id = "YOUR_PLACEHOLDER_HERE"
 
 [vars]
 ENVIRONMENT = "dev"
 
 # [[kv_namespaces]]
 # binding = "KV_CACHE"
-# id = "[VOID_DETECTED]"
+# id = "YOUR_PLACEHOLDER_HERE"
 
 # [[r2_buckets]]
 # binding = "R2_ARTIFACTS"
-# bucket_name = "[VOID_DETECTED]"
+# bucket_name = "YOUR_PLACEHOLDER_HERE"
 
 # [[durable_objects.bindings]]
 # name = "PROJECT_COORDINATOR"
