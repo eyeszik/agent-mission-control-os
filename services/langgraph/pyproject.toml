@@ -7,7 +7,7 @@ name = "amc-langgraph"
 version = "0.1.0"
 description = "Agent Mission Control LangGraph Backend"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "langgraph>=0.0.60",
     "langchain-core>=0.2.0",
@@ -19,4 +19,14 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.2.0"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "app",
+    "api",
+    "graph",
+    "persistence",
+    "quality",
+    "security"
 ]
