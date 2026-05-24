@@ -5,7 +5,7 @@ import { useRunStore } from '../../lib/stores/runStore';
 
 export function LiveStepProgressPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] || {} : {});
+  const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] : null);
 
   const nodes = ['ingest', 'planner'];
 
@@ -15,7 +15,7 @@ export function LiveStepProgressPanel() {
       <div className="flex-1 flex flex-col gap-2 overflow-y-auto">
         {!activeRunId && <div className="text-xs text-zinc-600 font-mono">Awaiting execution trace...</div>}
         {activeRunId && nodes.map((node) => {
-          const status = statuses[node] || 'idle';
+          const status = statuses ? statuses[node] || 'idle' : 'idle';
           if (status === 'idle') return null;
           
           return (

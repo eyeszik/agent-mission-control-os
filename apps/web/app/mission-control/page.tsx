@@ -1,3 +1,5 @@
+"use client";
+
 import { MissionControlProvider } from "../../components/mission-control/MissionControlProvider";
 import { CommandInputPanel } from "../../components/mission-control/CommandInputPanel";
 import { WorkflowMapPanel } from "../../components/mission-control/WorkflowMapPanel";
@@ -10,9 +12,9 @@ import { ArtifactPreviewPanel } from "../../components/mission-control/ArtifactP
 
 export default function MissionControlPage() {
   return (
-    <MissionControlProvider>
-      <main className="min-h-[100dvh] p-4 lg:p-6 flex flex-col gap-4 max-w-[1920px] mx-auto">
-        {/* Top App Bar Area */}
+    <main className="min-h-[100dvh] p-4 lg:p-6 flex flex-col gap-4 max-w-[1920px] mx-auto">
+      <MissionControlProvider />
+      {/* Top App Bar Area */}
         <header className="flex justify-between items-center pb-2 border-b border-zinc-800/50">
           <h1 className="text-zinc-100 font-medium tracking-tight">Mission Control</h1>
           <div className="flex items-center gap-3">
@@ -52,8 +54,7 @@ export default function MissionControlPage() {
             </div>
           </div>
 
-        </div>
-      </main>
-    </MissionControlProvider>
-  );
-}
+          </div>
+          </main>
+          );
+          }

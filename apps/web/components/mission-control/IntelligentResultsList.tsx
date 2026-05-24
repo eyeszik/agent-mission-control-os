@@ -5,22 +5,25 @@ import { useRunStore } from '../../lib/stores/runStore';
 
 export function IntelligentResultsList() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] || [] : []);
-  const { selectedArtifactId, setSelectedArtifact } = useArtifactStore();
+  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
+  const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
+  const setSelectedArtifact = useArtifactStore((state) => state.setSelectedArtifact);
+
+  const displayArtifacts = artifacts || [];
 
   return (
     <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-3 min-h-[250px]">
       <div className="flex items-center justify-between pb-2 border-b border-zinc-800/50">
         <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Prioritized Results</span>
-        <span className="text-xs text-zinc-600 font-mono">{artifacts.length} Items</span>
+        <span className="text-xs text-zinc-600 font-mono">{displayArtifacts.length} Items</span>
       </div>
       <div className="flex-1 flex flex-col gap-2 overflow-y-auto max-h-[300px]">
-        {artifacts.length === 0 ? (
+        {displayArtifacts.length === 0 ? (
           <div className="flex-1 flex items-center justify-center opacity-30">
             <p className="text-xs text-zinc-600 font-mono">No artifacts generated</p>
           </div>
         ) : (
-          artifacts.map((artifact) => {
+          displayArtifacts.map((artifact) => {
             const isSelected = artifact.id === selectedArtifactId;
             return (
               <button 

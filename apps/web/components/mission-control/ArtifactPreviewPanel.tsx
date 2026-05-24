@@ -6,13 +6,13 @@ import { useApprovalStore } from '../../lib/stores/approvalStore';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] || [] : []);
+  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
   const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
   
   const pendingApprovals = useApprovalStore((state) => Object.values(state.approvals).filter(a => a.status === 'pending'));
   const removeApproval = useApprovalStore((state) => state.removeApproval); 
 
-  const selectedArtifact = artifacts.find(a => a.id === selectedArtifactId);
+  const selectedArtifact = artifacts ? artifacts.find(a => a.id === selectedArtifactId) : null;
 
   const handleResolve = (id: string, action: 'approved' | 'rejected') => {
     // In a real implementation this would call the resolveApproval API via api/approvals.ts

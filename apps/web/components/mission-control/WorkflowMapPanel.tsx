@@ -5,9 +5,10 @@ import { useRunStore } from '../../lib/stores/runStore';
 
 export function WorkflowMapPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] || {} : {});
+  const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] : null);
 
   const getNodeColor = (nodeId: string) => {
+    if (!statuses) return 'text-zinc-700';
     const status = statuses[nodeId];
     if (status === 'completed') return 'text-emerald-500';
     if (status === 'running') return 'text-amber-500 animate-pulse';
