@@ -1,35 +1,55 @@
+import os
 import json
 from services.langgraph.graph.state import GraphState
 from langchain_core.messages import AIMessage
+from langchain_openai import ChatOpenAI
 from services.langgraph.quality.evaluator import evaluate_quality
 
 def planner_node(state: GraphState) -> dict:
     """
     Node: Planner
     Responsibilities: Construct the execution Task DAG based on constraints.
-    Instead of calling an LLM right now, we simulate the structured output.
+    Uses ChatOpenAI if OPENAI_API_KEY is available, otherwise falls back to mock output.
     """
     print(f"Running Planner for run {state['run'].id}")
     
     # 1. Read the messages created by Ingest
     last_message = state.get("messages", [])[-1].content if state.get("messages") else ""
     
-    # 2. Simulate an LLM parsing the request and returning a JSON DAG
-    simulated_dag = {
-        "tasks": [
-            {"id": "t1", "action": "Analyze Requirements"},
-            {"id": "t2", "action": "Generate Code", "depends_on": ["t1"]},
-            {"id": "t3", "action": "Review Quality", "depends_on": ["t2"]}
-        ]
-    }
+    api_key = os.environ.get("OPENAI_API_KEY")
+    content = ""
     
-    dag_string = json.dumps(simulated_dag)
+    if api_key:
+        try:
+            llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+            prompt = (
+                "You are an expert project planner. Given the user's request, "
+                "return ONLY a JSON object representing a Task DAG with a 'tasks' array. "
+                "Each task must have 'id', 'action', and an optional 'depends_on' array of IDs. "
+                f"User request: {last_message}"
+            )
+            response = llm.invoke(prompt)
+            content = response.content
+        except Exception as e:
+            print(f"LLM Error: {e}")
+            content = json.dumps({"error": str(e), "tasks": []})
+    
+    if not content or "tasks" not in content.lower():
+        # 2. Mock fallback
+        simulated_dag = {
+            "tasks": [
+                {"id": "t1", "action": f"Analyze Requirements for: {last_message[:30]}..."},
+                {"id": "t2", "action": "Generate Code", "depends_on": ["t1"]},
+                {"id": "t3", "action": "Review Quality", "depends_on": ["t2"]}
+            ]
+        }
+        content = json.dumps(simulated_dag)
     
     # 3. Evaluate the generated plan
-    quality = evaluate_quality(dag_string)
+    quality = evaluate_quality(content)
     
     # 4. Generate the AI Response
-    ai_msg = AIMessage(content=f"I have constructed the following DAG:\n{dag_string}")
+    ai_msg = AIMessage(content=f"I have constructed the following DAG:\n{content}")
     
     return {
         "current_node": "planner",

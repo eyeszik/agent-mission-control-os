@@ -1,17 +1,11 @@
-from typing import Dict, Any, Optional
+from langgraph.checkpoint.sqlite import SqliteSaver
+import sqlite3
+from services.langgraph.persistence.sqlite_db import DB_PATH
 
-class InMemoryCheckpointStore:
+def get_checkpointer():
     """
-    Mock store for LangGraph State checkpoints.
-    Will be replaced by SQLite/Postgres or Durable Objects.
+    Returns a LangGraph SqliteSaver checkpointer instance.
+    The caller must ensure the connection remains open during execution.
     """
-    def __init__(self):
-        self._store: Dict[str, Any] = {}
-
-    def save_checkpoint(self, run_id: str, node_id: str, state: dict) -> None:
-        key = f"{run_id}:{node_id}"
-        self._store[key] = state
-
-    def load_checkpoint(self, run_id: str, node_id: str) -> Optional[dict]:
-        key = f"{run_id}:{node_id}"
-        return self._store.get(key)
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    return SqliteSaver(conn)
