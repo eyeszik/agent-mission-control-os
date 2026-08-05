@@ -2,10 +2,12 @@
 
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { useRunStore } from '../../lib/stores/runStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export function WorkflowMapPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] : null);
+  // ⚡ Bolt: Using useShallow to prevent unnecessary re-renders when returning derived objects
+  const statuses = useNodeStatusStore(useShallow((state) => activeRunId ? state.statuses[activeRunId] : null));
 
   const getNodeColor = (nodeId: string) => {
     if (!statuses) return 'text-zinc-700';

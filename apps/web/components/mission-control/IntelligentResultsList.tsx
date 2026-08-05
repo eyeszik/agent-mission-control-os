@@ -2,10 +2,12 @@
 
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useRunStore } from '../../lib/stores/runStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export function IntelligentResultsList() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
+  // ⚡ Bolt: Using useShallow to prevent unnecessary re-renders when returning derived arrays
+  const artifacts = useArtifactStore(useShallow((state) => activeRunId ? state.artifacts[activeRunId] : null));
   const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
   const setSelectedArtifact = useArtifactStore((state) => state.setSelectedArtifact);
 
