@@ -1,18 +1,27 @@
 "use client";
 
+import { useShallow } from 'zustand/react/shallow';
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
-  const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
-  
-  const pendingApprovals = useApprovalStore((state) => Object.values(state.approvals).filter(a => a.status === 'pending'));
-  const removeApproval = useApprovalStore((state) => state.removeApproval); 
 
-  const selectedArtifact = artifacts ? artifacts.find(a => a.id === selectedArtifactId) : null;
+  // ⚡ Bolt: Optimize selectors to only trigger re-renders when the actual selected artifact changes
+  // rather than any time ANY artifact is added to the active run
+  const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
+  const selectedArtifact = useArtifactStore((state) => {
+    if (!activeRunId || !selectedArtifactId) return null;
+    const runArtifacts = state.artifacts[activeRunId];
+    return runArtifacts ? runArtifacts.find(a => a.id === selectedArtifactId) : null;
+  });
+  
+  // ⚡ Bolt: Use useShallow to prevent re-renders when pending approvals list is structurally identical
+  const pendingApprovals = useApprovalStore(
+    useShallow((state) => Object.values(state.approvals).filter(a => a.status === 'pending'))
+  );
+  const removeApproval = useApprovalStore((state) => state.removeApproval); 
 
   const handleResolve = (id: string, action: 'approved' | 'rejected') => {
     // In a real implementation this would call the resolveApproval API via api/approvals.ts
