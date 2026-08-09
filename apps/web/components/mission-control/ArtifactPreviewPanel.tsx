@@ -3,13 +3,17 @@
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
+
+  // ⚡ Bolt: using useShallow to prevent unnecessary re-renders when artifacts change
+  const artifacts = useArtifactStore(useShallow((state) => activeRunId ? state.artifacts[activeRunId] : null));
   const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
   
-  const pendingApprovals = useApprovalStore((state) => Object.values(state.approvals).filter(a => a.status === 'pending'));
+  // ⚡ Bolt: using useShallow to prevent unnecessary re-renders when filtering derived approvals
+  const pendingApprovals = useApprovalStore(useShallow((state) => Object.values(state.approvals).filter(a => a.status === 'pending')));
   const removeApproval = useApprovalStore((state) => state.removeApproval); 
 
   const selectedArtifact = artifacts ? artifacts.find(a => a.id === selectedArtifactId) : null;
