@@ -1,9 +1,12 @@
 "use client";
 
 import { useApprovalStore } from '../../lib/stores/approvalStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export function ApprovalInbox() {
-  const approvals = useApprovalStore((state) => Object.values(state.approvals));
+  // ⚡ Bolt: using useShallow to prevent unnecessary re-renders when approvals are added/removed
+  // Prevents re-rendering when the derived array reference changes but contents are shallowly equal.
+  const approvals = useApprovalStore(useShallow((state) => Object.values(state.approvals)));
   const pendingCount = approvals.filter(a => a.status === 'pending').length;
 
   return (
