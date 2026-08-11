@@ -1,0 +1,3 @@
+## 2024-08-11 - Zustand Array Derivations Cause Unnecessary Re-renders
+**Learning:** Returning a new array from `Object.values()` inside a Zustand selector without `useShallow` triggers a React component re-render on *every* store update, even if the actual data hasn't changed, because a new array reference is created each time. Computing a derived scalar value (like `.length`) directly in the selector, or wrapping derived arrays in `useShallow` from `zustand/react/shallow`, prevents this performance bottleneck.
+**Action:** When filtering objects into arrays or getting derived state lengths in Zustand, either compute the final primitive value directly in the selector or wrap array/object selectors in `useShallow` to ensure equality checks prevent unnecessary re-renders.
