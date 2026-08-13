@@ -1,15 +1,18 @@
 "use client";
 
+import { useShallow } from 'zustand/react/shallow';
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
+  // ⚡ Bolt: Use useShallow for artifacts array to prevent unnecessary re-renders when array contents are shallowly equal
+  const artifacts = useArtifactStore(useShallow((state) => activeRunId ? state.artifacts[activeRunId] : null));
   const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
   
-  const pendingApprovals = useApprovalStore((state) => Object.values(state.approvals).filter(a => a.status === 'pending'));
+  // ⚡ Bolt: Use useShallow to prevent re-renders when the filtered pending approvals array is shallowly equal
+  const pendingApprovals = useApprovalStore(useShallow((state) => Object.values(state.approvals).filter(a => a.status === 'pending')));
   const removeApproval = useApprovalStore((state) => state.removeApproval); 
 
   const selectedArtifact = artifacts ? artifacts.find(a => a.id === selectedArtifactId) : null;

@@ -1,0 +1,3 @@
+## 2024-05-24 - Optimizing Zustand derived state to prevent re-renders
+**Learning:** In Zustand, computing derived state directly inside the selector (e.g. returning `.length` or filtering primitives) or using `useShallow` from `zustand/react/shallow` for arrays/objects prevents unnecessary React component re-renders. This is particularly important for derived data in lists or filtered views where the parent state changes but the derived result remains the same or shallowly equal.
+**Action:** Always compute derived state directly inside the selector if returning a primitive, and always wrap array/object returning selectors with `useShallow` from `zustand/react/shallow`.
