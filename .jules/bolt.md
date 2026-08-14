@@ -1,0 +1,3 @@
+## 2024-05-24 - Zustand Selectors Returning Arrays/Objects
+**Learning:** Returning arrays or objects from Zustand selectors (like using `Object.values(state).filter()`) without `useShallow` or memoization causes unnecessary React component re-renders because a new reference is created on every state update, even if the underlying values haven't meaningfully changed.
+**Action:** Always compute primitive values (like `.length`) or single objects (like `.find()`) inside the Zustand selector if possible. When a selector must return an array/object from derived computation (like `.filter()`), wrap it in `useShallow` from `zustand/react/shallow`.

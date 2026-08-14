@@ -1,16 +1,28 @@
-import { describe, it, expect } from 'vitest';
-import { useNodeStatusStore } from '../lib/stores/nodeStatusStore';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { useApprovalStore } from '../lib/stores/approvalStore';
+import { useArtifactStore } from '../lib/stores/artifactStore';
 
-describe('Zustand State Stores', () => {
-  describe('Node Status Store', () => {
-    it('should initialize with empty statuses', () => {
-      // Scaffold: Check initial state
-      expect(true).toBe(true);
+// We mock React hooks usage for now since we're just checking that the store acts independently.
+
+describe('Zustand Stores', () => {
+  beforeEach(() => {
+    // Reset stores if necessary
+    useApprovalStore.setState({ approvals: {} });
+    useArtifactStore.setState({ artifacts: {}, selectedArtifactId: null });
+  });
+
+  it('useApprovalStore adds and removes approvals', () => {
+    const store = useApprovalStore.getState();
+    store.upsertApproval({
+      id: 'test-1',
+      description: 'Test approval',
+      action_type: 'test',
+      status: 'pending'
     });
 
-    it('should update status for a specific run and node without mutating others', () => {
-      // Scaffold: Add multiple runs/nodes, update one, assert others remain unchanged (store isolation)
-      expect(true).toBe(true);
-    });
+    expect(useApprovalStore.getState().approvals['test-1']).toBeDefined();
+
+    useApprovalStore.getState().removeApproval('test-1');
+    expect(useApprovalStore.getState().approvals['test-1']).toBeUndefined();
   });
 });
