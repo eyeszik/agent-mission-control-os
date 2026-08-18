@@ -3,8 +3,11 @@
 import { useApprovalStore } from '../../lib/stores/approvalStore';
 
 export function ApprovalInbox() {
-  const approvals = useApprovalStore((state) => Object.values(state.approvals));
-  const pendingCount = approvals.filter(a => a.status === 'pending').length;
+  // ⚡ Bolt Optimization: Compute derived state directly in the selector
+  // Prevents re-rendering on every store update caused by Object.values() creating a new array
+  const pendingCount = useApprovalStore((state) =>
+    Object.values(state.approvals).filter(a => a.status === 'pending').length
+  );
 
   return (
     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md border transition-colors ${pendingCount > 0 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-zinc-900/60 border-zinc-800/60'}`}>
