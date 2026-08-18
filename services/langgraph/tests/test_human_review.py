@@ -1,12 +1,19 @@
 from uuid import uuid4
+from datetime import datetime, timezone
 from services.langgraph.graph.nodes.human_review import human_review_node
 from services.langgraph.graph.models import AgentRun
 from services.langgraph.persistence.approvals import list_pending_approvals
 
 def test_human_review_node_creates_approval_request():
-    # NOTE: AgentRun's full required-field list was not fully verified this
-    # session; adjust constructor args if this fails against the real model.
-    run = AgentRun(id=uuid4(), tenant_id="tenant-interim-test", project_id="proj-interim-test")
+    now = datetime.now(timezone.utc)
+    run = AgentRun(
+        id=uuid4(),
+        tenant_id="tenant-interim-test",
+        project_id="proj-interim-test",
+        status="running",
+        created_at=now,
+        updated_at=now,
+    )
     state = {
         "run": run,
         "current_node": "validation",
