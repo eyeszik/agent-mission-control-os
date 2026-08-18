@@ -3,13 +3,19 @@
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
   const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
   
-  const pendingApprovals = useApprovalStore((state) => Object.values(state.approvals).filter(a => a.status === 'pending'));
+  // ⚡ Bolt: Optimize array-returning selector by wrapping with useShallow.
+  // 🎯 Why: Object.values(...).filter(...) returns a new array reference every time the store updates, breaking Zustand's strict equality check and causing unnecessary re-renders.
+  // 📊 Impact: Prevents ArtifactPreviewPanel from re-rendering on every unconnected approval store change, improving rendering performance.
+  const pendingApprovals = useApprovalStore(useShallow((state) =>
+    Object.values(state.approvals).filter(a => a.status === 'pending')
+  ));
   const removeApproval = useApprovalStore((state) => state.removeApproval); 
 
   const selectedArtifact = artifacts ? artifacts.find(a => a.id === selectedArtifactId) : null;

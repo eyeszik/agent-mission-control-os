@@ -1,0 +1,3 @@
+## 2024-05-15 - Zustand Array/Object Returning Selectors Causing Unnecessary Re-renders
+**Learning:** Using `Object.values(state).filter(...)` or mapping over collections directly in Zustand selectors without `useShallow` creates a new array reference on every store update. Because Zustand uses strict equality checking (`old === new`), this leads to unnecessary re-renders of the component even when the resulting array contents haven't changed.
+**Action:** When computing derived state that returns an array or object in Zustand, either compute scalar values directly inside the selector (e.g., `let count = 0; ... return count;`) to maintain O(1) equality, or wrap the selector function in `useShallow` from `zustand/react/shallow`.
