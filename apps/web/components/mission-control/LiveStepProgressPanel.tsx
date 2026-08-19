@@ -3,11 +3,29 @@
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { useRunStore } from '../../lib/stores/runStore';
 
+// Mirrors services/langgraph/graph/agency/nodes.py AGENCY_PIPELINE_STAGES —
+// see WorkflowMapPanel.tsx for the same list. This used to be a hardcoded
+// ['ingest', 'planner'] left over from the original 3-node scaffold graph,
+// which meant this panel never displayed anything for an agency run (whose
+// node ids are brief_intake/brand_strategy/etc.) and could show a stale
+// "Planner (running)" from the old SSE mock stream that never resolved.
+const AGENCY_PIPELINE_STAGES = [
+  'brief_intake',
+  'brand_strategy',
+  'creative_concepting',
+  'copywriting',
+  'design_brief',
+  'campaign_assembly',
+  'brand_safety_qa',
+  'hitl_gate',
+  'delivery',
+] as const;
+
 export function LiveStepProgressPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] : null);
 
-  const nodes = ['ingest', 'planner'];
+  const nodes = AGENCY_PIPELINE_STAGES;
 
   return (
     <div className="h-full bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col">

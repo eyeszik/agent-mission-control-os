@@ -9,6 +9,7 @@ from services.langgraph.graph.models import AgentRun
 from services.langgraph.persistence.runs import create_run_record, get_run_record, update_run_status
 from services.langgraph.persistence.idempotency import verify_idempotency, record_idempotency
 from services.langgraph.persistence.approvals import get_approvals_for_run
+from services.langgraph.persistence.events import record_event
 
 router = APIRouter()
 
@@ -37,6 +38,27 @@ def _run_config(run_id: str) -> dict:
 
 def _agency_payload(state: dict) -> dict:
     return (state.get("extracted_data") or {}).get("agency", {}) if state else {}
+
+
+def _run_and_record_events(graph, input_state, config: dict, run_id: str) -> dict:
+    """
+    Runs the graph via stream(..., stream_mode="updates") instead of invoke() so
+    each node's completion can be persisted as a real run_events row (node_start
+    + node_complete, synthesized together since nodes run synchronously here).
+    Replaces the old fixed ingest/planner mock stream in GET /runs/{id}/events,
+    which emitted the same 3 canned events for every run_id regardless of what
+    actually happened. Returns the final merged state via get_state(), since
+    stream() only yields per-node deltas, not the merged state invoke() gives.
+    """
+    for step in graph.stream(input_state, config=config, stream_mode="updates"):
+        for node_id, _delta in step.items():
+            if node_id == "__interrupt__":
+                continue
+            record_event(run_id, node_id, "node_start")
+            record_event(run_id, node_id, "node_complete")
+
+    snapshot = graph.get_state(config)
+    return dict(snapshot.values) if snapshot and snapshot.values else {}
 
 
 @router.post("/runs", status_code=201)
@@ -77,7 +99,7 @@ def create_agency_run(
     }
 
     try:
-        state = graph.invoke(initial_state, config=config)
+        state = _run_and_record_events(graph, initial_state, config, run_id)
     except Exception as exc:
         update_run_status(run_id, "failed", {"error": str(exc)})
         raise HTTPException(status_code=500, detail=f"Agency pipeline failed: {exc}")
@@ -159,7 +181,7 @@ def resume_agency_run(run_id: str):
     graph = build_agency_workflow()
     config = _run_config(run_id)
     try:
-        state = graph.invoke(None, config=config)
+        state = _run_and_record_events(graph, None, config, run_id)
     except Exception as exc:
         update_run_status(run_id, "failed", {"error": str(exc)})
         raise HTTPException(status_code=500, detail=f"Delivery failed: {exc}")
