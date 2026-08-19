@@ -12,7 +12,8 @@ export class SSEClient {
   connect() {
     if (this.eventSource) return;
 
-    this.eventSource = new EventSource(`http://localhost:8000/runs/${this.runId}/events`);
+    const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    this.eventSource = new EventSource(`${base}/runs/${this.runId}/events`);
 
     this.eventSource.onmessage = (event) => {
       try {

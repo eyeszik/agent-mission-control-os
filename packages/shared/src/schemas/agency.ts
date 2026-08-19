@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ApprovalRequestSchema } from './approvals';
 
 // Mirrors services/langgraph/graph/agency/models.py — keep in sync manually
 // until schema generation is wired up (see contract_architecture.json).
@@ -76,13 +77,22 @@ export const AgencyRunStatusSchema = z.enum([
   'failed',
 ]);
 
+// The backend (services/langgraph/api/routes/agency.py) returns three
+// distinct response shapes from the same logical resource depending on the
+// endpoint: create returns pending_approval, get returns pending_next_node +
+// approvals, resume returns only run_id/status/delivery. Only run_id/status
+// are present in all three, so everything else here is optional rather than
+// asserting fields resume/create don't actually send.
 export const AgencyRunSchema = z.object({
   run_id: z.string().uuid(),
   status: AgencyRunStatusSchema,
-  pipeline: z.literal('branding_marketing_agency'),
-  stages: z.array(AgencyPipelineStageSchema),
+  pipeline: z.literal('branding_marketing_agency').optional(),
+  stages: z.array(AgencyPipelineStageSchema).optional(),
+  pending_next_node: z.array(z.string()).optional(),
   campaign_package: CampaignPackageSchema.nullable().optional(),
   qa_report: QAReportSchema.nullable().optional(),
+  pending_approval: ApprovalRequestSchema.nullable().optional(),
+  approvals: z.array(ApprovalRequestSchema).optional(),
   delivery: z
     .object({
       campaign_package: CampaignPackageSchema,

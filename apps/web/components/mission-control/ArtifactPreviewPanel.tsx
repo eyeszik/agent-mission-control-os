@@ -1,23 +1,66 @@
 "use client";
 
+import { useState } from 'react';
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
+import { resolveApproval } from '../../lib/api/approvals';
+import { resumeAgencyRun } from '../../lib/api/agency';
+import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
+import { generateIdempotencyKey } from '../../lib/utils/idempotency';
+
+// No auth/identity system exists in this repo yet — every decision is
+// attributed to this placeholder until one is wired up.
+const REVIEWER_ID = 'mission-control-operator';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
   const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
-  
-  const pendingApprovals = useApprovalStore((state) => Object.values(state.approvals).filter(a => a.status === 'pending'));
-  const removeApproval = useApprovalStore((state) => state.removeApproval); 
+  const addArtifact = useArtifactStore((state) => state.addArtifact);
+
+  // Select the stable record, not a freshly-allocated array — see ApprovalInbox.tsx.
+  const approvalsRecord = useApprovalStore((state) => state.approvals);
+  const pendingApprovals = Object.values(approvalsRecord).filter(a => a.status === 'pending');
+  const removeApproval = useApprovalStore((state) => state.removeApproval);
+  const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
+
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const selectedArtifact = artifacts ? artifacts.find(a => a.id === selectedArtifactId) : null;
 
-  const handleResolve = (id: string, action: 'approved' | 'rejected') => {
-    // In a real implementation this would call the resolveApproval API via api/approvals.ts
-    // For now we optimistically remove it from the UI inbox
-    removeApproval(id);
+  const handleResolve = async (approvalId: string, runId: string, decision: 'approve' | 'reject') => {
+    setResolvingId(approvalId);
+    setError(null);
+    try {
+      await resolveApproval(approvalId, REVIEWER_ID, decision, generateIdempotencyKey());
+
+      if (decision === 'approve') {
+        // Resuming past the HITL gate is what actually runs delivery — the
+        // approval decision alone does not deliver the campaign.
+        const resumed = await resumeAgencyRun(runId);
+        updateNodeStatus(runId, 'hitl_gate', 'completed');
+        if (resumed.delivery) {
+          updateNodeStatus(runId, 'delivery', 'completed');
+          addArtifact(runId, {
+            id: crypto.randomUUID(),
+            run_id: runId,
+            node_id: 'delivery',
+            type: 'document',
+            content: JSON.stringify(resumed.delivery, null, 2),
+            created_at: resumed.delivery.delivered_at,
+          });
+        }
+      }
+
+      removeApproval(approvalId);
+    } catch (err) {
+      console.error('Failed to resolve approval', err);
+      setError(err instanceof Error ? err.message : 'Failed to resolve approval');
+    } finally {
+      setResolvingId(null);
+    }
   };
 
   return (
@@ -26,7 +69,11 @@ export function ArtifactPreviewPanel() {
         <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Inspector</span>
         {selectedArtifact && <span className="text-xs bg-zinc-800 px-2 py-0.5 rounded text-zinc-400 font-mono">{selectedArtifact.type}</span>}
       </div>
-      
+
+      {error && (
+        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</div>
+      )}
+
       <div className="flex-1 overflow-y-auto">
         {selectedArtifact ? (
           <div className="text-sm text-zinc-300 whitespace-pre-wrap font-mono bg-zinc-950/50 p-4 rounded-lg border border-zinc-800/60 overflow-x-auto">
@@ -35,26 +82,33 @@ export function ArtifactPreviewPanel() {
         ) : pendingApprovals.length > 0 ? (
           <div className="flex flex-col gap-3">
             <h3 className="text-sm font-medium text-amber-500 mb-2">Pending Approvals</h3>
-            {pendingApprovals.map(approval => (
-              <div key={approval.id} className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
-                <p className="text-sm text-zinc-200 mb-1">{approval.description}</p>
-                <p className="text-xs text-zinc-500 mb-4 font-mono">Action: {approval.action_type}</p>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => handleResolve(approval.id, 'approved')}
-                    className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 rounded text-xs font-medium transition-colors"
-                  >
-                    Approve
-                  </button>
-                  <button 
-                    onClick={() => handleResolve(approval.id, 'rejected')}
-                    className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 rounded text-xs font-medium transition-colors"
-                  >
-                    Reject
-                  </button>
+            {pendingApprovals.map(approval => {
+              const isResolving = resolvingId === approval.approval_id;
+              return (
+                <div key={approval.approval_id} className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
+                  <p className="text-sm text-zinc-200 mb-1">{approval.reason}</p>
+                  <p className="text-xs text-zinc-500 mb-4 font-mono">
+                    run {approval.run_id.slice(0, 8)} · confidence {approval.confidence != null ? approval.confidence.toFixed(2) : 'n/a'}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleResolve(approval.approval_id, approval.run_id, 'approve')}
+                      disabled={isResolving}
+                      className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 rounded text-xs font-medium transition-colors disabled:opacity-50"
+                    >
+                      {isResolving ? 'Working…' : 'Approve'}
+                    </button>
+                    <button
+                      onClick={() => handleResolve(approval.approval_id, approval.run_id, 'reject')}
+                      disabled={isResolving}
+                      className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 rounded text-xs font-medium transition-colors disabled:opacity-50"
+                    >
+                      {isResolving ? 'Working…' : 'Reject'}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="h-full flex items-center justify-center opacity-30">

@@ -18,8 +18,8 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
     headers.set('Idempotency-Key', options.idempotencyKey);
   }
 
-  // Scaffold: Hardcoded to local backend for now
-  const url = `http://localhost:8000${endpoint}`;
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+  const url = `${base}${endpoint}`;
 
   const response = await fetch(url, { ...options, headers });
 
