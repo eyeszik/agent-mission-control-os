@@ -39,9 +39,11 @@ jobs:
         with:
           node-version: "20"
 
+      # No `version:` here on purpose — pnpm/action-setup reads the pinned
+      # version from the root package.json's "packageManager" field, and
+      # passing both makes the action hard-fail with "Multiple versions of
+      # pnpm specified" (confirmed by the first real CI run on this repo).
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
