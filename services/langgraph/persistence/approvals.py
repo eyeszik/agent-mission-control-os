@@ -50,3 +50,11 @@ def resolve_approval(approval_id: str, reviewer: str, decision: str) -> dict:
             ('resolved', reviewer, decision, datetime.utcnow().isoformat(), approval_id)
         )
     return {"approval_id": approval_id, "status": "resolved", "decision": decision}
+
+def get_approvals_for_run(run_id: str) -> list:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT * FROM approvals WHERE run_id = ? ORDER BY created_at DESC", (run_id,)
+        ).fetchall()
+        return [dict(r) for r in rows]

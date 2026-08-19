@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from services.langgraph.api.routes import runs, events, approvals
+from services.langgraph.api.routes import runs, events, approvals, agency
 
 app = FastAPI(
     title="Agent Mission Control API",
@@ -10,6 +10,7 @@ app = FastAPI(
 app.include_router(runs.router, prefix="/runs", tags=["Runs"])
 app.include_router(events.router, prefix="/runs", tags=["Events"])
 app.include_router(approvals.router, prefix="/approvals", tags=["Approvals"])
+app.include_router(agency.router, prefix="/agency", tags=["Agency Pipeline"])
 
 @app.get("/health")
 def health_check():

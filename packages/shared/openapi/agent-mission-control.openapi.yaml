@@ -27,8 +27,182 @@ paths:
       responses:
         '200':
           description: SSE stream of RunEvents
+  /agency/runs:
+    post:
+      summary: Create and execute a branding/marketing agency pipeline run
+      description: >
+        Runs brief_intake -> brand_strategy -> creative_concepting -> copywriting ->
+        design_brief -> campaign_assembly -> brand_safety_qa -> hitl_gate synchronously,
+        then pauses before delivery pending human approval.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgencyRunRequest'
+      responses:
+        '201':
+          description: Run executed through the HITL gate; awaiting approval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyRun'
+        '409':
+          description: Duplicate Idempotency-Key already processed
+  /agency/runs/{run_id}:
+    get:
+      summary: Get agency run status and current artifacts
+      parameters:
+        - in: path
+          name: run_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Current run state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyRun'
+        '404':
+          description: Run not found
+  /agency/runs/{run_id}/resume:
+    post:
+      summary: Resume an approved agency run to deliver the campaign package
+      description: >
+        Requires the run's HITL gate approval to be resolved with decision=approve.
+        Idempotent: resuming an already-completed run returns the cached delivery.
+      parameters:
+        - in: path
+          name: run_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Delivery result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyRun'
+        '404':
+          description: Run not found
+        '409':
+          description: Run not awaiting delivery, or approval unresolved/rejected
 components:
   schemas:
     AgentRun:
       type: object
       # Scaffold, fully defined in Zod/Pydantic
+    CampaignBrief:
+      type: object
+      required: [brand_name, target_audience]
+      properties:
+        brand_name: { type: string }
+        industry: { type: string, nullable: true }
+        goals: { type: array, items: { type: string } }
+        target_audience: { type: string }
+        tone: { type: string, nullable: true }
+        channels: { type: array, items: { type: string } }
+        constraints: { type: array, items: { type: string } }
+    CreateAgencyRunRequest:
+      type: object
+      required: [tenant_id, project_id, brief]
+      properties:
+        tenant_id: { type: string }
+        project_id: { type: string }
+        brief:
+          $ref: '#/components/schemas/CampaignBrief'
+    BrandStrategy:
+      type: object
+      properties:
+        positioning_statement: { type: string }
+        brand_pillars: { type: array, items: { type: string } }
+        tone_of_voice: { type: string }
+        target_audience_summary: { type: string }
+    CreativeConcept:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        tagline: { type: string }
+        rationale: { type: string }
+    CopyVariant:
+      type: object
+      properties:
+        concept_id: { type: string }
+        headline: { type: string }
+        body: { type: string }
+        cta: { type: string }
+    DesignBrief:
+      type: object
+      properties:
+        palette: { type: array, items: { type: string } }
+        typography_direction: { type: string }
+        imagery_style: { type: string }
+        layout_notes: { type: string }
+    QAReport:
+      type: object
+      properties:
+        brand_safety_passed: { type: boolean }
+        flagged_terms: { type: array, items: { type: string } }
+        quality_metrics: { type: object }
+        notes: { type: string }
+    CampaignPackage:
+      type: object
+      properties:
+        brief: { $ref: '#/components/schemas/CampaignBrief' }
+        strategy: { $ref: '#/components/schemas/BrandStrategy' }
+        concepts:
+          type: array
+          items: { $ref: '#/components/schemas/CreativeConcept' }
+        copy_variants:
+          type: array
+          items: { $ref: '#/components/schemas/CopyVariant' }
+        design_brief: { $ref: '#/components/schemas/DesignBrief' }
+        qa_report: { $ref: '#/components/schemas/QAReport' }
+    AgencyRun:
+      type: object
+      properties:
+        run_id: { type: string, format: uuid }
+        status:
+          type: string
+          enum: [running, needs_approval, completed, failed]
+        pipeline:
+          type: string
+          enum: [branding_marketing_agency]
+        stages:
+          type: array
+          items:
+            type: string
+            enum:
+              - brief_intake
+              - brand_strategy
+              - creative_concepting
+              - copywriting
+              - design_brief
+              - campaign_assembly
+              - brand_safety_qa
+              - hitl_gate
+              - delivery
+        campaign_package: { $ref: '#/components/schemas/CampaignPackage' }
+        qa_report: { $ref: '#/components/schemas/QAReport' }
+        delivery:
+          type: object
+          nullable: true
+          properties:
+            campaign_package: { $ref: '#/components/schemas/CampaignPackage' }
+            delivered_at: { type: string, format: date-time }
+            approval_id: { type: string, format: uuid, nullable: true }
+            format:
+              type: string
+              enum: [json_bundle_v1]
