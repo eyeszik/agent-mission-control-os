@@ -1,0 +1,3 @@
+## 2024-05-14 - Zustand Re-render Optimization
+**Learning:** Default Zustand selectors using exact equality (`===`) cause React components to re-render unnecessarily when returning new object/array references on unrelated state updates. For instance, `state => Object.values(state).filter(...)` triggers a re-render on every state update, even if the result elements remain identical.
+**Action:** Compute simple derived values directly within selectors (e.g. `length`) or use `useShallow` from `zustand/react/shallow` when returning arrays or objects to perform a shallow comparison and prevent redundant renders.
