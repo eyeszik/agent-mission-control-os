@@ -1,43 +1,117 @@
-# Deterministic Agent Operating Spec Compiler
+# Agent Mission Control OS
 
-## Purpose
+Agent Mission Control OS is a local-first LangGraph + FastAPI + Next.js control plane for running a branding/marketing agency workflow with durable checkpoints, approval gating, event replay, typed contracts, and explicit degraded-provider semantics.
 
-This repo artifact bundle compiles a high-complexity prompt into an agent-runnable operating specification for deterministic AI orchestration.
+## Current implementation status
 
-It preserves the LangGraph + Cloudflare + Next.js Mission Control OS intent while converting vague, aspirational, duplicated, or unverified claims into explicit requirements, assumptions, constraints, DAGs, contracts, state-machine rules, streaming resilience rules, runtime topology, governance decisions, risks, role handoffs, validation criteria, observability hooks, and approval routing.
+**Implemented and usable locally**
 
-## Current Status
+- Agency workflow: `brief_intake → brand_strategy → creative_concepting → copywriting → design_brief → campaign_assembly → brand_safety_qa → hitl_gate → delivery`.
+- Human approval before delivery.
+- Server-derived loopback development principal; browser-supplied tenant/reviewer values are not authoritative.
+- Sensitive campaign input is recursively sanitized/redacted before run persistence/checkpointing.
+- Atomic approval decisions and scoped idempotency reservations with deterministic replay.
+- Versioned local SQLite migrations.
+- Explicit provider provenance and `FALLBACK_DEGRADED` handling; degraded generation cannot be delivered.
+- Truthful local evaluation metrics (`faithfulness`/`hallucination_rate` remain `NOT_MEASURED` without grounding evidence).
+- Cursor-addressable persisted run events with runtime-validated frontend consumption.
+- Zod runtime validation for core agency/approval API responses.
+- Shared frontend pipeline-stage contract.
 
-- Status: `architecture_bundle_complete_requires_review`
-- Routing: `ESCALATE`
-- Production release: **not approved**
-- Implementation code: **not included**
+**Not claimed / deliberately blocked**
 
-## Why It Escalates
+- Production authentication provider: **not implemented**. `AMC_AUTH_MODE=local` is loopback-only.
+- Production deployment: not performed by this repository setup.
+- External campaign publication or paid-media spend: not implemented.
+- Real campaign analytics: deferred until a verified channel/data source exists.
+- Initial pipeline execution is still synchronous. The SSE endpoint supports durable cursor replay/tailing of persisted events, but the synchronous request path does not claim pre-node live-start timing.
+- Cloudflare/Supabase bindings are planning inputs until independently configured and verified.
 
-Human review is required because no repository was provided, package versions and commands are unverified, Cloudflare bindings are unverified, external tool/provider contracts are unverified, SEC dissent blocks production deployment and unverified tool execution, and runtime schema validation was not executed.
+## Repository layout
 
-## Start Here
+- `services/langgraph/` — FastAPI API, LangGraph workflow, persistence, security, evaluation, tests.
+- `apps/web/` — Next.js Mission Control frontend.
+- `packages/shared/` — shared Zod/TypeScript contracts and OpenAPI artifact.
+- `constraint_ledger.yaml` — explicit runtime/governance constraints.
+- `runtime_topology.yaml`, `streaming_resilience_spec.json`, `contract_architecture.json` — intended architecture and invariants.
 
-1. Read `STEP_BY_STEP_GITHUB_CODEX_GUIDE.md`.
-2. Push this bundle to a GitHub repository.
-3. Connect the repository to Codex.
-4. Run Codex Phase 0 with `codex/codex_phase_plan.md` and `codex/codex_implementation_prompt.md`.
-5. Let Codex inspect the repo before asking it to build anything.
+## Local setup
 
-## Key Files
+### Prerequisites
 
-- `execution_blueprint.json`: top-level architecture summary.
-- `task_dag.json`: deterministic task sequence and dependencies.
-- `contract_architecture.json`: contract/source-of-truth plan.
-- `fsm_spec.json`: state machine and transition rules.
-- `runtime_topology.yaml`: backend/frontend/edge topology.
-- `governance_decisions.json`: LEG/ETH/SEC/RG results.
-- `approval_decision.json`: final approval routing.
-- `codex/codex_implementation_prompt.md`: prompt to give Codex.
-- `codex/codex_file_handoff_matrix.md`: which files to give Codex at each phase.
-- `github/github_setup_guide.md`: GitHub setup instructions.
+- Node.js 20+
+- pnpm version pinned by the root `packageManager` field
+- Python 3.11 recommended for parity with CI
 
-## Non-Goals
+### 1. Configure environment
 
-This bundle does not deploy, mutate infrastructure, request secrets, expose credentials, or perform irreversible actions. It does not claim production readiness.
+Copy `.env.example` to your local environment and keep secrets out of Git.
+
+For local loopback use, the minimum security/runtime variables are:
+
+```text
+AMC_AUTH_MODE=local
+AMC_LOCAL_USER_ID=local-operator
+AMC_LOCAL_TENANT_ID=tenant_1
+AMC_LOCAL_PROJECT_IDS=proj_1
+AMC_LOCAL_ROLE=operator
+AMC_DB_PATH=amc_local.db
+AMC_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+```
+
+To use real provider generation, set `OPENAI_API_KEY` in your local environment. If it is absent or provider output repeatedly fails validation, the run is explicitly degraded and delivery remains blocked.
+
+### 2. Install frontend/shared dependencies
+
+```bash
+pnpm install --frozen-lockfile
+pnpm --filter @amc/shared build
+```
+
+### 3. Install backend
+
+From `services/langgraph`:
+
+```bash
+python -m pip install -e ".[dev]"
+```
+
+### 4. Run backend
+
+From the repository root:
+
+```bash
+python -m uvicorn services.langgraph.app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+Local auth intentionally rejects non-loopback clients.
+
+### 5. Run frontend
+
+```bash
+pnpm --filter @amc/web dev
+```
+
+Open `http://localhost:3000`.
+
+## Validation
+
+Run the same core gates used by CI:
+
+```bash
+python -m compileall services/langgraph
+python -m pytest services/langgraph/tests -q
+pnpm --filter @amc/shared build
+pnpm --filter @amc/shared typecheck
+pnpm --filter @amc/shared test
+pnpm --filter @amc/web typecheck
+pnpm --filter @amc/web test
+pnpm --filter @amc/web build
+```
+
+Security/concurrency tests cover tenant substitution, pre-persistence redaction, immutable approval decisions, atomic idempotency reservation/replay, provider degradation, event cursor replay, and checkpointer lifecycle.
+
+## Production boundary
+
+Do not expose the current API to a network as a production multi-user service using `AMC_AUTH_MODE=local`. Before production deployment, integrate a verified authentication/authorization provider, configure durable production persistence, run production-specific dependency/security scans, and validate deployment/runtime bindings in the target environment.
