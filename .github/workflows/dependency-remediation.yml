@@ -28,7 +28,14 @@ jobs:
         run: |
           set -uo pipefail
           pnpm install --frozen-lockfile
-          pnpm --filter @amc/web add next@15.5.21
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = 'apps/web/package.json';
+          const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+          if (pkg.scripts?.lint === 'next lint') delete pkg.scripts.lint;
+          fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
+          NODE
+          pnpm --filter @amc/web add next@16.3.0
           pnpm audit --fix --prod || true
           audit_status=0
           pnpm audit --prod --audit-level high || audit_status=$?
@@ -37,7 +44,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add apps/web/package.json package.json pnpm-lock.yaml
           if ! git diff --cached --quiet; then
-            git commit -m "chore: remediate audited web dependencies"
+            git commit -m "chore: upgrade Next.js to audited 16.3 line"
             git push origin HEAD:remediate/drrpc-production-hardening
           fi
 
