@@ -92,7 +92,9 @@ jobs:
 
       - name: Audit Python environment
         run: |
+          python -m pip install --upgrade "setuptools>=83.0.0"
           python -m pip install -e "./services/langgraph[dev]" pip-audit
+          python -m pip install --upgrade "setuptools>=83.0.0"
           python -m pip_audit
 
       - uses: actions/setup-node@v4

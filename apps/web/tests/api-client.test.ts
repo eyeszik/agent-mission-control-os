@@ -1,6 +1,6 @@
 import { AgencyRunSchema } from '@amc/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { apiFetch, ServiceError } from '../lib/api/client';
+import { apiFetch } from '../lib/api/client';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -26,7 +26,7 @@ describe('apiFetch runtime boundary', () => {
       })
     ));
 
-    await expect(apiFetch('/test')).rejects.toMatchObject<ServiceError>({
+    await expect(apiFetch('/test')).rejects.toMatchObject({
       status: 403,
       message: 'Resource belongs to a different tenant',
     });

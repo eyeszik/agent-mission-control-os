@@ -5,7 +5,7 @@
   "policy": "This manifest intentionally covers security-, runtime-, contract-, persistence-, and release-critical files rather than every repository artifact. CI recomputes Git blob hashes and fails on drift.",
   "files": [
     {"path": ".env.example", "git_blob_sha": "a3ca80fd9e37026b6f80db22a3ae2c8eafac45f7"},
-    {"path": ".github/workflows/ci.yml", "git_blob_sha": "074bcf14053c359e23997dfaecbbcc57c2fa5490"},
+    {"path": ".github/workflows/ci.yml", "git_blob_sha": "bcc334ba3d219d995b44534b4b80251c796fec81"},
     {"path": "README.md", "git_blob_sha": "cbe7ec7a8a7f2e66a6e8c2f66eb682397aadfbe4"},
     {"path": "apps/web/lib/api/client.ts", "git_blob_sha": "4f41857fe69ae6e24f1b818187d07a36ee73fb3b"},
     {"path": "packages/shared/openapi/agent-mission-control.openapi.yaml", "git_blob_sha": "d7ae80ddc219c0f8a688e38adbbd71791f6f8eab"},
