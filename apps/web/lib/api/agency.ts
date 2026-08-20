@@ -2,14 +2,13 @@ import { apiFetch } from './client';
 import type { AgencyRun, CampaignBrief } from '@amc/shared';
 
 export async function createAgencyRun(
-  tenantId: string,
   projectId: string,
   brief: CampaignBrief,
   idempotencyKey: string
 ): Promise<AgencyRun> {
   return apiFetch<AgencyRun>('/agency/runs', {
     method: 'POST',
-    body: JSON.stringify({ tenant_id: tenantId, project_id: projectId, brief }),
+    body: JSON.stringify({ project_id: projectId, brief }),
     idempotencyKey,
   });
 }

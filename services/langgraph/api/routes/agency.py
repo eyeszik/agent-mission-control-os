@@ -1,15 +1,19 @@
-from fastapi import APIRouter, HTTPException, Header
-from pydantic import BaseModel, Field
-from typing import Optional, List
-from uuid import uuid4
 from datetime import datetime
+from typing import List, Optional
+from uuid import uuid4
 
-from services.langgraph.graph.agency.build import build_agency_workflow, AGENCY_PIPELINE_STAGES
+from fastapi import APIRouter, Depends, Header, HTTPException
+from pydantic import BaseModel, Field
+
+from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.models import AgentRun
-from services.langgraph.persistence.runs import create_run_record, get_run_record, update_run_status
-from services.langgraph.persistence.idempotency import verify_idempotency, record_idempotency
 from services.langgraph.persistence.approvals import get_approvals_for_run
 from services.langgraph.persistence.events import record_event
+from services.langgraph.persistence.idempotency import record_idempotency, verify_idempotency
+from services.langgraph.persistence.runs import create_run_record, get_run_record, update_run_status
+from services.langgraph.security.auth import Principal, authorize_project, authorize_resource, get_principal
+from services.langgraph.security.pii import quarantine_payload
+from services.langgraph.security.preprocess import sanitize_deep
 
 router = APIRouter()
 
@@ -27,7 +31,9 @@ class CampaignBriefRequest(BaseModel):
 
 
 class CreateAgencyRunRequest(BaseModel):
-    tenant_id: str
+    # Deprecated compatibility field. It is never authoritative; the server
+    # principal supplies tenant identity and a mismatch is denied.
+    tenant_id: Optional[str] = None
     project_id: str
     brief: CampaignBriefRequest
 
@@ -40,16 +46,14 @@ def _agency_payload(state: dict) -> dict:
     return (state.get("extracted_data") or {}).get("agency", {}) if state else {}
 
 
+def _safe_brief(req: CreateAgencyRunRequest) -> dict:
+    sanitized = sanitize_deep(req.brief.model_dump())
+    return quarantine_payload(sanitized)
+
+
 def _run_and_record_events(graph, input_state, config: dict, run_id: str) -> dict:
-    """
-    Runs the graph via stream(..., stream_mode="updates") instead of invoke() so
-    each node's completion can be persisted as a real run_events row (node_start
-    + node_complete, synthesized together since nodes run synchronously here).
-    Replaces the old fixed ingest/planner mock stream in GET /runs/{id}/events,
-    which emitted the same 3 canned events for every run_id regardless of what
-    actually happened. Returns the final merged state via get_state(), since
-    stream() only yields per-node deltas, not the merged state invoke() gives.
-    """
+    # This remains history recording rather than genuine live progress. The
+    # event model is hardened separately; do not synthesize timing claims here.
     for step in graph.stream(input_state, config=config, stream_mode="updates"):
         for node_id, _delta in step.items():
             if node_id == "__interrupt__":
@@ -61,32 +65,43 @@ def _run_and_record_events(graph, input_state, config: dict, run_id: str) -> dic
     return dict(snapshot.values) if snapshot and snapshot.values else {}
 
 
+def _authorize_run(principal: Principal, record: dict) -> None:
+    authorize_resource(principal, record["tenant_id"], record["project_id"])
+
+
 @router.post("/runs", status_code=201)
 def create_agency_run(
     req: CreateAgencyRunRequest,
     idempotency_key: Optional[str] = Header(default=None, alias="Idempotency-Key"),
+    principal: Principal = Depends(get_principal),
 ):
-    """
-    Kicks off a branding/marketing agency pipeline run and executes it synchronously
-    up to (but not including) delivery, where it pauses for human-in-the-loop review.
-    """
+    """Create an agency run using only server-derived tenant identity."""
+
+    authorize_project(principal, req.project_id)
+    if req.tenant_id is not None and req.tenant_id != principal.tenant_id:
+        raise HTTPException(status_code=403, detail="tenant_id does not match authenticated principal")
+
     if idempotency_key and verify_idempotency(idempotency_key):
         raise HTTPException(status_code=409, detail="Request already processed for this idempotency key")
 
     run_id = str(uuid4())
     now = datetime.utcnow()
-    metadata = {"input_data": {"brief": req.brief.model_dump()}}
+
+    # Security invariant: only sanitized/redacted input crosses the persistence
+    # and checkpoint boundary. The raw request object is never placed in AgentRun.
+    safe_brief = _safe_brief(req)
+    metadata = {"input_data": {"brief": safe_brief}}
 
     run = AgentRun(
         id=run_id,
-        tenant_id=req.tenant_id,
+        tenant_id=principal.tenant_id,
         project_id=req.project_id,
         status="running",
         created_at=now,
         updated_at=now,
         metadata=metadata,
     )
-    create_run_record(run_id, req.tenant_id, req.project_id, PIPELINE_NAME, "running", metadata)
+    create_run_record(run_id, principal.tenant_id, req.project_id, PIPELINE_NAME, "running", metadata)
 
     graph = build_agency_workflow()
     config = _run_config(run_id)
@@ -102,7 +117,7 @@ def create_agency_run(
         state = _run_and_record_events(graph, initial_state, config, run_id)
     except Exception as exc:
         update_run_status(run_id, "failed", {"error": str(exc)})
-        raise HTTPException(status_code=500, detail=f"Agency pipeline failed: {exc}")
+        raise HTTPException(status_code=500, detail="Agency pipeline failed") from exc
 
     agency_data = _agency_payload(state)
     record = update_run_status(run_id, "needs_approval", {"agency": agency_data})
@@ -124,10 +139,11 @@ def create_agency_run(
 
 
 @router.get("/runs/{run_id}")
-def get_agency_run(run_id: str):
+def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
     record = get_run_record(run_id)
     if not record:
         raise HTTPException(status_code=404, detail="Run not found")
+    _authorize_run(principal, record)
 
     graph = build_agency_workflow()
     snapshot = graph.get_state(_run_config(run_id))
@@ -147,16 +163,11 @@ def get_agency_run(run_id: str):
 
 
 @router.post("/runs/{run_id}/resume")
-def resume_agency_run(run_id: str):
-    """
-    Resumes a run past the HITL gate to deliver the campaign, but only once the
-    run's approval has been resolved with decision=approve. Idempotent: resuming
-    an already-completed run returns the cached delivery result instead of
-    re-invoking delivery.
-    """
+def resume_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
     record = get_run_record(run_id)
     if not record:
         raise HTTPException(status_code=404, detail="Run not found")
+    _authorize_run(principal, record)
 
     if record["status"] == "completed":
         return {
@@ -184,7 +195,7 @@ def resume_agency_run(run_id: str):
         state = _run_and_record_events(graph, None, config, run_id)
     except Exception as exc:
         update_run_status(run_id, "failed", {"error": str(exc)})
-        raise HTTPException(status_code=500, detail=f"Delivery failed: {exc}")
+        raise HTTPException(status_code=500, detail="Delivery failed") from exc
 
     agency_data = _agency_payload(state)
     update_run_status(run_id, "completed", {"agency": agency_data})

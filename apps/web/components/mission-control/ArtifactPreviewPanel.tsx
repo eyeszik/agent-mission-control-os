@@ -9,17 +9,12 @@ import { resumeAgencyRun } from '../../lib/api/agency';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { generateIdempotencyKey } from '../../lib/utils/idempotency';
 
-// No auth/identity system exists in this repo yet — every decision is
-// attributed to this placeholder until one is wired up.
-const REVIEWER_ID = 'mission-control-operator';
-
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
   const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
   const addArtifact = useArtifactStore((state) => state.addArtifact);
 
-  // Select the stable record, not a freshly-allocated array — see ApprovalInbox.tsx.
   const approvalsRecord = useApprovalStore((state) => state.approvals);
   const pendingApprovals = Object.values(approvalsRecord).filter(a => a.status === 'pending');
   const removeApproval = useApprovalStore((state) => state.removeApproval);
@@ -34,11 +29,11 @@ export function ArtifactPreviewPanel() {
     setResolvingId(approvalId);
     setError(null);
     try {
-      await resolveApproval(approvalId, REVIEWER_ID, decision, generateIdempotencyKey());
+      // Reviewer identity is intentionally not supplied by the browser. The
+      // backend derives the actor from authenticated server context.
+      await resolveApproval(approvalId, decision, generateIdempotencyKey());
 
       if (decision === 'approve') {
-        // Resuming past the HITL gate is what actually runs delivery — the
-        // approval decision alone does not deliver the campaign.
         const resumed = await resumeAgencyRun(runId);
         updateNodeStatus(runId, 'hitl_gate', 'completed');
         if (resumed.delivery) {

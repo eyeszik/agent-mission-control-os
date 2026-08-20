@@ -47,7 +47,6 @@ export function CommandInputPanel() {
     setError(null);
     try {
       const run = await createAgencyRun(
-        'tenant_1',
         'proj_1',
         {
           brand_name: brandName.trim(),
@@ -61,11 +60,6 @@ export function CommandInputPanel() {
 
       setActiveRun(run.run_id);
 
-      // The agency pipeline runs synchronously server-side up to the HITL
-      // gate (no incremental SSE events are emitted per node yet), so mark
-      // everything through hitl_gate as completed based on the response we
-      // actually got back rather than leaving the map inert or faking a
-      // live animation the backend doesn't produce.
       const stages = run.stages ?? [];
       const preGateStages = stages.slice(0, stages.indexOf('delivery'));
       for (const stage of preGateStages) {
