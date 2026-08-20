@@ -29,9 +29,13 @@ test.describe('Agent Mission Control local release smoke', () => {
     page.on('pageerror', (error) => browserErrors.push(error.message));
 
     await page.goto('/mission-control');
-    await page.getByLabel('Brand name').fill('Deterministic Local Test');
-    await page.getByLabel('Target audience').fill('Local release-gate operators');
-    await page.getByLabel(/Goals/).fill('verify browser path, verify HITL safety');
+    const brandInput = page.getByLabel('Brand name');
+    const audienceInput = page.getByLabel('Target audience');
+    const goalsInput = page.getByLabel(/Goals/);
+
+    await brandInput.fill('Deterministic Local Test');
+    await audienceInput.fill('Local release-gate operators');
+    await goalsInput.fill('verify browser path, verify HITL safety');
 
     const apiResponsePromise = page.waitForResponse(
       (response) => response.url().endsWith('/agency/runs') && response.request().method() === 'POST'
@@ -50,7 +54,10 @@ test.describe('Agent Mission Control local release smoke', () => {
     expect(payload.campaign_package).toBeTruthy();
 
     await expect(page.getByText(/Inbox/)).toContainText('(1)');
-    await expect(page.getByRole('button', { name: 'Launch Campaign' })).toBeEnabled();
+    await expect(brandInput).toHaveValue('');
+    await expect(audienceInput).toHaveValue('');
+    await expect(goalsInput).toHaveValue('');
+    await expect(page.getByRole('button', { name: 'Launch Campaign' })).toBeDisabled();
 
     expect(browserErrors).toEqual([]);
   });
