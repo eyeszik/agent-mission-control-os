@@ -1,0 +1,44 @@
+name: Dependency Remediation
+
+on:
+  push:
+    branches: ["remediate/drrpc-production-hardening"]
+
+permissions:
+  contents: write
+
+jobs:
+  update-web-dependencies:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: remediate/drrpc-production-hardening
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Resolve patched web dependency graph
+        shell: bash
+        run: |
+          set -uo pipefail
+          pnpm install --frozen-lockfile
+          pnpm --filter @amc/web add next@15.5.21
+          pnpm audit --fix --prod || true
+          audit_status=0
+          pnpm audit --prod --audit-level high || audit_status=$?
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/package.json package.json pnpm-lock.yaml
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: remediate audited web dependencies"
+            git push origin HEAD:remediate/drrpc-production-hardening
+          fi
+
+          exit "$audit_status"
