@@ -20,7 +20,7 @@
     {"path": "packages/shared/src/schemas/events.ts", "git_blob_sha": "26bb1fdec6f46362bab3522a7a33356b755d7e3f"},
     {"path": "scripts/verify_manifest.py", "git_blob_sha": "c30eb45cd4f0799ecd203d8d89a1a79f3e685a80"},
     {"path": "scripts/verify_repository_invariants.py", "git_blob_sha": "0c1a138335eee339cea97bc44bb7cc89aee7b428"},
-    {"path": "scripts/verify_production_readiness.py", "git_blob_sha": "2bbb434eb00a835175e01c04e24a2c0d55477a0c"},
+    {"path": "scripts/verify_production_readiness.py", "git_blob_sha": "c06601dde60a0cceb19501a2c33189a306f21dbc"},
     {"path": "services/langgraph/api/routes/agency.py", "git_blob_sha": "bec95fecb2faecdae179df6750412b7f32b84264"},
     {"path": "services/langgraph/api/routes/approvals.py", "git_blob_sha": "c7cd4c5494357b93e2de7f6c6094e392f14dfdd3"},
     {"path": "services/langgraph/api/routes/events.py", "git_blob_sha": "25651d86cdf9d182897a63138c59f97b5aad8812"},
