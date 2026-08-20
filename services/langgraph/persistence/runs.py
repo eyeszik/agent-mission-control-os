@@ -1,16 +1,27 @@
-import json
-import sqlite3
-from datetime import datetime
+from __future__ import annotations
+
+from datetime import datetime, timezone
 from typing import Optional
 
-from services.langgraph.persistence.sqlite_db import DB_PATH, init_db
+from services.langgraph.persistence.database import (
+    decode_json,
+    is_postgres,
+    json_param,
+    normalize_record,
+    table,
+    transaction,
+)
 
-init_db()
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
-def init_runs_table():
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute(
+def init_runs_table() -> None:
+    if is_postgres():
+        return
+    with transaction(write=True) as db:
+        db.execute(
             """
             CREATE TABLE IF NOT EXISTS runs (
                 run_id TEXT PRIMARY KEY,
@@ -20,85 +31,79 @@ def init_runs_table():
                 status TEXT NOT NULL,
                 metadata TEXT,
                 result TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
             )
             """
         )
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_runs_tenant_project ON runs (tenant_id, project_id)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_runs_status_updated ON runs (status, updated_at DESC)")
+        db.execute("CREATE INDEX IF NOT EXISTS idx_runs_tenant_project ON runs (tenant_id, project_id)")
+        db.execute("CREATE INDEX IF NOT EXISTS idx_runs_status_updated ON runs (status, updated_at DESC)")
 
 
 init_runs_table()
 
 
-def _row_to_record(row: sqlite3.Row) -> dict:
-    record = dict(row)
-    record["metadata"] = json.loads(record["metadata"]) if record["metadata"] else {}
-    record["result"] = json.loads(record["result"]) if record["result"] else None
+def _row_to_record(row) -> dict:
+    record = normalize_record(row)
+    record["metadata"] = decode_json(record.get("metadata"), {})
+    record["result"] = decode_json(record.get("result"), None)
     return record
 
 
 def create_run_record(run_id: str, tenant_id: str, project_id: str, pipeline: str, status: str, metadata: dict) -> dict:
-    now = datetime.utcnow().isoformat()
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute(
-            "INSERT INTO runs (run_id, tenant_id, project_id, pipeline, status, metadata, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (run_id, tenant_id, project_id, pipeline, status, json.dumps(metadata), now, now),
+    now = _now()
+    with transaction(write=True) as db:
+        db.execute(
+            f"INSERT INTO {table('runs')} (run_id, tenant_id, project_id, pipeline, status, metadata, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (run_id, tenant_id, project_id, pipeline, status, json_param(metadata), now, now),
         )
-    return get_run_record(run_id)
+    record = get_run_record(run_id)
+    if record is None:
+        raise RuntimeError("Run insert succeeded but record could not be read back")
+    return record
 
 
 def get_run_record(run_id: str) -> Optional[dict]:
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        row = conn.execute("SELECT * FROM runs WHERE run_id = ?", (run_id,)).fetchone()
+    with transaction() as db:
+        row = db.execute(f"SELECT * FROM {table('runs')} WHERE run_id = ?", (run_id,)).fetchone()
         return _row_to_record(row) if row else None
 
 
 def update_run_status(run_id: str, status: str, result: Optional[dict] = None) -> Optional[dict]:
-    now = datetime.utcnow().isoformat()
-    with sqlite3.connect(DB_PATH) as conn:
+    now = _now()
+    with transaction(write=True) as db:
         if result is not None:
-            conn.execute(
-                "UPDATE runs SET status = ?, result = ?, updated_at = ? WHERE run_id = ?",
-                (status, json.dumps(result), now, run_id),
+            db.execute(
+                f"UPDATE {table('runs')} SET status = ?, result = ?, updated_at = ? WHERE run_id = ?",
+                (status, json_param(result), now, run_id),
             )
         else:
-            conn.execute(
-                "UPDATE runs SET status = ?, updated_at = ? WHERE run_id = ?",
+            db.execute(
+                f"UPDATE {table('runs')} SET status = ?, updated_at = ? WHERE run_id = ?",
                 (status, now, run_id),
             )
     return get_run_record(run_id)
 
 
-def compare_and_set_run_status(
-    run_id: str,
-    expected_status: str,
-    new_status: str,
-    result: Optional[dict] = None,
-) -> bool:
-    """Atomically transition one run status if its current state matches."""
-
-    now = datetime.utcnow().isoformat()
-    with sqlite3.connect(DB_PATH) as conn:
+def compare_and_set_run_status(run_id: str, expected_status: str, new_status: str, result: Optional[dict] = None) -> bool:
+    now = _now()
+    with transaction(write=True) as db:
         if result is None:
-            cursor = conn.execute(
-                "UPDATE runs SET status = ?, updated_at = ? WHERE run_id = ? AND status = ?",
+            cursor = db.execute(
+                f"UPDATE {table('runs')} SET status = ?, updated_at = ? WHERE run_id = ? AND status = ?",
                 (new_status, now, run_id, expected_status),
             )
         else:
-            cursor = conn.execute(
-                "UPDATE runs SET status = ?, result = ?, updated_at = ? WHERE run_id = ? AND status = ?",
-                (new_status, json.dumps(result), now, run_id, expected_status),
+            cursor = db.execute(
+                f"UPDATE {table('runs')} SET status = ?, result = ?, updated_at = ? WHERE run_id = ? AND status = ?",
+                (new_status, json_param(result), now, run_id, expected_status),
             )
         return cursor.rowcount == 1
 
 
-def list_runs(tenant_id: Optional[str] = None, pipeline: Optional[str] = None) -> list:
-    query = "SELECT * FROM runs"
-    clauses = []
+def list_runs(tenant_id: Optional[str] = None, pipeline: Optional[str] = None, limit: int = 200) -> list:
+    query = f"SELECT * FROM {table('runs')}"
+    clauses: list[str] = []
     params: list = []
     if tenant_id:
         clauses.append("tenant_id = ?")
@@ -108,8 +113,8 @@ def list_runs(tenant_id: Optional[str] = None, pipeline: Optional[str] = None) -
         params.append(pipeline)
     if clauses:
         query += " WHERE " + " AND ".join(clauses)
-    query += " ORDER BY created_at DESC"
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        rows = conn.execute(query, params).fetchall()
+    query += " ORDER BY created_at DESC LIMIT ?"
+    params.append(max(1, min(limit, 1000)))
+    with transaction() as db:
+        rows = db.execute(query, params).fetchall()
         return [_row_to_record(row) for row in rows]

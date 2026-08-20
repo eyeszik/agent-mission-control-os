@@ -1,16 +1,21 @@
-import sqlite3
-from datetime import datetime
+from __future__ import annotations
+
+from datetime import datetime, timezone
 from typing import Optional
 from uuid import uuid4
 
-from services.langgraph.persistence.sqlite_db import DB_PATH, init_db
-
-init_db()
+from services.langgraph.persistence.database import is_postgres, normalize_record, table, transaction
 
 
-def init_approvals_table():
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute(
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def init_approvals_table() -> None:
+    if is_postgres():
+        return
+    with transaction(write=True) as db:
+        db.execute(
             """
             CREATE TABLE IF NOT EXISTS approvals (
                 approval_id TEXT PRIMARY KEY,
@@ -22,85 +27,66 @@ def init_approvals_table():
                 status TEXT DEFAULT 'pending',
                 reviewer TEXT,
                 decision TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                decided_at TIMESTAMP
+                created_at TEXT NOT NULL,
+                decided_at TEXT
             )
             """
         )
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_approvals_tenant_status ON approvals (tenant_id, status)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_approvals_run_created ON approvals (run_id, created_at DESC)")
+        db.execute("CREATE INDEX IF NOT EXISTS idx_approvals_tenant_status ON approvals (tenant_id, status)")
+        db.execute("CREATE INDEX IF NOT EXISTS idx_approvals_run_created ON approvals (run_id, created_at DESC)")
 
 
 init_approvals_table()
 
 
-def _row_to_dict(row: sqlite3.Row | None) -> Optional[dict]:
-    return dict(row) if row else None
+def _row_to_dict(row) -> Optional[dict]:
+    return normalize_record(row) if row else None
 
 
-def create_approval_request(
-    run_id: str,
-    tenant_id: str,
-    project_id: str,
-    reason: str,
-    confidence: Optional[float],
-) -> dict:
+def create_approval_request(run_id: str, tenant_id: str, project_id: str, reason: str, confidence: Optional[float]) -> dict:
     approval_id = str(uuid4())
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute(
-            "INSERT INTO approvals (approval_id, run_id, tenant_id, project_id, reason, confidence) VALUES (?, ?, ?, ?, ?, ?)",
-            (approval_id, run_id, tenant_id, project_id, reason, confidence),
+    with transaction(write=True) as db:
+        db.execute(
+            f"INSERT INTO {table('approvals')} (approval_id, run_id, tenant_id, project_id, reason, confidence, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (approval_id, run_id, tenant_id, project_id, reason, confidence, _now()),
         )
     return {"approval_id": approval_id, "status": "pending"}
 
 
 def get_approval(approval_id: str) -> Optional[dict]:
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        row = conn.execute("SELECT * FROM approvals WHERE approval_id = ?", (approval_id,)).fetchone()
+    with transaction() as db:
+        row = db.execute(f"SELECT * FROM {table('approvals')} WHERE approval_id = ?", (approval_id,)).fetchone()
         return _row_to_dict(row)
 
 
 def list_pending_approvals(tenant_id: str) -> list:
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        rows = conn.execute(
-            "SELECT * FROM approvals WHERE status = 'pending' AND tenant_id = ? ORDER BY created_at ASC",
+    with transaction() as db:
+        rows = db.execute(
+            f"SELECT * FROM {table('approvals')} WHERE status = 'pending' AND tenant_id = ? ORDER BY created_at ASC",
             (tenant_id,),
         ).fetchall()
-        return [dict(row) for row in rows]
+        return [normalize_record(row) for row in rows]
 
 
 def resolve_approval(approval_id: str, reviewer: str, decision: str) -> Optional[dict]:
-    """Atomically transition PENDING -> one immutable terminal decision."""
-
     if decision not in ("approve", "reject"):
         raise ValueError("decision must be 'approve' or 'reject'")
-
-    decided_at = datetime.utcnow().isoformat()
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        conn.execute("BEGIN IMMEDIATE")
-        cursor = conn.execute(
-            """
-            UPDATE approvals
-               SET status = 'resolved', reviewer = ?, decision = ?, decided_at = ?
-             WHERE approval_id = ? AND status = 'pending'
-            """,
+    decided_at = _now()
+    with transaction(write=True) as db:
+        cursor = db.execute(
+            f"UPDATE {table('approvals')} SET status = 'resolved', reviewer = ?, decision = ?, decided_at = ? WHERE approval_id = ? AND status = 'pending'",
             (reviewer, decision, decided_at, approval_id),
         )
         if cursor.rowcount != 1:
-            conn.rollback()
             return None
-        row = conn.execute("SELECT * FROM approvals WHERE approval_id = ?", (approval_id,)).fetchone()
-        conn.commit()
+        row = db.execute(f"SELECT * FROM {table('approvals')} WHERE approval_id = ?", (approval_id,)).fetchone()
         return _row_to_dict(row)
 
 
 def get_approvals_for_run(run_id: str) -> list:
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.row_factory = sqlite3.Row
-        rows = conn.execute(
-            "SELECT * FROM approvals WHERE run_id = ? ORDER BY created_at DESC", (run_id,)
+    with transaction() as db:
+        rows = db.execute(
+            f"SELECT * FROM {table('approvals')} WHERE run_id = ? ORDER BY created_at DESC",
+            (run_id,),
         ).fetchall()
-        return [dict(row) for row in rows]
+        return [normalize_record(row) for row in rows]
