@@ -97,6 +97,8 @@ def main() -> None:
         raise SystemExit("Web package must remain pinned to audited Next.js 16.3.0")
     if web_package.get("devDependencies", {}).get("@playwright/test") != "1.61.0":
         raise SystemExit("Browser gate must pin @playwright/test to 1.61.0")
+    if web_package.get("scripts", {}).get("test") != "vitest run tests":
+        raise SystemExit("Web unit tests must be scoped to tests/ so Vitest cannot execute Playwright specs")
     if web_package.get("scripts", {}).get("test:e2e") != "playwright test":
         raise SystemExit("Web package must expose the deterministic test:e2e script")
     if web_package.get("scripts", {}).get("lint") == "next lint":
@@ -122,6 +124,7 @@ def main() -> None:
     for required in [
         "Browser E2E (local degraded HITL)",
         "playwright install --with-deps chromium",
+        "pnpm --filter @amc/shared build",
         "pnpm --filter @amc/web test:e2e",
         "AMC_AUTH_MODE: local",
         "contents: read",
