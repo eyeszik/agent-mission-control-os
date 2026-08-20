@@ -100,6 +100,7 @@ jobs:
       - name: Install application dependencies
         run: |
           pnpm install --frozen-lockfile
+          pnpm --filter @amc/shared build
           python -m pip install -e "./services/langgraph[dev]"
 
       - name: Install Chromium runtime
