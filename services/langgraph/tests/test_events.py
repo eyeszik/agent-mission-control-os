@@ -5,24 +5,9 @@ from fastapi.testclient import TestClient
 
 from services.langgraph.app.main import app
 from services.langgraph.persistence.events import list_events_for_run, record_event
+from services.langgraph.persistence.runs import create_run_record
 
 client = TestClient(app)
-
-
-def test_record_and_list_events_are_ordered_by_sequence():
-    run_id = "run-events-test-1"
-    record_event(run_id, "brief_intake", "node_start")
-    record_event(run_id, "brief_intake", "node_complete")
-    record_event(run_id, "brand_strategy", "node_start")
-
-    events = list_events_for_run(run_id)
-    assert [e["node_id"] for e in events] == ["brief_intake", "brief_intake", "brand_strategy"]
-    assert [e["type"] for e in events] == ["node_start", "node_complete", "node_start"]
-    assert [e["sequence"] for e in events] == [0, 1, 2]
-
-
-def test_list_events_for_unknown_run_is_empty():
-    assert list_events_for_run("run-that-does-not-exist") == []
 
 
 def _parse_sse_events(body: str) -> list:
@@ -33,25 +18,57 @@ def _parse_sse_events(body: str) -> list:
     return events
 
 
-def test_events_endpoint_replays_real_agency_pipeline_events_not_the_old_mock():
-    payload = {
-        "tenant_id": "tenant-events-test",
-        "project_id": "proj-events-test",
-        "brief": {"brand_name": "Acme", "target_audience": "Developers"},
-    }
+def test_record_and_list_events_are_ordered_by_sequence():
+    run_id = f"run-events-{uuid4()}"
+    record_event(run_id, "tenant-events-test", "proj-events-test", "brief_intake", "node_complete")
+    record_event(run_id, "tenant-events-test", "proj-events-test", "brand_strategy", "node_complete")
+    events = list_events_for_run(run_id)
+    assert [event["sequence"] for event in events] == [0, 1]
+    assert [event["node_id"] for event in events] == ["brief_intake", "brand_strategy"]
+    assert all(event["schema_version"] == "run-event-v2" for event in events)
+
+
+def test_cursor_returns_only_events_after_acknowledged_sequence():
+    run_id = f"run-cursor-{uuid4()}"
+    create_run_record(run_id, "tenant-events-test", "proj-events-test", "branding_marketing_agency", "completed", {})
+    for node in ["brief_intake", "brand_strategy", "copywriting"]:
+        record_event(run_id, "tenant-events-test", "proj-events-test", node, "node_complete")
+
+    response = client.get(f"/runs/{run_id}/events?cursor=0")
+    assert response.status_code == 200
+    events = _parse_sse_events(response.text)
+    assert [event["sequence"] for event in events] == [1, 2]
+
+
+def test_last_event_id_resumes_after_header_cursor():
+    run_id = f"run-header-{uuid4()}"
+    create_run_record(run_id, "tenant-events-test", "proj-events-test", "branding_marketing_agency", "completed", {})
+    for node in ["brief_intake", "brand_strategy", "copywriting"]:
+        record_event(run_id, "tenant-events-test", "proj-events-test", node, "node_complete")
+
+    response = client.get(f"/runs/{run_id}/events", headers={"Last-Event-ID": "1"})
+    assert response.status_code == 200
+    events = _parse_sse_events(response.text)
+    assert [event["sequence"] for event in events] == [2]
+
+
+def test_events_endpoint_replays_completed_agency_stage_observations():
     create_resp = client.post(
         "/agency/runs",
-        json=payload,
+        json={
+            "tenant_id": "tenant-events-test",
+            "project_id": "proj-events-test",
+            "brief": {"brand_name": "Acme", "target_audience": "Developers"},
+        },
         headers={"Idempotency-Key": str(uuid4())},
     )
     assert create_resp.status_code == 201
     run_id = create_resp.json()["run_id"]
 
-    sse_resp = client.get(f"/runs/{run_id}/events")
-    assert sse_resp.status_code == 200
-    events = _parse_sse_events(sse_resp.text)
-
-    node_ids = [e["node_id"] for e in events]
+    response = client.get(f"/runs/{run_id}/events")
+    assert response.status_code == 200
+    events = _parse_sse_events(response.text)
+    node_ids = [event["node_id"] for event in events]
     for stage in [
         "brief_intake",
         "brand_strategy",
@@ -64,14 +81,18 @@ def test_events_endpoint_replays_real_agency_pipeline_events_not_the_old_mock():
     ]:
         assert stage in node_ids
     assert "delivery" not in node_ids
-    assert "ingest" not in node_ids
-    assert "planner" not in node_ids
-    assert events[0]["type"] == "node_start"
-    assert events[1]["type"] == "node_complete"
-    assert all(e["run_id"] == run_id for e in events)
+    assert all(event["event_type"] == "node_complete" for event in events)
+    assert all(event["started_at"] is None for event in events)
+    assert all(event["completed_at"] is not None for event in events)
 
 
-def test_events_endpoint_for_unknown_run_returns_empty_stream():
-    resp = client.get("/runs/some-run-id-that-was-never-created/events")
-    assert resp.status_code == 200
-    assert _parse_sse_events(resp.text) == []
+def test_unknown_run_event_stream_returns_404():
+    response = client.get(f"/runs/{uuid4()}/events")
+    assert response.status_code == 404
+
+
+def test_foreign_tenant_event_stream_is_denied():
+    run_id = f"run-foreign-{uuid4()}"
+    create_run_record(run_id, "tenant-other", "proj-other", "branding_marketing_agency", "completed", {})
+    response = client.get(f"/runs/{run_id}/events")
+    assert response.status_code == 403

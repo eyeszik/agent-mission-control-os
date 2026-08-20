@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import uuid4
 
@@ -47,6 +47,10 @@ class CreateAgencyRunRequest(BaseModel):
     brief: CampaignBriefRequest
 
 
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
 def _run_config(run_id: str) -> dict:
     return {"configurable": {"thread_id": run_id}}
 
@@ -59,13 +63,30 @@ def _safe_brief(req: CreateAgencyRunRequest) -> dict:
     return quarantine_payload(sanitize_deep(req.brief.model_dump()))
 
 
-def _run_and_record_events(graph, input_state, config: dict, run_id: str) -> dict:
+def _run_and_record_events(graph, input_state, config: dict, run: AgentRun) -> dict:
+    """
+    Execute synchronously and persist causally honest completion observations.
+
+    The current execution API does not expose a pre-node callback from this
+    wrapper, so we intentionally do NOT fabricate node_start timestamps. Each
+    event records the point at which a completed node update was observed.
+    """
+
     for step in graph.stream(input_state, config=config, stream_mode="updates"):
         for node_id, _delta in step.items():
             if node_id == "__interrupt__":
                 continue
-            record_event(run_id, node_id, "node_start")
-            record_event(run_id, node_id, "node_complete")
+            completed_at = _now()
+            record_event(
+                str(run.id),
+                run.tenant_id,
+                run.project_id,
+                node_id,
+                "node_complete",
+                observed_at=completed_at,
+                completed_at=completed_at,
+            )
+
     snapshot = graph.get_state(config)
     return dict(snapshot.values) if snapshot and snapshot.values else {}
 
@@ -108,7 +129,7 @@ def create_agency_run(
         return replay
 
     run_id = str(uuid4())
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     metadata = {"input_data": {"brief": safe_brief}}
     run = AgentRun(
         id=run_id,
@@ -131,9 +152,10 @@ def create_agency_run(
         "validation_status": "pending",
     }
     try:
-        state = _run_and_record_events(graph, initial_state, config, run_id)
+        state = _run_and_record_events(graph, initial_state, config, run)
     except Exception as exc:
         update_run_status(run_id, "failed", {"error": type(exc).__name__})
+        record_event(run_id, run.tenant_id, run.project_id, "pipeline", "node_error", safe_payload={"error_class": type(exc).__name__})
         fail_idempotency(scope, idempotency_key, type(exc).__name__)
         raise HTTPException(status_code=500, detail="Agency pipeline failed") from exc
 
@@ -243,10 +265,20 @@ def resume_agency_run(
 
     graph = build_agency_workflow()
     config = _run_config(run_id)
+    run_model = AgentRun(
+        id=run_id,
+        tenant_id=record["tenant_id"],
+        project_id=record["project_id"],
+        status=record["status"],
+        created_at=datetime.fromisoformat(record["created_at"]),
+        updated_at=datetime.fromisoformat(record["updated_at"]),
+        metadata=record.get("metadata"),
+    )
     try:
-        state = _run_and_record_events(graph, None, config, run_id)
+        state = _run_and_record_events(graph, None, config, run_model)
     except Exception as exc:
         update_run_status(run_id, "failed", {"error": type(exc).__name__})
+        record_event(run_id, record["tenant_id"], record["project_id"], "delivery", "node_error", safe_payload={"error_class": type(exc).__name__})
         fail_idempotency(scope, idempotency_key, type(exc).__name__)
         raise HTTPException(status_code=500, detail="Delivery failed") from exc
 

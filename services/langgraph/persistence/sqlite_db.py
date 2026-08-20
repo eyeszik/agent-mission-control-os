@@ -34,6 +34,33 @@ _MIGRATIONS = [
             ON idempotency_records (expires_at);
         """,
     ),
+    (
+        3,
+        """
+        CREATE TABLE IF NOT EXISTS run_events_v2 (
+            event_id TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            sequence INTEGER NOT NULL,
+            schema_version TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            node_id TEXT,
+            observed_at TEXT NOT NULL,
+            started_at TEXT,
+            completed_at TEXT,
+            persisted_at TEXT NOT NULL,
+            checkpoint_ref TEXT,
+            safe_payload TEXT NOT NULL,
+            redactions_applied TEXT NOT NULL,
+            UNIQUE (run_id, sequence)
+        );
+        CREATE INDEX IF NOT EXISTS idx_run_events_v2_cursor
+            ON run_events_v2 (run_id, sequence);
+        CREATE INDEX IF NOT EXISTS idx_run_events_v2_tenant
+            ON run_events_v2 (tenant_id, project_id, run_id);
+        """,
+    ),
 ]
 
 
@@ -42,6 +69,7 @@ def init_db() -> None:
 
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA busy_timeout = 5000")
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -50,10 +78,7 @@ def init_db() -> None:
             )
             """
         )
-        applied = {
-            row[0]
-            for row in conn.execute("SELECT version FROM schema_migrations").fetchall()
-        }
+        applied = {row[0] for row in conn.execute("SELECT version FROM schema_migrations").fetchall()}
         for version, script in _MIGRATIONS:
             if version in applied:
                 continue
