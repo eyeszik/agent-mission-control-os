@@ -1,5 +1,5 @@
 {
-  "schema_version": "amc-integrity/v3",
+  "schema_version": "amc-integrity/v2",
   "scope": "critical_runtime_release_and_production_contracts",
   "status": "generated_and_ci_verified_required",
   "policy": "This manifest covers security-, runtime-, contract-, dependency-, browser-release-, production-persistence-, external-mutation-guard-, and deployment-critical files. CI recomputes Git blob hashes and fails on drift.",
