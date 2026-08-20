@@ -1,9 +1,10 @@
 import json
+from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
-from services.langgraph.persistence.events import record_event, list_events_for_run
 from services.langgraph.app.main import app
+from services.langgraph.persistence.events import list_events_for_run, record_event
 
 client = TestClient(app)
 
@@ -38,7 +39,11 @@ def test_events_endpoint_replays_real_agency_pipeline_events_not_the_old_mock():
         "project_id": "proj-events-test",
         "brief": {"brand_name": "Acme", "target_audience": "Developers"},
     }
-    create_resp = client.post("/agency/runs", json=payload)
+    create_resp = client.post(
+        "/agency/runs",
+        json=payload,
+        headers={"Idempotency-Key": str(uuid4())},
+    )
     assert create_resp.status_code == 201
     run_id = create_resp.json()["run_id"]
 
@@ -47,16 +52,20 @@ def test_events_endpoint_replays_real_agency_pipeline_events_not_the_old_mock():
     events = _parse_sse_events(sse_resp.text)
 
     node_ids = [e["node_id"] for e in events]
-    # Every stage through the HITL gate ran and was recorded.
-    for stage in ["brief_intake", "brand_strategy", "creative_concepting", "copywriting",
-                  "design_brief", "campaign_assembly", "brand_safety_qa", "hitl_gate"]:
+    for stage in [
+        "brief_intake",
+        "brand_strategy",
+        "creative_concepting",
+        "copywriting",
+        "design_brief",
+        "campaign_assembly",
+        "brand_safety_qa",
+        "hitl_gate",
+    ]:
         assert stage in node_ids
-    # delivery hasn't run yet (blocked on approval) so it must not appear.
     assert "delivery" not in node_ids
-    # Regression guard: the old mock unconditionally emitted these for every run_id.
     assert "ingest" not in node_ids
     assert "planner" not in node_ids
-    # Each recorded node has a start/complete pair.
     assert events[0]["type"] == "node_start"
     assert events[1]["type"] == "node_complete"
     assert all(e["run_id"] == run_id for e in events)

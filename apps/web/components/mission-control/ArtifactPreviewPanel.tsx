@@ -29,12 +29,10 @@ export function ArtifactPreviewPanel() {
     setResolvingId(approvalId);
     setError(null);
     try {
-      // Reviewer identity is intentionally not supplied by the browser. The
-      // backend derives the actor from authenticated server context.
       await resolveApproval(approvalId, decision, generateIdempotencyKey());
 
       if (decision === 'approve') {
-        const resumed = await resumeAgencyRun(runId);
+        const resumed = await resumeAgencyRun(runId, generateIdempotencyKey());
         updateNodeStatus(runId, 'hitl_gate', 'completed');
         if (resumed.delivery) {
           updateNodeStatus(runId, 'delivery', 'completed');

@@ -1,5 +1,5 @@
-import sqlite3
 import json
+import sqlite3
 from datetime import datetime
 from typing import Optional
 
@@ -25,6 +25,8 @@ def init_runs_table():
             )
             """
         )
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_runs_tenant_project ON runs (tenant_id, project_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_runs_status_updated ON runs (status, updated_at DESC)")
 
 
 init_runs_table()
@@ -71,6 +73,29 @@ def update_run_status(run_id: str, status: str, result: Optional[dict] = None) -
     return get_run_record(run_id)
 
 
+def compare_and_set_run_status(
+    run_id: str,
+    expected_status: str,
+    new_status: str,
+    result: Optional[dict] = None,
+) -> bool:
+    """Atomically transition one run status if its current state matches."""
+
+    now = datetime.utcnow().isoformat()
+    with sqlite3.connect(DB_PATH) as conn:
+        if result is None:
+            cursor = conn.execute(
+                "UPDATE runs SET status = ?, updated_at = ? WHERE run_id = ? AND status = ?",
+                (new_status, now, run_id, expected_status),
+            )
+        else:
+            cursor = conn.execute(
+                "UPDATE runs SET status = ?, result = ?, updated_at = ? WHERE run_id = ? AND status = ?",
+                (new_status, json.dumps(result), now, run_id, expected_status),
+            )
+        return cursor.rowcount == 1
+
+
 def list_runs(tenant_id: Optional[str] = None, pipeline: Optional[str] = None) -> list:
     query = "SELECT * FROM runs"
     clauses = []
@@ -87,4 +112,4 @@ def list_runs(tenant_id: Optional[str] = None, pipeline: Optional[str] = None) -
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         rows = conn.execute(query, params).fetchall()
-        return [_row_to_record(r) for r in rows]
+        return [_row_to_record(row) for row in rows]

@@ -11,6 +11,10 @@ from services.langgraph.security.preprocess import sanitize_deep
 client = TestClient(app)
 
 
+def _idem() -> dict:
+    return {"Idempotency-Key": str(uuid4())}
+
+
 def test_cross_tenant_run_access_is_denied():
     run_id = str(uuid4())
     create_run_record(run_id, "tenant-other", "proj-other", "branding_marketing_agency", "running", {})
@@ -26,6 +30,7 @@ def test_client_tenant_substitution_is_denied():
             "project_id": "proj-security",
             "brief": {"brand_name": "Acme", "target_audience": "Developers"},
         },
+        headers=_idem(),
     )
     assert response.status_code == 403
 
@@ -47,6 +52,7 @@ def test_nested_sensitive_canaries_are_redacted_before_persistence():
                 "goals": [canaries["phone"], canaries["ssn"], canaries["card"]],
             },
         },
+        headers=_idem(),
     )
     assert response.status_code == 201
     record = get_run_record(response.json()["run_id"])
@@ -78,7 +84,11 @@ def test_approval_terminal_decision_cannot_be_overwritten():
 
 
 def test_invalid_approval_id_returns_404():
-    response = client.post(f"/approvals/{uuid4()}/decide", json={"decision": "approve"})
+    response = client.post(
+        f"/approvals/{uuid4()}/decide",
+        json={"decision": "approve"},
+        headers=_idem(),
+    )
     assert response.status_code == 404
 
 
@@ -89,12 +99,17 @@ def test_rejection_uses_server_reviewer_and_terminal_run_state():
             "project_id": "proj-security",
             "brief": {"brand_name": "Acme", "target_audience": "Developers"},
         },
+        headers=_idem(),
     )
     assert create_response.status_code == 201
     body = create_response.json()
     approval_id = body["pending_approval"]["approval_id"]
 
-    decision = client.post(f"/approvals/{approval_id}/decide", json={"decision": "reject"})
+    decision = client.post(
+        f"/approvals/{approval_id}/decide",
+        json={"decision": "reject"},
+        headers=_idem(),
+    )
     assert decision.status_code == 200
     assert decision.json()["reviewer"] == "test-operator"
 
