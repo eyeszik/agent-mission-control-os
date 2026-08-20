@@ -119,6 +119,9 @@ def main() -> None:
     smoke_spec = ROOT / "apps/web/e2e/agency-smoke.spec.ts"
     if not playwright_config.is_file() or not smoke_spec.is_file():
         raise SystemExit("Browser E2E config/spec must remain committed")
+    playwright_text = playwright_config.read_text(encoding="utf-8")
+    if "retries: 0" not in playwright_text or "workers: 1" not in playwright_text:
+        raise SystemExit("Stateful browser release gate must remain single-attempt and single-worker")
 
     ci = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
     for required in [
