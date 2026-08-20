@@ -1,6 +1,6 @@
 # Agent Mission Control OS
 
-Agent Mission Control OS is a local-first LangGraph + FastAPI + Next.js control plane for running a branding/marketing agency workflow with durable checkpoints, approval gating, event replay, typed contracts, and explicit degraded-provider semantics.
+Agent Mission Control OS is a local-first LangGraph + FastAPI + Next.js control plane for running a branding/marketing agency workflow with durable checkpoints, approval gating, cursor-addressable event replay, typed runtime contracts, and explicit degraded-provider semantics.
 
 ## Current implementation status
 
@@ -17,6 +17,7 @@ Agent Mission Control OS is a local-first LangGraph + FastAPI + Next.js control 
 - Cursor-addressable persisted run events with runtime-validated frontend consumption.
 - Zod runtime validation for core agency/approval API responses.
 - Shared frontend pipeline-stage contract.
+- Next.js `16.3.0` frontend with an audited, lockfile-pinned production dependency graph.
 
 **Not claimed / deliberately blocked**
 
@@ -32,6 +33,8 @@ Agent Mission Control OS is a local-first LangGraph + FastAPI + Next.js control 
 - `services/langgraph/` — FastAPI API, LangGraph workflow, persistence, security, evaluation, tests.
 - `apps/web/` — Next.js Mission Control frontend.
 - `packages/shared/` — shared Zod/TypeScript contracts and OpenAPI artifact.
+- `scripts/verify_repository_invariants.py` — executable repository/contract drift checks.
+- `scripts/verify_manifest.py` + `manifest.json` — critical-runtime integrity verification.
 - `constraint_ledger.yaml` — explicit runtime/governance constraints.
 - `runtime_topology.yaml`, `streaming_resilience_spec.json`, `contract_architecture.json` — intended architecture and invariants.
 
@@ -39,7 +42,7 @@ Agent Mission Control OS is a local-first LangGraph + FastAPI + Next.js control 
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js **20.9+**
 - pnpm version pinned by the root `packageManager` field
 - Python 3.11 recommended for parity with CI
 
@@ -97,10 +100,12 @@ Open `http://localhost:3000`.
 
 ## Validation
 
-Run the same core gates used by CI:
+Run the same core deterministic gates used by CI:
 
 ```bash
-python -m compileall services/langgraph
+python scripts/verify_repository_invariants.py
+python scripts/verify_manifest.py
+python -m compileall -q services/langgraph scripts
 python -m pytest services/langgraph/tests -q
 pnpm --filter @amc/shared build
 pnpm --filter @amc/shared typecheck
@@ -110,7 +115,7 @@ pnpm --filter @amc/web test
 pnpm --filter @amc/web build
 ```
 
-Security/concurrency tests cover tenant substitution, pre-persistence redaction, immutable approval decisions, atomic idempotency reservation/replay, provider degradation, event cursor replay, and checkpointer lifecycle.
+CI additionally runs Python and production JavaScript dependency audits. Security/concurrency tests cover tenant substitution, pre-persistence redaction, immutable approval decisions, atomic idempotency reservation/replay, provider degradation, event cursor replay, and checkpointer lifecycle.
 
 ## Production boundary
 

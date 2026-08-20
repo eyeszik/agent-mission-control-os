@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import ast
+import json
 import re
 from pathlib import Path
 
@@ -83,6 +84,23 @@ def main() -> None:
         if stale.lower() in readme.lower():
             raise SystemExit(f"README contains stale implementation claim: {stale}")
 
+    root_package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+    if root_package.get("engines", {}).get("node") != ">=20.9.0":
+        raise SystemExit("Root Node.js engine must match the Next.js 16 minimum: >=20.9.0")
+    if "lint" in root_package.get("scripts", {}):
+        raise SystemExit("Root package still advertises an unimplemented recursive lint command")
+
+    web_package = json.loads((ROOT / "apps/web/package.json").read_text(encoding="utf-8"))
+    if web_package.get("dependencies", {}).get("next") != "16.3.0":
+        raise SystemExit("Web package must remain pinned to audited Next.js 16.3.0")
+    if web_package.get("scripts", {}).get("lint") == "next lint":
+        raise SystemExit("Next.js 16 removed `next lint`; stale script detected")
+
+    lockfile = (ROOT / "pnpm-lock.yaml").read_text(encoding="utf-8")
+    for required in ["specifier: 16.3.0", "sharp@0.35.3", "postcss@8.5.23"]:
+        if required not in lockfile:
+            raise SystemExit(f"Audited frontend lockfile token missing: {required}")
+
     command_panel = (ROOT / "apps/web/components/mission-control/CommandInputPanel.tsx").read_text(encoding="utf-8")
     if "GENERAL" in command_panel or "createRun(" in command_panel:
         raise SystemExit("Mock GENERAL execution surface must not be exposed")
@@ -128,6 +146,9 @@ def main() -> None:
     idempotency = (ROOT / "services/langgraph/persistence/idempotency.py").read_text(encoding="utf-8")
     if "SELECT 1 FROM idempotency_keys" in idempotency or "INSERT OR REPLACE INTO idempotency_keys" in idempotency:
         raise SystemExit("Legacy check-then-record idempotency path remains executable")
+
+    if (ROOT / ".github/workflows/dependency-remediation.yml").exists():
+        raise SystemExit("Temporary write-enabled dependency remediation workflow must be removed")
 
     print("Repository invariants verified")
 
