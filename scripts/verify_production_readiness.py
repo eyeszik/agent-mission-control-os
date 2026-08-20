@@ -17,17 +17,29 @@ def require(path: str, token: str | None = None) -> None:
 
 def main() -> None:
     require("supabase/migrations/20260820_amc_production_foundation_v1.sql", "amc.tenant_memberships")
+    require("supabase/migrations/20260820_amc_production_foundation_v2_fk_indexes.sql", "idx_amc_runs_project_id")
     require("services/langgraph/vercel.json", "app/main.py")
     require("apps/web/vercel.json", "nextjs")
     require("services/langgraph/app/config.py", "AMC_AUTH_MODE must be supabase")
     require("services/langgraph/security/auth.py", "X-AMC-Tenant")
     require("services/langgraph/integrations/publication.py", "publication_disabled")
     require("services/langgraph/integrations/paid_media.py", "and False")
-    require("services/langgraph/api/routes/analytics.py", "amc_first_party")
+    require("services/langgraph/api/routes/analytics.py", "record_analytics_event")
+    require("services/langgraph/api/routes/operations.py", "/publications/preview")
+    require("services/langgraph/api/routes/operations.py", "/spend/authorizations")
     env_text = (ROOT / ".env.example").read_text(encoding="utf-8")
-    for key in ["AMC_ENV", "AMC_DATABASE_BACKEND", "DATABASE_URL", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "AMC_PUBLICATION_MODE", "AMC_PAID_MEDIA_MODE"]:
+    for key in [
+        "AMC_ENV",
+        "AMC_DATABASE_BACKEND",
+        "DATABASE_URL",
+        "SUPABASE_URL",
+        "SUPABASE_PUBLISHABLE_KEY",
+        "AMC_PUBLICATION_MODE",
+        "AMC_PAID_MEDIA_MODE",
+    ]:
         if f"{key}=" not in env_text:
             raise SystemExit(f".env.example missing {key}")
+
     os.environ["AMC_ENV"] = "production"
     os.environ["AMC_AUTH_MODE"] = "supabase"
     os.environ["AMC_DATABASE_BACKEND"] = "postgres"
@@ -38,11 +50,19 @@ def main() -> None:
     os.environ["AMC_PUBLICATION_MODE"] = "disabled"
     os.environ["AMC_PAID_MEDIA_MODE"] = "disabled"
     from services.langgraph.app.config import production_config_errors
-    if production_config_errors():
-        raise SystemExit(f"valid production fixture rejected: {production_config_errors()}")
+
+    errors = production_config_errors()
+    if errors:
+        raise SystemExit(f"valid production fixture rejected: {errors}")
+
     os.environ["AMC_PAID_MEDIA_MODE"] = "live"
     if not production_config_errors():
         raise SystemExit("live paid media must fail production readiness until an adapter exists")
+    os.environ["AMC_PAID_MEDIA_MODE"] = "disabled"
+    os.environ["AMC_PUBLICATION_MODE"] = "live"
+    if not production_config_errors():
+        raise SystemExit("live publication must fail production readiness until an adapter exists")
+
     print("Production readiness invariants verified")
 
 
