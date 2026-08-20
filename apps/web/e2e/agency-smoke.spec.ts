@@ -1,0 +1,57 @@
+import { expect, test } from '@playwright/test';
+
+test.describe('Agent Mission Control local release smoke', () => {
+  test('renders the live Mission Control surface without browser errors', async ({ page }) => {
+    const browserErrors: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') browserErrors.push(message.text());
+    });
+    page.on('pageerror', (error) => browserErrors.push(error.message));
+
+    const response = await page.goto('/mission-control', { waitUntil: 'networkidle' });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole('heading', { name: 'Mission Control' })).toBeVisible();
+    await expect(page.getByText('Campaign Terminal', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('Brand name')).toBeVisible();
+    await expect(page.getByLabel('Target audience')).toBeVisible();
+    await expect(page.getByLabel(/Goals/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Launch Campaign' })).toBeDisabled();
+
+    expect(browserErrors).toEqual([]);
+  });
+
+  test('reaches HITL through the real browser/API path with provider absence explicitly degraded', async ({ page }) => {
+    const browserErrors: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') browserErrors.push(message.text());
+    });
+    page.on('pageerror', (error) => browserErrors.push(error.message));
+
+    await page.goto('/mission-control');
+    await page.getByLabel('Brand name').fill('Deterministic Local Test');
+    await page.getByLabel('Target audience').fill('Local release-gate operators');
+    await page.getByLabel(/Goals/).fill('verify browser path, verify HITL safety');
+
+    const apiResponsePromise = page.waitForResponse(
+      (response) => response.url().endsWith('/agency/runs') && response.request().method() === 'POST'
+    );
+
+    await page.getByRole('button', { name: 'Launch Campaign' }).click();
+    const apiResponse = await apiResponsePromise;
+
+    expect(apiResponse.status()).toBe(201);
+    const payload = await apiResponse.json();
+    expect(payload.pipeline).toBe('branding_marketing_agency');
+    expect(payload.status).toBe('needs_approval');
+    expect(payload.degraded).toBe(true);
+    expect(payload.pending_approval?.status).toBe('pending');
+    expect(payload.pending_approval?.run_id).toBe(payload.run_id);
+    expect(payload.campaign_package).toBeTruthy();
+
+    await expect(page.getByText(/Inbox/)).toContainText('(1)');
+    await expect(page.getByRole('button', { name: 'Launch Campaign' })).toBeEnabled();
+
+    expect(browserErrors).toEqual([]);
+  });
+});
