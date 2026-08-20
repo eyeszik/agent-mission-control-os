@@ -1,6 +1,6 @@
 # Agent Mission Control OS
 
-Agent Mission Control OS is a local-first LangGraph + FastAPI + Next.js control plane for running a branding/marketing agency workflow with durable checkpoints, approval gating, cursor-addressable event replay, typed runtime contracts, and explicit degraded-provider semantics.
+Agent Mission Control OS is a local-first LangGraph + FastAPI + Next.js control plane for running a branding/marketing agency workflow with durable checkpoints, approval gating, cursor-addressable event replay, typed runtime contracts, explicit degraded-provider semantics, and a deterministic browser release gate.
 
 ## Current implementation status
 
@@ -18,6 +18,7 @@ Agent Mission Control OS is a local-first LangGraph + FastAPI + Next.js control 
 - Zod runtime validation for core agency/approval API responses.
 - Shared frontend pipeline-stage contract.
 - Next.js `16.3.0` frontend with an audited, lockfile-pinned production dependency graph.
+- Browser E2E release gate using pinned Playwright/Chromium against the real local Next.js + FastAPI stack.
 
 **Not claimed / deliberately blocked**
 
@@ -32,6 +33,8 @@ Agent Mission Control OS is a local-first LangGraph + FastAPI + Next.js control 
 
 - `services/langgraph/` — FastAPI API, LangGraph workflow, persistence, security, evaluation, tests.
 - `apps/web/` — Next.js Mission Control frontend.
+- `apps/web/e2e/agency-smoke.spec.ts` — live-stack browser release smoke test.
+- `apps/web/playwright.config.ts` — deterministic Chromium browser-test configuration.
 - `packages/shared/` — shared Zod/TypeScript contracts and OpenAPI artifact.
 - `scripts/verify_repository_invariants.py` — executable repository/contract drift checks.
 - `scripts/verify_manifest.py` + `manifest.json` — critical-runtime integrity verification.
@@ -93,10 +96,10 @@ Local auth intentionally rejects non-loopback clients.
 ### 5. Run frontend
 
 ```bash
-pnpm --filter @amc/web dev
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000 pnpm --filter @amc/web dev --hostname 127.0.0.1 --port 3000
 ```
 
-Open `http://localhost:3000`.
+Open `http://127.0.0.1:3000`.
 
 ## Validation
 
@@ -115,8 +118,21 @@ pnpm --filter @amc/web test
 pnpm --filter @amc/web build
 ```
 
+### Browser E2E release gate
+
+The browser gate intentionally runs without an external provider key. It proves the real browser → Next.js → FastAPI → LangGraph path reaches HITL while provider absence remains explicitly `degraded: true` and no delivery capability is fabricated.
+
+With the local backend and frontend already running on `127.0.0.1:8000` and `127.0.0.1:3000`:
+
+```bash
+pnpm --filter @amc/web exec playwright install chromium
+E2E_BASE_URL=http://127.0.0.1:3000 pnpm --filter @amc/web test:e2e
+```
+
+CI installs Chromium with its OS dependencies, starts both local services using loopback-only auth, waits for `/health` and `/mission-control`, executes the browser gate, and uploads Playwright traces/screenshots/video only on failure.
+
 CI additionally runs Python and production JavaScript dependency audits. Security/concurrency tests cover tenant substitution, pre-persistence redaction, immutable approval decisions, atomic idempotency reservation/replay, provider degradation, event cursor replay, and checkpointer lifecycle.
 
 ## Production boundary
 
-Do not expose the current API to a network as a production multi-user service using `AMC_AUTH_MODE=local`. Before production deployment, integrate a verified authentication/authorization provider, configure durable production persistence, run production-specific dependency/security scans, and validate deployment/runtime bindings in the target environment.
+Do not expose the current API to a network as a production multi-user service using `AMC_AUTH_MODE=local`. Before production deployment, integrate a verified authentication/authorization provider, configure durable production persistence, run production-specific dependency/security scans, rerun browser/accessibility/recovery validation in the target environment, and verify all deployment/runtime bindings.

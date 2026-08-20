@@ -52,6 +52,8 @@ def main() -> None:
         "package.json",
         "pnpm-lock.yaml",
         "apps/web/package.json",
+        "apps/web/playwright.config.ts",
+        "apps/web/e2e/agency-smoke.spec.ts",
         "apps/web/lib/api/client.ts",
         "packages/shared/openapi/agent-mission-control.openapi.yaml",
         "packages/shared/src/schemas/agency.ts",

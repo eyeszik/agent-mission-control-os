@@ -52,7 +52,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.20.2"
 
       - uses: pnpm/action-setup@v4
 
@@ -76,8 +76,102 @@ jobs:
 
       - name: Build web app
         env:
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+          NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000
         run: pnpm --filter @amc/web build
+
+  browser-e2e:
+    name: Browser E2E (local degraded HITL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.20.2"
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Install application dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @amc/shared build
+          python -m pip install -e "./services/langgraph[dev]"
+
+      - name: Install Chromium runtime
+        run: pnpm --filter @amc/web exec playwright install --with-deps chromium
+
+      - name: Start local stack
+        env:
+          AMC_AUTH_MODE: local
+          AMC_LOCAL_USER_ID: local-e2e
+          AMC_LOCAL_TENANT_ID: tenant_1
+          AMC_LOCAL_PROJECT_IDS: proj_1
+          AMC_LOCAL_ROLE: operator
+          AMC_DB_PATH: /tmp/amc_e2e_${{ github.run_id }}.db
+          AMC_CORS_ALLOWED_ORIGINS: http://127.0.0.1:3000
+          NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000
+        run: |
+          nohup python -m uvicorn services.langgraph.app.main:app --host 127.0.0.1 --port 8000 > /tmp/amc-backend.log 2>&1 &
+          echo $! > /tmp/amc-backend.pid
+          nohup pnpm --filter @amc/web exec next dev --hostname 127.0.0.1 --port 3000 > /tmp/amc-frontend.log 2>&1 &
+          echo $! > /tmp/amc-frontend.pid
+
+          backend_ready=0
+          for _ in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8000/health >/dev/null; then
+              backend_ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$backend_ready" -eq 1
+
+          frontend_ready=0
+          for _ in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:3000/mission-control >/dev/null; then
+              frontend_ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$frontend_ready" -eq 1
+
+      - name: Run browser release smoke
+        env:
+          CI: "true"
+          E2E_BASE_URL: http://127.0.0.1:3000
+        run: pnpm --filter @amc/web test:e2e
+
+      - name: Print service logs on failure
+        if: failure()
+        run: |
+          echo "===== backend ====="
+          cat /tmp/amc-backend.log || true
+          echo "===== frontend ====="
+          cat /tmp/amc-frontend.log || true
+
+      - name: Upload Playwright failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-${{ github.run_id }}
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Stop local stack
+        if: always()
+        run: |
+          test ! -f /tmp/amc-frontend.pid || kill "$(cat /tmp/amc-frontend.pid)" 2>/dev/null || true
+          test ! -f /tmp/amc-backend.pid || kill "$(cat /tmp/amc-backend.pid)" 2>/dev/null || true
 
   dependency-audit:
     name: Dependency audit
@@ -99,7 +193,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.20.2"
       - uses: pnpm/action-setup@v4
 
       - name: Audit production JavaScript dependencies

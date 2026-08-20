@@ -83,6 +83,8 @@ def main() -> None:
     for stale in stale_claims:
         if stale.lower() in readme.lower():
             raise SystemExit(f"README contains stale implementation claim: {stale}")
+    if "Browser E2E release gate" not in readme:
+        raise SystemExit("README must document the browser E2E release gate")
 
     root_package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     if root_package.get("engines", {}).get("node") != ">=20.9.0":
@@ -93,13 +95,45 @@ def main() -> None:
     web_package = json.loads((ROOT / "apps/web/package.json").read_text(encoding="utf-8"))
     if web_package.get("dependencies", {}).get("next") != "16.3.0":
         raise SystemExit("Web package must remain pinned to audited Next.js 16.3.0")
+    if web_package.get("devDependencies", {}).get("@playwright/test") != "1.61.0":
+        raise SystemExit("Browser gate must pin @playwright/test to 1.61.0")
+    if web_package.get("scripts", {}).get("test") != "vitest run tests":
+        raise SystemExit("Web unit tests must be scoped to tests/ so Vitest cannot execute Playwright specs")
+    if web_package.get("scripts", {}).get("test:e2e") != "playwright test":
+        raise SystemExit("Web package must expose the deterministic test:e2e script")
     if web_package.get("scripts", {}).get("lint") == "next lint":
         raise SystemExit("Next.js 16 removed `next lint`; stale script detected")
 
     lockfile = (ROOT / "pnpm-lock.yaml").read_text(encoding="utf-8")
-    for required in ["specifier: 16.3.0", "sharp@0.35.3", "postcss@8.5.23"]:
+    for required in [
+        "specifier: 16.3.0",
+        "sharp@0.35.3",
+        "postcss@8.5.23",
+        "'@playwright/test@1.61.0'",
+        "playwright-core@1.61.0",
+    ]:
         if required not in lockfile:
             raise SystemExit(f"Audited frontend lockfile token missing: {required}")
+
+    playwright_config = ROOT / "apps/web/playwright.config.ts"
+    smoke_spec = ROOT / "apps/web/e2e/agency-smoke.spec.ts"
+    if not playwright_config.is_file() or not smoke_spec.is_file():
+        raise SystemExit("Browser E2E config/spec must remain committed")
+    playwright_text = playwright_config.read_text(encoding="utf-8")
+    if "retries: 0" not in playwright_text or "workers: 1" not in playwright_text:
+        raise SystemExit("Stateful browser release gate must remain single-attempt and single-worker")
+
+    ci = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    for required in [
+        "Browser E2E (local degraded HITL)",
+        "playwright install --with-deps chromium",
+        "pnpm --filter @amc/shared build",
+        "pnpm --filter @amc/web test:e2e",
+        "AMC_AUTH_MODE: local",
+        "contents: read",
+    ]:
+        if required not in ci:
+            raise SystemExit(f"CI browser release gate token missing: {required}")
 
     command_panel = (ROOT / "apps/web/components/mission-control/CommandInputPanel.tsx").read_text(encoding="utf-8")
     if "GENERAL" in command_panel or "createRun(" in command_panel:
@@ -147,8 +181,12 @@ def main() -> None:
     if "SELECT 1 FROM idempotency_keys" in idempotency or "INSERT OR REPLACE INTO idempotency_keys" in idempotency:
         raise SystemExit("Legacy check-then-record idempotency path remains executable")
 
-    if (ROOT / ".github/workflows/dependency-remediation.yml").exists():
-        raise SystemExit("Temporary write-enabled dependency remediation workflow must be removed")
+    for temporary_workflow in [
+        ".github/workflows/dependency-remediation.yml",
+        ".github/workflows/e2e-bootstrap.yml",
+    ]:
+        if (ROOT / temporary_workflow).exists():
+            raise SystemExit(f"Temporary write-enabled workflow must be removed: {temporary_workflow}")
 
     print("Repository invariants verified")
 
