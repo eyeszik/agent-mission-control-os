@@ -1,25 +1,27 @@
+import {
+  ApprovalDecisionResponseSchema,
+  ApprovalListSchema,
+  type ApprovalDecisionResponse,
+  type ApprovalRequest,
+} from '@amc/shared';
 import { apiFetch } from './client';
-import type { ApprovalRequest } from '@amc/shared';
 
-export async function getPendingApprovals(tenantId?: string): Promise<ApprovalRequest[]> {
-  const query = tenantId ? `?tenant_id=${encodeURIComponent(tenantId)}` : '';
-  return apiFetch<ApprovalRequest[]>(`/approvals${query}`, {
-    method: 'GET',
-  });
+export async function getPendingApprovals(): Promise<ApprovalRequest[]> {
+  return apiFetch('/approvals', { method: 'GET' }, ApprovalListSchema);
 }
 
 export async function resolveApproval(
   approvalId: string,
-  reviewer: string,
   decision: 'approve' | 'reject',
   idempotencyKey: string
-): Promise<{ approval_id: string; status: string; decision: string }> {
-  return apiFetch<{ approval_id: string; status: string; decision: string }>(
+): Promise<ApprovalDecisionResponse> {
+  return apiFetch(
     `/approvals/${approvalId}/decide`,
     {
       method: 'POST',
-      body: JSON.stringify({ reviewer, decision }),
+      body: JSON.stringify({ decision }),
       idempotencyKey,
-    }
+    },
+    ApprovalDecisionResponseSchema
   );
 }

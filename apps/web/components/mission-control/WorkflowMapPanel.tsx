@@ -1,21 +1,8 @@
 "use client";
 
+import { AGENCY_PIPELINE_STAGES } from '@amc/shared';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { useRunStore } from '../../lib/stores/runStore';
-
-// Mirrors services/langgraph/graph/agency/nodes.py AGENCY_PIPELINE_STAGES —
-// keep in sync manually until this is generated from the OpenAPI contract.
-const AGENCY_PIPELINE_STAGES = [
-  'brief_intake',
-  'brand_strategy',
-  'creative_concepting',
-  'copywriting',
-  'design_brief',
-  'campaign_assembly',
-  'brand_safety_qa',
-  'hitl_gate',
-  'delivery',
-] as const;
 
 const STAGE_LABELS: Record<string, string> = {
   brief_intake: 'INTAKE',
@@ -44,54 +31,31 @@ export function WorkflowMapPanel() {
     if (status === 'completed') return 'text-emerald-500';
     if (status === 'running') return 'text-amber-500 animate-pulse';
     if (status === 'failed') return 'text-red-500';
-    return 'text-zinc-700'; // idle
+    return 'text-zinc-700';
   };
 
-  const positions = AGENCY_PIPELINE_STAGES.map((stage, i) => ({
+  const positions = AGENCY_PIPELINE_STAGES.map((stage, index) => ({
     stage,
-    x: (i % COLS) * CELL_W + CELL_W / 2,
-    y: Math.floor(i / COLS) * CELL_H + CELL_H / 2,
+    x: (index % COLS) * CELL_W + CELL_W / 2,
+    y: Math.floor(index / COLS) * CELL_H + CELL_H / 2,
   }));
 
   const width = COLS * CELL_W;
-  const rows = Math.ceil(AGENCY_PIPELINE_STAGES.length / COLS);
-  const height = rows * CELL_H;
+  const height = Math.ceil(AGENCY_PIPELINE_STAGES.length / COLS) * CELL_H;
 
   return (
     <div className="flex-1 flex items-center justify-center p-8 relative">
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <svg className="w-full h-full" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
-          {positions.slice(0, -1).map((p, i) => {
-            const next = positions[i + 1];
-            return (
-              <line
-                key={`edge-${p.stage}`}
-                x1={p.x}
-                y1={p.y}
-                x2={next.x}
-                y2={next.y}
-                stroke="#3f3f46"
-                strokeWidth="2"
-                strokeDasharray="4 4"
-              />
-            );
+        <svg className="w-full h-full" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" aria-label="Agency workflow">
+          {positions.slice(0, -1).map((position, index) => {
+            const next = positions[index + 1];
+            return <line key={`edge-${position.stage}`} x1={position.x} y1={position.y} x2={next.x} y2={next.y} stroke="currentColor" className="text-zinc-700" strokeWidth="2" strokeDasharray="4 4" />;
           })}
-
-          {positions.map((p) => (
-            <g key={p.stage}>
-              <circle
-                cx={p.x}
-                cy={p.y}
-                r={NODE_R}
-                className={`${getNodeColor(p.stage)} fill-current transition-colors duration-500`}
-              />
-              <text
-                x={p.x}
-                y={p.y + NODE_R + 14}
-                textAnchor="middle"
-                className="text-[9px] fill-zinc-500 font-mono"
-              >
-                {STAGE_LABELS[p.stage] ?? p.stage.toUpperCase()}
+          {positions.map((position) => (
+            <g key={position.stage}>
+              <circle cx={position.x} cy={position.y} r={NODE_R} className={`${getNodeColor(position.stage)} fill-current transition-colors duration-500`} />
+              <text x={position.x} y={position.y + NODE_R + 14} textAnchor="middle" className="text-[9px] fill-zinc-500 font-mono">
+                {STAGE_LABELS[position.stage] ?? position.stage.toUpperCase()}
               </text>
             </g>
           ))}

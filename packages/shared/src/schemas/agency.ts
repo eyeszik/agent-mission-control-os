@@ -1,10 +1,7 @@
 import { z } from 'zod';
 import { ApprovalRequestSchema } from './approvals';
 
-// Mirrors services/langgraph/graph/agency/models.py — keep in sync manually
-// until schema generation is wired up (see contract_architecture.json).
-
-export const AgencyPipelineStageSchema = z.enum([
+export const AGENCY_PIPELINE_STAGES = [
   'brief_intake',
   'brand_strategy',
   'creative_concepting',
@@ -14,14 +11,16 @@ export const AgencyPipelineStageSchema = z.enum([
   'brand_safety_qa',
   'hitl_gate',
   'delivery',
-]);
+] as const;
+
+export const AgencyPipelineStageSchema = z.enum(AGENCY_PIPELINE_STAGES);
 
 export const CampaignBriefSchema = z.object({
   brand_name: z.string(),
-  industry: z.string().optional(),
+  industry: z.string().optional().nullable(),
   goals: z.array(z.string()).default([]),
   target_audience: z.string(),
-  tone: z.string().optional(),
+  tone: z.string().optional().nullable(),
   channels: z.array(z.string()).default([]),
   constraints: z.array(z.string()).default([]),
 });
@@ -54,11 +53,26 @@ export const DesignBriefSchema = z.object({
   layout_notes: z.string(),
 });
 
+export const QualityMetricsSchema = z.object({
+  evaluation_mode: z.literal('heuristic'),
+  schema_valid: z.boolean(),
+  non_empty: z.boolean(),
+  length_chars: z.number().int().nonnegative(),
+  length_sufficient: z.boolean(),
+  faithfulness: z.literal('NOT_MEASURED'),
+  hallucination_rate: z.literal('NOT_MEASURED'),
+  tool_selection_accuracy: z.literal('NOT_MEASURED'),
+  output_relevance: z.literal('NOT_MEASURED'),
+  threshold_passed: z.boolean(),
+});
+
 export const QAReportSchema = z.object({
   brand_safety_passed: z.boolean(),
   flagged_terms: z.array(z.string()).default([]),
-  quality_metrics: z.record(z.unknown()).default({}),
+  quality_metrics: QualityMetricsSchema,
   notes: z.string(),
+  release_blocked: z.boolean().default(false),
+  degradation_reasons: z.array(z.string()).default([]),
 });
 
 export const CampaignPackageSchema = z.object({
@@ -70,19 +84,30 @@ export const CampaignPackageSchema = z.object({
   qa_report: QAReportSchema.optional(),
 });
 
+export const GenerationProvenanceSchema = z.object({
+  task: z.string(),
+  mode: z.enum(['PROVIDER_SUCCESS', 'FALLBACK_DEGRADED', 'VALIDATION_FAILED', 'PROVIDER_FAILED', 'BLOCKED']),
+  provider: z.string().nullable(),
+  model: z.string().nullable(),
+  schema_version: z.string(),
+  prompt_version: z.string(),
+  prompt_hash: z.string(),
+  attempts: z.number().int().nonnegative(),
+  started_at: z.string().datetime({ offset: true }),
+  completed_at: z.string().datetime({ offset: true }),
+  fallback_used: z.boolean(),
+  error_class: z.string().nullable(),
+});
+
 export const AgencyRunStatusSchema = z.enum([
   'running',
   'needs_approval',
+  'delivering',
   'completed',
+  'rejected',
   'failed',
 ]);
 
-// The backend (services/langgraph/api/routes/agency.py) returns three
-// distinct response shapes from the same logical resource depending on the
-// endpoint: create returns pending_approval, get returns pending_next_node +
-// approvals, resume returns only run_id/status/delivery. Only run_id/status
-// are present in all three, so everything else here is optional rather than
-// asserting fields resume/create don't actually send.
 export const AgencyRunSchema = z.object({
   run_id: z.string().uuid(),
   status: AgencyRunStatusSchema,
@@ -93,10 +118,12 @@ export const AgencyRunSchema = z.object({
   qa_report: QAReportSchema.nullable().optional(),
   pending_approval: ApprovalRequestSchema.nullable().optional(),
   approvals: z.array(ApprovalRequestSchema).optional(),
+  degraded: z.boolean().optional(),
+  generation_provenance: z.array(GenerationProvenanceSchema).optional(),
   delivery: z
     .object({
       campaign_package: CampaignPackageSchema,
-      delivered_at: z.string().datetime(),
+      delivered_at: z.string().datetime({ offset: true }),
       approval_id: z.string().uuid().nullable(),
       format: z.literal('json_bundle_v1'),
     })
@@ -112,5 +139,6 @@ export type CopyVariant = z.infer<typeof CopyVariantSchema>;
 export type DesignBrief = z.infer<typeof DesignBriefSchema>;
 export type QAReport = z.infer<typeof QAReportSchema>;
 export type CampaignPackage = z.infer<typeof CampaignPackageSchema>;
+export type GenerationProvenance = z.infer<typeof GenerationProvenanceSchema>;
 export type AgencyRunStatus = z.infer<typeof AgencyRunStatusSchema>;
 export type AgencyRun = z.infer<typeof AgencyRunSchema>;

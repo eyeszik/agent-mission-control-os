@@ -1,11 +1,16 @@
-from typing import TypedDict, Annotated, List, Dict, Any
+from typing import Annotated, Any, Dict, TypedDict
+
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
+
 from .models import AgentRun
 
-# The state dictionary that is passed between LangGraph nodes
+
 class GraphState(TypedDict):
     run: AgentRun
     current_node: str
-    # Use Annotated with a reducer to append rather than overwrite
-    messages: Annotated[List[Dict[str, Any]], "append"]
+    # LangGraph requires reducer metadata to be an actual binary callable. The
+    # prebuilt add_messages reducer appends new messages and handles message IDs.
+    messages: Annotated[list[BaseMessage], add_messages]
     extracted_data: Dict[str, Any]
     validation_status: str

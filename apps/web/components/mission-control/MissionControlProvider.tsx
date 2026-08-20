@@ -1,18 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
+import type { RunEvent } from '@amc/shared';
 import { globalBus } from '../../lib/events/bus';
-import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
-import { useRunStore } from '../../lib/stores/runStore';
-import { useApprovalStore } from '../../lib/stores/approvalStore';
 import { SSEClient } from '../../lib/api/events';
 import { getPendingApprovals } from '../../lib/api/approvals';
-import type { RunEvent } from '@amc/shared';
+import { useApprovalStore } from '../../lib/stores/approvalStore';
+import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
+import { useRunStore } from '../../lib/stores/runStore';
 
-// The backend's /runs/{id}/events SSE endpoint is still a fixed 3-event mock
-// stream (services/langgraph/api/routes/events.py), so it cannot be relied on
-// to surface new approvals. Poll instead until that's wired to real node
-// execution events; this can be dropped in favor of SSE-only once it is.
 const APPROVALS_POLL_INTERVAL_MS = 4000;
 
 export function MissionControlProvider() {
@@ -23,9 +19,12 @@ export function MissionControlProvider() {
 
   useEffect(() => {
     const handleEvent = (event: RunEvent) => {
-      if (event.type === 'node_start') updateNodeStatus(event.run_id, event.node_id, 'running');
-      else if (event.type === 'node_complete') updateNodeStatus(event.run_id, event.node_id, 'completed');
-      else if (event.type === 'node_error') updateNodeStatus(event.run_id, event.node_id, 'failed');
+      if (!event.node_id) return;
+      if (event.event_type === 'node_complete') {
+        updateNodeStatus(event.run_id, event.node_id, 'completed');
+      } else if (event.event_type === 'node_error') {
+        updateNodeStatus(event.run_id, event.node_id, 'failed');
+      }
     };
 
     globalBus.on('run_event_received', handleEvent as any);
@@ -36,11 +35,7 @@ export function MissionControlProvider() {
 
   useEffect(() => {
     if (!activeRunId) return;
-
-    // Clean up existing connection if it exists
-    if (sseRef.current) {
-      sseRef.current.disconnect();
-    }
+    if (sseRef.current) sseRef.current.disconnect();
 
     const sse = new SSEClient(activeRunId, globalBus);
     sseRef.current = sse;
@@ -52,6 +47,8 @@ export function MissionControlProvider() {
     };
   }, [activeRunId]);
 
+  // Approval rows are not yet emitted as domain events, so poll the
+  // authenticated tenant-scoped endpoint independently from run-event replay.
   useEffect(() => {
     let cancelled = false;
 
