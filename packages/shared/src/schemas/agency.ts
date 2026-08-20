@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ApprovalRequestSchema } from './approvals';
 
-export const AgencyPipelineStageSchema = z.enum([
+export const AGENCY_PIPELINE_STAGES = [
   'brief_intake',
   'brand_strategy',
   'creative_concepting',
@@ -11,7 +11,9 @@ export const AgencyPipelineStageSchema = z.enum([
   'brand_safety_qa',
   'hitl_gate',
   'delivery',
-]);
+] as const;
+
+export const AgencyPipelineStageSchema = z.enum(AGENCY_PIPELINE_STAGES);
 
 export const CampaignBriefSchema = z.object({
   brand_name: z.string(),
@@ -91,8 +93,8 @@ export const GenerationProvenanceSchema = z.object({
   prompt_version: z.string(),
   prompt_hash: z.string(),
   attempts: z.number().int().nonnegative(),
-  started_at: z.string(),
-  completed_at: z.string(),
+  started_at: z.string().datetime({ offset: true }),
+  completed_at: z.string().datetime({ offset: true }),
   fallback_used: z.boolean(),
   error_class: z.string().nullable(),
 });

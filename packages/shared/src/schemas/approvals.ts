@@ -1,10 +1,5 @@
 import { z } from 'zod';
 
-// Mirrors the actual runtime shape returned by
-// services/langgraph/persistence/approvals.py / GET|POST /approvals — the
-// previous version of this schema (id/node_id/action_type/description/context)
-// never matched what the backend returns and nothing in the frontend caught it
-// because nothing called the API. Corrected to the real row shape.
 export const ApprovalRequestSchema = z.object({
   approval_id: z.string().uuid(),
   run_id: z.string(),
@@ -19,4 +14,15 @@ export const ApprovalRequestSchema = z.object({
   decided_at: z.string().nullable(),
 });
 
+export const ApprovalListSchema = z.array(ApprovalRequestSchema);
+
+export const ApprovalDecisionResponseSchema = z.object({
+  approval_id: z.string().uuid(),
+  status: z.literal('resolved'),
+  decision: z.enum(['approve', 'reject']),
+  reviewer: z.string(),
+  decided_at: z.string(),
+});
+
 export type ApprovalRequest = z.infer<typeof ApprovalRequestSchema>;
+export type ApprovalDecisionResponse = z.infer<typeof ApprovalDecisionResponseSchema>;

@@ -1,27 +1,30 @@
+import { AgencyRunSchema, type AgencyRun, type CampaignBrief } from '@amc/shared';
 import { apiFetch } from './client';
-import type { AgencyRun, CampaignBrief } from '@amc/shared';
 
 export async function createAgencyRun(
   projectId: string,
   brief: CampaignBrief,
   idempotencyKey: string
 ): Promise<AgencyRun> {
-  return apiFetch<AgencyRun>('/agency/runs', {
-    method: 'POST',
-    body: JSON.stringify({ project_id: projectId, brief }),
-    idempotencyKey,
-  });
+  return apiFetch(
+    '/agency/runs',
+    {
+      method: 'POST',
+      body: JSON.stringify({ project_id: projectId, brief }),
+      idempotencyKey,
+    },
+    AgencyRunSchema
+  );
 }
 
 export async function getAgencyRun(runId: string): Promise<AgencyRun> {
-  return apiFetch<AgencyRun>(`/agency/runs/${runId}`, {
-    method: 'GET',
-  });
+  return apiFetch(`/agency/runs/${runId}`, { method: 'GET' }, AgencyRunSchema);
 }
 
 export async function resumeAgencyRun(runId: string, idempotencyKey: string): Promise<AgencyRun> {
-  return apiFetch<AgencyRun>(`/agency/runs/${runId}/resume`, {
-    method: 'POST',
-    idempotencyKey,
-  });
+  return apiFetch(
+    `/agency/runs/${runId}/resume`,
+    { method: 'POST', idempotencyKey },
+    AgencyRunSchema
+  );
 }

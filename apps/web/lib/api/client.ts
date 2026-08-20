@@ -6,11 +6,18 @@ export class ServiceError extends Error {
 }
 
 interface FetchOptions extends RequestInit {
-  // Option to attach idempotency keys transparently
   idempotencyKey?: string;
 }
 
-export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+export interface RuntimeSchema<T> {
+  parse(input: unknown): T;
+}
+
+export async function apiFetch<T>(
+  endpoint: string,
+  options: FetchOptions = {},
+  schema?: RuntimeSchema<T>
+): Promise<T> {
   const headers = new Headers(options.headers || {});
   headers.set('Content-Type', 'application/json');
 
@@ -20,18 +27,22 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
 
   const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
   const url = `${base}${endpoint}`;
-
   const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
-    let errorData;
+    let errorData: Record<string, unknown> = {};
     try {
-      errorData = await response.json();
+      errorData = (await response.json()) as Record<string, unknown>;
     } catch {
-      errorData = { message: response.statusText };
+      errorData = {};
     }
-    throw new ServiceError(response.status, errorData.code || 'UNKNOWN', errorData.message || 'API request failed');
+    const detail = typeof errorData.detail === 'string' ? errorData.detail : undefined;
+    const message = typeof errorData.message === 'string' ? errorData.message : undefined;
+    const code = typeof errorData.code === 'string' ? errorData.code : 'UNKNOWN';
+    throw new ServiceError(response.status, code, detail || message || response.statusText || 'API request failed');
   }
 
-  return response.json() as Promise<T>;
+  const data: unknown = await response.json();
+  if (schema) return schema.parse(data);
+  return data as T;
 }

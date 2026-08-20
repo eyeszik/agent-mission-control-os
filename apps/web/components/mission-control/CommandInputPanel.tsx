@@ -1,19 +1,14 @@
 "use client";
 
 import { useState } from 'react';
-import { createRun } from '../../lib/api/runs';
 import { createAgencyRun } from '../../lib/api/agency';
 import { generateIdempotencyKey } from '../../lib/utils/idempotency';
-import { useRunStore } from '../../lib/stores/runStore';
-import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
+import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
-
-type Mode = 'general' | 'agency';
+import { useRunStore } from '../../lib/stores/runStore';
 
 export function CommandInputPanel() {
-  const [mode, setMode] = useState<Mode>('agency');
-  const [input, setInput] = useState('');
   const [brandName, setBrandName] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
   const [goals, setGoals] = useState('');
@@ -25,22 +20,6 @@ export function CommandInputPanel() {
   const upsertApproval = useApprovalStore((state) => state.upsertApproval);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
 
-  const handleExecuteGeneral = async () => {
-    if (!input.trim()) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const run = await createRun('proj_1', 'tenant_1', { command: input }, generateIdempotencyKey());
-      setActiveRun(run.id);
-      setInput('');
-    } catch (err) {
-      console.error('Failed to create run', err);
-      setError(err instanceof Error ? err.message : 'Failed to create run');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleLaunchCampaign = async () => {
     if (!brandName.trim() || !targetAudience.trim()) return;
     setLoading(true);
@@ -51,7 +30,7 @@ export function CommandInputPanel() {
         {
           brand_name: brandName.trim(),
           target_audience: targetAudience.trim(),
-          goals: goals.split(',').map((g) => g.trim()).filter(Boolean),
+          goals: goals.split(',').map((goal) => goal.trim()).filter(Boolean),
           channels: [],
           constraints: [],
         },
@@ -59,10 +38,8 @@ export function CommandInputPanel() {
       );
 
       setActiveRun(run.run_id);
-
-      const stages = run.stages ?? [];
-      const preGateStages = stages.slice(0, stages.indexOf('delivery'));
-      for (const stage of preGateStages) {
+      for (const stage of run.stages ?? []) {
+        if (stage === 'delivery') break;
         updateNodeStatus(run.run_id, stage, 'completed');
       }
 
@@ -76,9 +53,7 @@ export function CommandInputPanel() {
           created_at: new Date().toISOString(),
         });
       }
-      if (run.pending_approval) {
-        upsertApproval(run.pending_approval);
-      }
+      if (run.pending_approval) upsertApproval(run.pending_approval);
 
       setBrandName('');
       setTargetAudience('');
@@ -94,83 +69,35 @@ export function CommandInputPanel() {
   return (
     <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Terminal</span>
-        <div className="flex gap-1 text-[10px] font-mono">
-          <button
-            onClick={() => setMode('agency')}
-            className={`px-2 py-0.5 rounded ${mode === 'agency' ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-600 hover:text-zinc-400'}`}
-          >
-            CAMPAIGN
-          </button>
-          <button
-            onClick={() => setMode('general')}
-            className={`px-2 py-0.5 rounded ${mode === 'general' ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-600 hover:text-zinc-400'}`}
-          >
-            GENERAL
-          </button>
-        </div>
+        <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Campaign Terminal</span>
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">AGENCY</span>
       </div>
 
       {error && (
-        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</div>
+        <div role="alert" className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</div>
       )}
 
-      {mode === 'agency' ? (
-        <div className="flex flex-col gap-2">
-          <input
-            value={brandName}
-            onChange={(e) => setBrandName(e.target.value)}
-            disabled={loading}
-            placeholder="Brand name"
-            className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
-          />
-          <input
-            value={targetAudience}
-            onChange={(e) => setTargetAudience(e.target.value)}
-            disabled={loading}
-            placeholder="Target audience"
-            className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
-          />
-          <input
-            value={goals}
-            onChange={(e) => setGoals(e.target.value)}
-            disabled={loading}
-            placeholder="Goals (comma separated, optional)"
-            className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
-          />
-          <div className="flex justify-end">
-            <button
-              onClick={handleLaunchCampaign}
-              disabled={loading || !brandName.trim() || !targetAudience.trim()}
-              className="px-4 py-1.5 bg-zinc-100 text-zinc-900 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors"
-            >
-              {loading ? 'Running pipeline…' : 'Launch Campaign'}
-            </button>
-          </div>
+      <div className="flex flex-col gap-2">
+        <label className="text-xs text-zinc-500" htmlFor="brand-name">Brand name</label>
+        <input id="brand-name" value={brandName} onChange={(event) => setBrandName(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <label className="text-xs text-zinc-500" htmlFor="target-audience">Target audience</label>
+        <input id="target-audience" value={targetAudience} onChange={(event) => setTargetAudience(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <label className="text-xs text-zinc-500" htmlFor="campaign-goals">Goals <span className="text-zinc-600">(comma separated, optional)</span></label>
+        <input id="campaign-goals" value={goals} onChange={(event) => setGoals(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <div className="flex justify-end pt-1">
+          <button
+            type="button"
+            onClick={handleLaunchCampaign}
+            disabled={loading || !brandName.trim() || !targetAudience.trim()}
+            className="px-4 py-1.5 bg-zinc-100 text-zinc-900 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
+          >
+            {loading ? 'Running pipeline…' : 'Launch Campaign'}
+          </button>
         </div>
-      ) : (
-        <>
-          <div className="relative">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={loading}
-              placeholder="Enter directive..."
-              className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-3 text-sm text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 transition-colors resize-none h-24"
-            />
-            {loading && <div className="absolute top-4 left-3 w-1.5 h-4 bg-emerald-500/80 animate-pulse" />}
-          </div>
-          <div className="flex justify-end">
-            <button
-              onClick={handleExecuteGeneral}
-              disabled={loading || !input.trim()}
-              className="px-4 py-1.5 bg-zinc-100 text-zinc-900 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors"
-            >
-              {loading ? 'Executing...' : 'Execute'}
-            </button>
-          </div>
-        </>
-      )}
+      </div>
     </div>
   );
 }
