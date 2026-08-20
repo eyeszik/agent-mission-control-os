@@ -1,5 +1,6 @@
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
 
 
 class CampaignBrief(BaseModel):
@@ -45,6 +46,8 @@ class QAReport(BaseModel):
     flagged_terms: List[str] = Field(default_factory=list)
     quality_metrics: Dict[str, Any] = Field(default_factory=dict)
     notes: str
+    release_blocked: bool = False
+    degradation_reasons: List[str] = Field(default_factory=list)
 
 
 class CampaignPackage(BaseModel):

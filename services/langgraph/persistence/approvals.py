@@ -38,7 +38,13 @@ def _row_to_dict(row: sqlite3.Row | None) -> Optional[dict]:
     return dict(row) if row else None
 
 
-def create_approval_request(run_id: str, tenant_id: str, project_id: str, reason: str, confidence: float) -> dict:
+def create_approval_request(
+    run_id: str,
+    tenant_id: str,
+    project_id: str,
+    reason: str,
+    confidence: Optional[float],
+) -> dict:
     approval_id = str(uuid4())
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute(

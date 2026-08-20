@@ -42,8 +42,6 @@ class CampaignBriefRequest(BaseModel):
 
 
 class CreateAgencyRunRequest(BaseModel):
-    # Deprecated compatibility field. It is never authoritative; the server
-    # principal supplies tenant identity and a mismatch is denied.
     tenant_id: Optional[str] = None
     project_id: str
     brief: CampaignBriefRequest
@@ -58,20 +56,16 @@ def _agency_payload(state: dict) -> dict:
 
 
 def _safe_brief(req: CreateAgencyRunRequest) -> dict:
-    sanitized = sanitize_deep(req.brief.model_dump())
-    return quarantine_payload(sanitized)
+    return quarantine_payload(sanitize_deep(req.brief.model_dump()))
 
 
 def _run_and_record_events(graph, input_state, config: dict, run_id: str) -> dict:
-    # Historical node recording is retained until the causal event batch below
-    # replaces it. It intentionally makes no duration claim.
     for step in graph.stream(input_state, config=config, stream_mode="updates"):
         for node_id, _delta in step.items():
             if node_id == "__interrupt__":
                 continue
             record_event(run_id, node_id, "node_start")
             record_event(run_id, node_id, "node_complete")
-
     snapshot = graph.get_state(config)
     return dict(snapshot.values) if snapshot and snapshot.values else {}
 
@@ -102,8 +96,6 @@ def create_agency_run(
     idempotency_key: str = Header(..., alias="Idempotency-Key"),
     principal: Principal = Depends(get_principal),
 ):
-    """Create exactly one logical agency run for one idempotency key/input pair."""
-
     authorize_project(principal, req.project_id)
     if req.tenant_id is not None and req.tenant_id != principal.tenant_id:
         raise HTTPException(status_code=403, detail="tenant_id does not match authenticated principal")
@@ -118,7 +110,6 @@ def create_agency_run(
     run_id = str(uuid4())
     now = datetime.utcnow()
     metadata = {"input_data": {"brief": safe_brief}}
-
     run = AgentRun(
         id=run_id,
         tenant_id=principal.tenant_id,
@@ -139,7 +130,6 @@ def create_agency_run(
         "extracted_data": {},
         "validation_status": "pending",
     }
-
     try:
         state = _run_and_record_events(graph, initial_state, config, run_id)
     except Exception as exc:
@@ -150,7 +140,6 @@ def create_agency_run(
     agency_data = _agency_payload(state)
     record = update_run_status(run_id, "needs_approval", {"agency": agency_data})
     run_approvals = get_approvals_for_run(run_id)
-
     response = {
         "run_id": run_id,
         "status": record["status"],
@@ -159,6 +148,8 @@ def create_agency_run(
         "campaign_package": agency_data.get("campaign_package"),
         "qa_report": agency_data.get("qa_report"),
         "pending_approval": run_approvals[0] if run_approvals else None,
+        "degraded": bool(agency_data.get("degraded")),
+        "generation_provenance": agency_data.get("generation_provenance", []),
     }
     if not complete_idempotency(scope, idempotency_key, response):
         raise HTTPException(status_code=500, detail="Failed to finalize idempotency record")
@@ -175,7 +166,6 @@ def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
     graph = build_agency_workflow()
     snapshot = graph.get_state(_run_config(run_id))
     agency_data = _agency_payload(dict(snapshot.values)) if snapshot and snapshot.values else {}
-
     return {
         "run_id": run_id,
         "status": record["status"],
@@ -186,6 +176,8 @@ def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
         "qa_report": agency_data.get("qa_report"),
         "delivery": agency_data.get("delivery"),
         "approvals": get_approvals_for_run(run_id),
+        "degraded": bool(agency_data.get("degraded")),
+        "generation_provenance": agency_data.get("generation_provenance", []),
     }
 
 
@@ -218,11 +210,18 @@ def resume_agency_run(
         fail_idempotency(scope, idempotency_key, f"invalid_status:{record['status']}")
         raise HTTPException(status_code=409, detail=f"Run is not awaiting delivery (status={record['status']})")
 
+    stored_agency = (record.get("result") or {}).get("agency", {})
+    if (stored_agency.get("qa_report") or {}).get("release_blocked"):
+        fail_idempotency(scope, idempotency_key, "degraded_release_block")
+        raise HTTPException(
+            status_code=409,
+            detail="Run contains degraded provider output and cannot be delivered; rerun with a configured provider",
+        )
+
     run_approvals = get_approvals_for_run(run_id)
     if not run_approvals:
         fail_idempotency(scope, idempotency_key, "approval_missing")
         raise HTTPException(status_code=409, detail="No approval found for this run")
-
     latest = run_approvals[0]
     if latest["status"] != "resolved":
         fail_idempotency(scope, idempotency_key, "approval_pending")
