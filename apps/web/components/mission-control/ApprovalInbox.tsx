@@ -1,9 +1,11 @@
 "use client";
 
+import { useShallow } from 'zustand/react/shallow';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
 
 export function ApprovalInbox() {
-  const approvals = useApprovalStore((state) => Object.values(state.approvals));
+  // ⚡ Bolt: Use useShallow to prevent unnecessary re-renders when returning derived arrays
+  const approvals = useApprovalStore(useShallow((state) => Object.values(state.approvals)));
   const pendingCount = approvals.filter(a => a.status === 'pending').length;
 
   return (
