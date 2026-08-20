@@ -30,8 +30,11 @@ jobs:
       - name: Verify repository invariants
         run: python scripts/verify_repository_invariants.py
 
+      - name: Verify integrity manifest
+        run: python scripts/verify_manifest.py
+
       - name: Compile Python sources
-        run: python -m compileall -q services/langgraph
+        run: python -m compileall -q services/langgraph scripts
 
       - name: Verify installed dependency consistency
         run: python -m pip check

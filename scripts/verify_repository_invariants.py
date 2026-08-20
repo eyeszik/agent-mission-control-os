@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+OPENAPI = ROOT / "packages/shared/openapi/agent-mission-control.openapi.yaml"
 
 REQUIRED_ENV_VARS = {
     "NEXT_PUBLIC_API_BASE_URL",
@@ -45,6 +46,14 @@ def shared_stages() -> list[str]:
     return re.findall(r"['\"]([^'\"]+)['\"]", match.group(1))
 
 
+def openapi_stages() -> list[str]:
+    text = OPENAPI.read_text(encoding="utf-8")
+    match = re.search(r"enum:\s*\[(brief_intake[^\]]*)\]", text)
+    if not match:
+        raise SystemExit("OpenAPI agency pipeline-stage enum not found")
+    return [item.strip() for item in match.group(1).split(",")]
+
+
 def env_keys() -> set[str]:
     keys: set[str] = set()
     for raw in (ROOT / ".env.example").read_text(encoding="utf-8").splitlines():
@@ -58,8 +67,11 @@ def env_keys() -> set[str]:
 def main() -> None:
     backend = backend_stages()
     shared = shared_stages()
-    if backend != shared:
-        raise SystemExit(f"Pipeline contract drift: backend={backend!r} shared={shared!r}")
+    documented = openapi_stages()
+    if backend != shared or backend != documented:
+        raise SystemExit(
+            f"Pipeline contract drift: backend={backend!r} shared={shared!r} openapi={documented!r}"
+        )
 
     missing_env = sorted(REQUIRED_ENV_VARS - env_keys())
     if missing_env:
@@ -83,6 +95,39 @@ def main() -> None:
     for required in ["sequence", "schema_version", "tenant_id", "project_id", "persisted_at"]:
         if required not in event_schema:
             raise SystemExit(f"Run-event contract missing required field: {required}")
+
+    main_py = (ROOT / "services/langgraph/app/main.py").read_text(encoding="utf-8")
+    if "include_router(runs.router" in main_py or "from services.langgraph.api.routes import runs" in main_py:
+        raise SystemExit("Legacy mock generic /runs router must not be mounted")
+    if '"langgraph": "scaffolded"' in main_py:
+        raise SystemExit("Health endpoint still claims LangGraph is scaffolded")
+
+    openapi = OPENAPI.read_text(encoding="utf-8")
+    if re.search(r"^  /runs:\s*$", openapi, re.M):
+        raise SystemExit("OpenAPI must not advertise the removed generic /runs scaffold")
+    for required in [
+        "/agency/runs:",
+        "/agency/runs/{run_id}/resume:",
+        "/approvals/{approval_id}/decide:",
+        "/runs/{run_id}/events:",
+        "FALLBACK_DEGRADED",
+        "NOT_MEASURED",
+        "delivering",
+        "rejected",
+        "Last-Event-ID",
+    ]:
+        if required not in openapi:
+            raise SystemExit(f"OpenAPI missing material runtime contract token: {required}")
+
+    agency_route = (ROOT / "services/langgraph/api/routes/agency.py").read_text(encoding="utf-8")
+    approvals_route = (ROOT / "services/langgraph/api/routes/approvals.py").read_text(encoding="utf-8")
+    for route_path, text in [("agency.py", agency_route), ("approvals.py", approvals_route)]:
+        if "Depends(get_principal)" not in text:
+            raise SystemExit(f"{route_path} lost server-derived authentication dependency")
+
+    idempotency = (ROOT / "services/langgraph/persistence/idempotency.py").read_text(encoding="utf-8")
+    if "SELECT 1 FROM idempotency_keys" in idempotency or "INSERT OR REPLACE INTO idempotency_keys" in idempotency:
+        raise SystemExit("Legacy check-then-record idempotency path remains executable")
 
     print("Repository invariants verified")
 

@@ -15,6 +15,7 @@ def hash_payload(payload: Any) -> str:
 
 
 def generate_idempotency_key(project_id: str, node_id: str, input_dict: dict, attempt: int = 1) -> str:
+    """Deterministic helper retained for internal non-HTTP callers/tests."""
     input_hash = hash_payload(input_dict)
     raw_key = f"{project_id}:{node_id}:{input_hash}:{attempt}"
     return hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
@@ -65,6 +66,7 @@ def reserve_idempotency(
     with sqlite3.connect(DB_PATH, isolation_level=None) as conn:
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA busy_timeout = 5000")
         conn.execute("BEGIN IMMEDIATE")
         row = conn.execute(
             "SELECT * FROM idempotency_records WHERE scope = ? AND key = ?",
@@ -95,14 +97,13 @@ def reserve_idempotency(
                 conn.commit()
                 return {"state": "in_progress", "record": record}
 
-            # A previously failed logical operation may be retried explicitly.
             conn.execute(
                 """
                 UPDATE idempotency_records
                    SET status = 'executing', result = NULL, error = NULL,
                        attempt_count = attempt_count + 1,
                        updated_at = ?, expires_at = ?
-                 WHERE scope = ? AND key = ?
+                 WHERE scope = ? AND key = ? AND status = 'failed'
                 """,
                 (now_s, expires_s, scope, key),
             )
@@ -166,20 +167,3 @@ def get_idempotency_record(scope: str, key: str) -> Optional[dict]:
             (scope, key),
         ).fetchone()
         return _record_to_result(row) if row else None
-
-
-# Legacy compatibility wrappers for older internal callers. New mutation routes
-# must use reserve/complete/fail with an explicit scope and request hash.
-def verify_idempotency(key: str) -> bool:
-    with sqlite3.connect(DB_PATH) as conn:
-        cur = conn.execute("SELECT 1 FROM idempotency_keys WHERE key = ?", (key,))
-        return cur.fetchone() is not None
-
-
-def record_idempotency(key: str, result: Any, ttlSeconds: int = 86400) -> None:
-    del ttlSeconds
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute(
-            "INSERT OR REPLACE INTO idempotency_keys (key, result) VALUES (?, ?)",
-            (key, json.dumps(result)),
-        )
