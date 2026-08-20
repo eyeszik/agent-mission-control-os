@@ -1,16 +1,28 @@
 import { z } from 'zod';
 
 export const ApprovalRequestSchema = z.object({
-  id: z.string().uuid(),
-  run_id: z.string().uuid(),
-  node_id: z.string(),
-  action_type: z.enum(['external_write', 'pii_release', 'canonical_publish', 'high_cost_execution']),
-  description: z.string(),
-  context: z.record(z.unknown()),
-  status: z.enum(['pending', 'approved', 'rejected']),
-  requested_at: z.string().datetime(),
-  resolved_at: z.string().datetime().optional(),
-  resolved_by: z.string().optional()
+  approval_id: z.string().uuid(),
+  run_id: z.string(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  reason: z.string(),
+  confidence: z.number().nullable(),
+  status: z.enum(['pending', 'resolved']),
+  reviewer: z.string().nullable(),
+  decision: z.enum(['approve', 'reject']).nullable(),
+  created_at: z.string(),
+  decided_at: z.string().nullable(),
+});
+
+export const ApprovalListSchema = z.array(ApprovalRequestSchema);
+
+export const ApprovalDecisionResponseSchema = z.object({
+  approval_id: z.string().uuid(),
+  status: z.literal('resolved'),
+  decision: z.enum(['approve', 'reject']),
+  reviewer: z.string(),
+  decided_at: z.string(),
 });
 
 export type ApprovalRequest = z.infer<typeof ApprovalRequestSchema>;
+export type ApprovalDecisionResponse = z.infer<typeof ApprovalDecisionResponseSchema>;

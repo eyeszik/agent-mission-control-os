@@ -31,3 +31,9 @@ logs/
 
 # Local
 .codex/local*
+
+# Local SQLite runtime state (checkpoints, approvals, runs, idempotency keys)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

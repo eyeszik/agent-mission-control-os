@@ -1,0 +1,290 @@
+from datetime import datetime, timezone
+from typing import List, Optional
+from uuid import uuid4
+
+from fastapi import APIRouter, Depends, Header, HTTPException
+from pydantic import BaseModel, Field
+
+from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
+from services.langgraph.graph.models import AgentRun
+from services.langgraph.persistence.approvals import get_approvals_for_run
+from services.langgraph.persistence.events import record_event
+from services.langgraph.persistence.idempotency import (
+    complete_idempotency,
+    fail_idempotency,
+    hash_payload,
+    reserve_idempotency,
+)
+from services.langgraph.persistence.runs import (
+    compare_and_set_run_status,
+    create_run_record,
+    get_run_record,
+    update_run_status,
+)
+from services.langgraph.security.auth import Principal, authorize_project, authorize_resource, get_principal
+from services.langgraph.security.pii import quarantine_payload
+from services.langgraph.security.preprocess import sanitize_deep
+
+router = APIRouter()
+
+PIPELINE_NAME = "branding_marketing_agency"
+IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
+
+
+class CampaignBriefRequest(BaseModel):
+    brand_name: str
+    industry: Optional[str] = None
+    goals: List[str] = Field(default_factory=list)
+    target_audience: str
+    tone: Optional[str] = None
+    channels: List[str] = Field(default_factory=list)
+    constraints: List[str] = Field(default_factory=list)
+
+
+class CreateAgencyRunRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    project_id: str
+    brief: CampaignBriefRequest
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _run_config(run_id: str) -> dict:
+    return {"configurable": {"thread_id": run_id}}
+
+
+def _agency_payload(state: dict) -> dict:
+    return (state.get("extracted_data") or {}).get("agency", {}) if state else {}
+
+
+def _safe_brief(req: CreateAgencyRunRequest) -> dict:
+    return quarantine_payload(sanitize_deep(req.brief.model_dump()))
+
+
+def _run_and_record_events(graph, input_state, config: dict, run: AgentRun) -> dict:
+    """
+    Execute synchronously and persist causally honest completion observations.
+
+    The current execution API does not expose a pre-node callback from this
+    wrapper, so we intentionally do NOT fabricate node_start timestamps. Each
+    event records the point at which a completed node update was observed.
+    """
+
+    for step in graph.stream(input_state, config=config, stream_mode="updates"):
+        for node_id, _delta in step.items():
+            if node_id == "__interrupt__":
+                continue
+            completed_at = _now()
+            record_event(
+                str(run.id),
+                run.tenant_id,
+                run.project_id,
+                node_id,
+                "node_complete",
+                observed_at=completed_at,
+                completed_at=completed_at,
+            )
+
+    snapshot = graph.get_state(config)
+    return dict(snapshot.values) if snapshot and snapshot.values else {}
+
+
+def _authorize_run(principal: Principal, record: dict) -> None:
+    authorize_resource(principal, record["tenant_id"], record["project_id"])
+
+
+def _idempotency_scope(principal: Principal, operation: str, resource: str) -> str:
+    return f"{principal.tenant_id}:{principal.user_id}:{operation}:{resource}"
+
+
+def _reserve_or_replay(scope: str, key: str, request_hash: str) -> Optional[dict]:
+    reservation = reserve_idempotency(scope, key, request_hash, IDEMPOTENCY_TTL_SECONDS)
+    state = reservation["state"]
+    if state == "replay":
+        return reservation["record"]["result"]
+    if state == "in_progress":
+        raise HTTPException(status_code=409, detail="Equivalent request is already executing")
+    if state == "conflict":
+        raise HTTPException(status_code=409, detail="Idempotency-Key was reused with different input")
+    return None
+
+
+@router.post("/runs", status_code=201)
+def create_agency_run(
+    req: CreateAgencyRunRequest,
+    idempotency_key: str = Header(..., alias="Idempotency-Key"),
+    principal: Principal = Depends(get_principal),
+):
+    authorize_project(principal, req.project_id)
+    if req.tenant_id is not None and req.tenant_id != principal.tenant_id:
+        raise HTTPException(status_code=403, detail="tenant_id does not match authenticated principal")
+
+    safe_brief = _safe_brief(req)
+    scope = _idempotency_scope(principal, "agency.create", req.project_id)
+    request_hash = hash_payload({"project_id": req.project_id, "brief": safe_brief})
+    replay = _reserve_or_replay(scope, idempotency_key, request_hash)
+    if replay is not None:
+        return replay
+
+    run_id = str(uuid4())
+    now = datetime.now(timezone.utc)
+    metadata = {"input_data": {"brief": safe_brief}}
+    run = AgentRun(
+        id=run_id,
+        tenant_id=principal.tenant_id,
+        project_id=req.project_id,
+        status="running",
+        created_at=now,
+        updated_at=now,
+        metadata=metadata,
+    )
+    create_run_record(run_id, principal.tenant_id, req.project_id, PIPELINE_NAME, "running", metadata)
+
+    graph = build_agency_workflow()
+    config = _run_config(run_id)
+    initial_state = {
+        "run": run,
+        "current_node": "start",
+        "messages": [],
+        "extracted_data": {},
+        "validation_status": "pending",
+    }
+    try:
+        state = _run_and_record_events(graph, initial_state, config, run)
+    except Exception as exc:
+        update_run_status(run_id, "failed", {"error": type(exc).__name__})
+        record_event(run_id, run.tenant_id, run.project_id, "pipeline", "node_error", safe_payload={"error_class": type(exc).__name__})
+        fail_idempotency(scope, idempotency_key, type(exc).__name__)
+        raise HTTPException(status_code=500, detail="Agency pipeline failed") from exc
+
+    agency_data = _agency_payload(state)
+    record = update_run_status(run_id, "needs_approval", {"agency": agency_data})
+    run_approvals = get_approvals_for_run(run_id)
+    response = {
+        "run_id": run_id,
+        "status": record["status"],
+        "pipeline": PIPELINE_NAME,
+        "stages": AGENCY_PIPELINE_STAGES,
+        "campaign_package": agency_data.get("campaign_package"),
+        "qa_report": agency_data.get("qa_report"),
+        "pending_approval": run_approvals[0] if run_approvals else None,
+        "degraded": bool(agency_data.get("degraded")),
+        "generation_provenance": agency_data.get("generation_provenance", []),
+    }
+    if not complete_idempotency(scope, idempotency_key, response):
+        raise HTTPException(status_code=500, detail="Failed to finalize idempotency record")
+    return response
+
+
+@router.get("/runs/{run_id}")
+def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
+    record = get_run_record(run_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Run not found")
+    _authorize_run(principal, record)
+
+    graph = build_agency_workflow()
+    snapshot = graph.get_state(_run_config(run_id))
+    agency_data = _agency_payload(dict(snapshot.values)) if snapshot and snapshot.values else {}
+    return {
+        "run_id": run_id,
+        "status": record["status"],
+        "pipeline": record["pipeline"],
+        "stages": AGENCY_PIPELINE_STAGES,
+        "pending_next_node": list(snapshot.next) if snapshot else [],
+        "campaign_package": agency_data.get("campaign_package"),
+        "qa_report": agency_data.get("qa_report"),
+        "delivery": agency_data.get("delivery"),
+        "approvals": get_approvals_for_run(run_id),
+        "degraded": bool(agency_data.get("degraded")),
+        "generation_provenance": agency_data.get("generation_provenance", []),
+    }
+
+
+@router.post("/runs/{run_id}/resume")
+def resume_agency_run(
+    run_id: str,
+    idempotency_key: str = Header(..., alias="Idempotency-Key"),
+    principal: Principal = Depends(get_principal),
+):
+    record = get_run_record(run_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Run not found")
+    _authorize_run(principal, record)
+
+    scope = _idempotency_scope(principal, "agency.resume", run_id)
+    replay = _reserve_or_replay(scope, idempotency_key, hash_payload({"run_id": run_id}))
+    if replay is not None:
+        return replay
+
+    if record["status"] == "completed":
+        response = {
+            "run_id": run_id,
+            "status": "completed",
+            "delivery": (record["result"] or {}).get("agency", {}).get("delivery"),
+        }
+        complete_idempotency(scope, idempotency_key, response)
+        return response
+
+    if record["status"] != "needs_approval":
+        fail_idempotency(scope, idempotency_key, f"invalid_status:{record['status']}")
+        raise HTTPException(status_code=409, detail=f"Run is not awaiting delivery (status={record['status']})")
+
+    stored_agency = (record.get("result") or {}).get("agency", {})
+    if (stored_agency.get("qa_report") or {}).get("release_blocked"):
+        fail_idempotency(scope, idempotency_key, "degraded_release_block")
+        raise HTTPException(
+            status_code=409,
+            detail="Run contains degraded provider output and cannot be delivered; rerun with a configured provider",
+        )
+
+    run_approvals = get_approvals_for_run(run_id)
+    if not run_approvals:
+        fail_idempotency(scope, idempotency_key, "approval_missing")
+        raise HTTPException(status_code=409, detail="No approval found for this run")
+    latest = run_approvals[0]
+    if latest["status"] != "resolved":
+        fail_idempotency(scope, idempotency_key, "approval_pending")
+        raise HTTPException(status_code=409, detail="Run still has an unresolved approval")
+    if latest["decision"] != "approve":
+        fail_idempotency(scope, idempotency_key, "approval_not_approved")
+        raise HTTPException(status_code=409, detail=f"Run was not approved (decision={latest['decision']})")
+
+    if not compare_and_set_run_status(run_id, "needs_approval", "delivering"):
+        fail_idempotency(scope, idempotency_key, "resume_race_lost")
+        current = get_run_record(run_id)
+        if current and current["status"] == "completed":
+            return {
+                "run_id": run_id,
+                "status": "completed",
+                "delivery": (current["result"] or {}).get("agency", {}).get("delivery"),
+            }
+        raise HTTPException(status_code=409, detail="Run delivery is already being processed")
+
+    graph = build_agency_workflow()
+    config = _run_config(run_id)
+    run_model = AgentRun(
+        id=run_id,
+        tenant_id=record["tenant_id"],
+        project_id=record["project_id"],
+        status=record["status"],
+        created_at=datetime.fromisoformat(record["created_at"]),
+        updated_at=datetime.fromisoformat(record["updated_at"]),
+        metadata=record.get("metadata"),
+    )
+    try:
+        state = _run_and_record_events(graph, None, config, run_model)
+    except Exception as exc:
+        update_run_status(run_id, "failed", {"error": type(exc).__name__})
+        record_event(run_id, record["tenant_id"], record["project_id"], "delivery", "node_error", safe_payload={"error_class": type(exc).__name__})
+        fail_idempotency(scope, idempotency_key, type(exc).__name__)
+        raise HTTPException(status_code=500, detail="Delivery failed") from exc
+
+    agency_data = _agency_payload(state)
+    update_run_status(run_id, "completed", {"agency": agency_data})
+    response = {"run_id": run_id, "status": "completed", "delivery": agency_data.get("delivery")}
+    if not complete_idempotency(scope, idempotency_key, response):
+        raise HTTPException(status_code=500, detail="Failed to finalize idempotency record")
+    return response

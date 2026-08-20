@@ -1,7 +1,7 @@
 import pytest
 from uuid import uuid4
 from datetime import datetime
-from .graph.models import AgentRun
+from services.langgraph.graph.models import AgentRun
 
 def test_agent_run_creation():
     run = AgentRun(

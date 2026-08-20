@@ -1,3 +1,3 @@
 ## 2026-08-20 - Zustand derived state rendering optimization
-**Learning:** Returning arrays via `Object.values(state.approvals)` or `state.approvals.filter()` inside a Zustand selector causes unnecessary React re-renders on every store update, even if the result array is conceptually the same, because a new array reference is created every time.
-**Action:** Use `useShallow` from `zustand/react/shallow` when returning arrays, objects, or computing derived state in Zustand selectors to ensure components only re-render when the actual content changes.
+**Learning:** Returning freshly allocated arrays such as `Object.values(state.approvals)` from a Zustand selector can trigger unnecessary React re-renders and, with React 19/useSyncExternalStore, can contribute to update loops.
+**Resolution:** The agency branch selects the stable `approvals` record and derives arrays/counts during render. `useShallow` is also valid when a selector must return derived arrays/objects; prefer the smallest selector that preserves stable equality semantics.

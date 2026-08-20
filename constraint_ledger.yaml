@@ -81,3 +81,29 @@ flags:
   - FLAG-VERSIONS-NULL-UNTIL-REPO-AUDIT
   - FLAG-CLOUDFLARE-BINDINGS-UNVERIFIED
   - FLAG-IMPLEMENTATION-NOT-REQUESTED
+
+# Decisions resolved by the user for the branding/marketing agency pipeline
+# (services/langgraph/graph/agency/). Recorded here rather than left as
+# silent assumptions, per this ledger's own no-silent-decisions posture.
+agency_pipeline_decisions:
+  spend_authority:
+    decision: "no_spend_mvp"
+    rationale: >
+      No spend cap, currency, or approver was ever defined in this repo.
+      Campaign Agent's paid-media execution stays explicitly out of scope:
+      it produces channel_plan/targeting_spec/schedule as deliverables for
+      a human to execute manually. external:spend remains a denied
+      permission for every agent (see services/langgraph/graph/agency/nodes.py
+      and the Campaign Agent spec in the deterministic-agent-spec-compiler
+      output above) until a spend cap, currency, and approver are defined.
+    resolved_by: "user, 2026-08-19"
+  analytics_metrics_source:
+    decision: "deferred"
+    rationale: >
+      No real ad/campaign platform is connected, and nothing has actually
+      been published yet, so there is no real performance data to measure.
+      Deferred until a real channel is connected and worth measuring.
+      Analytics Agent stays non-functional; any metric it would report
+      must be tagged [UNVERIFIED] with a stated confirmation method rather
+      than estimated.
+    resolved_by: "user, 2026-08-19"

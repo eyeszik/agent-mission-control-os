@@ -2,33 +2,376 @@ openapi: 3.0.3
 info:
   title: Agent Mission Control API
   version: 0.1.0
-  description: API for managing LangGraph runs, artifacts, events, and approvals.
+  description: >-
+    Local-first API for the Agent Mission Control branding/marketing agency workflow.
+    The repository currently implements loopback-only local authentication. Production
+    authentication and deployment are deliberately not claimed.
 paths:
-  /runs:
-    post:
-      summary: Create a new run
+  /health:
+    get:
+      summary: Service health and local runtime mode
       responses:
-        '201':
-          description: Run created
+        '200':
+          description: Health status
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AgentRun'
-  /runs/{run_id}/events:
-    get:
-      summary: Stream events for a run (SSE)
+                type: object
+                required: [status, langgraph, version, auth_mode, production_ready]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  langgraph: { type: string, enum: [active] }
+                  version: { type: string }
+                  auth_mode: { type: string }
+                  production_ready: { type: boolean, enum: [false] }
+  /agency/runs:
+    post:
+      summary: Create one agency workflow run
+      description: >-
+        Executes the agency workflow synchronously through hitl_gate and pauses before
+        delivery. Tenant identity is derived from server authentication context. The
+        optional tenant_id request field exists only for backwards compatibility and
+        must match the authenticated tenant when supplied.
       parameters:
-        - in: path
-          name: run_id
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgencyRunRequest'
+      responses:
+        '201':
+          description: Run executed through the human-review gate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyRun'
+        '403': { description: Tenant/project outside authenticated scope }
+        '409': { description: Idempotency conflict or equivalent request already executing }
+        '503': { description: Local authentication is not configured }
+  /agency/runs/{run_id}:
+    get:
+      summary: Get one authorized agency run
+      parameters:
+        - $ref: '#/components/parameters/RunId'
       responses:
         '200':
-          description: SSE stream of RunEvents
+          description: Current run state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyRun'
+        '403': { description: Run belongs to another authorization scope }
+        '404': { description: Run not found }
+        '503': { description: Local authentication is not configured }
+  /agency/runs/{run_id}/resume:
+    post:
+      summary: Resume an approved run into delivery
+      description: >-
+        Requires an approved HITL decision, a non-degraded generation result, and an
+        atomic run-state transition. Duplicate requests replay the canonical result.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Delivery result or deterministic replay
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyRun'
+        '403': { description: Run belongs to another authorization scope }
+        '404': { description: Run not found }
+        '409': { description: Run state or approval does not permit delivery }
+        '503': { description: Local authentication is not configured }
+  /approvals:
+    get:
+      summary: List pending approvals for the authenticated tenant
+      parameters:
+        - in: query
+          name: tenant_id
+          required: false
+          deprecated: true
+          description: Optional compatibility assertion; if supplied it must match the authenticated tenant.
+          schema: { type: string }
+      responses:
+        '200':
+          description: Pending approval rows for the authenticated tenant
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ApprovalRequest' }
+        '403': { description: Supplied tenant_id does not match authenticated tenant }
+        '503': { description: Local authentication is not configured }
+  /approvals/{approval_id}/decide:
+    post:
+      summary: Resolve a pending approval exactly once
+      parameters:
+        - in: path
+          name: approval_id
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalDecision'
+      responses:
+        '200':
+          description: Immutable approval decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalDecisionResponse'
+        '403': { description: Approval belongs to another authorization scope }
+        '404': { description: Approval not found }
+        '409': { description: Approval is terminal, run state changed, or idempotency conflict }
+        '503': { description: Local authentication is not configured }
+  /runs/{run_id}/events:
+    get:
+      summary: Replay or follow authorized run events after a monotonic cursor
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - in: query
+          name: cursor
+          required: false
+          schema: { type: integer, minimum: -1, default: -1 }
+        - in: query
+          name: follow
+          required: false
+          schema: { type: boolean, default: false }
+        - in: header
+          name: Last-Event-ID
+          required: false
+          description: Integer event sequence used as a replay cursor.
+          schema: { type: string }
+      responses:
+        '200':
+          description: text/event-stream carrying RunEvent envelopes; SSE id equals the per-run sequence.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '400': { description: Last-Event-ID is not a valid integer sequence }
+        '403': { description: Run belongs to another authorization scope }
+        '404': { description: Run not found }
+        '503': { description: Local authentication is not configured }
 components:
+  parameters:
+    RunId:
+      in: path
+      name: run_id
+      required: true
+      schema: { type: string, format: uuid }
+    IdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema: { type: string, minLength: 1 }
   schemas:
-    AgentRun:
+    CampaignBrief:
       type: object
-      # Scaffold, fully defined in Zod/Pydantic
+      required: [brand_name, target_audience]
+      properties:
+        brand_name: { type: string }
+        industry: { type: string, nullable: true }
+        goals: { type: array, items: { type: string }, default: [] }
+        target_audience: { type: string }
+        tone: { type: string, nullable: true }
+        channels: { type: array, items: { type: string }, default: [] }
+        constraints: { type: array, items: { type: string }, default: [] }
+    CreateAgencyRunRequest:
+      type: object
+      required: [project_id, brief]
+      properties:
+        tenant_id:
+          type: string
+          nullable: true
+          deprecated: true
+          description: Compatibility assertion only; not an identity source.
+        project_id: { type: string }
+        brief: { $ref: '#/components/schemas/CampaignBrief' }
+    BrandStrategy:
+      type: object
+      required: [positioning_statement, brand_pillars, tone_of_voice, target_audience_summary]
+      properties:
+        positioning_statement: { type: string }
+        brand_pillars: { type: array, items: { type: string } }
+        tone_of_voice: { type: string }
+        target_audience_summary: { type: string }
+    CreativeConcept:
+      type: object
+      required: [id, name, tagline, rationale]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        tagline: { type: string }
+        rationale: { type: string }
+    CopyVariant:
+      type: object
+      required: [concept_id, headline, body, cta]
+      properties:
+        concept_id: { type: string }
+        headline: { type: string }
+        body: { type: string }
+        cta: { type: string }
+    DesignBrief:
+      type: object
+      required: [palette, typography_direction, imagery_style, layout_notes]
+      properties:
+        palette: { type: array, items: { type: string } }
+        typography_direction: { type: string }
+        imagery_style: { type: string }
+        layout_notes: { type: string }
+    QualityMetrics:
+      type: object
+      required:
+        - evaluation_mode
+        - schema_valid
+        - non_empty
+        - length_chars
+        - length_sufficient
+        - faithfulness
+        - hallucination_rate
+        - tool_selection_accuracy
+        - output_relevance
+        - threshold_passed
+      properties:
+        evaluation_mode: { type: string, enum: [heuristic] }
+        schema_valid: { type: boolean }
+        non_empty: { type: boolean }
+        length_chars: { type: integer, minimum: 0 }
+        length_sufficient: { type: boolean }
+        faithfulness: { type: string, enum: [NOT_MEASURED] }
+        hallucination_rate: { type: string, enum: [NOT_MEASURED] }
+        tool_selection_accuracy: { type: string, enum: [NOT_MEASURED] }
+        output_relevance: { type: string, enum: [NOT_MEASURED] }
+        threshold_passed: { type: boolean }
+    QAReport:
+      type: object
+      required: [brand_safety_passed, flagged_terms, quality_metrics, notes, release_blocked, degradation_reasons]
+      properties:
+        brand_safety_passed: { type: boolean }
+        flagged_terms: { type: array, items: { type: string } }
+        quality_metrics: { $ref: '#/components/schemas/QualityMetrics' }
+        notes: { type: string }
+        release_blocked: { type: boolean }
+        degradation_reasons: { type: array, items: { type: string } }
+    CampaignPackage:
+      type: object
+      required: [brief, strategy, concepts, copy_variants, design_brief]
+      properties:
+        brief: { $ref: '#/components/schemas/CampaignBrief' }
+        strategy: { $ref: '#/components/schemas/BrandStrategy' }
+        concepts: { type: array, items: { $ref: '#/components/schemas/CreativeConcept' } }
+        copy_variants: { type: array, items: { $ref: '#/components/schemas/CopyVariant' } }
+        design_brief: { $ref: '#/components/schemas/DesignBrief' }
+        qa_report: { $ref: '#/components/schemas/QAReport' }
+    GenerationProvenance:
+      type: object
+      required: [task, mode, schema_version, prompt_version, prompt_hash, attempts, started_at, completed_at, fallback_used]
+      properties:
+        task: { type: string }
+        mode:
+          type: string
+          enum: [PROVIDER_SUCCESS, FALLBACK_DEGRADED, VALIDATION_FAILED, PROVIDER_FAILED, BLOCKED]
+        provider: { type: string, nullable: true }
+        model: { type: string, nullable: true }
+        schema_version: { type: string }
+        prompt_version: { type: string }
+        prompt_hash: { type: string }
+        attempts: { type: integer, minimum: 0 }
+        started_at: { type: string, format: date-time }
+        completed_at: { type: string, format: date-time }
+        fallback_used: { type: boolean }
+        error_class: { type: string, nullable: true }
+    ApprovalRequest:
+      type: object
+      required: [approval_id, run_id, tenant_id, project_id, reason, status, created_at]
+      properties:
+        approval_id: { type: string, format: uuid }
+        run_id: { type: string }
+        tenant_id: { type: string }
+        project_id: { type: string }
+        reason: { type: string }
+        confidence: { type: number, nullable: true }
+        status: { type: string, enum: [pending, resolved] }
+        reviewer: { type: string, nullable: true }
+        decision: { type: string, enum: [approve, reject], nullable: true }
+        created_at: { type: string }
+        decided_at: { type: string, nullable: true }
+    ApprovalDecision:
+      type: object
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [approve, reject] }
+    ApprovalDecisionResponse:
+      type: object
+      required: [approval_id, status, decision, reviewer, decided_at]
+      properties:
+        approval_id: { type: string, format: uuid }
+        status: { type: string, enum: [resolved] }
+        decision: { type: string, enum: [approve, reject] }
+        reviewer: { type: string }
+        decided_at: { type: string }
+    Delivery:
+      type: object
+      required: [campaign_package, delivered_at, format]
+      properties:
+        campaign_package: { $ref: '#/components/schemas/CampaignPackage' }
+        delivered_at: { type: string, format: date-time }
+        approval_id: { type: string, format: uuid, nullable: true }
+        format: { type: string, enum: [json_bundle_v1] }
+    AgencyRun:
+      type: object
+      required: [run_id, status]
+      properties:
+        run_id: { type: string, format: uuid }
+        status:
+          type: string
+          enum: [running, needs_approval, delivering, completed, rejected, failed]
+        pipeline: { type: string, enum: [branding_marketing_agency] }
+        stages:
+          type: array
+          items:
+            type: string
+            enum: [brief_intake, brand_strategy, creative_concepting, copywriting, design_brief, campaign_assembly, brand_safety_qa, hitl_gate, delivery]
+        pending_next_node: { type: array, items: { type: string } }
+        campaign_package:
+          allOf: [{ $ref: '#/components/schemas/CampaignPackage' }]
+          nullable: true
+        qa_report:
+          allOf: [{ $ref: '#/components/schemas/QAReport' }]
+          nullable: true
+        pending_approval:
+          allOf: [{ $ref: '#/components/schemas/ApprovalRequest' }]
+          nullable: true
+        approvals: { type: array, items: { $ref: '#/components/schemas/ApprovalRequest' } }
+        degraded: { type: boolean }
+        generation_provenance: { type: array, items: { $ref: '#/components/schemas/GenerationProvenance' } }
+        delivery:
+          allOf: [{ $ref: '#/components/schemas/Delivery' }]
+          nullable: true
+    RunEvent:
+      type: object
+      required: [event_id, run_id, tenant_id, project_id, sequence, schema_version, event_type, observed_at, persisted_at, safe_payload, redactions_applied]
+      properties:
+        event_id: { type: string, format: uuid }
+        run_id: { type: string }
+        tenant_id: { type: string }
+        project_id: { type: string }
+        sequence: { type: integer, minimum: 0 }
+        schema_version: { type: string, enum: [run-event-v2] }
+        event_type: { type: string, enum: [node_complete, node_error, artifact_generated, approval_requested] }
+        node_id: { type: string, nullable: true }
+        observed_at: { type: string, format: date-time }
+        started_at: { type: string, format: date-time, nullable: true }
+        completed_at: { type: string, format: date-time, nullable: true }
+        persisted_at: { type: string, format: date-time }
+        checkpoint_ref: { type: string, nullable: true }
+        safe_payload: { type: object, additionalProperties: true }
+        redactions_applied: { type: array, items: { type: string } }

@@ -1,16 +1,27 @@
+import {
+  ApprovalDecisionResponseSchema,
+  ApprovalListSchema,
+  type ApprovalDecisionResponse,
+  type ApprovalRequest,
+} from '@amc/shared';
 import { apiFetch } from './client';
-import type { ApprovalRequest } from '@amc/shared';
 
-export async function getPendingApprovals(): Promise<{ data: ApprovalRequest[] }> {
-  return apiFetch<{ data: ApprovalRequest[] }>('/approvals', {
-    method: 'GET',
-  });
+export async function getPendingApprovals(): Promise<ApprovalRequest[]> {
+  return apiFetch('/approvals', { method: 'GET' }, ApprovalListSchema);
 }
 
-export async function resolveApproval(approvalId: string, action: string, idempotencyKey: string): Promise<{ status: string }> {
-  return apiFetch<{ status: string }>(`/approvals/${approvalId}/resolve`, {
-    method: 'POST',
-    body: JSON.stringify({ action }),
-    idempotencyKey,
-  });
+export async function resolveApproval(
+  approvalId: string,
+  decision: 'approve' | 'reject',
+  idempotencyKey: string
+): Promise<ApprovalDecisionResponse> {
+  return apiFetch(
+    `/approvals/${approvalId}/decide`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ decision }),
+      idempotencyKey,
+    },
+    ApprovalDecisionResponseSchema
+  );
 }
