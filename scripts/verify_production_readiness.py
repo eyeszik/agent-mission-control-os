@@ -34,6 +34,27 @@ def main() -> None:
     require("services/langgraph/api/routes/operations.py", "publication_previewed")
     require("services/langgraph/api/routes/operations.py", "spend_authorization_requested")
     require("services/langgraph/tests/test_lifecycle_analytics.py", "agency_run_needs_approval")
+    require("docs/production-activation.md", "AUTH_USER_REQUIRED")
+    require("docs/production-activation.md", "agent-mission-control-web")
+    require("docs/production-activation.md", "authenticated production smoke")
+
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    stale_readme_claims = [
+        "Production authentication provider: **not implemented**",
+        "Real campaign analytics: deferred",
+        "Cloudflare/Supabase bindings are planning inputs",
+    ]
+    for claim in stale_readme_claims:
+        if claim.lower() in readme.lower():
+            raise SystemExit(f"README contains stale production claim: {claim}")
+    for token in [
+        "Supabase Auth",
+        "PostgreSQL production persistence",
+        "Automatic agency lifecycle analytics",
+        "docs/production-activation.md",
+    ]:
+        if token not in readme:
+            raise SystemExit(f"README missing production-state token: {token}")
 
     openapi = (ROOT / "packages/shared/openapi/agent-mission-control.openapi.yaml").read_text(encoding="utf-8")
     for token in [
