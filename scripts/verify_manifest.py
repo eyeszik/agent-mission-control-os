@@ -49,6 +49,7 @@ def main() -> None:
         ".github/workflows/ci.yml",
         ".env.example",
         "README.md",
+        "docs/production-activation.md",
         "package.json",
         "pnpm-lock.yaml",
         "apps/web/package.json",
