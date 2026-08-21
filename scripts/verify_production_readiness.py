@@ -27,9 +27,28 @@ def main() -> None:
     require("services/langgraph/security/auth.py", "X-AMC-Tenant")
     require("services/langgraph/integrations/publication.py", "publication_disabled")
     require("services/langgraph/integrations/paid_media.py", "and False")
-    require("services/langgraph/api/routes/analytics.py", "record_analytics_event")
-    require("services/langgraph/api/routes/operations.py", "/publications/preview")
-    require("services/langgraph/api/routes/operations.py", "/spend/authorizations")
+    require("services/langgraph/persistence/analytics.py", "emit_lifecycle_event")
+    require("services/langgraph/api/routes/agency.py", "agency_run_created")
+    require("services/langgraph/api/routes/agency.py", "agency_run_completed")
+    require("services/langgraph/api/routes/approvals.py", "agency_approval_decided")
+    require("services/langgraph/api/routes/operations.py", "publication_previewed")
+    require("services/langgraph/api/routes/operations.py", "spend_authorization_requested")
+    require("services/langgraph/tests/test_lifecycle_analytics.py", "agency_run_needs_approval")
+
+    openapi = (ROOT / "packages/shared/openapi/agent-mission-control.openapi.yaml").read_text(encoding="utf-8")
+    for token in [
+        "/analytics/events:",
+        "/operations/capabilities:",
+        "/operations/publications/preview:",
+        "/operations/spend/authorizations:",
+        "BearerAuth:",
+        "AnalyticsEventRequest:",
+        "PublicationJob:",
+        "SpendAuthorization:",
+    ]:
+        if token not in openapi:
+            raise SystemExit(f"OpenAPI production contract missing token: {token}")
+
     env_text = (ROOT / ".env.example").read_text(encoding="utf-8")
     for key in [
         "AMC_ENV",

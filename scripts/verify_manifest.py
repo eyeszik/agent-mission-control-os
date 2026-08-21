@@ -20,7 +20,7 @@ def main() -> None:
     payload = json.loads(MANIFEST.read_text(encoding="utf-8"))
     if payload.get("schema_version") != "amc-integrity/v2":
         raise SystemExit("manifest.json must use amc-integrity/v2")
-    if payload.get("scope") != "critical_runtime_and_release_contracts":
+    if payload.get("scope") != "critical_runtime_release_and_production_contracts":
         raise SystemExit("manifest.json has unexpected integrity scope")
 
     files = payload.get("files")
@@ -55,18 +55,40 @@ def main() -> None:
         "apps/web/playwright.config.ts",
         "apps/web/e2e/agency-smoke.spec.ts",
         "apps/web/lib/api/client.ts",
+        "apps/web/lib/auth/session.ts",
+        "apps/web/lib/auth/supabase.ts",
+        "apps/web/app/login/page.tsx",
+        "apps/web/app/mission-control/page.tsx",
+        "apps/web/vercel.json",
         "packages/shared/openapi/agent-mission-control.openapi.yaml",
         "packages/shared/src/schemas/agency.ts",
         "packages/shared/src/schemas/approvals.ts",
         "packages/shared/src/schemas/events.ts",
         "services/langgraph/api/routes/agency.py",
+        "services/langgraph/api/routes/analytics.py",
         "services/langgraph/api/routes/approvals.py",
         "services/langgraph/api/routes/events.py",
+        "services/langgraph/api/routes/operations.py",
+        "services/langgraph/app/config.py",
         "services/langgraph/app/main.py",
+        "services/langgraph/integrations/publication.py",
+        "services/langgraph/integrations/paid_media.py",
+        "services/langgraph/persistence/analytics.py",
+        "services/langgraph/persistence/checkpoints.py",
+        "services/langgraph/persistence/database.py",
         "services/langgraph/persistence/idempotency.py",
+        "services/langgraph/persistence/memberships.py",
+        "services/langgraph/persistence/operations.py",
         "services/langgraph/persistence/sqlite_db.py",
         "services/langgraph/security/auth.py",
+        "services/langgraph/pyproject.toml",
+        "services/langgraph/vercel.json",
+        "services/langgraph/tests/test_lifecycle_analytics.py",
+        "services/langgraph/tests/test_production_foundation.py",
+        "supabase/migrations/20260820_amc_production_foundation_v1.sql",
+        "supabase/migrations/20260820_amc_production_foundation_v2_fk_indexes.sql",
         "scripts/verify_repository_invariants.py",
+        "scripts/verify_production_readiness.py",
         "scripts/verify_manifest.py",
     }
     missing = sorted(required - seen)

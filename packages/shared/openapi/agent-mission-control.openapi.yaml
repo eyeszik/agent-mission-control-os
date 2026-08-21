@@ -1,29 +1,26 @@
 openapi: 3.0.3
 info:
   title: Agent Mission Control API
-  version: 0.1.0
+  version: 0.2.0
   description: >-
-    Local-first API for the Agent Mission Control branding/marketing agency workflow.
-    The repository currently implements loopback-only local authentication. Production
-    authentication and deployment are deliberately not claimed.
+    Agentic AI branding/marketing agency execution API with local and production
+    runtime modes. Production authentication uses Supabase bearer tokens plus
+    server-side tenant/project memberships. External publication and paid-media
+    execution remain fail-closed until concrete provider adapters are installed.
+security:
+  - BearerAuth: []
 paths:
   /health:
     get:
-      summary: Service health and local runtime mode
+      security: []
+      summary: Service health and runtime capability state
       responses:
         '200':
-          description: Health status
+          description: Health and production-readiness state
           content:
             application/json:
               schema:
-                type: object
-                required: [status, langgraph, version, auth_mode, production_ready]
-                properties:
-                  status: { type: string, enum: [ok] }
-                  langgraph: { type: string, enum: [active] }
-                  version: { type: string }
-                  auth_mode: { type: string }
-                  production_ready: { type: boolean, enum: [false] }
+                $ref: '#/components/schemas/HealthStatus'
   /agency/runs:
     post:
       summary: Create one agency workflow run
@@ -47,9 +44,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgencyRun'
+        '401': { description: Authentication required or token invalid }
         '403': { description: Tenant/project outside authenticated scope }
         '409': { description: Idempotency conflict or equivalent request already executing }
-        '503': { description: Local authentication is not configured }
+        '503': { description: Authentication provider or runtime configuration unavailable }
   /agency/runs/{run_id}:
     get:
       summary: Get one authorized agency run
@@ -62,9 +60,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgencyRun'
+        '401': { description: Authentication required or token invalid }
         '403': { description: Run belongs to another authorization scope }
         '404': { description: Run not found }
-        '503': { description: Local authentication is not configured }
+        '503': { description: Authentication provider or runtime configuration unavailable }
   /agency/runs/{run_id}/resume:
     post:
       summary: Resume an approved run into delivery
@@ -81,10 +80,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgencyRun'
+        '401': { description: Authentication required or token invalid }
         '403': { description: Run belongs to another authorization scope }
         '404': { description: Run not found }
         '409': { description: Run state or approval does not permit delivery }
-        '503': { description: Local authentication is not configured }
+        '503': { description: Authentication provider or runtime configuration unavailable }
   /approvals:
     get:
       summary: List pending approvals for the authenticated tenant
@@ -103,8 +103,9 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/ApprovalRequest' }
+        '401': { description: Authentication required or token invalid }
         '403': { description: Supplied tenant_id does not match authenticated tenant }
-        '503': { description: Local authentication is not configured }
+        '503': { description: Authentication provider or runtime configuration unavailable }
   /approvals/{approval_id}/decide:
     post:
       summary: Resolve a pending approval exactly once
@@ -127,10 +128,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApprovalDecisionResponse'
+        '400': { description: Invalid decision }
+        '401': { description: Authentication required or token invalid }
         '403': { description: Approval belongs to another authorization scope }
         '404': { description: Approval not found }
         '409': { description: Approval is terminal, run state changed, or idempotency conflict }
-        '503': { description: Local authentication is not configured }
+        '503': { description: Authentication provider or runtime configuration unavailable }
   /runs/{run_id}/events:
     get:
       summary: Replay or follow authorized run events after a monotonic cursor
@@ -157,10 +160,102 @@ paths:
               schema:
                 type: string
         '400': { description: Last-Event-ID is not a valid integer sequence }
+        '401': { description: Authentication required or token invalid }
         '403': { description: Run belongs to another authorization scope }
         '404': { description: Run not found }
-        '503': { description: Local authentication is not configured }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+  /analytics/events:
+    post:
+      summary: Record one authenticated first-party analytics event
+      description: >-
+        Persists an analytics event inside the authenticated tenant/project boundary.
+        The server derives tenant identity from the authenticated principal; clients
+        cannot supply or override tenant_id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyticsEventRequest'
+      responses:
+        '201':
+          description: Analytics event persisted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsEvent'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Project outside authenticated scope }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+  /operations/capabilities:
+    get:
+      summary: Report authenticated external-action capability boundaries
+      responses:
+        '200':
+          description: Capability state for publication, paid media, and analytics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationsCapabilities'
+        '401': { description: Authentication required or token invalid }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+  /operations/publications/preview:
+    post:
+      summary: Validate and record a publication preview without live publication
+      description: >-
+        Records a publication job at the current fail-closed publication mode. Disabled
+        mode produces a blocked audit record; dry_run produces a validated audit record.
+        Live publication has no executor until a reviewed provider adapter is installed.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicationPreviewRequest'
+      responses:
+        '201':
+          description: Publication audit record created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationJob'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Run outside authenticated scope }
+        '404': { description: Run not found }
+        '409': { description: Idempotency conflict }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+  /operations/spend/authorizations:
+    post:
+      summary: Request a paid-media spend authorization record
+      description: >-
+        Creates a pending authorization ledger entry. This endpoint does not execute
+        spend and does not imply that a paid-media provider adapter is available.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpendAuthorizationRequest'
+      responses:
+        '201':
+          description: Pending spend authorization created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpendAuthorization'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Project/run outside authenticated scope }
+        '404': { description: Referenced run not found }
+        '409': { description: run_id and project_id do not match }
+        '503': { description: Authentication provider or runtime configuration unavailable }
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Supabase access token
   parameters:
     RunId:
       in: path
@@ -173,6 +268,20 @@ components:
       required: true
       schema: { type: string, minLength: 1 }
   schemas:
+    HealthStatus:
+      type: object
+      required: [status, langgraph, version, environment, auth_mode, database_backend, analytics_source, publication_mode, paid_media_mode, production_ready]
+      properties:
+        status: { type: string, enum: [ok] }
+        langgraph: { type: string, enum: [active] }
+        version: { type: string }
+        environment: { type: string, enum: [local, production] }
+        auth_mode: { type: string, enum: [local, supabase, disabled] }
+        database_backend: { type: string, enum: [sqlite, postgres] }
+        analytics_source: { type: string, enum: [amc_first_party] }
+        publication_mode: { type: string, enum: [disabled, dry_run, live] }
+        paid_media_mode: { type: string, enum: [disabled, live] }
+        production_ready: { type: boolean }
     CampaignBrief:
       type: object
       required: [brand_name, target_audience]
@@ -375,3 +484,100 @@ components:
         checkpoint_ref: { type: string, nullable: true }
         safe_payload: { type: object, additionalProperties: true }
         redactions_applied: { type: array, items: { type: string } }
+    AnalyticsEventRequest:
+      type: object
+      required: [project_id, event_name]
+      properties:
+        project_id: { type: string }
+        event_name: { type: string, minLength: 1, maxLength: 120 }
+        run_id: { type: string, nullable: true }
+        properties: { type: object, additionalProperties: true, default: {} }
+    AnalyticsEvent:
+      type: object
+      required: [event_id, tenant_id, project_id, event_name, source, occurred_at, properties, schema_version]
+      properties:
+        event_id: { type: string, format: uuid }
+        tenant_id: { type: string }
+        project_id: { type: string }
+        run_id: { type: string, nullable: true }
+        event_name: { type: string }
+        source: { type: string, enum: [amc_first_party] }
+        occurred_at: { type: string, format: date-time }
+        properties: { type: object, additionalProperties: true }
+        schema_version: { type: string, enum: [analytics-event-v1] }
+    OperationsCapabilities:
+      type: object
+      required: [tenant_id, publication, paid_media, analytics]
+      properties:
+        tenant_id: { type: string }
+        publication:
+          type: object
+          required: [live, dry_run]
+          properties:
+            live: { type: boolean, enum: [false] }
+            dry_run: { type: boolean, enum: [true] }
+        paid_media:
+          type: object
+          required: [live_spend, authorization_ledger]
+          properties:
+            live_spend: { type: boolean, enum: [false] }
+            authorization_ledger: { type: boolean, enum: [true] }
+        analytics:
+          type: object
+          required: [source, ingestion]
+          properties:
+            source: { type: string, enum: [amc_first_party] }
+            ingestion: { type: boolean, enum: [true] }
+    PublicationPreviewRequest:
+      type: object
+      required: [run_id, provider, payload]
+      properties:
+        run_id: { type: string }
+        provider: { type: string, minLength: 1, maxLength: 80 }
+        payload: { type: object, additionalProperties: true }
+    PublicationJob:
+      type: object
+      required: [job_id, run_id, tenant_id, project_id, provider, mode, status, idempotency_key, payload, created_at, updated_at]
+      properties:
+        job_id: { type: string, format: uuid }
+        run_id: { type: string }
+        tenant_id: { type: string }
+        project_id: { type: string }
+        provider: { type: string }
+        mode: { type: string, enum: [dry_run, live] }
+        status: { type: string, enum: [pending, validated, executing, completed, failed, blocked] }
+        idempotency_key: { type: string }
+        payload: { type: object, additionalProperties: true }
+        external_id: { type: string, nullable: true }
+        error: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    SpendAuthorizationRequest:
+      type: object
+      required: [project_id, provider, amount_minor, currency, reason]
+      properties:
+        project_id: { type: string }
+        run_id: { type: string, nullable: true }
+        provider: { type: string, minLength: 1, maxLength: 80 }
+        amount_minor: { type: integer, minimum: 0 }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        reason: { type: string, minLength: 1, maxLength: 500 }
+    SpendAuthorization:
+      type: object
+      required: [authorization_id, tenant_id, project_id, provider, amount_minor, currency, status, requested_by, reason, created_at]
+      properties:
+        authorization_id: { type: string, format: uuid }
+        run_id: { type: string, nullable: true }
+        tenant_id: { type: string }
+        project_id: { type: string }
+        provider: { type: string }
+        amount_minor: { type: integer, minimum: 0 }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        status: { type: string, enum: [pending, approved, rejected, executed, cancelled] }
+        requested_by: { type: string }
+        approved_by: { type: string, nullable: true }
+        reason: { type: string }
+        external_id: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        decided_at: { type: string, format: date-time, nullable: true }
+        executed_at: { type: string, format: date-time, nullable: true }

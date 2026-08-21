@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.models import AgentRun
+from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import get_approvals_for_run
 from services.langgraph.persistence.events import record_event
 from services.langgraph.persistence.idempotency import (
@@ -141,6 +142,13 @@ def create_agency_run(
         metadata=metadata,
     )
     create_run_record(run_id, principal.tenant_id, req.project_id, PIPELINE_NAME, "running", metadata)
+    emit_lifecycle_event(
+        principal.tenant_id,
+        req.project_id,
+        "agency_run_created",
+        {"pipeline": PIPELINE_NAME, "status": "running"},
+        run_id,
+    )
 
     graph = build_agency_workflow()
     config = _run_config(run_id)
@@ -156,12 +164,32 @@ def create_agency_run(
     except Exception as exc:
         update_run_status(run_id, "failed", {"error": type(exc).__name__})
         record_event(run_id, run.tenant_id, run.project_id, "pipeline", "node_error", safe_payload={"error_class": type(exc).__name__})
+        emit_lifecycle_event(
+            run.tenant_id,
+            run.project_id,
+            "agency_run_failed",
+            {"pipeline": PIPELINE_NAME, "phase": "generation", "error_class": type(exc).__name__},
+            run_id,
+        )
         fail_idempotency(scope, idempotency_key, type(exc).__name__)
         raise HTTPException(status_code=500, detail="Agency pipeline failed") from exc
 
     agency_data = _agency_payload(state)
     record = update_run_status(run_id, "needs_approval", {"agency": agency_data})
     run_approvals = get_approvals_for_run(run_id)
+    release_blocked = bool((agency_data.get("qa_report") or {}).get("release_blocked"))
+    emit_lifecycle_event(
+        principal.tenant_id,
+        req.project_id,
+        "agency_run_needs_approval",
+        {
+            "pipeline": PIPELINE_NAME,
+            "status": record["status"],
+            "degraded": bool(agency_data.get("degraded")),
+            "release_blocked": release_blocked,
+        },
+        run_id,
+    )
     response = {
         "run_id": run_id,
         "status": record["status"],
@@ -234,6 +262,13 @@ def resume_agency_run(
 
     stored_agency = (record.get("result") or {}).get("agency", {})
     if (stored_agency.get("qa_report") or {}).get("release_blocked"):
+        emit_lifecycle_event(
+            record["tenant_id"],
+            record["project_id"],
+            "agency_run_delivery_blocked",
+            {"pipeline": record["pipeline"], "reason": "degraded_release_block"},
+            run_id,
+        )
         fail_idempotency(scope, idempotency_key, "degraded_release_block")
         raise HTTPException(
             status_code=409,
@@ -263,6 +298,14 @@ def resume_agency_run(
             }
         raise HTTPException(status_code=409, detail="Run delivery is already being processed")
 
+    emit_lifecycle_event(
+        record["tenant_id"],
+        record["project_id"],
+        "agency_run_delivery_started",
+        {"pipeline": record["pipeline"], "status": "delivering"},
+        run_id,
+    )
+
     graph = build_agency_workflow()
     config = _run_config(run_id)
     run_model = AgentRun(
@@ -279,11 +322,25 @@ def resume_agency_run(
     except Exception as exc:
         update_run_status(run_id, "failed", {"error": type(exc).__name__})
         record_event(run_id, record["tenant_id"], record["project_id"], "delivery", "node_error", safe_payload={"error_class": type(exc).__name__})
+        emit_lifecycle_event(
+            record["tenant_id"],
+            record["project_id"],
+            "agency_run_failed",
+            {"pipeline": record["pipeline"], "phase": "delivery", "error_class": type(exc).__name__},
+            run_id,
+        )
         fail_idempotency(scope, idempotency_key, type(exc).__name__)
         raise HTTPException(status_code=500, detail="Delivery failed") from exc
 
     agency_data = _agency_payload(state)
     update_run_status(run_id, "completed", {"agency": agency_data})
+    emit_lifecycle_event(
+        record["tenant_id"],
+        record["project_id"],
+        "agency_run_completed",
+        {"pipeline": record["pipeline"], "status": "completed"},
+        run_id,
+    )
     response = {"run_id": run_id, "status": "completed", "delivery": agency_data.get("delivery")}
     if not complete_idempotency(scope, idempotency_key, response):
         raise HTTPException(status_code=500, detail="Failed to finalize idempotency record")

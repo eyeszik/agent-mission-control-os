@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from services.langgraph.integrations.paid_media import request_spend_authorization, spend_execution_available
 from services.langgraph.integrations.publication import prepare_publication
+from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.runs import get_run_record
 from services.langgraph.security.auth import Principal, authorize_project, authorize_resource, get_principal
 
@@ -46,7 +47,26 @@ def publication_preview(
     if not run:
         raise HTTPException(status_code=404, detail="Run not found")
     authorize_resource(principal, run["tenant_id"], run["project_id"])
-    return prepare_publication(req.run_id, principal.tenant_id, run["project_id"], req.provider, req.payload, idempotency_key)
+    job = prepare_publication(
+        req.run_id,
+        principal.tenant_id,
+        run["project_id"],
+        req.provider,
+        req.payload,
+        idempotency_key,
+    )
+    emit_lifecycle_event(
+        principal.tenant_id,
+        run["project_id"],
+        "publication_previewed",
+        {
+            "provider": req.provider,
+            "mode": job.get("mode"),
+            "status": job.get("status"),
+        },
+        req.run_id,
+    )
+    return job
 
 
 @router.post("/spend/authorizations", status_code=201)
@@ -59,7 +79,7 @@ def create_spend_authorization(req: SpendAuthorizationRequest, principal: Princi
         authorize_resource(principal, run["tenant_id"], run["project_id"])
         if run["project_id"] != req.project_id:
             raise HTTPException(status_code=409, detail="run_id and project_id do not match")
-    return request_spend_authorization(
+    authorization = request_spend_authorization(
         req.run_id,
         principal.tenant_id,
         req.project_id,
@@ -69,3 +89,17 @@ def create_spend_authorization(req: SpendAuthorizationRequest, principal: Princi
         principal.user_id,
         req.reason,
     )
+    emit_lifecycle_event(
+        principal.tenant_id,
+        req.project_id,
+        "spend_authorization_requested",
+        {
+            "provider": req.provider,
+            "authorization_id": authorization.get("authorization_id"),
+            "amount_minor": req.amount_minor,
+            "currency": req.currency.upper(),
+            "status": authorization.get("status"),
+        },
+        req.run_id,
+    )
+    return authorization

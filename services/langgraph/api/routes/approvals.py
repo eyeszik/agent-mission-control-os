@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 
+from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import get_approval, list_pending_approvals, resolve_approval
 from services.langgraph.persistence.idempotency import (
     complete_idempotency,
@@ -92,6 +93,21 @@ def decide_approval(
         if not changed:
             fail_idempotency(scope, idempotency_key, "run_state_race")
             raise HTTPException(status_code=409, detail="Run state changed while rejection was being recorded")
+        emit_lifecycle_event(
+            approval["tenant_id"],
+            approval["project_id"],
+            "agency_run_rejected",
+            {"approval_id": approval_id, "decision": "reject"},
+            approval["run_id"],
+        )
+
+    emit_lifecycle_event(
+        approval["tenant_id"],
+        approval["project_id"],
+        "agency_approval_decided",
+        {"approval_id": approval_id, "decision": body.decision},
+        approval["run_id"],
+    )
 
     response = {
         "approval_id": resolved["approval_id"],
