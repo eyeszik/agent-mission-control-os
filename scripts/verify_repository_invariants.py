@@ -188,6 +188,27 @@ def main() -> None:
         if (ROOT / temporary_workflow).exists():
             raise SystemExit(f"Temporary write-enabled workflow must be removed: {temporary_workflow}")
 
+    # N1-N4 ontology layer: the release guards are the reason the layer exists,
+    # so their absence is a contract regression rather than a refactor.
+    lifecycle = (ROOT / "services/langgraph/agency/kernel/lifecycle.py").read_text(encoding="utf-8")
+    for required in ["FALLBACK_DEGRADED", "RELEASE_GUARDS", "CLIENT_VISIBLE_TRANSITIONS"]:
+        if required not in lifecycle:
+            raise SystemExit(f"Agency lifecycle contract missing release guard token: {required}")
+
+    roles = (ROOT / "services/langgraph/agency/kernel/roles.py").read_text(encoding="utf-8")
+    for required in ["requires_human_approval", "external_side_effect"]:
+        if required not in roles:
+            raise SystemExit(f"Role contract missing authority field: {required}")
+
+    registry = (ROOT / "services/langgraph/agency/kernel/registry.py").read_text(encoding="utf-8")
+    if "MERGE_MATRIX" not in registry:
+        raise SystemExit("Artifact registry must resolve merges through a declared matrix")
+
+    ci_workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    for required_gate in ["verify_auth_bindings.py", "verify_ontology_parity.py"]:
+        if required_gate not in ci_workflow:
+            raise SystemExit(f"CI must run the {required_gate} gate")
+
     print("Repository invariants verified")
 
 
