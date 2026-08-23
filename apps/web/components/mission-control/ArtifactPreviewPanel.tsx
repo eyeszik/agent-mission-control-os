@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
@@ -11,19 +12,22 @@ import { generateIdempotencyKey } from '../../lib/utils/idempotency';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
+
   const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
   const addArtifact = useArtifactStore((state) => state.addArtifact);
+  const selectedArtifact = useArtifactStore((state) => {
+    const list = activeRunId ? state.artifacts[activeRunId] : null;
+    return list ? list.find(a => a.id === selectedArtifactId) : null;
+  });
 
-  const approvalsRecord = useApprovalStore((state) => state.approvals);
-  const pendingApprovals = Object.values(approvalsRecord).filter(a => a.status === 'pending');
+  const pendingApprovals = useApprovalStore(
+    useShallow((state) => Object.values(state.approvals).filter(a => a.status === 'pending'))
+  );
   const removeApproval = useApprovalStore((state) => state.removeApproval);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
 
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const selectedArtifact = artifacts ? artifacts.find(a => a.id === selectedArtifactId) : null;
 
   const handleResolve = async (approvalId: string, runId: string, decision: 'approve' | 'reject') => {
     setResolvingId(approvalId);
