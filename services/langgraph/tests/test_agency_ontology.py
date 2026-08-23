@@ -83,6 +83,7 @@ def test_unknown_vocabulary_fails_closed():
 def _clean_context(**overrides) -> TransitionContext:
     base = {
         "generation_mode": "PROVIDER_SUCCESS",
+        "approval_exists": True,
         "approval_decision": "approve",
         "approval_resolved": True,
         "brand_safety_passed": True,

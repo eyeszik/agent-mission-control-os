@@ -100,7 +100,7 @@ def test_agency_kernel_persists_and_selectively_invalidates():
         engagement_id,
         "tenant_1",
         "proj_1",
-        "positioning",
+        "positioning_statement",
         "strategy",
         workstream_id=workstream_id,
         status="approved",
@@ -110,7 +110,7 @@ def test_agency_kernel_persists_and_selectively_invalidates():
         engagement_id,
         "tenant_1",
         "proj_1",
-        "messaging",
+        "brand_platform",
         "brand",
         status="approved",
     )
@@ -119,7 +119,7 @@ def test_agency_kernel_persists_and_selectively_invalidates():
         engagement_id,
         "tenant_1",
         "proj_1",
-        "landing_page",
+        "campaign_package",
         "growth",
         status="approved",
     )
@@ -160,9 +160,9 @@ def test_artifact_dependency_rejects_cycles_and_cross_engagement_edges():
     a1 = _id("a1")
     a2 = _id("a2")
     b1 = _id("b1")
-    kernel.create_artifact(a1, engagement_a, "tenant_1", "proj_1", "strategy", "strategy")
-    kernel.create_artifact(a2, engagement_a, "tenant_1", "proj_1", "messaging", "brand")
-    kernel.create_artifact(b1, engagement_b, "tenant_1", "proj_1", "campaign", "growth")
+    kernel.create_artifact(a1, engagement_a, "tenant_1", "proj_1", "positioning_statement", "strategy")
+    kernel.create_artifact(a2, engagement_a, "tenant_1", "proj_1", "brand_platform", "brand")
+    kernel.create_artifact(b1, engagement_b, "tenant_1", "proj_1", "campaign_package", "growth")
 
     kernel.add_artifact_dependency(a2, a1, "hard")
 

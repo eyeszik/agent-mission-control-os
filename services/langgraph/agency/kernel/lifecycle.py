@@ -43,16 +43,40 @@ class TransitionContext:
     """Facts a guard may consult. Absent facts are treated as unproven."""
 
     generation_mode: str | None = None
+    approval_exists: bool = False
     approval_decision: str | None = None
     approval_resolved: bool = False
     brand_safety_passed: bool | None = None
     external_side_effect: bool = False
     spend_authorized: bool = False
     unmet_hard_dependencies: tuple[str, ...] = ()
+    # Whether a human approval discharges a failed brand-safety review.
+    #
+    # The ontology default is False: a banned-claim flag is a hard gate. The
+    # live agency delivery route sets this True to preserve its existing
+    # behavior, where the HITL gate is the authority and an approver may ship a
+    # flagged campaign. Which of the two is correct is a policy decision, so it
+    # is surfaced as an explicit field rather than buried in either call site.
+    brand_safety_advisory: bool = False
 
     @property
     def is_degraded(self) -> bool:
         return (self.generation_mode or "") in DEGRADED_PROVENANCE_MODES
+
+    @property
+    def human_approved(self) -> bool:
+        return self.approval_exists and self.approval_resolved and self.approval_decision == "approve"
+
+
+@dataclass(frozen=True)
+class GuardFailure:
+    """A single failed guard, carrying a stable code for call-site mapping."""
+
+    code: str
+    message: str
+
+    def __str__(self) -> str:  # pragma: no cover - convenience only
+        return self.message
 
 
 # --------------------------------------------------------------------------
@@ -68,18 +92,34 @@ def _guard_not_degraded(context: TransitionContext) -> str | None:
     return None
 
 
-def _guard_approved(context: TransitionContext) -> str | None:
-    if not context.approval_resolved:
+def _guard_approval_exists(context: TransitionContext) -> str | None:
+    if not context.approval_exists:
+        return "no human approval exists for this run"
+    return None
+
+
+def _guard_approval_resolved(context: TransitionContext) -> str | None:
+    # Only meaningful once an approval exists; absence is reported by its own guard.
+    if context.approval_exists and not context.approval_resolved:
         return "human approval is unresolved"
-    if context.approval_decision != "approve":
+    return None
+
+
+def _guard_approval_decision(context: TransitionContext) -> str | None:
+    if context.approval_exists and context.approval_resolved and context.approval_decision != "approve":
         return f"human approval decision is '{context.approval_decision}', not 'approve'"
     return None
 
 
 def _guard_brand_safety(context: TransitionContext) -> str | None:
-    if context.brand_safety_passed is not True:
-        return "brand safety review has not passed"
-    return None
+    if context.brand_safety_passed is True:
+        return None
+    # Under advisory policy the human gate is the authority: an explicit
+    # approval discharges the flag. Under the default hard-gate policy it does
+    # not, and no approval can release flagged content.
+    if context.brand_safety_advisory and context.human_approved:
+        return None
+    return "brand safety review has not passed"
 
 
 def _guard_dependencies_met(context: TransitionContext) -> str | None:
@@ -94,13 +134,29 @@ def _guard_spend_authorized(context: TransitionContext) -> str | None:
     return None
 
 
-# Guards applied to any transition entering a client-visible state.
-RELEASE_GUARDS = (
-    _guard_not_degraded,
-    _guard_approved,
-    _guard_brand_safety,
-    _guard_spend_authorized,
+# Guards applied to any transition entering a client-visible state. Each carries
+# a stable code so a call site can map a failure onto its own error contract
+# without string matching.
+RELEASE_GUARDS: tuple[tuple[str, Any], ...] = (
+    ("degraded_release_block", _guard_not_degraded),
+    ("approval_missing", _guard_approval_exists),
+    ("approval_pending", _guard_approval_resolved),
+    ("approval_not_approved", _guard_approval_decision),
+    ("brand_safety_failed", _guard_brand_safety),
+    ("spend_unauthorized", _guard_spend_authorized),
 )
+
+DEPENDENCY_GUARD_CODE = "unmet_hard_dependencies"
+
+
+def release_guard_failures(context: TransitionContext) -> list[GuardFailure]:
+    """Evaluate every release guard, returning structured failures in order."""
+    failures: list[GuardFailure] = []
+    for code, guard in RELEASE_GUARDS:
+        message = guard(context)
+        if message:
+            failures.append(GuardFailure(code=code, message=message))
+    return failures
 
 
 # --------------------------------------------------------------------------
@@ -207,37 +263,49 @@ def allowed_transitions(entity: str, current: Any) -> frozenset:
     return _MATRICES[entity][_resolve(entity, current)]
 
 
+def transition_failures(
+    entity: str,
+    current: Any,
+    target: Any,
+    context: TransitionContext | None = None,
+) -> list[GuardFailure]:
+    """Every reason this move is illegal, with stable codes. Empty means legal."""
+    resolved_current = _resolve(entity, current)
+    resolved_target = _resolve(entity, target)
+    context = context or TransitionContext()
+
+    if resolved_target not in _MATRICES[entity][resolved_current]:
+        # An illegal edge makes guard results meaningless; report the edge alone.
+        return [
+            GuardFailure(
+                code="illegal_transition",
+                message=(
+                    f"{entity} cannot move from '{resolved_current.value}' "
+                    f"to '{resolved_target.value}'"
+                ),
+            )
+        ]
+
+    failures: list[GuardFailure] = []
+    if resolved_target in CLIENT_VISIBLE_TRANSITIONS[entity]:
+        failures.extend(release_guard_failures(context))
+
+    if resolved_target in DEPENDENCY_GATED_TRANSITIONS[entity]:
+        reason = _guard_dependencies_met(context)
+        if reason:
+            failures.append(GuardFailure(code=DEPENDENCY_GUARD_CODE, message=reason))
+
+    return failures
+
+
 def transition_blockers(
     entity: str,
     current: Any,
     target: Any,
     context: TransitionContext | None = None,
 ) -> list[str]:
-    """Return every reason this move is illegal. Empty means the move is legal."""
-    resolved_current = _resolve(entity, current)
-    resolved_target = _resolve(entity, target)
-    context = context or TransitionContext()
-    blockers: list[str] = []
-
-    if resolved_target not in _MATRICES[entity][resolved_current]:
-        blockers.append(
-            f"{entity} cannot move from '{resolved_current.value}' to '{resolved_target.value}'"
-        )
-        # An illegal edge makes guard results meaningless; report the edge alone.
-        return blockers
-
-    if resolved_target in CLIENT_VISIBLE_TRANSITIONS[entity]:
-        for guard in RELEASE_GUARDS:
-            reason = guard(context)
-            if reason:
-                blockers.append(reason)
-
-    if resolved_target in DEPENDENCY_GATED_TRANSITIONS[entity]:
-        reason = _guard_dependencies_met(context)
-        if reason:
-            blockers.append(reason)
-
-    return blockers
+    """Human-readable form of :func:`transition_failures`."""
+    return [failure.message for failure in transition_failures(entity, current, target, context)]
 
 
 def can_transition(

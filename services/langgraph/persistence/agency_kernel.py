@@ -4,6 +4,11 @@ from collections import deque
 from datetime import datetime, timezone
 from typing import Any, Optional
 
+from services.langgraph.agency.kernel.ontology import (
+    assert_department_owns,
+    resolve_artifact_type,
+    resolve_department,
+)
 from services.langgraph.persistence.database import (
     decode_json,
     json_param,
@@ -112,6 +117,10 @@ def create_workstream(
     metadata: Optional[dict] = None,
 ) -> dict:
     _assert_engagement_scope(engagement_id, tenant_id, project_id)
+    # N1: the department must belong to the closed agency vocabulary. Storing an
+    # unrecognized department would make downstream ownership and release
+    # questions unanswerable.
+    department = resolve_department(department).value
     now = _now()
     with transaction(write=True) as db:
         db.execute(
@@ -271,6 +280,12 @@ def create_artifact(
     metadata: Optional[dict] = None,
 ) -> dict:
     _assert_engagement_scope(engagement_id, tenant_id, project_id)
+    # N1: artifact type and owning department must both be known, and the
+    # department must actually own that type. Ownership is exclusive, so this
+    # is decidable at write time rather than argued about at release time.
+    artifact_type = resolve_artifact_type(artifact_type).value
+    owner_department = resolve_department(owner_department).value
+    assert_department_owns(owner_department, artifact_type)
     if workstream_id is not None:
         workstream = get_workstream(workstream_id)
         if not workstream or workstream["engagement_id"] != engagement_id:

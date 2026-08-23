@@ -118,7 +118,7 @@
     },
     {
       "path": "services/langgraph/agency/kernel/lifecycle.py",
-      "git_blob_sha": "4bfead12bb131cceaaaa224984d781108b830669"
+      "git_blob_sha": "baa823d46012753a4732a716839f45178592a7eb"
     },
     {
       "path": "services/langgraph/agency/kernel/models.py",
@@ -138,7 +138,7 @@
     },
     {
       "path": "services/langgraph/api/routes/agency.py",
-      "git_blob_sha": "9f3ae3479e23c1115635ae69791331abe4ad864e"
+      "git_blob_sha": "8faf03ee6abe1d1696ca821c054a1ea224369391"
     },
     {
       "path": "services/langgraph/api/routes/analytics.py",
@@ -174,7 +174,7 @@
     },
     {
       "path": "services/langgraph/persistence/agency_kernel.py",
-      "git_blob_sha": "322240477fead32598c341ce6cf0d6472acb9f62"
+      "git_blob_sha": "024bbba6c8e5eda9ed9063c518ecfedb18064723"
     },
     {
       "path": "services/langgraph/persistence/analytics.py",
@@ -214,11 +214,15 @@
     },
     {
       "path": "services/langgraph/tests/test_agency_kernel.py",
-      "git_blob_sha": "aa40253175b0ec998872a7537d84bc4b72367f01"
+      "git_blob_sha": "75003029eee5c57da383e26141f05a444f64a5e8"
     },
     {
       "path": "services/langgraph/tests/test_agency_ontology.py",
-      "git_blob_sha": "9453eff36fef8927d18b43f62e84264cb093789f"
+      "git_blob_sha": "feb04b084c405cc6bd5fc8a04cb360609105bc98"
+    },
+    {
+      "path": "services/langgraph/tests/test_delivery_gate.py",
+      "git_blob_sha": "80f550b0bcdab4ffcd2281f16c6ebff044888f4a"
     },
     {
       "path": "services/langgraph/tests/test_lifecycle_analytics.py",
