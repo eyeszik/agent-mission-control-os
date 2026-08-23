@@ -45,6 +45,110 @@ _MIGRATIONS = [
             created_at TEXT NOT NULL, decided_at TEXT, executed_at TEXT
         );
     """),
+    (5, """
+        CREATE TABLE IF NOT EXISTS engagements (
+            engagement_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            objective TEXT NOT NULL,
+            desired_outcome TEXT NOT NULL,
+            status TEXT NOT NULL,
+            constraints TEXT NOT NULL,
+            permissions TEXT NOT NULL,
+            metadata TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_engagements_tenant_project ON engagements (tenant_id, project_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_engagements_status ON engagements (status, updated_at DESC);
+
+        CREATE TABLE IF NOT EXISTS workstreams (
+            workstream_id TEXT PRIMARY KEY,
+            engagement_id TEXT NOT NULL REFERENCES engagements(engagement_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            department TEXT NOT NULL,
+            objective TEXT NOT NULL,
+            status TEXT NOT NULL,
+            dependencies TEXT NOT NULL,
+            acceptance_criteria TEXT NOT NULL,
+            permissions TEXT NOT NULL,
+            metadata TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_workstreams_engagement ON workstreams (engagement_id, status, created_at);
+
+        CREATE TABLE IF NOT EXISTS agency_evidence (
+            evidence_id TEXT PRIMARY KEY,
+            engagement_id TEXT NOT NULL REFERENCES engagements(engagement_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            evidence_type TEXT NOT NULL,
+            source_ref TEXT,
+            claim TEXT NOT NULL,
+            epistemic_status TEXT NOT NULL,
+            confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+            collected_at TEXT NOT NULL,
+            freshness_seconds INTEGER CHECK (freshness_seconds IS NULL OR freshness_seconds >= 0),
+            payload TEXT NOT NULL,
+            metadata TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_agency_evidence_engagement ON agency_evidence (engagement_id, epistemic_status, collected_at DESC);
+
+        CREATE TABLE IF NOT EXISTS agency_decisions (
+            decision_id TEXT PRIMARY KEY,
+            engagement_id TEXT NOT NULL REFERENCES engagements(engagement_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            question TEXT NOT NULL,
+            alternatives TEXT NOT NULL,
+            selected_option TEXT NOT NULL,
+            evidence_ids TEXT NOT NULL,
+            assumptions TEXT NOT NULL,
+            affected_artifact_ids TEXT NOT NULL,
+            confidence TEXT NOT NULL,
+            status TEXT NOT NULL,
+            approver TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_agency_decisions_engagement ON agency_decisions (engagement_id, status, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS agency_artifacts (
+            artifact_id TEXT PRIMARY KEY,
+            engagement_id TEXT NOT NULL REFERENCES engagements(engagement_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            workstream_id TEXT REFERENCES workstreams(workstream_id) ON DELETE SET NULL,
+            artifact_type TEXT NOT NULL,
+            subtype TEXT,
+            owner_department TEXT NOT NULL,
+            version INTEGER NOT NULL CHECK (version > 0),
+            status TEXT NOT NULL,
+            content_location TEXT,
+            content_hash TEXT,
+            semantic_fingerprint TEXT,
+            assumptions TEXT NOT NULL,
+            validation TEXT NOT NULL,
+            approval TEXT NOT NULL,
+            metadata TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_agency_artifacts_engagement ON agency_artifacts (engagement_id, status, artifact_type);
+        CREATE INDEX IF NOT EXISTS idx_agency_artifacts_workstream ON agency_artifacts (workstream_id) WHERE workstream_id IS NOT NULL;
+
+        CREATE TABLE IF NOT EXISTS artifact_dependencies (
+            artifact_id TEXT NOT NULL REFERENCES agency_artifacts(artifact_id) ON DELETE CASCADE,
+            depends_on_artifact_id TEXT NOT NULL REFERENCES agency_artifacts(artifact_id) ON DELETE CASCADE,
+            relationship TEXT NOT NULL CHECK (relationship IN ('hard', 'soft')),
+            created_at TEXT NOT NULL,
+            PRIMARY KEY (artifact_id, depends_on_artifact_id),
+            CHECK (artifact_id <> depends_on_artifact_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_artifact_dependencies_upstream ON artifact_dependencies (depends_on_artifact_id, artifact_id);
+    """),
 ]
 
 
