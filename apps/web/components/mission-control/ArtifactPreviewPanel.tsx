@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
+import { useShallow } from 'zustand/react/shallow';
 import { resolveApproval } from '../../lib/api/approvals';
 import { resumeAgencyRun } from '../../lib/api/agency';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
@@ -15,8 +16,10 @@ export function ArtifactPreviewPanel() {
   const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
   const addArtifact = useArtifactStore((state) => state.addArtifact);
 
-  const approvalsRecord = useApprovalStore((state) => state.approvals);
-  const pendingApprovals = Object.values(approvalsRecord).filter(a => a.status === 'pending');
+  // Optimization: useShallow prevents unnecessary re-renders by returning the same
+  // array reference if the content of pendingApprovals hasn't structurally changed,
+  // even if other non-pending approvals update in the record.
+  const pendingApprovals = useApprovalStore(useShallow((state) => Object.values(state.approvals).filter(a => a.status === 'pending')));
   const removeApproval = useApprovalStore((state) => state.removeApproval);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
 
