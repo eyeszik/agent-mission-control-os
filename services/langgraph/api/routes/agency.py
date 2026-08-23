@@ -5,6 +5,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
+from services.langgraph.agency.kernel.lifecycle import TransitionContext, release_guard_failures
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.models import AgentRun
 from services.langgraph.persistence.analytics import emit_lifecycle_event
@@ -90,6 +91,51 @@ def _run_and_record_events(graph, input_state, config: dict, run: AgentRun) -> d
 
     snapshot = graph.get_state(config)
     return dict(snapshot.values) if snapshot and snapshot.values else {}
+
+
+def _delivery_context(stored_agency: dict, approval: Optional[dict]) -> TransitionContext:
+    """Build the N2 guard context from the run's persisted facts.
+
+    ``brand_safety_advisory`` is True because this route's established policy is
+    that the HITL gate is the authority: a reviewer may approve a campaign whose
+    brand-safety heuristic flagged terms. Degraded provider output is *not*
+    discharged that way and remains a hard block.
+    """
+    qa_report = stored_agency.get("qa_report") or {}
+    return TransitionContext(
+        # release_blocked is set by brand_safety_qa when any generation stage
+        # fell back, so it is the persisted form of degraded provenance.
+        generation_mode="FALLBACK_DEGRADED" if qa_report.get("release_blocked") else "PROVIDER_SUCCESS",
+        approval_exists=approval is not None,
+        approval_resolved=bool(approval and approval.get("status") == "resolved"),
+        approval_decision=(approval or {}).get("decision"),
+        brand_safety_passed=bool(qa_report.get("brand_safety_passed")),
+        brand_safety_advisory=True,
+    )
+
+
+# Guard codes that represent a substantive release block worth recording in
+# lifecycle analytics, as opposed to a run simply awaiting its approval
+# decision. Matches the pre-refactor emission behavior.
+_ANALYTICS_REPORTED_BLOCKS = frozenset({"degraded_release_block", "brand_safety_failed", "spend_unauthorized"})
+
+_DELIVERY_BLOCK_DETAIL = {
+    "degraded_release_block": lambda _approval: (
+        "Run contains degraded provider output and cannot be delivered; "
+        "rerun with a configured provider"
+    ),
+    "approval_missing": lambda _approval: "No approval found for this run",
+    "approval_pending": lambda _approval: "Run still has an unresolved approval",
+    "approval_not_approved": lambda approval: (
+        f"Run was not approved (decision={(approval or {}).get('decision')})"
+    ),
+    "brand_safety_failed": lambda _approval: (
+        "Run failed brand-safety review and cannot be delivered"
+    ),
+    "spend_unauthorized": lambda _approval: (
+        "Delivery requires an explicit spend/publication authorization"
+    ),
+}
 
 
 def _authorize_run(principal: Principal, record: dict) -> None:
@@ -261,31 +307,29 @@ def resume_agency_run(
         raise HTTPException(status_code=409, detail=f"Run is not awaiting delivery (status={record['status']})")
 
     stored_agency = (record.get("result") or {}).get("agency", {})
-    if (stored_agency.get("qa_report") or {}).get("release_blocked"):
-        emit_lifecycle_event(
-            record["tenant_id"],
-            record["project_id"],
-            "agency_run_delivery_blocked",
-            {"pipeline": record["pipeline"], "reason": "degraded_release_block"},
-            run_id,
-        )
-        fail_idempotency(scope, idempotency_key, "degraded_release_block")
-        raise HTTPException(
-            status_code=409,
-            detail="Run contains degraded provider output and cannot be delivered; rerun with a configured provider",
-        )
-
     run_approvals = get_approvals_for_run(run_id)
-    if not run_approvals:
-        fail_idempotency(scope, idempotency_key, "approval_missing")
-        raise HTTPException(status_code=409, detail="No approval found for this run")
-    latest = run_approvals[0]
-    if latest["status"] != "resolved":
-        fail_idempotency(scope, idempotency_key, "approval_pending")
-        raise HTTPException(status_code=409, detail="Run still has an unresolved approval")
-    if latest["decision"] != "approve":
-        fail_idempotency(scope, idempotency_key, "approval_not_approved")
-        raise HTTPException(status_code=409, detail=f"Run was not approved (decision={latest['decision']})")
+    latest = run_approvals[0] if run_approvals else None
+
+    # Delivery is gated by the declared N2 release guards rather than by ad-hoc
+    # checks, so the transition matrix stays the single authority on what may
+    # reach a client. The guard codes map onto this route's existing error
+    # contract below; behavior is unchanged.
+    failures = release_guard_failures(_delivery_context(stored_agency, latest))
+    if failures:
+        blocker = failures[0]
+        # A run blocked on its own approval state is an ordinary interaction —
+        # someone resumed before deciding — so it stays out of the lifecycle
+        # analytics stream. Only a substantive release block is recorded.
+        if blocker.code in _ANALYTICS_REPORTED_BLOCKS:
+            emit_lifecycle_event(
+                record["tenant_id"],
+                record["project_id"],
+                "agency_run_delivery_blocked",
+                {"pipeline": record["pipeline"], "reason": blocker.code},
+                run_id,
+            )
+        fail_idempotency(scope, idempotency_key, blocker.code)
+        raise HTTPException(status_code=409, detail=_DELIVERY_BLOCK_DETAIL[blocker.code](latest))
 
     if not compare_and_set_run_status(run_id, "needs_approval", "delivering"):
         fail_idempotency(scope, idempotency_key, "resume_race_lost")
