@@ -1,29 +1,23 @@
 from __future__ import annotations
 
-import importlib
 from datetime import datetime, timezone
+from uuid import uuid4
 
 import pytest
 from pydantic import ValidationError
 
 
-def _kernel(monkeypatch, tmp_path):
-    db_path = str(tmp_path / "agency-kernel.db")
-    monkeypatch.setenv("AMC_DATABASE_BACKEND", "sqlite")
-    monkeypatch.setenv("AMC_DB_PATH", db_path)
-
+def _kernel():
+    """Use the suite-managed SQLite database without mutating shared module state."""
     import services.langgraph.persistence.sqlite_db as sqlite_db
-    importlib.reload(sqlite_db)
-    sqlite_db.DB_PATH = db_path
+    from services.langgraph.persistence import agency_kernel
+
     sqlite_db.init_db()
-
-    import services.langgraph.persistence.database as database
-    importlib.reload(database)
-    database.DB_PATH = db_path
-
-    import services.langgraph.persistence.agency_kernel as agency_kernel
-    importlib.reload(agency_kernel)
     return sqlite_db, agency_kernel
+
+
+def _id(prefix: str) -> str:
+    return f"{prefix}-{uuid4()}"
 
 
 def _confidence() -> dict:
@@ -38,12 +32,20 @@ def _confidence() -> dict:
     }
 
 
-def test_agency_kernel_persists_and_selectively_invalidates(monkeypatch, tmp_path):
-    sqlite_db, kernel = _kernel(monkeypatch, tmp_path)
+def test_agency_kernel_persists_and_selectively_invalidates():
+    sqlite_db, kernel = _kernel()
     assert sqlite_db.current_schema_version() == 5
 
+    engagement_id = _id("eng")
+    workstream_id = _id("ws-strategy")
+    evidence_id = _id("ev")
+    decision_id = _id("dec")
+    positioning_id = _id("art-positioning")
+    messaging_id = _id("art-messaging")
+    landing_id = _id("art-landing")
+
     engagement = kernel.create_engagement(
-        "eng_1",
+        engagement_id,
         "tenant_1",
         "proj_1",
         "Launch a new product",
@@ -55,8 +57,8 @@ def test_agency_kernel_persists_and_selectively_invalidates(monkeypatch, tmp_pat
     assert engagement["permissions"] == {"production_deploy": False}
 
     workstream = kernel.create_workstream(
-        "ws_strategy",
-        "eng_1",
+        workstream_id,
+        engagement_id,
         "tenant_1",
         "proj_1",
         "strategy",
@@ -66,8 +68,8 @@ def test_agency_kernel_persists_and_selectively_invalidates(monkeypatch, tmp_pat
     assert workstream["department"] == "strategy"
 
     evidence = kernel.create_evidence(
-        "ev_1",
-        "eng_1",
+        evidence_id,
+        engagement_id,
         "tenant_1",
         "proj_1",
         "customer_research",
@@ -79,33 +81,33 @@ def test_agency_kernel_persists_and_selectively_invalidates(monkeypatch, tmp_pat
     assert evidence["confidence"] == pytest.approx(0.92)
 
     decision = kernel.create_decision(
-        "dec_1",
-        "eng_1",
+        decision_id,
+        engagement_id,
         "tenant_1",
         "proj_1",
         "Which positioning should lead?",
         _confidence(),
         alternatives=["speed", "price"],
         selected_option="speed",
-        evidence_ids=["ev_1"],
+        evidence_ids=[evidence_id],
         status="accepted",
     )
     assert decision["selected_option"] == "speed"
     assert decision["confidence"]["aggregate"] == pytest.approx(0.9)
 
     kernel.create_artifact(
-        "art_positioning",
-        "eng_1",
+        positioning_id,
+        engagement_id,
         "tenant_1",
         "proj_1",
         "positioning",
         "strategy",
-        workstream_id="ws_strategy",
+        workstream_id=workstream_id,
         status="approved",
     )
     kernel.create_artifact(
-        "art_messaging",
-        "eng_1",
+        messaging_id,
+        engagement_id,
         "tenant_1",
         "proj_1",
         "messaging",
@@ -113,8 +115,8 @@ def test_agency_kernel_persists_and_selectively_invalidates(monkeypatch, tmp_pat
         status="approved",
     )
     kernel.create_artifact(
-        "art_landing",
-        "eng_1",
+        landing_id,
+        engagement_id,
         "tenant_1",
         "proj_1",
         "landing_page",
@@ -122,26 +124,31 @@ def test_agency_kernel_persists_and_selectively_invalidates(monkeypatch, tmp_pat
         status="approved",
     )
 
-    kernel.add_artifact_dependency("art_messaging", "art_positioning", "hard")
-    kernel.add_artifact_dependency("art_landing", "art_messaging", "soft")
+    kernel.add_artifact_dependency(messaging_id, positioning_id, "hard")
+    kernel.add_artifact_dependency(landing_id, messaging_id, "soft")
 
-    graph = kernel.artifact_dependency_graph("eng_1")
-    assert [node["artifact_id"] for node in graph["nodes"]] == ["art_landing", "art_messaging", "art_positioning"]
+    graph = kernel.artifact_dependency_graph(engagement_id)
+    assert {node["artifact_id"] for node in graph["nodes"]} == {landing_id, messaging_id, positioning_id}
     assert len(graph["edges"]) == 2
 
-    affected = kernel.propagate_artifact_change("art_positioning")
-    assert affected == [
-        {"artifact_id": "art_landing", "status": "review_required"},
-        {"artifact_id": "art_messaging", "status": "invalidated"},
-    ]
-    assert kernel.get_artifact("art_messaging")["status"] == "invalidated"
-    assert kernel.get_artifact("art_landing")["status"] == "review_required"
+    affected = kernel.propagate_artifact_change(positioning_id)
+    assert affected == sorted(
+        [
+            {"artifact_id": landing_id, "status": "review_required"},
+            {"artifact_id": messaging_id, "status": "invalidated"},
+        ],
+        key=lambda item: item["artifact_id"],
+    )
+    assert kernel.get_artifact(messaging_id)["status"] == "invalidated"
+    assert kernel.get_artifact(landing_id)["status"] == "review_required"
 
 
-def test_artifact_dependency_rejects_cycles_and_cross_engagement_edges(monkeypatch, tmp_path):
-    _sqlite_db, kernel = _kernel(monkeypatch, tmp_path)
+def test_artifact_dependency_rejects_cycles_and_cross_engagement_edges():
+    _sqlite_db, kernel = _kernel()
 
-    for engagement_id in ["eng_a", "eng_b"]:
+    engagement_a = _id("eng-a")
+    engagement_b = _id("eng-b")
+    for engagement_id in [engagement_a, engagement_b]:
         kernel.create_engagement(
             engagement_id,
             "tenant_1",
@@ -150,17 +157,20 @@ def test_artifact_dependency_rejects_cycles_and_cross_engagement_edges(monkeypat
             "Outcome",
         )
 
-    kernel.create_artifact("a1", "eng_a", "tenant_1", "proj_1", "strategy", "strategy")
-    kernel.create_artifact("a2", "eng_a", "tenant_1", "proj_1", "messaging", "brand")
-    kernel.create_artifact("b1", "eng_b", "tenant_1", "proj_1", "campaign", "growth")
+    a1 = _id("a1")
+    a2 = _id("a2")
+    b1 = _id("b1")
+    kernel.create_artifact(a1, engagement_a, "tenant_1", "proj_1", "strategy", "strategy")
+    kernel.create_artifact(a2, engagement_a, "tenant_1", "proj_1", "messaging", "brand")
+    kernel.create_artifact(b1, engagement_b, "tenant_1", "proj_1", "campaign", "growth")
 
-    kernel.add_artifact_dependency("a2", "a1", "hard")
+    kernel.add_artifact_dependency(a2, a1, "hard")
 
     with pytest.raises(ValueError, match="cycle"):
-        kernel.add_artifact_dependency("a1", "a2", "hard")
+        kernel.add_artifact_dependency(a1, a2, "hard")
 
     with pytest.raises(ValueError, match="cross engagement"):
-        kernel.add_artifact_dependency("b1", "a1", "soft")
+        kernel.add_artifact_dependency(b1, a1, "soft")
 
 
 def test_confidence_vector_enforces_unit_interval():
@@ -183,7 +193,7 @@ def test_engagement_model_uses_typed_status():
 
     now = datetime.now(timezone.utc)
     engagement = Engagement(
-        engagement_id="eng_model",
+        engagement_id=_id("eng-model"),
         tenant_id="tenant_1",
         project_id="proj_1",
         objective="Build the product",
