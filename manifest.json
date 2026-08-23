@@ -47,7 +47,7 @@
     {"path": "services/langgraph/security/auth.py", "git_blob_sha": "16bffbd8800a0368111d314f8714dd44656a0482"},
     {"path": "services/langgraph/pyproject.toml", "git_blob_sha": "acabaa537c40672f6be2b179fcc0fd5b602ea01a"},
     {"path": "services/langgraph/vercel.json", "git_blob_sha": "31b6dc202f06d2e9e6b59caeef8db42c33bfc346"},
-    {"path": "services/langgraph/tests/test_agency_kernel.py", "git_blob_sha": "8d485dc81acd7b12c381585d0fc5453409934534"},
+    {"path": "services/langgraph/tests/test_agency_kernel.py", "git_blob_sha": "4cdc32bc9668ac8368b49ec552fe15f3bf6c1861"},
     {"path": "services/langgraph/tests/test_lifecycle_analytics.py", "git_blob_sha": "0305beb5762ff98e8aed8b97b9fba58e3e12bff5"},
     {"path": "services/langgraph/tests/test_production_foundation.py", "git_blob_sha": "0fbe1a369a3d6286b39aba677f24f9285c193b55"},
     {"path": "supabase/migrations/20260820_amc_production_foundation_v1.sql", "git_blob_sha": "700cc0c17b1e848b81234ce8ed92151da3509fb9"},
