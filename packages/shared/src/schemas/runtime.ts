@@ -73,6 +73,23 @@ export const AuditCheckpointSummarySchema = z.object({
   created_at: z.string().datetime({ offset: true }),
 });
 
+export const LineageRemediationSummarySchema = z.object({
+  remediation_id: z.string(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  run_id: z.string(),
+  approval_id: z.string().nullable().optional(),
+  artifact_id: z.string(),
+  artifact_version_ref: z.string(),
+  changed_artifact_id: z.string(),
+  changed_version_ref: z.string(),
+  reason: z.string(),
+  status: z.enum(['OPEN', 'REGENERATED', 'RETRIED', 'RESOLVED']),
+  payload: z.record(z.unknown()),
+  created_at: z.string().datetime({ offset: true }),
+  resolved_at: z.string().datetime({ offset: true }).nullable().optional(),
+});
+
 export const RecoveryActionResponseSchema = RecoveryCaseSummarySchema;
 export const OutboxReplayResponseSchema = z.object({
   message_id: z.string(),
@@ -103,11 +120,14 @@ export const TrustSnapshotSchema = z.object({
   failed_outbox: z.number().int().nonnegative(),
   open_recovery_cases: z.number().int().nonnegative(),
   resolved_recovery_cases: z.number().int().nonnegative(),
+  open_lineage_remediations: z.number().int().nonnegative(),
+  resolved_lineage_remediations: z.number().int().nonnegative(),
   audit_head_hash: z.string().regex(/^[a-f0-9]{64}$/),
   idempotency_claims: z.number().int().nonnegative(),
   recent_policy_decisions: z.array(PolicyDecisionSummarySchema),
   recent_outbox_messages: z.array(OutboxMessageSummarySchema),
   recent_recovery_cases: z.array(RecoveryCaseSummarySchema),
+  recent_lineage_remediations: z.array(LineageRemediationSummarySchema),
   recent_audit_events: z.array(AuditCheckpointSummarySchema),
   metadata: z.record(z.unknown()),
   database_backend: z.enum(['sqlite', 'postgres']),
@@ -120,3 +140,4 @@ export type RecoveryActionResponse = z.infer<typeof RecoveryActionResponseSchema
 export type OutboxReplayResponse = z.infer<typeof OutboxReplayResponseSchema>;
 export type RunRemediationAction = z.infer<typeof RunRemediationActionSchema>;
 export type RunRemediationResponse = z.infer<typeof RunRemediationResponseSchema>;
+export type LineageRemediationSummary = z.infer<typeof LineageRemediationSummarySchema>;

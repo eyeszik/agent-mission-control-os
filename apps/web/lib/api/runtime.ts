@@ -102,3 +102,19 @@ export async function regenerateRunApproval(
     RunRemediationResponseSchema
   );
 }
+
+export async function reviseProtectedRunArtifact(
+  runId: string,
+  contentHash: string
+): Promise<TrustSnapshot> {
+  const response = await apiFetch<{ trust: unknown }>(
+    `/runtime/runs/${runId}/artifacts/protected/revise`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ content_hash: contentHash }),
+    },
+  );
+  return TrustSnapshotSchema.parse(
+    response.trust
+  );
+}

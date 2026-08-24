@@ -20,6 +20,7 @@ from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffec
 from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.models import AgentRun
+from services.langgraph.persistence.agency_kernel import create_artifact, create_engagement, get_artifact, get_engagement
 from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import bind_approval_subject, get_approvals_for_run, mark_approval_stale
 from services.langgraph.persistence.events import record_event
@@ -94,6 +95,44 @@ def _agency_subject_hash(agency_data: dict) -> str:
             "degraded": bool(agency_data.get("degraded")),
         }
     )
+
+
+def _ensure_protected_run_artifact(
+    *,
+    run_id: str,
+    tenant_id: str,
+    project_id: str,
+    approval_id: str | None,
+    subject_hash: str,
+) -> tuple[str, str]:
+    engagement_id = f"eng-lineage-{run_id}"
+    artifact_id = f"art-protected-{run_id}"
+    if not get_engagement(engagement_id):
+        create_engagement(
+            engagement_id,
+            tenant_id,
+            project_id,
+            "Protected runtime artifact lineage",
+            "Canonical protected artifact for HITL lineage invalidation",
+            status="active",
+        )
+    if not get_artifact(artifact_id):
+        create_artifact(
+            artifact_id,
+            engagement_id,
+            tenant_id,
+            project_id,
+            "campaign_package",
+            "growth",
+            status="approved",
+            content_hash=subject_hash,
+            metadata={
+                "protected_run_id": run_id,
+                "protected_approval_id": approval_id,
+                "canonical_protected_artifact": True,
+            },
+        )
+    return artifact_id, f"{artifact_id}:v1"
 
 
 def _project_snapshot_hash(*, run_id: str, project_id: str, phase: str, status: str, subject_hash: str | None = None) -> str:
@@ -493,11 +532,18 @@ def create_agency_run(
         evidence_refs=(subject_hash,),
     )
     if run_approvals:
+        protected_artifact_id, protected_version_ref = _ensure_protected_run_artifact(
+            run_id=run_id,
+            tenant_id=run.tenant_id,
+            project_id=run.project_id,
+            approval_id=run_approvals[0]["approval_id"],
+            subject_hash=subject_hash,
+        )
         bind_approval_subject(
             run_approvals[0]["approval_id"],
             subject_hash=subject_hash,
-            subject_ref=run_id,
-            subject_version_ref=run_id,
+            subject_ref=protected_artifact_id,
+            subject_version_ref=protected_version_ref,
             authority_ref="human-review",
             policy_version="amc-approval/v1",
         )

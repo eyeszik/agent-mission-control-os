@@ -6,6 +6,7 @@ from services.langgraph.app.main import app
 from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.persistence.approvals import create_approval_request, mark_approval_stale, resolve_approval
 from services.langgraph.persistence.events import list_events_for_run
+from services.langgraph.persistence.lineage import list_project_lineage_remediations
 from services.langgraph.persistence.runs import create_run_record
 
 client = TestClient(app)
@@ -190,3 +191,32 @@ def test_operator_can_regenerate_stale_approval_chain():
     events = list_events_for_run(run_id)
     assert any(event["event_type"] == "approval_requested" for event in events)
     assert any(event["event_type"] == "run_remediation_updated" for event in events)
+
+
+def test_artifact_revision_trust_projection_opens_lineage_remediation():
+    run_id = f"run-lineage-{uuid4()}"
+    project_id = f"proj-lineage-{uuid4()}"
+    create_run_record(
+        run_id,
+        "tenant-events-test",
+        project_id,
+        "branding_marketing_agency",
+        "needs_approval",
+        {"agency": {"campaign_package": {"brief": {"brand_name": "Northwind"}}, "qa_report": {"brand_safety_passed": True}, "generation_provenance": [], "degraded": False}},
+    )
+    create_approval_request(run_id, "tenant-events-test", project_id, "review artifact", 0.7)
+
+    response = client.post(
+        f"/runtime/runs/{run_id}/artifacts/protected/revise",
+        json={"content_hash": "c" * 64},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["changed_version_ref"].endswith(":v2")
+    trust = payload["trust"]
+    assert trust["open_lineage_remediations"] >= 1
+    assert trust["recent_lineage_remediations"][0]["run_id"] == run_id
+
+    queue = list_project_lineage_remediations(project_id, "tenant-events-test")
+    assert queue[0]["run_id"] == run_id
+    assert queue[0]["status"] == "OPEN"

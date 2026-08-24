@@ -34,7 +34,7 @@ def _confidence() -> dict:
 
 def test_agency_kernel_persists_and_selectively_invalidates():
     sqlite_db, kernel = _kernel()
-    assert sqlite_db.current_schema_version() == 8
+    assert sqlite_db.current_schema_version() == 9
 
     engagement_id = _id("eng")
     workstream_id = _id("ws-strategy")
@@ -202,3 +202,53 @@ def test_engagement_model_uses_typed_status():
         updated_at=now,
     )
     assert engagement.status is EngagementStatus.intake
+
+
+def test_artifact_revision_auto_stales_bound_approvals_and_opens_lineage_remediation():
+    _sqlite_db, kernel = _kernel()
+    from services.langgraph.persistence.approvals import bind_approval_subject, create_approval_request, get_approval
+    from services.langgraph.persistence.lineage import list_project_lineage_remediations
+
+    engagement_id = _id("eng-lineage")
+    artifact_id = _id("art-lineage")
+    run_id = _id("run-lineage")
+    kernel.create_engagement(engagement_id, "tenant_1", "proj_1", "Protect artifact", "Keep lineage canonical")
+    kernel.create_artifact(
+        artifact_id,
+        engagement_id,
+        "tenant_1",
+        "proj_1",
+        "campaign_package",
+        "growth",
+        status="approved",
+        metadata={"protected_run_id": run_id},
+    )
+    approval = create_approval_request(
+        run_id,
+        "tenant_1",
+        "proj_1",
+        "review protected artifact",
+        0.8,
+        subject_type="ARTIFACT_VERSION",
+        subject_ref=artifact_id,
+        subject_version_ref=f"{artifact_id}:v1",
+        subject_hash="a" * 64,
+    )
+    bind_approval_subject(
+        approval["approval_id"],
+        subject_hash="a" * 64,
+        subject_ref=artifact_id,
+        subject_version_ref=f"{artifact_id}:v1",
+    )
+
+    revised = kernel.record_artifact_revision(artifact_id, content_hash="b" * 64)
+    assert revised["artifact"]["version"] == 2
+
+    stale = get_approval(approval["approval_id"])
+    assert stale["status"] == "stale"
+    assert stale["stale_reason"].startswith("artifact_version_changed:")
+    queue = list_project_lineage_remediations("proj_1", "tenant_1")
+    assert queue
+    assert queue[0]["run_id"] == run_id
+    assert queue[0]["artifact_id"] == artifact_id
+    assert queue[0]["status"] == "OPEN"

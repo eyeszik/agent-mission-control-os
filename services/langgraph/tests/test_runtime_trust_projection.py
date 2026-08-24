@@ -27,4 +27,5 @@ def test_runtime_trust_projection_is_tenant_scoped(monkeypatch, tmp_path):
     assert payload["recent_policy_decisions"] == []
     assert payload["recent_outbox_messages"] == []
     assert payload["recent_recovery_cases"] == []
+    assert payload["recent_lineage_remediations"] == []
     assert payload["recent_audit_events"] == []

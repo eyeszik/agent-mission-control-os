@@ -7,6 +7,7 @@ import {
   compensateAmbiguousRun,
   getProjectTrust,
   regenerateRunApproval,
+  reviseProtectedRunArtifact,
   replayOutboxMessage,
   resolveRecoveryCase,
   retryBlockedRun,
@@ -193,6 +194,21 @@ export function ConsequentialLifecyclePanel() {
     }
   };
 
+  const handleSimulateLineageChange = async () => {
+    if (!run?.run_id) return;
+    const key = 'lineage:simulate';
+    setBusyKey(key);
+    setError(null);
+    try {
+      const trustSnapshot = await reviseProtectedRunArtifact(run.run_id, 'e'.repeat(64));
+      setTrust(trustSnapshot);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to revise protected artifact');
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
   if (!activeRunId || !trust || !run) {
     return (
       <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-3 min-h-[300px]">
@@ -236,14 +252,19 @@ export function ConsequentialLifecyclePanel() {
   }));
 
   const staleApprovals = (run.approvals ?? []).filter((approval) => approval.status === 'stale');
+  const activeRunLineageRemediations = trust.recent_lineage_remediations.filter((item) => item.run_id === run.run_id);
   const retryableRecoveries = trust.recent_recovery_cases.filter(
     (recovery) =>
       recovery.status === 'OPEN' &&
       recovery.reason !== 'AMBIGUOUS_EXTERNAL_RESULT' &&
+      recovery.execution_ref === run.run_id &&
       run.status === 'failed'
   );
   const compensatableRecoveries = trust.recent_recovery_cases.filter(
-    (recovery) => recovery.status === 'OPEN' && recovery.reason === 'AMBIGUOUS_EXTERNAL_RESULT'
+    (recovery) =>
+      recovery.status === 'OPEN' &&
+      recovery.reason === 'AMBIGUOUS_EXTERNAL_RESULT' &&
+      recovery.execution_ref === run.run_id
   );
 
   return (
@@ -258,6 +279,43 @@ export function ConsequentialLifecyclePanel() {
         </div>
       )}
       <Section title="Approval Decisions" rows={approvalRows} />
+      <div className="flex flex-col gap-2">
+        <Section
+          title="Lineage Remediation Queue"
+          rows={[
+            { label: 'open queue', value: String(activeRunLineageRemediations.filter((item) => item.status === 'OPEN').length), tone: activeRunLineageRemediations.some((item) => item.status === 'OPEN') ? 'warn' : 'default' },
+            { label: 'resolved queue', value: String(activeRunLineageRemediations.filter((item) => item.status !== 'OPEN').length), tone: activeRunLineageRemediations.some((item) => item.status !== 'OPEN') ? 'success' : 'default' },
+          ]}
+        />
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleSimulateLineageChange}
+            disabled={busyKey === 'lineage:simulate'}
+            className="rounded-md border border-zinc-700/60 bg-zinc-900/70 px-2 py-1 text-[10px] font-mono text-zinc-200 disabled:opacity-50"
+          >
+            {busyKey === 'lineage:simulate' ? 'Working…' : 'Simulate protected artifact change'}
+          </button>
+        </div>
+        {activeRunLineageRemediations.slice(0, 3).map((item) => (
+          <div key={item.remediation_id} className="rounded-lg border border-zinc-800/50 bg-zinc-950/40 px-3 py-2 flex items-center justify-between gap-3">
+            <div className="flex flex-col">
+              <span className="text-[11px] font-mono text-zinc-300">{item.changed_version_ref}</span>
+              <span className="text-[10px] font-mono text-zinc-600">{item.artifact_id} · {item.status}</span>
+            </div>
+            {item.status === 'OPEN' && item.approval_id ? (
+              <button
+                type="button"
+                onClick={() => handleRegenerateApproval(item.approval_id ?? undefined)}
+                disabled={busyKey === `approval:${item.approval_id}`}
+                className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[10px] font-mono text-amber-300 disabled:opacity-50"
+              >
+                {busyKey === `approval:${item.approval_id}` ? 'Working…' : 'Regenerate approval'}
+              </button>
+            ) : null}
+          </div>
+        ))}
+      </div>
       <div className="flex flex-col gap-2">
         <Section
           title="Run Remediation"

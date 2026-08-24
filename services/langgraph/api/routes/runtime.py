@@ -8,10 +8,18 @@ from services.langgraph.agency.reliability.models import OutboxStatus, RecoveryS
 from services.langgraph.agency.reliability.outbox import OutboxDispatcher
 from services.langgraph.app.in_memory_queue import DuplicateOperationError, QueueFullError
 from services.langgraph.app.runtime_support import role_os_registry, runtime_queue, trust_kernel
+from services.langgraph.persistence.agency_kernel import (
+    create_artifact,
+    create_engagement,
+    get_artifact,
+    get_engagement,
+    record_artifact_revision,
+)
 from services.langgraph.persistence.approvals import bind_approval_subject, create_approval_request, get_approvals_for_run
 from services.langgraph.persistence.database import database_backend
 from services.langgraph.persistence.events import record_event
 from services.langgraph.persistence.idempotency import complete_idempotency, fail_idempotency, hash_payload, reserve_idempotency
+from services.langgraph.persistence.lineage import list_project_lineage_remediations, resolve_lineage_remediation_for_run
 from services.langgraph.persistence.runs import get_run_record, update_run_status
 from services.langgraph.security.auth import Principal, authorize_project, authorize_resource, get_principal
 
@@ -45,6 +53,10 @@ class RunCompensationRequest(BaseModel):
 
 class RegenerateApprovalRequest(BaseModel):
     approval_id: str | None = None
+
+
+class ProtectedArtifactRevisionRequest(BaseModel):
+    content_hash: str = Field(min_length=32, max_length=128)
 
 
 def _operator_scope(principal: Principal, project_id: str, target: str) -> str:
@@ -134,6 +146,7 @@ def _project_trust_details(project_id: str, tenant_id: str) -> dict:
         if case.tenant_id == tenant_id and case.project_id == project_id
     ]
     recovery_cases.sort(key=lambda item: (item["created_at"], item["recovery_id"]), reverse=True)
+    lineage_remediations = list_project_lineage_remediations(project_id, tenant_id, limit=12)
 
     audit_events = [
         audit.model_dump(mode="json")
@@ -149,9 +162,12 @@ def _project_trust_details(project_id: str, tenant_id: str) -> dict:
         "delivered_outbox": sum(1 for item in outbox_messages if item["status"] == OutboxStatus.DELIVERED.value),
         "failed_outbox": sum(1 for item in outbox_messages if item["status"] == OutboxStatus.FAILED.value),
         "resolved_recovery_cases": sum(1 for item in recovery_cases if item["status"] != RecoveryStatus.OPEN.value),
+        "open_lineage_remediations": sum(1 for item in lineage_remediations if item["status"] == "OPEN"),
+        "resolved_lineage_remediations": sum(1 for item in lineage_remediations if item["status"] != "OPEN"),
         "recent_policy_decisions": policy_decisions[:5],
         "recent_outbox_messages": outbox_messages[:5],
         "recent_recovery_cases": recovery_cases[:5],
+        "recent_lineage_remediations": lineage_remediations[:6],
         "recent_audit_events": audit_events[:8],
     }
 
@@ -224,6 +240,63 @@ def get_project_recovery(project_id: str, principal: Principal = Depends(get_pri
         return _project_trust_details(project_id, principal.tenant_id)["recent_recovery_cases"]
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"trust recovery unavailable: {type(exc).__name__}") from exc
+
+
+@router.post("/runs/{run_id}/artifacts/protected/revise")
+def revise_protected_run_artifact(
+    run_id: str,
+    body: ProtectedArtifactRevisionRequest,
+    principal: Principal = Depends(get_principal),
+):
+    record = _authorized_run(principal, run_id)
+    approvals = get_approvals_for_run(run_id)
+    approval = approvals[0] if approvals else None
+    engagement_id = f"eng-lineage-{run_id}"
+    artifact_id = f"art-protected-{run_id}"
+    if not get_engagement(engagement_id):
+        create_engagement(
+            engagement_id,
+            record["tenant_id"],
+            record["project_id"],
+            "Protected runtime artifact lineage",
+            "Synthetic protected artifact for runtime remediation coverage",
+            status="active",
+        )
+    if not get_artifact(artifact_id):
+        create_artifact(
+            artifact_id,
+            engagement_id,
+            record["tenant_id"],
+            record["project_id"],
+            "campaign_package",
+            "growth",
+            status="approved",
+            content_hash=body.content_hash,
+            metadata={
+                "protected_run_id": run_id,
+                "protected_approval_id": approval["approval_id"] if approval else None,
+                "synthetic_protected_artifact": True,
+            },
+        )
+    result = record_artifact_revision(artifact_id, content_hash=body.content_hash)
+    record_event(
+        run_id,
+        record["tenant_id"],
+        record["project_id"],
+        "artifact",
+        "artifact_generated",
+        safe_payload={
+            "artifact_id": artifact_id,
+            "changed_version_ref": result["changed_version_ref"],
+            "approval_id": approval["approval_id"] if approval else None,
+        },
+    )
+    return {
+        "artifact": result["artifact"],
+        "changed_version_ref": result["changed_version_ref"],
+        "affected": result["affected"],
+        "trust": _project_trust_details(record["project_id"], record["tenant_id"]),
+    }
 
 
 @router.post("/projects/{project_id}/trust/recovery/{recovery_id}/resolve")
@@ -488,6 +561,7 @@ def retry_run_from_recovery(
             "status": run_response["status"],
         },
     )
+    resolve_lineage_remediation_for_run(run_id, status="RETRIED")
     response = {
         "action": "retry_blocked_execution",
         "run": run_response,
@@ -761,6 +835,7 @@ def regenerate_run_approval(
             "status": "needs_approval",
         },
     )
+    resolve_lineage_remediation_for_run(run_id, approval_id=target["approval_id"], status="REGENERATED")
     run_payload = agency_routes.get_agency_run(run_id, principal=principal)
     response = {
         "action": "regenerate_approval",

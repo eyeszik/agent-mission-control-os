@@ -175,3 +175,22 @@ def get_approvals_for_run(run_id: str) -> list:
             (run_id,),
         ).fetchall()
         return [normalize_record(row) for row in rows]
+
+
+def list_approvals_for_subject_refs(project_id: str, subject_refs: list[str]) -> list[dict]:
+    refs = [ref for ref in subject_refs if ref]
+    if not refs:
+        return []
+    placeholders = ", ".join("?" for _ in refs)
+    with transaction() as db:
+        rows = db.execute(
+            f"""
+            SELECT * FROM {table('approvals')}
+            WHERE project_id = ?
+              AND subject_ref IN ({placeholders})
+              AND status <> 'stale'
+            ORDER BY created_at DESC
+            """,
+            [project_id, *refs],
+        ).fetchall()
+    return [normalize_record(row) for row in rows]

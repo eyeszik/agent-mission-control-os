@@ -530,6 +530,109 @@ def propagate_artifact_change(artifact_id: str) -> list[dict]:
     ]
 
 
+def record_artifact_revision(
+    artifact_id: str,
+    *,
+    content_hash: Optional[str] = None,
+    semantic_fingerprint: Optional[str] = None,
+    content_location: Optional[str] = None,
+) -> dict:
+    source = get_artifact(artifact_id)
+    if not source:
+        raise ValueError("Artifact not found")
+
+    next_version = int(source["version"]) + 1
+    changed_version_ref = f"{artifact_id}:v{next_version}"
+    now = _now()
+    with transaction(write=True) as db:
+        db.execute(
+            f"""
+            UPDATE {table('agency_artifacts')}
+            SET version = ?, status = ?, content_hash = COALESCE(?, content_hash),
+                semantic_fingerprint = COALESCE(?, semantic_fingerprint),
+                content_location = COALESCE(?, content_location),
+                updated_at = ?
+            WHERE artifact_id = ?
+            """,
+            (
+                next_version,
+                "draft",
+                content_hash,
+                semantic_fingerprint,
+                content_location,
+                now,
+                artifact_id,
+            ),
+        )
+
+    updated = get_artifact(artifact_id)
+    if updated is None:
+        raise RuntimeError("Artifact revision succeeded but record could not be read back")
+
+    affected = propagate_artifact_change(artifact_id)
+    impacted_ids = [artifact_id, *[item["artifact_id"] for item in affected]]
+
+    from services.langgraph.persistence.approvals import list_approvals_for_subject_refs, mark_approval_stale
+    from services.langgraph.persistence.lineage import create_lineage_remediation
+
+    approvals = list_approvals_for_subject_refs(updated["project_id"], impacted_ids)
+    approvals_by_subject = {approval["subject_ref"]: approval for approval in approvals}
+
+    for impacted_id in impacted_ids:
+        impacted = get_artifact(impacted_id)
+        if not impacted:
+            continue
+        metadata = impacted.get("metadata") or {}
+        approval = approvals_by_subject.get(impacted_id)
+        run_id = metadata.get("protected_run_id") or (approval or {}).get("run_id")
+        approval_id = metadata.get("protected_approval_id") or (approval or {}).get("approval_id")
+        if not run_id:
+            continue
+        if approval_id:
+            mark_approval_stale(
+                approval_id,
+                f"artifact_version_changed:{changed_version_ref}",
+            )
+        create_lineage_remediation(
+            tenant_id=updated["tenant_id"],
+            project_id=updated["project_id"],
+            run_id=run_id,
+            approval_id=approval_id,
+            artifact_id=impacted_id,
+            artifact_version_ref=f"{impacted_id}:v{impacted['version']}",
+            changed_artifact_id=artifact_id,
+            changed_version_ref=changed_version_ref,
+            reason="PROTECTED_ARTIFACT_VERSION_CHANGED",
+            payload={
+                "changed_artifact_id": artifact_id,
+                "changed_version_ref": changed_version_ref,
+                "affected_artifact_id": impacted_id,
+                "affected_artifact_status": impacted["status"],
+            },
+        )
+
+    _record_trust_policy(
+        decision_id=f"policy-artifact-revision-{artifact_id}-v{next_version}",
+        tenant_id=updated["tenant_id"],
+        project_id=updated["project_id"],
+        subject_ref=artifact_id,
+        action="artifact.record_revision",
+        target=changed_version_ref,
+        policy_input={
+            "artifact_id": artifact_id,
+            "version": next_version,
+            "content_hash": content_hash,
+            "semantic_fingerprint": semantic_fingerprint,
+            "affected_artifact_ids": impacted_ids,
+        },
+    )
+    return {
+        "artifact": updated,
+        "changed_version_ref": changed_version_ref,
+        "affected": affected,
+    }
+
+
 def _assert_engagement_scope(engagement_id: str, tenant_id: str, project_id: str) -> None:
     engagement = get_engagement(engagement_id)
     if not engagement:

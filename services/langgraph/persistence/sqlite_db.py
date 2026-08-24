@@ -400,6 +400,28 @@ _MIGRATIONS = [
         CREATE INDEX IF NOT EXISTS idx_completion_evaluations_run
           ON completion_evaluations(run_id, created_at DESC);
     """),
+    (9, """
+        CREATE TABLE IF NOT EXISTS lineage_remediation_queue (
+            remediation_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            approval_id TEXT,
+            artifact_id TEXT NOT NULL,
+            artifact_version_ref TEXT NOT NULL,
+            changed_artifact_id TEXT NOT NULL,
+            changed_version_ref TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('OPEN', 'REGENERATED', 'RETRIED', 'RESOLVED')),
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            resolved_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_lineage_remediation_project
+          ON lineage_remediation_queue(tenant_id, project_id, status, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_lineage_remediation_run
+          ON lineage_remediation_queue(run_id, status, created_at DESC);
+    """),
 ]
 
 
