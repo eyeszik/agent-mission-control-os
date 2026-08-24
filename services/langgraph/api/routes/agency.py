@@ -6,10 +6,12 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from services.langgraph.agency.kernel.lifecycle import TransitionContext, release_guard_failures
+from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffect
+from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.models import AgentRun
 from services.langgraph.persistence.analytics import emit_lifecycle_event
-from services.langgraph.persistence.approvals import get_approvals_for_run
+from services.langgraph.persistence.approvals import bind_approval_subject, get_approvals_for_run, mark_approval_stale
 from services.langgraph.persistence.events import record_event
 from services.langgraph.persistence.idempotency import (
     complete_idempotency,
@@ -63,6 +65,17 @@ def _agency_payload(state: dict) -> dict:
 
 def _safe_brief(req: CreateAgencyRunRequest) -> dict:
     return quarantine_payload(sanitize_deep(req.brief.model_dump()))
+
+
+def _agency_subject_hash(agency_data: dict) -> str:
+    return hash_payload(
+        {
+            "campaign_package": agency_data.get("campaign_package"),
+            "qa_report": agency_data.get("qa_report"),
+            "generation_provenance": agency_data.get("generation_provenance", []),
+            "degraded": bool(agency_data.get("degraded")),
+        }
+    )
 
 
 def _run_and_record_events(graph, input_state, config: dict, run: AgentRun) -> dict:
@@ -176,6 +189,26 @@ def create_agency_run(
         return replay
 
     run_id = str(uuid4())
+    trust = trust_kernel()
+    trust.bind_project(tenant_id=principal.tenant_id, project_id=req.project_id)
+    trust.record_policy_decision(
+        tenant_id=principal.tenant_id,
+        project_id=req.project_id,
+        decision_id=f"policy-agency-create-{run_id}",
+        subject_ref=run_id,
+        action="agency.create",
+        target="campaign_package",
+        policy_version="amc-trust/v1",
+        policy_input={"project_id": req.project_id, "brief": safe_brief},
+        effect=PolicyEffect.ALLOW,
+    )
+    trust.claim_idempotency(
+        tenant_id=principal.tenant_id,
+        project_id=req.project_id,
+        idempotency_key=idempotency_key,
+        operation_id=f"agency.create:{req.project_id}",
+        request={"project_id": req.project_id, "brief": safe_brief},
+    )
     now = datetime.now(timezone.utc)
     metadata = {"input_data": {"brief": safe_brief}}
     run = AgentRun(
@@ -218,11 +251,23 @@ def create_agency_run(
             run_id,
         )
         fail_idempotency(scope, idempotency_key, type(exc).__name__)
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id, status=IdempotencyStatus.FAILED)
         raise HTTPException(status_code=500, detail="Agency pipeline failed") from exc
 
     agency_data = _agency_payload(state)
     record = update_run_status(run_id, "needs_approval", {"agency": agency_data})
     run_approvals = get_approvals_for_run(run_id)
+    subject_hash = _agency_subject_hash(agency_data)
+    if run_approvals:
+        bind_approval_subject(
+            run_approvals[0]["approval_id"],
+            subject_hash=subject_hash,
+            subject_ref=run_id,
+            subject_version_ref=run_id,
+            authority_ref="human-review",
+            policy_version="amc-approval/v1",
+        )
+        run_approvals = get_approvals_for_run(run_id)
     release_blocked = bool((agency_data.get("qa_report") or {}).get("release_blocked"))
     emit_lifecycle_event(
         principal.tenant_id,
@@ -249,6 +294,7 @@ def create_agency_run(
     }
     if not complete_idempotency(scope, idempotency_key, response):
         raise HTTPException(status_code=500, detail="Failed to finalize idempotency record")
+    trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)
     return response
 
 
@@ -300,6 +346,7 @@ def resume_agency_run(
             "delivery": (record["result"] or {}).get("agency", {}).get("delivery"),
         }
         complete_idempotency(scope, idempotency_key, response)
+        trust_kernel().complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)
         return response
 
     if record["status"] != "needs_approval":
@@ -309,6 +356,19 @@ def resume_agency_run(
     stored_agency = (record.get("result") or {}).get("agency", {})
     run_approvals = get_approvals_for_run(run_id)
     latest = run_approvals[0] if run_approvals else None
+    current_subject_hash = _agency_subject_hash(stored_agency)
+    if latest and latest.get("subject_hash") and latest["subject_hash"] != current_subject_hash:
+        mark_approval_stale(latest["approval_id"], "run_result_hash_changed")
+        trust_kernel().open_recovery_case(
+            tenant_id=record["tenant_id"],
+            project_id=record["project_id"],
+            operation_id=f"agency.resume:{run_id}",
+            reason="OBSERVATION_MISMATCH",
+            observation_ref=run_id,
+            evidence_refs=(latest["subject_hash"], current_subject_hash),
+        )
+        fail_idempotency(scope, idempotency_key, "approval_stale")
+        raise HTTPException(status_code=409, detail="Approval is stale because the protected run output changed")
 
     # Delivery is gated by the declared N2 release guards rather than by ad-hoc
     # checks, so the transition matrix stays the single authority on what may
@@ -374,6 +434,7 @@ def resume_agency_run(
             run_id,
         )
         fail_idempotency(scope, idempotency_key, type(exc).__name__)
+        trust_kernel().complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id, status=IdempotencyStatus.FAILED)
         raise HTTPException(status_code=500, detail="Delivery failed") from exc
 
     agency_data = _agency_payload(state)
@@ -388,4 +449,5 @@ def resume_agency_run(
     response = {"run_id": run_id, "status": "completed", "delivery": agency_data.get("delivery")}
     if not complete_idempotency(scope, idempotency_key, response):
         raise HTTPException(status_code=500, detail="Failed to finalize idempotency record")
+    trust_kernel().complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)
     return response

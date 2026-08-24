@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "terminal_states": [
+    "COMPLETE",
+    "BLOCKED",
+    "ESCALATED",
+    "REJECTED"
+  ],
+  "non_terminal_status": [
+    "READY",
+    "ACTIVE",
+    "WAITING_DEPENDENCY",
+    "WAITING_APPROVAL",
+    "BLOCKED_MISSING_INPUT",
+    "BLOCKED_TOOL",
+    "BLOCKED_POLICY",
+    "VALIDATION_FAILED",
+    "RETRYING",
+    "REVISION_REQUIRED",
+    "PARTIAL",
+    "FAILED_SAFE"
+  ],
+  "legacy_state_mapping": {
+    "ESCALATE_HUMAN": "ESCALATED",
+    "FAILED_SAFE": "BLOCKED",
+    "PARTIAL": "BLOCKED"
+  }
+}

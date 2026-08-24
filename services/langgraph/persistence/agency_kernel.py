@@ -9,6 +9,7 @@ from services.langgraph.agency.kernel.ontology import (
     resolve_artifact_type,
     resolve_department,
 )
+from services.langgraph.agency.reliability import PolicyEffect, ProductionTrustKernel
 from services.langgraph.persistence.database import (
     decode_json,
     json_param,
@@ -16,6 +17,8 @@ from services.langgraph.persistence.database import (
     table,
     transaction,
 )
+from services.langgraph.persistence.idempotency import hash_payload
+from services.langgraph.persistence.trust_kernel import DatabaseReliabilityStore
 
 _JSON_FIELDS = {
     "engagements": ("constraints", "permissions", "metadata"),
@@ -43,6 +46,35 @@ def _get(entity: str, id_column: str, value: str) -> Optional[dict]:
     with transaction() as db:
         row = db.execute(f"SELECT * FROM {table(entity)} WHERE {id_column} = ?", (value,)).fetchone()
     return _row_to_record(row, entity) if row else None
+
+
+def _trust_kernel() -> ProductionTrustKernel:
+    return ProductionTrustKernel(DatabaseReliabilityStore())
+
+
+def _record_trust_policy(
+    *,
+    decision_id: str,
+    tenant_id: str,
+    project_id: str,
+    subject_ref: str,
+    action: str,
+    target: str,
+    policy_input: dict[str, Any],
+) -> None:
+    trust = _trust_kernel()
+    trust.bind_project(tenant_id=tenant_id, project_id=project_id)
+    trust.record_policy_decision(
+        tenant_id=tenant_id,
+        project_id=project_id,
+        decision_id=decision_id,
+        subject_ref=subject_ref,
+        action=action,
+        target=target,
+        policy_version="amc-trust/v1",
+        policy_input=policy_input,
+        effect=PolicyEffect.ALLOW,
+    )
 
 
 def create_engagement(
@@ -82,6 +114,15 @@ def create_engagement(
     record = get_engagement(engagement_id)
     if record is None:
         raise RuntimeError("Engagement insert succeeded but record could not be read back")
+    _record_trust_policy(
+        decision_id=f"policy-engagement-create-{engagement_id}",
+        tenant_id=tenant_id,
+        project_id=project_id,
+        subject_ref=engagement_id,
+        action="engagement.create",
+        target=status,
+        policy_input={"objective": objective, "desired_outcome": desired_outcome, "status": status},
+    )
     return record
 
 
@@ -148,6 +189,15 @@ def create_workstream(
     record = get_workstream(workstream_id)
     if record is None:
         raise RuntimeError("Workstream insert succeeded but record could not be read back")
+    _record_trust_policy(
+        decision_id=f"policy-workstream-create-{workstream_id}",
+        tenant_id=tenant_id,
+        project_id=project_id,
+        subject_ref=workstream_id,
+        action="workstream.create",
+        target=department,
+        policy_input={"engagement_id": engagement_id, "department": department, "status": status},
+    )
     return record
 
 
@@ -323,6 +373,23 @@ def create_artifact(
     record = get_artifact(artifact_id)
     if record is None:
         raise RuntimeError("Artifact insert succeeded but record could not be read back")
+    _record_trust_policy(
+        decision_id=f"policy-artifact-create-{artifact_id}-v{version}",
+        tenant_id=tenant_id,
+        project_id=project_id,
+        subject_ref=artifact_id,
+        action="artifact.create",
+        target=artifact_type,
+        policy_input={
+            "engagement_id": engagement_id,
+            "workstream_id": workstream_id,
+            "owner_department": owner_department,
+            "version": version,
+            "status": status,
+            "content_hash": content_hash,
+            "semantic_fingerprint": semantic_fingerprint,
+        },
+    )
     return record
 
 
@@ -367,6 +434,15 @@ def add_artifact_dependency(artifact_id: str, depends_on_artifact_id: str, relat
             f"INSERT INTO {table('artifact_dependencies')} (artifact_id, depends_on_artifact_id, relationship, created_at) VALUES (?, ?, ?, ?)",
             (artifact_id, depends_on_artifact_id, relationship, _now()),
         )
+    _record_trust_policy(
+        decision_id=f"policy-artifact-dependency-{artifact_id}-{depends_on_artifact_id}",
+        tenant_id=artifact["tenant_id"],
+        project_id=artifact["project_id"],
+        subject_ref=artifact_id,
+        action="artifact.add_dependency",
+        target=depends_on_artifact_id,
+        policy_input={"relationship": relationship, "engagement_id": artifact["engagement_id"]},
+    )
     return {
         "artifact_id": artifact_id,
         "depends_on_artifact_id": depends_on_artifact_id,
@@ -437,6 +513,16 @@ def propagate_artifact_change(artifact_id: str) -> list[dict]:
                 f"UPDATE {table('agency_artifacts')} SET status = ?, updated_at = ? WHERE artifact_id = ? AND engagement_id = ?",
                 (severity[dependent_id], now, dependent_id, source["engagement_id"]),
             )
+    if severity:
+        _record_trust_policy(
+            decision_id=f"policy-artifact-propagation-{artifact_id}-{hash_payload(severity)}",
+            tenant_id=source["tenant_id"],
+            project_id=source["project_id"],
+            subject_ref=artifact_id,
+            action="artifact.propagate_change",
+            target=source["status"],
+            policy_input={"affected": severity, "engagement_id": source["engagement_id"]},
+        )
 
     return [
         {"artifact_id": dependent_id, "status": severity[dependent_id]}

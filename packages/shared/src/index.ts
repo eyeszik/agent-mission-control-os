@@ -6,4 +6,5 @@ export * from './schemas/quality';
 export * from './schemas/agency';
 export * from './schemas/ontology';
 export * from './schemas/lifecycle';
+export * from './schemas/runtime';
 export * from './types';

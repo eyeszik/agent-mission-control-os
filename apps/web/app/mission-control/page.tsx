@@ -9,6 +9,7 @@ import { LiveStepProgressPanel } from "../../components/mission-control/LiveStep
 import { IntelligentResultsList } from "../../components/mission-control/IntelligentResultsList";
 import { ApprovalInbox } from "../../components/mission-control/ApprovalInbox";
 import { QualityScorePanel } from "../../components/mission-control/QualityScorePanel";
+import { TrustStatusPanel } from "../../components/mission-control/TrustStatusPanel";
 import { FileOrganizationPanel } from "../../components/mission-control/FileOrganizationPanel";
 import { ArtifactPreviewPanel } from "../../components/mission-control/ArtifactPreviewPanel";
 import { readSession } from "../../lib/auth/session";
@@ -34,6 +35,7 @@ export default function MissionControlPage() {
         <h1 className="text-zinc-100 font-medium tracking-tight">Mission Control</h1>
         <div className="flex items-center gap-3">
           <QualityScorePanel />
+          <TrustStatusPanel />
           <div className="h-6 w-px bg-zinc-800" />
           <ApprovalInbox />
           {productionAuth && <button type="button" onClick={() => { signOut(); router.replace('/login'); }} className="text-xs text-zinc-400 hover:text-zinc-100">Sign out</button>}

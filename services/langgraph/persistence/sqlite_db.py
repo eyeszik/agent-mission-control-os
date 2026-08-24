@@ -149,7 +149,211 @@ _MIGRATIONS = [
         );
         CREATE INDEX IF NOT EXISTS idx_artifact_dependencies_upstream ON artifact_dependencies (depends_on_artifact_id, artifact_id);
     """),
+    (6, """
+        CREATE TABLE IF NOT EXISTS reliability_meta(
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS reliability_bindings(
+            project_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS reliability_policy_decisions(
+            decision_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_reliability_policy_project
+          ON reliability_policy_decisions(tenant_id, project_id);
+
+        CREATE TABLE IF NOT EXISTS reliability_idempotency(
+            idempotency_key TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            request_hash TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_reliability_idem_project
+          ON reliability_idempotency(tenant_id, project_id);
+
+        CREATE TABLE IF NOT EXISTS reliability_outbox(
+            message_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            status TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_reliability_outbox_pending
+          ON reliability_outbox(tenant_id, project_id, status);
+
+        CREATE TABLE IF NOT EXISTS reliability_audit_chain(
+            seq INTEGER PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            checkpoint_hash TEXT NOT NULL UNIQUE,
+            payload TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_reliability_audit_project
+          ON reliability_audit_chain(tenant_id, project_id, seq);
+
+        CREATE TABLE IF NOT EXISTS reliability_recovery(
+            recovery_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            status TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_reliability_recovery_open
+          ON reliability_recovery(tenant_id, project_id, status);
+
+        INSERT OR REPLACE INTO reliability_meta(key,value)
+        VALUES('schema_version','1');
+    """),
+    (7, """
+        CREATE TABLE IF NOT EXISTS approvals (
+            approval_id TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            confidence REAL,
+            status TEXT DEFAULT 'pending',
+            reviewer TEXT,
+            decision TEXT,
+            created_at TEXT NOT NULL,
+            decided_at TEXT,
+            subject_type TEXT,
+            subject_ref TEXT,
+            subject_version_ref TEXT,
+            subject_hash TEXT,
+            authority_ref TEXT,
+            policy_version TEXT,
+            stale_reason TEXT,
+            staled_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_approvals_tenant_status ON approvals (tenant_id, status);
+        CREATE INDEX IF NOT EXISTS idx_approvals_run_created ON approvals (run_id, created_at DESC);
+
+        CREATE TABLE IF NOT EXISTS tenant_project_bindings (
+            project_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            status TEXT NOT NULL,
+            binding_hash TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            revoked_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_tenant_project_bindings_tenant
+          ON tenant_project_bindings(tenant_id, status);
+
+        CREATE TABLE IF NOT EXISTS policy_decision_records (
+            decision_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            subject_ref TEXT NOT NULL,
+            action TEXT NOT NULL,
+            target TEXT NOT NULL,
+            policy_version TEXT NOT NULL,
+            input_hash TEXT NOT NULL,
+            effect TEXT NOT NULL,
+            required_authority_refs TEXT NOT NULL,
+            evidence_refs TEXT NOT NULL,
+            decision_hash TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            decided_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_policy_decisions_project
+          ON policy_decision_records(tenant_id, project_id, decided_at DESC);
+
+        CREATE TABLE IF NOT EXISTS trust_idempotency_records (
+            idempotency_key TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            operation_id TEXT NOT NULL,
+            request_hash TEXT NOT NULL,
+            status TEXT NOT NULL,
+            result_ref TEXT,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_trust_idempotency_project
+          ON trust_idempotency_records(tenant_id, project_id, updated_at DESC);
+
+        CREATE TABLE IF NOT EXISTS outbox_messages (
+            message_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            topic TEXT NOT NULL,
+            payload_hash TEXT NOT NULL,
+            payload_ref TEXT NOT NULL,
+            idempotency_key TEXT NOT NULL,
+            status TEXT NOT NULL,
+            attempts INTEGER NOT NULL,
+            claimed_by TEXT,
+            next_attempt_at TEXT,
+            delivered_at TEXT,
+            last_error TEXT,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_outbox_messages_project
+          ON outbox_messages(tenant_id, project_id, status, created_at);
+
+        CREATE TABLE IF NOT EXISTS audit_checkpoints (
+            seq INTEGER PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            object_ref TEXT NOT NULL,
+            payload_hash TEXT NOT NULL,
+            previous_hash TEXT NOT NULL,
+            checkpoint_hash TEXT NOT NULL UNIQUE,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_audit_checkpoints_project
+          ON audit_checkpoints(tenant_id, project_id, seq);
+
+        CREATE TABLE IF NOT EXISTS recovery_cases (
+            recovery_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            operation_id TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            execution_ref TEXT,
+            observation_ref TEXT,
+            idempotency_key TEXT,
+            status TEXT NOT NULL,
+            evidence_refs TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            resolved_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_recovery_cases_project
+          ON recovery_cases(tenant_id, project_id, status, created_at DESC);
+    """),
 ]
+
+
+def _ensure_approval_columns(conn: sqlite3.Connection) -> None:
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(approvals)").fetchall()}
+    for name in (
+        "subject_type",
+        "subject_ref",
+        "subject_version_ref",
+        "subject_hash",
+        "authority_ref",
+        "policy_version",
+        "stale_reason",
+        "staled_at",
+    ):
+        if name not in columns:
+            conn.execute(f"ALTER TABLE approvals ADD COLUMN {name} TEXT")
 
 
 def init_db() -> None:
@@ -163,6 +367,7 @@ def init_db() -> None:
                 continue
             conn.executescript(script)
             conn.execute("INSERT INTO schema_migrations (version) VALUES (?)", (version,))
+        _ensure_approval_columns(conn)
         conn.commit()
 
 

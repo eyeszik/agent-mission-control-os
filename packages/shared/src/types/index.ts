@@ -16,3 +16,4 @@ export type {
   AgencyRunStatus,
   AgencyRun,
 } from '../schemas/agency';
+export type { RoleOSManifest, TrustSnapshot } from '../schemas/runtime';
