@@ -7,6 +7,7 @@ import { getProjectTrust } from '../../lib/api/runtime';
 import { useRunStore } from '../../lib/stores/runStore';
 
 type RowTone = 'default' | 'success' | 'warn' | 'danger';
+const POLL_INTERVAL_MS = 4000;
 
 function Section({
   title,
@@ -58,10 +59,26 @@ export function ConsequentialLifecyclePanel() {
       setTrust(null);
       return;
     }
-    getAgencyRun(activeRunId).then(setRun).catch(() => {
-      setRun(null);
-      setTrust(null);
-    });
+    let cancelled = false;
+
+    const poll = async () => {
+      try {
+        const value = await getAgencyRun(activeRunId);
+        if (!cancelled) setRun(value);
+      } catch {
+        if (!cancelled) {
+          setRun(null);
+          setTrust(null);
+        }
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [activeRunId]);
 
   useEffect(() => {
@@ -69,7 +86,23 @@ export function ConsequentialLifecyclePanel() {
       setTrust(null);
       return;
     }
-    getProjectTrust(run.project_id).then(setTrust).catch(() => setTrust(null));
+    let cancelled = false;
+
+    const poll = async () => {
+      try {
+        const value = await getProjectTrust(run.project_id!);
+        if (!cancelled) setTrust(value);
+      } catch {
+        if (!cancelled) setTrust(null);
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [run?.project_id]);
 
   if (!activeRunId || !trust) {

@@ -6,6 +6,8 @@ import { getAgencyRun } from '../../lib/api/agency';
 import { getProjectTrust, getRoleOSManifest } from '../../lib/api/runtime';
 import { useRunStore } from '../../lib/stores/runStore';
 
+const POLL_INTERVAL_MS = 4000;
+
 export function TrustStatusPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const [manifest, setManifest] = useState<RoleOSManifest | null>(null);
@@ -22,7 +24,23 @@ export function TrustStatusPanel() {
       setTrust(null);
       return;
     }
-    getAgencyRun(activeRunId).then(setRun).catch(() => setRun(null));
+    let cancelled = false;
+
+    const poll = async () => {
+      try {
+        const value = await getAgencyRun(activeRunId);
+        if (!cancelled) setRun(value);
+      } catch {
+        if (!cancelled) setRun(null);
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [activeRunId]);
 
   useEffect(() => {
@@ -30,7 +48,23 @@ export function TrustStatusPanel() {
       setTrust(null);
       return;
     }
-    getProjectTrust(run.project_id).then(setTrust).catch(() => setTrust(null));
+    let cancelled = false;
+
+    const poll = async () => {
+      try {
+        const value = await getProjectTrust(run.project_id!);
+        if (!cancelled) setTrust(value);
+      } catch {
+        if (!cancelled) setTrust(null);
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [run?.project_id]);
 
   return (
