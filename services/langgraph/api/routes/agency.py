@@ -116,7 +116,8 @@ def _ensure_protected_run_artifact(
             "Canonical protected artifact for HITL lineage invalidation",
             status="active",
         )
-    if not get_artifact(artifact_id):
+    artifact = get_artifact(artifact_id)
+    if not artifact:
         create_artifact(
             artifact_id,
             engagement_id,
@@ -132,7 +133,15 @@ def _ensure_protected_run_artifact(
                 "canonical_protected_artifact": True,
             },
         )
-    return artifact_id, f"{artifact_id}:v1"
+        artifact = get_artifact(artifact_id)
+    elif artifact.get("content_hash") != subject_hash:
+        from services.langgraph.persistence.agency_kernel import record_artifact_revision
+
+        revised = record_artifact_revision(artifact_id, content_hash=subject_hash)
+        artifact = revised["artifact"]
+    if not artifact:
+        raise RuntimeError("Protected run artifact could not be materialized")
+    return artifact_id, f"{artifact_id}:v{artifact['version']}"
 
 
 def _project_snapshot_hash(*, run_id: str, project_id: str, phase: str, status: str, subject_hash: str | None = None) -> str:

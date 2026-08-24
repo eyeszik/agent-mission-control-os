@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Optional
 
+from services.langgraph.persistence.idempotency import hash_payload
 from services.langgraph.persistence.database import (
     decode_json,
     is_postgres,
@@ -50,6 +51,75 @@ def _row_to_record(row) -> dict:
     return record
 
 
+def _agency_subject_hash(result: Optional[dict]) -> Optional[str]:
+    agency = (result or {}).get("agency")
+    if not isinstance(agency, dict) or not agency.get("campaign_package"):
+        return None
+    return hash_payload(
+        {
+            "campaign_package": agency.get("campaign_package"),
+            "qa_report": agency.get("qa_report"),
+            "generation_provenance": agency.get("generation_provenance", []),
+            "degraded": bool(agency.get("degraded")),
+        }
+    )
+
+
+def _sync_protected_run_artifact(run_id: str, tenant_id: str, project_id: str, result: Optional[dict]) -> None:
+    subject_hash = _agency_subject_hash(result)
+    if subject_hash is None:
+        return
+
+    from services.langgraph.persistence.agency_kernel import (
+        create_artifact,
+        create_engagement,
+        get_artifact,
+        get_engagement,
+        record_artifact_revision,
+    )
+    from services.langgraph.persistence.approvals import get_approvals_for_run
+
+    engagement_id = f"eng-lineage-{run_id}"
+    artifact_id = f"art-protected-{run_id}"
+    approvals = get_approvals_for_run(run_id)
+    approval = approvals[0] if approvals else None
+
+    if not get_engagement(engagement_id):
+        create_engagement(
+            engagement_id,
+            tenant_id,
+            project_id,
+            "Protected runtime artifact lineage",
+            "Canonical protected artifact for ambient lineage invalidation",
+            status="active",
+        )
+
+    artifact = get_artifact(artifact_id)
+    if artifact is None:
+        create_artifact(
+            artifact_id,
+            engagement_id,
+            tenant_id,
+            project_id,
+            "campaign_package",
+            "growth",
+            status="approved",
+            content_hash=subject_hash,
+            metadata={
+                "protected_run_id": run_id,
+                "protected_approval_id": approval["approval_id"] if approval else None,
+                "canonical_protected_artifact": True,
+                "ambient_revision_source": "run_result_commit",
+            },
+        )
+        return
+
+    if artifact.get("content_hash") == subject_hash:
+        return
+
+    record_artifact_revision(artifact_id, content_hash=subject_hash)
+
+
 def create_run_record(run_id: str, tenant_id: str, project_id: str, pipeline: str, status: str, metadata: dict) -> dict:
     now = _now()
     with transaction(write=True) as db:
@@ -71,8 +141,17 @@ def get_run_record(run_id: str) -> Optional[dict]:
 
 def update_run_status(run_id: str, status: str, result: Optional[dict] = None) -> Optional[dict]:
     now = _now()
+    tenant_id: Optional[str] = None
+    project_id: Optional[str] = None
     with transaction(write=True) as db:
         if result is not None:
+            current = db.execute(
+                f"SELECT tenant_id, project_id FROM {table('runs')} WHERE run_id = ?",
+                (run_id,),
+            ).fetchone()
+            if current:
+                tenant_id = current["tenant_id"]
+                project_id = current["project_id"]
             db.execute(
                 f"UPDATE {table('runs')} SET status = ?, result = ?, updated_at = ? WHERE run_id = ?",
                 (status, json_param(result), now, run_id),
@@ -82,11 +161,17 @@ def update_run_status(run_id: str, status: str, result: Optional[dict] = None) -
                 f"UPDATE {table('runs')} SET status = ?, updated_at = ? WHERE run_id = ?",
                 (status, now, run_id),
             )
-    return get_run_record(run_id)
+    record = get_run_record(run_id)
+    if result is not None and tenant_id and project_id:
+        _sync_protected_run_artifact(run_id, tenant_id, project_id, result)
+        record = get_run_record(run_id)
+    return record
 
 
 def compare_and_set_run_status(run_id: str, expected_status: str, new_status: str, result: Optional[dict] = None) -> bool:
     now = _now()
+    tenant_id: Optional[str] = None
+    project_id: Optional[str] = None
     with transaction(write=True) as db:
         if result is None:
             cursor = db.execute(
@@ -94,11 +179,21 @@ def compare_and_set_run_status(run_id: str, expected_status: str, new_status: st
                 (new_status, now, run_id, expected_status),
             )
         else:
+            current = db.execute(
+                f"SELECT tenant_id, project_id FROM {table('runs')} WHERE run_id = ? AND status = ?",
+                (run_id, expected_status),
+            ).fetchone()
+            if current:
+                tenant_id = current["tenant_id"]
+                project_id = current["project_id"]
             cursor = db.execute(
                 f"UPDATE {table('runs')} SET status = ?, result = ?, updated_at = ? WHERE run_id = ? AND status = ?",
                 (new_status, json_param(result), now, run_id, expected_status),
             )
-        return cursor.rowcount == 1
+        changed = cursor.rowcount == 1
+    if changed and result is not None and tenant_id and project_id:
+        _sync_protected_run_artifact(run_id, tenant_id, project_id, result)
+    return changed
 
 
 def list_runs(tenant_id: Optional[str] = None, pipeline: Optional[str] = None, limit: int = 200) -> list:
