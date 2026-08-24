@@ -34,7 +34,7 @@ def _confidence() -> dict:
 
 def test_agency_kernel_persists_and_selectively_invalidates():
     sqlite_db, kernel = _kernel()
-    assert sqlite_db.current_schema_version() == 7
+    assert sqlite_db.current_schema_version() == 8
 
     engagement_id = _id("eng")
     workstream_id = _id("ws-strategy")

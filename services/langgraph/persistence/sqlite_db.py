@@ -337,6 +337,69 @@ _MIGRATIONS = [
         CREATE INDEX IF NOT EXISTS idx_recovery_cases_project
           ON recovery_cases(tenant_id, project_id, status, created_at DESC);
     """),
+    (8, """
+        CREATE TABLE IF NOT EXISTS execution_receipts (
+            operation_id TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            work_order_id TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            started_at TEXT NOT NULL,
+            ended_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_execution_receipts_run
+          ON execution_receipts(run_id, started_at);
+
+        CREATE TABLE IF NOT EXISTS observation_receipts (
+            operation_id TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            observed_at TEXT NOT NULL,
+            matches INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_observation_receipts_run
+          ON observation_receipts(run_id, observed_at);
+
+        CREATE TABLE IF NOT EXISTS dispatch_permits (
+            permit_id TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            work_order_id TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            issued_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_dispatch_permits_run
+          ON dispatch_permits(run_id, issued_at);
+
+        CREATE TABLE IF NOT EXISTS failure_fingerprints (
+            fingerprint TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            operation_id TEXT NOT NULL,
+            payload TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_failure_fingerprints_run
+          ON failure_fingerprints(run_id, operation_id);
+
+        CREATE TABLE IF NOT EXISTS completion_evaluations (
+            evaluation_id TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            terminal_candidate TEXT NOT NULL,
+            proof_coverage REAL NOT NULL,
+            confidence REAL NOT NULL,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_completion_evaluations_run
+          ON completion_evaluations(run_id, created_at DESC);
+    """),
 ]
 
 

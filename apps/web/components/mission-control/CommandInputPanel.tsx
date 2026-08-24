@@ -16,6 +16,7 @@ export function CommandInputPanel() {
   const [error, setError] = useState<string | null>(null);
 
   const setActiveRun = useRunStore((state) => state.setActiveRun);
+  const upsertRun = useRunStore((state) => state.upsertRun);
   const addArtifact = useArtifactStore((state) => state.addArtifact);
   const upsertApproval = useApprovalStore((state) => state.upsertApproval);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
@@ -37,6 +38,15 @@ export function CommandInputPanel() {
         generateIdempotencyKey()
       );
 
+      upsertRun({
+        id: run.run_id,
+        tenant_id: 'tenant_1',
+        project_id: run.project_id ?? 'proj_1',
+        status: run.status === 'needs_approval' ? 'needs_approval' : 'running',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        metadata: { proof: run.proof ?? null },
+      });
       setActiveRun(run.run_id);
       for (const stage of run.stages ?? []) {
         if (stage === 'delivery') break;

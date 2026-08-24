@@ -108,8 +108,110 @@ export const AgencyRunStatusSchema = z.enum([
   'failed',
 ]);
 
+export const DispatchPermitSchema = z.object({
+  run_id: z.string().uuid(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  permit_id: z.string(),
+  work_order_id: z.string(),
+  project_snapshot_hash: z.string().regex(/^[a-f0-9]{64}$/),
+  causal_epoch: z.number().int().nonnegative(),
+  dependency_version_refs: z.array(z.string()).default([]),
+  authority_refs: z.array(z.string()).default([]),
+  approval_refs: z.array(z.string()).default([]),
+  tool_contract_refs: z.array(z.string()).default([]),
+  eligibility_policy_version: z.string(),
+  issued_at: z.string().datetime({ offset: true }),
+});
+
+export const ExecutionReceiptSchema = z.object({
+  run_id: z.string().uuid(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  operation_id: z.string(),
+  work_order_id: z.string(),
+  actor_role_id: z.string(),
+  tool: z.string(),
+  tool_contract_ref: z.string(),
+  args_hash: z.string().regex(/^[a-f0-9]{64}$/),
+  target: z.string(),
+  idempotency_key: z.string(),
+  attempt: z.number().int().min(1).max(3),
+  started_at: z.string().datetime({ offset: true }),
+  ended_at: z.string().datetime({ offset: true }),
+  returned_state: z.string(),
+  result_ref: z.string().nullable().optional(),
+});
+
+export const ObservationReceiptSchema = z.object({
+  run_id: z.string().uuid(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  operation_id: z.string(),
+  target: z.string(),
+  expected_postcondition: z.record(z.unknown()),
+  observed_postcondition: z.record(z.unknown()),
+  observation_method: z.string(),
+  evidence_refs: z.array(z.string()).default([]),
+  observed_at: z.string().datetime({ offset: true }),
+  matches: z.boolean(),
+});
+
+export const FailureFingerprintSchema = z.object({
+  run_id: z.string().uuid(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  operation_id: z.string(),
+  fingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  failure_class: z.string(),
+  causal_node: z.string(),
+  work_order_input_hash: z.string().regex(/^[a-f0-9]{64}$/),
+  dependency_snapshot_hash: z.string().regex(/^[a-f0-9]{64}$/),
+  tool_contract_hash: z.string().regex(/^[a-f0-9]{64}$/),
+  environment_signature: z.string(),
+  error_class: z.string(),
+  error_code: z.string().nullable().optional(),
+  observed_postcondition: z.unknown().optional(),
+});
+
+export const CompletionCriterionResultSchema = z.object({
+  criterion_ref: z.string(),
+  status: z.enum(['SATISFIED', 'UNSATISFIED', 'STALE', 'BLOCKED', 'NOT_APPLICABLE']),
+  missing_refs: z.array(z.string()).default([]),
+  stale_refs: z.array(z.string()).default([]),
+});
+
+export const CompletionEvaluationSchema = z.object({
+  terminal_candidate: z.enum(['COMPLETE', 'BLOCKED']),
+  criteria: z.array(CompletionCriterionResultSchema),
+  proof_coverage: z.number().min(0).max(1),
+  evidence_score: z.number().min(0).max(1),
+  quality_score: z.number().min(0).max(1),
+  confidence: z.number().min(0).max(1),
+});
+
+export const ProofSummarySchema = z.object({
+  dispatch_count: z.number().int().nonnegative(),
+  execution_count: z.number().int().nonnegative(),
+  observation_count: z.number().int().nonnegative(),
+  matched_observation_count: z.number().int().nonnegative(),
+  failure_count: z.number().int().nonnegative(),
+  latest_terminal_candidate: z.enum(['COMPLETE', 'BLOCKED']).nullable().optional(),
+  latest_confidence: z.number().min(0).max(1).nullable().optional(),
+});
+
+export const RunProofSchema = z.object({
+  dispatch_permits: z.array(DispatchPermitSchema),
+  execution_receipts: z.array(ExecutionReceiptSchema),
+  observation_receipts: z.array(ObservationReceiptSchema),
+  failure_fingerprints: z.array(FailureFingerprintSchema),
+  completion_evaluation: CompletionEvaluationSchema.nullable().optional(),
+  summary: ProofSummarySchema,
+});
+
 export const AgencyRunSchema = z.object({
   run_id: z.string().uuid(),
+  project_id: z.string().optional(),
   status: AgencyRunStatusSchema,
   pipeline: z.literal('branding_marketing_agency').optional(),
   stages: z.array(AgencyPipelineStageSchema).optional(),
@@ -129,6 +231,7 @@ export const AgencyRunSchema = z.object({
     })
     .nullable()
     .optional(),
+  proof: RunProofSchema.optional(),
 });
 
 export type AgencyPipelineStage = z.infer<typeof AgencyPipelineStageSchema>;
@@ -142,3 +245,4 @@ export type CampaignPackage = z.infer<typeof CampaignPackageSchema>;
 export type GenerationProvenance = z.infer<typeof GenerationProvenanceSchema>;
 export type AgencyRunStatus = z.infer<typeof AgencyRunStatusSchema>;
 export type AgencyRun = z.infer<typeof AgencyRunSchema>;
+export type RunProof = z.infer<typeof RunProofSchema>;

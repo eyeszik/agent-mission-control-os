@@ -70,7 +70,7 @@
     },
     {
       "path": "packages/shared/src/schemas/agency.ts",
-      "git_blob_sha": "8349cf164f26a87246bb4534d8183ecbbc3fe745"
+      "git_blob_sha": "f47f9573c13083e109ccd9d487a66dafb95d130a"
     },
     {
       "path": "packages/shared/src/schemas/approvals.ts",
@@ -138,7 +138,7 @@
     },
     {
       "path": "services/langgraph/api/routes/agency.py",
-      "git_blob_sha": "b19e68a16a201265809bb49fe48e4f03b03650cd"
+      "git_blob_sha": "2ea383223ceb7de0cdcc9b0e5e110f889affe716"
     },
     {
       "path": "services/langgraph/api/routes/analytics.py",
@@ -202,7 +202,7 @@
     },
     {
       "path": "services/langgraph/persistence/sqlite_db.py",
-      "git_blob_sha": "b9f4132fec00fe52106860b95685f418ca3845b7"
+      "git_blob_sha": "c9c185ee2f6d86f8718560f89b1b216a7c75d7df"
     },
     {
       "path": "services/langgraph/persistence/trust_kernel.py",
@@ -218,7 +218,7 @@
     },
     {
       "path": "services/langgraph/tests/test_agency_kernel.py",
-      "git_blob_sha": "c849b7a23a16b12f7d82bfa5d0f73054ba8bedf6"
+      "git_blob_sha": "e8b5d16d558f89817aed51953098f1e299c7b12a"
     },
     {
       "path": "services/langgraph/tests/test_agency_ontology.py",
