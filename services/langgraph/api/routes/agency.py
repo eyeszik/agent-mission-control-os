@@ -445,6 +445,15 @@ def create_agency_run(
             criteria=[CompletionCriterionResult(criterion_ref="execution", status=CriterionStatus.BLOCKED)],
         )
         update_run_status(run_id, "failed", {"error": type(exc).__name__})
+        trust.open_recovery_case(
+            tenant_id=run.tenant_id,
+            project_id=run.project_id,
+            operation_id=f"agency.create:{run_id}",
+            reason="EXECUTION_WITHOUT_OBSERVATION",
+            execution_ref=run_id,
+            idempotency_key=idempotency_key,
+            evidence_refs=(type(exc).__name__,),
+        )
         record_event(run_id, run.tenant_id, run.project_id, "pipeline", "node_error", safe_payload={"error_class": type(exc).__name__})
         emit_lifecycle_event(
             run.tenant_id,
@@ -580,7 +589,8 @@ def resume_agency_run(
     replay = _reserve_or_replay(scope, idempotency_key, hash_payload({"run_id": run_id}))
     if replay is not None:
         return replay
-    trust_kernel().claim_idempotency(
+    trust = trust_kernel()
+    trust.claim_idempotency(
         tenant_id=record["tenant_id"],
         project_id=record["project_id"],
         idempotency_key=idempotency_key,
@@ -596,7 +606,7 @@ def resume_agency_run(
             "delivery": (record["result"] or {}).get("agency", {}).get("delivery"),
         }
         complete_idempotency(scope, idempotency_key, response)
-        trust_kernel().complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)
         return response
 
     if record["status"] != "needs_approval":
@@ -640,6 +650,20 @@ def resume_agency_run(
             )
         fail_idempotency(scope, idempotency_key, blocker.code)
         raise HTTPException(status_code=409, detail=_DELIVERY_BLOCK_DETAIL[blocker.code](latest))
+
+    trust.record_policy_decision(
+        tenant_id=record["tenant_id"],
+        project_id=record["project_id"],
+        decision_id=f"policy-agency-resume-{run_id}-{idempotency_key}",
+        subject_ref=run_id,
+        action="agency.resume",
+        target="delivery",
+        policy_version="amc-trust/v1",
+        policy_input={"run_id": run_id, "approval_id": latest["approval_id"] if latest else None},
+        effect=PolicyEffect.ALLOW,
+        required_authority_refs=("human-review",),
+        evidence_refs=(latest["approval_id"],) if latest else (),
+    )
 
     if not compare_and_set_run_status(run_id, "needs_approval", "delivering"):
         fail_idempotency(scope, idempotency_key, "resume_race_lost")
@@ -705,6 +729,15 @@ def resume_agency_run(
             args_payload={"run_id": run_id, "approval_id": latest["approval_id"] if latest else None},
             error_class=type(exc).__name__,
         )
+        trust.open_recovery_case(
+            tenant_id=record["tenant_id"],
+            project_id=record["project_id"],
+            operation_id=f"agency.resume:{run_id}",
+            reason="EXECUTION_WITHOUT_OBSERVATION",
+            execution_ref=run_id,
+            idempotency_key=idempotency_key,
+            evidence_refs=(type(exc).__name__,),
+        )
         update_run_status(run_id, "failed", {"error": type(exc).__name__})
         record_event(run_id, record["tenant_id"], record["project_id"], "delivery", "node_error", safe_payload={"error_class": type(exc).__name__})
         emit_lifecycle_event(
@@ -715,7 +748,7 @@ def resume_agency_run(
             run_id,
         )
         fail_idempotency(scope, idempotency_key, type(exc).__name__)
-        trust_kernel().complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id, status=IdempotencyStatus.FAILED)
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id, status=IdempotencyStatus.FAILED)
         raise HTTPException(status_code=500, detail="Delivery failed") from exc
 
     ended_at = datetime.now(timezone.utc)
@@ -749,6 +782,22 @@ def resume_agency_run(
         {"pipeline": record["pipeline"], "status": "completed"},
         run_id,
     )
+    outbox_message = trust.enqueue_outbox(
+        tenant_id=record["tenant_id"],
+        project_id=record["project_id"],
+        message_id=f"outbox-delivery-{run_id}",
+        topic="agency.delivery.completed",
+        payload={
+            "run_id": run_id,
+            "approval_id": latest["approval_id"] if latest else None,
+            "delivery": agency_data.get("delivery"),
+            "status": "completed",
+        },
+        payload_ref=run_id,
+        idempotency_key=idempotency_key,
+    )
+    trust.claim_outbox(message_id=outbox_message.message_id, worker_id="agency.resume")
+    trust.mark_outbox_delivered(message_id=outbox_message.message_id)
     response = {"run_id": run_id, "status": "completed", "delivery": agency_data.get("delivery")}
     response["project_id"] = record["project_id"]
     if not complete_idempotency(scope, idempotency_key, response):
@@ -766,6 +815,6 @@ def resume_agency_run(
             CompletionCriterionResult(criterion_ref="approval", status=CriterionStatus.SATISFIED),
         ],
     )
-    trust_kernel().complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)
+    trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)
     response["proof"] = get_run_proof_bundle(run_id)
     return response

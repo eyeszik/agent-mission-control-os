@@ -170,3 +170,14 @@ def test_create_and_resume_agency_run_emits_proof_bundle(monkeypatch):
     assert resumed["proof"]["summary"]["observation_count"] == 2
     assert resumed["proof"]["summary"]["failure_count"] == 0
     assert resumed["proof"]["summary"]["latest_terminal_candidate"] == "COMPLETE"
+
+    trust = client.get(f"/runtime/projects/{created['project_id']}/trust")
+    assert trust.status_code == 200
+    trust_payload = trust.json()
+    assert trust_payload["policy_decisions"] >= 3
+    assert trust_payload["delivered_outbox"] == 1
+    assert trust_payload["pending_outbox"] == 0
+    assert trust_payload["open_recovery_cases"] == 0
+    assert trust_payload["recent_policy_decisions"][0]["action"] in {"agency.resume", "approval.decide"}
+    assert trust_payload["recent_outbox_messages"][0]["topic"] == "agency.delivery.completed"
+    assert trust_payload["recent_outbox_messages"][0]["status"] == "DELIVERED"

@@ -53,6 +53,13 @@ export function TrustStatusPanel() {
           {run?.proof ? `${run.proof.summary.execution_count}/${run.proof.summary.observation_count}/${run.proof.summary.failure_count}` : 'no-run'}
         </div>
       </div>
+      {trust && (
+        <div className="hidden lg:flex items-center gap-3 text-[10px] font-mono text-zinc-400">
+          <span>approval={trust.recent_policy_decisions[0]?.target ?? 'n/a'}</span>
+          <span>outbox={trust.delivered_outbox}/{trust.failed_outbox}</span>
+          <span>recovery={trust.open_recovery_cases}/{trust.resolved_recovery_cases}</span>
+        </div>
+      )}
     </div>
   );
 }
