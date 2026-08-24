@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AgencyRunSchema } from './agency';
 
 export const RoleOSManifestSchema = z.object({
   tenant_id: z.string(),
@@ -80,6 +81,19 @@ export const OutboxReplayResponseSchema = z.object({
   error: z.string().nullable().optional(),
 });
 
+export const RunRemediationActionSchema = z.enum([
+  'retry_blocked_execution',
+  'compensate_ambiguous_result',
+  'regenerate_approval',
+]);
+
+export const RunRemediationResponseSchema = z.object({
+  action: RunRemediationActionSchema,
+  run: AgencyRunSchema,
+  recovery_case: RecoveryCaseSummarySchema.nullable().optional(),
+  pending_approval: z.record(z.unknown()).nullable().optional(),
+});
+
 export const TrustSnapshotSchema = z.object({
   tenant_id: z.string(),
   project_id: z.string(),
@@ -104,3 +118,5 @@ export type RoleOSManifest = z.infer<typeof RoleOSManifestSchema>;
 export type TrustSnapshot = z.infer<typeof TrustSnapshotSchema>;
 export type RecoveryActionResponse = z.infer<typeof RecoveryActionResponseSchema>;
 export type OutboxReplayResponse = z.infer<typeof OutboxReplayResponseSchema>;
+export type RunRemediationAction = z.infer<typeof RunRemediationActionSchema>;
+export type RunRemediationResponse = z.infer<typeof RunRemediationResponseSchema>;

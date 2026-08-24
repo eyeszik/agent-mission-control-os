@@ -3,7 +3,14 @@
 import { useEffect, useState } from 'react';
 import type { AgencyRun, TrustSnapshot } from '@amc/shared';
 import { getAgencyRun } from '../../lib/api/agency';
-import { getProjectTrust, replayOutboxMessage, resolveRecoveryCase } from '../../lib/api/runtime';
+import {
+  compensateAmbiguousRun,
+  getProjectTrust,
+  regenerateRunApproval,
+  replayOutboxMessage,
+  resolveRecoveryCase,
+  retryBlockedRun,
+} from '../../lib/api/runtime';
 import { globalBus } from '../../lib/events/bus';
 import { useRunStore } from '../../lib/stores/runStore';
 import { generateIdempotencyKey } from '../../lib/utils/idempotency';
@@ -141,7 +148,52 @@ export function ConsequentialLifecyclePanel() {
     }
   };
 
-  if (!activeRunId || !trust) {
+  const handleRetryBlockedRun = async (recoveryId: string) => {
+    if (!run?.run_id) return;
+    const key = `retry:${recoveryId}`;
+    setBusyKey(key);
+    setError(null);
+    try {
+      const result = await retryBlockedRun(run.run_id, recoveryId, generateIdempotencyKey());
+      setRun(result.run);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to retry blocked run');
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
+  const handleCompensateRun = async (recoveryId: string) => {
+    if (!run?.run_id) return;
+    const key = `compensate:${recoveryId}`;
+    setBusyKey(key);
+    setError(null);
+    try {
+      const result = await compensateAmbiguousRun(run.run_id, recoveryId, generateIdempotencyKey());
+      setRun(result.run);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to compensate ambiguous result');
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
+  const handleRegenerateApproval = async (approvalId?: string) => {
+    if (!run?.run_id) return;
+    const key = `approval:${approvalId ?? 'latest'}`;
+    setBusyKey(key);
+    setError(null);
+    try {
+      const result = await regenerateRunApproval(run.run_id, approvalId, generateIdempotencyKey());
+      setRun(result.run);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to regenerate approval');
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
+  if (!activeRunId || !trust || !run) {
     return (
       <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-3 min-h-[300px]">
         <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Consequential Lifecycle</span>
@@ -183,6 +235,17 @@ export function ConsequentialLifecyclePanel() {
     value: event.event_type,
   }));
 
+  const staleApprovals = (run.approvals ?? []).filter((approval) => approval.status === 'stale');
+  const retryableRecoveries = trust.recent_recovery_cases.filter(
+    (recovery) =>
+      recovery.status === 'OPEN' &&
+      recovery.reason !== 'AMBIGUOUS_EXTERNAL_RESULT' &&
+      run.status === 'failed'
+  );
+  const compensatableRecoveries = trust.recent_recovery_cases.filter(
+    (recovery) => recovery.status === 'OPEN' && recovery.reason === 'AMBIGUOUS_EXTERNAL_RESULT'
+  );
+
   return (
     <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-4 min-h-[300px]">
       <div className="flex items-center justify-between">
@@ -195,6 +258,53 @@ export function ConsequentialLifecyclePanel() {
         </div>
       )}
       <Section title="Approval Decisions" rows={approvalRows} />
+      <div className="flex flex-col gap-2">
+        <Section
+          title="Run Remediation"
+          rows={[
+            { label: 'run status', value: run.status },
+            { label: 'open retry paths', value: String(retryableRecoveries.length), tone: retryableRecoveries.length > 0 ? 'warn' : 'default' },
+            { label: 'ambiguous recoveries', value: String(compensatableRecoveries.length), tone: compensatableRecoveries.length > 0 ? 'warn' : 'default' },
+            { label: 'stale approvals', value: String(staleApprovals.length), tone: staleApprovals.length > 0 ? 'warn' : 'default' },
+          ]}
+        />
+        {retryableRecoveries.map((recovery) => (
+          <div key={`retry-${recovery.recovery_id}`} className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => handleRetryBlockedRun(recovery.recovery_id)}
+              disabled={busyKey === `retry:${recovery.recovery_id}`}
+              className="rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-1 text-[10px] font-mono text-sky-300 disabled:opacity-50"
+            >
+              {busyKey === `retry:${recovery.recovery_id}` ? 'Retrying…' : 'Retry blocked run'}
+            </button>
+          </div>
+        ))}
+        {compensatableRecoveries.map((recovery) => (
+          <div key={`compensate-${recovery.recovery_id}`} className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => handleCompensateRun(recovery.recovery_id)}
+              disabled={busyKey === `compensate:${recovery.recovery_id}`}
+              className="rounded-md border border-fuchsia-500/30 bg-fuchsia-500/10 px-2 py-1 text-[10px] font-mono text-fuchsia-300 disabled:opacity-50"
+            >
+              {busyKey === `compensate:${recovery.recovery_id}` ? 'Working…' : 'Compensate ambiguity'}
+            </button>
+          </div>
+        ))}
+        {staleApprovals.map((approval) => (
+          <div key={`approval-${approval.approval_id}`} className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => handleRegenerateApproval(approval.approval_id)}
+              disabled={busyKey === `approval:${approval.approval_id}`}
+              className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[10px] font-mono text-amber-300 disabled:opacity-50"
+            >
+              {busyKey === `approval:${approval.approval_id}` ? 'Working…' : 'Regenerate approval'}
+            </button>
+          </div>
+        ))}
+      </div>
       <div className="flex flex-col gap-2">
         <Section title="Outbox Delivery" rows={outboxRows} />
         {trust.recent_outbox_messages.slice(0, 3).map((message) => (

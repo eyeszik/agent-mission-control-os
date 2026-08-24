@@ -2,10 +2,12 @@ import {
   OutboxReplayResponseSchema,
   RecoveryActionResponseSchema,
   RoleOSManifestSchema,
+  RunRemediationResponseSchema,
   TrustSnapshotSchema,
   type OutboxReplayResponse,
   type RecoveryActionResponse,
   type RoleOSManifest,
+  type RunRemediationResponse,
   type TrustSnapshot,
 } from '@amc/shared';
 import { apiFetch } from './client';
@@ -50,5 +52,53 @@ export async function replayOutboxMessage(
       idempotencyKey,
     },
     OutboxReplayResponseSchema
+  );
+}
+
+export async function retryBlockedRun(
+  runId: string,
+  recoveryId: string,
+  idempotencyKey: string
+): Promise<RunRemediationResponse> {
+  return apiFetch(
+    `/runtime/runs/${runId}/remediation/retry`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ recovery_id: recoveryId }),
+      idempotencyKey,
+    },
+    RunRemediationResponseSchema
+  );
+}
+
+export async function compensateAmbiguousRun(
+  runId: string,
+  recoveryId: string,
+  idempotencyKey: string
+): Promise<RunRemediationResponse> {
+  return apiFetch(
+    `/runtime/runs/${runId}/remediation/compensate`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ recovery_id: recoveryId }),
+      idempotencyKey,
+    },
+    RunRemediationResponseSchema
+  );
+}
+
+export async function regenerateRunApproval(
+  runId: string,
+  approvalId: string | undefined,
+  idempotencyKey: string
+): Promise<RunRemediationResponse> {
+  return apiFetch(
+    `/runtime/runs/${runId}/remediation/regenerate-approval`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ approval_id: approvalId }),
+      idempotencyKey,
+    },
+    RunRemediationResponseSchema
   );
 }

@@ -13,6 +13,7 @@ test.describe('Agent Mission Control local release smoke', () => {
 
     await expect(page.getByRole('heading', { name: 'Mission Control' })).toBeVisible();
     await expect(page.getByText('Campaign Terminal', { exact: true })).toBeVisible();
+    await expect(page.getByText('Consequential Lifecycle', { exact: true })).toBeVisible();
     await expect(page.getByLabel('Brand name')).toBeVisible();
     await expect(page.getByLabel('Target audience')).toBeVisible();
     await expect(page.getByLabel(/Goals/)).toBeVisible();
@@ -54,6 +55,8 @@ test.describe('Agent Mission Control local release smoke', () => {
     expect(payload.campaign_package).toBeTruthy();
 
     await expect(page.getByText(/Inbox/)).toContainText('(1)');
+    await expect(page.getByText('Consequential Lifecycle', { exact: true })).toBeVisible();
+    await expect(page.getByText('Run Remediation', { exact: true })).toBeVisible();
     await expect(brandInput).toHaveValue('');
     await expect(audienceInput).toHaveValue('');
     await expect(goalsInput).toHaveValue('');

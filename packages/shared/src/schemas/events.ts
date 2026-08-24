@@ -15,6 +15,7 @@ export const RunEventSchema = z.object({
     'approval_decided',
     'recovery_case_updated',
     'outbox_updated',
+    'run_remediation_updated',
   ]),
   node_id: z.string().nullable(),
   observed_at: z.string().datetime({ offset: true }),

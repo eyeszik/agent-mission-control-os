@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 from services.langgraph.app.main import app
 from services.langgraph.app.runtime_support import trust_kernel
+from services.langgraph.persistence.approvals import create_approval_request, mark_approval_stale, resolve_approval
 from services.langgraph.persistence.events import list_events_for_run
 from services.langgraph.persistence.runs import create_run_record
 
@@ -79,3 +80,113 @@ def test_operator_can_replay_failed_outbox_and_emit_event():
 
     events = list_events_for_run(run_id)
     assert any(event["event_type"] == "outbox_updated" for event in events)
+
+
+def test_operator_can_retry_failed_run_from_recovery(monkeypatch):
+    run_id = f"run-retry-{uuid4()}"
+    project_id = f"proj-retry-{uuid4()}"
+    create_run_record(
+        run_id,
+        "tenant-events-test",
+        project_id,
+        "branding_marketing_agency",
+        "failed",
+        {"agency": {"qa_report": {"brand_safety_passed": True}}},
+    )
+    approval = create_approval_request(run_id, "tenant-events-test", project_id, "retry delivery", 0.8)
+    resolve_approval(approval["approval_id"], reviewer="qa-bot", decision="approve")
+    kernel = trust_kernel()
+    kernel.bind_project(tenant_id="tenant-events-test", project_id=project_id)
+    recovery = kernel.open_recovery_case(
+        tenant_id="tenant-events-test",
+        project_id=project_id,
+        operation_id=f"agency.resume:{run_id}",
+        reason="EXECUTION_WITHOUT_OBSERVATION",
+        execution_ref=run_id,
+    )
+
+    def fake_resume(*_args, **_kwargs):
+        return {
+            "run_id": run_id,
+            "project_id": project_id,
+            "status": "completed",
+            "approvals": [],
+            "proof": {"summary": {"dispatch_count": 2, "execution_count": 2, "observation_count": 2, "matched_observation_count": 2, "failure_count": 0, "latest_terminal_candidate": "COMPLETE", "latest_confidence": 0.96}},
+            "delivery": {"format": "json_bundle_v1", "approval_id": approval["approval_id"], "campaign_package": {}, "delivered_at": "2026-08-24T00:00:00+00:00"},
+        }
+
+    monkeypatch.setattr("services.langgraph.api.routes.agency.resume_agency_run", fake_resume)
+
+    response = client.post(
+        f"/runtime/runs/{run_id}/remediation/retry",
+        json={"recovery_id": recovery.recovery_id},
+        headers={"Idempotency-Key": str(uuid4())},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["action"] == "retry_blocked_execution"
+    assert payload["run"]["status"] == "completed"
+    assert payload["recovery_case"]["status"] == "RECONCILED"
+
+    events = list_events_for_run(run_id)
+    assert any(event["event_type"] == "run_remediation_updated" for event in events)
+    assert any(event["event_type"] == "recovery_case_updated" for event in events)
+
+
+def test_operator_can_compensate_ambiguous_recovery_case():
+    run_id = f"run-compensate-{uuid4()}"
+    project_id = f"proj-compensate-{uuid4()}"
+    create_run_record(run_id, "tenant-events-test", project_id, "branding_marketing_agency", "failed", {})
+    kernel = trust_kernel()
+    kernel.bind_project(tenant_id="tenant-events-test", project_id=project_id)
+    recovery = kernel.open_recovery_case(
+        tenant_id="tenant-events-test",
+        project_id=project_id,
+        operation_id=f"agency.resume:{run_id}",
+        reason="AMBIGUOUS_EXTERNAL_RESULT",
+        execution_ref=run_id,
+    )
+
+    response = client.post(
+        f"/runtime/runs/{run_id}/remediation/compensate",
+        json={"recovery_id": recovery.recovery_id},
+        headers={"Idempotency-Key": str(uuid4())},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["action"] == "compensate_ambiguous_result"
+    assert payload["recovery_case"]["status"] == "COMPENSATED"
+
+    events = list_events_for_run(run_id)
+    assert any(event["event_type"] == "run_remediation_updated" for event in events)
+    assert any(event["event_type"] == "recovery_case_updated" for event in events)
+
+
+def test_operator_can_regenerate_stale_approval_chain():
+    run_id = f"run-approval-{uuid4()}"
+    project_id = f"proj-approval-{uuid4()}"
+    create_run_record(
+        run_id,
+        "tenant-events-test",
+        project_id,
+        "branding_marketing_agency",
+        "needs_approval",
+        {"agency": {"campaign_package": {"brief": {"brand_name": "Northwind"}}, "qa_report": {"brand_safety_passed": True}, "generation_provenance": [], "degraded": False}},
+    )
+    approval = create_approval_request(run_id, "tenant-events-test", project_id, "review payload hash", 0.5)
+    mark_approval_stale(approval["approval_id"], "content changed")
+
+    response = client.post(
+        f"/runtime/runs/{run_id}/remediation/regenerate-approval",
+        json={"approval_id": approval["approval_id"]},
+        headers={"Idempotency-Key": str(uuid4())},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["action"] == "regenerate_approval"
+    assert payload["pending_approval"]["status"] == "pending"
+    assert payload["pending_approval"]["approval_id"] != approval["approval_id"]
+
+    events = list_events_for_run(run_id)
+    assert any(event["event_type"] == "approval_requested" for event in events)
+    assert any(event["event_type"] == "run_remediation_updated" for event in events)

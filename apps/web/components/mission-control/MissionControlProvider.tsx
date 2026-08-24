@@ -47,7 +47,7 @@ export function MissionControlProvider() {
           removeApproval(payload.approval_id);
         }
         globalBus.emit('lifecycle_event_received', event);
-      } else if (event.event_type === 'recovery_case_updated' || event.event_type === 'outbox_updated') {
+      } else if (['recovery_case_updated', 'outbox_updated', 'run_remediation_updated'].includes(event.event_type)) {
         globalBus.emit('lifecycle_event_received', event);
       }
     };
