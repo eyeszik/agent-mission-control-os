@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import type { AgencyRun, TrustSnapshot } from '@amc/shared';
 import { getAgencyRun } from '../../lib/api/agency';
-import { getProjectTrust } from '../../lib/api/runtime';
+import { getProjectTrust, replayOutboxMessage, resolveRecoveryCase } from '../../lib/api/runtime';
+import { globalBus } from '../../lib/events/bus';
 import { useRunStore } from '../../lib/stores/runStore';
+import { generateIdempotencyKey } from '../../lib/utils/idempotency';
 
 type RowTone = 'default' | 'success' | 'warn' | 'danger';
-const POLL_INTERVAL_MS = 4000;
 
 function Section({
   title,
@@ -52,6 +53,8 @@ export function ConsequentialLifecyclePanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const [run, setRun] = useState<AgencyRun | null>(null);
   const [trust, setTrust] = useState<TrustSnapshot | null>(null);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activeRunId) {
@@ -60,8 +63,7 @@ export function ConsequentialLifecyclePanel() {
       return;
     }
     let cancelled = false;
-
-    const poll = async () => {
+    const refreshRun = async () => {
       try {
         const value = await getAgencyRun(activeRunId);
         if (!cancelled) setRun(value);
@@ -72,12 +74,14 @@ export function ConsequentialLifecyclePanel() {
         }
       }
     };
-
-    poll();
-    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    const onLifecycle = (event: { run_id: string }) => {
+      if (event.run_id === activeRunId) void refreshRun();
+    };
+    void refreshRun();
+    globalBus.on('lifecycle_event_received', onLifecycle as any);
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      globalBus.off('lifecycle_event_received', onLifecycle as any);
     };
   }, [activeRunId]);
 
@@ -87,8 +91,7 @@ export function ConsequentialLifecyclePanel() {
       return;
     }
     let cancelled = false;
-
-    const poll = async () => {
+    const refreshTrust = async () => {
       try {
         const value = await getProjectTrust(run.project_id!);
         if (!cancelled) setTrust(value);
@@ -96,14 +99,47 @@ export function ConsequentialLifecyclePanel() {
         if (!cancelled) setTrust(null);
       }
     };
-
-    poll();
-    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    const onLifecycle = (event: { project_id: string }) => {
+      if (event.project_id === run.project_id) void refreshTrust();
+    };
+    void refreshTrust();
+    globalBus.on('lifecycle_event_received', onLifecycle as any);
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      globalBus.off('lifecycle_event_received', onLifecycle as any);
     };
   }, [run?.project_id]);
+
+  const handleResolveRecovery = async (
+    recoveryId: string,
+    status: 'RECONCILED' | 'COMPENSATED' | 'ESCALATED'
+  ) => {
+    if (!trust || !run?.run_id) return;
+    const key = `recovery:${recoveryId}:${status}`;
+    setBusyKey(key);
+    setError(null);
+    try {
+      await resolveRecoveryCase(trust.project_id, recoveryId, status, generateIdempotencyKey(), run.run_id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update recovery case');
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
+  const handleReplayOutbox = async (messageId: string) => {
+    if (!trust || !run?.run_id) return;
+    const key = `outbox:${messageId}`;
+    setBusyKey(key);
+    setError(null);
+    try {
+      await replayOutboxMessage(trust.project_id, messageId, generateIdempotencyKey(), run.run_id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to replay outbox message');
+    } finally {
+      setBusyKey(null);
+    }
+  };
 
   if (!activeRunId || !trust) {
     return (
@@ -153,9 +189,54 @@ export function ConsequentialLifecyclePanel() {
         <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Consequential Lifecycle</span>
         <span className="text-[10px] font-mono text-zinc-600">project {trust.project_id}</span>
       </div>
+      {error && (
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+          {error}
+        </div>
+      )}
       <Section title="Approval Decisions" rows={approvalRows} />
-      <Section title="Outbox Delivery" rows={outboxRows} />
-      <Section title="Recovery Cases" rows={recoveryRows} />
+      <div className="flex flex-col gap-2">
+        <Section title="Outbox Delivery" rows={outboxRows} />
+        {trust.recent_outbox_messages.slice(0, 3).map((message) => (
+          message.status !== 'DELIVERED' ? (
+            <div key={message.message_id} className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => handleReplayOutbox(message.message_id)}
+                disabled={busyKey === `outbox:${message.message_id}`}
+                className="rounded-md border border-sky-500/30 bg-sky-500/10 px-2 py-1 text-[10px] font-mono text-sky-300 disabled:opacity-50"
+              >
+                {busyKey === `outbox:${message.message_id}` ? 'Replaying…' : 'Replay'}
+              </button>
+            </div>
+          ) : null
+        ))}
+      </div>
+      <div className="flex flex-col gap-2">
+        <Section title="Recovery Cases" rows={recoveryRows} />
+        {trust.recent_recovery_cases.slice(0, 3).map((recovery) => (
+          recovery.status === 'OPEN' ? (
+            <div key={recovery.recovery_id} className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => handleResolveRecovery(recovery.recovery_id, 'RECONCILED')}
+                disabled={busyKey === `recovery:${recovery.recovery_id}:RECONCILED`}
+                className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-mono text-emerald-300 disabled:opacity-50"
+              >
+                {busyKey === `recovery:${recovery.recovery_id}:RECONCILED` ? 'Working…' : 'Resolve'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleResolveRecovery(recovery.recovery_id, 'ESCALATED')}
+                disabled={busyKey === `recovery:${recovery.recovery_id}:ESCALATED`}
+                className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[10px] font-mono text-amber-300 disabled:opacity-50"
+              >
+                {busyKey === `recovery:${recovery.recovery_id}:ESCALATED` ? 'Working…' : 'Escalate'}
+              </button>
+            </div>
+          ) : null
+        ))}
+      </div>
       <Section title="Audit Chain" rows={auditRows} />
     </div>
   );

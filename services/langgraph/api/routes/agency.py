@@ -502,6 +502,19 @@ def create_agency_run(
             policy_version="amc-approval/v1",
         )
         run_approvals = get_approvals_for_run(run_id)
+        record_event(
+            run_id,
+            principal.tenant_id,
+            req.project_id,
+            "hitl_gate",
+            "approval_requested",
+            safe_payload={
+                "approval_id": run_approvals[0]["approval_id"],
+                "status": run_approvals[0]["status"],
+                "reason": run_approvals[0]["reason"],
+                "confidence": run_approvals[0]["confidence"],
+            },
+        )
     release_blocked = bool((agency_data.get("qa_report") or {}).get("release_blocked"))
     emit_lifecycle_event(
         principal.tenant_id,

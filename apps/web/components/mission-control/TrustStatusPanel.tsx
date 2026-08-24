@@ -4,9 +4,8 @@ import { useEffect, useState } from 'react';
 import type { AgencyRun, RoleOSManifest, TrustSnapshot } from '@amc/shared';
 import { getAgencyRun } from '../../lib/api/agency';
 import { getProjectTrust, getRoleOSManifest } from '../../lib/api/runtime';
+import { globalBus } from '../../lib/events/bus';
 import { useRunStore } from '../../lib/stores/runStore';
-
-const POLL_INTERVAL_MS = 4000;
 
 export function TrustStatusPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
@@ -25,8 +24,7 @@ export function TrustStatusPanel() {
       return;
     }
     let cancelled = false;
-
-    const poll = async () => {
+    const refreshRun = async () => {
       try {
         const value = await getAgencyRun(activeRunId);
         if (!cancelled) setRun(value);
@@ -34,12 +32,14 @@ export function TrustStatusPanel() {
         if (!cancelled) setRun(null);
       }
     };
-
-    poll();
-    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    const onLifecycle = (event: { run_id: string }) => {
+      if (event.run_id === activeRunId) void refreshRun();
+    };
+    void refreshRun();
+    globalBus.on('lifecycle_event_received', onLifecycle as any);
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      globalBus.off('lifecycle_event_received', onLifecycle as any);
     };
   }, [activeRunId]);
 
@@ -49,8 +49,7 @@ export function TrustStatusPanel() {
       return;
     }
     let cancelled = false;
-
-    const poll = async () => {
+    const refreshTrust = async () => {
       try {
         const value = await getProjectTrust(run.project_id!);
         if (!cancelled) setTrust(value);
@@ -58,12 +57,14 @@ export function TrustStatusPanel() {
         if (!cancelled) setTrust(null);
       }
     };
-
-    poll();
-    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    const onLifecycle = (event: { project_id: string }) => {
+      if (event.project_id === run.project_id) void refreshTrust();
+    };
+    void refreshTrust();
+    globalBus.on('lifecycle_event_received', onLifecycle as any);
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      globalBus.off('lifecycle_event_received', onLifecycle as any);
     };
   }, [run?.project_id]);
 

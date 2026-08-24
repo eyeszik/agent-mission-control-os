@@ -1,15 +1,19 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from services.langgraph.agency.reliability.outbox import OutboxDispatcher
 from services.langgraph.agency.reliability.models import OutboxStatus, RecoveryStatus
 from services.langgraph.app.runtime_support import role_os_registry, runtime_queue, trust_kernel
 from services.langgraph.app.in_memory_queue import DuplicateOperationError, QueueFullError
 from services.langgraph.persistence.database import database_backend
+from services.langgraph.persistence.events import record_event
+from services.langgraph.persistence.idempotency import complete_idempotency, fail_idempotency, hash_payload, reserve_idempotency
 from services.langgraph.security.auth import Principal, authorize_project, get_principal
 
 router = APIRouter()
+IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
 
 
 class RuntimeIngressRequest(BaseModel):
@@ -17,6 +21,19 @@ class RuntimeIngressRequest(BaseModel):
     mission_id: str = Field(min_length=1, max_length=200)
     project_id: str = Field(min_length=1, max_length=200)
     payload: dict = Field(default_factory=dict)
+
+
+class RecoveryResolveRequest(BaseModel):
+    status: str = Field(pattern="^(RECONCILED|COMPENSATED|ESCALATED)$")
+    run_id: str | None = None
+
+
+class OutboxReplayRequest(BaseModel):
+    run_id: str | None = None
+
+
+def _operator_scope(principal: Principal, project_id: str, target: str) -> str:
+    return f"{principal.tenant_id}:{principal.user_id}:{target}:{project_id}"
 
 
 def _project_trust_details(project_id: str, tenant_id: str) -> dict:
@@ -135,3 +152,113 @@ def get_project_recovery(project_id: str, principal: Principal = Depends(get_pri
         return _project_trust_details(project_id, principal.tenant_id)["recent_recovery_cases"]
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"trust recovery unavailable: {type(exc).__name__}") from exc
+
+
+@router.post("/projects/{project_id}/trust/recovery/{recovery_id}/resolve")
+def resolve_project_recovery(
+    project_id: str,
+    recovery_id: str,
+    body: RecoveryResolveRequest,
+    idempotency_key: str = Header(..., alias="Idempotency-Key"),
+    principal: Principal = Depends(get_principal),
+):
+    authorize_project(principal, project_id)
+    scope = _operator_scope(principal, project_id, f"recovery.resolve:{recovery_id}")
+    request_hash = hash_payload({"recovery_id": recovery_id, "status": body.status, "run_id": body.run_id})
+    reservation = reserve_idempotency(scope, idempotency_key, request_hash, IDEMPOTENCY_TTL_SECONDS)
+    if reservation["state"] == "replay":
+        return reservation["record"]["result"]
+    if reservation["state"] == "in_progress":
+        raise HTTPException(status_code=409, detail="Recovery action is already executing")
+    if reservation["state"] == "conflict":
+        raise HTTPException(status_code=409, detail="Idempotency-Key was reused with different recovery input")
+
+    kernel = trust_kernel()
+    try:
+        kernel.assert_scope(tenant_id=principal.tenant_id, project_id=project_id)
+        updated = kernel.resolve_recovery(
+            recovery_id=recovery_id,
+            status=RecoveryStatus(body.status),
+            evidence_refs=((f"operator:{principal.user_id}"),),
+        )
+    except Exception as exc:
+        fail_idempotency(scope, idempotency_key, type(exc).__name__)
+        raise HTTPException(status_code=409, detail=f"Recovery resolution failed: {type(exc).__name__}") from exc
+
+    run_id = body.run_id or updated.execution_ref or updated.observation_ref or updated.operation_id
+    record_event(
+        str(run_id),
+        principal.tenant_id,
+        project_id,
+        "trust",
+        "recovery_case_updated",
+        safe_payload={
+            "recovery_id": updated.recovery_id,
+            "status": updated.status.value,
+            "reason": updated.reason,
+            "operation_id": updated.operation_id,
+        },
+    )
+    response = updated.model_dump(mode="json")
+    if not complete_idempotency(scope, idempotency_key, response):
+        raise HTTPException(status_code=500, detail="Failed to finalize recovery idempotency record")
+    return response
+
+
+@router.post("/projects/{project_id}/trust/outbox/{message_id}/replay")
+def replay_project_outbox(
+    project_id: str,
+    message_id: str,
+    body: OutboxReplayRequest,
+    idempotency_key: str = Header(..., alias="Idempotency-Key"),
+    principal: Principal = Depends(get_principal),
+):
+    authorize_project(principal, project_id)
+    scope = _operator_scope(principal, project_id, f"outbox.replay:{message_id}")
+    request_hash = hash_payload({"message_id": message_id, "run_id": body.run_id})
+    reservation = reserve_idempotency(scope, idempotency_key, request_hash, IDEMPOTENCY_TTL_SECONDS)
+    if reservation["state"] == "replay":
+        return reservation["record"]["result"]
+    if reservation["state"] == "in_progress":
+        raise HTTPException(status_code=409, detail="Outbox replay is already executing")
+    if reservation["state"] == "conflict":
+        raise HTTPException(status_code=409, detail="Idempotency-Key was reused with different outbox input")
+
+    kernel = trust_kernel()
+    dispatcher = OutboxDispatcher(
+        kernel,
+        authorize_delivery=lambda message: message.tenant_id == principal.tenant_id and message.project_id == project_id,
+    )
+    dispatcher.register("agency.delivery.completed", lambda message: message.payload_ref)
+
+    try:
+        result = dispatcher.dispatch_one(message_id=message_id, worker_id=f"operator:{principal.user_id}")
+    except Exception as exc:
+        fail_idempotency(scope, idempotency_key, type(exc).__name__)
+        raise HTTPException(status_code=409, detail=f"Outbox replay failed: {type(exc).__name__}") from exc
+
+    state = kernel.store.state
+    message = state.outbox.get(message_id)
+    run_id = body.run_id or (message.payload_ref if message else None) or message_id
+    record_event(
+        str(run_id),
+        principal.tenant_id,
+        project_id,
+        "trust",
+        "outbox_updated",
+        safe_payload={
+            "message_id": message_id,
+            "status": result.status,
+            "result_ref": result.result_ref,
+            "error": result.error,
+        },
+    )
+    response = {
+        "message_id": result.message_id,
+        "status": result.status,
+        "result_ref": result.result_ref,
+        "error": result.error,
+    }
+    if not complete_idempotency(scope, idempotency_key, response):
+        raise HTTPException(status_code=500, detail="Failed to finalize outbox idempotency record")
+    return response

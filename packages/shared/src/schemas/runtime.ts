@@ -72,6 +72,14 @@ export const AuditCheckpointSummarySchema = z.object({
   created_at: z.string().datetime({ offset: true }),
 });
 
+export const RecoveryActionResponseSchema = RecoveryCaseSummarySchema;
+export const OutboxReplayResponseSchema = z.object({
+  message_id: z.string(),
+  status: z.string(),
+  result_ref: z.string().nullable().optional(),
+  error: z.string().nullable().optional(),
+});
+
 export const TrustSnapshotSchema = z.object({
   tenant_id: z.string(),
   project_id: z.string(),
@@ -94,3 +102,5 @@ export const TrustSnapshotSchema = z.object({
 
 export type RoleOSManifest = z.infer<typeof RoleOSManifestSchema>;
 export type TrustSnapshot = z.infer<typeof TrustSnapshotSchema>;
+export type RecoveryActionResponse = z.infer<typeof RecoveryActionResponseSchema>;
+export type OutboxReplayResponse = z.infer<typeof OutboxReplayResponseSchema>;

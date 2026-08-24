@@ -7,6 +7,7 @@ from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffec
 from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import get_approval, list_pending_approvals, resolve_approval
+from services.langgraph.persistence.events import record_event
 from services.langgraph.persistence.idempotency import (
     complete_idempotency,
     fail_idempotency,
@@ -137,6 +138,19 @@ def decide_approval(
         "agency_approval_decided",
         {"approval_id": approval_id, "decision": body.decision},
         approval["run_id"],
+    )
+    record_event(
+        approval["run_id"],
+        approval["tenant_id"],
+        approval["project_id"],
+        "hitl_gate",
+        "approval_decided",
+        safe_payload={
+            "approval_id": resolved["approval_id"],
+            "decision": resolved["decision"],
+            "status": resolved["status"],
+            "reviewer": resolved["reviewer"],
+        },
     )
 
     response = {
