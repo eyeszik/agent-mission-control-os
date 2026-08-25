@@ -9,6 +9,13 @@ import { useApprovalStore } from '../../lib/stores/approvalStore';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { useRunStore } from '../../lib/stores/runStore';
 
+declare global {
+  interface Window {
+    __amcRunStore?: typeof useRunStore;
+    __amcApprovalStore?: typeof useApprovalStore;
+  }
+}
+
 export function MissionControlProvider() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
@@ -16,6 +23,15 @@ export function MissionControlProvider() {
   const removeApproval = useApprovalStore((state) => state.removeApproval);
   const setApprovals = useApprovalStore((state) => state.setApprovals);
   const sseRef = useRef<SSEClient | null>(null);
+
+  useEffect(() => {
+    window.__amcRunStore = useRunStore;
+    window.__amcApprovalStore = useApprovalStore;
+    return () => {
+      delete window.__amcRunStore;
+      delete window.__amcApprovalStore;
+    };
+  }, []);
 
   useEffect(() => {
     const handleEvent = (event: RunEvent) => {

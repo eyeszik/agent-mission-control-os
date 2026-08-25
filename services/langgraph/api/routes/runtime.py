@@ -8,7 +8,7 @@ from services.langgraph.agency.reliability.models import OutboxStatus, RecoveryS
 from services.langgraph.agency.reliability.outbox import OutboxDispatcher
 from services.langgraph.app.in_memory_queue import DuplicateOperationError, QueueFullError
 from services.langgraph.app.runtime_support import role_os_registry, runtime_queue, trust_kernel
-from services.langgraph.persistence.agency_kernel import create_or_revise_protected_run_artifact, record_artifact_revision
+from services.langgraph.persistence.agency_kernel import create_or_revise_protected_run_artifact
 from services.langgraph.persistence.approvals import bind_approval_subject, create_approval_request, get_approvals_for_run
 from services.langgraph.persistence.database import database_backend
 from services.langgraph.persistence.events import record_event
@@ -268,8 +268,6 @@ def revise_protected_run_artifact(
         synthetic=True,
     )
     artifact_id = result["artifact"]["artifact_id"]
-    if result["created"]:
-        result = record_artifact_revision(artifact_id, content_hash=body.content_hash)
     record_run_invalidation_bindings(
         tenant_id=record["tenant_id"],
         project_id=record["project_id"],

@@ -208,6 +208,12 @@ def test_artifact_revision_trust_projection_opens_lineage_remediation():
 
     response = client.post(
         f"/runtime/runs/{run_id}/artifacts/protected/revise",
+        json={"content_hash": "b" * 64},
+    )
+    assert response.status_code == 200
+
+    response = client.post(
+        f"/runtime/runs/{run_id}/artifacts/protected/revise",
         json={"content_hash": "c" * 64},
     )
     assert response.status_code == 200
