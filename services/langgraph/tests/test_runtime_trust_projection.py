@@ -24,6 +24,10 @@ def test_runtime_trust_projection_is_tenant_scoped(monkeypatch, tmp_path):
     assert payload["tenant_id"] == "tenant_1"
     assert payload["project_id"] == project_id
     assert payload["database_backend"] == "sqlite"
+    assert payload["compile_blocked"] is False
+    assert payload["open_invalidation_obligations"] == 0
+    assert payload["hook_gap_count"] == 0
+    assert payload["recent_invalidation_obligations"] == []
     assert payload["recent_policy_decisions"] == []
     assert payload["recent_outbox_messages"] == []
     assert payload["recent_recovery_cases"] == []

@@ -19,6 +19,12 @@ from services.langgraph.persistence.approvals import bind_approval_subject, crea
 from services.langgraph.persistence.database import database_backend
 from services.langgraph.persistence.events import record_event
 from services.langgraph.persistence.idempotency import complete_idempotency, fail_idempotency, hash_payload, reserve_idempotency
+from services.langgraph.persistence.invalidation import (
+    discharge_run_obligations,
+    list_project_invalidation_obligations,
+    record_run_invalidation_bindings,
+    run_compile_gate,
+)
 from services.langgraph.persistence.lineage import list_project_lineage_remediations, resolve_lineage_remediation_for_run
 from services.langgraph.persistence.runs import get_run_record, update_run_status
 from services.langgraph.security.auth import Principal, authorize_project, authorize_resource, get_principal
@@ -147,6 +153,7 @@ def _project_trust_details(project_id: str, tenant_id: str) -> dict:
     ]
     recovery_cases.sort(key=lambda item: (item["created_at"], item["recovery_id"]), reverse=True)
     lineage_remediations = list_project_lineage_remediations(project_id, tenant_id, limit=12)
+    obligations = list_project_invalidation_obligations(project_id, tenant_id, limit=20)
 
     audit_events = [
         audit.model_dump(mode="json")
@@ -159,11 +166,18 @@ def _project_trust_details(project_id: str, tenant_id: str) -> dict:
         **snapshot.model_dump(mode="json"),
         "database_backend": database_backend(),
         "persistence_mode": "canonical_database",
+        "compile_blocked": bool(
+            any(item["state"] in {"OPEN", "HOOK_GAP"} and item["demanded"] for item in obligations)
+            or any(item["status"] == "OPEN" for item in lineage_remediations)
+        ),
+        "open_invalidation_obligations": sum(1 for item in obligations if item["state"] == "OPEN"),
+        "hook_gap_count": sum(1 for item in obligations if item["state"] == "HOOK_GAP"),
         "delivered_outbox": sum(1 for item in outbox_messages if item["status"] == OutboxStatus.DELIVERED.value),
         "failed_outbox": sum(1 for item in outbox_messages if item["status"] == OutboxStatus.FAILED.value),
         "resolved_recovery_cases": sum(1 for item in recovery_cases if item["status"] != RecoveryStatus.OPEN.value),
         "open_lineage_remediations": sum(1 for item in lineage_remediations if item["status"] == "OPEN"),
         "resolved_lineage_remediations": sum(1 for item in lineage_remediations if item["status"] != "OPEN"),
+        "recent_invalidation_obligations": obligations[:8],
         "recent_policy_decisions": policy_decisions[:5],
         "recent_outbox_messages": outbox_messages[:5],
         "recent_recovery_cases": recovery_cases[:5],
@@ -279,6 +293,13 @@ def revise_protected_run_artifact(
             },
         )
     result = record_artifact_revision(artifact_id, content_hash=body.content_hash)
+    record_run_invalidation_bindings(
+        tenant_id=record["tenant_id"],
+        project_id=record["project_id"],
+        run_id=run_id,
+        artifact_branch=artifact_id,
+        result=record.get("result"),
+    )
     record_event(
         run_id,
         record["tenant_id"],
@@ -562,6 +583,7 @@ def retry_run_from_recovery(
         },
     )
     resolve_lineage_remediation_for_run(run_id, status="RETRIED")
+    discharge_run_obligations(run_id=run_id, artifact_branch=f"art-protected-{run_id}")
     response = {
         "action": "retry_blocked_execution",
         "run": run_response,
@@ -836,6 +858,7 @@ def regenerate_run_approval(
         },
     )
     resolve_lineage_remediation_for_run(run_id, approval_id=target["approval_id"], status="REGENERATED")
+    discharge_run_obligations(run_id=run_id, artifact_branch=f"art-protected-{run_id}")
     run_payload = agency_routes.get_agency_run(run_id, principal=principal)
     response = {
         "action": "regenerate_approval",

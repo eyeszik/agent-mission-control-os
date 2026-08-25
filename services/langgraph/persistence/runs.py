@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from services.langgraph.persistence.idempotency import hash_payload
+from services.langgraph.persistence.invalidation import record_run_invalidation_bindings
 from services.langgraph.persistence.database import (
     decode_json,
     is_postgres,
@@ -112,12 +113,26 @@ def _sync_protected_run_artifact(run_id: str, tenant_id: str, project_id: str, r
                 "ambient_revision_source": "run_result_commit",
             },
         )
+        record_run_invalidation_bindings(
+            tenant_id=tenant_id,
+            project_id=project_id,
+            run_id=run_id,
+            artifact_branch=artifact_id,
+            result=result,
+        )
         return
 
     if artifact.get("content_hash") == subject_hash:
         return
 
     record_artifact_revision(artifact_id, content_hash=subject_hash)
+    record_run_invalidation_bindings(
+        tenant_id=tenant_id,
+        project_id=project_id,
+        run_id=run_id,
+        artifact_branch=artifact_id,
+        result=result,
+    )
 
 
 def create_run_record(run_id: str, tenant_id: str, project_id: str, pipeline: str, status: str, metadata: dict) -> dict:

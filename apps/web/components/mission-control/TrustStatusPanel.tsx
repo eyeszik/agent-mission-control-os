@@ -83,6 +83,18 @@ export function TrustStatusPanel() {
         </div>
       </div>
       <div className="flex items-center gap-1.5">
+        <span className="text-zinc-500 text-xs uppercase font-mono">Gate</span>
+        <div
+          className={`px-2 py-0.5 border rounded font-mono text-xs ${
+            trust?.compile_blocked
+              ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+          }`}
+        >
+          {trust ? (trust.compile_blocked ? 'blocked' : 'clear') : 'unknown'}
+        </div>
+      </div>
+      <div className="flex items-center gap-1.5">
         <span className="text-zinc-500 text-xs uppercase font-mono">Proof</span>
         <div className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-mono text-xs">
           {run?.proof ? `${run.proof.summary.execution_count}/${run.proof.summary.observation_count}/${run.proof.summary.failure_count}` : 'no-run'}
@@ -91,6 +103,7 @@ export function TrustStatusPanel() {
       {trust && (
         <div className="hidden lg:flex items-center gap-3 text-[10px] font-mono text-zinc-400">
           <span>approval={trust.recent_policy_decisions[0]?.target ?? 'n/a'}</span>
+          <span>obligations={trust.open_invalidation_obligations}/{trust.hook_gap_count}</span>
           <span>outbox={trust.delivered_outbox}/{trust.failed_outbox}</span>
           <span>recovery={trust.open_recovery_cases}/{trust.resolved_recovery_cases}</span>
         </div>

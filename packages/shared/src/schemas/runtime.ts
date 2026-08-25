@@ -90,6 +90,32 @@ export const LineageRemediationSummarySchema = z.object({
   resolved_at: z.string().datetime({ offset: true }).nullable().optional(),
 });
 
+export const InvalidationObligationSummarySchema = z.object({
+  obligation_id: z.string(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  run_id: z.string(),
+  artifact_branch: z.string(),
+  node_id: z.string(),
+  event_class: z.enum([
+    'SPEC_CHANGE',
+    'MODEL_PARAM_CHANGE',
+    'TOOL_RESULT_CHANGE',
+    'SCHEMA_CHANGE',
+    'ACL_SECRET_CHANGE',
+    'MEMORY_WRITE',
+    'CLOCK_WINDOW_ADVANCE',
+    'HOOK_GAP',
+  ]),
+  state: z.enum(['OPEN', 'DISCHARGED_RECOMPUTE', 'DISCHARGED_CUTOFF', 'HOOK_GAP']),
+  demanded: z.union([z.boolean(), z.number().int().nonnegative()]).transform((value) => Boolean(value)),
+  cause_k: z.string().regex(/^[a-f0-9]{64}$/),
+  payload: z.record(z.unknown()),
+  created_at: z.string().datetime({ offset: true }),
+  updated_at: z.string().datetime({ offset: true }),
+  discharged_at: z.string().datetime({ offset: true }).nullable().optional(),
+});
+
 export const RecoveryActionResponseSchema = RecoveryCaseSummarySchema;
 export const OutboxReplayResponseSchema = z.object({
   message_id: z.string(),
@@ -115,15 +141,19 @@ export const TrustSnapshotSchema = z.object({
   tenant_id: z.string(),
   project_id: z.string(),
   policy_decisions: z.number().int().nonnegative(),
+  compile_blocked: z.boolean(),
   pending_outbox: z.number().int().nonnegative(),
   delivered_outbox: z.number().int().nonnegative(),
   failed_outbox: z.number().int().nonnegative(),
   open_recovery_cases: z.number().int().nonnegative(),
   resolved_recovery_cases: z.number().int().nonnegative(),
+  open_invalidation_obligations: z.number().int().nonnegative(),
+  hook_gap_count: z.number().int().nonnegative(),
   open_lineage_remediations: z.number().int().nonnegative(),
   resolved_lineage_remediations: z.number().int().nonnegative(),
   audit_head_hash: z.string().regex(/^[a-f0-9]{64}$/),
   idempotency_claims: z.number().int().nonnegative(),
+  recent_invalidation_obligations: z.array(InvalidationObligationSummarySchema),
   recent_policy_decisions: z.array(PolicyDecisionSummarySchema),
   recent_outbox_messages: z.array(OutboxMessageSummarySchema),
   recent_recovery_cases: z.array(RecoveryCaseSummarySchema),

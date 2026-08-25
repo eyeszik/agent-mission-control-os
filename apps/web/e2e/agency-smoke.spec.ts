@@ -81,6 +81,9 @@ test.describe('Agent Mission Control local release smoke', () => {
     const runId = payload.run_id as string;
 
     await page.getByRole('button', { name: 'Simulate protected artifact change' }).click();
+    const runRemediationSection = page.getByText('Run Remediation', { exact: true }).locator('..');
+    await expect(runRemediationSection).toContainText('compile gate');
+    await expect(runRemediationSection).toContainText('BLOCKED');
     await expect(page.getByText('Lineage Remediation Queue', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Regenerate approval' }).first()).toBeVisible();
     await page.getByRole('button', { name: 'Regenerate approval' }).first().click();

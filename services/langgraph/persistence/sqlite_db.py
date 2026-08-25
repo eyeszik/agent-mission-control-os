@@ -422,6 +422,42 @@ _MIGRATIONS = [
         CREATE INDEX IF NOT EXISTS idx_lineage_remediation_run
           ON lineage_remediation_queue(run_id, status, created_at DESC);
     """),
+    (10, """
+        CREATE TABLE IF NOT EXISTS invalidation_obligations (
+            obligation_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            artifact_branch TEXT NOT NULL,
+            node_id TEXT NOT NULL,
+            event_class TEXT NOT NULL CHECK (event_class IN (
+                'SPEC_CHANGE',
+                'MODEL_PARAM_CHANGE',
+                'TOOL_RESULT_CHANGE',
+                'SCHEMA_CHANGE',
+                'ACL_SECRET_CHANGE',
+                'MEMORY_WRITE',
+                'CLOCK_WINDOW_ADVANCE',
+                'HOOK_GAP'
+            )),
+            state TEXT NOT NULL CHECK (state IN (
+                'OPEN',
+                'DISCHARGED_RECOMPUTE',
+                'DISCHARGED_CUTOFF',
+                'HOOK_GAP'
+            )),
+            demanded INTEGER NOT NULL CHECK (demanded IN (0, 1)),
+            cause_k TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            discharged_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_invalidation_obligations_project
+          ON invalidation_obligations(tenant_id, project_id, state, updated_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_invalidation_obligations_branch
+          ON invalidation_obligations(run_id, artifact_branch, event_class, updated_at DESC);
+    """),
 ]
 
 

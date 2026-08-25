@@ -253,6 +253,7 @@ export function ConsequentialLifecyclePanel() {
 
   const staleApprovals = (run.approvals ?? []).filter((approval) => approval.status === 'stale');
   const activeRunLineageRemediations = trust.recent_lineage_remediations.filter((item) => item.run_id === run.run_id);
+  const activeRunObligations = trust.recent_invalidation_obligations.filter((item) => item.run_id === run.run_id);
   const retryableRecoveries = trust.recent_recovery_cases.filter(
     (recovery) =>
       recovery.status === 'OPEN' &&
@@ -321,11 +322,25 @@ export function ConsequentialLifecyclePanel() {
           title="Run Remediation"
           rows={[
             { label: 'run status', value: run.status },
+            { label: 'compile gate', value: trust.compile_blocked ? 'BLOCKED' : 'CLEAR', tone: trust.compile_blocked ? 'warn' : 'success' },
+            { label: 'open obligations', value: String(activeRunObligations.filter((item) => item.state === 'OPEN').length), tone: activeRunObligations.some((item) => item.state === 'OPEN') ? 'warn' : 'default' },
+            { label: 'hook gaps', value: String(activeRunObligations.filter((item) => item.state === 'HOOK_GAP').length), tone: activeRunObligations.some((item) => item.state === 'HOOK_GAP') ? 'danger' : 'default' },
             { label: 'open retry paths', value: String(retryableRecoveries.length), tone: retryableRecoveries.length > 0 ? 'warn' : 'default' },
             { label: 'ambiguous recoveries', value: String(compensatableRecoveries.length), tone: compensatableRecoveries.length > 0 ? 'warn' : 'default' },
             { label: 'stale approvals', value: String(staleApprovals.length), tone: staleApprovals.length > 0 ? 'warn' : 'default' },
           ]}
         />
+        {activeRunObligations.slice(0, 4).map((item) => (
+          <div key={item.obligation_id} className="rounded-lg border border-zinc-800/50 bg-zinc-950/40 px-3 py-2 flex items-center justify-between gap-3">
+            <div className="flex flex-col">
+              <span className="text-[11px] font-mono text-zinc-300">{item.event_class}</span>
+              <span className="text-[10px] font-mono text-zinc-600">{item.node_id} · {item.state}</span>
+            </div>
+            <span className={`text-[10px] font-mono ${item.state === 'HOOK_GAP' ? 'text-red-300' : item.state === 'OPEN' ? 'text-amber-300' : 'text-emerald-300'}`}>
+              {item.demanded ? 'demanded' : 'optional'}
+            </span>
+          </div>
+        ))}
         {retryableRecoveries.map((recovery) => (
           <div key={`retry-${recovery.recovery_id}`} className="flex justify-end">
             <button

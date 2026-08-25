@@ -30,6 +30,7 @@ from services.langgraph.persistence.idempotency import (
     hash_payload,
     reserve_idempotency,
 )
+from services.langgraph.persistence.invalidation import discharge_run_obligations, run_compile_gate
 from services.langgraph.persistence.proofs import (
     get_run_proof_bundle,
     put_completion_evaluation,
@@ -698,6 +699,14 @@ def resume_agency_run(
         fail_idempotency(scope, idempotency_key, "approval_stale")
         raise HTTPException(status_code=409, detail="Approval is stale because the protected run output changed")
 
+    compile_gate = run_compile_gate(run_id)
+    if compile_gate["compile_blocked"]:
+        fail_idempotency(scope, idempotency_key, "compile_blocked")
+        raise HTTPException(
+            status_code=409,
+            detail="Run delivery is blocked by open invalidation obligations or stale approvals",
+        )
+
     # Delivery is gated by the declared N2 release guards rather than by ad-hoc
     # checks, so the transition matrix stays the single authority on what may
     # reach a client. The guard codes map onto this route's existing error
@@ -850,6 +859,7 @@ def resume_agency_run(
         {"pipeline": record["pipeline"], "status": "completed"},
         run_id,
     )
+    discharge_run_obligations(run_id=run_id, artifact_branch=f"art-protected-{run_id}")
     outbox_message = trust.enqueue_outbox(
         tenant_id=record["tenant_id"],
         project_id=record["project_id"],
