@@ -7,6 +7,7 @@ from uuid import uuid4
 from services.langgraph.persistence.approvals import get_approvals_for_run
 from services.langgraph.persistence.database import decode_json, json_param, normalize_record, table, transaction
 from services.langgraph.persistence.idempotency import hash_payload
+from services.langgraph.persistence.lineage import list_project_lineage_remediations
 
 EVENT_CLASSES: tuple[str, ...] = (
     "SPEC_CHANGE",
@@ -372,7 +373,7 @@ def run_compile_gate(run_id: str) -> dict:
     }
 
 
-def project_snapshot_fold(*, tenant_id: str, project_id: str, run_id: str | None = None) -> str:
+def project_snapshot_state(*, tenant_id: str, project_id: str, run_id: str | None = None) -> dict:
     obligations = list_project_invalidation_obligations(project_id, tenant_id, run_id=run_id, limit=200)
     approvals: list[dict] = []
     with transaction() as db:
@@ -383,4 +384,20 @@ def project_snapshot_fold(*, tenant_id: str, project_id: str, run_id: str | None
             params.append(run_id)
         rows = db.execute(query, params).fetchall()
         approvals = [normalize_record(row) for row in rows]
-    return hash_payload({"obligations": obligations, "stale_approvals": approvals})
+    lineage = list_project_lineage_remediations(project_id, tenant_id, limit=200)
+    if run_id:
+        lineage = [item for item in lineage if item["run_id"] == run_id]
+    return {
+        "obligations": obligations,
+        "stale_approvals": approvals,
+        "lineage_remediations": lineage,
+        "compile_blocked": bool(
+            any(item["state"] in {"OPEN", "HOOK_GAP"} and item["demanded"] for item in obligations)
+            or approvals
+            or any(item["status"] == "OPEN" for item in lineage)
+        ),
+    }
+
+
+def project_snapshot_fold(*, tenant_id: str, project_id: str, run_id: str | None = None) -> str:
+    return hash_payload(project_snapshot_state(tenant_id=tenant_id, project_id=project_id, run_id=run_id))

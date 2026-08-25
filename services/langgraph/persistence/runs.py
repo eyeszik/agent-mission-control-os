@@ -71,66 +71,26 @@ def _sync_protected_run_artifact(run_id: str, tenant_id: str, project_id: str, r
     if subject_hash is None:
         return
 
-    from services.langgraph.persistence.agency_kernel import (
-        create_artifact,
-        create_engagement,
-        get_artifact,
-        get_engagement,
-        record_artifact_revision,
-    )
+    from services.langgraph.persistence.agency_kernel import create_or_revise_protected_run_artifact
     from services.langgraph.persistence.approvals import get_approvals_for_run
 
-    engagement_id = f"eng-lineage-{run_id}"
-    artifact_id = f"art-protected-{run_id}"
     approvals = get_approvals_for_run(run_id)
     approval = approvals[0] if approvals else None
-
-    if not get_engagement(engagement_id):
-        create_engagement(
-            engagement_id,
-            tenant_id,
-            project_id,
-            "Protected runtime artifact lineage",
-            "Canonical protected artifact for ambient lineage invalidation",
-            status="active",
-        )
-
-    artifact = get_artifact(artifact_id)
-    if artifact is None:
-        create_artifact(
-            artifact_id,
-            engagement_id,
-            tenant_id,
-            project_id,
-            "campaign_package",
-            "growth",
-            status="approved",
-            content_hash=subject_hash,
-            metadata={
-                "protected_run_id": run_id,
-                "protected_approval_id": approval["approval_id"] if approval else None,
-                "canonical_protected_artifact": True,
-                "ambient_revision_source": "run_result_commit",
-            },
-        )
-        record_run_invalidation_bindings(
-            tenant_id=tenant_id,
-            project_id=project_id,
-            run_id=run_id,
-            artifact_branch=artifact_id,
-            result=result,
-        )
+    revision = create_or_revise_protected_run_artifact(
+        run_id=run_id,
+        tenant_id=tenant_id,
+        project_id=project_id,
+        approval_id=approval["approval_id"] if approval else None,
+        content_hash=subject_hash,
+    )
+    if not revision["changed"]:
         return
 
-    if artifact.get("content_hash") == subject_hash:
-        return
-
-    record_artifact_revision(artifact_id, content_hash=subject_hash)
     record_run_invalidation_bindings(
         tenant_id=tenant_id,
         project_id=project_id,
         run_id=run_id,
-        artifact_branch=artifact_id,
+        artifact_branch=revision["artifact"]["artifact_id"],
         result=result,
     )
 

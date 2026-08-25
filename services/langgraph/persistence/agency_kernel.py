@@ -633,6 +633,65 @@ def record_artifact_revision(
     }
 
 
+def create_or_revise_protected_run_artifact(
+    *,
+    run_id: str,
+    tenant_id: str,
+    project_id: str,
+    approval_id: Optional[str],
+    content_hash: str,
+    synthetic: bool = False,
+) -> dict:
+    engagement_id = f"eng-lineage-{run_id}"
+    artifact_id = f"art-protected-{run_id}"
+    if not get_engagement(engagement_id):
+        create_engagement(
+            engagement_id,
+            tenant_id,
+            project_id,
+            "Protected runtime artifact lineage",
+            "Canonical protected artifact for ambient lineage invalidation",
+            status="active",
+        )
+    artifact = get_artifact(artifact_id)
+    if artifact is None:
+        created = create_artifact(
+            artifact_id,
+            engagement_id,
+            tenant_id,
+            project_id,
+            "campaign_package",
+            "growth",
+            status="approved",
+            content_hash=content_hash,
+            metadata={
+                "protected_run_id": run_id,
+                "protected_approval_id": approval_id,
+                "canonical_protected_artifact": True,
+                **({"synthetic_protected_artifact": True} if synthetic else {}),
+            },
+        )
+        return {
+            "artifact": created,
+            "changed_version_ref": f"{artifact_id}:v{created['version']}",
+            "affected": [],
+            "created": True,
+            "changed": True,
+        }
+    if artifact.get("content_hash") == content_hash:
+        return {
+            "artifact": artifact,
+            "changed_version_ref": f"{artifact_id}:v{artifact['version']}",
+            "affected": [],
+            "created": False,
+            "changed": False,
+        }
+    revised = record_artifact_revision(artifact_id, content_hash=content_hash)
+    revised["created"] = False
+    revised["changed"] = True
+    return revised
+
+
 def _assert_engagement_scope(engagement_id: str, tenant_id: str, project_id: str) -> None:
     engagement = get_engagement(engagement_id)
     if not engagement:

@@ -20,7 +20,7 @@ from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffec
 from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.models import AgentRun
-from services.langgraph.persistence.agency_kernel import create_artifact, create_engagement, get_artifact, get_engagement
+from services.langgraph.persistence.agency_kernel import create_or_revise_protected_run_artifact
 from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import bind_approval_subject, get_approvals_for_run, mark_approval_stale
 from services.langgraph.persistence.events import record_event
@@ -106,42 +106,17 @@ def _ensure_protected_run_artifact(
     approval_id: str | None,
     subject_hash: str,
 ) -> tuple[str, str]:
-    engagement_id = f"eng-lineage-{run_id}"
-    artifact_id = f"art-protected-{run_id}"
-    if not get_engagement(engagement_id):
-        create_engagement(
-            engagement_id,
-            tenant_id,
-            project_id,
-            "Protected runtime artifact lineage",
-            "Canonical protected artifact for HITL lineage invalidation",
-            status="active",
-        )
-    artifact = get_artifact(artifact_id)
-    if not artifact:
-        create_artifact(
-            artifact_id,
-            engagement_id,
-            tenant_id,
-            project_id,
-            "campaign_package",
-            "growth",
-            status="approved",
-            content_hash=subject_hash,
-            metadata={
-                "protected_run_id": run_id,
-                "protected_approval_id": approval_id,
-                "canonical_protected_artifact": True,
-            },
-        )
-        artifact = get_artifact(artifact_id)
-    elif artifact.get("content_hash") != subject_hash:
-        from services.langgraph.persistence.agency_kernel import record_artifact_revision
-
-        revised = record_artifact_revision(artifact_id, content_hash=subject_hash)
-        artifact = revised["artifact"]
+    revision = create_or_revise_protected_run_artifact(
+        run_id=run_id,
+        tenant_id=tenant_id,
+        project_id=project_id,
+        approval_id=approval_id,
+        content_hash=subject_hash,
+    )
+    artifact = revision["artifact"]
     if not artifact:
         raise RuntimeError("Protected run artifact could not be materialized")
+    artifact_id = artifact["artifact_id"]
     return artifact_id, f"{artifact_id}:v{artifact['version']}"
 
 

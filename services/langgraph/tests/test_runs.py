@@ -125,7 +125,8 @@ def test_invalidation_snapshot_fold_survives_runtime_restart(monkeypatch, tmp_pa
 
     import services.langgraph.persistence.sqlite_db as sqlite_db
     from services.langgraph.app import runtime_support
-    from services.langgraph.persistence.invalidation import project_snapshot_fold
+    from services.langgraph.persistence.invalidation import project_snapshot_fold, project_snapshot_state
+    from services.langgraph.persistence.approvals import bind_approval_subject, create_approval_request
     from services.langgraph.persistence.runs import create_run_record, update_run_status
 
     sqlite_db.init_db()
@@ -134,15 +135,34 @@ def test_invalidation_snapshot_fold_survives_runtime_restart(monkeypatch, tmp_pa
     tenant_id = "tenant_1"
     project_id = "proj_1"
     create_run_record(run_id, tenant_id, project_id, "branding_marketing_agency", "running", {})
+    approval = create_approval_request(
+        run_id,
+        tenant_id,
+        project_id,
+        "review generated campaign package",
+        0.8,
+    )
     update_run_status(run_id, "needs_approval", _agency_result("Northwind"))
+    bind_approval_subject(
+        approval["approval_id"],
+        subject_hash="a" * 64,
+        subject_ref=f"art-protected-{run_id}",
+        subject_version_ref=f"art-protected-{run_id}:v1",
+    )
 
     revised = _agency_result("Contoso")
     revised["agency"]["generation_provenance"][0]["prompt_hash"] = "c" * 64
     update_run_status(run_id, "needs_approval", revised)
 
+    before_state = project_snapshot_state(tenant_id=tenant_id, project_id=project_id, run_id=run_id)
     before = project_snapshot_fold(tenant_id=tenant_id, project_id=project_id, run_id=run_id)
     runtime_support.trust_kernel.cache_clear()
     runtime_support.runtime_queue.cache_clear()
+    after_state = project_snapshot_state(tenant_id=tenant_id, project_id=project_id, run_id=run_id)
     after = project_snapshot_fold(tenant_id=tenant_id, project_id=project_id, run_id=run_id)
 
+    assert before_state == after_state
+    assert before_state["compile_blocked"] is True
+    assert before_state["lineage_remediations"]
+    assert before_state["stale_approvals"]
     assert before == after
