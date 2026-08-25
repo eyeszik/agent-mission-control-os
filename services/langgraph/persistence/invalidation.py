@@ -365,11 +365,24 @@ def run_compile_gate(run_id: str) -> dict:
     obligations = open_demanded_obligations(run_id=run_id, artifact_branch=artifact_branch)
     approvals = get_approvals_for_run(run_id)
     stale_approvals = [approval for approval in approvals if approval.get("status") == "stale"]
+    lineage_remediations: list[dict] = []
+    with transaction() as db:
+        run_row = db.execute(
+            f"SELECT tenant_id, project_id FROM {table('runs')} WHERE run_id = ?",
+            (run_id,),
+        ).fetchone()
+    if run_row:
+        lineage_remediations = [
+            item
+            for item in list_project_lineage_remediations(run_row["project_id"], run_row["tenant_id"], limit=200)
+            if item["run_id"] == run_id and item["status"] == "OPEN"
+        ]
     return {
         "artifact_branch": artifact_branch,
-        "compile_blocked": bool(obligations or stale_approvals),
+        "compile_blocked": bool(obligations or stale_approvals or lineage_remediations),
         "open_obligations": obligations,
         "stale_approvals": stale_approvals,
+        "lineage_remediations": lineage_remediations,
     }
 
 

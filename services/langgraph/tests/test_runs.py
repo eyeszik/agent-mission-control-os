@@ -166,3 +166,45 @@ def test_invalidation_snapshot_fold_survives_runtime_restart(monkeypatch, tmp_pa
     assert before_state["lineage_remediations"]
     assert before_state["stale_approvals"]
     assert before == after
+
+
+def test_run_compile_gate_blocks_on_open_lineage_remediation_without_stale_approval():
+    import services.langgraph.persistence.sqlite_db as sqlite_db
+    from services.langgraph.persistence.agency_kernel import create_artifact, create_engagement, record_artifact_revision
+    from services.langgraph.persistence.invalidation import run_compile_gate
+    from services.langgraph.persistence.runs import create_run_record
+
+    sqlite_db.init_db()
+
+    run_id = _id("run-lineage-gate")
+    tenant_id = "tenant_1"
+    project_id = "proj_1"
+    engagement_id = f"eng-lineage-{run_id}"
+    artifact_id = f"art-protected-{run_id}"
+
+    create_run_record(run_id, tenant_id, project_id, "branding_marketing_agency", "needs_approval", {})
+    create_engagement(
+        engagement_id,
+        tenant_id,
+        project_id,
+        "Protected runtime artifact lineage",
+        "Canonical protected artifact for ambient lineage invalidation",
+        status="active",
+    )
+    create_artifact(
+        artifact_id,
+        engagement_id,
+        tenant_id,
+        project_id,
+        "campaign_package",
+        "growth",
+        status="approved",
+        content_hash="a" * 64,
+        metadata={"protected_run_id": run_id, "canonical_protected_artifact": True},
+    )
+    record_artifact_revision(artifact_id, content_hash="b" * 64)
+
+    gate = run_compile_gate(run_id)
+    assert gate["stale_approvals"] == []
+    assert gate["lineage_remediations"]
+    assert gate["compile_blocked"] is True
