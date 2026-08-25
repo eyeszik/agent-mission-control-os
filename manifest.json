@@ -227,7 +227,7 @@
       "path": "services/langgraph/tests/test_agency_ontology.py"
     },
     {
-      "git_blob_sha": "80f550b0bcdab4ffcd2281f16c6ebff044888f4a",
+      "git_blob_sha": "12dab9940ae8ea523997e443c21a4f7d1b5feca4",
       "path": "services/langgraph/tests/test_delivery_gate.py"
     },
     {

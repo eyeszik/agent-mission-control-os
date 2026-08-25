@@ -96,12 +96,14 @@ def test_run_result_commit_creates_then_revises_protected_artifact_automatically
 
 def test_run_result_commit_opens_and_discharges_invalidation_obligations():
     import services.langgraph.persistence.sqlite_db as sqlite_db
+    from services.langgraph.app.runtime_support import trust_kernel
     from services.langgraph.persistence.invalidation import discharge_run_obligations, open_demanded_obligations
     from services.langgraph.persistence.runs import create_run_record, update_run_status
 
     sqlite_db.init_db()
 
     run_id = _id("run-obligation")
+    trust_kernel().bind_project(tenant_id="tenant_1", project_id="proj_1")
     create_run_record(run_id, "tenant_1", "proj_1", "branding_marketing_agency", "running", {})
     update_run_status(run_id, "needs_approval", _agency_result("Northwind"))
 
@@ -118,6 +120,44 @@ def test_run_result_commit_opens_and_discharges_invalidation_obligations():
     assert all(item["state"] == "DISCHARGED_RECOMPUTE" for item in discharged)
 
 
+def test_run_result_commit_persists_hook_gap_for_unsourced_classes_and_blocks_compile():
+    import services.langgraph.persistence.sqlite_db as sqlite_db
+    from services.langgraph.persistence.invalidation import latest_branch_obligations, open_demanded_obligations, run_compile_gate
+    from services.langgraph.persistence.runs import create_run_record, update_run_status
+
+    sqlite_db.init_db()
+
+    run_id = _id("run-hook-gap")
+    project_id = _id("proj-hook-gap")
+    create_run_record(run_id, "tenant_1", project_id, "branding_marketing_agency", "running", {})
+    update_run_status(
+        run_id,
+        "needs_approval",
+        {
+            "agency": {
+                "campaign_package": {"brief": {"brand_name": "Northwind"}},
+                "qa_report": {"brand_safety_passed": True},
+                "generation_provenance": [],
+                "degraded": False,
+            }
+        },
+    )
+
+    open_rows = open_demanded_obligations(run_id=run_id, artifact_branch=f"art-protected-{run_id}")
+    by_class = {row["event_class"]: row for row in open_rows}
+    latest = latest_branch_obligations(run_id, f"art-protected-{run_id}")
+    assert by_class["MEMORY_WRITE"]["state"] == "HOOK_GAP"
+    assert by_class["CLOCK_WINDOW_ADVANCE"]["state"] == "HOOK_GAP"
+    assert latest["ACL_SECRET_CHANGE"]["state"] in {"HOOK_GAP", "DISCHARGED_RECOMPUTE"}
+    assert by_class["SPEC_CHANGE"]["state"] == "HOOK_GAP"
+    assert by_class["MODEL_PARAM_CHANGE"]["state"] == "HOOK_GAP"
+    assert by_class["SCHEMA_CHANGE"]["state"] == "HOOK_GAP"
+
+    gate = run_compile_gate(run_id)
+    assert gate["compile_blocked"] is True
+    assert any(item["state"] == "HOOK_GAP" for item in gate["open_obligations"])
+
+
 def test_invalidation_snapshot_fold_survives_runtime_restart(monkeypatch, tmp_path):
     db_path = tmp_path / "restart.db"
     monkeypatch.setenv("AMC_DATABASE_BACKEND", "sqlite")
@@ -125,6 +165,7 @@ def test_invalidation_snapshot_fold_survives_runtime_restart(monkeypatch, tmp_pa
 
     import services.langgraph.persistence.sqlite_db as sqlite_db
     from services.langgraph.app import runtime_support
+    from services.langgraph.app.runtime_support import trust_kernel
     from services.langgraph.persistence.invalidation import project_snapshot_fold, project_snapshot_state
     from services.langgraph.persistence.approvals import bind_approval_subject, create_approval_request
     from services.langgraph.persistence.runs import create_run_record, update_run_status
@@ -134,6 +175,7 @@ def test_invalidation_snapshot_fold_survives_runtime_restart(monkeypatch, tmp_pa
     run_id = _id("run-restart")
     tenant_id = "tenant_1"
     project_id = "proj_1"
+    trust_kernel().bind_project(tenant_id=tenant_id, project_id=project_id)
     create_run_record(run_id, tenant_id, project_id, "branding_marketing_agency", "running", {})
     approval = create_approval_request(
         run_id,
@@ -166,6 +208,53 @@ def test_invalidation_snapshot_fold_survives_runtime_restart(monkeypatch, tmp_pa
     assert before_state["lineage_remediations"]
     assert before_state["stale_approvals"]
     assert before == after
+
+
+def test_restart_restores_exact_hook_gap_state_without_global_invalidate(monkeypatch, tmp_path):
+    db_path = tmp_path / "restart-hook-gap.db"
+    monkeypatch.setenv("AMC_DATABASE_BACKEND", "sqlite")
+    monkeypatch.setenv("AMC_DB_PATH", str(db_path))
+
+    import services.langgraph.persistence.sqlite_db as sqlite_db
+    from services.langgraph.app import runtime_support
+    from services.langgraph.persistence.invalidation import project_snapshot_fold, project_snapshot_state
+    from services.langgraph.persistence.runs import create_run_record, update_run_status
+
+    sqlite_db.init_db()
+
+    affected_run_id = _id("run-restart-gap")
+    unaffected_run_id = _id("run-restart-clean")
+    create_run_record(affected_run_id, "tenant_1", "proj_1", "branding_marketing_agency", "running", {})
+    create_run_record(unaffected_run_id, "tenant_1", "proj_1", "branding_marketing_agency", "running", {})
+
+    update_run_status(
+        affected_run_id,
+        "needs_approval",
+        {
+            "agency": {
+                "campaign_package": {"brief": {"brand_name": "Gap"}},
+                "qa_report": {"brand_safety_passed": True},
+                "generation_provenance": [],
+                "degraded": False,
+            }
+        },
+    )
+    before_affected = project_snapshot_state(tenant_id="tenant_1", project_id="proj_1", run_id=affected_run_id)
+    before_unaffected = project_snapshot_state(tenant_id="tenant_1", project_id="proj_1", run_id=unaffected_run_id)
+    before_fold = project_snapshot_fold(tenant_id="tenant_1", project_id="proj_1", run_id=affected_run_id)
+
+    runtime_support.trust_kernel.cache_clear()
+    runtime_support.runtime_queue.cache_clear()
+
+    after_affected = project_snapshot_state(tenant_id="tenant_1", project_id="proj_1", run_id=affected_run_id)
+    after_unaffected = project_snapshot_state(tenant_id="tenant_1", project_id="proj_1", run_id=unaffected_run_id)
+    after_fold = project_snapshot_fold(tenant_id="tenant_1", project_id="proj_1", run_id=affected_run_id)
+
+    assert before_affected == after_affected
+    assert before_unaffected == after_unaffected
+    assert before_affected["compile_blocked"] is True
+    assert before_unaffected["compile_blocked"] is False
+    assert before_fold == after_fold
 
 
 def test_run_compile_gate_blocks_on_open_lineage_remediation_without_stale_approval():

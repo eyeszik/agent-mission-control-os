@@ -220,3 +220,40 @@ def test_artifact_revision_trust_projection_opens_lineage_remediation():
     queue = list_project_lineage_remediations(project_id, "tenant-events-test")
     assert queue[0]["run_id"] == run_id
     assert queue[0]["status"] == "OPEN"
+
+
+def test_resume_delivery_blocks_on_hook_gap_and_trust_projection_matches():
+    run_id = f"run-delivery-gap-{uuid4()}"
+    project_id = f"proj-delivery-gap-{uuid4()}"
+    kernel = trust_kernel()
+    kernel.bind_project(tenant_id="tenant-events-test", project_id=project_id)
+    create_run_record(run_id, "tenant-events-test", project_id, "branding_marketing_agency", "running", {})
+    from services.langgraph.persistence.runs import update_run_status
+    update_run_status(
+        run_id,
+        "needs_approval",
+        {
+            "agency": {
+                "campaign_package": {"brief": {"brand_name": "Northwind"}},
+                "qa_report": {"brand_safety_passed": True},
+                "generation_provenance": [],
+                "degraded": False,
+            }
+        },
+    )
+    approval = create_approval_request(run_id, "tenant-events-test", project_id, "release review", 0.8)
+    resolve_approval(approval["approval_id"], reviewer="qa-bot", decision="approve")
+
+    response = client.post(
+        f"/agency/runs/{run_id}/resume",
+        headers={"Idempotency-Key": str(uuid4())},
+    )
+    assert response.status_code == 409
+    assert "blocked" in response.json()["detail"].lower()
+
+    trust = client.get(f"/runtime/projects/{project_id}/trust")
+    assert trust.status_code == 200
+    payload = trust.json()
+    assert payload["compile_blocked"] is True
+    assert payload["hook_gap_count"] >= 1
+    assert any(item["run_id"] == run_id and item["state"] == "HOOK_GAP" for item in payload["recent_invalidation_obligations"])

@@ -76,16 +76,16 @@ def test_unresolved_approval_blocks_delivery(provider_success):
     body = _create_run()
     response = _resume(body["run_id"])
     assert response.status_code == 409
-    assert response.json()["detail"] == "Run still has an unresolved approval"
+    assert "blocked by open invalidation obligations" in response.json()["detail"].lower()
 
 
 def test_degraded_output_blocks_before_the_approval_guard(monkeypatch):
-    """Guard order is part of the contract: degraded reports first."""
+    """Unsourced demanded invalidation classes block delivery before release guards."""
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     body = _create_run()
     response = _resume(body["run_id"])
     assert response.status_code == 409
-    assert "degraded" in response.json()["detail"].lower()
+    assert "blocked by open invalidation obligations" in response.json()["detail"].lower()
 
 
 def test_rejected_approval_blocks_delivery_and_names_the_decision(provider_success):

@@ -43,7 +43,9 @@ def _project_binding_hash(tenant_id: str, project_id: str) -> str:
             f"SELECT binding_hash FROM {table('tenant_project_bindings')} WHERE tenant_id = ? AND project_id = ?",
             (tenant_id, project_id),
         ).fetchone()
-    binding_hash = row["binding_hash"] if row else "unbound"
+    if not row or not row["binding_hash"]:
+        return ""
+    binding_hash = row["binding_hash"]
     return hash_payload({"tenant_id": tenant_id, "project_id": project_id, "binding_hash": binding_hash})
 
 
@@ -55,6 +57,55 @@ def _generation_provenance(result: Optional[dict]) -> list[dict]:
     items = [item for item in provenance if isinstance(item, dict)]
     items.sort(key=lambda item: (str(item.get("task") or ""), str(item.get("completed_at") or "")))
     return items
+
+
+def _provenance_witness(
+    provenance: list[dict],
+    *,
+    required_fields: tuple[str, ...],
+    event_class: str,
+) -> dict[str, object]:
+    if not provenance:
+        return {
+            "status": "HOOK_GAP",
+            "cause_k": hash_payload({"event_class": event_class, "reason": "missing_generation_provenance"}),
+            "payload": {
+                "reason": "missing_generation_provenance",
+                "required_fields": list(required_fields),
+                "provenance_items": 0,
+            },
+        }
+
+    missing: list[dict[str, object]] = []
+    for item in provenance:
+        absent = [field for field in required_fields if not item.get(field)]
+        if absent:
+            missing.append(
+                {
+                    "task": item.get("task"),
+                    "missing_fields": absent,
+                }
+            )
+    if missing:
+        return {
+            "status": "HOOK_GAP",
+            "cause_k": hash_payload({"event_class": event_class, "reason": "incomplete_generation_provenance", "missing": missing}),
+            "payload": {
+                "reason": "incomplete_generation_provenance",
+                "required_fields": list(required_fields),
+                "missing": missing,
+                "provenance_items": len(provenance),
+            },
+        }
+
+    return {
+        "status": "BOUND",
+        "cause_k": "",
+        "payload": {
+            "required_fields": list(required_fields),
+            "provenance_items": len(provenance),
+        },
+    }
 
 
 def derive_event_bindings(*, tenant_id: str, project_id: str, result: Optional[dict]) -> dict[str, dict]:
@@ -94,17 +145,34 @@ def derive_event_bindings(*, tenant_id: str, project_id: str, result: Optional[d
         "delivery": agency.get("delivery"),
         "degraded": bool(agency.get("degraded")),
     }
+    spec_witness = _provenance_witness(
+        provenance,
+        required_fields=("task", "prompt_version", "prompt_hash"),
+        event_class="SPEC_CHANGE",
+    )
+    model_witness = _provenance_witness(
+        provenance,
+        required_fields=("task", "provider", "model", "mode", "attempts", "fallback_used"),
+        event_class="MODEL_PARAM_CHANGE",
+    )
+    schema_witness = _provenance_witness(
+        provenance,
+        required_fields=("task", "schema_version"),
+        event_class="SCHEMA_CHANGE",
+    )
+    binding_hash = _project_binding_hash(tenant_id, project_id)
+    acl_status = "BOUND" if binding_hash else "HOOK_GAP"
 
     return {
         "SPEC_CHANGE": {
-            "cause_k": hash_payload({"spec": spec_snapshot}),
-            "payload": {"spec_snapshot": spec_snapshot},
-            "status": "BOUND",
+            "cause_k": hash_payload({"spec": spec_snapshot}) if spec_witness["status"] == "BOUND" else spec_witness["cause_k"],
+            "payload": {"spec_snapshot": spec_snapshot, **spec_witness["payload"]},
+            "status": spec_witness["status"],
         },
         "MODEL_PARAM_CHANGE": {
-            "cause_k": hash_payload({"model_params": model_snapshot}),
-            "payload": {"model_snapshot": model_snapshot},
-            "status": "BOUND",
+            "cause_k": hash_payload({"model_params": model_snapshot}) if model_witness["status"] == "BOUND" else model_witness["cause_k"],
+            "payload": {"model_snapshot": model_snapshot, **model_witness["payload"]},
+            "status": model_witness["status"],
         },
         "TOOL_RESULT_CHANGE": {
             "cause_k": hash_payload({"tool_result": tool_snapshot}),
@@ -112,24 +180,27 @@ def derive_event_bindings(*, tenant_id: str, project_id: str, result: Optional[d
             "status": "BOUND",
         },
         "SCHEMA_CHANGE": {
-            "cause_k": hash_payload({"schema": schema_snapshot}),
-            "payload": {"schema_snapshot": schema_snapshot},
-            "status": "BOUND",
+            "cause_k": hash_payload({"schema": schema_snapshot}) if schema_witness["status"] == "BOUND" else schema_witness["cause_k"],
+            "payload": {"schema_snapshot": schema_snapshot, **schema_witness["payload"]},
+            "status": schema_witness["status"],
         },
         "ACL_SECRET_CHANGE": {
-            "cause_k": _project_binding_hash(tenant_id, project_id),
-            "payload": {"authz_scope": {"tenant_id": tenant_id, "project_id": project_id}},
-            "status": "BOUND",
+            "cause_k": binding_hash if binding_hash else hash_payload({"event_class": "ACL_SECRET_CHANGE", "reason": "missing_tenant_project_binding"}),
+            "payload": {
+                "authz_scope": {"tenant_id": tenant_id, "project_id": project_id},
+                "reason": None if acl_status == "BOUND" else "missing_tenant_project_binding",
+            },
+            "status": acl_status,
         },
         "MEMORY_WRITE": {
-            "cause_k": hash_payload({"memory_support": "not_present"}),
-            "payload": {"memory_support": "not_present"},
-            "status": "NOOP",
+            "cause_k": hash_payload({"event_class": "MEMORY_WRITE", "reason": "no_persisted_memory_source"}),
+            "payload": {"reason": "no_persisted_memory_source"},
+            "status": "HOOK_GAP",
         },
         "CLOCK_WINDOW_ADVANCE": {
-            "cause_k": hash_payload({"window_lease": None}),
-            "payload": {"window_lease": None},
-            "status": "NOOP",
+            "cause_k": hash_payload({"event_class": "CLOCK_WINDOW_ADVANCE", "reason": "missing_window_lease_source"}),
+            "payload": {"reason": "missing_window_lease_source", "window_lease": None},
+            "status": "HOOK_GAP",
         },
     }
 
@@ -239,6 +310,13 @@ def record_run_invalidation_bindings(
             "binding_status": binding["status"],
         }
         if previous is None:
+            initial_state = (
+                "DISCHARGED_RECOMPUTE"
+                if binding["status"] == "BOUND"
+                else "HOOK_GAP"
+                if binding["status"] == "HOOK_GAP"
+                else "DISCHARGED_CUTOFF"
+            )
             created.append(
                 create_invalidation_obligation(
                     tenant_id=tenant_id,
@@ -247,7 +325,7 @@ def record_run_invalidation_bindings(
                     artifact_branch=artifact_branch,
                     node_id=node_id,
                     event_class=event_class,
-                    state="DISCHARGED_RECOMPUTE" if binding["status"] == "BOUND" else "DISCHARGED_CUTOFF",
+                    state=initial_state,
                     demanded=demanded,
                     cause_k=cause_k,
                     payload=payload,
@@ -256,6 +334,7 @@ def record_run_invalidation_bindings(
             continue
         if previous["cause_k"] == cause_k:
             continue
+        next_state = "HOOK_GAP" if binding["status"] == "HOOK_GAP" else "OPEN"
         created.append(
             create_invalidation_obligation(
                 tenant_id=tenant_id,
@@ -264,7 +343,7 @@ def record_run_invalidation_bindings(
                 artifact_branch=artifact_branch,
                 node_id=node_id,
                 event_class=event_class,
-                state="OPEN",
+                state=next_state,
                 demanded=demanded,
                 cause_k=cause_k,
                 payload={**payload, "previous_cause_k": previous["cause_k"]},

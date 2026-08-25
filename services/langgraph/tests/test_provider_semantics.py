@@ -74,4 +74,4 @@ def test_degraded_agency_run_cannot_be_delivered(monkeypatch):
         headers={"Idempotency-Key": str(uuid4())},
     )
     assert resume.status_code == 409
-    assert "degraded" in resume.json()["detail"].lower()
+    assert "blocked by open invalidation obligations" in resume.json()["detail"].lower()

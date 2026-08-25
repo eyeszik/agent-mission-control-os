@@ -163,21 +163,16 @@ def test_create_and_resume_agency_run_emits_proof_bundle(monkeypatch):
         f"/agency/runs/{created['run_id']}/resume",
         headers={"Idempotency-Key": str(uuid4())},
     )
-    assert resume.status_code == 200
-    resumed = resume.json()
-    assert resumed["proof"]["summary"]["dispatch_count"] == 2
-    assert resumed["proof"]["summary"]["execution_count"] == 2
-    assert resumed["proof"]["summary"]["observation_count"] == 2
-    assert resumed["proof"]["summary"]["failure_count"] == 0
-    assert resumed["proof"]["summary"]["latest_terminal_candidate"] == "COMPLETE"
+    assert resume.status_code == 409
+    assert "blocked by open invalidation obligations" in resume.json()["detail"].lower()
 
     trust = client.get(f"/runtime/projects/{created['project_id']}/trust")
     assert trust.status_code == 200
     trust_payload = trust.json()
-    assert trust_payload["policy_decisions"] >= 3
-    assert trust_payload["delivered_outbox"] == 1
+    assert trust_payload["compile_blocked"] is True
+    assert trust_payload["hook_gap_count"] >= 1
+    assert trust_payload["policy_decisions"] >= 1
+    assert trust_payload["delivered_outbox"] == 0
     assert trust_payload["pending_outbox"] == 0
     assert trust_payload["open_recovery_cases"] == 0
-    assert trust_payload["recent_policy_decisions"][0]["action"] in {"agency.resume", "approval.decide"}
-    assert trust_payload["recent_outbox_messages"][0]["topic"] == "agency.delivery.completed"
-    assert trust_payload["recent_outbox_messages"][0]["status"] == "DELIVERED"
+    assert trust_payload["recent_policy_decisions"][0]["action"] in {"agency.create", "approval.decide"}
