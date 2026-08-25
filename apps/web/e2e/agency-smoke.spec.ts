@@ -58,6 +58,10 @@ test.describe('Agent Mission Control local release smoke', () => {
     await expect(page.getByText('Consequential Lifecycle', { exact: true })).toBeVisible();
     await expect(page.getByText('Lineage Remediation Queue', { exact: true })).toBeVisible();
     await expect(page.getByText('Run Remediation', { exact: true })).toBeVisible();
+    const runRemediationSection = page.getByText('Run Remediation', { exact: true }).locator('..');
+    await expect(runRemediationSection).toContainText('compile gate');
+    await expect(runRemediationSection).toContainText('BLOCKED');
+    await expect(runRemediationSection).toContainText(/hook gaps\s*[1-9]/i);
     await expect(brandInput).toHaveValue('');
     await expect(audienceInput).toHaveValue('');
     await expect(goalsInput).toHaveValue('');
