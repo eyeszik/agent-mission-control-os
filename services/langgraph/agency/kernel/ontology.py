@@ -76,6 +76,17 @@ class ArtifactType(str, Enum):
     measurement_plan = "measurement_plan"
     qa_report = "qa_report"
     release_record = "release_record"
+    brand_core = "brand_core"
+    brand_guidelines_doc = "brand_guidelines_doc"
+    design_token_set = "design_token_set"
+    design_system_spec = "design_system_spec"
+    website_lockup_spec = "website_lockup_spec"
+    asset_prompt_set = "asset_prompt_set"
+    business_model_spec = "business_model_spec"
+    offer_definition = "offer_definition"
+    app_build_spec = "app_build_spec"
+    automation_spec = "automation_spec"
+    knowledge_capsule = "knowledge_capsule"
 
 
 class DepartmentDefinition(BaseModel):
@@ -115,26 +126,40 @@ DEPARTMENT_REGISTRY: dict[Department, DepartmentDefinition] = {
             Department.research,
             "Gather and synthesize external evidence about market, audience, and category.",
             (Capability.research_synthesis, Capability.measurement),
-            (ArtifactType.research_brief, ArtifactType.market_analysis),
+            (
+                ArtifactType.research_brief,
+                ArtifactType.market_analysis,
+                ArtifactType.knowledge_capsule,
+            ),
         ),
         _definition(
             Department.strategy,
             "Convert evidence into a defensible market position and engagement plan.",
             (Capability.positioning, Capability.campaign_planning),
-            (ArtifactType.positioning_statement,),
+            (
+                ArtifactType.positioning_statement,
+                ArtifactType.business_model_spec,
+                ArtifactType.offer_definition,
+            ),
         ),
         _definition(
             Department.brand,
             "Own brand platform, naming, and identity coherence across every surface.",
             (Capability.naming, Capability.identity_system, Capability.positioning),
-            (ArtifactType.brand_platform, ArtifactType.naming_candidate, ArtifactType.identity_guidelines),
+            (
+                ArtifactType.brand_platform,
+                ArtifactType.naming_candidate,
+                ArtifactType.identity_guidelines,
+                ArtifactType.brand_core,
+                ArtifactType.brand_guidelines_doc,
+            ),
             (Department.quality,),
         ),
         _definition(
             Department.creative,
             "Translate strategy into distinct campaign concepts.",
             (Capability.concepting, Capability.art_direction),
-            (ArtifactType.creative_concept,),
+            (ArtifactType.creative_concept, ArtifactType.asset_prompt_set),
             (Department.quality,),
         ),
         _definition(
@@ -148,7 +173,12 @@ DEPARTMENT_REGISTRY: dict[Department, DepartmentDefinition] = {
             Department.design,
             "Specify and direct visual execution.",
             (Capability.art_direction, Capability.identity_system),
-            (ArtifactType.design_brief,),
+            (
+                ArtifactType.design_brief,
+                ArtifactType.design_token_set,
+                ArtifactType.design_system_spec,
+                ArtifactType.website_lockup_spec,
+            ),
             (Department.quality,),
         ),
         _definition(
@@ -161,7 +191,11 @@ DEPARTMENT_REGISTRY: dict[Department, DepartmentDefinition] = {
             Department.engineering,
             "Plan and carry out technical implementation.",
             (Capability.implementation,),
-            (ArtifactType.implementation_plan,),
+            (
+                ArtifactType.implementation_plan,
+                ArtifactType.app_build_spec,
+                ArtifactType.automation_spec,
+            ),
         ),
         _definition(
             Department.growth,

@@ -81,7 +81,7 @@
       "path": "packages/shared/src/schemas/lifecycle.ts"
     },
     {
-      "git_blob_sha": "6b1bd6cfd0486e6ccf7e3340a9f5d58228380e8f",
+      "git_blob_sha": "efe0dae5d3b81c5b9d5b3884095cfb7c663dc13f",
       "path": "packages/shared/src/schemas/ontology.ts"
     },
     {
@@ -121,7 +121,7 @@
       "path": "services/langgraph/agency/kernel/models.py"
     },
     {
-      "git_blob_sha": "8a950bdee37173e2586508bf943cc5fe29c52aef",
+      "git_blob_sha": "51db1dac454f52b1135190ff405ebcf4b5ed28b9",
       "path": "services/langgraph/agency/kernel/ontology.py"
     },
     {
@@ -129,7 +129,7 @@
       "path": "services/langgraph/agency/kernel/registry.py"
     },
     {
-      "git_blob_sha": "1c47f64fc2b190c49c152b98ce486887bfcf605f",
+      "git_blob_sha": "c398d9c8d684604fd6914652f7f28e43b69e6553",
       "path": "services/langgraph/agency/kernel/roles.py"
     },
     {
@@ -223,7 +223,7 @@
       "path": "services/langgraph/tests/test_agency_kernel.py"
     },
     {
-      "git_blob_sha": "feb04b084c405cc6bd5fc8a04cb360609105bc98",
+      "git_blob_sha": "ea103f6e2002aebd9e70f971efd9fd701345ed88",
       "path": "services/langgraph/tests/test_agency_ontology.py"
     },
     {
