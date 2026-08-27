@@ -93,34 +93,55 @@ ROLE_REGISTRY: dict[str, RoleContract] = {
             Department.research,
             "Collect and synthesize external evidence about the category and audience.",
             (Capability.research_synthesis,),
-            (ArtifactType.research_brief, ArtifactType.market_analysis),
+            (
+                ArtifactType.research_brief,
+                ArtifactType.market_analysis,
+                # Compressed, reusable knowledge for future engagements.
+                ArtifactType.knowledge_capsule,
+            ),
             min_evidence=3,
         ),
         _contract(
             "brand_strategist",
             Department.strategy,
-            "Derive a defensible position from research evidence.",
+            "Derive a defensible position and the commercial model that carries it.",
             (Capability.positioning,),
-            (ArtifactType.positioning_statement,),
+            (
+                ArtifactType.positioning_statement,
+                ArtifactType.business_model_spec,
+                ArtifactType.offer_definition,
+            ),
             consumes=(ArtifactType.research_brief, ArtifactType.market_analysis),
             min_evidence=2,
         ),
         _contract(
             "brand_architect",
             Department.brand,
-            "Build the brand platform, naming, and identity system.",
+            "Author the canonical brand object and the identity system derived from it.",
             (Capability.naming, Capability.identity_system),
-            (ArtifactType.brand_platform, ArtifactType.naming_candidate, ArtifactType.identity_guidelines),
+            (
+                ArtifactType.brand_platform,
+                ArtifactType.naming_candidate,
+                ArtifactType.identity_guidelines,
+                ArtifactType.brand_core,
+                ArtifactType.brand_guidelines_doc,
+            ),
             consumes=(ArtifactType.positioning_statement,),
-            min_evidence=1,
+            # brand_core is the root every downstream rendering depends on, so it
+            # carries a higher evidence floor than a single identity deliverable.
+            min_evidence=2,
         ),
         _contract(
             "creative_director",
             Department.creative,
-            "Generate distinct campaign concepts from the brand platform.",
+            "Generate campaign concepts and the reproducible prompts that realize them.",
             (Capability.concepting, Capability.art_direction),
-            (ArtifactType.creative_concept,),
-            consumes=(ArtifactType.brand_platform, ArtifactType.positioning_statement),
+            (ArtifactType.creative_concept, ArtifactType.asset_prompt_set),
+            consumes=(
+                ArtifactType.brand_platform,
+                ArtifactType.positioning_statement,
+                ArtifactType.brand_core,
+            ),
         ),
         _contract(
             "copywriter",
@@ -133,10 +154,19 @@ ROLE_REGISTRY: dict[str, RoleContract] = {
         _contract(
             "design_lead",
             Department.design,
-            "Specify visual execution for approved concepts.",
+            "Compile the brand object into tokens, components, and page composition.",
             (Capability.art_direction,),
-            (ArtifactType.design_brief,),
-            consumes=(ArtifactType.creative_concept, ArtifactType.identity_guidelines),
+            (
+                ArtifactType.design_brief,
+                ArtifactType.design_token_set,
+                ArtifactType.design_system_spec,
+                ArtifactType.website_lockup_spec,
+            ),
+            consumes=(
+                ArtifactType.creative_concept,
+                ArtifactType.identity_guidelines,
+                ArtifactType.brand_core,
+            ),
         ),
         _contract(
             "product_manager",
@@ -150,10 +180,17 @@ ROLE_REGISTRY: dict[str, RoleContract] = {
         _contract(
             "implementation_lead",
             Department.engineering,
-            "Plan technical delivery of the product specification.",
+            "Specify technical delivery, whether an application build or an automation.",
             (Capability.implementation,),
-            (ArtifactType.implementation_plan,),
-            consumes=(ArtifactType.product_spec,),
+            (
+                ArtifactType.implementation_plan,
+                ArtifactType.app_build_spec,
+                ArtifactType.automation_spec,
+            ),
+            # automation_spec is reachable without a product_spec, so consumed
+            # inputs stay optional at the contract level and are enforced per
+            # run profile instead.
+            consumes=(ArtifactType.product_spec, ArtifactType.design_system_spec),
         ),
         _contract(
             "growth_lead",
