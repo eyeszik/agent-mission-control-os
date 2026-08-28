@@ -86,6 +86,11 @@ class CreateAgencyRunRequest(BaseModel):
     brief: CampaignBriefRequest
 
 
+class RebindArtifactRequest(BaseModel):
+    artifact_key: str
+    revision_note: str = Field(min_length=1)
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -333,6 +338,85 @@ def _project_snapshot_hash(*, run_id: str, project_id: str, phase: str, status: 
             "subject_hash": subject_hash,
         }
     )
+
+
+def _apply_artifact_revision_note(*, agency_data: dict, artifact_key: str, revision_note: str) -> None:
+    package = agency_data.get("campaign_package")
+    if not isinstance(package, dict):
+      raise HTTPException(status_code=409, detail="Run does not have a compiled campaign package")
+
+    note = revision_note.strip()
+    if not note:
+      raise HTTPException(status_code=422, detail="revision_note must not be empty")
+
+    if artifact_key == "asset_prompt_set":
+        branding_workspace = package.setdefault("branding_workspace", {})
+        prompts = branding_workspace.setdefault("visual_asset_prompts", [])
+        if prompts:
+            prompts[0]["body"] = f"{prompts[0].get('body', '').rstrip()}\n{note}"
+        else:
+            prompts.append(
+                {
+                    "path": "branding/prompts/revision-note.md",
+                    "title": "Revision note",
+                    "kind": "prompt",
+                    "body": note,
+                    "metadata": {"source": "artifact_rebind"},
+                }
+            )
+    elif artifact_key == "brand_core":
+        branding_workspace = package.setdefault("branding_workspace", {})
+        raw_brand_data = branding_workspace.setdefault("raw_brand_data", {})
+        notes = raw_brand_data.setdefault("revision_notes", [])
+        if isinstance(notes, list):
+            notes.append(note)
+        else:
+            raw_brand_data["revision_notes"] = [str(notes), note]
+    elif artifact_key == "business_model_spec":
+        business_workspace = package.setdefault("business_workspace", {})
+        internal_docs = business_workspace.setdefault("internal_docs", [])
+        if internal_docs:
+            internal_docs[0]["body"] = f"{internal_docs[0].get('body', '').rstrip()}\n{note}"
+        else:
+            internal_docs.append(
+                {
+                    "path": "business/internal/revision-note.md",
+                    "title": "Revision note",
+                    "kind": "internal_doc",
+                    "body": note,
+                    "metadata": {"source": "artifact_rebind"},
+                }
+            )
+    elif artifact_key == "design_token_set":
+        design_system = package.setdefault("design_system", {})
+        validation_notes = design_system.setdefault("validation_notes", [])
+        validation_notes.append(note)
+    elif artifact_key == "design_system_spec":
+        design_system = package.setdefault("design_system", {})
+        scaffolds = design_system.setdefault("component_scaffolds", [])
+        if scaffolds:
+            scaffolds[0]["body"] = f"{scaffolds[0].get('body', '').rstrip()}\n{note}"
+        else:
+            scaffolds.append(
+                {
+                    "path": "branding/design-system/components/revision-note.tsx",
+                    "title": "Revision note",
+                    "kind": "component_scaffold",
+                    "body": note,
+                    "metadata": {"source": "artifact_rebind"},
+                }
+            )
+    elif artifact_key == "website_lockup_spec":
+        copy_variants = package.setdefault("copy_variants", [])
+        if copy_variants:
+            copy_variants[0]["body"] = f"{copy_variants[0].get('body', '').rstrip()}\n{note}"
+        else:
+            raise HTTPException(status_code=409, detail="Run does not have a website lockup payload to revise")
+    elif artifact_key == "campaign_package":
+        package.setdefault("revision_notes", []).append(note)
+    else:
+        raise HTTPException(status_code=404, detail=f"Unsupported artifact binding: {artifact_key}")
+    agency_data["campaign_package"] = package
 
 
 def _issue_dispatch_permit(
@@ -816,7 +900,13 @@ def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
     agency_data = _agency_payload(dict(snapshot.values)) if snapshot and snapshot.values else {}
     stored_agency = (record.get("result") or {}).get("agency", {})
     if stored_agency:
+        merged_package = {
+            **((stored_agency.get("campaign_package") or {}) if isinstance(stored_agency.get("campaign_package"), dict) else {}),
+            **((agency_data.get("campaign_package") or {}) if isinstance(agency_data.get("campaign_package"), dict) else {}),
+        }
         agency_data = {**stored_agency, **agency_data}
+        if merged_package:
+            agency_data["campaign_package"] = merged_package
     return {
         "run_id": run_id,
         "project_id": record["project_id"],
@@ -830,6 +920,72 @@ def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
         "qa_report": agency_data.get("qa_report"),
         "delivery": agency_data.get("delivery"),
         "approvals": get_approvals_for_run(run_id),
+        "degraded": bool(agency_data.get("degraded")),
+        "generation_provenance": agency_data.get("generation_provenance", []),
+        "proof": get_run_proof_bundle(run_id),
+    }
+
+
+@router.post("/runs/{run_id}/artifacts/rebind")
+def rebind_agency_run_artifact(
+    run_id: str,
+    req: RebindArtifactRequest,
+    principal: Principal = Depends(get_principal),
+):
+    record = get_run_record(run_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Run not found")
+    _authorize_run(principal, record)
+
+    stored_agency = (record.get("result") or {}).get("agency", {})
+    if not isinstance(stored_agency, dict) or not stored_agency.get("campaign_package"):
+        raise HTTPException(status_code=409, detail="Run has no compiled agency payload")
+
+    agency_data = {**stored_agency}
+    package = dict(stored_agency.get("campaign_package") or {})
+    agency_data["campaign_package"] = package
+    _apply_artifact_revision_note(
+        agency_data=agency_data,
+        artifact_key=req.artifact_key,
+        revision_note=req.revision_note,
+    )
+    workspace_export = _materialize_workspace_export(run_id=run_id, agency_data=agency_data)
+    agency_data["artifact_bindings"] = _bind_workspace_export_artifacts(
+        run_id=run_id,
+        tenant_id=record["tenant_id"],
+        project_id=record["project_id"],
+        package=agency_data.get("campaign_package") or {},
+        workspace_export=workspace_export,
+    )
+    updated = update_run_status(run_id, record["status"], {"agency": agency_data})
+    binding = next(
+        (item for item in agency_data.get("artifact_bindings", []) if item["artifact_key"] == req.artifact_key),
+        None,
+    )
+    record_event(
+        run_id,
+        record["tenant_id"],
+        record["project_id"],
+        "campaign_assembly",
+        "artifact_generated",
+        safe_payload={
+            "artifact_key": req.artifact_key,
+            "version": binding["version"] if binding else None,
+            "changed": binding["changed"] if binding else None,
+            "created": binding["created"] if binding else None,
+        },
+    )
+    return {
+        "run_id": run_id,
+        "project_id": record["project_id"],
+        "status": updated["status"],
+        "pipeline": record["pipeline"],
+        "stages": AGENCY_PIPELINE_STAGES,
+        "campaign_package": agency_data.get("campaign_package"),
+        "workspace_export": agency_data.get("campaign_package", {}).get("workspace_export"),
+        "artifact_bindings": agency_data.get("artifact_bindings", []),
+        "qa_report": agency_data.get("qa_report"),
+        "pending_approval": None,
         "degraded": bool(agency_data.get("degraded")),
         "generation_provenance": agency_data.get("generation_provenance", []),
         "proof": get_run_proof_bundle(run_id),

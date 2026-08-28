@@ -108,4 +108,33 @@ test.describe('Agent Mission Control local release smoke', () => {
     await page.getByRole('button', { name: 'Regenerate approval' }).first().click();
     await expect(page.getByText(/resolved queue/i)).toBeVisible();
   });
+
+  test('renders artifact bindings and updates their versions after a real export revision', async ({ page }) => {
+    await page.goto('/mission-control');
+    await page.getByLabel('Brand name').fill('Binding Lineage E2E');
+    await page.getByLabel('Target audience').fill('Operators validating export lineage bindings');
+    await page.getByLabel('Business idea').fill('Compile export artifacts into canonical lineage bindings.');
+    await page.getByLabel(/Goals/).fill('bind exports, render lineage panel, verify revision updates');
+    await page.getByRole('button', { name: 'Compile Idea Workspace' }).click();
+
+    await expect(page.getByTestId('artifact-export-tree')).toBeVisible();
+    await expect(page.getByTestId('artifact-bindings-panel')).toBeVisible();
+    await expect(page.getByTestId('artifact-binding-asset_prompt_set')).toContainText('asset_prompt_set');
+    await expect(page.getByTestId('artifact-binding-version-asset_prompt_set')).toContainText('v1');
+    await page.waitForFunction(() => Boolean(window.__amcRunStore?.getState().activeRunId));
+    const runId = await page.evaluate(() => window.__amcRunStore?.getState().activeRunId);
+    expect(runId).toBeTruthy();
+
+    const revisionResponse = await page.request.post(`http://127.0.0.1:8000/agency/runs/${runId}/artifacts/rebind`, {
+      headers: { 'Content-Type': 'application/json' },
+      data: {
+        artifact_key: 'asset_prompt_set',
+        revision_note: 'Add tighter silhouette and typography lock constraints.',
+      },
+    });
+    expect(revisionResponse.status()).toBe(200);
+
+    await expect(page.getByTestId('artifact-binding-version-asset_prompt_set')).toContainText('v2');
+    await expect(page.getByTestId('artifact-binding-version-asset_prompt_set')).toContainText('revised');
+  });
 });
