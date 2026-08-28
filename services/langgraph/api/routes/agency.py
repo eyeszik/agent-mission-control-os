@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from services.langgraph.agency.execution.canonical import canonical_hash
+from services.langgraph.agency.exporter import export_idea_workspace
 from services.langgraph.agency.execution.models import (
     CompletionCriterionResult,
     CompletionEvaluation,
@@ -58,11 +59,19 @@ IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
 class CampaignBriefRequest(BaseModel):
     brand_name: str
     industry: Optional[str] = None
+    business_idea: Optional[str] = None
+    offer_summary: Optional[str] = None
+    product_type: Optional[str] = None
     goals: List[str] = Field(default_factory=list)
     target_audience: str
     tone: Optional[str] = None
     channels: List[str] = Field(default_factory=list)
     constraints: List[str] = Field(default_factory=list)
+    business_model: Optional[str] = None
+    affiliate_model: Optional[bool] = None
+    workflow_idea: Optional[str] = None
+    differentiators: List[str] = Field(default_factory=list)
+    brand_style_notes: List[str] = Field(default_factory=list)
 
 
 class CreateAgencyRunRequest(BaseModel):
@@ -96,6 +105,24 @@ def _agency_subject_hash(agency_data: dict) -> str:
             "degraded": bool(agency_data.get("degraded")),
         }
     )
+
+
+def _materialize_workspace_export(*, run_id: str, agency_data: dict) -> dict | None:
+    package = agency_data.get("campaign_package")
+    if not isinstance(package, dict):
+        return None
+    brief = package.get("brief") or {}
+    brand_name = brief.get("brand_name")
+    if not isinstance(brand_name, str) or not brand_name.strip():
+        return None
+    workspace_export = export_idea_workspace(
+        brand_name=brand_name,
+        run_id=run_id,
+        package=package,
+    )
+    package["workspace_export"] = workspace_export
+    agency_data["campaign_package"] = package
+    return workspace_export
 
 
 def _ensure_protected_run_artifact(
@@ -504,6 +531,7 @@ def create_agency_run(
         result_ref=run_id,
     )
     agency_data = _agency_payload(state)
+    _materialize_workspace_export(run_id=run_id, agency_data=agency_data)
     record = update_run_status(run_id, "needs_approval", {"agency": agency_data})
     run_approvals = get_approvals_for_run(run_id)
     subject_hash = _agency_subject_hash(agency_data)
@@ -566,6 +594,7 @@ def create_agency_run(
         "pipeline": PIPELINE_NAME,
         "stages": AGENCY_PIPELINE_STAGES,
         "campaign_package": agency_data.get("campaign_package"),
+        "workspace_export": agency_data.get("campaign_package", {}).get("workspace_export"),
         "qa_report": agency_data.get("qa_report"),
         "pending_approval": run_approvals[0] if run_approvals else None,
         "degraded": bool(agency_data.get("degraded")),
@@ -601,6 +630,9 @@ def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
     graph = build_agency_workflow()
     snapshot = graph.get_state(_run_config(run_id))
     agency_data = _agency_payload(dict(snapshot.values)) if snapshot and snapshot.values else {}
+    stored_agency = (record.get("result") or {}).get("agency", {})
+    if stored_agency:
+        agency_data = {**stored_agency, **agency_data}
     return {
         "run_id": run_id,
         "project_id": record["project_id"],
@@ -609,6 +641,7 @@ def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
         "stages": AGENCY_PIPELINE_STAGES,
         "pending_next_node": list(snapshot.next) if snapshot else [],
         "campaign_package": agency_data.get("campaign_package"),
+        "workspace_export": agency_data.get("campaign_package", {}).get("workspace_export"),
         "qa_report": agency_data.get("qa_report"),
         "delivery": agency_data.get("delivery"),
         "approvals": get_approvals_for_run(run_id),
@@ -643,11 +676,14 @@ def resume_agency_run(
     )
 
     if record["status"] == "completed":
+        stored_agency = (record["result"] or {}).get("agency", {})
         response = {
             "run_id": run_id,
             "project_id": record["project_id"],
             "status": "completed",
-            "delivery": (record["result"] or {}).get("agency", {}).get("delivery"),
+            "delivery": stored_agency.get("delivery"),
+            "campaign_package": stored_agency.get("campaign_package"),
+            "workspace_export": (stored_agency.get("campaign_package") or {}).get("workspace_export"),
         }
         complete_idempotency(scope, idempotency_key, response)
         trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)

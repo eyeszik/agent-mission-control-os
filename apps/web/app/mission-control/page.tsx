@@ -12,6 +12,7 @@ import { QualityScorePanel } from "../../components/mission-control/QualityScore
 import { TrustStatusPanel } from "../../components/mission-control/TrustStatusPanel";
 import { ConsequentialLifecyclePanel } from "../../components/mission-control/ConsequentialLifecyclePanel";
 import { ArtifactPreviewPanel } from "../../components/mission-control/ArtifactPreviewPanel";
+import { FileOrganizationPanel } from "../../components/mission-control/FileOrganizationPanel";
 import { readSession } from "../../lib/auth/session";
 import { signOut } from "../../lib/auth/supabase";
 
@@ -50,7 +51,7 @@ export default function MissionControlPage() {
           </div>
           <div className="h-48 shrink-0"><LiveStepProgressPanel /></div>
         </div>
-        <div className="lg:col-span-4 flex flex-col gap-4"><IntelligentResultsList /><div className="flex-1 border border-zinc-800/60 rounded-xl overflow-hidden bg-zinc-900/40"><ArtifactPreviewPanel /></div></div>
+        <div className="lg:col-span-4 flex flex-col gap-4"><IntelligentResultsList /><FileOrganizationPanel /><div className="flex-1 border border-zinc-800/60 rounded-xl overflow-hidden bg-zinc-900/40"><ArtifactPreviewPanel /></div></div>
       </div>
     </main>
   );

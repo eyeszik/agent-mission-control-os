@@ -18,11 +18,19 @@ export const AgencyPipelineStageSchema = z.enum(AGENCY_PIPELINE_STAGES);
 export const CampaignBriefSchema = z.object({
   brand_name: z.string(),
   industry: z.string().optional().nullable(),
+  business_idea: z.string().optional().nullable(),
+  offer_summary: z.string().optional().nullable(),
+  product_type: z.string().optional().nullable(),
   goals: z.array(z.string()).default([]),
   target_audience: z.string(),
   tone: z.string().optional().nullable(),
   channels: z.array(z.string()).default([]),
   constraints: z.array(z.string()).default([]),
+  business_model: z.string().optional().nullable(),
+  affiliate_model: z.boolean().optional().nullable(),
+  workflow_idea: z.string().optional().nullable(),
+  differentiators: z.array(z.string()).default([]),
+  brand_style_notes: z.array(z.string()).default([]),
 });
 
 export const BrandStrategySchema = z.object({
@@ -51,6 +59,85 @@ export const DesignBriefSchema = z.object({
   typography_direction: z.string(),
   imagery_style: z.string(),
   layout_notes: z.string(),
+});
+
+export const WorkspaceDocumentSchema = z.object({
+  path: z.string(),
+  title: z.string(),
+  kind: z.string(),
+  body: z.string(),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const BusinessWorkspaceSchema = z.object({
+  overview: z.record(z.unknown()).default({}),
+  internal_docs: z.array(WorkspaceDocumentSchema).default([]),
+  production_docs: z.array(WorkspaceDocumentSchema).default([]),
+  prompt_library: z.array(WorkspaceDocumentSchema).default([]),
+});
+
+export const BrandingWorkspaceSchema = z.object({
+  raw_brand_data: z.record(z.unknown()).default({}),
+  internal_assets: z.array(WorkspaceDocumentSchema).default([]),
+  external_assets: z.array(WorkspaceDocumentSchema).default([]),
+  visual_asset_prompts: z.array(WorkspaceDocumentSchema).default([]),
+});
+
+export const DesignSystemPackageSchema = z.object({
+  tokens_json: z.record(z.unknown()).default({}),
+  tailwind_config: z.record(z.unknown()).default({}),
+  global_tokens_css: z.string(),
+  component_scaffolds: z.array(WorkspaceDocumentSchema).default([]),
+  asset_recipes: z.array(WorkspaceDocumentSchema).default([]),
+  validation_notes: z.array(z.string()).default([]),
+});
+
+export const RenderedAssetSchema = z.object({
+  asset_id: z.string(),
+  asset_type: z.string(),
+  title: z.string(),
+  prompt_path: z.string(),
+  spec_path: z.string(),
+  output_path: z.string(),
+  format: z.string(),
+  review_status: z.string(),
+  approval_required: z.boolean().default(true),
+  generation_mode: z.string(),
+  lineage_refs: z.array(z.string()).default([]),
+  notes: z.array(z.string()).default([]),
+});
+
+export const AssetReviewQueueSchema = z.object({
+  review_status: z.string(),
+  approval_required: z.boolean().default(true),
+  review_artifact_path: z.string(),
+  checklist: z.array(z.string()).default([]),
+  blocking_issues: z.array(z.string()).default([]),
+});
+
+export const PublishingAdapterSchema = z.object({
+  adapter_id: z.string(),
+  target: z.string(),
+  status: z.string(),
+  approval_required: z.boolean().default(true),
+  exported_asset_types: z.array(z.string()).default([]),
+  notes: z.array(z.string()).default([]),
+});
+
+export const AssetExecutionPackageSchema = z.object({
+  rendered_assets: z.array(RenderedAssetSchema).default([]),
+  review_queue: AssetReviewQueueSchema,
+  publishing_adapters: z.array(PublishingAdapterSchema).default([]),
+  execution_notes: z.array(z.string()).default([]),
+});
+
+export const WorkspaceExportSchema = z.object({
+  root_folder: z.string(),
+  business_folder: z.string(),
+  branding_folder: z.string(),
+  design_system_folder: z.string(),
+  rendered_assets_folder: z.string(),
+  files_written: z.array(z.string()).default([]),
 });
 
 export const QualityMetricsSchema = z.object({
@@ -82,6 +169,11 @@ export const CampaignPackageSchema = z.object({
   copy_variants: z.array(CopyVariantSchema),
   design_brief: DesignBriefSchema,
   qa_report: QAReportSchema.optional(),
+  business_workspace: BusinessWorkspaceSchema.optional(),
+  branding_workspace: BrandingWorkspaceSchema.optional(),
+  design_system: DesignSystemPackageSchema.optional(),
+  asset_execution: AssetExecutionPackageSchema.optional(),
+  workspace_export: WorkspaceExportSchema.optional(),
 });
 
 export const GenerationProvenanceSchema = z.object({
@@ -217,6 +309,7 @@ export const AgencyRunSchema = z.object({
   stages: z.array(AgencyPipelineStageSchema).optional(),
   pending_next_node: z.array(z.string()).optional(),
   campaign_package: CampaignPackageSchema.nullable().optional(),
+  workspace_export: WorkspaceExportSchema.nullable().optional(),
   qa_report: QAReportSchema.nullable().optional(),
   pending_approval: ApprovalRequestSchema.nullable().optional(),
   approvals: z.array(ApprovalRequestSchema).optional(),
@@ -242,6 +335,15 @@ export type CopyVariant = z.infer<typeof CopyVariantSchema>;
 export type DesignBrief = z.infer<typeof DesignBriefSchema>;
 export type QAReport = z.infer<typeof QAReportSchema>;
 export type CampaignPackage = z.infer<typeof CampaignPackageSchema>;
+export type WorkspaceDocument = z.infer<typeof WorkspaceDocumentSchema>;
+export type BusinessWorkspace = z.infer<typeof BusinessWorkspaceSchema>;
+export type BrandingWorkspace = z.infer<typeof BrandingWorkspaceSchema>;
+export type DesignSystemPackage = z.infer<typeof DesignSystemPackageSchema>;
+export type RenderedAsset = z.infer<typeof RenderedAssetSchema>;
+export type AssetReviewQueue = z.infer<typeof AssetReviewQueueSchema>;
+export type PublishingAdapter = z.infer<typeof PublishingAdapterSchema>;
+export type AssetExecutionPackage = z.infer<typeof AssetExecutionPackageSchema>;
+export type WorkspaceExport = z.infer<typeof WorkspaceExportSchema>;
 export type GenerationProvenance = z.infer<typeof GenerationProvenanceSchema>;
 export type AgencyRunStatus = z.infer<typeof AgencyRunStatusSchema>;
 export type AgencyRun = z.infer<typeof AgencyRunSchema>;

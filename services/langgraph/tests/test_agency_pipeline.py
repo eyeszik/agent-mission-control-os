@@ -4,6 +4,7 @@ from uuid import uuid4
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.agency.llm import GenerationOutcome
 from services.langgraph.graph.models import AgentRun
+from services.langgraph.agency.exporter import export_idea_workspace
 from services.langgraph.persistence.approvals import get_approvals_for_run, resolve_approval
 from services.langgraph.quality.brand_safety import check_brand_safety
 
@@ -71,6 +72,11 @@ def test_agency_graph_pauses_before_delivery_and_creates_approval():
     agency = state["extracted_data"]["agency"]
     assert "delivery" not in agency
     assert agency["campaign_package"]["brief"]["brand_name"] == "Northwind Coffee"
+    assert agency["campaign_package"]["business_workspace"]["overview"]["idea_name"] == "Northwind Coffee"
+    assert agency["campaign_package"]["branding_workspace"]["raw_brand_data"]["brand_name"] == "Northwind Coffee"
+    assert agency["campaign_package"]["design_system"]["tokens_json"]["brand"]["semantic"]["color"]["bg"]["value"] == "{brand.raw.surface.value}"
+    assert len(agency["campaign_package"]["asset_execution"]["rendered_assets"]) == 3
+    assert agency["campaign_package"]["asset_execution"]["review_queue"]["review_status"] == "pending_review"
     assert len(agency["creative_concepts"]) == 3
     assert len(agency["copy_variants"]) == 3
     snapshot = graph.get_state(config)
@@ -93,8 +99,25 @@ def test_agency_graph_resumes_and_delivers_after_successful_provider_approval(mo
     assert final_state["validation_status"] == "passed"
     delivery = final_state["extracted_data"]["agency"]["delivery"]
     assert delivery["campaign_package"]["brief"]["brand_name"] == "Northwind Coffee"
+    assert delivery["campaign_package"]["design_system"]["component_scaffolds"][0]["path"].endswith("Button.tsx")
+    assert delivery["campaign_package"]["asset_execution"]["publishing_adapters"][0]["status"] == "draft_only"
     assert delivery["approval_id"] == approvals[0]["approval_id"]
     assert graph.get_state(config).next == ()
+
+
+def test_export_idea_workspace_renders_assets(tmp_path, monkeypatch):
+    monkeypatch.setattr("services.langgraph.agency.exporter.DEFAULT_EXPORT_ROOT", tmp_path)
+    run = _make_run()
+    graph = build_agency_workflow()
+    state = graph.invoke(_initial_state(run), config={"configurable": {"thread_id": str(run.id)}})
+    package = state["extracted_data"]["agency"]["campaign_package"]
+    export = export_idea_workspace(brand_name="Northwind Coffee", run_id=str(run.id), package=package)
+    assert export["rendered_assets_folder"].endswith("/branding/rendered")
+    written = export["files_written"]
+    assert any(path.endswith("branding/rendered/logo-mark.svg") for path in written)
+    assert any(path.endswith("branding/rendered/background-pattern.svg") for path in written)
+    assert any(path.endswith("branding/rendered/hero-illustration.svg") for path in written)
+    assert any(path.endswith("branding/review/asset-approval-inbox.md") for path in written)
 
 
 def test_pipeline_stage_order_is_stable():
