@@ -120,6 +120,57 @@ def test_export_idea_workspace_renders_assets(tmp_path, monkeypatch):
     assert any(path.endswith("branding/review/asset-approval-inbox.md") for path in written)
 
 
+def test_workspace_export_artifacts_bind_to_canonical_revision_path(tmp_path, monkeypatch):
+    import services.langgraph.persistence.sqlite_db as sqlite_db
+    from services.langgraph.api.routes.agency import _bind_workspace_export_artifacts
+    from services.langgraph.persistence.agency_kernel import get_artifact
+
+    sqlite_db.init_db()
+    monkeypatch.setattr("services.langgraph.agency.exporter.DEFAULT_EXPORT_ROOT", tmp_path)
+
+    run = _make_run()
+    graph = build_agency_workflow()
+    state = graph.invoke(_initial_state(run), config={"configurable": {"thread_id": str(run.id)}})
+    package = state["extracted_data"]["agency"]["campaign_package"]
+    export = export_idea_workspace(brand_name="Northwind Coffee", run_id=str(run.id), package=package)
+
+    first_bindings = _bind_workspace_export_artifacts(
+        run_id=str(run.id),
+        tenant_id=run.tenant_id,
+        project_id=run.project_id,
+        package=package,
+        workspace_export=export,
+    )
+    assert {item["artifact_key"] for item in first_bindings} == {
+        "business_model_spec",
+        "brand_core",
+        "asset_prompt_set",
+        "design_token_set",
+        "design_system_spec",
+        "website_lockup_spec",
+        "campaign_package",
+    }
+    assert all(item["created"] is True for item in first_bindings)
+    prompt_binding = next(item for item in first_bindings if item["artifact_key"] == "asset_prompt_set")
+    prompt_artifact = get_artifact(prompt_binding["artifact_id"])
+    assert prompt_artifact is not None
+    assert prompt_artifact["version"] == 1
+    assert prompt_artifact["content_location"].endswith("/branding/prompts")
+
+    package["branding_workspace"]["visual_asset_prompts"][0]["body"] += "\nAdd sharper silhouette constraints."
+    second_bindings = _bind_workspace_export_artifacts(
+        run_id=str(run.id),
+        tenant_id=run.tenant_id,
+        project_id=run.project_id,
+        package=package,
+        workspace_export=export,
+    )
+    second_prompt_binding = next(item for item in second_bindings if item["artifact_key"] == "asset_prompt_set")
+    assert second_prompt_binding["created"] is False
+    assert second_prompt_binding["changed"] is True
+    assert second_prompt_binding["version"] == 2
+
+
 def test_pipeline_stage_order_is_stable():
     assert AGENCY_PIPELINE_STAGES == [
         "brief_intake",

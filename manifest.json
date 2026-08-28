@@ -17,11 +17,11 @@
       "path": "apps/web/app/login/page.tsx"
     },
     {
-      "git_blob_sha": "da952995fd5a0c436040548980ce4fe011b9fced",
+      "git_blob_sha": "a921785a397cab43d6a16ba69b3cdf50d37ac42b",
       "path": "apps/web/app/mission-control/page.tsx"
     },
     {
-      "git_blob_sha": "8d20647772fb6ce4bd7e33792a16808de889a775",
+      "git_blob_sha": "cbe1439de9b67bd60bb948a71a17268ebcc2609a",
       "path": "apps/web/e2e/agency-smoke.spec.ts"
     },
     {
@@ -65,7 +65,7 @@
       "path": "packages/shared/openapi/agent-mission-control.openapi.yaml"
     },
     {
-      "git_blob_sha": "f47f9573c13083e109ccd9d487a66dafb95d130a",
+      "git_blob_sha": "6b94f16ea68afe4d66b47180ff20b62b102b8ee2",
       "path": "packages/shared/src/schemas/agency.ts"
     },
     {
@@ -133,7 +133,7 @@
       "path": "services/langgraph/agency/kernel/roles.py"
     },
     {
-      "git_blob_sha": "d7ff6643b7db5f954a7c4f1231ad06f4f904ccaf",
+      "git_blob_sha": "9fdcb1c07f7cbad4e72e164f5c3f8a040a0c057a",
       "path": "services/langgraph/api/routes/agency.py",
       "sha1": "d7ff6643b7db5f954a7c4f1231ad06f4f904ccaf"
     },
@@ -175,7 +175,7 @@
       "path": "services/langgraph/integrations/publication.py"
     },
     {
-      "git_blob_sha": "caee943fda9cd5448c67e97c92d170c27b9c2d0e",
+      "git_blob_sha": "39f637d1d9a3a42b1c373622b548bccddb992942",
       "path": "services/langgraph/persistence/agency_kernel.py"
     },
     {

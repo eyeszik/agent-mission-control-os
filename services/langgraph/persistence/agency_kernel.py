@@ -397,6 +397,17 @@ def get_artifact(artifact_id: str) -> Optional[dict]:
     return _get("agency_artifacts", "artifact_id", artifact_id)
 
 
+def ensure_artifact_dependency(artifact_id: str, depends_on_artifact_id: str, relationship: str = "hard") -> dict:
+    with transaction() as db:
+        row = db.execute(
+            f"SELECT artifact_id, depends_on_artifact_id, relationship FROM {table('artifact_dependencies')} WHERE artifact_id = ? AND depends_on_artifact_id = ?",
+            (artifact_id, depends_on_artifact_id),
+        ).fetchone()
+    if row:
+        return normalize_record(row)
+    return add_artifact_dependency(artifact_id, depends_on_artifact_id, relationship)
+
+
 def _dependency_would_cycle(artifact_id: str, depends_on_artifact_id: str) -> bool:
     queue: deque[str] = deque([depends_on_artifact_id])
     visited: set[str] = set()
@@ -687,6 +698,67 @@ def create_or_revise_protected_run_artifact(
             "changed": False,
         }
     revised = record_artifact_revision(artifact_id, content_hash=content_hash)
+    revised["created"] = False
+    revised["changed"] = True
+    return revised
+
+
+def create_or_revise_artifact(
+    *,
+    artifact_id: str,
+    engagement_id: str,
+    tenant_id: str,
+    project_id: str,
+    artifact_type: str,
+    owner_department: str,
+    content_hash: str,
+    content_location: Optional[str] = None,
+    semantic_fingerprint: Optional[str] = None,
+    status_on_create: str = "draft",
+    subtype: Optional[str] = None,
+    metadata: Optional[dict] = None,
+) -> dict:
+    artifact = get_artifact(artifact_id)
+    if artifact is None:
+        created = create_artifact(
+            artifact_id,
+            engagement_id,
+            tenant_id,
+            project_id,
+            artifact_type,
+            owner_department,
+            subtype=subtype,
+            status=status_on_create,
+            content_hash=content_hash,
+            content_location=content_location,
+            semantic_fingerprint=semantic_fingerprint,
+            metadata=metadata,
+        )
+        return {
+            "artifact": created,
+            "changed_version_ref": f"{artifact_id}:v{created['version']}",
+            "affected": [],
+            "created": True,
+            "changed": True,
+        }
+    if (
+        artifact.get("content_hash") == content_hash
+        and artifact.get("content_location") == content_location
+        and artifact.get("semantic_fingerprint") == semantic_fingerprint
+    ):
+        return {
+            "artifact": artifact,
+            "changed_version_ref": f"{artifact_id}:v{artifact['version']}",
+            "affected": [],
+            "created": False,
+            "changed": False,
+        }
+    revised = record_artifact_revision(
+        artifact_id,
+        content_hash=content_hash,
+        semantic_fingerprint=semantic_fingerprint,
+        content_location=content_location,
+    )
     revised["created"] = False
     revised["changed"] = True
     return revised

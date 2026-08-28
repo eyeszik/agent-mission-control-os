@@ -21,7 +21,13 @@ from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffec
 from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.models import AgentRun
-from services.langgraph.persistence.agency_kernel import create_or_revise_protected_run_artifact
+from services.langgraph.persistence.agency_kernel import (
+    create_engagement,
+    create_or_revise_artifact,
+    create_or_revise_protected_run_artifact,
+    ensure_artifact_dependency,
+    get_engagement,
+)
 from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import bind_approval_subject, get_approvals_for_run, mark_approval_stale
 from services.langgraph.persistence.events import record_event
@@ -123,6 +129,176 @@ def _materialize_workspace_export(*, run_id: str, agency_data: dict) -> dict | N
     package["workspace_export"] = workspace_export
     agency_data["campaign_package"] = package
     return workspace_export
+
+
+def _workspace_artifact_specs(*, run_id: str, workspace_export: dict, package: dict) -> list[dict]:
+    root_folder = workspace_export["root_folder"]
+    business_workspace = package.get("business_workspace") or {}
+    branding_workspace = package.get("branding_workspace") or {}
+    design_system = package.get("design_system") or {}
+    asset_execution = package.get("asset_execution") or {}
+    return [
+        {
+            "artifact_key": "business_model_spec",
+            "artifact_type": "business_model_spec",
+            "owner_department": "strategy",
+            "content_location": f"{root_folder}/business",
+            "payload": {
+                "overview": business_workspace.get("overview"),
+                "internal_docs": business_workspace.get("internal_docs", []),
+                "production_docs": business_workspace.get("production_docs", []),
+            },
+            "depends_on": [],
+        },
+        {
+            "artifact_key": "brand_core",
+            "artifact_type": "brand_core",
+            "owner_department": "brand",
+            "content_location": f"{root_folder}/branding/raw",
+            "payload": {
+                "raw_brand_data": branding_workspace.get("raw_brand_data"),
+                "internal_assets": branding_workspace.get("internal_assets", []),
+                "external_assets": branding_workspace.get("external_assets", []),
+            },
+            "depends_on": ["business_model_spec"],
+        },
+        {
+            "artifact_key": "asset_prompt_set",
+            "artifact_type": "asset_prompt_set",
+            "owner_department": "creative",
+            "content_location": f"{root_folder}/branding/prompts",
+            "payload": {
+                "visual_asset_prompts": branding_workspace.get("visual_asset_prompts", []),
+            },
+            "depends_on": ["brand_core"],
+        },
+        {
+            "artifact_key": "design_token_set",
+            "artifact_type": "design_token_set",
+            "owner_department": "design",
+            "content_location": f"{root_folder}/branding/design-system/tokens.json",
+            "payload": {
+                "tokens_json": design_system.get("tokens_json"),
+                "tailwind_config": design_system.get("tailwind_config"),
+                "global_tokens_css": design_system.get("global_tokens_css"),
+            },
+            "depends_on": ["brand_core"],
+        },
+        {
+            "artifact_key": "design_system_spec",
+            "artifact_type": "design_system_spec",
+            "owner_department": "design",
+            "content_location": f"{root_folder}/branding/design-system",
+            "payload": {
+                "component_scaffolds": design_system.get("component_scaffolds", []),
+                "asset_recipes": design_system.get("asset_recipes", []),
+                "validation_notes": design_system.get("validation_notes", []),
+            },
+            "depends_on": ["design_token_set", "asset_prompt_set"],
+        },
+        {
+            "artifact_key": "website_lockup_spec",
+            "artifact_type": "website_lockup_spec",
+            "owner_department": "design",
+            "content_location": f"{root_folder}/branding/rendered",
+            "payload": {
+                "rendered_assets": asset_execution.get("rendered_assets", []),
+                "review_queue": asset_execution.get("review_queue"),
+                "publishing_adapters": asset_execution.get("publishing_adapters", []),
+            },
+            "depends_on": ["design_system_spec", "asset_prompt_set"],
+        },
+        {
+            "artifact_key": "campaign_package",
+            "artifact_type": "campaign_package",
+            "owner_department": "growth",
+            "content_location": f"{root_folder}/workspace-package.json",
+            "payload": {
+                "brief": package.get("brief"),
+                "strategy": package.get("strategy"),
+                "concepts": package.get("concepts", []),
+                "copy_variants": package.get("copy_variants", []),
+                "design_brief": package.get("design_brief"),
+                "workspace_export": workspace_export,
+            },
+            "depends_on": [
+                "business_model_spec",
+                "brand_core",
+                "asset_prompt_set",
+                "design_token_set",
+                "design_system_spec",
+                "website_lockup_spec",
+            ],
+        },
+    ]
+
+
+def _bind_workspace_export_artifacts(
+    *,
+    run_id: str,
+    tenant_id: str,
+    project_id: str,
+    package: dict,
+    workspace_export: dict | None,
+) -> list[dict]:
+    if workspace_export is None:
+        return []
+    engagement_id = f"eng-workspace-{run_id}"
+    if not get_engagement(engagement_id):
+        create_engagement(
+            engagement_id,
+            tenant_id,
+            project_id,
+            "Workspace export artifact graph",
+            "Canonical artifact bindings for user-visible business, branding, design-system, and rendered outputs",
+            status="active",
+        )
+    artifact_specs = _workspace_artifact_specs(run_id=run_id, workspace_export=workspace_export, package=package)
+    revisions_by_key: dict[str, dict] = {}
+    bindings: list[dict] = []
+    for spec in artifact_specs:
+        artifact_id = f"art-{run_id}-{spec['artifact_key']}"
+        payload = spec["payload"]
+        content_hash = hash_payload(payload)
+        revision = create_or_revise_artifact(
+            artifact_id=artifact_id,
+            engagement_id=engagement_id,
+            tenant_id=tenant_id,
+            project_id=project_id,
+            artifact_type=spec["artifact_type"],
+            owner_department=spec["owner_department"],
+            content_hash=content_hash,
+            content_location=spec["content_location"],
+            semantic_fingerprint=canonical_hash(payload),
+            metadata={
+                "run_id": run_id,
+                "artifact_key": spec["artifact_key"],
+                "export_root": workspace_export["root_folder"],
+                "canonical_workspace_export_artifact": True,
+            },
+        )
+        revisions_by_key[spec["artifact_key"]] = revision
+        artifact = revision["artifact"]
+        bindings.append(
+            {
+                "artifact_key": spec["artifact_key"],
+                "artifact_id": artifact["artifact_id"],
+                "artifact_type": artifact["artifact_type"],
+                "owner_department": artifact["owner_department"],
+                "version": artifact["version"],
+                "version_ref": f"{artifact['artifact_id']}:v{artifact['version']}",
+                "content_location": artifact.get("content_location"),
+                "content_hash": artifact.get("content_hash"),
+                "changed": revision["changed"],
+                "created": revision["created"],
+            }
+        )
+    for spec in artifact_specs:
+        artifact_id = revisions_by_key[spec["artifact_key"]]["artifact"]["artifact_id"]
+        for dependency_key in spec["depends_on"]:
+            upstream_id = revisions_by_key[dependency_key]["artifact"]["artifact_id"]
+            ensure_artifact_dependency(artifact_id, upstream_id)
+    return bindings
 
 
 def _ensure_protected_run_artifact(
@@ -531,7 +707,14 @@ def create_agency_run(
         result_ref=run_id,
     )
     agency_data = _agency_payload(state)
-    _materialize_workspace_export(run_id=run_id, agency_data=agency_data)
+    workspace_export = _materialize_workspace_export(run_id=run_id, agency_data=agency_data)
+    agency_data["artifact_bindings"] = _bind_workspace_export_artifacts(
+        run_id=run_id,
+        tenant_id=run.tenant_id,
+        project_id=run.project_id,
+        package=agency_data.get("campaign_package") or {},
+        workspace_export=workspace_export,
+    )
     record = update_run_status(run_id, "needs_approval", {"agency": agency_data})
     run_approvals = get_approvals_for_run(run_id)
     subject_hash = _agency_subject_hash(agency_data)
@@ -595,6 +778,7 @@ def create_agency_run(
         "stages": AGENCY_PIPELINE_STAGES,
         "campaign_package": agency_data.get("campaign_package"),
         "workspace_export": agency_data.get("campaign_package", {}).get("workspace_export"),
+        "artifact_bindings": agency_data.get("artifact_bindings", []),
         "qa_report": agency_data.get("qa_report"),
         "pending_approval": run_approvals[0] if run_approvals else None,
         "degraded": bool(agency_data.get("degraded")),
@@ -642,6 +826,7 @@ def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
         "pending_next_node": list(snapshot.next) if snapshot else [],
         "campaign_package": agency_data.get("campaign_package"),
         "workspace_export": agency_data.get("campaign_package", {}).get("workspace_export"),
+        "artifact_bindings": agency_data.get("artifact_bindings", []),
         "qa_report": agency_data.get("qa_report"),
         "delivery": agency_data.get("delivery"),
         "approvals": get_approvals_for_run(run_id),
@@ -684,6 +869,7 @@ def resume_agency_run(
             "delivery": stored_agency.get("delivery"),
             "campaign_package": stored_agency.get("campaign_package"),
             "workspace_export": (stored_agency.get("campaign_package") or {}).get("workspace_export"),
+            "artifact_bindings": stored_agency.get("artifact_bindings", []),
         }
         complete_idempotency(scope, idempotency_key, response)
         trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)

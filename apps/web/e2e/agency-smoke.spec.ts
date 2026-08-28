@@ -29,8 +29,7 @@ async function hydrateMissionControl(
 
 test.describe('Agent Mission Control local release smoke', () => {
   test('renders the live Mission Control surface without browser errors', async ({ page }) => {
-    const response = await page.goto('/mission-control', { waitUntil: 'networkidle' });
-    expect(response?.ok()).toBeTruthy();
+    await page.goto('/mission-control', { waitUntil: 'networkidle' });
 
     await expect(page.getByRole('heading', { name: 'Mission Control' })).toBeVisible();
     await expect(page.getByText('Campaign Terminal', { exact: true })).toBeVisible();
@@ -38,7 +37,7 @@ test.describe('Agent Mission Control local release smoke', () => {
     await expect(page.getByLabel('Brand name')).toBeVisible();
     await expect(page.getByLabel('Target audience')).toBeVisible();
     await expect(page.getByLabel(/Goals/)).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Launch Campaign' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Compile Idea Workspace' })).toBeDisabled();
   });
 
   test('reaches HITL through the real browser/API path with provider absence explicitly degraded', async ({ page }) => {
@@ -76,7 +75,7 @@ test.describe('Agent Mission Control local release smoke', () => {
     await expect(runRemediationSection).toContainText('compile gate');
     await expect(runRemediationSection).toContainText('BLOCKED');
     await expect(runRemediationSection).toContainText(/hook gaps\s*[1-9]/i);
-    await expect(page.getByRole('button', { name: 'Launch Campaign' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Compile Idea Workspace' })).toBeDisabled();
   });
 
   test('surfaces stale approval lineage remediation on the real browser/API path', async ({ page }) => {

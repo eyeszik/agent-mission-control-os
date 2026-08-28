@@ -140,6 +140,19 @@ export const WorkspaceExportSchema = z.object({
   files_written: z.array(z.string()).default([]),
 });
 
+export const ArtifactBindingSchema = z.object({
+  artifact_key: z.string(),
+  artifact_id: z.string(),
+  artifact_type: z.string(),
+  owner_department: z.string(),
+  version: z.number().int().positive(),
+  version_ref: z.string(),
+  content_location: z.string().nullable().optional(),
+  content_hash: z.string().nullable().optional(),
+  changed: z.boolean(),
+  created: z.boolean(),
+});
+
 export const QualityMetricsSchema = z.object({
   evaluation_mode: z.literal('heuristic'),
   schema_valid: z.boolean(),
@@ -173,7 +186,7 @@ export const CampaignPackageSchema = z.object({
   branding_workspace: BrandingWorkspaceSchema.optional(),
   design_system: DesignSystemPackageSchema.optional(),
   asset_execution: AssetExecutionPackageSchema.optional(),
-  workspace_export: WorkspaceExportSchema.optional(),
+  workspace_export: WorkspaceExportSchema.nullable().optional(),
 });
 
 export const GenerationProvenanceSchema = z.object({
@@ -310,6 +323,7 @@ export const AgencyRunSchema = z.object({
   pending_next_node: z.array(z.string()).optional(),
   campaign_package: CampaignPackageSchema.nullable().optional(),
   workspace_export: WorkspaceExportSchema.nullable().optional(),
+  artifact_bindings: z.array(ArtifactBindingSchema).default([]),
   qa_report: QAReportSchema.nullable().optional(),
   pending_approval: ApprovalRequestSchema.nullable().optional(),
   approvals: z.array(ApprovalRequestSchema).optional(),
@@ -344,6 +358,7 @@ export type AssetReviewQueue = z.infer<typeof AssetReviewQueueSchema>;
 export type PublishingAdapter = z.infer<typeof PublishingAdapterSchema>;
 export type AssetExecutionPackage = z.infer<typeof AssetExecutionPackageSchema>;
 export type WorkspaceExport = z.infer<typeof WorkspaceExportSchema>;
+export type ArtifactBinding = z.infer<typeof ArtifactBindingSchema>;
 export type GenerationProvenance = z.infer<typeof GenerationProvenanceSchema>;
 export type AgencyRunStatus = z.infer<typeof AgencyRunStatusSchema>;
 export type AgencyRun = z.infer<typeof AgencyRunSchema>;
