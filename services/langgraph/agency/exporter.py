@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -11,7 +13,20 @@ from services.langgraph.agency.assets import (
     render_logo_svg,
 )
 
-DEFAULT_EXPORT_ROOT = Path("/home/workspace/Documents/agent-mission-control-ideas")
+_ZO_WORKSPACE = Path("/home/workspace")
+_ZO_EXPORT_ROOT = _ZO_WORKSPACE / "Documents" / "agent-mission-control-ideas"
+
+
+def resolve_export_root() -> Path:
+    override = (os.environ.get("AMC_EXPORT_ROOT") or "").strip()
+    if override:
+        return Path(override)
+    if _ZO_WORKSPACE.is_dir() and os.access(_ZO_WORKSPACE, os.W_OK):
+        return _ZO_EXPORT_ROOT
+    return Path(tempfile.gettempdir()) / "amc-idea-exports"
+
+
+DEFAULT_EXPORT_ROOT = resolve_export_root()
 
 
 def _slugify(value: str) -> str:
@@ -108,7 +123,9 @@ def _write_rendered_assets(root: Path, package: dict) -> list[str]:
 
 def export_idea_workspace(*, brand_name: str, run_id: str, package: dict) -> dict:
     slug = _slugify(brand_name)
-    root = DEFAULT_EXPORT_ROOT / f"{slug}-{run_id[:8]}"
+    override = (os.environ.get("AMC_EXPORT_ROOT") or "").strip()
+    base = Path(override) if override else Path(DEFAULT_EXPORT_ROOT)
+    root = base / f"{slug}-{run_id[:8]}"
     business = root / "business"
     branding = root / "branding"
     design_system = branding / "design-system"

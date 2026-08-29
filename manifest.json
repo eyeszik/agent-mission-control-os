@@ -1,11 +1,11 @@
 {
   "files": [
     {
-      "git_blob_sha": "9dbc88e176a615ec20719f3456d17028d9f267b3",
+      "git_blob_sha": "0790efbe8024489c10e40fe20895a76bfe2b2511",
       "path": ".env.example"
     },
     {
-      "git_blob_sha": "025bf20122caf44c2a0932b556c0408ec749b9ed",
+      "git_blob_sha": "f2286a6208fa5c3bcb77ecb8846fa1a0af33dd8b",
       "path": ".github/workflows/ci.yml"
     },
     {
@@ -21,8 +21,12 @@
       "path": "apps/web/app/mission-control/page.tsx"
     },
     {
-      "git_blob_sha": "cbe1439de9b67bd60bb948a71a17268ebcc2609a",
+      "git_blob_sha": "4652a64f9e4f114532735cbdea41edd4c70fbf6c",
       "path": "apps/web/e2e/agency-smoke.spec.ts"
+    },
+    {
+      "git_blob_sha": "278b12e36bebb39ca6d36fdcef37a725f2d58773",
+      "path": "services/langgraph/agency/exporter.py"
     },
     {
       "git_blob_sha": "53824a79245d8371a77af1df9502344520ced283",
@@ -93,7 +97,7 @@
       "path": "scripts/verify_auth_bindings.py"
     },
     {
-      "git_blob_sha": "e235bea4b11b8809626752728d1db221a98568f7",
+      "git_blob_sha": "184a814821aea1d4837f3cc45fb791e4ee730402",
       "path": "scripts/verify_manifest.py"
     },
     {
@@ -105,7 +109,7 @@
       "path": "scripts/verify_production_readiness.py"
     },
     {
-      "git_blob_sha": "e56cc1f3b451e6707b10a68d5b78247c035d6bbb",
+      "git_blob_sha": "d042496d07cda94693985d57f4dd2349f8152df3",
       "path": "scripts/verify_repository_invariants.py"
     },
     {
@@ -133,9 +137,8 @@
       "path": "services/langgraph/agency/kernel/roles.py"
     },
     {
-      "git_blob_sha": "9fdcb1c07f7cbad4e72e164f5c3f8a040a0c057a",
-      "path": "services/langgraph/api/routes/agency.py",
-      "sha1": "d7ff6643b7db5f954a7c4f1231ad06f4f904ccaf"
+      "git_blob_sha": "336248d1a133c5ad8292e6e8a58dd16f310e87b1",
+      "path": "services/langgraph/api/routes/agency.py"
     },
     {
       "git_blob_sha": "aa4f63c5709b0342b301c110b09db4775c27f045",
@@ -155,8 +158,7 @@
     },
     {
       "git_blob_sha": "9a9e7605bdd25c91ac2f40173b10b3792bb84323",
-      "path": "services/langgraph/api/routes/runtime.py",
-      "sha1": "035f8175a3373abf3bea7b236df63c21995d809d"
+      "path": "services/langgraph/api/routes/runtime.py"
     },
     {
       "git_blob_sha": "4b49e585cb0e1e473dfe533423bc9fdf086d5037",
@@ -262,6 +264,5 @@
   "policy": "This manifest covers security-, runtime-, contract-, dependency-, browser-release-, production-persistence-, lifecycle-analytics-, agency-kernel-, agency-ontology-, production-activation-, external-mutation-guard-, and deployment-critical files. CI recomputes Git blob hashes and fails on drift.",
   "schema_version": "amc-integrity/v2",
   "scope": "critical_runtime_release_and_production_contracts",
-  "services/langgraph/api/routes/agency.py": "7172e7906622fa0aad99e3a3083a71d9ba80e048",
   "status": "generated_and_ci_verified_required"
 }

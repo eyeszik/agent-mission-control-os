@@ -4,7 +4,7 @@ from uuid import uuid4
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.agency.llm import GenerationOutcome
 from services.langgraph.graph.models import AgentRun
-from services.langgraph.agency.exporter import export_idea_workspace
+from services.langgraph.agency.exporter import export_idea_workspace, resolve_export_root
 from services.langgraph.persistence.approvals import get_approvals_for_run, resolve_approval
 from services.langgraph.quality.brand_safety import check_brand_safety
 
@@ -103,6 +103,18 @@ def test_agency_graph_resumes_and_delivers_after_successful_provider_approval(mo
     assert delivery["campaign_package"]["asset_execution"]["publishing_adapters"][0]["status"] == "draft_only"
     assert delivery["approval_id"] == approvals[0]["approval_id"]
     assert graph.get_state(config).next == ()
+
+
+def test_export_root_is_writable_without_zo_workspace(tmp_path, monkeypatch):
+    monkeypatch.delenv("AMC_EXPORT_ROOT", raising=False)
+    monkeypatch.setattr("services.langgraph.agency.exporter._ZO_WORKSPACE", tmp_path / "missing-zo")
+    monkeypatch.setattr("services.langgraph.agency.exporter.os.access", lambda *_args, **_kwargs: False)
+    root = resolve_export_root()
+    assert root.name == "amc-idea-exports"
+    root.mkdir(parents=True, exist_ok=True)
+    probe = root / "ci-write-probe.txt"
+    probe.write_text("ok\n", encoding="utf-8")
+    assert probe.read_text(encoding="utf-8") == "ok\n"
 
 
 def test_export_idea_workspace_renders_assets(tmp_path, monkeypatch):
