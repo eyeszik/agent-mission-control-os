@@ -21,6 +21,15 @@ const CELL_W = 120;
 const CELL_H = 90;
 const NODE_R = 14;
 
+// ⚡ Bolt Optimization: Move static layout computations outside of render loop
+const POSITIONS = AGENCY_PIPELINE_STAGES.map((stage, index) => ({
+  stage,
+  x: (index % COLS) * CELL_W + CELL_W / 2,
+  y: Math.floor(index / COLS) * CELL_H + CELL_H / 2,
+}));
+const MAP_WIDTH = COLS * CELL_W;
+const MAP_HEIGHT = Math.ceil(AGENCY_PIPELINE_STAGES.length / COLS) * CELL_H;
+
 export function WorkflowMapPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] : null);
@@ -34,24 +43,15 @@ export function WorkflowMapPanel() {
     return 'text-zinc-700';
   };
 
-  const positions = AGENCY_PIPELINE_STAGES.map((stage, index) => ({
-    stage,
-    x: (index % COLS) * CELL_W + CELL_W / 2,
-    y: Math.floor(index / COLS) * CELL_H + CELL_H / 2,
-  }));
-
-  const width = COLS * CELL_W;
-  const height = Math.ceil(AGENCY_PIPELINE_STAGES.length / COLS) * CELL_H;
-
   return (
     <div className="flex-1 flex items-center justify-center p-8 relative">
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <svg className="w-full h-full" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" aria-label="Agency workflow">
-          {positions.slice(0, -1).map((position, index) => {
-            const next = positions[index + 1];
+        <svg className="w-full h-full" viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} preserveAspectRatio="xMidYMid meet" aria-label="Agency workflow">
+          {POSITIONS.slice(0, -1).map((position, index) => {
+            const next = POSITIONS[index + 1];
             return <line key={`edge-${position.stage}`} x1={position.x} y1={position.y} x2={next.x} y2={next.y} stroke="currentColor" className="text-zinc-700" strokeWidth="2" strokeDasharray="4 4" />;
           })}
-          {positions.map((position) => (
+          {POSITIONS.map((position) => (
             <g key={position.stage}>
               <circle cx={position.x} cy={position.y} r={NODE_R} className={`${getNodeColor(position.stage)} fill-current transition-colors duration-500`} />
               <text x={position.x} y={position.y + NODE_R + 14} textAnchor="middle" className="text-[9px] fill-zinc-500 font-mono">
