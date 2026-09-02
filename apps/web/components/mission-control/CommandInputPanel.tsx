@@ -11,11 +11,17 @@ import { useRunStore } from '../../lib/stores/runStore';
 export function CommandInputPanel() {
   const [brandName, setBrandName] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
+  const [businessIdea, setBusinessIdea] = useState('');
+  const [offerSummary, setOfferSummary] = useState('');
+  const [productType, setProductType] = useState('app');
+  const [workflowIdea, setWorkflowIdea] = useState('');
+  const [brandStyleNotes, setBrandStyleNotes] = useState('');
   const [goals, setGoals] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const setActiveRun = useRunStore((state) => state.setActiveRun);
+  const upsertRun = useRunStore((state) => state.upsertRun);
   const addArtifact = useArtifactStore((state) => state.addArtifact);
   const upsertApproval = useApprovalStore((state) => state.upsertApproval);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
@@ -29,14 +35,29 @@ export function CommandInputPanel() {
         'proj_1',
         {
           brand_name: brandName.trim(),
+          business_idea: businessIdea.trim() || null,
+          offer_summary: offerSummary.trim() || null,
+          product_type: productType.trim() || null,
           target_audience: targetAudience.trim(),
+          workflow_idea: workflowIdea.trim() || null,
           goals: goals.split(',').map((goal) => goal.trim()).filter(Boolean),
+          differentiators: [],
+          brand_style_notes: brandStyleNotes.split(',').map((note) => note.trim()).filter(Boolean),
           channels: [],
           constraints: [],
         },
         generateIdempotencyKey()
       );
 
+      upsertRun({
+        id: run.run_id,
+        tenant_id: 'tenant_1',
+        project_id: run.project_id ?? 'proj_1',
+        status: run.status === 'needs_approval' ? 'needs_approval' : 'running',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        metadata: { proof: run.proof ?? null },
+      });
       setActiveRun(run.run_id);
       for (const stage of run.stages ?? []) {
         if (stage === 'delivery') break;
@@ -57,6 +78,11 @@ export function CommandInputPanel() {
 
       setBrandName('');
       setTargetAudience('');
+      setBusinessIdea('');
+      setOfferSummary('');
+      setProductType('app');
+      setWorkflowIdea('');
+      setBrandStyleNotes('');
       setGoals('');
     } catch (err) {
       console.error('Failed to launch campaign', err);
@@ -81,11 +107,26 @@ export function CommandInputPanel() {
         <label className="text-xs text-zinc-500" htmlFor="brand-name">Brand name</label>
         <input id="brand-name" value={brandName} onChange={(event) => setBrandName(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
 
+        <label className="text-xs text-zinc-500" htmlFor="business-idea">Business idea</label>
+        <textarea id="business-idea" value={businessIdea} onChange={(event) => setBusinessIdea(event.target.value)} disabled={loading} rows={3} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <label className="text-xs text-zinc-500" htmlFor="offer-summary">Offer summary</label>
+        <textarea id="offer-summary" value={offerSummary} onChange={(event) => setOfferSummary(event.target.value)} disabled={loading} rows={2} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
         <label className="text-xs text-zinc-500" htmlFor="target-audience">Target audience</label>
         <input id="target-audience" value={targetAudience} onChange={(event) => setTargetAudience(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
 
+        <label className="text-xs text-zinc-500" htmlFor="product-type">Product type</label>
+        <input id="product-type" value={productType} onChange={(event) => setProductType(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <label className="text-xs text-zinc-500" htmlFor="workflow-idea">Workflow / automation idea</label>
+        <textarea id="workflow-idea" value={workflowIdea} onChange={(event) => setWorkflowIdea(event.target.value)} disabled={loading} rows={2} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
         <label className="text-xs text-zinc-500" htmlFor="campaign-goals">Goals <span className="text-zinc-600">(comma separated, optional)</span></label>
         <input id="campaign-goals" value={goals} onChange={(event) => setGoals(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <label className="text-xs text-zinc-500" htmlFor="brand-style-notes">Brand style notes <span className="text-zinc-600">(comma separated)</span></label>
+        <input id="brand-style-notes" value={brandStyleNotes} onChange={(event) => setBrandStyleNotes(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
 
         <div className="flex justify-end pt-1">
           <button
@@ -94,7 +135,7 @@ export function CommandInputPanel() {
             disabled={loading || !brandName.trim() || !targetAudience.trim()}
             className="px-4 py-1.5 bg-zinc-100 text-zinc-900 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
           >
-            {loading ? 'Running pipeline…' : 'Launch Campaign'}
+            {loading ? 'Running pipeline…' : 'Compile Idea Workspace'}
           </button>
         </div>
       </div>

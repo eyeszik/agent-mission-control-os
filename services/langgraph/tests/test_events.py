@@ -68,7 +68,8 @@ def test_events_endpoint_replays_completed_agency_stage_observations():
     response = client.get(f"/runs/{run_id}/events")
     assert response.status_code == 200
     events = _parse_sse_events(response.text)
-    node_ids = [event["node_id"] for event in events]
+    node_complete_events = [event for event in events if event["event_type"] == "node_complete"]
+    node_ids = [event["node_id"] for event in node_complete_events]
     for stage in [
         "brief_intake",
         "brand_strategy",
@@ -81,9 +82,38 @@ def test_events_endpoint_replays_completed_agency_stage_observations():
     ]:
         assert stage in node_ids
     assert "delivery" not in node_ids
-    assert all(event["event_type"] == "node_complete" for event in events)
-    assert all(event["started_at"] is None for event in events)
-    assert all(event["completed_at"] is not None for event in events)
+    assert all(event["started_at"] is None for event in node_complete_events)
+    assert all(event["completed_at"] is not None for event in node_complete_events)
+
+
+def test_agency_lifecycle_event_stream_includes_approval_events():
+    create_resp = client.post(
+        "/agency/runs",
+        json={
+            "tenant_id": "tenant-events-test",
+            "project_id": f"proj-events-{uuid4()}",
+            "brief": {"brand_name": "Acme", "target_audience": "Developers"},
+        },
+        headers={"Idempotency-Key": str(uuid4())},
+    )
+    assert create_resp.status_code == 201
+    body = create_resp.json()
+    run_id = body["run_id"]
+    approval_id = body["pending_approval"]["approval_id"]
+
+    decide = client.post(
+        f"/approvals/{approval_id}/decide",
+        json={"decision": "approve"},
+        headers={"Idempotency-Key": str(uuid4())},
+    )
+    assert decide.status_code == 200
+
+    response = client.get(f"/runs/{run_id}/events")
+    assert response.status_code == 200
+    events = _parse_sse_events(response.text)
+    types = [event["event_type"] for event in events]
+    assert "approval_requested" in types
+    assert "approval_decided" in types
 
 
 def test_unknown_run_event_stream_returns_404():

@@ -38,3 +38,11 @@ def assert_runtime_configuration() -> None:
     errors = production_config_errors()
     if errors:
         raise RuntimeError("Invalid production configuration: " + "; ".join(errors))
+
+
+def hmac_ingress_enabled() -> bool:
+    return bool((os.environ.get("AMC_HMAC_SECRET") or "").strip())
+
+
+def hmac_ingress_header_name() -> str:
+    return (os.environ.get("AMC_HMAC_HEADER") or "X-AMC-Signature").strip()

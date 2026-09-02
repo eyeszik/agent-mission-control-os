@@ -55,6 +55,7 @@ def main() -> None:
         "apps/web/package.json",
         "apps/web/playwright.config.ts",
         "apps/web/e2e/agency-smoke.spec.ts",
+        "services/langgraph/agency/exporter.py",
         "apps/web/lib/api/client.ts",
         "apps/web/lib/auth/session.ts",
         "apps/web/lib/auth/supabase.ts",
