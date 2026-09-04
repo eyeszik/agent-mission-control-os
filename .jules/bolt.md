@@ -4,3 +4,6 @@
 ## 2026-08-21 - Zustand Primitive Selector Optimization
 **Learning:** Selecting a full object in Zustand just to compute a primitive like `.length` in the component causes unnecessary re-renders.
 **Action:** Compute and return the primitive value directly inside the selector.
+## 2026-08-22 - Zustand derived object selection optimization
+**Learning:** Extracting an entire array from Zustand state just to immediately filter or search it via `.find()` within the render body causes unnecessary component re-renders whenever any unselected element in the array updates.
+**Action:** Push the `.find()` or `.filter()` calculation directly inside the inline selector `useStore((state) => state.list.find(...))` so the component only re-renders when the exact desired derived object reference changes.
