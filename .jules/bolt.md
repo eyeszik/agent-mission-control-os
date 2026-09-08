@@ -4,3 +4,6 @@
 ## 2026-08-21 - Zustand Primitive Selector Optimization
 **Learning:** Selecting a full object in Zustand just to compute a primitive like `.length` in the component causes unnecessary re-renders.
 **Action:** Compute and return the primitive value directly inside the selector.
+## 2026-09-08 - Hoist Static Layout Collections
+**Learning:** Arrays, slice iterations, and math logic based entirely on constants inside React components causes unnecessary memory allocation on every single update cycle.
+**Action:** Move entirely static mapping, slice objects, and layout dimensions outside the React function body.
