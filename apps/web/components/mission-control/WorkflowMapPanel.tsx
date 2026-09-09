@@ -21,6 +21,17 @@ const CELL_W = 120;
 const CELL_H = 90;
 const NODE_R = 14;
 
+// Optimization: Compute static positions and SVG dimensions once at module load
+// rather than re-calculating them on every component render.
+const positions = AGENCY_PIPELINE_STAGES.map((stage, index) => ({
+  stage,
+  x: (index % COLS) * CELL_W + CELL_W / 2,
+  y: Math.floor(index / COLS) * CELL_H + CELL_H / 2,
+}));
+
+const width = COLS * CELL_W;
+const height = Math.ceil(AGENCY_PIPELINE_STAGES.length / COLS) * CELL_H;
+
 export function WorkflowMapPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] : null);
@@ -33,15 +44,6 @@ export function WorkflowMapPanel() {
     if (status === 'failed') return 'text-red-500';
     return 'text-zinc-700';
   };
-
-  const positions = AGENCY_PIPELINE_STAGES.map((stage, index) => ({
-    stage,
-    x: (index % COLS) * CELL_W + CELL_W / 2,
-    y: Math.floor(index / COLS) * CELL_H + CELL_H / 2,
-  }));
-
-  const width = COLS * CELL_W;
-  const height = Math.ceil(AGENCY_PIPELINE_STAGES.length / COLS) * CELL_H;
 
   return (
     <div className="flex-1 flex items-center justify-center p-8 relative">
