@@ -5,6 +5,6 @@
 **Learning:** Selecting a full object in Zustand just to compute a primitive like `.length` in the component causes unnecessary re-renders.
 **Action:** Compute and return the primitive value directly inside the selector.
 
-## 2026-09-09 - React Component Static Calculation Hoisting
+## 2026-09-10 - React Component Static Calculation Hoisting
 **Learning:** Generating arrays and layout coordinates directly inside React component bodies, especially using `.map()` on static data, causes unnecessary memory allocation and garbage collection on every render frame.
 **Action:** Hoist static layout calculations, arrays, and coordinate math derived solely from constants outside of React components.
