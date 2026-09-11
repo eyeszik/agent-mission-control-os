@@ -32,6 +32,13 @@ const positions = AGENCY_PIPELINE_STAGES.map((stage, index) => ({
 const width = COLS * CELL_W;
 const height = Math.ceil(AGENCY_PIPELINE_STAGES.length / COLS) * CELL_H;
 
+// Optimization: Hoist static edge array calculations outside the render function
+// to prevent O(N) mapping overhead on every component re-render.
+const edges = positions.slice(0, -1).map((position, index) => {
+  const next = positions[index + 1];
+  return { key: `edge-${position.stage}`, x1: position.x, y1: position.y, x2: next.x, y2: next.y };
+});
+
 export function WorkflowMapPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] : null);
@@ -49,10 +56,9 @@ export function WorkflowMapPanel() {
     <div className="flex-1 flex items-center justify-center p-8 relative">
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <svg className="w-full h-full" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" aria-label="Agency workflow">
-          {positions.slice(0, -1).map((position, index) => {
-            const next = positions[index + 1];
-            return <line key={`edge-${position.stage}`} x1={position.x} y1={position.y} x2={next.x} y2={next.y} stroke="currentColor" className="text-zinc-700" strokeWidth="2" strokeDasharray="4 4" />;
-          })}
+          {edges.map((edge) => (
+            <line key={edge.key} x1={edge.x1} y1={edge.y1} x2={edge.x2} y2={edge.y2} stroke="currentColor" className="text-zinc-700" strokeWidth="2" strokeDasharray="4 4" />
+          ))}
           {positions.map((position) => (
             <g key={position.stage}>
               <circle cx={position.x} cy={position.y} r={NODE_R} className={`${getNodeColor(position.stage)} fill-current transition-colors duration-500`} />
