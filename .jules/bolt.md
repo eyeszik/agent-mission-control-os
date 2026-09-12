@@ -7,3 +7,6 @@
 ## 2026-08-22 - Static Calculations Outside Render Loop
 **Learning:** Computing static layout values or arrays (e.g., node positions and SVG dimensions derived from constant workflow stages) inside a React component's render body causes unnecessary redundant calculations and allocates new object/array references on every render.
 **Action:** Move static data mappings and derived calculations outside of the component render function so they are only evaluated once at module load time.
+## 2026-08-23 - Zustand Derived Object Selection
+**Learning:** Selecting an entire array from Zustand (`state.artifacts[runId]`) and a primitive selector (`state.selectedArtifactId`) only to run `.find()` in the component causes the component to re-render whenever *any* artifact in the array is added/updated, even if the selected artifact itself hasn't changed.
+**Action:** Move the `.find()` operation directly into the selector so the component only subscribes to the specific resolved object reference.
