@@ -1,0 +1,36 @@
+{
+  "name": "@aisl/proxy-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Agentic Intent Settlement Layer (AISL) - middleware proxy gateway bridging merchant commerce platforms to Agentic Commerce Protocol rails",
+  "type": "module",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "migrate": "tsx src/db/migrate-cli.ts",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:e2e": "vitest run tests/e2e",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "fastify": "^5.12.4",
+    "ioredis": "^5.9.0",
+    "pg": "^8.23.0",
+    "stripe": "^22.6.2",
+    "uuid": "^14.0.2",
+    "zod": "^4.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

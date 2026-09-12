@@ -1,0 +1,151 @@
+name: AISL Proxy Gateway
+
+on:
+  push:
+    branches: [master, "claude/**", "remediate/**"]
+    paths:
+      - "aisl-proxy/**"
+      - ".github/workflows/aisl-proxy.yml"
+  pull_request:
+    paths:
+      - "aisl-proxy/**"
+      - ".github/workflows/aisl-proxy.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aisl-proxy-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: aisl-proxy
+
+jobs:
+  verify:
+    name: Typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: aisl
+          POSTGRES_PASSWORD: aisl
+          POSTGRES_DB: aisl_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U aisl -d aisl_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      TEST_DATABASE_URL: postgresql://aisl:aisl@127.0.0.1:5432/aisl_test
+      TEST_REDIS_URL: redis://127.0.0.1:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: aisl-proxy/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test (unit + integration)
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke-test the compiled gateway
+        env:
+          NODE_ENV: development
+          LOG_LEVEL: warn
+          HOST: 127.0.0.1
+          PORT: 8080
+          PUBLIC_BASE_URL: http://127.0.0.1:8080
+          DATABASE_URL: postgresql://aisl:aisl@127.0.0.1:5432/aisl_test
+          REDIS_URL: redis://127.0.0.1:6379
+          STRIPE_SECRET_KEY: sk_test_ci
+          STRIPE_WEBHOOK_SECRET: whsec_test_ci
+          AISL_ATTRIBUTION_SALT: ci-attribution-salt-0123456789abcdef0123
+          AISL_CREDENTIAL_ENCRYPTION_KEY: BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=
+          AISL_AGENT_API_KEYS: ci_agent_key
+        run: |
+          node dist/index.js > /tmp/aisl.log 2>&1 &
+          echo $! > /tmp/aisl.pid
+          for _ in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:8080/ready >/dev/null && break
+            sleep 1
+          done
+
+          # TASK 1 gate: exact manifest, 200, application/json.
+          curl -fsS -D /tmp/headers http://127.0.0.1:8080/.well-known/acp/config.json -o /tmp/config.json
+          grep -qi '^content-type: application/json' /tmp/headers
+          node -e "
+            const fs = require('node:fs');
+            const actual = JSON.parse(fs.readFileSync('/tmp/config.json', 'utf8'));
+            const expected = {
+              version: '2026.1',
+              capabilities: { catalog_search: true, delegated_checkout: true, session_persistence: false },
+              endpoints: {
+                catalog_query: '/v1/agent/intent',
+                checkout_execution: '/v1/agent/checkout',
+                order_status: '/v1/agent/order/{order_id}',
+              },
+              payment_methods: ['stripe_delegated_token', 'merchant_shared_payment_token'],
+              supported_currencies: ['USD', 'EUR', 'GBP'],
+            };
+            if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+              throw new Error('ACP manifest drift: ' + JSON.stringify(actual));
+            }
+          "
+
+          # Agent routes must reject an unauthenticated caller.
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8080/v1/agent/intent \
+            -H 'content-type: application/json' -d '{"agent_id":"ci","query":"x"}')" = "401"
+
+          kill "$(cat /tmp/aisl.pid)"
+
+      - name: Print gateway log on failure
+        if: failure()
+        run: cat /tmp/aisl.log || true
+
+  docker:
+    name: Docker image builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: aisl-proxy
+          target: runner
+          push: false
+          load: true
+          tags: aisl-proxy-gateway:ci
+      - name: Container starts and reports its version
+        run: docker run --rm --entrypoint node aisl-proxy-gateway:ci --version
