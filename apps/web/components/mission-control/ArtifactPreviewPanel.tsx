@@ -12,9 +12,14 @@ import { generateIdempotencyKey } from '../../lib/utils/idempotency';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
-  const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
   const addArtifact = useArtifactStore((state) => state.addArtifact);
+
+  const selectedArtifact = useArtifactStore((state) => {
+    if (!activeRunId) return null;
+    const runArtifacts = state.artifacts[activeRunId];
+    if (!runArtifacts || !state.selectedArtifactId) return null;
+    return runArtifacts.find(a => a.id === state.selectedArtifactId) || null;
+  });
 
   // Optimization: useShallow prevents unnecessary re-renders by returning the same
   // array reference if the content of pendingApprovals hasn't structurally changed,
@@ -25,8 +30,6 @@ export function ArtifactPreviewPanel() {
 
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const selectedArtifact = artifacts ? artifacts.find(a => a.id === selectedArtifactId) : null;
 
   const handleResolve = async (approvalId: string, runId: string, decision: 'approve' | 'reject') => {
     setResolvingId(approvalId);
