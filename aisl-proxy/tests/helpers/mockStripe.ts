@@ -13,10 +13,20 @@ export interface MockStripeState {
     chargeId: string;
   }>;
   refunds: Array<{ id: string; paymentIntentId: string }>;
+  transfers: Array<{
+    id: string;
+    amount: number;
+    currency: string;
+    destination: string | null;
+    idempotencyKey: string | null;
+    metadata: Record<string, string>;
+  }>;
   /** Decline the next PaymentIntent, to exercise the 402 path. */
   declineNext: boolean;
   /** Fail every refund, to exercise the orphaned-capture alarm. */
   failRefunds: boolean;
+  /** Fail every transfer, to exercise payout claim release. */
+  failTransfers: boolean;
 }
 
 export interface MockStripe {
@@ -37,8 +47,10 @@ export async function startMockStripe(): Promise<MockStripe> {
   const state: MockStripeState = {
     paymentIntents: [],
     refunds: [],
+    transfers: [],
     declineNext: false,
     failRefunds: false,
+    failTransfers: false,
   };
   let sequence = 0;
 
@@ -109,6 +121,56 @@ export async function startMockStripe(): Promise<MockStripe> {
         const id = `re_test_${String(sequence).padStart(6, '0')}`;
         state.refunds.push({ id, paymentIntentId: form.get('payment_intent') ?? '' });
         return json(response, 200, { id, object: 'refund', status: 'succeeded' });
+      }
+
+      if (path === '/v1/transfers' && request.method === 'POST') {
+        if (state.failTransfers) {
+          return json(response, 400, {
+            error: {
+              type: 'invalid_request_error',
+              code: 'balance_insufficient',
+              message: 'Insufficient funds in the platform balance',
+            },
+          });
+        }
+        const idempotencyKey = header(request.headers['idempotency-key']);
+        // Stripe replays the original response for a repeated idempotency key;
+        // the payout engine relies on that to survive an ambiguous failure.
+        const replay = state.transfers.find((transfer) => transfer.idempotencyKey === idempotencyKey);
+        if (replay) {
+          return json(response, 200, {
+            id: replay.id,
+            object: 'transfer',
+            amount: replay.amount,
+            currency: replay.currency,
+            destination: replay.destination,
+          });
+        }
+
+        sequence += 1;
+        const id = `tr_test_${String(sequence).padStart(6, '0')}`;
+        const metadata: Record<string, string> = {};
+        for (const [key, value] of form.entries()) {
+          const match = /^metadata\[(.+)\]$/.exec(key);
+          if (match?.[1]) metadata[match[1]] = value;
+        }
+        const amount = Number(form.get('amount') ?? 0);
+        const currency = form.get('currency') ?? 'usd';
+        state.transfers.push({
+          id,
+          amount,
+          currency,
+          destination: form.get('destination'),
+          idempotencyKey,
+          metadata,
+        });
+        return json(response, 200, {
+          id,
+          object: 'transfer',
+          amount,
+          currency,
+          destination: form.get('destination'),
+        });
       }
 
       json(response, 404, {

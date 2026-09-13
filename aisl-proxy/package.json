@@ -16,7 +16,11 @@
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:e2e": "vitest run tests/e2e",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "payouts": "tsx src/cli/run-payouts.ts",
+    "agent-account": "tsx src/cli/agent-account.ts",
+    "reconcile": "tsx src/cli/reconcile.ts",
+    "merchant": "tsx src/cli/manage-merchant.ts"
   },
   "dependencies": {
     "fastify": "^5.12.4",

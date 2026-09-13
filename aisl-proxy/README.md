@@ -17,15 +17,21 @@ AI agent
   │  POST /v1/agent/checkout                delegated payment + order + ledger write
   │  GET  /v1/agent/order/{order_id}        settlement status incl. reversals
   ▼
-AISL gateway ── Postgres (merchants, intents, conversions, ledger_entries)
+AISL gateway ── Postgres (merchants, intents, conversions, ledger_entries, payouts)
              └─ Redis    (catalogue cache, webhook dedupe, token-bucket rate limit)
   │
   ├─ Shopify Storefront GraphQL / WooCommerce REST   catalogue
   ├─ Shopify Admin REST / WooCommerce REST           order dispatch
-  └─ Stripe PaymentIntents                           shared payment token redemption
+  ├─ Stripe PaymentIntents                           shared payment token redemption
+  └─ Stripe Transfers                                agent commission payouts
        ▲
-       └── POST /v1/webhooks/stripe-acp    settlement + clawback
+       ├── POST /v1/webhooks/stripe-acp    settlement + clawback
+       └── GET  /internal/reconciliation   operator probe: 200 clean, 503 otherwise
 ```
+
+Two scheduled jobs close the loop: `npm run payouts` moves accrued commission
+out to agents, and `npm run reconcile` reports the states that need a human.
+Both are documented in [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
 
 ## Quick start
 
@@ -52,6 +58,18 @@ echo '{
 }' | npx tsx src/cli/onboard-merchant.ts \
     --name "Your Store" --commission-bps 500 --aisl-bps 80
 ```
+
+## Operator commands
+
+```bash
+npm run payouts                 # sweep accrued agent commission and transfer it
+npm run payouts -- --dry-run    # report balances without claiming anything
+npm run reconcile               # the states that need a human; exit 1 if any
+npm run agent-account -- --agent-id agent_acme --stripe-account acct_123
+npm run merchant -- list        # rotate / disable / enable a merchant's credentials
+```
+
+See [`docs/OPERATIONS.md`](docs/OPERATIONS.md) for the runbook behind each.
 
 ## Tests
 
@@ -122,15 +140,20 @@ commission_total == aisl_fee + agent_payout
 gross            == merchant_net + commission_total
 ```
 
-Beside the denormalised `conversions` row, every transaction also writes four
+Beside the denormalised `conversions` row, every transaction also writes
 balanced legs into `ledger_entries`:
 
-| account              | sale   | reversal |
-| -------------------- | ------ | -------- |
-| `merchant_receivable`| DEBIT  | CREDIT   |
-| `merchant_revenue`   | CREDIT | DEBIT    |
-| `agent_payable`      | CREDIT | DEBIT    |
-| `platform_revenue`   | CREDIT | DEBIT    |
+| account              | sale   | reversal | payout |
+| -------------------- | ------ | -------- | ------ |
+| `merchant_receivable`| DEBIT  | CREDIT   | —      |
+| `merchant_revenue`   | CREDIT | DEBIT    | —      |
+| `agent_payable`      | CREDIT | DEBIT    | DEBIT  |
+| `platform_revenue`   | CREDIT | DEBIT    | —      |
+| `agent_cash`         | —      | —        | CREDIT |
+
+A sale credits `agent_payable`; the payout that discharges it debits the same
+account back to zero. Commission that has been earned but not yet transferred is
+exactly the outstanding balance on that account.
 
 Debits equal credits within every `entry_group_id`;
 `findUnbalancedEntryGroups()` returns the corruption alarm and is asserted
@@ -162,7 +185,16 @@ shipping added after the agent's quote).
 - **A refund cannot be undone by a late settlement event.** `markSettled` only
   transitions `PENDING_SETTLEMENT`, never `REFUNDED`.
 - **Merchant credentials are encrypted at rest** (AES-256-GCM), and secrets are
-  redacted from request logs.
+  redacted from request logs. They can be rotated in place (`npm run merchant --
+  rotate`), which overwrites the old ciphertext rather than archiving it.
+- **An agent is never paid twice.** A payout claims its conversions atomically
+  before the transfer is attempted, and `payout_items.conversion_id` is a UNIQUE
+  index — a concurrent sweep aborts rather than funding a second transfer. A
+  failed transfer releases the claim; a transfer whose outcome is unknown stays
+  `IN_FLIGHT` for a human, because guessing risks paying twice.
+- **A refund is clawed back out of the next payout**, netting against future
+  earnings. Refunding a sale that was never paid out nets to zero instead of
+  inventing a debt.
 
 ## Layout
 
@@ -177,7 +209,7 @@ src/
   redis/store.ts             narrow KV surface + Lua token bucket + in-memory twin
   connectors/                Shopify Storefront/Admin, WooCommerce, Stripe SPT
   services/                  intent, checkout, webhook orchestration
-  cli/onboard-merchant.ts    sealed merchant onboarding
+  cli/                       onboarding, merchant lifecycle, payouts, reconciliation
 tests/
   unit/                      money, crypto, ids, connectors, dedupe primitives
   e2e/                       schema gate + full gateway cycle
@@ -191,3 +223,5 @@ tests/
   blueprint instead, and what remains unverified.
 - [`docs/blueprint-conformance.md`](docs/blueprint-conformance.md) — each
   blueprint validation gate mapped to the test that proves it.
+- [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — payout and reconciliation
+  runbooks, every alarm and what to do about it.

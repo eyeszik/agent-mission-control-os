@@ -5,6 +5,7 @@ import { CheckoutIdempotencyRepository } from './db/repositories/checkoutIdempot
 import { ConversionRepository } from './db/repositories/conversions.js';
 import { IntentRepository } from './db/repositories/intents.js';
 import { MerchantRepository } from './db/repositories/merchants.js';
+import { PayoutRepository } from './db/repositories/payouts.js';
 import { WebhookEventRepository } from './db/repositories/webhookEvents.js';
 import { InMemoryStore, RedisStore, type KeyValueStore } from './redis/store.js';
 import { ConnectorRegistry, type PaymentProcessor } from './connectors/types.js';
@@ -12,6 +13,7 @@ import { ShopifyStorefrontConnector } from './connectors/shopify/storefront.js';
 import { ShopifyAdminOrderDispatcher } from './connectors/shopify/admin.js';
 import { WooCommerceConnector } from './connectors/woocommerce/rest.js';
 import { StripeDelegatedPaymentProcessor } from './connectors/stripe/delegatedPayments.js';
+import { StripeTransferProcessor, type PayoutProcessor } from './connectors/stripe/transfers.js';
 import { AislError } from './lib/errors.js';
 
 /** Verifies and parses a raw S2S webhook body. */
@@ -50,6 +52,7 @@ export interface AppDependencies {
   cache: KeyValueStore;
   connectors: ConnectorRegistry;
   payments: PaymentProcessor;
+  transfers: PayoutProcessor;
   webhookVerifier: WebhookVerifier;
   repositories: {
     merchants: MerchantRepository;
@@ -57,6 +60,7 @@ export interface AppDependencies {
     conversions: ConversionRepository;
     idempotency: CheckoutIdempotencyRepository;
     webhookEvents: WebhookEventRepository;
+    payouts: PayoutRepository;
   };
   /** Releases every owned resource. Only closes what this container created. */
   shutdown: () => Promise<void>;
@@ -69,6 +73,7 @@ export function buildRepositories(db: Database, env: Env): AppDependencies['repo
     conversions: new ConversionRepository(db),
     idempotency: new CheckoutIdempotencyRepository(db),
     webhookEvents: new WebhookEventRepository(db),
+    payouts: new PayoutRepository(db),
   };
 }
 
@@ -100,6 +105,7 @@ export function createContainer(env: Env): AppDependencies {
     cache,
     connectors: buildConnectorRegistry(env),
     payments: new StripeDelegatedPaymentProcessor(stripe),
+    transfers: new StripeTransferProcessor(stripe),
     webhookVerifier: new StripeWebhookVerifier(stripe, env.STRIPE_WEBHOOK_SECRET),
     repositories: buildRepositories(db, env),
     shutdown: async () => {

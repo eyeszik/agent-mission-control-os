@@ -1,6 +1,7 @@
 import { loadEnv } from '../config/env.js';
 import { createDatabase } from '../db/pool.js';
 import { MerchantRepository, MerchantCredentialsSchema } from '../db/repositories/merchants.js';
+import { numberArg, parseArgs, readStdin } from './args.js';
 
 /**
  * Idempotent merchant onboarding.
@@ -52,41 +53,6 @@ async function main(): Promise<void> {
   } finally {
     await db.close();
   }
-}
-
-function parseArgs(argv: readonly string[]): Map<string, string> {
-  const parsed = new Map<string, string>();
-  for (let index = 0; index < argv.length; index += 1) {
-    const token = argv[index];
-    if (!token?.startsWith('--')) continue;
-    const key = token.slice(2);
-    const next = argv[index + 1];
-    if (next !== undefined && !next.startsWith('--')) {
-      parsed.set(key, next);
-      index += 1;
-    } else {
-      parsed.set(key, 'true');
-    }
-  }
-  return parsed;
-}
-
-function numberArg(args: Map<string, string>, key: string): number | undefined {
-  const value = args.get(key);
-  if (value === undefined) return undefined;
-  const parsed = Number(value);
-  if (!Number.isInteger(parsed)) {
-    throw new Error(`--${key} must be an integer`);
-  }
-  return parsed;
-}
-
-async function readStdin(): Promise<string> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of process.stdin) {
-    chunks.push(Buffer.from(chunk));
-  }
-  return Buffer.concat(chunks).toString('utf8');
 }
 
 main().catch((error: unknown) => {

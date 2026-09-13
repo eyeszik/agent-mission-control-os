@@ -26,6 +26,8 @@ function merchantFor(domain: string): Merchant {
     commissionRateBps: 500,
     aislCutBps: 80,
     createdAt: new Date(),
+    enabled: true,
+    credentialsRotatedAt: null,
     credentials: {
       platform: 'shopify',
       store_domain: domain,

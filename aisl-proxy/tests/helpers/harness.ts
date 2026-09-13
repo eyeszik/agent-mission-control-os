@@ -10,6 +10,7 @@ import { ConnectorRegistry } from '../../src/connectors/types.js';
 import { ShopifyStorefrontConnector } from '../../src/connectors/shopify/storefront.js';
 import { ShopifyAdminOrderDispatcher } from '../../src/connectors/shopify/admin.js';
 import { StripeDelegatedPaymentProcessor } from '../../src/connectors/stripe/delegatedPayments.js';
+import { StripeTransferProcessor } from '../../src/connectors/stripe/transfers.js';
 import { startMockShopify, redirectingFetch, type MockProduct, type MockShopify } from './mockShopify.js';
 import { startMockStripe, type MockStripe } from './mockStripe.js';
 import { testEnv, TEST_WEBHOOK_SECRET } from './testEnv.js';
@@ -103,6 +104,7 @@ export async function startHarness(
     cache,
     connectors,
     payments: new StripeDelegatedPaymentProcessor(stripeClient),
+    transfers: new StripeTransferProcessor(stripeClient),
     webhookVerifier: new StripeWebhookVerifier(stripeClient, TEST_WEBHOOK_SECRET),
     repositories,
     shutdown: async () => {
@@ -157,8 +159,9 @@ export async function startHarness(
 
 export async function truncateAll(db: Database): Promise<void> {
   await db.query(`
-    TRUNCATE TABLE ledger_entries, checkout_idempotency, webhook_events, conversions,
-                   agent_intent_bindings, agent_intents, idempotency_keys, merchants
+    TRUNCATE TABLE payout_items, payouts, agent_accounts, ledger_entries, checkout_idempotency,
+                   webhook_events, conversions, agent_intent_bindings, agent_intents,
+                   idempotency_keys, merchants
     RESTART IDENTITY CASCADE
   `);
 }
@@ -166,8 +169,9 @@ export async function truncateAll(db: Database): Promise<void> {
 /** Clears run state but keeps the onboarded merchants a suite already seeded. */
 export async function truncateTransactional(db: Database): Promise<void> {
   await db.query(`
-    TRUNCATE TABLE ledger_entries, checkout_idempotency, webhook_events, conversions,
-                   agent_intent_bindings, agent_intents, idempotency_keys
+    TRUNCATE TABLE payout_items, payouts, agent_accounts, ledger_entries, checkout_idempotency,
+                   webhook_events, conversions, agent_intent_bindings, agent_intents,
+                   idempotency_keys
     RESTART IDENTITY CASCADE
   `);
 }

@@ -34,6 +34,53 @@ describe('database schema and ledger deployment', () => {
     for (const table of ['ledger_entries', 'webhook_events', 'checkout_idempotency', 'agent_intent_bindings']) {
       expect(tables, `settlement table ${table}`).toContain(table);
     }
+    for (const table of ['agent_accounts', 'payouts', 'payout_items']) {
+      expect(tables, `payout table ${table}`).toContain(table);
+    }
+  });
+
+  it('lets a conversion be claimed by only one payout', async () => {
+    await db.query(
+      `INSERT INTO agent_accounts (agent_id, stripe_account_id) VALUES ('agent_schema', 'acct_schema')`,
+    );
+    const { rows: merchant } = await db.query<{ id: string }>(
+      `INSERT INTO merchants (name, platform, api_credentials_encrypted)
+       VALUES ('Schema Co', 'shopify', '{}'::jsonb) RETURNING id`,
+    );
+    const merchantId = merchant[0]?.id;
+
+    const { rows: conversion } = await db.query<{ id: string }>(
+      `INSERT INTO conversions
+         (merchant_id, external_order_id, gross_amount_cents, commission_total_cents,
+          aisl_fee_cents, agent_payout_cents, merchant_net_cents, currency, agent_id)
+       VALUES ($1, 'schema-order-1', 10000, 500, 80, 420, 9500, 'USD', 'agent_schema')
+       RETURNING id`,
+      [merchantId],
+    );
+    const conversionId = conversion[0]?.id;
+
+    const payoutIds: string[] = [];
+    for (const key of ['schema_key_a', 'schema_key_b']) {
+      const { rows } = await db.query<{ id: string }>(
+        `INSERT INTO payouts (agent_id, currency, amount_cents, idempotency_key)
+         VALUES ('agent_schema', 'USD', 420, $1) RETURNING id`,
+        [key],
+      );
+      payoutIds.push(rows[0]?.id ?? '');
+    }
+
+    await db.query(`INSERT INTO payout_items (payout_id, conversion_id, amount_cents) VALUES ($1, $2, 420)`, [
+      payoutIds[0],
+      conversionId,
+    ]);
+
+    // The double-payment guard: the same conversion cannot fund a second transfer.
+    await expect(
+      db.query(`INSERT INTO payout_items (payout_id, conversion_id, amount_cents) VALUES ($1, $2, 420)`, [
+        payoutIds[1],
+        conversionId,
+      ]),
+    ).rejects.toThrow(/duplicate key|unique/i);
   });
 
   it('wires the declared foreign keys', async () => {

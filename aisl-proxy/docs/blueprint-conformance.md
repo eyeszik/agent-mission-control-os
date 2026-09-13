@@ -11,7 +11,7 @@ the code that implements it and the test that proves it.
 | `POST /v1/agent/intent` returns real-time catalog prices with bound SubID tracking tokens | `gateway.e2e.test.ts` → "returns live catalogue results bound to UUIDv7 attribution tokens": every result's price is compared against the merchant catalogue, and `sub_id_1`/`sub_id_2` round-trip. |
 | `POST /v1/agent/checkout` executes an atomic delegated payment token reservation | `gateway.e2e.test.ts` → "redeems the shared payment token, places the order, and books a balanced ledger": asserts the SPT reached Stripe in the documented parameter, on the connected account, under an idempotency key. |
 | `POST /v1/webhooks/stripe-acp` reconciles the ledger with 0% dropped events | `gateway.e2e.test.ts` → settlement, duplicate, concurrent-duplicate, clawback, dispute, late-settlement, orphan and unhandled-type cases. Every path answers 200 so Stripe never retries a decided event. |
-| 100% passing automated integration suite across mock agent and mock Shopify/Stripe APIs | `npm test`: 4 unit files + 2 integration files, 72 tests. |
+| 100% passing automated integration suite across mock agent and mock Shopify/Stripe APIs | `npm test`: 5 unit files + 5 integration files, 117 tests. |
 
 ## Task 1 — Repository scaffold and protocol manifest
 
@@ -50,6 +50,8 @@ the code that implements it and the test that proves it.
   - `webhook_events` and `checkout_idempotency` provide durable dedupe.
   - `idempotency_keys` is created per the blueprint but unused — see
     `acp-compatibility.md` §7.
+  - Migration `003_payouts.sql` and `004_merchant_lifecycle.sql` are beyond the
+    blueprint entirely; see "Beyond the blueprint" below.
 
 ## Task 3 — Product feed normalizer and discovery endpoint
 
@@ -120,7 +122,7 @@ the code that implements it and the test that proves it.
   (gateway + `postgres:16-alpine` + `redis:7-alpine`, health-gated startup),
   `tests/e2e/gateway.e2e.test.ts`.
 - **Evidence:**
-  - `npm test` → 72 passed, 0 failed.
+  - `npm test` → 117 passed, 0 failed.
   - `docker compose up -d --build` → all three containers reported healthy;
     `/ready` returned `{"status":"ready","database":true,"cache":true}`;
     migrations `001_init.sql` and `002_settlement_extensions.sql` present in
@@ -132,3 +134,56 @@ the code that implements it and the test that proves it.
 - **Deviation:** the Dockerfile accepts an optional `proxy_ca` build secret so
   the image can be built behind a TLS-inspecting egress proxy. Without the
   secret it is a plain `npm ci`, and nothing is added to the runtime image.
+
+---
+
+# Beyond the blueprint
+
+The blueprint's six tasks make the gateway an accurate **book of record**. They
+stop short of two things a gateway handling real money needs, which are
+implemented here and are explicitly *not* traceable to a blueprint gate.
+
+## Agent payouts (`003_payouts.sql`)
+
+Every sale credits `agent_payable` and every reversal debits it back, but the
+blueprint never settles that liability — commission accrues forever and nothing
+leaves. `PayoutService` sweeps it.
+
+- **Implementation:** `src/db/repositories/payouts.ts`,
+  `src/connectors/stripe/transfers.ts`, `src/services/payoutService.ts`,
+  `src/cli/run-payouts.ts`, `src/cli/agent-account.ts`.
+- **Evidence:** `payouts.e2e.test.ts` (12 tests) plus the schema guard in
+  `schema.e2e.test.ts`. Covered: eligibility (settled sales only), the
+  never-paid-refund case netting to zero, ledger discharge to a zero
+  `agent_payable`, run idempotency, two concurrent sweeps producing exactly one
+  transfer, claim release on a failed transfer, clawback netting against a later
+  sale, a negative balance carried forward, and each of the four gates
+  (unregistered, no destination, below minimum, disabled).
+- **Design note.** The claim is taken *before* the external transfer. A crash in
+  between therefore leaves a visible `IN_FLIGHT` payout — surfaced by
+  reconciliation as `payout_in_flight_stale` — rather than risking a double
+  payment. This trade is deliberate: money briefly stuck is recoverable, money
+  sent twice is not.
+- **Unverified:** `stripe.transfers.create` is exercised against the mock Stripe
+  server only. It is the stable, generally available Transfers API rather than a
+  preview one, so no cast is needed — but no live transfer has been made.
+
+## Reconciliation and merchant lifecycle (`004_merchant_lifecycle.sql`)
+
+- **Implementation:** `src/services/reconciliationService.ts`,
+  `src/cli/reconcile.ts`, `GET /internal/reconciliation`,
+  `src/cli/manage-merchant.ts`, `MerchantRepository.rotateCredentials` /
+  `setEnabled`.
+- **Evidence:** `reconciliation.e2e.test.ts` (10 tests) and
+  `merchantLifecycle.e2e.test.ts` (7 tests), including an assertion that a
+  rotated-away token leaves no plaintext trace in `merchants`.
+- **Runbook:** [`OPERATIONS.md`](OPERATIONS.md).
+
+## WooCommerce coverage
+
+`acp-compatibility.md` §7 previously recorded that the WooCommerce connector had
+no automated coverage. It now has 15 tests (`tests/unit/woocommerce.test.ts`)
+against an in-process REST v3 stand-in: normalisation, stock-status mapping,
+Basic auth, per-merchant currency caching, zero-decimal currency handling, order
+creation with the attribution trail, and the auth-failure path. It is still
+**not** exercised against a live WooCommerce store.

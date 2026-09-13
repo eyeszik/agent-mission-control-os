@@ -126,7 +126,34 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8080/v1/agent/intent \
             -H 'content-type: application/json' -d '{"agent_id":"ci","query":"x"}')" = "401"
 
+          # A fresh database reconciles clean, and the probe needs no agent key.
+          curl -fsS http://127.0.0.1:8080/internal/reconciliation -o /tmp/reconcile.json
+          node -e "
+            const report = require('/tmp/reconcile.json');
+            if (report.healthy !== true || report.findings.length !== 0) {
+              throw new Error('fresh database did not reconcile clean: ' + JSON.stringify(report));
+            }
+          "
+
           kill "$(cat /tmp/aisl.pid)"
+
+      - name: Operator CLIs run against the migrated schema
+        env:
+          NODE_ENV: development
+          LOG_LEVEL: warn
+          PUBLIC_BASE_URL: http://127.0.0.1:8080
+          DATABASE_URL: postgresql://aisl:aisl@127.0.0.1:5432/aisl_test
+          REDIS_URL: redis://127.0.0.1:6379
+          STRIPE_SECRET_KEY: sk_test_ci
+          STRIPE_WEBHOOK_SECRET: whsec_test_ci
+          AISL_ATTRIBUTION_SALT: ci-attribution-salt-0123456789abcdef0123
+          AISL_CREDENTIAL_ENCRYPTION_KEY: BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=
+          AISL_AGENT_API_KEYS: ci_agent_key
+        run: |
+          npx tsx src/cli/reconcile.ts
+          npx tsx src/cli/manage-merchant.ts list
+          # No agent has a destination, so this claims and transfers nothing.
+          npx tsx src/cli/run-payouts.ts --dry-run
 
       - name: Print gateway log on failure
         if: failure()

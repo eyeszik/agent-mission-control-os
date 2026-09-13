@@ -7,6 +7,7 @@ import type { AppDependencies } from './container.js';
 import { IntentService } from './services/intentService.js';
 import { CheckoutService } from './services/checkoutService.js';
 import { WebhookService } from './services/webhookService.js';
+import { ReconciliationService } from './services/reconciliationService.js';
 import {
   ACP_CONFIG,
   CheckoutRequestSchema,
@@ -178,6 +179,25 @@ function registerDiscoveryRoutes(app: FastifyInstance, deps: AppDependencies): v
   });
 
   app.get('/health', async () => ({ status: 'ok', service: 'aisl-proxy-gateway' }));
+
+  /**
+   * Operator reconciliation probe.
+   *
+   * Answers 200 when the books agree with reality and 503 when they do not, so
+   * an uptime monitor can alert on it without parsing the body. It sits
+   * alongside /health and /ready rather than under /v1/agent, and is therefore
+   * outside both the agent auth hook and the rate limiter: expose it only on an
+   * internal listener or behind your ingress' own access control.
+   */
+  app.get('/internal/reconciliation', async (_request, reply) => {
+    const report = await new ReconciliationService({
+      db: deps.db,
+      conversions: deps.repositories.conversions,
+      payouts: deps.repositories.payouts,
+    }).run();
+
+    reply.status(report.healthy ? 200 : 503).send(report);
+  });
 
   app.get('/ready', async (_request, reply) => {
     const [database, cache] = await Promise.all([

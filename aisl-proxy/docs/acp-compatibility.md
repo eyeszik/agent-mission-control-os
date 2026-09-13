@@ -112,7 +112,8 @@ handling is exercised for real rather than stubbed.
 | --- | --- |
 | Shopify Storefront `products(query:)` GraphQL | Shape follows the blueprint plus standard Storefront fields (`availableForSale`, `handle`, `onlineStoreUrl`, `featuredImage`). Exercised against a mock, **not** against a live store. |
 | Shopify Admin `POST /admin/api/{version}/orders.json` | Standard Admin REST order creation with an external `sale` transaction. Exercised against a mock, **not** a live store. |
-| WooCommerce REST v3 products/orders | Implemented to the documented v3 shapes; **no test coverage against a mock or live store.** |
+| WooCommerce REST v3 products/orders | Implemented to the documented v3 shapes. Exercised against an in-process mock (`tests/unit/woocommerce.test.ts`, 15 tests), **not** against a live store. |
+| Stripe Transfers (`POST /v1/transfers`) | Stable, generally available Connect API — no preview version and no cast. Exercised against a mock, **not** a live account. Requires a funded platform balance and an onboarded destination account. |
 
 Before pointing this at a live store, run one search and one order against a
 development store and confirm the selection sets still resolve — Shopify
@@ -122,7 +123,12 @@ exactly that reason.
 
 ## 7. Known gaps
 
-- The WooCommerce connector has no automated coverage.
+- No call in this repository has been made against a live Shopify store, a live
+  WooCommerce store, or a live Stripe account. Every external integration is
+  verified against an in-process stand-in only.
+- Shared payment tokens require Stripe to have enabled agentic commerce on the
+  account. That enrollment cannot be verified from here; if it is absent, the
+  first real checkout fails at the rail and no code change helps.
 - There is no ACP-native checkout-session adapter (see §3).
 - Currency handling assumes a single currency per merchant catalogue; a
   multi-currency Shopify market would need per-context pricing.

@@ -12,6 +12,8 @@ export const LEDGER_ACCOUNTS = {
   agentPayable: 'agent_payable',
   /** AISL's take-rate. */
   platformRevenue: 'platform_revenue',
+  /** Cash actually transferred out to an agent. Discharges agent_payable. */
+  agentCash: 'agent_cash',
 } as const;
 
 export type LedgerAccount = (typeof LEDGER_ACCOUNTS)[keyof typeof LEDGER_ACCOUNTS];
@@ -327,6 +329,21 @@ export function saleLegs(split: CommissionSplit): LedgerLeg[] {
   ];
 }
 
+/**
+ * Paying an agent discharges the liability: debit what we owed, credit the cash
+ * that left. A negative amount (a clawback riding along in the same payout)
+ * swaps the directions rather than writing a negative leg.
+ */
+export function payoutLegs(amountCents: number): LedgerLeg[] {
+  const magnitude = Math.abs(amountCents);
+  const owedDirection: LedgerDirection = amountCents >= 0 ? 'DEBIT' : 'CREDIT';
+  const cashDirection: LedgerDirection = amountCents >= 0 ? 'CREDIT' : 'DEBIT';
+  return [
+    { account: LEDGER_ACCOUNTS.agentPayable, direction: owedDirection, amountCents: magnitude },
+    { account: LEDGER_ACCOUNTS.agentCash, direction: cashDirection, amountCents: magnitude },
+  ];
+}
+
 /** A reversal is the same legs with the directions swapped. Amounts stay positive. */
 export function reversalLegs(split: CommissionSplit): LedgerLeg[] {
   return saleLegs(split).map((leg) => ({
@@ -335,7 +352,7 @@ export function reversalLegs(split: CommissionSplit): LedgerLeg[] {
   }));
 }
 
-async function insertLedgerGroup(
+export async function insertLedgerGroup(
   tx: Database,
   input: {
     conversionId: string;
