@@ -6,7 +6,7 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "9dbc88e176a615ec20719f3456d17028d9f267b3"
+      "git_blob_sha": "660af18818f74b50a748c4e6c5128feadf0406f7"
     },
     {
       "path": ".github/workflows/ci.yml",
@@ -167,6 +167,10 @@
     {
       "path": "services/langgraph/integrations/paid_media.py",
       "git_blob_sha": "df43f79b0fc4a242c385652362522be6a0f3d7ed"
+    },
+    {
+      "path": "services/langgraph/integrations/zo.py",
+      "git_blob_sha": "7ed252307021a1cfa8586960d27fb1a7885b4de7"
     },
     {
       "path": "services/langgraph/integrations/publication.py",
