@@ -7,3 +7,6 @@
 ## 2026-08-22 - Static Calculations Outside Render Loop
 **Learning:** Computing static layout values or arrays (e.g., node positions and SVG dimensions derived from constant workflow stages) inside a React component's render body causes unnecessary redundant calculations and allocates new object/array references on every render.
 **Action:** Move static data mappings and derived calculations outside of the component render function so they are only evaluated once at module load time.
+## 2026-08-25 - Fine-grained Zustand subscriptions for lists
+**Learning:** Having a parent list/graph component subscribe to an entire dictionary of states (like `state.statuses[runId]`) causes the parent and *all* children to re-render whenever *any* child's status changes.
+**Action:** Extract list items/nodes into their own child components and have each subscribe directly to its specific key in the Zustand store (e.g., `state.statuses[runId]?.[nodeId]`).
