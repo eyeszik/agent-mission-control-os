@@ -32,18 +32,30 @@ const positions = AGENCY_PIPELINE_STAGES.map((stage, index) => ({
 const width = COLS * CELL_W;
 const height = Math.ceil(AGENCY_PIPELINE_STAGES.length / COLS) * CELL_H;
 
-export function WorkflowMapPanel() {
-  const activeRunId = useRunStore((state) => state.activeRunId);
-  const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] : null);
+// Optimization: Extract child component for individual nodes so that each node
+// subscribes only to its own status, avoiding full graph re-renders.
+function WorkflowNode({ runId, stage, x, y }: { runId: string | null; stage: string; x: number; y: number }) {
+  const status = useNodeStatusStore((state) => runId ? (state.statuses[runId]?.[stage] || 'idle') : 'idle');
 
-  const getNodeColor = (nodeId: string) => {
-    if (!statuses) return 'text-zinc-700';
-    const status = statuses[nodeId];
+  const getNodeColor = (status: string) => {
     if (status === 'completed') return 'text-emerald-500';
     if (status === 'running') return 'text-amber-500 animate-pulse';
     if (status === 'failed') return 'text-red-500';
     return 'text-zinc-700';
   };
+
+  return (
+    <g>
+      <circle cx={x} cy={y} r={NODE_R} className={`${getNodeColor(status)} fill-current transition-colors duration-500`} />
+      <text x={x} y={y + NODE_R + 14} textAnchor="middle" className="text-[9px] fill-zinc-500 font-mono">
+        {STAGE_LABELS[stage] ?? stage.toUpperCase()}
+      </text>
+    </g>
+  );
+}
+
+export function WorkflowMapPanel() {
+  const activeRunId = useRunStore((state) => state.activeRunId);
 
   return (
     <div className="flex-1 flex items-center justify-center p-8 relative">
@@ -54,12 +66,13 @@ export function WorkflowMapPanel() {
             return <line key={`edge-${position.stage}`} x1={position.x} y1={position.y} x2={next.x} y2={next.y} stroke="currentColor" className="text-zinc-700" strokeWidth="2" strokeDasharray="4 4" />;
           })}
           {positions.map((position) => (
-            <g key={position.stage}>
-              <circle cx={position.x} cy={position.y} r={NODE_R} className={`${getNodeColor(position.stage)} fill-current transition-colors duration-500`} />
-              <text x={position.x} y={position.y + NODE_R + 14} textAnchor="middle" className="text-[9px] fill-zinc-500 font-mono">
-                {STAGE_LABELS[position.stage] ?? position.stage.toUpperCase()}
-              </text>
-            </g>
+            <WorkflowNode
+              key={position.stage}
+              runId={activeRunId}
+              stage={position.stage}
+              x={position.x}
+              y={position.y}
+            />
           ))}
         </svg>
       </div>
