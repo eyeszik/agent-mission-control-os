@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>FreeVideoForge</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #0d1117; --panel: #161b22; --line: #273041; --ink: #e9edf5;
+    --muted: #97a3b6; --accent: #f5c451; --ok: #4ade80; --bad: #f87171;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f6f7fb; --panel:#fff; --line:#dfe4ee; --ink:#12161f;
+            --muted:#5b6678; --accent:#a9761a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font:14px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  .wrap { max-width: 1080px; margin:0 auto; padding:24px 16px 64px; }
+  header { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+    padding-bottom:16px; border-bottom:1px solid var(--line); margin-bottom:20px; }
+  h1 { font-size:20px; margin:0; letter-spacing:-.01em; }
+  .tag { font-size:11px; color:var(--muted); border:1px solid var(--line);
+    padding:2px 8px; border-radius:999px; }
+  .grid { display:grid; grid-template-columns: 1.15fr .85fr; gap:20px; }
+  @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+  .card { background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius); padding:18px; }
+  .card h2 { font-size:13px; text-transform:uppercase; letter-spacing:.09em;
+    color:var(--muted); margin:0 0 14px; font-weight:600; }
+  label { display:block; font-size:12px; color:var(--muted); margin:12px 0 5px; }
+  input, select, textarea, button {
+    font:inherit; width:100%; padding:9px 11px; border-radius:8px;
+    border:1px solid var(--line); background:var(--bg); color:var(--ink); }
+  textarea { min-height:86px; resize:vertical; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  button.primary { margin-top:18px; background:var(--accent); color:#10131a;
+    border:none; font-weight:650; cursor:pointer; padding:11px; }
+  button.primary:disabled { opacity:.55; cursor:not-allowed; }
+  .bar { height:7px; background:var(--line); border-radius:999px; overflow:hidden;
+    margin:10px 0 6px; }
+  .bar > i { display:block; height:100%; width:0;
+    background:linear-gradient(90deg,var(--accent),#6ee7b7); transition:width .3s; }
+  .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
+  .muted { color:var(--muted); }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  ul.plain { list-style:none; margin:0; padding:0; }
+  ul.plain li { padding:7px 0; border-bottom:1px solid var(--line); }
+  ul.plain li:last-child { border-bottom:none; }
+  video, img.thumb { width:100%; max-height:62vh; border-radius:8px; margin-top:12px;
+    background:#000; display:block; object-fit:contain; }
+  a { color:var(--accent); }
+  .files a { display:inline-block; margin:2px 10px 2px 0; font-size:12px; }
+  .pill { display:inline-block; font-size:11px; padding:1px 7px; border-radius:999px;
+    border:1px solid var(--line); color:var(--muted); margin-right:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>FreeVideoForge</h1>
+    <span class="tag" id="version">local</span>
+    <span class="tag" id="tier">tier …</span>
+    <span class="tag">$0 API spend</span>
+    <span class="tag">no credentials</span>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Brief</h2>
+      <label for="topic">Topic</label>
+      <input id="topic" value="Why the moon changes shape" autocomplete="off">
+
+      <label for="brief">Source material (optional)</label>
+      <textarea id="brief" placeholder="Paste real content here. Its sentences become the body beats. Leave empty and the script engine generates a structural scaffold instead — it will not invent facts."></textarea>
+
+      <div class="row">
+        <div><label for="duration">Duration (s)</label>
+          <input id="duration" type="number" value="30" min="3" max="600" step="1"></div>
+        <div><label for="aspect">Aspect</label>
+          <select id="aspect"><option>9:16</option><option>1:1</option>
+            <option>16:9</option><option>4:5</option></select></div>
+      </div>
+
+      <div class="row3">
+        <div><label for="style">Style</label>
+          <select id="style"><option value="auto">auto</option><option>editorial</option>
+            <option>neon</option><option>clean</option><option>warm</option>
+            <option>slate</option></select></div>
+        <div><label for="quality">Quality</label>
+          <select id="quality"><option value="draft">draft (720p)</option>
+            <option value="balanced" selected>balanced</option>
+            <option value="high">high</option></select></div>
+        <div><label for="music">Music</label>
+          <select id="music"><option value="ambient">ambient</option>
+            <option value="none">none</option></select></div>
+      </div>
+
+      <div class="row">
+        <div><label for="seed">Seed (optional)</label>
+          <input id="seed" type="number" placeholder="random"></div>
+        <div><label for="scenes">Scenes (optional)</label>
+          <input id="scenes" type="number" min="1" max="40" placeholder="auto"></div>
+      </div>
+
+      <button class="primary" id="go">Generate video</button>
+      <div id="progress" hidden>
+        <div class="bar"><i id="fill"></i></div>
+        <div class="mono muted" id="status">starting…</div>
+      </div>
+      <div id="result"></div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>This machine</h2>
+        <div id="doctor" class="mono muted">checking…</div>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <h2>Recent runs</h2>
+        <ul class="plain" id="runs"><li class="muted">none yet</li></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function json(url, options) {
+  const response = await fetch(url, options);
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error || response.statusText);
+  return body;
+}
+
+async function loadDoctor() {
+  try {
+    const d = await json('/api/doctor');
+    $('version').textContent = 'v' + d.version;
+    $('tier').textContent = 'tier ' + d.capability_tier;
+    const active = d.providers.active.map(p => `<span class="pill">${esc(p.name)}</span>`).join('');
+    $('doctor').innerHTML = `
+      <div class="${d.can_render ? 'ok' : 'bad'}">${d.can_render ? 'Ready to render' : 'Blocked'}</div>
+      <div style="margin-top:8px">tier ${esc(d.capability_tier)} — ${esc(d.capability_tier_description)}</div>
+      <div style="margin-top:8px">ffmpeg ${esc(d.toolchain.ffmpeg_version || 'missing')}</div>
+      <div>narration: ${esc(d.narration.note)}</div>
+      <div style="margin-top:10px">${active}</div>
+      ${d.blockers.length ? '<div class="bad" style="margin-top:10px">' +
+        d.blockers.map(b => esc(b)).join('<br>') + '</div>' : ''}`;
+  } catch (e) { $('doctor').innerHTML = `<span class="bad">${esc(e.message)}</span>`; }
+}
+
+async function loadRuns() {
+  try {
+    const d = await json('/api/runs?limit=12');
+    $('runs').innerHTML = d.runs.length ? d.runs.map(r => `
+      <li><span class="mono">${esc(r.run_id)}</span><br>
+        <span class="${r.state === 'COMPLETED' ? 'ok' : r.state === 'FAILED' ? 'bad' : 'muted'}">
+        ${esc(r.state)}</span> <span class="muted">— ${esc(r.topic)}</span></li>`).join('')
+      : '<li class="muted">none yet</li>';
+  } catch (e) { /* the list is a convenience; a failure here is not fatal */ }
+}
+
+// Some browser builds (notably open-source Chromium) ship without H.264/AAC.
+// The MP4 is still correct, so show the thumbnail and say so rather than
+// leaving a dead player on screen.
+function canPreviewMp4() {
+  const v = document.createElement('video');
+  return v.canPlayType('video/mp4; codecs="avc1.42E01E"') !== '';
+}
+
+function showResult(job) {
+  const r = job.result;
+  if (!r) { $('result').innerHTML = `<div class="bad mono" style="margin-top:12px">${esc(job.error || job.message)}</div>`; return; }
+  const rel = (p) => p ? p.split('/out/').pop() : null;
+  const video = rel(r.final_video);
+  const thumb = rel(r.thumbnail);
+  const preview = video && canPreviewMp4()
+    ? `<video controls playsinline preload="metadata" src="/media/${encodeURI(video)}"></video>`
+    : (thumb ? `<img class="thumb" alt="Title card" src="/media/${encodeURI(thumb)}">
+        <div class="mono muted" style="margin-top:8px">This browser has no H.264/AAC
+        decoder, so it cannot preview the MP4 inline. The file itself is valid —
+        download it below.</div>` : '');
+  $('result').innerHTML = `
+    ${preview}
+    <div class="files" style="margin-top:12px">
+      ${['final_video','thumbnail','script','storyboard','captions','manifest','quality_report']
+        .filter(k => r[k]).map(k =>
+          `<a href="/media/${encodeURI(rel(r[k]))}" download>${k.replace('_',' ')}</a>`).join('')}
+    </div>
+    <div class="mono muted" style="margin-top:8px">
+      ${esc(r.duration ? r.duration.toFixed(2) + 's' : '')} ·
+      ${esc(Object.entries(r.providers || {}).map(([k, v]) => k + '=' + v).join(' · '))}
+    </div>
+    ${(r.warnings || []).map(w => `<div class="mono bad" style="margin-top:6px">${esc(w)}</div>`).join('')}`;
+}
+
+async function poll(runId) {
+  const job = await json('/api/jobs/' + encodeURIComponent(runId));
+  const pct = Math.round((job.progress || 0) * 100);
+  $('fill').style.width = pct + '%';
+  $('status').textContent = `${pct}% · ${job.stage || ''} · ${job.message || ''}`;
+  if (job.state === 'COMPLETED' || job.state === 'FAILED') {
+    $('go').disabled = false;
+    $('status').className = 'mono ' + (job.state === 'COMPLETED' ? 'ok' : 'bad');
+    showResult(job);
+    loadRuns();
+    return;
+  }
+  setTimeout(() => poll(runId), 900);
+}
+
+$('go').addEventListener('click', async () => {
+  $('go').disabled = true;
+  $('progress').hidden = false;
+  $('result').innerHTML = '';
+  $('status').className = 'mono muted';
+  $('fill').style.width = '0%';
+  const payload = {
+    topic: $('topic').value.trim(),
+    brief: $('brief').value.trim(),
+    duration: parseFloat($('duration').value),
+    aspect: $('aspect').value,
+    style: $('style').value,
+    quality_preset: $('quality').value,
+    music: $('music').value,
+  };
+  if ($('seed').value) payload.seed = parseInt($('seed').value, 10);
+  if ($('scenes').value) payload.scenes = parseInt($('scenes').value, 10);
+  try {
+    const { run_id } = await json('/api/generate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    poll(run_id);
+  } catch (e) {
+    $('go').disabled = false;
+    $('status').className = 'mono bad';
+    $('status').textContent = e.message;
+  }
+});
+
+loadDoctor(); loadRuns();
+</script>
+</body>
+</html>
