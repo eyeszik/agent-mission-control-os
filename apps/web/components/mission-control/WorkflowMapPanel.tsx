@@ -32,18 +32,28 @@ const positions = AGENCY_PIPELINE_STAGES.map((stage, index) => ({
 const width = COLS * CELL_W;
 const height = Math.ceil(AGENCY_PIPELINE_STAGES.length / COLS) * CELL_H;
 
+// ⚡ Bolt: Extract child component to subscribe directly to a specific status key.
+// This prevents the entire SVG and parent panel from re-rendering when a single node changes.
+function WorkflowNode({ runId, position }: { runId: string, position: { stage: string, x: number, y: number } }) {
+  const status = useNodeStatusStore((state) => state.statuses[runId]?.[position.stage]);
+
+  let color = 'text-zinc-700';
+  if (status === 'completed') color = 'text-emerald-500';
+  else if (status === 'running') color = 'text-amber-500 animate-pulse';
+  else if (status === 'failed') color = 'text-red-500';
+
+  return (
+    <g>
+      <circle cx={position.x} cy={position.y} r={NODE_R} className={`${color} fill-current transition-colors duration-500`} />
+      <text x={position.x} y={position.y + NODE_R + 14} textAnchor="middle" className="text-[9px] fill-zinc-500 font-mono">
+        {STAGE_LABELS[position.stage] ?? position.stage.toUpperCase()}
+      </text>
+    </g>
+  );
+}
+
 export function WorkflowMapPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const statuses = useNodeStatusStore((state) => activeRunId ? state.statuses[activeRunId] : null);
-
-  const getNodeColor = (nodeId: string) => {
-    if (!statuses) return 'text-zinc-700';
-    const status = statuses[nodeId];
-    if (status === 'completed') return 'text-emerald-500';
-    if (status === 'running') return 'text-amber-500 animate-pulse';
-    if (status === 'failed') return 'text-red-500';
-    return 'text-zinc-700';
-  };
 
   return (
     <div className="flex-1 flex items-center justify-center p-8 relative">
@@ -54,12 +64,16 @@ export function WorkflowMapPanel() {
             return <line key={`edge-${position.stage}`} x1={position.x} y1={position.y} x2={next.x} y2={next.y} stroke="currentColor" className="text-zinc-700" strokeWidth="2" strokeDasharray="4 4" />;
           })}
           {positions.map((position) => (
-            <g key={position.stage}>
-              <circle cx={position.x} cy={position.y} r={NODE_R} className={`${getNodeColor(position.stage)} fill-current transition-colors duration-500`} />
-              <text x={position.x} y={position.y + NODE_R + 14} textAnchor="middle" className="text-[9px] fill-zinc-500 font-mono">
-                {STAGE_LABELS[position.stage] ?? position.stage.toUpperCase()}
-              </text>
-            </g>
+            activeRunId ? (
+              <WorkflowNode key={position.stage} runId={activeRunId} position={position} />
+            ) : (
+              <g key={position.stage}>
+                <circle cx={position.x} cy={position.y} r={NODE_R} className="text-zinc-700 fill-current transition-colors duration-500" />
+                <text x={position.x} y={position.y + NODE_R + 14} textAnchor="middle" className="text-[9px] fill-zinc-500 font-mono">
+                  {STAGE_LABELS[position.stage] ?? position.stage.toUpperCase()}
+                </text>
+              </g>
+            )
           ))}
         </svg>
       </div>
