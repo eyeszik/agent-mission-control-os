@@ -93,8 +93,8 @@ def main() -> None:
         raise SystemExit("Root package still advertises an unimplemented recursive lint command")
 
     web_package = json.loads((ROOT / "apps/web/package.json").read_text(encoding="utf-8"))
-    if web_package.get("dependencies", {}).get("next") != "16.3.0":
-        raise SystemExit("Web package must remain pinned to audited Next.js 16.3.0")
+    if web_package.get("dependencies", {}).get("next") != "16.3.3":
+        raise SystemExit("Web package must remain pinned to audited Next.js 16.3.3")
     if web_package.get("devDependencies", {}).get("@playwright/test") != "1.61.0":
         raise SystemExit("Browser gate must pin @playwright/test to 1.61.0")
     if web_package.get("scripts", {}).get("test") != "vitest run tests":
@@ -106,8 +106,8 @@ def main() -> None:
 
     lockfile = (ROOT / "pnpm-lock.yaml").read_text(encoding="utf-8")
     for required in [
-        "specifier: 16.3.0",
-        "sharp@0.35.3",
+        "specifier: 16.3.3",
+        "sharp@0.35.4",
         "postcss@8.5.23",
         "'@playwright/test@1.61.0'",
         "playwright-core@1.61.0",

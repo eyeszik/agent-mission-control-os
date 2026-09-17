@@ -34,7 +34,7 @@ Broader product-development, creative-studio, growth, publishing, and paid-media
 - Paid-media authorization ledger; no live spend executor is installed.
 - Canonical OpenAPI coverage for agency, approval, event, analytics, and operations APIs.
 - Vercel deployment manifests for frontend/backend project roots.
-- Next.js `16.3.0` with an audited lockfile-pinned production dependency graph.
+- Next.js `16.3.3` with an audited lockfile-pinned production dependency graph.
 - **Browser E2E release gate** using pinned Playwright/Chromium against the real local Next.js + FastAPI stack.
 - CI production-readiness and critical-file integrity gates.
 
