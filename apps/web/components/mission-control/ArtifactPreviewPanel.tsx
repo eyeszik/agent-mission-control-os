@@ -15,8 +15,13 @@ import type { AgencyRun, TrustSnapshot } from '@amc/shared';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
-  const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
+  // ⚡ Bolt: Compute derived state directly inside the selector to avoid
+  // subscribing the component to the entire artifacts array and causing unneeded re-renders.
+  const selectedArtifact = useArtifactStore((state) => {
+    if (!activeRunId || !state.selectedArtifactId) return null;
+    const runArtifacts = state.artifacts[activeRunId];
+    return runArtifacts ? runArtifacts.find(a => a.id === state.selectedArtifactId) || null : null;
+  });
   const addArtifact = useArtifactStore((state) => state.addArtifact);
 
   // Optimization: useShallow prevents unnecessary re-renders by returning the same
@@ -30,8 +35,6 @@ export function ArtifactPreviewPanel() {
   const [error, setError] = useState<string | null>(null);
   const [run, setRun] = useState<AgencyRun | null>(null);
   const [trust, setTrust] = useState<TrustSnapshot | null>(null);
-
-  const selectedArtifact = artifacts ? artifacts.find(a => a.id === selectedArtifactId) : null;
 
   useEffect(() => {
     if (!activeRunId) {

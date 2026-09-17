@@ -440,6 +440,53 @@ components:
         tool_selection_accuracy: { type: string, enum: [NOT_MEASURED] }
         output_relevance: { type: string, enum: [NOT_MEASURED] }
         threshold_passed: { type: boolean }
+    BrandComplianceViolation:
+      type: object
+      required: [pattern_id, matched_text, description]
+      properties:
+        pattern_id: { type: string }
+        matched_text: { type: string }
+        description: { type: string }
+    BrandComplianceReadability:
+      type: object
+      required: [flesch_kincaid_grade, within_target_band, target_grade_min, target_grade_max]
+      properties:
+        flesch_kincaid_grade:
+          oneOf:
+            - { type: number }
+            - { type: string, enum: [NOT_MEASURED] }
+        within_target_band:
+          oneOf:
+            - { type: boolean }
+            - { type: string, enum: [NOT_MEASURED] }
+        target_grade_min: { type: number }
+        target_grade_max: { type: number }
+    BrandComplianceSentiment:
+      type: object
+      required: [compound, within_target_band, target_min, target_max]
+      properties:
+        compound:
+          oneOf:
+            - { type: number }
+            - { type: string, enum: [NOT_MEASURED] }
+        within_target_band:
+          oneOf:
+            - { type: boolean }
+            - { type: string, enum: [NOT_MEASURED] }
+        target_min: { type: number }
+        target_max: { type: number }
+    BrandCompliance:
+      type: object
+      required: [engine_version, passed, flagged_terms, violations, missing_disclaimers, readability, sentiment, advisories]
+      properties:
+        engine_version: { type: string }
+        passed: { type: boolean }
+        flagged_terms: { type: array, items: { type: string } }
+        violations: { type: array, items: { $ref: '#/components/schemas/BrandComplianceViolation' } }
+        missing_disclaimers: { type: array, items: { type: string } }
+        readability: { $ref: '#/components/schemas/BrandComplianceReadability' }
+        sentiment: { $ref: '#/components/schemas/BrandComplianceSentiment' }
+        advisories: { type: array, items: { type: string } }
     QAReport:
       type: object
       required: [brand_safety_passed, flagged_terms, quality_metrics, notes, release_blocked, degradation_reasons]
@@ -447,6 +494,7 @@ components:
         brand_safety_passed: { type: boolean }
         flagged_terms: { type: array, items: { type: string } }
         quality_metrics: { $ref: '#/components/schemas/QualityMetrics' }
+        brand_compliance: { $ref: '#/components/schemas/BrandCompliance' }
         notes: { type: string }
         release_blocked: { type: boolean }
         degradation_reasons: { type: array, items: { type: string } }
@@ -628,9 +676,23 @@ components:
         pending_approval:
           allOf: [{ $ref: '#/components/schemas/ApprovalRequest' }]
           nullable: true
+    SkillRegistryEntry:
+      type: object
+      required: [skill_id, capability, description, available]
+      properties:
+        skill_id: { type: string }
+        capability: { type: string }
+        description: { type: string }
+        available: { type: boolean, nullable: true }
+    SkillRegistrySnapshot:
+      type: object
+      required: [skill_runtime_version, skills]
+      properties:
+        skill_runtime_version: { type: string }
+        skills: { type: array, items: { $ref: '#/components/schemas/SkillRegistryEntry' } }
     OperationsCapabilities:
       type: object
-      required: [tenant_id, publication, paid_media, analytics]
+      required: [tenant_id, publication, paid_media, analytics, skills]
       properties:
         tenant_id: { type: string }
         publication:
@@ -651,6 +713,7 @@ components:
           properties:
             source: { type: string, enum: [amc_first_party] }
             ingestion: { type: boolean, enum: [true] }
+        skills: { $ref: '#/components/schemas/SkillRegistrySnapshot' }
     PublicationPreviewRequest:
       type: object
       required: [run_id, provider, payload]

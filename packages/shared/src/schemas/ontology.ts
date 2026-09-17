@@ -61,6 +61,8 @@ export const AGENCY_ARTIFACT_TYPES = [
   'measurement_plan',
   'qa_report',
   'release_record',
+  // Compiler artifacts. brand_core is the root every brand rendering derives
+  // from, so a rendering is never authoritative over it.
   'brand_core',
   'brand_guidelines_doc',
   'design_token_set',

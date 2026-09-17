@@ -1,268 +1,278 @@
 {
-  "files": [
-    {
-      "git_blob_sha": "0790efbe8024489c10e40fe20895a76bfe2b2511",
-      "path": ".env.example"
-    },
-    {
-      "git_blob_sha": "f2286a6208fa5c3bcb77ecb8846fa1a0af33dd8b",
-      "path": ".github/workflows/ci.yml"
-    },
-    {
-      "git_blob_sha": "d9ceb0b9d9dbbaa32362146782526a43287fccd2",
-      "path": "README.md"
-    },
-    {
-      "git_blob_sha": "c29a2b7339e12edc1e811bc7829e1047e4600eff",
-      "path": "apps/web/app/login/page.tsx"
-    },
-    {
-      "git_blob_sha": "a921785a397cab43d6a16ba69b3cdf50d37ac42b",
-      "path": "apps/web/app/mission-control/page.tsx"
-    },
-    {
-      "git_blob_sha": "4652a64f9e4f114532735cbdea41edd4c70fbf6c",
-      "path": "apps/web/e2e/agency-smoke.spec.ts"
-    },
-    {
-      "git_blob_sha": "278b12e36bebb39ca6d36fdcef37a725f2d58773",
-      "path": "services/langgraph/agency/exporter.py"
-    },
-    {
-      "git_blob_sha": "53824a79245d8371a77af1df9502344520ced283",
-      "path": "apps/web/lib/api/client.ts"
-    },
-    {
-      "git_blob_sha": "028fd3ce33b6350e41e265d048d11cdfcc33d970",
-      "path": "apps/web/lib/auth/session.ts"
-    },
-    {
-      "git_blob_sha": "7cb3cdca65734779deaf21ca3ba111eaed2243b4",
-      "path": "apps/web/lib/auth/supabase.ts"
-    },
-    {
-      "git_blob_sha": "5bbc5335282ac40d9b96522aa2b95f97d107ef48",
-      "path": "apps/web/package.json"
-    },
-    {
-      "git_blob_sha": "aa8bdc246f61c95ccfda1dc7e3d810ef657d074a",
-      "path": "apps/web/playwright.config.ts"
-    },
-    {
-      "git_blob_sha": "a667db8cdaad0d862c4173ec447d8fbf9f64fcb1",
-      "path": "apps/web/vercel.json"
-    },
-    {
-      "git_blob_sha": "eeb0a03f930e5385c927378f8c8868332a0cb7da",
-      "path": "docs/agency-role-contracts.md"
-    },
-    {
-      "git_blob_sha": "19f7d331ace300d69542e3db3a1755e84f7a30a8",
-      "path": "docs/production-activation.md"
-    },
-    {
-      "git_blob_sha": "d7052ce894c03c4261c96f01f0e194ce37da0e9c",
-      "path": "package.json"
-    },
-    {
-      "git_blob_sha": "999bd10c13bc447a283d5147b36bea5d1794319b",
-      "path": "packages/shared/openapi/agent-mission-control.openapi.yaml"
-    },
-    {
-      "git_blob_sha": "6b94f16ea68afe4d66b47180ff20b62b102b8ee2",
-      "path": "packages/shared/src/schemas/agency.ts"
-    },
-    {
-      "git_blob_sha": "997fe5f2752b569773d803c8f65b822c90b2202d",
-      "path": "packages/shared/src/schemas/approvals.ts"
-    },
-    {
-      "git_blob_sha": "2bbf25a3d139f6e3c3000419da9a72f822cb58b4",
-      "path": "packages/shared/src/schemas/events.ts"
-    },
-    {
-      "git_blob_sha": "66255ba88dd919c0070cf4d694918414b1ce1af0",
-      "path": "packages/shared/src/schemas/lifecycle.ts"
-    },
-    {
-      "git_blob_sha": "efe0dae5d3b81c5b9d5b3884095cfb7c663dc13f",
-      "path": "packages/shared/src/schemas/ontology.ts"
-    },
-    {
-      "git_blob_sha": "b10e67d174795126e7e547bbb766e64227c9793e",
-      "path": "pnpm-lock.yaml"
-    },
-    {
-      "git_blob_sha": "b37af10802beb8533a840297c78955e1aef7ac2e",
-      "path": "scripts/verify_auth_bindings.py"
-    },
-    {
-      "git_blob_sha": "184a814821aea1d4837f3cc45fb791e4ee730402",
-      "path": "scripts/verify_manifest.py"
-    },
-    {
-      "git_blob_sha": "493a90d1f98658cea0cf03fa55d5fc02484f27d3",
-      "path": "scripts/verify_ontology_parity.py"
-    },
-    {
-      "git_blob_sha": "b7ef5da4814b37606eac3b40bbc771c204af1dcf",
-      "path": "scripts/verify_production_readiness.py"
-    },
-    {
-      "git_blob_sha": "d042496d07cda94693985d57f4dd2349f8152df3",
-      "path": "scripts/verify_repository_invariants.py"
-    },
-    {
-      "git_blob_sha": "b988fd22f116db9c6a9f658abaccd3e4a4c38dcb",
-      "path": "services/langgraph/agency/kernel/__init__.py"
-    },
-    {
-      "git_blob_sha": "baa823d46012753a4732a716839f45178592a7eb",
-      "path": "services/langgraph/agency/kernel/lifecycle.py"
-    },
-    {
-      "git_blob_sha": "1bdc982095ce66b50bbe24df39f9b888108d9fed",
-      "path": "services/langgraph/agency/kernel/models.py"
-    },
-    {
-      "git_blob_sha": "51db1dac454f52b1135190ff405ebcf4b5ed28b9",
-      "path": "services/langgraph/agency/kernel/ontology.py"
-    },
-    {
-      "git_blob_sha": "0fc11001682aa1cee3997a275e3197b56e5196d6",
-      "path": "services/langgraph/agency/kernel/registry.py"
-    },
-    {
-      "git_blob_sha": "c398d9c8d684604fd6914652f7f28e43b69e6553",
-      "path": "services/langgraph/agency/kernel/roles.py"
-    },
-    {
-      "git_blob_sha": "336248d1a133c5ad8292e6e8a58dd16f310e87b1",
-      "path": "services/langgraph/api/routes/agency.py"
-    },
-    {
-      "git_blob_sha": "aa4f63c5709b0342b301c110b09db4775c27f045",
-      "path": "services/langgraph/api/routes/analytics.py"
-    },
-    {
-      "git_blob_sha": "9224da0cc18244217908752fd1257773cb7f04f0",
-      "path": "services/langgraph/api/routes/approvals.py"
-    },
-    {
-      "git_blob_sha": "25651d86cdf9d182897a63138c59f97b5aad8812",
-      "path": "services/langgraph/api/routes/events.py"
-    },
-    {
-      "git_blob_sha": "79958e19104b9b4a32465bfcd92eab05aadce824",
-      "path": "services/langgraph/api/routes/operations.py"
-    },
-    {
-      "git_blob_sha": "9a9e7605bdd25c91ac2f40173b10b3792bb84323",
-      "path": "services/langgraph/api/routes/runtime.py"
-    },
-    {
-      "git_blob_sha": "4b49e585cb0e1e473dfe533423bc9fdf086d5037",
-      "path": "services/langgraph/app/config.py"
-    },
-    {
-      "git_blob_sha": "76540f9b8ab615a069c48353fdb4f55632eb7b91",
-      "path": "services/langgraph/app/main.py"
-    },
-    {
-      "git_blob_sha": "df43f79b0fc4a242c385652362522be6a0f3d7ed",
-      "path": "services/langgraph/integrations/paid_media.py"
-    },
-    {
-      "git_blob_sha": "402bfd495b928ab13f5f7a3c223e2e7386bc5193",
-      "path": "services/langgraph/integrations/publication.py"
-    },
-    {
-      "git_blob_sha": "39f637d1d9a3a42b1c373622b548bccddb992942",
-      "path": "services/langgraph/persistence/agency_kernel.py"
-    },
-    {
-      "git_blob_sha": "d9e133c918b0c0cc3a6f01ccc1d806186f4625aa",
-      "path": "services/langgraph/persistence/analytics.py"
-    },
-    {
-      "git_blob_sha": "722f870b8b432d6011f18ef1f6a88e1a22dd4602",
-      "path": "services/langgraph/persistence/checkpoints.py"
-    },
-    {
-      "git_blob_sha": "e9728e9369bb6467d5c8ccd4ff1b30e1a0581c77",
-      "path": "services/langgraph/persistence/database.py"
-    },
-    {
-      "git_blob_sha": "446c3c18b108469f05243fc5863a51ea174014a8",
-      "path": "services/langgraph/persistence/idempotency.py"
-    },
-    {
-      "git_blob_sha": "b35053982609a82da1ef2ed17b439036209e488f",
-      "path": "services/langgraph/persistence/memberships.py"
-    },
-    {
-      "git_blob_sha": "ab2ec35befe331af9039d673f39def2feec2aeb9",
-      "path": "services/langgraph/persistence/operations.py"
-    },
-    {
-      "git_blob_sha": "aa481dd220155806aac841978bca87c67530267b",
-      "path": "services/langgraph/persistence/sqlite_db.py"
-    },
-    {
-      "git_blob_sha": "e1cd559a853a1d912885b5db5c0b421b063c5376",
-      "path": "services/langgraph/persistence/trust_kernel.py"
-    },
-    {
-      "git_blob_sha": "acabaa537c40672f6be2b179fcc0fd5b602ea01a",
-      "path": "services/langgraph/pyproject.toml"
-    },
-    {
-      "git_blob_sha": "16bffbd8800a0368111d314f8714dd44656a0482",
-      "path": "services/langgraph/security/auth.py"
-    },
-    {
-      "git_blob_sha": "c8cba14639eae376ebffe37b16b4640798cac1df",
-      "path": "services/langgraph/tests/test_agency_kernel.py"
-    },
-    {
-      "git_blob_sha": "ea103f6e2002aebd9e70f971efd9fd701345ed88",
-      "path": "services/langgraph/tests/test_agency_ontology.py"
-    },
-    {
-      "git_blob_sha": "12dab9940ae8ea523997e443c21a4f7d1b5feca4",
-      "path": "services/langgraph/tests/test_delivery_gate.py"
-    },
-    {
-      "git_blob_sha": "0305beb5762ff98e8aed8b97b9fba58e3e12bff5",
-      "path": "services/langgraph/tests/test_lifecycle_analytics.py"
-    },
-    {
-      "git_blob_sha": "0fbe1a369a3d6286b39aba677f24f9285c193b55",
-      "path": "services/langgraph/tests/test_production_foundation.py"
-    },
-    {
-      "git_blob_sha": "31b6dc202f06d2e9e6b59caeef8db42c33bfc346",
-      "path": "services/langgraph/vercel.json"
-    },
-    {
-      "git_blob_sha": "700cc0c17b1e848b81234ce8ed92151da3509fb9",
-      "path": "supabase/migrations/20260820_amc_production_foundation_v1.sql"
-    },
-    {
-      "git_blob_sha": "a4d0a2c424fd1d9f73954616e9c10b77c86c4c2d",
-      "path": "supabase/migrations/20260820_amc_production_foundation_v2_fk_indexes.sql"
-    },
-    {
-      "git_blob_sha": "ced988ab2c5d14b09101a7b8103d2f7c12ebd273",
-      "path": "supabase/migrations/20260822_amc_agency_kernel_v1.sql"
-    },
-    {
-      "git_blob_sha": "7de79a1f4809114007c44e17c254398617cf1b9b",
-      "path": "supabase/migrations/20260824_amc_trust_kernel_v1.sql"
-    }
-  ],
-  "policy": "This manifest covers security-, runtime-, contract-, dependency-, browser-release-, production-persistence-, lifecycle-analytics-, agency-kernel-, agency-ontology-, production-activation-, external-mutation-guard-, and deployment-critical files. CI recomputes Git blob hashes and fails on drift.",
   "schema_version": "amc-integrity/v2",
   "scope": "critical_runtime_release_and_production_contracts",
-  "status": "generated_and_ci_verified_required"
+  "files": [
+    {
+      "path": ".env.example",
+      "git_blob_sha": "5e18b4be33a89470f7637b35ccb423331bbd5208"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "git_blob_sha": "f2286a6208fa5c3bcb77ecb8846fa1a0af33dd8b"
+    },
+    {
+      "path": "README.md",
+      "git_blob_sha": "d9ceb0b9d9dbbaa32362146782526a43287fccd2"
+    },
+    {
+      "path": "apps/web/app/login/page.tsx",
+      "git_blob_sha": "c29a2b7339e12edc1e811bc7829e1047e4600eff"
+    },
+    {
+      "path": "apps/web/app/mission-control/page.tsx",
+      "git_blob_sha": "a921785a397cab43d6a16ba69b3cdf50d37ac42b"
+    },
+    {
+      "path": "apps/web/e2e/agency-smoke.spec.ts",
+      "git_blob_sha": "4652a64f9e4f114532735cbdea41edd4c70fbf6c"
+    },
+    {
+      "path": "apps/web/lib/api/client.ts",
+      "git_blob_sha": "53824a79245d8371a77af1df9502344520ced283"
+    },
+    {
+      "path": "apps/web/lib/auth/session.ts",
+      "git_blob_sha": "028fd3ce33b6350e41e265d048d11cdfcc33d970"
+    },
+    {
+      "path": "apps/web/lib/auth/supabase.ts",
+      "git_blob_sha": "7cb3cdca65734779deaf21ca3ba111eaed2243b4"
+    },
+    {
+      "path": "apps/web/package.json",
+      "git_blob_sha": "25daae5c5ef532b51b4cd1c293b277f130c08b5d"
+    },
+    {
+      "path": "apps/web/playwright.config.ts",
+      "git_blob_sha": "aa8bdc246f61c95ccfda1dc7e3d810ef657d074a"
+    },
+    {
+      "path": "apps/web/vercel.json",
+      "git_blob_sha": "a667db8cdaad0d862c4173ec447d8fbf9f64fcb1"
+    },
+    {
+      "path": "docs/agency-role-contracts.md",
+      "git_blob_sha": "eeb0a03f930e5385c927378f8c8868332a0cb7da"
+    },
+    {
+      "path": "docs/production-activation.md",
+      "git_blob_sha": "19f7d331ace300d69542e3db3a1755e84f7a30a8"
+    },
+    {
+      "path": "package.json",
+      "git_blob_sha": "d7052ce894c03c4261c96f01f0e194ce37da0e9c"
+    },
+    {
+      "path": "packages/shared/openapi/agent-mission-control.openapi.yaml",
+      "git_blob_sha": "4ace822ad3b7f78b02b8d6008790b0b11a4b7d8e"
+    },
+    {
+      "path": "packages/shared/src/schemas/agency.ts",
+      "git_blob_sha": "14cc14bbe657dd696302a498ef524d70d8a51ee4"
+    },
+    {
+      "path": "packages/shared/src/schemas/approvals.ts",
+      "git_blob_sha": "997fe5f2752b569773d803c8f65b822c90b2202d"
+    },
+    {
+      "path": "packages/shared/src/schemas/events.ts",
+      "git_blob_sha": "2bbf25a3d139f6e3c3000419da9a72f822cb58b4"
+    },
+    {
+      "path": "packages/shared/src/schemas/lifecycle.ts",
+      "git_blob_sha": "66255ba88dd919c0070cf4d694918414b1ce1af0"
+    },
+    {
+      "path": "packages/shared/src/schemas/ontology.ts",
+      "git_blob_sha": "44af494d836c8ca40c91a22f7a2ee4746b308324"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "git_blob_sha": "152142b86abb21ae302a74534ccaeba470c08d9c"
+    },
+    {
+      "path": "scripts/verify_auth_bindings.py",
+      "git_blob_sha": "b37af10802beb8533a840297c78955e1aef7ac2e"
+    },
+    {
+      "path": "scripts/verify_manifest.py",
+      "git_blob_sha": "184a814821aea1d4837f3cc45fb791e4ee730402"
+    },
+    {
+      "path": "scripts/verify_ontology_parity.py",
+      "git_blob_sha": "493a90d1f98658cea0cf03fa55d5fc02484f27d3"
+    },
+    {
+      "path": "scripts/verify_production_readiness.py",
+      "git_blob_sha": "b7ef5da4814b37606eac3b40bbc771c204af1dcf"
+    },
+    {
+      "path": "scripts/verify_repository_invariants.py",
+      "git_blob_sha": "a077fc8807a03f07283d6529ab3f74e0ceabb575"
+    },
+    {
+      "path": "services/langgraph/agency/exporter.py",
+      "git_blob_sha": "278b12e36bebb39ca6d36fdcef37a725f2d58773"
+    },
+    {
+      "path": "services/langgraph/agency/kernel/__init__.py",
+      "git_blob_sha": "b988fd22f116db9c6a9f658abaccd3e4a4c38dcb"
+    },
+    {
+      "path": "services/langgraph/agency/kernel/lifecycle.py",
+      "git_blob_sha": "baa823d46012753a4732a716839f45178592a7eb"
+    },
+    {
+      "path": "services/langgraph/agency/kernel/models.py",
+      "git_blob_sha": "1bdc982095ce66b50bbe24df39f9b888108d9fed"
+    },
+    {
+      "path": "services/langgraph/agency/kernel/ontology.py",
+      "git_blob_sha": "a220e6ce6e6a0d86813ddf9be06e414a37c0660b"
+    },
+    {
+      "path": "services/langgraph/agency/kernel/registry.py",
+      "git_blob_sha": "0fc11001682aa1cee3997a275e3197b56e5196d6"
+    },
+    {
+      "path": "services/langgraph/agency/kernel/roles.py",
+      "git_blob_sha": "241f7aae6b203af005f817c0e921ab47165a0218"
+    },
+    {
+      "path": "services/langgraph/agency/skills/dispatcher.py",
+      "git_blob_sha": "b56e656dfcee86cd70f715dacc5ea50c256386f6"
+    },
+    {
+      "path": "services/langgraph/api/routes/agency.py",
+      "git_blob_sha": "336248d1a133c5ad8292e6e8a58dd16f310e87b1"
+    },
+    {
+      "path": "services/langgraph/api/routes/analytics.py",
+      "git_blob_sha": "aa4f63c5709b0342b301c110b09db4775c27f045"
+    },
+    {
+      "path": "services/langgraph/api/routes/approvals.py",
+      "git_blob_sha": "9224da0cc18244217908752fd1257773cb7f04f0"
+    },
+    {
+      "path": "services/langgraph/api/routes/events.py",
+      "git_blob_sha": "25651d86cdf9d182897a63138c59f97b5aad8812"
+    },
+    {
+      "path": "services/langgraph/api/routes/operations.py",
+      "git_blob_sha": "f8ef2252ee3a779157ac3ebb68229dfd30b0e23c"
+    },
+    {
+      "path": "services/langgraph/api/routes/runtime.py",
+      "git_blob_sha": "9a9e7605bdd25c91ac2f40173b10b3792bb84323"
+    },
+    {
+      "path": "services/langgraph/app/config.py",
+      "git_blob_sha": "4b49e585cb0e1e473dfe533423bc9fdf086d5037"
+    },
+    {
+      "path": "services/langgraph/app/main.py",
+      "git_blob_sha": "76540f9b8ab615a069c48353fdb4f55632eb7b91"
+    },
+    {
+      "path": "services/langgraph/integrations/paid_media.py",
+      "git_blob_sha": "df43f79b0fc4a242c385652362522be6a0f3d7ed"
+    },
+    {
+      "path": "services/langgraph/integrations/publication.py",
+      "git_blob_sha": "402bfd495b928ab13f5f7a3c223e2e7386bc5193"
+    },
+    {
+      "path": "services/langgraph/integrations/zo.py",
+      "git_blob_sha": "7ed252307021a1cfa8586960d27fb1a7885b4de7"
+    },
+    {
+      "path": "services/langgraph/persistence/agency_kernel.py",
+      "git_blob_sha": "39f637d1d9a3a42b1c373622b548bccddb992942"
+    },
+    {
+      "path": "services/langgraph/persistence/analytics.py",
+      "git_blob_sha": "d9e133c918b0c0cc3a6f01ccc1d806186f4625aa"
+    },
+    {
+      "path": "services/langgraph/persistence/checkpoints.py",
+      "git_blob_sha": "722f870b8b432d6011f18ef1f6a88e1a22dd4602"
+    },
+    {
+      "path": "services/langgraph/persistence/database.py",
+      "git_blob_sha": "e9728e9369bb6467d5c8ccd4ff1b30e1a0581c77"
+    },
+    {
+      "path": "services/langgraph/persistence/idempotency.py",
+      "git_blob_sha": "446c3c18b108469f05243fc5863a51ea174014a8"
+    },
+    {
+      "path": "services/langgraph/persistence/memberships.py",
+      "git_blob_sha": "b35053982609a82da1ef2ed17b439036209e488f"
+    },
+    {
+      "path": "services/langgraph/persistence/operations.py",
+      "git_blob_sha": "ab2ec35befe331af9039d673f39def2feec2aeb9"
+    },
+    {
+      "path": "services/langgraph/persistence/sqlite_db.py",
+      "git_blob_sha": "aa481dd220155806aac841978bca87c67530267b"
+    },
+    {
+      "path": "services/langgraph/persistence/trust_kernel.py",
+      "git_blob_sha": "e1cd559a853a1d912885b5db5c0b421b063c5376"
+    },
+    {
+      "path": "services/langgraph/pyproject.toml",
+      "git_blob_sha": "d1b6adc9497289de5ac1ab7400c6b407a7fcecf0"
+    },
+    {
+      "path": "services/langgraph/quality/brand_safety.py",
+      "git_blob_sha": "27883fb486074ba2be666831b6cff4cc35f84d1c"
+    },
+    {
+      "path": "services/langgraph/security/auth.py",
+      "git_blob_sha": "16bffbd8800a0368111d314f8714dd44656a0482"
+    },
+    {
+      "path": "services/langgraph/tests/test_agency_kernel.py",
+      "git_blob_sha": "c8cba14639eae376ebffe37b16b4640798cac1df"
+    },
+    {
+      "path": "services/langgraph/tests/test_agency_ontology.py",
+      "git_blob_sha": "ea103f6e2002aebd9e70f971efd9fd701345ed88"
+    },
+    {
+      "path": "services/langgraph/tests/test_delivery_gate.py",
+      "git_blob_sha": "12dab9940ae8ea523997e443c21a4f7d1b5feca4"
+    },
+    {
+      "path": "services/langgraph/tests/test_lifecycle_analytics.py",
+      "git_blob_sha": "0305beb5762ff98e8aed8b97b9fba58e3e12bff5"
+    },
+    {
+      "path": "services/langgraph/tests/test_production_foundation.py",
+      "git_blob_sha": "0fbe1a369a3d6286b39aba677f24f9285c193b55"
+    },
+    {
+      "path": "services/langgraph/vercel.json",
+      "git_blob_sha": "31b6dc202f06d2e9e6b59caeef8db42c33bfc346"
+    },
+    {
+      "path": "supabase/migrations/20260820_amc_production_foundation_v1.sql",
+      "git_blob_sha": "700cc0c17b1e848b81234ce8ed92151da3509fb9"
+    },
+    {
+      "path": "supabase/migrations/20260820_amc_production_foundation_v2_fk_indexes.sql",
+      "git_blob_sha": "a4d0a2c424fd1d9f73954616e9c10b77c86c4c2d"
+    },
+    {
+      "path": "supabase/migrations/20260822_amc_agency_kernel_v1.sql",
+      "git_blob_sha": "ced988ab2c5d14b09101a7b8103d2f7c12ebd273"
+    },
+    {
+      "path": "supabase/migrations/20260824_amc_trust_kernel_v1.sql",
+      "git_blob_sha": "7de79a1f4809114007c44e17c254398617cf1b9b"
+    }
+  ]
 }

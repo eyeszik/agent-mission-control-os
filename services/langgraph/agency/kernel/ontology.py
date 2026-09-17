@@ -76,6 +76,11 @@ class ArtifactType(str, Enum):
     measurement_plan = "measurement_plan"
     qa_report = "qa_report"
     release_record = "release_record"
+
+    # --- compiler artifacts -------------------------------------------------
+    # These carry the machine-readable state the render pipeline consumes. The
+    # distinction that matters: brand_core is authored once and every brand
+    # rendering is a function of it, so a rendering is never authoritative.
     brand_core = "brand_core"
     brand_guidelines_doc = "brand_guidelines_doc"
     design_token_set = "design_token_set"

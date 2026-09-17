@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
+from services.langgraph.agency.skills import skill_registry_snapshot
 from services.langgraph.integrations.paid_media import request_spend_authorization, spend_execution_available
 from services.langgraph.integrations.publication import prepare_publication
 from services.langgraph.persistence.analytics import emit_lifecycle_event
@@ -34,6 +35,7 @@ def capabilities(principal: Principal = Depends(get_principal)):
         "publication": {"live": False, "dry_run": True},
         "paid_media": {"live_spend": spend_execution_available(), "authorization_ledger": True},
         "analytics": {"source": "amc_first_party", "ingestion": True},
+        "skills": skill_registry_snapshot(),
     }
 
 

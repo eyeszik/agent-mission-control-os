@@ -96,6 +96,7 @@ ROLE_REGISTRY: dict[str, RoleContract] = {
             (
                 ArtifactType.research_brief,
                 ArtifactType.market_analysis,
+                # Compressed, reusable knowledge for future engagements.
                 ArtifactType.knowledge_capsule,
             ),
             min_evidence=3,
@@ -103,7 +104,7 @@ ROLE_REGISTRY: dict[str, RoleContract] = {
         _contract(
             "brand_strategist",
             Department.strategy,
-            "Derive a defensible position from research evidence.",
+            "Derive a defensible position and the commercial model that carries it.",
             (Capability.positioning,),
             (
                 ArtifactType.positioning_statement,
@@ -116,7 +117,7 @@ ROLE_REGISTRY: dict[str, RoleContract] = {
         _contract(
             "brand_architect",
             Department.brand,
-            "Build the brand platform, naming, and identity system.",
+            "Author the canonical brand object and the identity system derived from it.",
             (Capability.naming, Capability.identity_system),
             (
                 ArtifactType.brand_platform,
@@ -126,14 +127,14 @@ ROLE_REGISTRY: dict[str, RoleContract] = {
                 ArtifactType.brand_guidelines_doc,
             ),
             consumes=(ArtifactType.positioning_statement,),
-            # brand_core is the canonical source object for every downstream brand render,
-            # so one source is not an evidence-backed floor.
+            # brand_core is the root every downstream rendering depends on, so it
+            # carries a higher evidence floor than a single identity deliverable.
             min_evidence=2,
         ),
         _contract(
             "creative_director",
             Department.creative,
-            "Generate distinct campaign concepts from the brand platform.",
+            "Generate campaign concepts and the reproducible prompts that realize them.",
             (Capability.concepting, Capability.art_direction),
             (ArtifactType.creative_concept, ArtifactType.asset_prompt_set),
             consumes=(
@@ -153,7 +154,7 @@ ROLE_REGISTRY: dict[str, RoleContract] = {
         _contract(
             "design_lead",
             Department.design,
-            "Specify visual execution for approved concepts.",
+            "Compile the brand object into tokens, components, and page composition.",
             (Capability.art_direction,),
             (
                 ArtifactType.design_brief,
@@ -179,13 +180,16 @@ ROLE_REGISTRY: dict[str, RoleContract] = {
         _contract(
             "implementation_lead",
             Department.engineering,
-            "Plan technical delivery of the product specification.",
+            "Specify technical delivery, whether an application build or an automation.",
             (Capability.implementation,),
             (
                 ArtifactType.implementation_plan,
                 ArtifactType.app_build_spec,
                 ArtifactType.automation_spec,
             ),
+            # automation_spec is reachable without a product_spec, so consumed
+            # inputs stay optional at the contract level and are enforced per
+            # run profile instead.
             consumes=(ArtifactType.product_spec, ArtifactType.design_system_spec),
         ),
         _contract(

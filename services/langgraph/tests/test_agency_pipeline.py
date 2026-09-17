@@ -6,7 +6,7 @@ from services.langgraph.graph.agency.llm import GenerationOutcome
 from services.langgraph.graph.models import AgentRun
 from services.langgraph.agency.exporter import export_idea_workspace, resolve_export_root
 from services.langgraph.persistence.approvals import get_approvals_for_run, resolve_approval
-from services.langgraph.quality.brand_safety import check_brand_safety
+from services.langgraph.quality.brand_safety import evaluate_brand_compliance
 
 
 def _make_run(**metadata_overrides) -> AgentRun:
@@ -198,8 +198,13 @@ def test_pipeline_stage_order_is_stable():
 
 
 def test_brand_safety_flags_banned_claims():
-    assert check_brand_safety("This product is a guaranteed cure for everything.") == ["guaranteed", "cure"]
-    assert check_brand_safety("A thoughtfully designed everyday companion.") == []
+    flagged = evaluate_brand_compliance("This product is a guaranteed cure for everything.")
+    assert flagged["passed"] is False
+    assert flagged["flagged_terms"] == ["guaranteed", "cure"]
+
+    clean = evaluate_brand_compliance("A thoughtfully designed everyday companion.")
+    assert clean["passed"] is True
+    assert clean["flagged_terms"] == []
 
 
 def test_brand_safety_qa_node_flags_banned_claims_in_assembled_copy():
@@ -227,3 +232,53 @@ def test_brand_safety_qa_node_flags_banned_claims_in_assembled_copy():
     assert qa_report["brand_safety_passed"] is False
     assert set(qa_report["flagged_terms"]) == {"guaranteed", "clinically proven", "miracle", "cure"}
     assert result["validation_status"] == "failed"
+
+
+def test_hitl_approval_reason_carries_advisory_findings_to_the_reviewer():
+    """Brand safety is advisory at the delivery guard because the reviewer is the
+    authority. That only holds if the reviewer is actually shown the advisories."""
+    from services.langgraph.graph.agency.nodes import hitl_gate_node
+    from services.langgraph.persistence.approvals import get_approvals_for_run
+
+    run = _make_run()
+    state = _initial_state(run)
+    state["extracted_data"] = {
+        "agency": {
+            "qa_report": {
+                "brand_safety_passed": True,
+                "flagged_terms": [],
+                "release_blocked": False,
+                "brand_compliance": {
+                    "advisories": ["Required disclaimer not present: statutory_ad_label."],
+                },
+            }
+        }
+    }
+
+    hitl_gate_node(state)
+
+    reason = get_approvals_for_run(str(run.id))[0]["reason"]
+    assert "statutory_ad_label" in reason
+
+
+def test_hitl_approval_reason_is_unchanged_when_there_are_no_advisories():
+    from services.langgraph.graph.agency.nodes import hitl_gate_node
+    from services.langgraph.persistence.approvals import get_approvals_for_run
+
+    run = _make_run()
+    state = _initial_state(run)
+    state["extracted_data"] = {
+        "agency": {
+            "qa_report": {
+                "brand_safety_passed": True,
+                "flagged_terms": [],
+                "release_blocked": False,
+                "brand_compliance": {"advisories": []},
+            }
+        }
+    }
+
+    hitl_gate_node(state)
+
+    reason = get_approvals_for_run(str(run.id))[0]["reason"]
+    assert reason == "Campaign package ready for human review before external publish."
