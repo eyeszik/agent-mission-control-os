@@ -13,11 +13,13 @@ import pytest
 from pydantic import ValidationError
 
 from services.langgraph.agency.artifacts.brand import (
+    MINIMUM_COLOR_STORY_DISTINCTION_RATIO,
     BrandCore,
     BrandVoice,
     ColorRole,
     LogoLockup,
     LogoLockupType,
+    MotionCharacter,
 )
 
 
@@ -50,6 +52,11 @@ def _brand_core(**overrides) -> dict:
         ],
         "typography_direction": "A humanist serif for headlines, a clean grotesk for body copy.",
         "imagery_style": "Natural light, unstyled hands, no studio gloss.",
+        "motion": {
+            "pace": "Brisk, confident deceleration, minimal overshoot.",
+            "emphasis_moments": ["primary CTA activation", "order confirmation"],
+            "reduced_motion_fallback": "Cross-fade only; no translation or scale.",
+        },
         "logo_lockups": [_lockup()],
     }
     base.update(overrides)
@@ -148,6 +155,90 @@ def test_blank_required_string_fields_are_rejected():
         BrandCore(**_brand_core(brand_name=""))
     with pytest.raises(ValidationError):
         LogoLockup(**_lockup(generation_reference=""))
+
+
+def test_motion_requires_at_least_one_emphasis_moment():
+    with pytest.raises(ValidationError):
+        MotionCharacter(
+            pace="Brisk.",
+            emphasis_moments=[],
+            reduced_motion_fallback="Cross-fade only.",
+        )
+
+
+def test_motion_reduced_motion_fallback_is_required():
+    with pytest.raises(ValidationError):
+        MotionCharacter(pace="Brisk.", emphasis_moments=["primary CTA activation"])
+
+
+def test_motion_character_is_qualitative_not_a_duration_value():
+    motion = MotionCharacter(
+        pace="Brisk, confident deceleration.",
+        emphasis_moments=["primary CTA activation"],
+        reduced_motion_fallback="Cross-fade only.",
+    )
+    dumped = motion.model_dump()
+    assert "duration_ms" not in dumped
+    assert "easing" not in dumped
+
+
+def test_brand_core_requires_motion():
+    payload = _brand_core()
+    del payload["motion"]
+    with pytest.raises(ValidationError):
+        BrandCore(**payload)
+
+
+def test_reference_hex_accepts_a_valid_hex_color():
+    role = ColorRole(role="primary", description="A deep, confident blue.", reference_hex="#1a2b4c")
+    assert role.reference_hex == "#1a2b4c"
+
+
+def test_reference_hex_defaults_to_none():
+    role = ColorRole(role="primary", description="A deep, confident blue.")
+    assert role.reference_hex is None
+
+
+def test_reference_hex_rejects_non_hex_value():
+    with pytest.raises(ValidationError, match="not a 6-digit hex color"):
+        ColorRole(role="primary", description="A deep, confident blue.", reference_hex="blue")
+
+
+def test_color_story_without_reference_hex_skips_distinction_check():
+    # No reference_hex anywhere -- nothing to compute, nothing should raise.
+    core = BrandCore(**_brand_core())
+    assert core.color_story[0].reference_hex is None
+
+
+def test_two_reference_hex_colors_that_are_distinguishable_pass():
+    core = BrandCore(
+        **_brand_core(
+            color_story=[
+                {"role": "primary", "description": "Deep blue.", "reference_hex": "#1a2b4c"},
+                {"role": "accent", "description": "Warm amber.", "reference_hex": "#e08a2c"},
+            ]
+        )
+    )
+    assert len(core.color_story) == 2
+
+
+def test_two_near_identical_reference_hex_colors_are_rejected():
+    with pytest.raises(ValidationError, match="not visually distinguishable"):
+        BrandCore(
+            **_brand_core(
+                color_story=[
+                    {"role": "primary", "description": "Deep blue.", "reference_hex": "#1a2b4c"},
+                    {"role": "accent", "description": "Almost the same blue.", "reference_hex": "#1a2b4d"},
+                ]
+            )
+        )
+
+
+def test_distinction_threshold_matches_the_documented_constant():
+    from services.langgraph.agency.artifacts.color_contrast import contrast_ratio
+
+    ratio = contrast_ratio("#1a2b4c", "#1a2b4d")
+    assert ratio < MINIMUM_COLOR_STORY_DISTINCTION_RATIO
 
 
 def test_round_trips_through_json_without_loss():

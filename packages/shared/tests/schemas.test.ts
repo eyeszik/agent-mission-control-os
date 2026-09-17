@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { AgentRunSchema, RunStateSchema } from '../src/schemas/run';
 import { ApprovalRequestSchema } from '../src/schemas/approvals';
 import { AgencyRunSchema, CampaignBriefSchema } from '../src/schemas/agency';
-import { BrandCoreSchema } from '../src/schemas/brand';
+import { BrandCoreSchema, MINIMUM_COLOR_STORY_DISTINCTION_RATIO } from '../src/schemas/brand';
+import { contrastRatio } from '../src/schemas/colorContrast';
 
 describe('Shared Schemas', () => {
   describe('AgentRunSchema', () => {
@@ -125,6 +126,11 @@ describe('Shared Schemas', () => {
       ],
       typography_direction: 'A humanist serif for headlines, a clean grotesk for body copy.',
       imagery_style: 'Natural light, unstyled hands, no studio gloss.',
+      motion: {
+        pace: 'Brisk, confident deceleration, minimal overshoot.',
+        emphasis_moments: ['primary CTA activation', 'order confirmation'],
+        reduced_motion_fallback: 'Cross-fade only; no translation or scale.',
+      },
       logo_lockups: [primaryLockup],
     };
 
@@ -179,6 +185,72 @@ describe('Shared Schemas', () => {
     it('requires at least one color_story entry', () => {
       const result = BrandCoreSchema.safeParse({ ...validBrandCore, color_story: [] });
       expect(result.success).toBe(false);
+    });
+
+    it('requires motion', () => {
+      const { motion, ...withoutMotion } = validBrandCore;
+      expect(BrandCoreSchema.safeParse(withoutMotion).success).toBe(false);
+    });
+
+    it('rejects motion with zero emphasis_moments', () => {
+      const result = BrandCoreSchema.safeParse({
+        ...validBrandCore,
+        motion: { ...validBrandCore.motion, emphasis_moments: [] },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('requires reduced_motion_fallback', () => {
+      const { reduced_motion_fallback, ...motionWithoutFallback } = validBrandCore.motion;
+      const result = BrandCoreSchema.safeParse({
+        ...validBrandCore,
+        motion: motionWithoutFallback,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a valid reference_hex on a color role', () => {
+      const result = BrandCoreSchema.safeParse({
+        ...validBrandCore,
+        color_story: [{ ...validBrandCore.color_story[0], reference_hex: '#1a2b4c' }],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a non-hex reference_hex value', () => {
+      const result = BrandCoreSchema.safeParse({
+        ...validBrandCore,
+        color_story: [{ ...validBrandCore.color_story[0], reference_hex: 'blue' }],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts two distinguishable reference_hex colors', () => {
+      const result = BrandCoreSchema.safeParse({
+        ...validBrandCore,
+        color_story: [
+          { role: 'primary', description: 'Deep blue.', reference_hex: '#1a2b4c' },
+          { role: 'accent', description: 'Warm amber.', reference_hex: '#e08a2c' },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects two near-identical reference_hex colors', () => {
+      const result = BrandCoreSchema.safeParse({
+        ...validBrandCore,
+        color_story: [
+          { role: 'primary', description: 'Deep blue.', reference_hex: '#1a2b4c' },
+          { role: 'accent', description: 'Almost the same blue.', reference_hex: '#1a2b4d' },
+        ],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('the near-identical fixture is below the documented distinction ratio', () => {
+      expect(contrastRatio('#1a2b4c', '#1a2b4d')).toBeLessThan(
+        MINIMUM_COLOR_STORY_DISTINCTION_RATIO
+      );
     });
   });
 });
