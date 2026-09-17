@@ -5,7 +5,7 @@ from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_
 from services.langgraph.graph.agency.llm import GenerationOutcome
 from services.langgraph.graph.models import AgentRun
 from services.langgraph.persistence.approvals import get_approvals_for_run, resolve_approval
-from services.langgraph.quality.brand_safety import check_brand_safety
+from services.langgraph.quality.brand_safety import evaluate_brand_compliance
 
 
 def _make_run(**metadata_overrides) -> AgentRun:
@@ -112,8 +112,13 @@ def test_pipeline_stage_order_is_stable():
 
 
 def test_brand_safety_flags_banned_claims():
-    assert check_brand_safety("This product is a guaranteed cure for everything.") == ["guaranteed", "cure"]
-    assert check_brand_safety("A thoughtfully designed everyday companion.") == []
+    flagged = evaluate_brand_compliance("This product is a guaranteed cure for everything.")
+    assert flagged["passed"] is False
+    assert flagged["flagged_terms"] == ["guaranteed", "cure"]
+
+    clean = evaluate_brand_compliance("A thoughtfully designed everyday companion.")
+    assert clean["passed"] is True
+    assert clean["flagged_terms"] == []
 
 
 def test_brand_safety_qa_node_flags_banned_claims_in_assembled_copy():

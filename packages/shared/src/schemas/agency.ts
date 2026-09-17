@@ -66,10 +66,35 @@ export const QualityMetricsSchema = z.object({
   threshold_passed: z.boolean(),
 });
 
+export const BrandComplianceViolationSchema = z.object({
+  pattern_id: z.string(),
+  matched_text: z.string(),
+  description: z.string(),
+});
+
+export const BrandComplianceReadabilitySchema = z.object({
+  flesch_kincaid_grade: z.union([z.number(), z.literal('NOT_MEASURED')]),
+  within_target_band: z.union([z.boolean(), z.literal('NOT_MEASURED')]),
+  target_grade_min: z.number(),
+  target_grade_max: z.number(),
+});
+
+export const BrandComplianceSchema = z.object({
+  engine_version: z.string(),
+  passed: z.boolean(),
+  flagged_terms: z.array(z.string()).default([]),
+  violations: z.array(BrandComplianceViolationSchema).default([]),
+  missing_disclaimers: z.array(z.string()).default([]),
+  readability: BrandComplianceReadabilitySchema,
+  sentiment_polarity: z.literal('NOT_MEASURED'),
+  advisories: z.array(z.string()).default([]),
+});
+
 export const QAReportSchema = z.object({
   brand_safety_passed: z.boolean(),
   flagged_terms: z.array(z.string()).default([]),
   quality_metrics: QualityMetricsSchema,
+  brand_compliance: BrandComplianceSchema.partial().default({}),
   notes: z.string(),
   release_blocked: z.boolean().default(false),
   degradation_reasons: z.array(z.string()).default([]),
@@ -137,6 +162,7 @@ export type BrandStrategy = z.infer<typeof BrandStrategySchema>;
 export type CreativeConcept = z.infer<typeof CreativeConceptSchema>;
 export type CopyVariant = z.infer<typeof CopyVariantSchema>;
 export type DesignBrief = z.infer<typeof DesignBriefSchema>;
+export type BrandCompliance = z.infer<typeof BrandComplianceSchema>;
 export type QAReport = z.infer<typeof QAReportSchema>;
 export type CampaignPackage = z.infer<typeof CampaignPackageSchema>;
 export type GenerationProvenance = z.infer<typeof GenerationProvenanceSchema>;

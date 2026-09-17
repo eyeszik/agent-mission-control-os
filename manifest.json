@@ -66,11 +66,11 @@
     },
     {
       "path": "packages/shared/openapi/agent-mission-control.openapi.yaml",
-      "git_blob_sha": "1ff7a87e8036d880e7c6c0e91b63c67bada405b4"
+      "git_blob_sha": "131751a2d1b408b6c5eb4030e767adaf7a6657cf"
     },
     {
       "path": "packages/shared/src/schemas/agency.ts",
-      "git_blob_sha": "8349cf164f26a87246bb4534d8183ecbbc3fe745"
+      "git_blob_sha": "fac08b1777afd02606d9a2f13030a54742b20ddc"
     },
     {
       "path": "packages/shared/src/schemas/approvals.ts",
@@ -175,6 +175,10 @@
     {
       "path": "services/langgraph/integrations/publication.py",
       "git_blob_sha": "402bfd495b928ab13f5f7a3c223e2e7386bc5193"
+    },
+    {
+      "path": "services/langgraph/quality/brand_safety.py",
+      "git_blob_sha": "276b31f8ae45a89812f64d7c663598a7ffbd0e10"
     },
     {
       "path": "services/langgraph/persistence/agency_kernel.py",

@@ -16,7 +16,7 @@ from services.langgraph.graph.agency.models import (
 )
 from services.langgraph.graph.state import GraphState
 from services.langgraph.persistence.approvals import create_approval_request
-from services.langgraph.quality.brand_safety import check_brand_safety
+from services.langgraph.quality.brand_safety import evaluate_brand_compliance
 from services.langgraph.quality.evaluator import evaluate_quality
 from services.langgraph.security.pii import quarantine_payload
 from services.langgraph.security.preprocess import sanitize_deep
@@ -230,7 +230,8 @@ def brand_safety_qa_node(state: GraphState) -> dict:
         f"{item.get('headline', '')} {item.get('body', '')} {item.get('cta', '')}"
         for item in package.get("copy_variants", [])
     ).strip()
-    flagged = check_brand_safety(combined_text)
+    compliance = evaluate_brand_compliance(combined_text)
+    flagged = compliance["flagged_terms"]
     quality = evaluate_quality(combined_text or package.get("strategy", {}).get("positioning_statement", ""))
     degraded_tasks = [item.get("task", "unknown") for item in agency.get("generation_provenance", []) if item.get("mode") != "PROVIDER_SUCCESS"]
     release_blocked = bool(degraded_tasks)
@@ -238,10 +239,12 @@ def brand_safety_qa_node(state: GraphState) -> dict:
     notes = ["No banned-claim heuristic matches detected." if not flagged else f"Flagged terms requiring review: {', '.join(flagged)}"]
     if release_blocked:
         notes.append("Release blocked because one or more generation stages used degraded fallback output; rerun with a configured provider before delivery.")
+    notes.extend(compliance["advisories"])
     qa_report = QAReport(
         brand_safety_passed=not flagged,
         flagged_terms=flagged,
         quality_metrics=quality,
+        brand_compliance=compliance,
         notes=" ".join(notes),
         release_blocked=release_blocked,
         degradation_reasons=degraded_tasks,
