@@ -60,7 +60,20 @@ export const AGENCY_ARTIFACT_TYPES = [
   'media_plan',
   'measurement_plan',
   'qa_report',
-  'release_record'
+  'release_record',
+  // Compiler artifacts. brand_core is the root every brand rendering derives
+  // from, so a rendering is never authoritative over it.
+  'brand_core',
+  'brand_guidelines_doc',
+  'design_token_set',
+  'design_system_spec',
+  'website_lockup_spec',
+  'asset_prompt_set',
+  'business_model_spec',
+  'offer_definition',
+  'app_build_spec',
+  'automation_spec',
+  'knowledge_capsule'
 ] as const;
 
 export const DepartmentSchema = z.enum(DEPARTMENTS);
@@ -103,7 +116,18 @@ export const ARTIFACT_TYPE_OWNER: Record<AgencyArtifactType, Department> = {
   media_plan: 'media',
   measurement_plan: 'analytics',
   qa_report: 'quality',
-  release_record: 'operations'
+  release_record: 'operations',
+  brand_core: 'brand',
+  brand_guidelines_doc: 'brand',
+  design_token_set: 'design',
+  design_system_spec: 'design',
+  website_lockup_spec: 'design',
+  asset_prompt_set: 'creative',
+  business_model_spec: 'strategy',
+  offer_definition: 'strategy',
+  app_build_spec: 'engineering',
+  automation_spec: 'engineering',
+  knowledge_capsule: 'research'
 };
 
 export function owningDepartment(artifactType: AgencyArtifactType): Department {
