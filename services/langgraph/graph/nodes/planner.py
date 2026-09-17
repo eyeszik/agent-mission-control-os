@@ -12,13 +12,13 @@ def planner_node(state: GraphState) -> dict:
     Uses ChatOpenAI if OPENAI_API_KEY is available, otherwise falls back to mock output.
     """
     print(f"Running Planner for run {state['run'].id}")
-    
+
     # 1. Read the messages created by Ingest
     last_message = state.get("messages", [])[-1].content if state.get("messages") else ""
-    
+
     api_key = os.environ.get("OPENAI_API_KEY")
     content = ""
-    
+
     if api_key:
         try:
             llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
@@ -33,7 +33,7 @@ def planner_node(state: GraphState) -> dict:
         except Exception as e:
             print(f"LLM Error: {e}")
             content = json.dumps({"error": str(e), "tasks": []})
-    
+
     if not content or "tasks" not in content.lower():
         # 2. Mock fallback
         simulated_dag = {
@@ -44,13 +44,18 @@ def planner_node(state: GraphState) -> dict:
             ]
         }
         content = json.dumps(simulated_dag)
-    
+
     # 3. Evaluate the generated plan
-    quality = evaluate_quality(content)
-    
+    # NOTE: `context` here is state["extracted_data"] (the sanitized original
+    # request from ingest_node) -- checks fidelity to the request, not
+    # retrieval-grounded correctness. See risk R-013.
+    extracted_data = state.get("extracted_data") or {}
+    context = json.dumps(extracted_data) if extracted_data else None
+    quality = evaluate_quality(content, context=context)
+
     # 4. Generate the AI Response
     ai_msg = AIMessage(content=f"I have constructed the following DAG:\n{content}")
-    
+
     return {
         "current_node": "planner",
         "messages": [ai_msg],
