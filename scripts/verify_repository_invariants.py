@@ -14,6 +14,7 @@ OPENAPI = ROOT / "packages/shared/openapi/agent-mission-control.openapi.yaml"
 REQUIRED_ENV_VARS = {
     "NEXT_PUBLIC_API_BASE_URL",
     "AMC_DB_PATH",
+    "AMC_EXPORT_ROOT",
     "AMC_CORS_ALLOWED_ORIGINS",
     "AMC_AUTH_MODE",
     "AMC_LOCAL_USER_ID",

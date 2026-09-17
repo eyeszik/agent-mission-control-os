@@ -15,7 +15,6 @@ import json
 import pytest
 
 from services.langgraph.agency.kernel import (
-    ROLE_REGISTRY,
     ArtifactRegistry,
     ArtifactStatus,
     ArtifactType,
@@ -44,6 +43,34 @@ from services.langgraph.agency.kernel import (
     validate_registry,
 )
 
+COMPILER_ARTIFACT_OWNERS = {
+    ArtifactType.brand_core: Department.brand,
+    ArtifactType.brand_guidelines_doc: Department.brand,
+    ArtifactType.design_token_set: Department.design,
+    ArtifactType.design_system_spec: Department.design,
+    ArtifactType.website_lockup_spec: Department.design,
+    ArtifactType.asset_prompt_set: Department.creative,
+    ArtifactType.business_model_spec: Department.strategy,
+    ArtifactType.offer_definition: Department.strategy,
+    ArtifactType.app_build_spec: Department.engineering,
+    ArtifactType.automation_spec: Department.engineering,
+    ArtifactType.knowledge_capsule: Department.research,
+}
+
+COMPILER_ARTIFACT_PRODUCERS = {
+    ArtifactType.brand_core: "brand_architect",
+    ArtifactType.brand_guidelines_doc: "brand_architect",
+    ArtifactType.design_token_set: "design_lead",
+    ArtifactType.design_system_spec: "design_lead",
+    ArtifactType.website_lockup_spec: "design_lead",
+    ArtifactType.asset_prompt_set: "creative_director",
+    ArtifactType.business_model_spec: "brand_strategist",
+    ArtifactType.offer_definition: "brand_strategist",
+    ArtifactType.app_build_spec: "implementation_lead",
+    ArtifactType.automation_spec: "implementation_lead",
+    ArtifactType.knowledge_capsule: "market_researcher",
+}
+
 
 # ---------------------------------------------------------------------------
 # Structural integrity
@@ -68,82 +95,15 @@ def test_every_artifact_type_has_exactly_one_owning_department():
     assert all(isinstance(owner, Department) for owner in owners.values())
 
 
-COMPILER_ARTIFACTS = {
-    "brand_core": "brand",
-    "brand_guidelines_doc": "brand",
-    "design_token_set": "design",
-    "design_system_spec": "design",
-    "website_lockup_spec": "design",
-    "asset_prompt_set": "creative",
-    "business_model_spec": "strategy",
-    "offer_definition": "strategy",
-    "app_build_spec": "engineering",
-    "automation_spec": "engineering",
-    "knowledge_capsule": "research",
-}
-
-
-@pytest.mark.parametrize("artifact_type,department", sorted(COMPILER_ARTIFACTS.items()))
-def test_compiler_artifact_is_owned_by_its_declared_department(artifact_type, department):
-    assert owning_department(artifact_type) is Department(department)
-    assert_department_owns(department, artifact_type)
-
-
-@pytest.mark.parametrize("artifact_type,department", sorted(COMPILER_ARTIFACTS.items()))
-def test_compiler_artifact_has_exactly_one_producing_role(artifact_type, department):
-    from services.langgraph.agency.kernel import roles_for_department
-
-    producers = [
-        role.role_id
-        for role in roles_for_department(department)
-        if ArtifactType(artifact_type) in role.produces
-    ]
-    assert len(producers) == 1, f"{artifact_type} has producers {producers}"
-
-
-def test_brand_core_carries_a_real_evidence_floor():
-    """brand_core is the root of every rendering; it may not be invented."""
-    contract = get_role("brand_architect")
-    assert ArtifactType.brand_core in contract.produces
-    assert contract.min_evidence >= 2
-    with pytest.raises(RoleContractError):
-        assert_evidence_sufficient("brand_architect", 1)
-
-
-def test_design_compile_chain_is_owned_end_to_end():
-    """brand_core → tokens → system → lockup must not cross a department."""
-    design_lead = get_role("design_lead")
-    for step in (
-        ArtifactType.design_token_set,
-        ArtifactType.design_system_spec,
-        ArtifactType.website_lockup_spec,
-    ):
-        assert step in design_lead.produces
-    # The chain's input is authored elsewhere and must be consumed, not re-derived.
-    assert ArtifactType.brand_core in design_lead.consumes
-
-
-def test_automation_only_work_needs_no_brand_artifact():
-    """Profile E: an automation is producible without touching brand."""
-    implementation_lead = get_role("implementation_lead")
-    assert ArtifactType.automation_spec in implementation_lead.produces
-    brand_owned = {
-        artifact_type
-        for artifact_type in ArtifactType
-        if owning_department(artifact_type) is Department.brand
-    }
-    assert not (implementation_lead.produces & brand_owned)
-    assert not (implementation_lead.consumes & brand_owned)
-
-
-def test_no_role_may_produce_a_compiler_artifact_it_does_not_own():
-    for artifact_type, department in COMPILER_ARTIFACTS.items():
-        for role_id in ROLE_REGISTRY:
-            contract = get_role(role_id)
-            if contract.department is not Department(department):
-                assert ArtifactType(artifact_type) not in contract.produces
-                with pytest.raises(RoleContractError):
-                    assert_role_may_produce(role_id, artifact_type)
+@pytest.mark.parametrize(
+    ("artifact_type", "owner"),
+    list(COMPILER_ARTIFACT_OWNERS.items()),
+)
+def test_compiler_artifacts_are_owned_by_declared_department(
+    artifact_type: ArtifactType, owner: Department
+):
+    assert owning_department(artifact_type) is owner
+    assert_department_owns(owner, artifact_type)
 
 
 def test_unknown_vocabulary_fails_closed():
@@ -291,6 +251,68 @@ def test_external_side_effect_roles_always_require_human_approval():
     for entry in role_snapshot()["roles"]:
         if entry["external_side_effect"]:
             assert entry["requires_human_approval"], entry["role_id"]
+
+
+@pytest.mark.parametrize(
+    ("artifact_type", "producer_role"),
+    list(COMPILER_ARTIFACT_PRODUCERS.items()),
+)
+def test_each_compiler_artifact_has_exactly_one_producing_role_within_owning_department(
+    artifact_type: ArtifactType, producer_role: str
+):
+    producer = get_role(producer_role)
+    assert artifact_type in producer.produces
+    assert producer.department is COMPILER_ARTIFACT_OWNERS[artifact_type]
+
+    matching_roles = [
+        contract["role_id"]
+        for contract in role_snapshot()["roles"]
+        if artifact_type.value in contract["produces"]
+    ]
+    assert matching_roles == [producer_role]
+
+
+@pytest.mark.parametrize(
+    ("artifact_type", "owner"),
+    list(COMPILER_ARTIFACT_OWNERS.items()),
+)
+def test_no_role_outside_owning_department_may_produce_compiler_artifact(
+    artifact_type: ArtifactType, owner: Department
+):
+    for contract in role_snapshot()["roles"]:
+        if contract["department"] == owner.value:
+            continue
+        with pytest.raises(RoleContractError):
+            assert_role_may_produce(contract["role_id"], artifact_type)
+
+
+def test_brand_architect_requires_two_evidence_items_for_brand_core():
+    role = get_role("brand_architect")
+    assert role.min_evidence >= 2
+    with pytest.raises(RoleContractError):
+        assert_evidence_sufficient("brand_architect", 1)
+
+
+def test_design_chain_is_owned_by_design_lead_and_consumes_brand_core():
+    role = get_role("design_lead")
+    assert {
+        ArtifactType.design_token_set,
+        ArtifactType.design_system_spec,
+        ArtifactType.website_lockup_spec,
+    } <= role.produces
+    assert ArtifactType.brand_core in role.consumes
+
+
+def test_implementation_lead_automation_path_stays_disjoint_from_brand_types():
+    role = get_role("implementation_lead")
+    brand_owned_types = {
+        artifact_type
+        for artifact_type, owner in COMPILER_ARTIFACT_OWNERS.items()
+        if owner is Department.brand
+    }
+    assert ArtifactType.automation_spec in role.produces
+    assert role.produces.isdisjoint(brand_owned_types)
+    assert role.consumes.isdisjoint(brand_owned_types)
 
 
 # ---------------------------------------------------------------------------

@@ -4,6 +4,7 @@ from uuid import uuid4
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.agency.llm import GenerationOutcome
 from services.langgraph.graph.models import AgentRun
+from services.langgraph.agency.exporter import export_idea_workspace, resolve_export_root
 from services.langgraph.persistence.approvals import get_approvals_for_run, resolve_approval
 from services.langgraph.quality.brand_safety import evaluate_brand_compliance
 
@@ -71,6 +72,11 @@ def test_agency_graph_pauses_before_delivery_and_creates_approval():
     agency = state["extracted_data"]["agency"]
     assert "delivery" not in agency
     assert agency["campaign_package"]["brief"]["brand_name"] == "Northwind Coffee"
+    assert agency["campaign_package"]["business_workspace"]["overview"]["idea_name"] == "Northwind Coffee"
+    assert agency["campaign_package"]["branding_workspace"]["raw_brand_data"]["brand_name"] == "Northwind Coffee"
+    assert agency["campaign_package"]["design_system"]["tokens_json"]["brand"]["semantic"]["color"]["bg"]["value"] == "{brand.raw.surface.value}"
+    assert len(agency["campaign_package"]["asset_execution"]["rendered_assets"]) == 3
+    assert agency["campaign_package"]["asset_execution"]["review_queue"]["review_status"] == "pending_review"
     assert len(agency["creative_concepts"]) == 3
     assert len(agency["copy_variants"]) == 3
     snapshot = graph.get_state(config)
@@ -93,8 +99,88 @@ def test_agency_graph_resumes_and_delivers_after_successful_provider_approval(mo
     assert final_state["validation_status"] == "passed"
     delivery = final_state["extracted_data"]["agency"]["delivery"]
     assert delivery["campaign_package"]["brief"]["brand_name"] == "Northwind Coffee"
+    assert delivery["campaign_package"]["design_system"]["component_scaffolds"][0]["path"].endswith("Button.tsx")
+    assert delivery["campaign_package"]["asset_execution"]["publishing_adapters"][0]["status"] == "draft_only"
     assert delivery["approval_id"] == approvals[0]["approval_id"]
     assert graph.get_state(config).next == ()
+
+
+def test_export_root_is_writable_without_zo_workspace(tmp_path, monkeypatch):
+    monkeypatch.delenv("AMC_EXPORT_ROOT", raising=False)
+    monkeypatch.setattr("services.langgraph.agency.exporter._ZO_WORKSPACE", tmp_path / "missing-zo")
+    monkeypatch.setattr("services.langgraph.agency.exporter.os.access", lambda *_args, **_kwargs: False)
+    root = resolve_export_root()
+    assert root.name == "amc-idea-exports"
+    root.mkdir(parents=True, exist_ok=True)
+    probe = root / "ci-write-probe.txt"
+    probe.write_text("ok\n", encoding="utf-8")
+    assert probe.read_text(encoding="utf-8") == "ok\n"
+
+
+def test_export_idea_workspace_renders_assets(tmp_path, monkeypatch):
+    monkeypatch.setattr("services.langgraph.agency.exporter.DEFAULT_EXPORT_ROOT", tmp_path)
+    run = _make_run()
+    graph = build_agency_workflow()
+    state = graph.invoke(_initial_state(run), config={"configurable": {"thread_id": str(run.id)}})
+    package = state["extracted_data"]["agency"]["campaign_package"]
+    export = export_idea_workspace(brand_name="Northwind Coffee", run_id=str(run.id), package=package)
+    assert export["rendered_assets_folder"].endswith("/branding/rendered")
+    written = export["files_written"]
+    assert any(path.endswith("branding/rendered/logo-mark.svg") for path in written)
+    assert any(path.endswith("branding/rendered/background-pattern.svg") for path in written)
+    assert any(path.endswith("branding/rendered/hero-illustration.svg") for path in written)
+    assert any(path.endswith("branding/review/asset-approval-inbox.md") for path in written)
+
+
+def test_workspace_export_artifacts_bind_to_canonical_revision_path(tmp_path, monkeypatch):
+    import services.langgraph.persistence.sqlite_db as sqlite_db
+    from services.langgraph.api.routes.agency import _bind_workspace_export_artifacts
+    from services.langgraph.persistence.agency_kernel import get_artifact
+
+    sqlite_db.init_db()
+    monkeypatch.setattr("services.langgraph.agency.exporter.DEFAULT_EXPORT_ROOT", tmp_path)
+
+    run = _make_run()
+    graph = build_agency_workflow()
+    state = graph.invoke(_initial_state(run), config={"configurable": {"thread_id": str(run.id)}})
+    package = state["extracted_data"]["agency"]["campaign_package"]
+    export = export_idea_workspace(brand_name="Northwind Coffee", run_id=str(run.id), package=package)
+
+    first_bindings = _bind_workspace_export_artifacts(
+        run_id=str(run.id),
+        tenant_id=run.tenant_id,
+        project_id=run.project_id,
+        package=package,
+        workspace_export=export,
+    )
+    assert {item["artifact_key"] for item in first_bindings} == {
+        "business_model_spec",
+        "brand_core",
+        "asset_prompt_set",
+        "design_token_set",
+        "design_system_spec",
+        "website_lockup_spec",
+        "campaign_package",
+    }
+    assert all(item["created"] is True for item in first_bindings)
+    prompt_binding = next(item for item in first_bindings if item["artifact_key"] == "asset_prompt_set")
+    prompt_artifact = get_artifact(prompt_binding["artifact_id"])
+    assert prompt_artifact is not None
+    assert prompt_artifact["version"] == 1
+    assert prompt_artifact["content_location"].endswith("/branding/prompts")
+
+    package["branding_workspace"]["visual_asset_prompts"][0]["body"] += "\nAdd sharper silhouette constraints."
+    second_bindings = _bind_workspace_export_artifacts(
+        run_id=str(run.id),
+        tenant_id=run.tenant_id,
+        project_id=run.project_id,
+        package=package,
+        workspace_export=export,
+    )
+    second_prompt_binding = next(item for item in second_bindings if item["artifact_key"] == "asset_prompt_set")
+    assert second_prompt_binding["created"] is False
+    assert second_prompt_binding["changed"] is True
+    assert second_prompt_binding["version"] == 2
 
 
 def test_pipeline_stage_order_is_stable():

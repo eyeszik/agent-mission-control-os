@@ -3,8 +3,11 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 
+from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffect
+from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import get_approval, list_pending_approvals, resolve_approval
+from services.langgraph.persistence.events import record_event
 from services.langgraph.persistence.idempotency import (
     complete_idempotency,
     fail_idempotency,
@@ -64,15 +67,41 @@ def decide_approval(
         raise HTTPException(status_code=409, detail="Approval decision is already executing")
     if reservation["state"] == "conflict":
         raise HTTPException(status_code=409, detail="Idempotency-Key was reused with a different decision")
+    trust = trust_kernel()
+    trust.bind_project(tenant_id=approval["tenant_id"], project_id=approval["project_id"])
+    trust.record_policy_decision(
+        tenant_id=approval["tenant_id"],
+        project_id=approval["project_id"],
+        decision_id=f"policy-approval-decide-{approval_id}-{idempotency_key}",
+        subject_ref=approval_id,
+        action="approval.decide",
+        target=body.decision,
+        policy_version="amc-trust/v1",
+        policy_input={"approval_id": approval_id, "decision": body.decision},
+        effect=PolicyEffect.ALLOW,
+    )
+    trust.claim_idempotency(
+        tenant_id=approval["tenant_id"],
+        project_id=approval["project_id"],
+        idempotency_key=idempotency_key,
+        operation_id=f"approval.decide:{approval_id}",
+        request={"approval_id": approval_id, "decision": body.decision},
+    )
 
     run = get_run_record(approval["run_id"])
     if not run:
         fail_idempotency(scope, idempotency_key, "run_missing")
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=None, status=IdempotencyStatus.FAILED)
         raise HTTPException(status_code=409, detail="Approval references a missing run")
     authorize_resource(principal, run["tenant_id"], run["project_id"])
     if run["status"] != "needs_approval":
         fail_idempotency(scope, idempotency_key, f"invalid_run_status:{run['status']}")
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=None, status=IdempotencyStatus.FAILED)
         raise HTTPException(status_code=409, detail=f"Run is not awaiting approval (status={run['status']})")
+    if approval["status"] == "stale":
+        fail_idempotency(scope, idempotency_key, "approval_stale")
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=None, status=IdempotencyStatus.FAILED)
+        raise HTTPException(status_code=409, detail="Approval is stale and must be regenerated")
 
     resolved = resolve_approval(
         approval_id,
@@ -81,6 +110,7 @@ def decide_approval(
     )
     if not resolved:
         fail_idempotency(scope, idempotency_key, "approval_terminal")
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=None, status=IdempotencyStatus.FAILED)
         raise HTTPException(status_code=409, detail="Approval already has a terminal decision")
 
     if body.decision == "reject":
@@ -92,6 +122,7 @@ def decide_approval(
         )
         if not changed:
             fail_idempotency(scope, idempotency_key, "run_state_race")
+            trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=None, status=IdempotencyStatus.FAILED)
             raise HTTPException(status_code=409, detail="Run state changed while rejection was being recorded")
         emit_lifecycle_event(
             approval["tenant_id"],
@@ -108,6 +139,19 @@ def decide_approval(
         {"approval_id": approval_id, "decision": body.decision},
         approval["run_id"],
     )
+    record_event(
+        approval["run_id"],
+        approval["tenant_id"],
+        approval["project_id"],
+        "hitl_gate",
+        "approval_decided",
+        safe_payload={
+            "approval_id": resolved["approval_id"],
+            "decision": resolved["decision"],
+            "status": resolved["status"],
+            "reviewer": resolved["reviewer"],
+        },
+    )
 
     response = {
         "approval_id": resolved["approval_id"],
@@ -118,4 +162,5 @@ def decide_approval(
     }
     if not complete_idempotency(scope, idempotency_key, response):
         raise HTTPException(status_code=500, detail="Failed to finalize idempotency record")
+    trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=approval_id)
     return response

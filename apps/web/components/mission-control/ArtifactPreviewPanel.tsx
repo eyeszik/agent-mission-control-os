@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
 import { useShallow } from 'zustand/react/shallow';
 import { resolveApproval } from '../../lib/api/approvals';
-import { resumeAgencyRun } from '../../lib/api/agency';
+import { getAgencyRun, resumeAgencyRun } from '../../lib/api/agency';
+import { getProjectTrust } from '../../lib/api/runtime';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { generateIdempotencyKey } from '../../lib/utils/idempotency';
+import { globalBus } from '../../lib/events/bus';
+import type { AgencyRun, TrustSnapshot } from '@amc/shared';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
@@ -30,6 +33,62 @@ export function ArtifactPreviewPanel() {
 
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [run, setRun] = useState<AgencyRun | null>(null);
+  const [trust, setTrust] = useState<TrustSnapshot | null>(null);
+
+  useEffect(() => {
+    if (!activeRunId) {
+      setRun(null);
+      setTrust(null);
+      return;
+    }
+    let cancelled = false;
+    const refreshRun = async () => {
+      try {
+        const value = await getAgencyRun(activeRunId);
+        if (!cancelled) setRun(value);
+      } catch {
+        if (!cancelled) {
+          setRun(null);
+          setTrust(null);
+        }
+      }
+    };
+    const onLifecycle = (event: { run_id: string }) => {
+      if (event.run_id === activeRunId) void refreshRun();
+    };
+    void refreshRun();
+    globalBus.on('lifecycle_event_received', onLifecycle as any);
+    return () => {
+      cancelled = true;
+      globalBus.off('lifecycle_event_received', onLifecycle as any);
+    };
+  }, [activeRunId]);
+
+  useEffect(() => {
+    if (!run?.project_id) {
+      setTrust(null);
+      return;
+    }
+    let cancelled = false;
+    const refreshTrust = async () => {
+      try {
+        const value = await getProjectTrust(run.project_id!);
+        if (!cancelled) setTrust(value);
+      } catch {
+        if (!cancelled) setTrust(null);
+      }
+    };
+    const onLifecycle = (event: { project_id: string }) => {
+      if (event.project_id === run.project_id) void refreshTrust();
+    };
+    void refreshTrust();
+    globalBus.on('lifecycle_event_received', onLifecycle as any);
+    return () => {
+      cancelled = true;
+      globalBus.off('lifecycle_event_received', onLifecycle as any);
+    };
+  }, [run?.project_id]);
 
   const handleResolve = async (approvalId: string, runId: string, decision: 'approve' | 'reject') => {
     setResolvingId(approvalId);
@@ -73,6 +132,15 @@ export function ArtifactPreviewPanel() {
         <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</div>
       )}
 
+      {trust?.compile_blocked && (
+        <div
+          data-testid="mc-compile-blocked-banner"
+          className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2"
+        >
+          Compile/release blocked until demanded obligations are discharged.
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto">
         {selectedArtifact ? (
           <div className="text-sm text-zinc-300 whitespace-pre-wrap font-mono bg-zinc-950/50 p-4 rounded-lg border border-zinc-800/60 overflow-x-auto">
@@ -92,7 +160,8 @@ export function ArtifactPreviewPanel() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleResolve(approval.approval_id, approval.run_id, 'approve')}
-                      disabled={isResolving}
+                      disabled={isResolving || Boolean(trust?.compile_blocked)}
+                      data-testid="mc-release-btn"
                       className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 rounded text-xs font-medium transition-colors disabled:opacity-50"
                     >
                       {isResolving ? 'Working…' : 'Approve'}

@@ -6,8 +6,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from services.langgraph.api.routes import agency, analytics, approvals, events, operations
-from services.langgraph.app.config import assert_runtime_configuration, production_config_errors, runtime_environment
+from services.langgraph.api.routes import agency, analytics, approvals, events, operations, runtime
+from services.langgraph.app.config import (
+    assert_runtime_configuration,
+    hmac_ingress_enabled,
+    hmac_ingress_header_name,
+    production_config_errors,
+    runtime_environment,
+)
+from services.langgraph.security.hmac_ingress import HMACIngressConfig, HMACIngressMiddleware
 from services.langgraph.persistence.checkpoints import close_checkpointer
 from services.langgraph.persistence.database import database_backend
 
@@ -36,11 +43,22 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "Last-Event-ID", "X-AMC-Tenant"],
 )
 
+if hmac_ingress_enabled():
+    app.add_middleware(
+        HMACIngressMiddleware,
+        config=HMACIngressConfig(
+            header_name=hmac_ingress_header_name(),
+            secret=os.environ["AMC_HMAC_SECRET"].encode("utf-8"),
+            protected_paths=("/runtime/ingest",),
+        ),
+    )
+
 app.include_router(events.router, prefix="/runs", tags=["Events"])
 app.include_router(approvals.router, prefix="/approvals", tags=["Approvals"])
 app.include_router(agency.router, prefix="/agency", tags=["Agency Pipeline"])
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
 app.include_router(operations.router, prefix="/operations", tags=["Operations"])
+app.include_router(runtime.router, prefix="/runtime", tags=["Runtime"])
 
 
 @app.get("/health")
@@ -57,5 +75,6 @@ def health_check():
         "analytics_source": "amc_first_party",
         "publication_mode": os.environ.get("AMC_PUBLICATION_MODE", "disabled").strip().lower(),
         "paid_media_mode": os.environ.get("AMC_PAID_MEDIA_MODE", "disabled").strip().lower(),
+        "hmac_ingress_enabled": hmac_ingress_enabled(),
         "production_ready": environment == "production" and not errors,
     }

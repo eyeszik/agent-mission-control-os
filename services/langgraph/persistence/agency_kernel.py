@@ -9,6 +9,7 @@ from services.langgraph.agency.kernel.ontology import (
     resolve_artifact_type,
     resolve_department,
 )
+from services.langgraph.agency.reliability import PolicyEffect, ProductionTrustKernel
 from services.langgraph.persistence.database import (
     decode_json,
     json_param,
@@ -16,6 +17,8 @@ from services.langgraph.persistence.database import (
     table,
     transaction,
 )
+from services.langgraph.persistence.idempotency import hash_payload
+from services.langgraph.persistence.trust_kernel import DatabaseReliabilityStore
 
 _JSON_FIELDS = {
     "engagements": ("constraints", "permissions", "metadata"),
@@ -43,6 +46,35 @@ def _get(entity: str, id_column: str, value: str) -> Optional[dict]:
     with transaction() as db:
         row = db.execute(f"SELECT * FROM {table(entity)} WHERE {id_column} = ?", (value,)).fetchone()
     return _row_to_record(row, entity) if row else None
+
+
+def _trust_kernel() -> ProductionTrustKernel:
+    return ProductionTrustKernel(DatabaseReliabilityStore())
+
+
+def _record_trust_policy(
+    *,
+    decision_id: str,
+    tenant_id: str,
+    project_id: str,
+    subject_ref: str,
+    action: str,
+    target: str,
+    policy_input: dict[str, Any],
+) -> None:
+    trust = _trust_kernel()
+    trust.bind_project(tenant_id=tenant_id, project_id=project_id)
+    trust.record_policy_decision(
+        tenant_id=tenant_id,
+        project_id=project_id,
+        decision_id=decision_id,
+        subject_ref=subject_ref,
+        action=action,
+        target=target,
+        policy_version="amc-trust/v1",
+        policy_input=policy_input,
+        effect=PolicyEffect.ALLOW,
+    )
 
 
 def create_engagement(
@@ -82,6 +114,15 @@ def create_engagement(
     record = get_engagement(engagement_id)
     if record is None:
         raise RuntimeError("Engagement insert succeeded but record could not be read back")
+    _record_trust_policy(
+        decision_id=f"policy-engagement-create-{engagement_id}",
+        tenant_id=tenant_id,
+        project_id=project_id,
+        subject_ref=engagement_id,
+        action="engagement.create",
+        target=status,
+        policy_input={"objective": objective, "desired_outcome": desired_outcome, "status": status},
+    )
     return record
 
 
@@ -148,6 +189,15 @@ def create_workstream(
     record = get_workstream(workstream_id)
     if record is None:
         raise RuntimeError("Workstream insert succeeded but record could not be read back")
+    _record_trust_policy(
+        decision_id=f"policy-workstream-create-{workstream_id}",
+        tenant_id=tenant_id,
+        project_id=project_id,
+        subject_ref=workstream_id,
+        action="workstream.create",
+        target=department,
+        policy_input={"engagement_id": engagement_id, "department": department, "status": status},
+    )
     return record
 
 
@@ -323,11 +373,39 @@ def create_artifact(
     record = get_artifact(artifact_id)
     if record is None:
         raise RuntimeError("Artifact insert succeeded but record could not be read back")
+    _record_trust_policy(
+        decision_id=f"policy-artifact-create-{artifact_id}-v{version}",
+        tenant_id=tenant_id,
+        project_id=project_id,
+        subject_ref=artifact_id,
+        action="artifact.create",
+        target=artifact_type,
+        policy_input={
+            "engagement_id": engagement_id,
+            "workstream_id": workstream_id,
+            "owner_department": owner_department,
+            "version": version,
+            "status": status,
+            "content_hash": content_hash,
+            "semantic_fingerprint": semantic_fingerprint,
+        },
+    )
     return record
 
 
 def get_artifact(artifact_id: str) -> Optional[dict]:
     return _get("agency_artifacts", "artifact_id", artifact_id)
+
+
+def ensure_artifact_dependency(artifact_id: str, depends_on_artifact_id: str, relationship: str = "hard") -> dict:
+    with transaction() as db:
+        row = db.execute(
+            f"SELECT artifact_id, depends_on_artifact_id, relationship FROM {table('artifact_dependencies')} WHERE artifact_id = ? AND depends_on_artifact_id = ?",
+            (artifact_id, depends_on_artifact_id),
+        ).fetchone()
+    if row:
+        return normalize_record(row)
+    return add_artifact_dependency(artifact_id, depends_on_artifact_id, relationship)
 
 
 def _dependency_would_cycle(artifact_id: str, depends_on_artifact_id: str) -> bool:
@@ -367,6 +445,15 @@ def add_artifact_dependency(artifact_id: str, depends_on_artifact_id: str, relat
             f"INSERT INTO {table('artifact_dependencies')} (artifact_id, depends_on_artifact_id, relationship, created_at) VALUES (?, ?, ?, ?)",
             (artifact_id, depends_on_artifact_id, relationship, _now()),
         )
+    _record_trust_policy(
+        decision_id=f"policy-artifact-dependency-{artifact_id}-{depends_on_artifact_id}",
+        tenant_id=artifact["tenant_id"],
+        project_id=artifact["project_id"],
+        subject_ref=artifact_id,
+        action="artifact.add_dependency",
+        target=depends_on_artifact_id,
+        policy_input={"relationship": relationship, "engagement_id": artifact["engagement_id"]},
+    )
     return {
         "artifact_id": artifact_id,
         "depends_on_artifact_id": depends_on_artifact_id,
@@ -437,11 +524,244 @@ def propagate_artifact_change(artifact_id: str) -> list[dict]:
                 f"UPDATE {table('agency_artifacts')} SET status = ?, updated_at = ? WHERE artifact_id = ? AND engagement_id = ?",
                 (severity[dependent_id], now, dependent_id, source["engagement_id"]),
             )
+    if severity:
+        _record_trust_policy(
+            decision_id=f"policy-artifact-propagation-{artifact_id}-{hash_payload(severity)}",
+            tenant_id=source["tenant_id"],
+            project_id=source["project_id"],
+            subject_ref=artifact_id,
+            action="artifact.propagate_change",
+            target=source["status"],
+            policy_input={"affected": severity, "engagement_id": source["engagement_id"]},
+        )
 
     return [
         {"artifact_id": dependent_id, "status": severity[dependent_id]}
         for dependent_id in sorted(severity)
     ]
+
+
+def record_artifact_revision(
+    artifact_id: str,
+    *,
+    content_hash: Optional[str] = None,
+    semantic_fingerprint: Optional[str] = None,
+    content_location: Optional[str] = None,
+) -> dict:
+    source = get_artifact(artifact_id)
+    if not source:
+        raise ValueError("Artifact not found")
+
+    next_version = int(source["version"]) + 1
+    changed_version_ref = f"{artifact_id}:v{next_version}"
+    now = _now()
+    with transaction(write=True) as db:
+        db.execute(
+            f"""
+            UPDATE {table('agency_artifacts')}
+            SET version = ?, status = ?, content_hash = COALESCE(?, content_hash),
+                semantic_fingerprint = COALESCE(?, semantic_fingerprint),
+                content_location = COALESCE(?, content_location),
+                updated_at = ?
+            WHERE artifact_id = ?
+            """,
+            (
+                next_version,
+                "draft",
+                content_hash,
+                semantic_fingerprint,
+                content_location,
+                now,
+                artifact_id,
+            ),
+        )
+
+    updated = get_artifact(artifact_id)
+    if updated is None:
+        raise RuntimeError("Artifact revision succeeded but record could not be read back")
+
+    affected = propagate_artifact_change(artifact_id)
+    impacted_ids = [artifact_id, *[item["artifact_id"] for item in affected]]
+
+    from services.langgraph.persistence.approvals import list_approvals_for_subject_refs, mark_approval_stale
+    from services.langgraph.persistence.lineage import create_lineage_remediation
+
+    approvals = list_approvals_for_subject_refs(updated["project_id"], impacted_ids)
+    approvals_by_subject = {approval["subject_ref"]: approval for approval in approvals}
+
+    for impacted_id in impacted_ids:
+        impacted = get_artifact(impacted_id)
+        if not impacted:
+            continue
+        metadata = impacted.get("metadata") or {}
+        approval = approvals_by_subject.get(impacted_id)
+        run_id = metadata.get("protected_run_id") or (approval or {}).get("run_id")
+        approval_id = metadata.get("protected_approval_id") or (approval or {}).get("approval_id")
+        if not run_id:
+            continue
+        if approval_id:
+            mark_approval_stale(
+                approval_id,
+                f"artifact_version_changed:{changed_version_ref}",
+            )
+        create_lineage_remediation(
+            tenant_id=updated["tenant_id"],
+            project_id=updated["project_id"],
+            run_id=run_id,
+            approval_id=approval_id,
+            artifact_id=impacted_id,
+            artifact_version_ref=f"{impacted_id}:v{impacted['version']}",
+            changed_artifact_id=artifact_id,
+            changed_version_ref=changed_version_ref,
+            reason="PROTECTED_ARTIFACT_VERSION_CHANGED",
+            payload={
+                "changed_artifact_id": artifact_id,
+                "changed_version_ref": changed_version_ref,
+                "affected_artifact_id": impacted_id,
+                "affected_artifact_status": impacted["status"],
+            },
+        )
+
+    _record_trust_policy(
+        decision_id=f"policy-artifact-revision-{artifact_id}-v{next_version}",
+        tenant_id=updated["tenant_id"],
+        project_id=updated["project_id"],
+        subject_ref=artifact_id,
+        action="artifact.record_revision",
+        target=changed_version_ref,
+        policy_input={
+            "artifact_id": artifact_id,
+            "version": next_version,
+            "content_hash": content_hash,
+            "semantic_fingerprint": semantic_fingerprint,
+            "affected_artifact_ids": impacted_ids,
+        },
+    )
+    return {
+        "artifact": updated,
+        "changed_version_ref": changed_version_ref,
+        "affected": affected,
+    }
+
+
+def create_or_revise_protected_run_artifact(
+    *,
+    run_id: str,
+    tenant_id: str,
+    project_id: str,
+    approval_id: Optional[str],
+    content_hash: str,
+    synthetic: bool = False,
+) -> dict:
+    engagement_id = f"eng-lineage-{run_id}"
+    artifact_id = f"art-protected-{run_id}"
+    if not get_engagement(engagement_id):
+        create_engagement(
+            engagement_id,
+            tenant_id,
+            project_id,
+            "Protected runtime artifact lineage",
+            "Canonical protected artifact for ambient lineage invalidation",
+            status="active",
+        )
+    artifact = get_artifact(artifact_id)
+    if artifact is None:
+        created = create_artifact(
+            artifact_id,
+            engagement_id,
+            tenant_id,
+            project_id,
+            "campaign_package",
+            "growth",
+            status="approved",
+            content_hash=content_hash,
+            metadata={
+                "protected_run_id": run_id,
+                "protected_approval_id": approval_id,
+                "canonical_protected_artifact": True,
+                **({"synthetic_protected_artifact": True} if synthetic else {}),
+            },
+        )
+        return {
+            "artifact": created,
+            "changed_version_ref": f"{artifact_id}:v{created['version']}",
+            "affected": [],
+            "created": True,
+            "changed": True,
+        }
+    if artifact.get("content_hash") == content_hash:
+        return {
+            "artifact": artifact,
+            "changed_version_ref": f"{artifact_id}:v{artifact['version']}",
+            "affected": [],
+            "created": False,
+            "changed": False,
+        }
+    revised = record_artifact_revision(artifact_id, content_hash=content_hash)
+    revised["created"] = False
+    revised["changed"] = True
+    return revised
+
+
+def create_or_revise_artifact(
+    *,
+    artifact_id: str,
+    engagement_id: str,
+    tenant_id: str,
+    project_id: str,
+    artifact_type: str,
+    owner_department: str,
+    content_hash: str,
+    content_location: Optional[str] = None,
+    semantic_fingerprint: Optional[str] = None,
+    status_on_create: str = "draft",
+    subtype: Optional[str] = None,
+    metadata: Optional[dict] = None,
+) -> dict:
+    artifact = get_artifact(artifact_id)
+    if artifact is None:
+        created = create_artifact(
+            artifact_id,
+            engagement_id,
+            tenant_id,
+            project_id,
+            artifact_type,
+            owner_department,
+            subtype=subtype,
+            status=status_on_create,
+            content_hash=content_hash,
+            content_location=content_location,
+            semantic_fingerprint=semantic_fingerprint,
+            metadata=metadata,
+        )
+        return {
+            "artifact": created,
+            "changed_version_ref": f"{artifact_id}:v{created['version']}",
+            "affected": [],
+            "created": True,
+            "changed": True,
+        }
+    if (
+        artifact.get("content_hash") == content_hash
+        and artifact.get("content_location") == content_location
+        and artifact.get("semantic_fingerprint") == semantic_fingerprint
+    ):
+        return {
+            "artifact": artifact,
+            "changed_version_ref": f"{artifact_id}:v{artifact['version']}",
+            "affected": [],
+            "created": False,
+            "changed": False,
+        }
+    revised = record_artifact_revision(
+        artifact_id,
+        content_hash=content_hash,
+        semantic_fingerprint=semantic_fingerprint,
+        content_location=content_location,
+    )
+    revised["created"] = False
+    revised["changed"] = True
+    return revised
 
 
 def _assert_engagement_scope(engagement_id: str, tenant_id: str, project_id: str) -> None:

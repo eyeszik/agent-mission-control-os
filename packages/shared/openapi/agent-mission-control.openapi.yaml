@@ -85,6 +85,86 @@ paths:
         '404': { description: Run not found }
         '409': { description: Run state or approval does not permit delivery }
         '503': { description: Authentication provider or runtime configuration unavailable }
+  /runtime/runs/{run_id}/remediation/retry:
+    post:
+      summary: Retry a blocked run from an open recovery case
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recovery_id]
+              properties:
+                recovery_id: { type: string }
+      responses:
+        '200':
+          description: Canonical run remediation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunRemediationResponse'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Run or recovery case belongs to another authorization scope }
+        '404': { description: Run or recovery case not found }
+        '409': { description: Run is not retryable, recovery is not open, or idempotency conflict }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+  /runtime/runs/{run_id}/remediation/compensate:
+    post:
+      summary: Compensate an ambiguous external-result recovery case
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recovery_id]
+              properties:
+                recovery_id: { type: string }
+      responses:
+        '200':
+          description: Canonical run remediation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunRemediationResponse'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Run or recovery case belongs to another authorization scope }
+        '404': { description: Run or recovery case not found }
+        '409': { description: Recovery is not compensatable or idempotency conflict }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+  /runtime/runs/{run_id}/remediation/regenerate-approval:
+    post:
+      summary: Regenerate a stale approval chain for a protected run artifact
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approval_id: { type: string, format: uuid, nullable: true }
+      responses:
+        '200':
+          description: Canonical run remediation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunRemediationResponse'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Run or approval belongs to another authorization scope }
+        '404': { description: Run or approval not found }
+        '409': { description: Approval is not stale or idempotency conflict }
+        '503': { description: Authentication provider or runtime configuration unavailable }
   /approvals:
     get:
       summary: List pending approvals for the authenticated tenant
@@ -456,9 +536,17 @@ components:
         project_id: { type: string }
         reason: { type: string }
         confidence: { type: number, nullable: true }
-        status: { type: string, enum: [pending, resolved] }
+        status: { type: string, enum: [pending, resolved, stale] }
         reviewer: { type: string, nullable: true }
         decision: { type: string, enum: [approve, reject], nullable: true }
+        subject_type: { type: string, nullable: true }
+        subject_ref: { type: string, nullable: true }
+        subject_version_ref: { type: string, nullable: true }
+        subject_hash: { type: string, nullable: true }
+        authority_ref: { type: string, nullable: true }
+        policy_version: { type: string, nullable: true }
+        stale_reason: { type: string, nullable: true }
+        staled_at: { type: string, nullable: true }
         created_at: { type: string }
         decided_at: { type: string, nullable: true }
     ApprovalDecision:
@@ -523,7 +611,10 @@ components:
         project_id: { type: string }
         sequence: { type: integer, minimum: 0 }
         schema_version: { type: string, enum: [run-event-v2] }
-        event_type: { type: string, enum: [node_complete, node_error, artifact_generated, approval_requested] }
+        event_type:
+          type: string
+          enum:
+            [node_complete, node_error, artifact_generated, approval_requested, approval_decided, recovery_case_updated, outbox_updated, run_remediation_updated]
         node_id: { type: string, nullable: true }
         observed_at: { type: string, format: date-time }
         started_at: { type: string, format: date-time, nullable: true }
@@ -553,6 +644,38 @@ components:
         occurred_at: { type: string, format: date-time }
         properties: { type: object, additionalProperties: true }
         schema_version: { type: string, enum: [analytics-event-v1] }
+    RecoveryCaseSummary:
+      type: object
+      required: [recovery_id, tenant_id, project_id, operation_id, reason, status, created_at, evidence_refs]
+      properties:
+        recovery_id: { type: string }
+        tenant_id: { type: string }
+        project_id: { type: string }
+        operation_id: { type: string }
+        reason:
+          type: string
+          enum: [EXECUTION_WITHOUT_OBSERVATION, OBSERVATION_MISMATCH, AMBIGUOUS_EXTERNAL_RESULT, IDEMPOTENCY_CONFLICT]
+        execution_ref: { type: string, nullable: true }
+        observation_ref: { type: string, nullable: true }
+        idempotency_key: { type: string, nullable: true }
+        status: { type: string, enum: [OPEN, RECONCILED, COMPENSATED, ESCALATED] }
+        evidence_refs: { type: array, items: { type: string } }
+        created_at: { type: string, format: date-time }
+        resolved_at: { type: string, format: date-time, nullable: true }
+    RunRemediationResponse:
+      type: object
+      required: [action, run]
+      properties:
+        action:
+          type: string
+          enum: [retry_blocked_execution, compensate_ambiguous_result, regenerate_approval]
+        run: { $ref: '#/components/schemas/AgencyRun' }
+        recovery_case:
+          allOf: [{ $ref: '#/components/schemas/RecoveryCaseSummary' }]
+          nullable: true
+        pending_approval:
+          allOf: [{ $ref: '#/components/schemas/ApprovalRequest' }]
+          nullable: true
     SkillRegistryEntry:
       type: object
       required: [skill_id, capability, description, available]

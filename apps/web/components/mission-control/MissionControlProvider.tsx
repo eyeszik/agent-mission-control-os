@@ -9,21 +9,62 @@ import { useApprovalStore } from '../../lib/stores/approvalStore';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { useRunStore } from '../../lib/stores/runStore';
 
-const APPROVALS_POLL_INTERVAL_MS = 4000;
+declare global {
+  interface Window {
+    __amcRunStore?: typeof useRunStore;
+    __amcApprovalStore?: typeof useApprovalStore;
+  }
+}
 
 export function MissionControlProvider() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
+  const upsertApproval = useApprovalStore((state) => state.upsertApproval);
+  const removeApproval = useApprovalStore((state) => state.removeApproval);
   const setApprovals = useApprovalStore((state) => state.setApprovals);
   const sseRef = useRef<SSEClient | null>(null);
 
   useEffect(() => {
+    window.__amcRunStore = useRunStore;
+    window.__amcApprovalStore = useApprovalStore;
+    return () => {
+      delete window.__amcRunStore;
+      delete window.__amcApprovalStore;
+    };
+  }, []);
+
+  useEffect(() => {
     const handleEvent = (event: RunEvent) => {
-      if (!event.node_id) return;
-      if (event.event_type === 'node_complete') {
+      if (event.event_type === 'node_complete' && event.node_id) {
         updateNodeStatus(event.run_id, event.node_id, 'completed');
-      } else if (event.event_type === 'node_error') {
+      } else if (event.event_type === 'node_error' && event.node_id) {
         updateNodeStatus(event.run_id, event.node_id, 'failed');
+      } else if (event.event_type === 'approval_requested') {
+        const payload = event.safe_payload as Record<string, unknown>;
+        if (payload.approval_id && typeof payload.approval_id === 'string') {
+          upsertApproval({
+            approval_id: payload.approval_id,
+            run_id: event.run_id,
+            tenant_id: event.tenant_id,
+            project_id: event.project_id,
+            reason: typeof payload.reason === 'string' ? payload.reason : 'Approval requested',
+            confidence: typeof payload.confidence === 'number' ? payload.confidence : null,
+            status: 'pending',
+            reviewer: null,
+            decision: null,
+            created_at: event.observed_at,
+            decided_at: null,
+          });
+        }
+        globalBus.emit('lifecycle_event_received', event);
+      } else if (event.event_type === 'approval_decided') {
+        const payload = event.safe_payload as Record<string, unknown>;
+        if (payload.approval_id && typeof payload.approval_id === 'string') {
+          removeApproval(payload.approval_id);
+        }
+        globalBus.emit('lifecycle_event_received', event);
+      } else if (['artifact_generated', 'recovery_case_updated', 'outbox_updated', 'run_remediation_updated'].includes(event.event_type)) {
+        globalBus.emit('lifecycle_event_received', event);
       }
     };
 
@@ -47,27 +88,20 @@ export function MissionControlProvider() {
     };
   }, [activeRunId]);
 
-  // Approval rows are not yet emitted as domain events, so poll the
-  // authenticated tenant-scoped endpoint independently from run-event replay.
   useEffect(() => {
+    if (!activeRunId) return;
     let cancelled = false;
-
-    const poll = async () => {
-      try {
-        const approvals = await getPendingApprovals();
+    getPendingApprovals()
+      .then((approvals) => {
         if (!cancelled) setApprovals(approvals);
-      } catch (err) {
-        console.warn('Approval poll failed', err);
-      }
-    };
-
-    poll();
-    const interval = setInterval(poll, APPROVALS_POLL_INTERVAL_MS);
+      })
+      .catch((err) => {
+        console.warn('Initial approval sync failed', err);
+      });
     return () => {
       cancelled = true;
-      clearInterval(interval);
     };
-  }, [setApprovals]);
+  }, [activeRunId, setApprovals]);
 
   return null;
 }
