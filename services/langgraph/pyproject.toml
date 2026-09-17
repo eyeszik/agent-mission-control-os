@@ -26,4 +26,4 @@ dependencies = [
 dev = ["pytest>=8.2.0"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["app", "api", "graph", "persistence", "quality", "security", "integrations"]
+packages = ["app", "api", "agency", "graph", "persistence", "quality", "security", "integrations"]

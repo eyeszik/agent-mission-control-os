@@ -66,7 +66,7 @@
     },
     {
       "path": "packages/shared/openapi/agent-mission-control.openapi.yaml",
-      "git_blob_sha": "3d17a87620d977ca28d71384d9f2f7e78dc5764f"
+      "git_blob_sha": "7e533345632fbe457aa2267c51d6fad741f159c7"
     },
     {
       "path": "packages/shared/src/schemas/agency.ts",
@@ -153,8 +153,12 @@
       "git_blob_sha": "25651d86cdf9d182897a63138c59f97b5aad8812"
     },
     {
+      "path": "services/langgraph/agency/skills/dispatcher.py",
+      "git_blob_sha": "b56e656dfcee86cd70f715dacc5ea50c256386f6"
+    },
+    {
       "path": "services/langgraph/api/routes/operations.py",
-      "git_blob_sha": "79958e19104b9b4a32465bfcd92eab05aadce824"
+      "git_blob_sha": "f8ef2252ee3a779157ac3ebb68229dfd30b0e23c"
     },
     {
       "path": "services/langgraph/app/config.py",
@@ -214,7 +218,7 @@
     },
     {
       "path": "services/langgraph/pyproject.toml",
-      "git_blob_sha": "cb5fff320a07c8d95b5752412f20a60f8aa31d20"
+      "git_blob_sha": "d1b6adc9497289de5ac1ab7400c6b407a7fcecf0"
     },
     {
       "path": "services/langgraph/security/auth.py",

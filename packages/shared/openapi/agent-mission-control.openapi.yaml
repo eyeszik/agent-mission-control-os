@@ -553,9 +553,23 @@ components:
         occurred_at: { type: string, format: date-time }
         properties: { type: object, additionalProperties: true }
         schema_version: { type: string, enum: [analytics-event-v1] }
+    SkillRegistryEntry:
+      type: object
+      required: [skill_id, capability, description, available]
+      properties:
+        skill_id: { type: string }
+        capability: { type: string }
+        description: { type: string }
+        available: { type: boolean, nullable: true }
+    SkillRegistrySnapshot:
+      type: object
+      required: [skill_runtime_version, skills]
+      properties:
+        skill_runtime_version: { type: string }
+        skills: { type: array, items: { $ref: '#/components/schemas/SkillRegistryEntry' } }
     OperationsCapabilities:
       type: object
-      required: [tenant_id, publication, paid_media, analytics]
+      required: [tenant_id, publication, paid_media, analytics, skills]
       properties:
         tenant_id: { type: string }
         publication:
@@ -576,6 +590,7 @@ components:
           properties:
             source: { type: string, enum: [amc_first_party] }
             ingestion: { type: boolean, enum: [true] }
+        skills: { $ref: '#/components/schemas/SkillRegistrySnapshot' }
     PublicationPreviewRequest:
       type: object
       required: [run_id, provider, payload]
