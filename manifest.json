@@ -86,7 +86,7 @@
     },
     {
       "path": "packages/shared/src/schemas/ontology.ts",
-      "git_blob_sha": "6b1bd6cfd0486e6ccf7e3340a9f5d58228380e8f"
+      "git_blob_sha": "44af494d836c8ca40c91a22f7a2ee4746b308324"
     },
     {
       "path": "pnpm-lock.yaml",
@@ -126,7 +126,7 @@
     },
     {
       "path": "services/langgraph/agency/kernel/ontology.py",
-      "git_blob_sha": "8a950bdee37173e2586508bf943cc5fe29c52aef"
+      "git_blob_sha": "a220e6ce6e6a0d86813ddf9be06e414a37c0660b"
     },
     {
       "path": "services/langgraph/agency/kernel/registry.py",
@@ -134,7 +134,7 @@
     },
     {
       "path": "services/langgraph/agency/kernel/roles.py",
-      "git_blob_sha": "1c47f64fc2b190c49c152b98ce486887bfcf605f"
+      "git_blob_sha": "241f7aae6b203af005f817c0e921ab47165a0218"
     },
     {
       "path": "services/langgraph/api/routes/agency.py",
@@ -226,7 +226,7 @@
     },
     {
       "path": "services/langgraph/tests/test_agency_ontology.py",
-      "git_blob_sha": "feb04b084c405cc6bd5fc8a04cb360609105bc98"
+      "git_blob_sha": "d536b1a90498fc80b38b27716cbb345741f92b14"
     },
     {
       "path": "services/langgraph/tests/test_delivery_gate.py",
