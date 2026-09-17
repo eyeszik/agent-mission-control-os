@@ -10,3 +10,6 @@
 ## 2026-08-23 - Zustand List Item Subscription Optimization
 **Learning:** Rendering lists or graphs from a Zustand store dictionary directly in a parent component (e.g., subscribing to the entire `statuses` object) causes the parent and all siblings to re-render whenever a single item updates.
 **Action:** Extract list items into individual child components that subscribe directly to their specific keys in the Zustand store to prevent O(N) parent re-renders.
+## 2026-08-24 - Zustand List Item Selection Optimization
+**Learning:** Re-rendering an entire list component solely because the selected item ID changed in a Zustand store causes O(N) re-renders, wasting CPU cycles on items whose state hasn't changed.
+**Action:** Extract list items into their own components and subscribe them directly to a boolean Zustand selector (`state.selectedId === item.id`). This ensures only the newly selected and previously selected items re-render.
