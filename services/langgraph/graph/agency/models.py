@@ -45,6 +45,7 @@ class QAReport(BaseModel):
     brand_safety_passed: bool
     flagged_terms: List[str] = Field(default_factory=list)
     quality_metrics: Dict[str, Any] = Field(default_factory=dict)
+    brand_compliance: Dict[str, Any] = Field(default_factory=dict)
     notes: str
     release_blocked: bool = False
     degradation_reasons: List[str] = Field(default_factory=list)
