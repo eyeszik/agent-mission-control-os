@@ -272,6 +272,12 @@ def hitl_gate_node(state: GraphState) -> dict:
         reason = "Campaign package ready for human review before external publish."
     else:
         reason = f"Brand-safety QA flagged terms: {', '.join(qa_report.get('flagged_terms', []))}. Human review required before publish."
+    # Brand safety is advisory at the delivery guard because the reviewer is the
+    # authority (see _delivery_context). That only holds if the reviewer is told
+    # what the advisory checks found, so they travel with the approval request.
+    advisories = (qa_report.get("brand_compliance") or {}).get("advisories") or []
+    if advisories:
+        reason = f"{reason} Advisory findings: {' '.join(advisories)}"
     approval = create_approval_request(
         run_id=str(run.id),
         tenant_id=run.tenant_id,

@@ -18,7 +18,9 @@ import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Sequence, Tuple
 
-ENGINE_VERSION = "brand-compliance/v1"
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+ENGINE_VERSION = "brand-compliance/v2"
 
 READABILITY_GRADE_MIN = 6.0
 READABILITY_GRADE_MAX = 9.0
@@ -26,6 +28,15 @@ READABILITY_GRADE_MAX = 9.0
 # Below this, a Flesch-Kincaid score is arithmetic noise rather than a
 # readability signal, so it is reported as NOT_MEASURED instead of a number.
 READABILITY_MIN_WORDS = 20
+
+# Compound-polarity band. The upper bound is the operative one: copy scoring
+# above it reads as manufactured euphoria rather than a claim about the
+# product, which is the register regulators and readers both distrust.
+SENTIMENT_MIN = 0.15
+SENTIMENT_MAX = 0.65
+SENTIMENT_MIN_WORDS = 3
+
+_SENTIMENT_ANALYZER = SentimentIntensityAnalyzer()
 
 _NEGATORS = frozenset(
     {
@@ -154,6 +165,13 @@ def flesch_kincaid_grade(text: str) -> float | None:
     return round(grade, 2)
 
 
+def sentiment_polarity(text: str) -> float | None:
+    """VADER compound polarity, or None when there is too little text to score."""
+    if len(_WORD_RE.findall(text or "")) < SENTIMENT_MIN_WORDS:
+        return None
+    return round(_SENTIMENT_ANALYZER.polarity_scores(text)["compound"], 3)
+
+
 def _is_negated(text: str, match_start: int) -> bool:
     preceding = _WORD_RE.findall(text[:match_start].lower())
     window = preceding[-_NEGATION_WINDOW_WORDS:]
@@ -210,6 +228,22 @@ def evaluate_brand_compliance(
             "target_grade_max": READABILITY_GRADE_MAX,
         }
 
+    polarity = sentiment_polarity(source)
+    if polarity is None:
+        sentiment: Dict[str, Any] = {
+            "compound": "NOT_MEASURED",
+            "within_target_band": "NOT_MEASURED",
+            "target_min": SENTIMENT_MIN,
+            "target_max": SENTIMENT_MAX,
+        }
+    else:
+        sentiment = {
+            "compound": polarity,
+            "within_target_band": SENTIMENT_MIN <= polarity <= SENTIMENT_MAX,
+            "target_min": SENTIMENT_MIN,
+            "target_max": SENTIMENT_MAX,
+        }
+
     # Normalized and deduplicated for stable aggregation across runs; the
     # verbatim match stays available on each violation for human reviewers.
     flagged_terms: List[str] = []
@@ -228,6 +262,17 @@ def evaluate_brand_compliance(
             f"Readability grade {grade} is outside the target band "
             f"{READABILITY_GRADE_MIN}-{READABILITY_GRADE_MAX}."
         )
+    if sentiment["within_target_band"] is False:
+        if polarity > SENTIMENT_MAX:
+            advisories.append(
+                f"Sentiment polarity {polarity} exceeds {SENTIMENT_MAX}; copy reads as "
+                "overstated enthusiasm rather than a substantiated claim."
+            )
+        else:
+            advisories.append(
+                f"Sentiment polarity {polarity} is below {SENTIMENT_MIN}; copy reads as "
+                "flat or negative for a marketing context."
+            )
 
     return {
         "engine_version": ENGINE_VERSION,
@@ -236,8 +281,6 @@ def evaluate_brand_compliance(
         "violations": violations,
         "missing_disclaimers": missing_disclaimers,
         "readability": readability,
-        # No sentiment lexicon or model is installed, so a polarity score here
-        # would be invented rather than measured.
-        "sentiment_polarity": "NOT_MEASURED",
+        "sentiment": sentiment,
         "advisories": advisories,
     }

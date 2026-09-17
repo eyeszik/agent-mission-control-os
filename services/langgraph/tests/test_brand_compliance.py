@@ -5,8 +5,10 @@ from __future__ import annotations
 from services.langgraph.quality.brand_safety import (
     READABILITY_GRADE_MAX,
     READABILITY_GRADE_MIN,
+    SENTIMENT_MAX,
     evaluate_brand_compliance,
     flesch_kincaid_grade,
+    sentiment_polarity,
 )
 
 
@@ -139,9 +141,37 @@ def test_dense_prose_is_flagged_as_advisory_only():
     assert any("Readability grade" in note for note in result["advisories"])
 
 
-def test_sentiment_is_reported_as_not_measured():
-    result = evaluate_brand_compliance("Anything at all.")
-    assert result["sentiment_polarity"] == "NOT_MEASURED"
+def test_measured_business_copy_sits_inside_the_sentiment_band():
+    result = evaluate_brand_compliance(
+        "Our team helps small shops plan a seasonal campaign."
+    )
+    assert isinstance(result["sentiment"]["compound"], float)
+    assert result["sentiment"]["within_target_band"] is True
+
+
+def test_manufactured_euphoria_exceeds_the_sentiment_band():
+    result = evaluate_brand_compliance(
+        "AMAZING!!! The most incredible life-changing deal EVER!!! Unbelievable joy!"
+    )
+    assert result["sentiment"]["compound"] > SENTIMENT_MAX
+    assert result["sentiment"]["within_target_band"] is False
+    assert any("exceeds" in note for note in result["advisories"])
+
+
+def test_sentiment_band_breach_is_advisory_not_a_failure():
+    result = evaluate_brand_compliance("Wonderful! Fantastic! Perfect! Brilliant! Superb!")
+    assert result["sentiment"]["within_target_band"] is False
+    assert result["passed"] is True
+
+
+def test_sentiment_not_measured_on_trivial_text():
+    result = evaluate_brand_compliance("Hello.")
+    assert result["sentiment"]["compound"] == "NOT_MEASURED"
+    assert result["sentiment"]["within_target_band"] == "NOT_MEASURED"
+
+
+def test_sentiment_polarity_returns_none_below_word_floor():
+    assert sentiment_polarity("Hi.") is None
 
 
 def test_flesch_kincaid_returns_none_below_word_floor():

@@ -79,6 +79,13 @@ export const BrandComplianceReadabilitySchema = z.object({
   target_grade_max: z.number(),
 });
 
+export const BrandComplianceSentimentSchema = z.object({
+  compound: z.union([z.number(), z.literal('NOT_MEASURED')]),
+  within_target_band: z.union([z.boolean(), z.literal('NOT_MEASURED')]),
+  target_min: z.number(),
+  target_max: z.number(),
+});
+
 export const BrandComplianceSchema = z.object({
   engine_version: z.string(),
   passed: z.boolean(),
@@ -86,7 +93,7 @@ export const BrandComplianceSchema = z.object({
   violations: z.array(BrandComplianceViolationSchema).default([]),
   missing_disclaimers: z.array(z.string()).default([]),
   readability: BrandComplianceReadabilitySchema,
-  sentiment_polarity: z.literal('NOT_MEASURED'),
+  sentiment: BrandComplianceSentimentSchema,
   advisories: z.array(z.string()).default([]),
 });
 
