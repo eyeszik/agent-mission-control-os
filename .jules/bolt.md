@@ -13,3 +13,6 @@
 ## 2026-08-24 - Zustand List Item Selection Optimization
 **Learning:** Re-rendering an entire list component solely because the selected item ID changed in a Zustand store causes O(N) re-renders, wasting CPU cycles on items whose state hasn't changed.
 **Action:** Extract list items into their own components and subscribe them directly to a boolean Zustand selector (`state.selectedId === item.id`). This ensures only the newly selected and previously selected items re-render.
+## 2026-08-25 - Expensive derived state in render
+**Learning:** Re-calculating expensive arrays, slices, maps, and filters inside a component render function on every update can cause unnecessary garbage collection and performance degradation.
+**Action:** Wrap complex map/filter chains and array construction logic in a `useMemo` block with appropriate dependencies to avoid re-evaluating them when unrelated state updates trigger a re-render.
