@@ -209,17 +209,6 @@ export function ConsequentialLifecyclePanel() {
     }
   };
 
-  if (!activeRunId || !trust || !run) {
-    return (
-      <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-3 min-h-[300px]">
-        <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Consequential Lifecycle</span>
-        <div className="flex-1 border border-zinc-800/40 rounded-lg p-3 flex items-center justify-center opacity-40">
-          <p className="text-xs text-zinc-600 font-mono">Awaiting run-scoped trust state...</p>
-        </div>
-      </div>
-    );
-  }
-
   const {
     approvalRows,
     outboxRows,
@@ -235,6 +224,15 @@ export function ConsequentialLifecyclePanel() {
     openObligationsCount,
     hookGapsCount,
   } = useMemo(() => {
+    if (!trust || !run) {
+      return {
+        approvalRows: [], outboxRows: [], recoveryRows: [], auditRows: [], staleApprovals: [],
+        activeRunLineageRemediations: [], activeRunObligations: [], retryableRecoveries: [],
+        compensatableRecoveries: [], openLineageCount: 0, resolvedLineageCount: 0,
+        openObligationsCount: 0, hookGapsCount: 0,
+      };
+    }
+
     const approvalRows = trust.recent_policy_decisions.slice(0, 3).map((decision) => ({
       label: decision.action,
       value: `${decision.target} · ${decision.effect}`,
@@ -268,23 +266,17 @@ export function ConsequentialLifecyclePanel() {
 
     const staleApprovals = (run.approvals ?? []).filter((approval) => approval.status === 'stale');
 
-    let openLineageCount = 0;
-    let resolvedLineageCount = 0;
-    const activeRunLineageRemediations = trust.recent_lineage_remediations.filter((item) => {
-      if (item.run_id !== run.run_id) return false;
-      if (item.status === 'OPEN') openLineageCount++;
-      else resolvedLineageCount++;
-      return true;
-    });
+    const activeRunLineageRemediations = trust.recent_lineage_remediations.filter(
+      (item) => item.run_id === run.run_id
+    );
+    const openLineageCount = activeRunLineageRemediations.filter((item) => item.status === 'OPEN').length;
+    const resolvedLineageCount = activeRunLineageRemediations.length - openLineageCount;
 
-    let openObligationsCount = 0;
-    let hookGapsCount = 0;
-    const activeRunObligations = trust.recent_invalidation_obligations.filter((item) => {
-      if (item.run_id !== run.run_id) return false;
-      if (item.state === 'OPEN') openObligationsCount++;
-      else if (item.state === 'HOOK_GAP') hookGapsCount++;
-      return true;
-    });
+    const activeRunObligations = trust.recent_invalidation_obligations.filter(
+      (item) => item.run_id === run.run_id
+    );
+    const openObligationsCount = activeRunObligations.filter((item) => item.state === 'OPEN').length;
+    const hookGapsCount = activeRunObligations.filter((item) => item.state === 'HOOK_GAP').length;
 
     const retryableRecoveries = trust.recent_recovery_cases.filter(
       (recovery) =>
@@ -317,6 +309,17 @@ export function ConsequentialLifecyclePanel() {
       hookGapsCount,
     };
   }, [trust, run]);
+
+  if (!activeRunId || !trust || !run) {
+    return (
+      <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-3 min-h-[300px]">
+        <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Consequential Lifecycle</span>
+        <div className="flex-1 border border-zinc-800/40 rounded-lg p-3 flex items-center justify-center opacity-40">
+          <p className="text-xs text-zinc-600 font-mono">Awaiting run-scoped trust state...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-4 min-h-[300px]">
