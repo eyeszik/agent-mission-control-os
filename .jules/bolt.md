@@ -13,3 +13,12 @@
 ## 2026-08-24 - Zustand List Item Selection Optimization
 **Learning:** Re-rendering an entire list component solely because the selected item ID changed in a Zustand store causes O(N) re-renders, wasting CPU cycles on items whose state hasn't changed.
 **Action:** Extract list items into their own components and subscribe them directly to a boolean Zustand selector (`state.selectedId === item.id`). This ensures only the newly selected and previously selected items re-render.
+## 2026-08-25 - Expensive derived state in render
+**Learning:** Re-calculating expensive arrays, slices, maps, and filters inside a component render function on every update can cause unnecessary garbage collection and performance degradation.
+**Action:** Wrap complex map/filter chains and array construction logic in a `useMemo` block with appropriate dependencies to avoid re-evaluating them when unrelated state updates trigger a re-render.
+## 2026-08-25 - Rules of Hooks violation with useMemo
+**Learning:** Placing hooks like `useMemo` after an early return (e.g. `if (!activeRunId) return <div/>;`) violates React's Rules of Hooks because hooks must be called in the exact same order on every render.
+**Action:** Always declare all hooks at the top level of the functional component before any conditional early returns. Handle `null` or `undefined` state within the `useMemo` computation logic itself.
+## 2026-08-25 - Using array functions for side effects
+**Learning:** Using `.filter()` (or `.map()`) merely to execute a side-effect block (like incrementing external loop counters) is a functional anti-pattern and violates pure function expectations in React components, which can confuse linters and future developers, and might trigger bugs if the render aborts or repeats.
+**Action:** Always compute derived variables using pure mappings or reductions. Calculate array lengths independently, or use `.reduce()` if traversing complex aggregations in a single pass.

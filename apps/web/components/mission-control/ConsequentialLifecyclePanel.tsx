@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import type { AgencyRun, TrustSnapshot } from '@amc/shared';
 import { getAgencyRun } from '../../lib/api/agency';
 import {
@@ -209,6 +209,107 @@ export function ConsequentialLifecyclePanel() {
     }
   };
 
+  const {
+    approvalRows,
+    outboxRows,
+    recoveryRows,
+    auditRows,
+    staleApprovals,
+    activeRunLineageRemediations,
+    activeRunObligations,
+    retryableRecoveries,
+    compensatableRecoveries,
+    openLineageCount,
+    resolvedLineageCount,
+    openObligationsCount,
+    hookGapsCount,
+  } = useMemo(() => {
+    if (!trust || !run) {
+      return {
+        approvalRows: [], outboxRows: [], recoveryRows: [], auditRows: [], staleApprovals: [],
+        activeRunLineageRemediations: [], activeRunObligations: [], retryableRecoveries: [],
+        compensatableRecoveries: [], openLineageCount: 0, resolvedLineageCount: 0,
+        openObligationsCount: 0, hookGapsCount: 0,
+      };
+    }
+
+    const approvalRows = trust.recent_policy_decisions.slice(0, 3).map((decision) => ({
+      label: decision.action,
+      value: `${decision.target} · ${decision.effect}`,
+      tone: (decision.target === 'reject' ? 'danger' : decision.target === 'approve' ? 'success' : 'default') as RowTone,
+    }));
+
+    const outboxRows = trust.recent_outbox_messages.slice(0, 3).map((message) => ({
+      label: message.topic,
+      value: `${message.status} · attempt ${message.attempts}`,
+      tone: (
+        message.status === 'DELIVERED'
+          ? 'success'
+          : message.status === 'FAILED'
+            ? 'danger'
+            : message.status === 'CLAIMED'
+              ? 'warn'
+              : 'default'
+      ) as RowTone,
+    }));
+
+    const recoveryRows = trust.recent_recovery_cases.slice(0, 3).map((recovery) => ({
+      label: recovery.reason,
+      value: recovery.status,
+      tone: (recovery.status === 'OPEN' ? 'warn' : recovery.status === 'ESCALATED' ? 'danger' : 'success') as RowTone,
+    }));
+
+    const auditRows = trust.recent_audit_events.slice(0, 4).map((event) => ({
+      label: `#${event.seq}`,
+      value: event.event_type,
+    }));
+
+    const staleApprovals = (run.approvals ?? []).filter((approval) => approval.status === 'stale');
+
+    const activeRunLineageRemediations = trust.recent_lineage_remediations.filter(
+      (item) => item.run_id === run.run_id
+    );
+    const openLineageCount = activeRunLineageRemediations.filter((item) => item.status === 'OPEN').length;
+    const resolvedLineageCount = activeRunLineageRemediations.length - openLineageCount;
+
+    const activeRunObligations = trust.recent_invalidation_obligations.filter(
+      (item) => item.run_id === run.run_id
+    );
+    const openObligationsCount = activeRunObligations.filter((item) => item.state === 'OPEN').length;
+    const hookGapsCount = activeRunObligations.filter((item) => item.state === 'HOOK_GAP').length;
+
+    const retryableRecoveries = trust.recent_recovery_cases.filter(
+      (recovery) =>
+        recovery.status === 'OPEN' &&
+        recovery.reason !== 'AMBIGUOUS_EXTERNAL_RESULT' &&
+        recovery.execution_ref === run.run_id &&
+        run.status === 'failed'
+    );
+
+    const compensatableRecoveries = trust.recent_recovery_cases.filter(
+      (recovery) =>
+        recovery.status === 'OPEN' &&
+        recovery.reason === 'AMBIGUOUS_EXTERNAL_RESULT' &&
+        recovery.execution_ref === run.run_id
+    );
+
+    return {
+      approvalRows,
+      outboxRows,
+      recoveryRows,
+      auditRows,
+      staleApprovals,
+      activeRunLineageRemediations,
+      activeRunObligations,
+      retryableRecoveries,
+      compensatableRecoveries,
+      openLineageCount,
+      resolvedLineageCount,
+      openObligationsCount,
+      hookGapsCount,
+    };
+  }, [trust, run]);
+
   if (!activeRunId || !trust || !run) {
     return (
       <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-3 min-h-[300px]">
@@ -219,54 +320,6 @@ export function ConsequentialLifecyclePanel() {
       </div>
     );
   }
-
-  const approvalRows = trust.recent_policy_decisions.slice(0, 3).map((decision) => ({
-    label: decision.action,
-    value: `${decision.target} · ${decision.effect}`,
-    tone: (decision.target === 'reject' ? 'danger' : decision.target === 'approve' ? 'success' : 'default') as RowTone,
-  }));
-
-  const outboxRows = trust.recent_outbox_messages.slice(0, 3).map((message) => ({
-    label: message.topic,
-    value: `${message.status} · attempt ${message.attempts}`,
-    tone: (
-      message.status === 'DELIVERED'
-        ? 'success'
-        : message.status === 'FAILED'
-          ? 'danger'
-          : message.status === 'CLAIMED'
-            ? 'warn'
-            : 'default'
-    ) as RowTone,
-  }));
-
-  const recoveryRows = trust.recent_recovery_cases.slice(0, 3).map((recovery) => ({
-    label: recovery.reason,
-    value: recovery.status,
-    tone: (recovery.status === 'OPEN' ? 'warn' : recovery.status === 'ESCALATED' ? 'danger' : 'success') as RowTone,
-  }));
-
-  const auditRows = trust.recent_audit_events.slice(0, 4).map((event) => ({
-    label: `#${event.seq}`,
-    value: event.event_type,
-  }));
-
-  const staleApprovals = (run.approvals ?? []).filter((approval) => approval.status === 'stale');
-  const activeRunLineageRemediations = trust.recent_lineage_remediations.filter((item) => item.run_id === run.run_id);
-  const activeRunObligations = trust.recent_invalidation_obligations.filter((item) => item.run_id === run.run_id);
-  const retryableRecoveries = trust.recent_recovery_cases.filter(
-    (recovery) =>
-      recovery.status === 'OPEN' &&
-      recovery.reason !== 'AMBIGUOUS_EXTERNAL_RESULT' &&
-      recovery.execution_ref === run.run_id &&
-      run.status === 'failed'
-  );
-  const compensatableRecoveries = trust.recent_recovery_cases.filter(
-    (recovery) =>
-      recovery.status === 'OPEN' &&
-      recovery.reason === 'AMBIGUOUS_EXTERNAL_RESULT' &&
-      recovery.execution_ref === run.run_id
-  );
 
   return (
     <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-4 min-h-[300px]">
@@ -284,8 +337,8 @@ export function ConsequentialLifecyclePanel() {
         <Section
           title="Lineage Remediation Queue"
           rows={[
-            { label: 'open queue', value: String(activeRunLineageRemediations.filter((item) => item.status === 'OPEN').length), tone: activeRunLineageRemediations.some((item) => item.status === 'OPEN') ? 'warn' : 'default' },
-            { label: 'resolved queue', value: String(activeRunLineageRemediations.filter((item) => item.status !== 'OPEN').length), tone: activeRunLineageRemediations.some((item) => item.status !== 'OPEN') ? 'success' : 'default' },
+            { label: 'open queue', value: String(openLineageCount), tone: openLineageCount > 0 ? 'warn' : 'default' },
+            { label: 'resolved queue', value: String(resolvedLineageCount), tone: resolvedLineageCount > 0 ? 'success' : 'default' },
           ]}
         />
         <div className="flex justify-end">
@@ -323,8 +376,8 @@ export function ConsequentialLifecyclePanel() {
           rows={[
             { label: 'run status', value: run.status },
             { label: 'compile gate', value: trust.compile_blocked ? 'BLOCKED' : 'CLEAR', tone: trust.compile_blocked ? 'warn' : 'success' },
-            { label: 'open obligations', value: String(activeRunObligations.filter((item) => item.state === 'OPEN').length), tone: activeRunObligations.some((item) => item.state === 'OPEN') ? 'warn' : 'default' },
-            { label: 'hook gaps', value: String(activeRunObligations.filter((item) => item.state === 'HOOK_GAP').length), tone: activeRunObligations.some((item) => item.state === 'HOOK_GAP') ? 'danger' : 'default' },
+            { label: 'open obligations', value: String(openObligationsCount), tone: openObligationsCount > 0 ? 'warn' : 'default' },
+            { label: 'hook gaps', value: String(hookGapsCount), tone: hookGapsCount > 0 ? 'danger' : 'default' },
             { label: 'open retry paths', value: String(retryableRecoveries.length), tone: retryableRecoveries.length > 0 ? 'warn' : 'default' },
             { label: 'ambiguous recoveries', value: String(compensatableRecoveries.length), tone: compensatableRecoveries.length > 0 ? 'warn' : 'default' },
             { label: 'stale approvals', value: String(staleApprovals.length), tone: staleApprovals.length > 0 ? 'warn' : 'default' },
