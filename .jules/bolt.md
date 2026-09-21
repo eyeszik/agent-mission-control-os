@@ -13,3 +13,6 @@
 ## 2026-08-24 - Zustand List Item Selection Optimization
 **Learning:** Re-rendering an entire list component solely because the selected item ID changed in a Zustand store causes O(N) re-renders, wasting CPU cycles on items whose state hasn't changed.
 **Action:** Extract list items into their own components and subscribe them directly to a boolean Zustand selector (`state.selectedId === item.id`). This ensures only the newly selected and previously selected items re-render.
+## 2026-08-25 - React Hook Rules for Expensive Derived State
+**Learning:** Placing hooks like `useMemo` after conditional early returns violates React's Rules of Hooks. When components derive expensive layout arrays from remote state using maps/filters, they must be wrapped in `useMemo` before any early return to prevent unneeded garbage collection on unrelated local state updates. Handle null checks directly inside the hook.
+**Action:** Always declare all `useMemo` hooks at the top level of the component before early returns. If derived values depend on potentially null objects, safely handle the null checks inside the `useMemo` calculation logic and return dummy/empty arrays.

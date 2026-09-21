@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import type { AgencyRun, TrustSnapshot } from '@amc/shared';
 import { getAgencyRun } from '../../lib/api/agency';
 import {
@@ -209,6 +209,72 @@ export function ConsequentialLifecyclePanel() {
     }
   };
 
+  // ⚡ Bolt: Wrapped expensive derived array calculations in a useMemo block.
+  // This prevents 9 redundant array map/filter cycles when unrelated local state
+  // (like busyKey or error) triggers a re-render.
+  // Note: Placed before the early return to comply with Rules of Hooks.
+  const derivedData = useMemo(() => {
+    if (!trust || !run) {
+      return {
+        approvalRows: [],
+        outboxRows: [],
+        recoveryRows: [],
+        auditRows: [],
+        staleApprovals: [],
+        activeRunLineageRemediations: [],
+        activeRunObligations: [],
+        retryableRecoveries: [],
+        compensatableRecoveries: [],
+      };
+    }
+
+    return {
+      approvalRows: trust.recent_policy_decisions.slice(0, 3).map((decision) => ({
+        label: decision.action,
+        value: `${decision.target} · ${decision.effect}`,
+        tone: (decision.target === 'reject' ? 'danger' : decision.target === 'approve' ? 'success' : 'default') as RowTone,
+      })),
+      outboxRows: trust.recent_outbox_messages.slice(0, 3).map((message) => ({
+        label: message.topic,
+        value: `${message.status} · attempt ${message.attempts}`,
+        tone: (
+          message.status === 'DELIVERED'
+            ? 'success'
+            : message.status === 'FAILED'
+              ? 'danger'
+              : message.status === 'CLAIMED'
+                ? 'warn'
+                : 'default'
+        ) as RowTone,
+      })),
+      recoveryRows: trust.recent_recovery_cases.slice(0, 3).map((recovery) => ({
+        label: recovery.reason,
+        value: recovery.status,
+        tone: (recovery.status === 'OPEN' ? 'warn' : recovery.status === 'ESCALATED' ? 'danger' : 'success') as RowTone,
+      })),
+      auditRows: trust.recent_audit_events.slice(0, 4).map((event) => ({
+        label: `#${event.seq}`,
+        value: event.event_type,
+      })),
+      staleApprovals: (run.approvals ?? []).filter((approval) => approval.status === 'stale'),
+      activeRunLineageRemediations: trust.recent_lineage_remediations.filter((item) => item.run_id === run.run_id),
+      activeRunObligations: trust.recent_invalidation_obligations.filter((item) => item.run_id === run.run_id),
+      retryableRecoveries: trust.recent_recovery_cases.filter(
+        (recovery) =>
+          recovery.status === 'OPEN' &&
+          recovery.reason !== 'AMBIGUOUS_EXTERNAL_RESULT' &&
+          recovery.execution_ref === run.run_id &&
+          run.status === 'failed'
+      ),
+      compensatableRecoveries: trust.recent_recovery_cases.filter(
+        (recovery) =>
+          recovery.status === 'OPEN' &&
+          recovery.reason === 'AMBIGUOUS_EXTERNAL_RESULT' &&
+          recovery.execution_ref === run.run_id
+      ),
+    };
+  }, [trust, run]);
+
   if (!activeRunId || !trust || !run) {
     return (
       <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-3 min-h-[300px]">
@@ -220,53 +286,17 @@ export function ConsequentialLifecyclePanel() {
     );
   }
 
-  const approvalRows = trust.recent_policy_decisions.slice(0, 3).map((decision) => ({
-    label: decision.action,
-    value: `${decision.target} · ${decision.effect}`,
-    tone: (decision.target === 'reject' ? 'danger' : decision.target === 'approve' ? 'success' : 'default') as RowTone,
-  }));
-
-  const outboxRows = trust.recent_outbox_messages.slice(0, 3).map((message) => ({
-    label: message.topic,
-    value: `${message.status} · attempt ${message.attempts}`,
-    tone: (
-      message.status === 'DELIVERED'
-        ? 'success'
-        : message.status === 'FAILED'
-          ? 'danger'
-          : message.status === 'CLAIMED'
-            ? 'warn'
-            : 'default'
-    ) as RowTone,
-  }));
-
-  const recoveryRows = trust.recent_recovery_cases.slice(0, 3).map((recovery) => ({
-    label: recovery.reason,
-    value: recovery.status,
-    tone: (recovery.status === 'OPEN' ? 'warn' : recovery.status === 'ESCALATED' ? 'danger' : 'success') as RowTone,
-  }));
-
-  const auditRows = trust.recent_audit_events.slice(0, 4).map((event) => ({
-    label: `#${event.seq}`,
-    value: event.event_type,
-  }));
-
-  const staleApprovals = (run.approvals ?? []).filter((approval) => approval.status === 'stale');
-  const activeRunLineageRemediations = trust.recent_lineage_remediations.filter((item) => item.run_id === run.run_id);
-  const activeRunObligations = trust.recent_invalidation_obligations.filter((item) => item.run_id === run.run_id);
-  const retryableRecoveries = trust.recent_recovery_cases.filter(
-    (recovery) =>
-      recovery.status === 'OPEN' &&
-      recovery.reason !== 'AMBIGUOUS_EXTERNAL_RESULT' &&
-      recovery.execution_ref === run.run_id &&
-      run.status === 'failed'
-  );
-  const compensatableRecoveries = trust.recent_recovery_cases.filter(
-    (recovery) =>
-      recovery.status === 'OPEN' &&
-      recovery.reason === 'AMBIGUOUS_EXTERNAL_RESULT' &&
-      recovery.execution_ref === run.run_id
-  );
+  const {
+    approvalRows,
+    outboxRows,
+    recoveryRows,
+    auditRows,
+    staleApprovals,
+    activeRunLineageRemediations,
+    activeRunObligations,
+    retryableRecoveries,
+    compensatableRecoveries,
+  } = derivedData;
 
   return (
     <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-4 min-h-[300px]">
