@@ -847,8 +847,21 @@ def synthesize_report(
     validated_claims: list[ClaimRecord],
     gaps: list[GapRecord],
 ) -> tuple[CompletenessReport, float, ConfidenceBand]:
-    verified = [claim.confidence for claim in validated_claims if claim.confidence > 0]
-    evidence_score = 4 if verified and sum(verified) / len(verified) >= 0.8 else 2 if verified else 1
+    material_types = {
+        ClaimType.api_claim,
+        ClaimType.metric,
+        ClaimType.legal_claim,
+        ClaimType.market_claim,
+        ClaimType.promise,
+    }
+    material_claims = [claim for claim in validated_claims if claim.claim_type in material_types]
+    material_scores = [claim.confidence for claim in material_claims]
+    if not material_claims:
+        evidence_score = 4
+    elif material_scores and sum(material_scores) / len(material_scores) >= 0.8:
+        evidence_score = 4
+    else:
+        evidence_score = 2
     brand_score = 4 if request.brand_core is not None else 0
     production_score = 4 if request.asset_requirements else 0
     verified_providers = [provider for provider in request.providers if provider.verified]
@@ -863,7 +876,10 @@ def synthesize_report(
     if any(gap.blocks_synthesis for gap in gaps):
         blockers.append("evidence")
 
-    confidence = sum(verified) / len(verified) if verified else (0.70 if request.brand_core else 0.45)
+    if material_scores:
+        confidence = sum(material_scores) / len(material_scores)
+    else:
+        confidence = 0.92 if request.brand_core is not None and request.asset_requirements else 0.60
     if blockers:
         confidence = min(confidence, 0.64)
 
@@ -890,12 +906,14 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
     gaps = hunt_gaps(claims)
     passes.append(PassResult(pass_name="GAP_HUNT", status="COMPLETE", produced=len(gaps)))
 
-    research_requests = build_research_backfill(gaps)
     unresolved_gap_ids = {gap.gap_id for gap in gaps}
     evidence_claim_ids = {claim_id for item in request.evidence for claim_id in item.claim_ids}
     for gap in gaps:
         if any(ref in evidence_claim_ids for ref in gap.claim_refs):
             unresolved_gap_ids.discard(gap.gap_id)
+    research_requests = build_research_backfill(
+        [gap for gap in gaps if gap.gap_id in unresolved_gap_ids]
+    )
     passes.append(
         PassResult(
             pass_name="RESEARCH_BACKFILL",
