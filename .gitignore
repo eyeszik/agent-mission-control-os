@@ -33,6 +33,9 @@ logs/
 # Local
 .codex/local*
 
+# Brand orchestrator checkpoint/export output
+scratch/
+
 # Local SQLite runtime state (checkpoints, approvals, runs, idempotency keys)
 *.db
 *.db-journal

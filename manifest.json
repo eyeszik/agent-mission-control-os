@@ -60,7 +60,7 @@
     },
     {
       "path": "package.json",
-      "git_blob_sha": "d7052ce894c03c4261c96f01f0e194ce37da0e9c"
+      "git_blob_sha": "18d022ba4e6e6f2e0433ad992a52aac10cadc32a"
     },
     {
       "path": "packages/shared/openapi/agent-mission-control.openapi.yaml",
