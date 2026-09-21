@@ -1,0 +1,10 @@
+{
+  "project_name": "Agent Mission Control OS Brand Rebrand",
+  "deliverable_types": ["ui_component", "copywriting", "imagery", "motion"],
+  "brand_input": {
+    "colors": {
+      "brand-primary": "#0052CC",
+      "brand-secondary": "#0747A6"
+    }
+  }
+}
