@@ -1,7 +1,0 @@
-{
-  "plugins": ["stylelint-declaration-strict-value"],
-  "rules": {
-    "color-named": "never",
-    "color-no-hex": [true, { "message": "Forbidden raw hex color. Replace with registered CSS design tokens." }]
-  }
-}

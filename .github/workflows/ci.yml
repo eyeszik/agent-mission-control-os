@@ -39,6 +39,9 @@ jobs:
       - name: Verify N1/N2 ontology parity across Python and TypeScript
         run: python scripts/verify_ontology_parity.py
 
+      - name: Verify frontend consumes design tokens, not raw colors
+        run: python scripts/verify_design_tokens.py
+
       - name: Verify integrity manifest
         run: python scripts/verify_manifest.py
 
