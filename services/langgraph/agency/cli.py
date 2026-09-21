@@ -34,6 +34,12 @@ from typing import Any, Iterable
 
 from pydantic import BaseModel, Field, ValidationError
 
+from services.langgraph.agency.prompt_compiler import (
+    CompilerState,
+    compile_prompt_packages,
+    load_request,
+    write_result,
+)
 from services.langgraph.agency.kernel.lifecycle import (
     ENGAGEMENT_TRANSITIONS,
     TransitionContext,
@@ -353,6 +359,31 @@ def _cmd_roles(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_compile_prompts(args: argparse.Namespace) -> int:
+    try:
+        request = load_request(args.input)
+    except FileNotFoundError as exc:
+        raise BriefError(f"prompt compiler request not found: {args.input}") from exc
+    except json.JSONDecodeError as exc:
+        raise BriefError(f"prompt compiler request is not valid JSON: {exc}") from exc
+    except ValidationError as exc:
+        raise BriefError(f"prompt compiler request does not match the expected shape:\n{exc}") from exc
+
+    result = compile_prompt_packages(request)
+    if args.output:
+        write_result(args.output, result)
+
+    if args.json or not args.output:
+        print(result.model_dump_json(indent=2))
+    else:
+        print(
+            f"{result.final_state.value}: {len(result.prompt_packages)} prompt package(s); "
+            f"confidence={result.confidence:.3f}; generation firewall={result.generation_firewall}"
+        )
+
+    return 0 if result.final_state is CompilerState.prompt_package_ready else 1
+
+
 def _cmd_validate(_args: argparse.Namespace) -> int:
     problems = validate_matrices() + validate_registry() + validate_merge_matrix()
     if problems:
@@ -368,7 +399,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agency",
         description=(
-            "Plan work against the agency kernel. Plans only -- this generates no assets."
+            "Plan work and compile provider-ready creative prompts. This CLI never generates assets."
         ),
     )
     sub = parser.add_subparsers(dest="command", required=True)
@@ -381,6 +412,21 @@ def build_parser() -> argparse.ArgumentParser:
     roles = sub.add_parser("roles", help="List N3 role contracts.")
     roles.add_argument("-d", "--department", help="Filter to one department.")
     roles.set_defaults(handler=_cmd_roles)
+
+    compile_prompts = sub.add_parser(
+        "compile-prompts",
+        help="Audit content and compile validated prompt packages without generating assets.",
+    )
+    compile_prompts.add_argument(
+        "-i", "--input", required=True, help="Path to a prompt compiler request JSON file."
+    )
+    compile_prompts.add_argument(
+        "-o", "--output", help="Optional path for the compiled result JSON."
+    )
+    compile_prompts.add_argument(
+        "--json", action="store_true", help="Print the compiled result as JSON."
+    )
+    compile_prompts.set_defaults(handler=_cmd_compile_prompts)
 
     validate = sub.add_parser("validate", help="Run the kernel's structural self-checks.")
     validate.set_defaults(handler=_cmd_validate)
