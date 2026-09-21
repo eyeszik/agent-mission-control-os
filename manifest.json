@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "f2286a6208fa5c3bcb77ecb8846fa1a0af33dd8b"
+      "git_blob_sha": "30d8d83b6af70b0539306fc13d8d2c7e3d01bef8"
     },
     {
       "path": "README.md",
@@ -60,7 +60,7 @@
     },
     {
       "path": "package.json",
-      "git_blob_sha": "18d022ba4e6e6f2e0433ad992a52aac10cadc32a"
+      "git_blob_sha": "26fbb8019a0911c278790ddd49947c80a4bf6ba5"
     },
     {
       "path": "packages/shared/openapi/agent-mission-control.openapi.yaml",
@@ -93,6 +93,10 @@
     {
       "path": "scripts/verify_auth_bindings.py",
       "git_blob_sha": "b37af10802beb8533a840297c78955e1aef7ac2e"
+    },
+    {
+      "path": "scripts/verify_design_tokens.py",
+      "git_blob_sha": "f704e2505f4c3d74dc115c5fa2fa2c3a31a3815a"
     },
     {
       "path": "scripts/verify_manifest.py",
