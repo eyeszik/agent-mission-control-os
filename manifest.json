@@ -100,7 +100,7 @@
     },
     {
       "path": "scripts/verify_guidance_registry.py",
-      "git_blob_sha": "7517daa3d3ef00cbb4be600f0a106ab3b3c48e15"
+      "git_blob_sha": "d07fb7aacf56fff759163226fbee6c905561611d"
     },
     {
       "path": "scripts/verify_manifest.py",
