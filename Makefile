@@ -1,4 +1,4 @@
-.PHONY: help check-env tokens-build brand-plan brand-roles prompt-compile brand-validate setup-agent gates
+.PHONY: help check-env tokens-build brand-plan brand-roles prompt-compile guidance-validate brand-validate setup-agent gates
 
 help:
 	@echo "Available commands:"
@@ -7,6 +7,7 @@ help:
 	@echo "  make brand-plan [BRIEF=f.json]  - Plan a brief against the agency kernel"
 	@echo "  make brand-roles [DEPT=brand]   - List N3 role contracts"
 	@echo "  make prompt-compile [REQUEST=f]  - Compile validated prompt packages only"
+	@echo "  make guidance-validate          - Validate repository guidance packs"
 	@echo "  make brand-validate             - Run the kernel's structural self-checks"
 	@echo "  make setup-agent                - Run workspace setup script"
 	@echo "  make gates                      - Run every CI verifier gate"
@@ -28,6 +29,9 @@ brand-roles:
 prompt-compile:
 	@python3 orchestrate_brand_pipeline.py compile-prompts --input $(if $(REQUEST),$(REQUEST),sample_prompt_request.json) --json
 
+guidance-validate:
+	@python3 scripts/verify_guidance_registry.py
+
 brand-validate:
 	@python3 orchestrate_brand_pipeline.py validate
 
@@ -41,3 +45,4 @@ gates:
 	@python3 scripts/verify_ontology_parity.py
 	@python3 scripts/verify_design_tokens.py
 	@python3 scripts/verify_manifest.py
+	@python3 scripts/verify_guidance_registry.py
