@@ -1,0 +1,343 @@
+{
+  "id": "pg.branding.core",
+  "schema_version": "1.0.0",
+  "pack_version": "1.0.0",
+  "domain": "BRANDING",
+  "guidance_class": "METHODOLOGY",
+  "authority_class": "ADVISORY",
+  "description": "Professional brand strategy, positioning, naming, verbal identity, creative direction, and visual-identity methodology.",
+  "activation": {
+    "asset_families": [
+      "IMAGE",
+      "UI_UX",
+      "COPY",
+      "MOTION",
+      "VIDEO",
+      "STORYBOARD",
+      "PRINT",
+      "PRESENTATION"
+    ],
+    "asset_types": [
+      "brand identity",
+      "logo",
+      "logo system",
+      "wordmark",
+      "visual identity",
+      "brand guidelines",
+      "brand campaign",
+      "naming",
+      "positioning",
+      "messaging",
+      "brand story",
+      "marketing site",
+      "brand film",
+      "homepage hero image"
+    ],
+    "channels": [
+      "web",
+      "social",
+      "advertising",
+      "email",
+      "sales",
+      "presentation",
+      "print",
+      "video",
+      "environment"
+    ],
+    "brand_domains": [
+      "strategy",
+      "verbal",
+      "visual",
+      "motion"
+    ],
+    "capabilities": [],
+    "task_tags": [
+      "branding",
+      "brand",
+      "identity",
+      "positioning",
+      "naming",
+      "verbal identity",
+      "creative direction",
+      "visual identity",
+      "campaign"
+    ]
+  },
+  "excludes": {
+    "asset_families": [],
+    "asset_types": [],
+    "channels": [],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": []
+  },
+  "dependencies": [],
+  "conflicts_with": [],
+  "context_budget": {
+    "max_sections": 5,
+    "max_chars": 16000
+  },
+  "sections": [
+    {
+      "id": "brand.strategy",
+      "purpose": "Improve strategic grounding before creative translation.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Establish purpose as the organization's reason for existence beyond an individual transaction.",
+        "Express vision as the future state the organization seeks to help create.",
+        "Express values as behavioral decision principles rather than decorative adjectives.",
+        "Model audience through jobs, goals, pains, barriers, triggers, alternatives, language, and context.",
+        "Evaluate market through direct competitors, indirect competitors, substitutes, category codes, parity, whitespace, and risk.",
+        "Distinguish desired recognition, comprehension, memory, emotional association, and perception shift."
+      ],
+      "evaluation_criteria": [
+        "relevance",
+        "distinctiveness",
+        "credibility",
+        "clarity",
+        "sustainability",
+        "operational usefulness"
+      ],
+      "anti_patterns": [],
+      "evidence_requirements": [
+        "Treat unsupported market differentiation as recommendation or hypothesis, not confirmed fact."
+      ],
+      "output_targets": [
+        "strategy directives",
+        "audience model",
+        "market framing"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "purpose",
+        "vision",
+        "values",
+        "audience model",
+        "market frame"
+      ],
+      "subsections": {}
+    },
+    {
+      "id": "brand.positioning",
+      "purpose": "Strengthen positioning and differentiated value without inventing proof.",
+      "directive_class": "EVIDENCE_BOUND_ADVISORY",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Structure positioning around audience, context, category or frame, distinctive value, and supporting proof.",
+        "Distinguish category parity from genuine whitespace.",
+        "Ensure positioning can inform copy, design, product, and campaign decisions."
+      ],
+      "evaluation_criteria": [
+        "relevance",
+        "distinctiveness",
+        "credibility",
+        "clarity",
+        "sustainability",
+        "operational usefulness"
+      ],
+      "anti_patterns": [
+        "Treating unsupported differentiation as verified fact."
+      ],
+      "evidence_requirements": [
+        "Distinctive-value claims require evidence when presented as factual."
+      ],
+      "output_targets": [
+        "positioning directives"
+      ],
+      "patterns": {
+        "positioning": "For [AUDIENCE] in [CONTEXT], [BRAND] is [CATEGORY/FRAME] delivering [DISTINCTIVE_VALUE], supported by [PROOF]."
+      },
+      "dimensions": [],
+      "possible_outputs": [
+        "positioning statement"
+      ],
+      "subsections": {}
+    },
+    {
+      "id": "brand.naming",
+      "purpose": "Guide brand-name development when naming is part of the requested task.",
+      "directive_class": "EVIDENCE_BOUND_ADVISORY",
+      "activate_when": {
+        "any": [
+          "naming",
+          "brand name",
+          "product name",
+          "service name"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Clarify brand, audience, naming objectives, and selection criteria before name generation.",
+        "Review category naming patterns before choosing a territory.",
+        "Explore descriptive, evocative, invented, metaphorical, compound, founder, acronymic, and symbolic territories when strategically relevant.",
+        "Evaluate strategic fit, distinctiveness, pronunciation, memorability, spelling, extensibility, semantic risk, and localization risk.",
+        "Treat domain and trademark observations as preliminary unless authoritative verification exists."
+      ],
+      "evaluation_criteria": [
+        "strategic fit",
+        "distinctiveness",
+        "pronunciation",
+        "memorability",
+        "spelling",
+        "extensibility",
+        "semantic risk",
+        "localization risk"
+      ],
+      "anti_patterns": [
+        "Presenting speculative trademark availability as clearance.",
+        "Generating large undifferentiated name lists.",
+        "Selecting names solely because they sound fashionable."
+      ],
+      "evidence_requirements": [
+        "Trademark clearance requires authoritative review evidence."
+      ],
+      "output_targets": [
+        "name candidates",
+        "naming rationale"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "brand name",
+        "product name",
+        "service name"
+      ],
+      "subsections": {}
+    },
+    {
+      "id": "brand.verbal_identity",
+      "purpose": "Improve language-system consistency across channels.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Define durable voice separately from context-dependent tone.",
+        "Prefer concrete active verbs and consistent terminology.",
+        "Write from the intended audience's perspective.",
+        "Avoid unsupported guarantees and superlatives."
+      ],
+      "evaluation_criteria": [
+        "consistency",
+        "clarity",
+        "credibility",
+        "audience fit"
+      ],
+      "anti_patterns": [
+        "Unsupported superlatives or guarantees."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "verbal directives"
+      ],
+      "patterns": {},
+      "dimensions": [
+        "formal_vs_conversational",
+        "restrained_vs_expressive",
+        "expert_vs_accessible",
+        "serious_vs_playful",
+        "concise_vs_explanatory",
+        "direct_vs_narrative"
+      ],
+      "possible_outputs": [
+        "voice",
+        "tone by context",
+        "vocabulary",
+        "terminology",
+        "message pillars",
+        "value proposition",
+        "brand story",
+        "headline system",
+        "CTA system",
+        "microcopy",
+        "editorial rules"
+      ],
+      "subsections": {}
+    },
+    {
+      "id": "brand.creative_direction",
+      "purpose": "Translate strategy into a distinctive visual and experiential direction.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Map audience expectations and competitor or category visual codes.",
+        "Translate personality into form and verbal rhythm into visual rhythm.",
+        "Develop distinct creative territories before selecting a governing concept.",
+        "Use typography as a personality-bearing system.",
+        "Encode content meaning in structure and hierarchy.",
+        "Prefer one identifiable signature device.",
+        "Use motion to communicate or organize rather than decorate.",
+        "Let subject-specific language outrank aesthetic trends."
+      ],
+      "evaluation_criteria": [
+        "distinctiveness",
+        "strategic fit",
+        "coherence",
+        "genericity resistance"
+      ],
+      "anti_patterns": [
+        "A hero that follows a fashionable layout recipe without communicating a thesis.",
+        "A palette, typography, composition, imagery, and signature device reusable unchanged across unrelated brands."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "creative direction",
+        "visual directives",
+        "composition directives"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "creative territory",
+        "governing concept",
+        "moodboard direction"
+      ],
+      "subsections": {
+        "visual_identity": {
+          "logo": [
+            "test one-color, inverse, small-size, silhouette, print, responsive lockup, busy-background, and favicon behavior"
+          ],
+          "color": [
+            "separate primitive, semantic, and component roles",
+            "treat color meaning as contextual",
+            "preserve non-color cues for essential information"
+          ],
+          "typography": [
+            "evaluate strategic character, distinctiveness, legibility, language coverage, licensing, web performance, print behavior, and fallback quality"
+          ],
+          "imagery": [
+            "define subject, framing, composition, lighting, color behavior, texture, camera behavior, realism, human representation, illustration geometry, and exclusions"
+          ],
+          "iconography": [
+            "define grid, stroke, fill, optical weight, corners, metaphor rules, and sizes"
+          ],
+          "geometry": [
+            "define grid, spacing, radius, border, shadow, elevation, and density"
+          ]
+        }
+      }
+    }
+  ],
+  "provenance": {
+    "source": "PG_BRAND_OS design-guidance extraction supplied by project owner",
+    "version": "101.0-derived",
+    "author": "project owner",
+    "created_at": "2026-09-21T00:00:00Z",
+    "updated_at": "2026-09-21T00:00:00Z",
+    "evidence_refs": [],
+    "license_or_ip_status": "project-owned guidance"
+  },
+  "content_hash": ""
+}

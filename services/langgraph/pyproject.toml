@@ -25,5 +25,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.2.0"]
 
+[tool.hatch.build]
+include = ["agency/guidance/packs/*.yaml"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["app", "api", "agency", "graph", "persistence", "quality", "security", "integrations"]
