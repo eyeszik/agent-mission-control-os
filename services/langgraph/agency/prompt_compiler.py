@@ -28,6 +28,12 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, model_validator
 
 from services.langgraph.agency.artifacts.brand import BrandCore
+from services.langgraph.agency.guidance import (
+    GuidanceOverride,
+    GuidanceSelection,
+    default_registry,
+    route_guidance,
+)
 
 
 COMPILER_VERSION = "amc-prompt-compiler/v1"
@@ -269,6 +275,7 @@ class AssetRequirement(BaseModel):
     negative_constraints: list[str] = Field(default_factory=list)
     quality_constraints: list[str] = Field(default_factory=list)
     production: ProductionSpec = Field(default_factory=ProductionSpec)
+    guidance_overrides: GuidanceOverride = Field(default_factory=GuidanceOverride)
 
     model_config = {"extra": "forbid"}
 
@@ -310,6 +317,13 @@ class PromptContext(BaseModel):
     brand_context: dict[str, Any]
     included_domains: list[str]
     excluded_domains: list[str]
+    guidance_context: dict[str, Any] = Field(default_factory=dict)
+    included_guidance: list[str] = Field(default_factory=list)
+    excluded_guidance: list[str] = Field(default_factory=list)
+    guidance_hash: str = ""
+    activation_reasons: list[str] = Field(default_factory=list)
+    registry_version: str | None = None
+    router_version: str | None = None
     context_hash: str
 
     model_config = {"extra": "forbid"}
@@ -323,6 +337,16 @@ class PromptIR(BaseModel):
     channel: str
     destination: str
     brand_directives: list[str]
+    strategy_directives: list[str] = Field(default_factory=list)
+    verbal_directives: list[str] = Field(default_factory=list)
+    visual_directives: list[str] = Field(default_factory=list)
+    composition_directives: list[str] = Field(default_factory=list)
+    typography_directives: list[str] = Field(default_factory=list)
+    interaction_directives: list[str] = Field(default_factory=list)
+    motion_directives: list[str] = Field(default_factory=list)
+    camera_directives: list[str] = Field(default_factory=list)
+    audio_directives: list[str] = Field(default_factory=list)
+    accessibility_directives: list[str] = Field(default_factory=list)
     content_directives: list[str]
     production_directives: list[str]
     negative_constraints: list[str]
@@ -665,7 +689,11 @@ def compile_asset_spec(requirement: AssetRequirement, brand: BrandCore) -> Asset
     )
 
 
-def resolve_prompt_context(spec: AssetSpec, brand: BrandCore) -> PromptContext:
+def resolve_prompt_context(
+    spec: AssetSpec,
+    brand: BrandCore,
+    guidance: GuidanceSelection | None = None,
+) -> PromptContext:
     included: dict[str, Any] = {}
     for domain in spec.required_brand_domains:
         if domain == "strategy":
@@ -688,12 +716,85 @@ def resolve_prompt_context(spec: AssetSpec, brand: BrandCore) -> PromptContext:
             included[domain] = {"status": "[VOID_DETECTED:BRAND_DOMAIN]"}
 
     known = {"strategy", "verbal", "visual", "motion"}
+    guidance_context = guidance.guidance_context if guidance is not None else {}
+    guidance_hash = guidance.guidance_hash if guidance is not None else ""
+    context_payload = {
+        "brand_context": included,
+        "guidance_hash": guidance_hash,
+        "guidance_context": guidance_context,
+    }
     return PromptContext(
         brand_context=included,
         included_domains=sorted(spec.required_brand_domains),
         excluded_domains=sorted(known - set(spec.required_brand_domains)),
-        context_hash=stable_hash(included),
+        guidance_context=guidance_context,
+        included_guidance=guidance.selected_section_ids if guidance is not None else [],
+        excluded_guidance=guidance.rejected_pack_ids if guidance is not None else [],
+        guidance_hash=guidance_hash,
+        activation_reasons=guidance.activation_reasons if guidance is not None else [],
+        registry_version=guidance.registry_version if guidance is not None else None,
+        router_version=guidance.router_version if guidance is not None else None,
+        context_hash=stable_hash(context_payload),
     )
+
+
+def _flatten_guidance_value(value: Any, prefix: str = "") -> list[str]:
+    values: list[str] = []
+    if isinstance(value, str):
+        values.append(f"{prefix}{value}" if prefix else value)
+    elif isinstance(value, list):
+        for item in value:
+            values.extend(_flatten_guidance_value(item, prefix))
+    elif isinstance(value, dict):
+        for key in sorted(value):
+            label = f"{prefix}{key}: " if prefix else f"{key}: "
+            values.extend(_flatten_guidance_value(value[key], label))
+    return values
+
+
+def _guidance_directive_buckets(context: PromptContext) -> dict[str, list[str]]:
+    buckets = {
+        "strategy": [],
+        "verbal": [],
+        "visual": [],
+        "composition": [],
+        "typography": [],
+        "interaction": [],
+        "motion": [],
+        "camera": [],
+        "audio": [],
+        "accessibility": [],
+    }
+    for key in sorted(context.guidance_context):
+        payload = context.guidance_context[key]
+        section = payload.get("section", {})
+        section_id = str(section.get("id", "")).lower()
+        directives = [str(item) for item in section.get("directives", [])]
+
+        if "strategy" in section_id or "positioning" in section_id:
+            buckets["strategy"].extend(directives)
+        elif "verbal" in section_id or "naming" in section_id:
+            buckets["verbal"].extend(directives)
+        elif "motion" in section_id:
+            buckets["motion"].extend(directives)
+        else:
+            buckets["visual"].extend(directives)
+            if "creative_direction" in section_id:
+                buckets["composition"].extend(directives)
+
+        subsections = section.get("subsections", {})
+        visual_identity = subsections.get("visual_identity", {}) if isinstance(subsections, dict) else {}
+        if isinstance(visual_identity, dict):
+            for name, value in visual_identity.items():
+                flattened = _flatten_guidance_value(value)
+                if name == "typography":
+                    buckets["typography"].extend(flattened)
+                elif name in {"imagery", "geometry", "iconography", "color", "logo"}:
+                    buckets["visual"].extend(flattened)
+
+    for name in buckets:
+        buckets[name] = list(dict.fromkeys(buckets[name]))
+    return buckets
 
 
 def compile_prompt_ir(spec: AssetSpec, context: PromptContext) -> PromptIR:
@@ -705,6 +806,10 @@ def compile_prompt_ir(spec: AssetSpec, context: PromptContext) -> PromptIR:
         f"{key}={value}"
         for key, value in spec.production.model_dump(mode="json", exclude_none=True).items()
     ]
+    guidance = _guidance_directive_buckets(context)
+    provenance = [spec.brand_hash, context.context_hash]
+    if context.guidance_hash:
+        provenance.append(context.guidance_hash)
     return PromptIR(
         asset_id=spec.asset_id,
         family=spec.family,
@@ -713,12 +818,22 @@ def compile_prompt_ir(spec: AssetSpec, context: PromptContext) -> PromptIR:
         channel=spec.channel,
         destination=spec.destination,
         brand_directives=brand_directives,
+        strategy_directives=guidance["strategy"],
+        verbal_directives=guidance["verbal"],
+        visual_directives=guidance["visual"],
+        composition_directives=guidance["composition"],
+        typography_directives=guidance["typography"],
+        interaction_directives=guidance["interaction"],
+        motion_directives=guidance["motion"],
+        camera_directives=guidance["camera"],
+        audio_directives=guidance["audio"],
+        accessibility_directives=guidance["accessibility"],
         content_directives=list(spec.content_requirements),
         production_directives=production,
         negative_constraints=list(spec.negative_constraints),
         quality_constraints=list(spec.quality_constraints),
         required_capabilities=list(spec.required_capabilities),
-        provenance_refs=[spec.brand_hash, context.context_hash],
+        provenance_refs=provenance,
     )
 
 
@@ -742,14 +857,26 @@ def serialize_generic_prompt(ir: PromptIR, spec: AssetSpec) -> str:
         "",
     ]
     lines += section("Canonical brand directives", ir.brand_directives)
+    lines += section("Selected advisory strategy guidance", ir.strategy_directives)
+    lines += section("Selected advisory verbal guidance", ir.verbal_directives)
+    lines += section("Selected advisory visual guidance", ir.visual_directives)
+    lines += section("Selected advisory composition guidance", ir.composition_directives)
+    lines += section("Selected advisory typography guidance", ir.typography_directives)
+    lines += section("Selected advisory interaction guidance", ir.interaction_directives)
+    lines += section("Selected advisory motion guidance", ir.motion_directives)
+    lines += section("Selected advisory camera guidance", ir.camera_directives)
+    lines += section("Selected advisory audio guidance", ir.audio_directives)
+    lines += section("Selected advisory accessibility guidance", ir.accessibility_directives)
     lines += section("Required content", ir.content_directives)
     lines += section("Production specification", ir.production_directives)
     lines += section("Quality constraints", ir.quality_constraints)
     lines += section("Negative constraints", ir.negative_constraints)
     lines += [
         "## Execution contract",
-        "- Treat the supplied brand context as authoritative.",
-        "- Do not invent missing factual claims, logos, product details, or credentials.",
+        "- Treat canonical brand context and verified project constraints as authoritative.",
+        "- Treat selected domain guidance as advisory methodology only.",
+        "- Never let guidance override canonical BrandCore, evidence, accessibility, permissions, or provider capability truth.",
+        "- Do not invent missing factual claims, logos, product details, credentials, or provider features.",
         "- Preserve the requested medium, hierarchy, destination, and accessibility constraints.",
         "- Produce the requested creative asset for downstream review; do not reinterpret the brand system.",
     ]
@@ -816,6 +943,8 @@ def validate_prompt_package(
         issues.append("objective missing from serialized prompt")
     if spec.audience not in generic_prompt:
         issues.append("audience missing from serialized prompt")
+    if context.included_guidance and not context.guidance_hash:
+        issues.append("selected guidance missing deterministic hash")
     for provider in provider_prompts:
         if provider.status is AdapterStatus.blocked:
             issues.append(
@@ -837,6 +966,7 @@ def validate_prompt_package(
             "PROVIDER",
             "ACCESSIBILITY",
             "SECURITY",
+            "GUIDANCE_AUTHORITY",
             "PROVENANCE",
         ],
     )
@@ -987,9 +1117,15 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
         )
 
     packages: list[PromptPackage] = []
+    guidance_registry = default_registry()
     for requirement in request.asset_requirements:
         spec = compile_asset_spec(requirement, request.brand_core)
-        context = resolve_prompt_context(spec, request.brand_core)
+        guidance = route_guidance(
+            requirement,
+            guidance_registry,
+            requirement.guidance_overrides,
+        )
+        context = resolve_prompt_context(spec, request.brand_core, guidance)
         ir = compile_prompt_ir(spec, context)
         generic = serialize_generic_prompt(ir, spec)
         provider_prompts = adapt_provider_prompts(ir, generic, request.providers)
