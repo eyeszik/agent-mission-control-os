@@ -45,6 +45,9 @@ jobs:
       - name: Verify integrity manifest
         run: python scripts/verify_manifest.py
 
+      - name: Verify prompt guidance registry
+        run: python scripts/verify_guidance_registry.py
+
       - name: Compile Python sources
         run: python -m compileall -q services/langgraph scripts
 
