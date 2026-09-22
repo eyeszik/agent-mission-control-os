@@ -120,6 +120,18 @@ class GuidanceSection(BaseModel):
         return self
 
 
+class TrendMetadata(BaseModel):
+    observed_at: str
+    expires_at: str
+    source_refs: list[str] = Field(min_length=1)
+    confidence: float = Field(ge=0.0, le=1.0)
+    trend_status: str = Field(min_length=1)
+    applicability: list[str] = Field(default_factory=list)
+    avoid_when: list[str] = Field(default_factory=list)
+
+    model_config = {"extra": "forbid"}
+
+
 class GuidancePack(BaseModel):
     id: str = Field(min_length=1)
     schema_version: str = Field(min_length=1)
@@ -135,6 +147,7 @@ class GuidancePack(BaseModel):
     context_budget: ContextBudget = Field(default_factory=ContextBudget)
     sections: list[GuidanceSection] = Field(min_length=1)
     provenance: GuidanceProvenance
+    trend: TrendMetadata | None = None
     content_hash: str = ""
 
     model_config = {"extra": "forbid"}
@@ -144,6 +157,10 @@ class GuidancePack(BaseModel):
         ids = [section.id for section in self.sections]
         if len(ids) != len(set(ids)):
             raise ValueError("guidance section ids must be unique within a pack")
+        if self.guidance_class is GuidanceClass.trend_intelligence and self.trend is None:
+            raise ValueError("TREND_INTELLIGENCE packs require trend freshness metadata")
+        if self.guidance_class is GuidanceClass.methodology and self.trend is not None:
+            raise ValueError("METHODOLOGY packs cannot declare trend freshness metadata")
         return self
 
 
