@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import type { ArtifactBinding, AgencyRun } from "@amc/shared";
 import { getAgencyRun } from "../../lib/api/agency";
 import { globalBus } from "../../lib/events/bus";
@@ -48,7 +48,12 @@ export function FileOrganizationPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const [workspaceExport, setWorkspaceExport] = useState<WorkspaceExport | null>(null);
   const [artifactBindings, setArtifactBindings] = useState<ArtifactBinding[]>([]);
-  const effectiveWorkspaceExport = workspaceExport ?? deriveWorkspaceExport(artifactBindings);
+
+  // ⚡ Bolt: Wrapped derived workspace calculation in useMemo to prevent redundant
+  // array allocations and derivations when unrelated state triggers re-renders.
+  const effectiveWorkspaceExport = useMemo(() => {
+    return workspaceExport ?? deriveWorkspaceExport(artifactBindings);
+  }, [workspaceExport, artifactBindings]);
 
   useEffect(() => {
     if (!activeRunId) {
