@@ -213,6 +213,14 @@ def route_guidance(
 
             for dependency in pack.dependencies:
                 if dependency in selected:
+                    dependency_score, dependency_pack, dependency_reasons = selected[dependency]
+                    dependency_reason = f"dependency_of={pack_id}"
+                    if dependency_reason not in dependency_reasons:
+                        selected[dependency] = (
+                            dependency_score,
+                            dependency_pack,
+                            [*dependency_reasons, dependency_reason],
+                        )
                     continue
                 dependency_pack = registry.get(dependency)
                 selected[dependency] = (
