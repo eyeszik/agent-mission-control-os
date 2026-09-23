@@ -62,6 +62,7 @@ def main() -> None:
         "services/langgraph/agency/guidance/registry.py",
         "services/langgraph/agency/guidance/router.py",
         "services/langgraph/agency/guidance/packs/branding.yaml",
+        "services/langgraph/agency/guidance/packs/studio_identity_v4.yaml",
         "scripts/verify_guidance_registry.py",
         "apps/web/lib/api/client.ts",
         "apps/web/lib/auth/session.ts",
