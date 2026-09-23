@@ -78,7 +78,10 @@ def _requirement(**overrides) -> AssetRequirement:
 def test_default_registry_loads_branding_pack_and_has_stable_hash():
     first = default_registry()
     second = default_registry()
-    assert [pack.id for pack in first.packs] == ["pg.branding.core"]
+    assert [pack.id for pack in first.packs] == [
+        "pg.branding.core",
+        "pg.studio_identity.v4",
+    ]
     assert first.registry_hash == second.registry_hash
     assert first.get("pg.branding.core").content_hash
 
@@ -174,3 +177,89 @@ def test_request_can_disable_guidance_without_breaking_prompt_compilation():
     assert result.final_state is CompilerState.prompt_package_ready
     assert package.context_manifest.included_guidance == []
     assert package.context_manifest.guidance_context == {}
+
+
+def test_one_off_image_does_not_over_trigger_studio_identity_pack():
+    selection = route_guidance(_requirement(), default_registry())
+    assert "pg.branding.core" in selection.selected_pack_ids
+    assert "pg.studio_identity.v4" not in selection.selected_pack_ids
+
+
+def test_design_system_routes_studio_identity_and_branding_dependency():
+    requirement = _requirement(
+        family=PromptFamily.ui_ux,
+        asset_type="design system",
+        objective="Define a cross-platform product UI component library and token system.",
+        channel="product",
+        required_capabilities=["UI_GENERATION"],
+    )
+    selection = route_guidance(requirement, default_registry())
+
+    assert "pg.studio_identity.v4" in selection.selected_pack_ids
+    assert "pg.branding.core" in selection.selected_pack_ids
+    assert any("studio.token_system" in item for item in selection.selected_section_ids)
+    assert any(
+        "studio.product_ui_accessibility" in item
+        for item in selection.selected_section_ids
+    )
+
+
+def test_excluding_required_branding_dependency_removes_studio_pack():
+    requirement = _requirement(
+        family=PromptFamily.ui_ux,
+        asset_type="design system",
+        objective="Define a design system and token architecture.",
+        channel="product",
+    )
+    selection = route_guidance(
+        requirement,
+        default_registry(),
+        GuidanceOverride(exclude=["pg.branding.core"]),
+    )
+    assert "pg.studio_identity.v4" not in selection.selected_pack_ids
+    assert any(
+        "dependency pg.branding.core explicitly excluded" in reason
+        for reason in selection.exclusion_reasons
+    )
+
+
+def test_studio_guidance_populates_typed_prompt_channels_and_acceptance():
+    requirement = _requirement(
+        family=PromptFamily.ui_ux,
+        asset_type="design system",
+        objective=(
+            "Define an accessible cross-platform UI component library, token system, "
+            "implementation plan, and QA handoff."
+        ),
+        audience="Product teams and end users.",
+        channel="product",
+        destination="design-system",
+        required_capabilities=["UI_GENERATION"],
+        content_requirements=[
+            "Define reusable component behavior and implementation-aware prompts."
+        ],
+    )
+    request = PromptCompilerRequest.model_validate(
+        {
+            "project_name": "Northwind design system",
+            "brand_core": _brand_core(),
+            "asset_requirements": [requirement.model_dump(mode="json")],
+        }
+    )
+    result = compile_prompt_packages(request)
+    package = result.prompt_packages[0]
+
+    assert result.final_state is CompilerState.prompt_package_ready
+    assert result.acceptance.status.value == "PASS"
+    assert "pg.studio_identity.v4" in package.context_manifest.included_guidance[0] or any(
+        item.startswith("pg.studio_identity.v4:")
+        for item in package.context_manifest.included_guidance
+    )
+    assert package.prompt_ir.token_directives
+    assert package.prompt_ir.accessibility_directives
+    assert package.prompt_ir.qa_directives
+    assert package.prompt_ir.engineering_directives
+    assert "Selected advisory token-system guidance" in package.generic_master_prompt
+    assert "Selected advisory QA guidance" in package.generic_master_prompt
+    assert package.terminal_state == "PROMPT_PACKAGE_READY"
+    assert package.handoff_only is True
