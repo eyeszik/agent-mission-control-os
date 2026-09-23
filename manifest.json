@@ -144,7 +144,7 @@
     },
     {
       "path": "services/langgraph/agency/guidance/router.py",
-      "git_blob_sha": "0510d0becd9fbcf070ca686c5adc23f9f395efe9"
+      "git_blob_sha": "2cb8683e92d00bbbdf18089948b51463fb0643be"
     },
     {
       "path": "services/langgraph/agency/kernel/__init__.py",
