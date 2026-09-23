@@ -10,6 +10,7 @@ from .models import (
     GuidancePack,
     GuidanceSection,
     GuidanceSelection,
+    GuidanceTarget,
 )
 from .registry import GuidanceRegistry, default_registry
 from .router import ROUTER_VERSION, route_guidance
@@ -25,6 +26,7 @@ __all__ = [
     "GuidanceRegistry",
     "GuidanceSection",
     "GuidanceSelection",
+    "GuidanceTarget",
     "ROUTER_VERSION",
     "default_registry",
     "route_guidance",

@@ -172,6 +172,13 @@ class PromptValidationStatus(str, Enum):
     blocked = "BLOCK"
 
 
+class AcceptanceStatus(str, Enum):
+    passed = "PASS"
+    partial = "PARTIAL"
+    blocked = "BLOCKED"
+    failed = "FAIL"
+
+
 class SourceClass(str, Enum):
     primary = "PRIMARY"
     official = "OFFICIAL"
@@ -347,6 +354,12 @@ class PromptIR(BaseModel):
     camera_directives: list[str] = Field(default_factory=list)
     audio_directives: list[str] = Field(default_factory=list)
     accessibility_directives: list[str] = Field(default_factory=list)
+    trend_directives: list[str] = Field(default_factory=list)
+    token_directives: list[str] = Field(default_factory=list)
+    engineering_directives: list[str] = Field(default_factory=list)
+    governance_directives: list[str] = Field(default_factory=list)
+    qa_directives: list[str] = Field(default_factory=list)
+    production_guidance_directives: list[str] = Field(default_factory=list)
     content_directives: list[str]
     production_directives: list[str]
     negative_constraints: list[str]
@@ -373,6 +386,15 @@ class PromptValidationResult(BaseModel):
     status: PromptValidationStatus
     issues: list[str] = Field(default_factory=list)
     checked_dimensions: list[str] = Field(default_factory=list)
+
+    model_config = {"extra": "forbid"}
+
+
+class AcceptanceReport(BaseModel):
+    status: AcceptanceStatus
+    blocking_criteria: list[str] = Field(default_factory=list)
+    limitations: list[str] = Field(default_factory=list)
+    checks: list[str] = Field(default_factory=list)
 
     model_config = {"extra": "forbid"}
 
@@ -447,6 +469,7 @@ class PromptCompilerResult(BaseModel):
     completeness: CompletenessReport
     confidence: float = Field(ge=0.0, le=1.0)
     confidence_band: ConfidenceBand
+    acceptance: AcceptanceReport
     prompt_packages: list[PromptPackage]
     voids: list[str] = Field(default_factory=list)
     speculative_inferences: list[str] = Field(default_factory=list)
@@ -764,14 +787,25 @@ def _guidance_directive_buckets(context: PromptContext) -> dict[str, list[str]]:
         "camera": [],
         "audio": [],
         "accessibility": [],
+        "trend": [],
+        "tokens": [],
+        "engineering": [],
+        "governance": [],
+        "quality": [],
+        "production": [],
     }
     for key in sorted(context.guidance_context):
         payload = context.guidance_context[key]
         section = payload.get("section", {})
         section_id = str(section.get("id", "")).lower()
         directives = [str(item) for item in section.get("directives", [])]
+        targets = [str(item) for item in section.get("directive_targets", [])]
 
-        if "strategy" in section_id or "positioning" in section_id:
+        if targets:
+            for target in targets:
+                if target in buckets:
+                    buckets[target].extend(directives)
+        elif "strategy" in section_id or "positioning" in section_id:
             buckets["strategy"].extend(directives)
         elif "verbal" in section_id or "naming" in section_id:
             buckets["verbal"].extend(directives)
@@ -781,6 +815,15 @@ def _guidance_directive_buckets(context: PromptContext) -> dict[str, list[str]]:
             buckets["visual"].extend(directives)
             if "creative_direction" in section_id:
                 buckets["composition"].extend(directives)
+
+        for criterion in section.get("evaluation_criteria", []):
+            buckets["quality"].append(f"Evaluate: {criterion}")
+        for anti_pattern in section.get("anti_patterns", []):
+            buckets["quality"].append(f"Avoid: {anti_pattern}")
+        for evidence_requirement in section.get("evidence_requirements", []):
+            buckets["governance"].append(
+                f"Evidence requirement: {evidence_requirement}"
+            )
 
         subsections = section.get("subsections", {})
         visual_identity = subsections.get("visual_identity", {}) if isinstance(subsections, dict) else {}
@@ -828,6 +871,12 @@ def compile_prompt_ir(spec: AssetSpec, context: PromptContext) -> PromptIR:
         camera_directives=guidance["camera"],
         audio_directives=guidance["audio"],
         accessibility_directives=guidance["accessibility"],
+        trend_directives=guidance["trend"],
+        token_directives=guidance["tokens"],
+        engineering_directives=guidance["engineering"],
+        governance_directives=guidance["governance"],
+        qa_directives=guidance["quality"],
+        production_guidance_directives=guidance["production"],
         content_directives=list(spec.content_requirements),
         production_directives=production,
         negative_constraints=list(spec.negative_constraints),
@@ -867,6 +916,12 @@ def serialize_generic_prompt(ir: PromptIR, spec: AssetSpec) -> str:
     lines += section("Selected advisory camera guidance", ir.camera_directives)
     lines += section("Selected advisory audio guidance", ir.audio_directives)
     lines += section("Selected advisory accessibility guidance", ir.accessibility_directives)
+    lines += section("Selected advisory trend guidance", ir.trend_directives)
+    lines += section("Selected advisory token-system guidance", ir.token_directives)
+    lines += section("Selected advisory engineering guidance", ir.engineering_directives)
+    lines += section("Selected advisory governance guidance", ir.governance_directives)
+    lines += section("Selected advisory QA guidance", ir.qa_directives)
+    lines += section("Selected advisory production guidance", ir.production_guidance_directives)
     lines += section("Required content", ir.content_directives)
     lines += section("Production specification", ir.production_directives)
     lines += section("Quality constraints", ir.quality_constraints)
@@ -1027,6 +1082,26 @@ def synthesize_report(
     )
 
 
+def _acceptance_report(
+    status: AcceptanceStatus,
+    *,
+    blocking_criteria: list[str] | None = None,
+    limitations: list[str] | None = None,
+) -> AcceptanceReport:
+    return AcceptanceReport(
+        status=status,
+        blocking_criteria=blocking_criteria or [],
+        limitations=limitations or [],
+        checks=[
+            "brand_authority_present",
+            "asset_requirements_present",
+            "blocking_evidence_gaps_resolved",
+            "prompt_validation_executed",
+            "generation_firewall_preserved",
+        ],
+    )
+
+
 def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerResult:
     passes: list[PassResult] = []
 
@@ -1075,6 +1150,11 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
             completeness=completeness,
             confidence=confidence,
             confidence_band=confidence_band,
+            acceptance=_acceptance_report(
+                AcceptanceStatus.blocked,
+                blocking_criteria=["brand_core_missing"],
+                limitations=["Canonical BrandCore is required before prompt synthesis."],
+            ),
             prompt_packages=[],
             voids=sorted(unresolved_gap_ids),
         )
@@ -1091,6 +1171,11 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
             completeness=completeness,
             confidence=confidence,
             confidence_band=confidence_band,
+            acceptance=_acceptance_report(
+                AcceptanceStatus.blocked,
+                blocking_criteria=["asset_requirements_missing"],
+                limitations=["At least one typed AssetRequirement is required."],
+            ),
             prompt_packages=[],
             voids=["[VOID_DETECTED:ASSET_REQUIREMENTS]"],
         )
@@ -1112,6 +1197,11 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
             completeness=completeness,
             confidence=confidence,
             confidence_band=confidence_band,
+            acceptance=_acceptance_report(
+                AcceptanceStatus.blocked,
+                blocking_criteria=[gap.gap_id for gap in blocking_unresolved],
+                limitations=["Material evidence gaps block synthesis until resolved."],
+            ),
             prompt_packages=[],
             voids=[f"[VOID_DETECTED:{gap.gap_id}]" for gap in blocking_unresolved],
         )
@@ -1152,6 +1242,32 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
     else:
         final_state = CompilerState.prompt_package_ready
 
+    has_validation_repairs = any(
+        package.validation.status is PromptValidationStatus.repair
+        for package in packages
+    )
+    partial_reasons: list[str] = []
+    if unresolved_gap_ids and final_state is not CompilerState.blocked:
+        partial_reasons.append("Non-blocking evidence gaps remain explicit in the package.")
+    if has_validation_repairs and final_state is not CompilerState.blocked:
+        partial_reasons.append("One or more prompt validation checks require bounded repair.")
+
+    acceptance = _acceptance_report(
+        AcceptanceStatus.failed
+        if final_state is CompilerState.blocked
+        else (
+            AcceptanceStatus.partial
+            if unresolved_gap_ids or has_validation_repairs
+            else AcceptanceStatus.passed
+        ),
+        blocking_criteria=(
+            ["prompt_validation_blocked"]
+            if final_state is CompilerState.blocked
+            else []
+        ),
+        limitations=partial_reasons,
+    )
+
     return PromptCompilerResult(
         project_name=request.project_name,
         final_state=final_state,
@@ -1163,6 +1279,7 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
         completeness=completeness,
         confidence=confidence,
         confidence_band=confidence_band,
+        acceptance=acceptance,
         prompt_packages=packages,
         voids=[f"[VOID_DETECTED:{gap_id}]" for gap_id in sorted(unresolved_gap_ids)],
     )
@@ -1189,6 +1306,7 @@ def runtime_receipt(result: PromptCompilerResult) -> dict[str, Any]:
         "prompt_package_count": len(result.prompt_packages),
         "confidence": result.confidence,
         "confidence_band": result.confidence_band.value,
+        "acceptance_status": result.acceptance.status.value,
         "generation_firewall": result.generation_firewall,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "result_hash": stable_hash(result),

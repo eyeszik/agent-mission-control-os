@@ -188,6 +188,52 @@ def route_guidance(
             continue
         ranked.append((score, pack.id, pack, reasons))
 
+    selected: dict[str, tuple[float, GuidancePack, list[str]]] = {
+        pack.id: (score, pack, reasons)
+        for score, _, pack, reasons in ranked
+    }
+
+    changed = True
+    while changed:
+        changed = False
+        for pack_id in sorted(list(selected)):
+            score, pack, reasons = selected[pack_id]
+            blocked_dependency = next(
+                (dependency for dependency in pack.dependencies if dependency in exclude),
+                None,
+            )
+            if blocked_dependency is not None:
+                selected.pop(pack_id, None)
+                rejected.append(pack_id)
+                exclusion_reasons.append(
+                    f"{pack_id}: dependency {blocked_dependency} explicitly excluded"
+                )
+                changed = True
+                continue
+
+            for dependency in pack.dependencies:
+                if dependency in selected:
+                    dependency_score, dependency_pack, dependency_reasons = selected[dependency]
+                    dependency_reason = f"dependency_of={pack_id}"
+                    if dependency_reason not in dependency_reasons:
+                        selected[dependency] = (
+                            dependency_score,
+                            dependency_pack,
+                            [*dependency_reasons, dependency_reason],
+                        )
+                    continue
+                dependency_pack = registry.get(dependency)
+                selected[dependency] = (
+                    score,
+                    dependency_pack,
+                    [f"dependency_of={pack_id}"],
+                )
+                changed = True
+
+    ranked = [
+        (score, pack_id, pack, reasons)
+        for pack_id, (score, pack, reasons) in selected.items()
+    ]
     ranked.sort(key=lambda item: (-item[0], item[1]))
 
     selected_pack_ids: list[str] = []
