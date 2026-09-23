@@ -54,3 +54,10 @@ provider capability truth, accessibility requirements, permissions, evidence,
 or the PROMPT_PACKAGE_READY terminal boundary.
 
 See docs/guidance-system.md for the pack contract and extension model.
+
+
+## Evidence-based acceptance
+
+Compiler results include an `AcceptanceReport` with `PASS`, `PARTIAL`, `BLOCKED`, or `FAIL`. The existing numeric confidence field remains a compatibility heuristic and does not authorize release or override failed mandatory gates.
+
+System-level guidance such as `pg.studio_identity.v4` may add trend, token, interaction, accessibility, engineering, governance, QA, and production directives. These remain advisory and are serialized separately from canonical brand constraints.
