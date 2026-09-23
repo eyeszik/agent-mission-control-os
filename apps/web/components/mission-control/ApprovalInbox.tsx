@@ -5,9 +5,13 @@ import { useApprovalStore } from '../../lib/stores/approvalStore';
 export function ApprovalInbox() {
   // Optimization: Select and compute the primitive count directly.
   // Returning a primitive avoids unnecessary re-renders when other approval properties change.
-  const pendingCount = useApprovalStore(
-    (state) => Object.values(state.approvals).filter((a) => a.status === 'pending').length
-  );
+  const pendingCount = useApprovalStore((state) => {
+    let count = 0;
+    for (const id in state.approvals) {
+      if (state.approvals[id].status === 'pending') count++;
+    }
+    return count;
+  });
 
   return (
     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md border transition-colors ${pendingCount > 0 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-zinc-900/60 border-zinc-800/60'}`}>

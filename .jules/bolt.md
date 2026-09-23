@@ -16,3 +16,6 @@
 ## 2026-08-25 - React Hook Rules for Expensive Derived State
 **Learning:** Placing hooks like `useMemo` after conditional early returns violates React's Rules of Hooks. When components derive expensive layout arrays from remote state using maps/filters, they must be wrapped in `useMemo` before any early return to prevent unneeded garbage collection on unrelated local state updates. Handle null checks directly inside the hook.
 **Action:** Always declare all `useMemo` hooks at the top level of the component before early returns. If derived values depend on potentially null objects, safely handle the null checks inside the `useMemo` calculation logic and return dummy/empty arrays.
+## 2026-08-26 - Zustand Selector Allocation Avoidance
+**Learning:** Using `Object.values().filter()` inside Zustand selectors creates unnecessary intermediate arrays and closures on every single state update. Even if the component doesn't re-render, the selector itself runs and causes excess memory allocations and garbage collection overhead.
+**Action:** Replace `Object.values().filter().map()` chains in high-frequency Zustand selectors with a zero-allocation or single-allocation `for...in` loop to avoid intermediate array allocations.
