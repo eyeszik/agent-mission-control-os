@@ -52,6 +52,25 @@ class DirectiveClass(str, Enum):
     trend_suggestion = "TREND_SUGGESTION"
 
 
+class GuidanceTarget(str, Enum):
+    strategy = "strategy"
+    verbal = "verbal"
+    visual = "visual"
+    composition = "composition"
+    typography = "typography"
+    interaction = "interaction"
+    motion = "motion"
+    camera = "camera"
+    audio = "audio"
+    accessibility = "accessibility"
+    trend = "trend"
+    tokens = "tokens"
+    engineering = "engineering"
+    governance = "governance"
+    quality = "quality"
+    production = "production"
+
+
 class GuidanceActivation(BaseModel):
     asset_families: list[str] = Field(default_factory=list)
     asset_types: list[str] = Field(default_factory=list)
@@ -98,7 +117,7 @@ class GuidanceSection(BaseModel):
     evaluation_criteria: list[str] = Field(default_factory=list)
     anti_patterns: list[str] = Field(default_factory=list)
     evidence_requirements: list[str] = Field(default_factory=list)
-    output_targets: list[str] = Field(default_factory=list)
+    output_targets: list[GuidanceTarget] = Field(default_factory=list)
     patterns: dict[str, str] = Field(default_factory=dict)
     dimensions: list[str] = Field(default_factory=list)
     possible_outputs: list[str] = Field(default_factory=list)
