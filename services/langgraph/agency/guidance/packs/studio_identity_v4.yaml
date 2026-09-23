@@ -49,7 +49,7 @@
   ],
   "conflicts_with": [],
   "context_budget": {
-    "max_sections": 11,
+    "max_sections": 12,
     "max_chars": 32000
   },
   "sections": [
@@ -94,6 +94,57 @@
       "directive_targets": [
         "strategy",
         "governance"
+      ]
+    },
+    {
+      "id": "studio.evidence_authority",
+      "purpose": "Preserve statement provenance, rule provenance, freshness, and one explicit authority order across creative and implementation decisions.",
+      "directive_class": "EVIDENCE_BOUND_ADVISORY",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Classify material statements as FACT, INFERENCE, PROPOSAL, DECISION, ACTION, or UNRESOLVED and preserve provenance such as USER_PROVIDED, SOURCE_VERIFIED, OBSERVED, INFERRED, PROPOSED, or UNKNOWN.",
+        "Support material claims about results, customers, certifications, awards, history, sustainability, leadership, standards, APIs, packages, and licensing with relevant evidence before treating them as established facts.",
+        "Evaluate evidence freshness according to volatility, implementation version, and decision consequence; distinguish historical accuracy from present applicability.",
+        "Keep numerical confidence absent unless a defined calibrated method supports it.",
+        "Classify material rules as NORMATIVE, PROJECT_STANDARD, REFERENCE_PATTERN, HEURISTIC, TREND_SIGNAL, or EXPERIMENT and record provenance for adopted consequential rules.",
+        "Apply one authority order: verified obligations; explicit user objectives and protected requirements; approved project assets and decisions; verified project evidence and user needs; project design-system contracts; verified external reference patterns; heuristics; trend signals; aesthetic preferences.",
+        "Investigate conflicting mandatory obligations and preserve unresolved constraints instead of silently averaging or overriding them."
+      ],
+      "evaluation_criteria": [
+        "material statements retain provenance",
+        "freshness-sensitive claims are visibly scoped",
+        "adopted rules have an identifiable authority class",
+        "conflict resolution follows one precedence order"
+      ],
+      "anti_patterns": [
+        "using trend popularity as authority",
+        "treating a generated artifact as approved project truth",
+        "reporting arbitrary confidence percentages as evidence"
+      ],
+      "evidence_requirements": [
+        "source-dependent claims must link to inspected relevant material",
+        "changing technical or legal requirements require current verification when material"
+      ],
+      "output_targets": [
+        "evidence record",
+        "rule provenance",
+        "conflict record"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "evidence record",
+        "rule provenance ledger",
+        "conflict record"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "governance",
+        "quality",
+        "strategy"
       ]
     },
     {
