@@ -104,7 +104,7 @@
     },
     {
       "path": "scripts/verify_manifest.py",
-      "git_blob_sha": "7a5250ffce59feba667c1e84229cc24ce2cbcc7c"
+      "git_blob_sha": "390890c37787d8e31af97a8b5a8a03301476d79d"
     },
     {
       "path": "scripts/verify_ontology_parity.py",
@@ -281,6 +281,10 @@
     {
       "path": "services/langgraph/tests/test_delivery_gate.py",
       "git_blob_sha": "12dab9940ae8ea523997e443c21a4f7d1b5feca4"
+    },
+    {
+      "path": "services/langgraph/tests/test_guidance.py",
+      "git_blob_sha": "eac89838d2f06a7803cc690b6e44d5a39efbd685"
     },
     {
       "path": "services/langgraph/tests/test_lifecycle_analytics.py",
