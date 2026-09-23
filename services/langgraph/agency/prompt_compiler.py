@@ -799,7 +799,7 @@ def _guidance_directive_buckets(context: PromptContext) -> dict[str, list[str]]:
         section = payload.get("section", {})
         section_id = str(section.get("id", "")).lower()
         directives = [str(item) for item in section.get("directives", [])]
-        targets = [str(item) for item in section.get("output_targets", [])]
+        targets = [str(item) for item in section.get("directive_targets", [])]
 
         if targets:
             for target in targets:
