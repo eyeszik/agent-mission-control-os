@@ -93,6 +93,7 @@ def main() -> None:
         "services/langgraph/security/auth.py",
         "services/langgraph/pyproject.toml",
         "services/langgraph/vercel.json",
+        "services/langgraph/tests/test_guidance.py",
         "services/langgraph/tests/test_lifecycle_analytics.py",
         "services/langgraph/tests/test_production_foundation.py",
         "supabase/migrations/20260820_amc_production_foundation_v1.sql",
