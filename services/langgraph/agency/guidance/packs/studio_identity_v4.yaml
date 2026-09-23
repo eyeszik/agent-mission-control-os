@@ -81,8 +81,8 @@
         "claims attributed to source material are used only after the relevant source has been inspected"
       ],
       "output_targets": [
-        "strategy",
-        "governance"
+        "project contract",
+        "completed brand brief"
       ],
       "patterns": {},
       "dimensions": [],
@@ -90,7 +90,11 @@
         "project contract",
         "completed brand brief"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "strategy",
+        "governance"
+      ]
     },
     {
       "id": "studio.identity_system",
@@ -119,10 +123,8 @@
       ],
       "evidence_requirements": [],
       "output_targets": [
-        "visual",
-        "composition",
-        "typography",
-        "motion"
+        "identity system",
+        "creative direction"
       ],
       "patterns": {},
       "dimensions": [],
@@ -130,7 +132,13 @@
         "identity system",
         "creative direction"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "visual",
+        "composition",
+        "typography",
+        "motion"
+      ]
     },
     {
       "id": "studio.trend_intelligence",
@@ -166,8 +174,8 @@
         "material trend claims require current source references and an observation window"
       ],
       "output_targets": [
-        "trend",
-        "governance"
+        "trend record",
+        "adopt-pilot-watch-reject decision"
       ],
       "patterns": {},
       "dimensions": [],
@@ -175,7 +183,11 @@
         "trend record",
         "adopt-pilot-watch-reject decision"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "trend",
+        "governance"
+      ]
     },
     {
       "id": "studio.token_system",
@@ -210,9 +222,8 @@
       ],
       "evidence_requirements": [],
       "output_targets": [
-        "tokens",
-        "engineering",
-        "accessibility"
+        "token architecture",
+        "platform mapping"
       ],
       "patterns": {},
       "dimensions": [],
@@ -220,7 +231,12 @@
         "token architecture",
         "platform mapping"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "tokens",
+        "engineering",
+        "accessibility"
+      ]
     },
     {
       "id": "studio.product_ui_accessibility",
@@ -258,9 +274,8 @@
         "release-level accessibility claims require executed checks on the actual artifact"
       ],
       "output_targets": [
-        "interaction",
-        "accessibility",
-        "quality"
+        "component contract",
+        "accessibility test matrix"
       ],
       "patterns": {},
       "dimensions": [],
@@ -268,7 +283,12 @@
         "component contract",
         "accessibility test matrix"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "interaction",
+        "accessibility",
+        "quality"
+      ]
     },
     {
       "id": "studio.ai_experience",
@@ -302,9 +322,8 @@
       ],
       "evidence_requirements": [],
       "output_targets": [
-        "interaction",
-        "governance",
-        "accessibility"
+        "AI experience contract",
+        "delegated-action state model"
       ],
       "patterns": {},
       "dimensions": [],
@@ -312,7 +331,12 @@
         "AI experience contract",
         "delegated-action state model"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "interaction",
+        "governance",
+        "accessibility"
+      ]
     },
     {
       "id": "studio.asset_catalog",
@@ -338,15 +362,18 @@
       ],
       "evidence_requirements": [],
       "output_targets": [
-        "strategy",
-        "production"
+        "prioritized asset plan"
       ],
       "patterns": {},
       "dimensions": [],
       "possible_outputs": [
         "prioritized asset plan"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "strategy",
+        "production"
+      ]
     },
     {
       "id": "studio.prompt_compiler",
@@ -375,9 +402,8 @@
         "provider-specific features require current capability evidence"
       ],
       "output_targets": [
-        "production",
-        "quality",
-        "governance"
+        "generic master prompt",
+        "verified provider adaptation"
       ],
       "patterns": {},
       "dimensions": [],
@@ -385,7 +411,12 @@
         "generic master prompt",
         "verified provider adaptation"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "production",
+        "quality",
+        "governance"
+      ]
     },
     {
       "id": "studio.engineering_operations",
@@ -424,9 +455,8 @@
         "changing package, API, and platform claims require current verification"
       ],
       "output_targets": [
-        "engineering",
-        "governance",
-        "quality"
+        "implementation plan",
+        "verification plan"
       ],
       "patterns": {},
       "dimensions": [],
@@ -434,7 +464,12 @@
         "implementation plan",
         "verification plan"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "engineering",
+        "governance",
+        "quality"
+      ]
     },
     {
       "id": "studio.versioning_handoff",
@@ -466,8 +501,8 @@
       ],
       "evidence_requirements": [],
       "output_targets": [
-        "governance",
-        "engineering"
+        "handoff record",
+        "migration plan"
       ],
       "patterns": {},
       "dimensions": [],
@@ -475,7 +510,11 @@
         "handoff record",
         "migration plan"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "governance",
+        "engineering"
+      ]
     },
     {
       "id": "studio.qa_acceptance",
@@ -506,8 +545,8 @@
         "release readiness claims require actual artifact and test evidence"
       ],
       "output_targets": [
-        "quality",
-        "governance"
+        "acceptance report",
+        "evidence receipt"
       ],
       "patterns": {},
       "dimensions": [],
@@ -515,7 +554,11 @@
         "acceptance report",
         "evidence receipt"
       ],
-      "subsections": {}
+      "subsections": {},
+      "directive_targets": [
+        "quality",
+        "governance"
+      ]
     }
   ],
   "provenance": {
