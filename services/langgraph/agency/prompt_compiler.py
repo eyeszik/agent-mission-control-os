@@ -1242,20 +1242,30 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
     else:
         final_state = CompilerState.prompt_package_ready
 
+    has_validation_repairs = any(
+        package.validation.status is PromptValidationStatus.repair
+        for package in packages
+    )
+    partial_reasons: list[str] = []
+    if unresolved_gap_ids and final_state is not CompilerState.blocked:
+        partial_reasons.append("Non-blocking evidence gaps remain explicit in the package.")
+    if has_validation_repairs and final_state is not CompilerState.blocked:
+        partial_reasons.append("One or more prompt validation checks require bounded repair.")
+
     acceptance = _acceptance_report(
         AcceptanceStatus.failed
         if final_state is CompilerState.blocked
-        else (AcceptanceStatus.partial if unresolved_gap_ids else AcceptanceStatus.passed),
+        else (
+            AcceptanceStatus.partial
+            if unresolved_gap_ids or has_validation_repairs
+            else AcceptanceStatus.passed
+        ),
         blocking_criteria=(
             ["prompt_validation_blocked"]
             if final_state is CompilerState.blocked
             else []
         ),
-        limitations=(
-            ["Non-blocking evidence gaps remain explicit in the package."]
-            if unresolved_gap_ids and final_state is not CompilerState.blocked
-            else []
-        ),
+        limitations=partial_reasons,
     )
 
     return PromptCompilerResult(
