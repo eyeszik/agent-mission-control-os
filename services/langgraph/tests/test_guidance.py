@@ -263,3 +263,119 @@ def test_studio_guidance_populates_typed_prompt_channels_and_acceptance():
     assert "Selected advisory QA guidance" in package.generic_master_prompt
     assert package.terminal_state == "PROMPT_PACKAGE_READY"
     assert package.handoff_only is True
+
+
+def test_studio_identity_system_activates_v4_and_branding_dependency():
+    requirement = _requirement(
+        asset_type="brand identity system",
+        objective="Compile a complete brand system and asset prompt system from the company description.",
+        channel="brand",
+    )
+    selection = route_guidance(requirement, default_registry())
+
+    assert "pg.studio_identity.v4" in selection.selected_pack_ids
+    assert "pg.branding.core" in selection.selected_pack_ids
+    assert any(
+        "dependency_of=pg.studio_identity.v4" in reason
+        for reason in selection.activation_reasons
+        if reason.startswith("pg.branding.core:")
+    )
+    assert any(
+        "studio.project_contract" in section_id
+        for section_id in selection.selected_section_ids
+    )
+    assert any(
+        "studio.prompt_compiler" in section_id
+        for section_id in selection.selected_section_ids
+    )
+
+
+def test_excluding_required_branding_dependency_rejects_studio_pack():
+    requirement = _requirement(
+        asset_type="brand identity system",
+        objective="Compile a complete identity system from a company description.",
+        channel="brand",
+    )
+    selection = route_guidance(
+        requirement,
+        default_registry(),
+        GuidanceOverride(exclude=["pg.branding.core"]),
+    )
+
+    assert "pg.branding.core" not in selection.selected_pack_ids
+    assert "pg.studio_identity.v4" not in selection.selected_pack_ids
+    assert any(
+        "dependency pg.branding.core explicitly excluded" in reason
+        for reason in selection.exclusion_reasons
+    )
+
+
+def test_design_system_task_selects_tokens_and_accessibility_but_not_ai():
+    requirement = _requirement(
+        family=PromptFamily.ui_ux,
+        asset_type="design system",
+        objective="Create a cross-platform design system for a web app with accessible components.",
+        channel="product",
+        required_capabilities=[],
+    )
+    selection = route_guidance(requirement, default_registry())
+
+    assert any(
+        "studio.token_system" in section_id
+        for section_id in selection.selected_section_ids
+    )
+    assert any(
+        "studio.product_ui_accessibility" in section_id
+        for section_id in selection.selected_section_ids
+    )
+    assert all(
+        "studio.ai_experience" not in section_id
+        for section_id in selection.selected_section_ids
+    )
+
+
+def test_ai_product_task_selects_ai_experience_guidance():
+    requirement = _requirement(
+        family=PromptFamily.ui_ux,
+        asset_type="application design system",
+        objective="Design an AI agent interface with delegated actions, cancellation, and recovery.",
+        channel="product",
+        required_capabilities=[],
+    )
+    selection = route_guidance(requirement, default_registry())
+
+    assert any(
+        "studio.ai_experience" in section_id
+        for section_id in selection.selected_section_ids
+    )
+
+
+def test_studio_compiler_serializes_contextual_channels_and_preserves_firewall():
+    requirement = _requirement(
+        family=PromptFamily.ui_ux,
+        asset_type="design system",
+        objective="Compile a product UI design system and implementation-aware prompt package.",
+        channel="product",
+        required_capabilities=[],
+    )
+    request = PromptCompilerRequest.model_validate(
+        {
+            "project_name": "Northwind product system",
+            "brand_core": _brand_core(),
+            "asset_requirements": [requirement.model_dump(mode="json")],
+        }
+    )
+
+    result = compile_prompt_packages(request)
+    package = result.prompt_packages[0]
+
+    assert result.final_state is CompilerState.prompt_package_ready
+    assert result.acceptance.status.value in {"PASS", "PARTIAL"}
+    assert package.terminal_state == "PROMPT_PACKAGE_READY"
+    assert package.handoff_only is True
+    assert package.prompt_ir.token_directives
+    assert package.prompt_ir.accessibility_directives
+    assert package.prompt_ir.qa_directives
+    assert "Selected advisory token-system guidance" in package.generic_master_prompt
+    assert "Selected advisory QA guidance" in package.generic_master_prompt
+    assert "PROMPT_PACKAGE_READY" == result.generation_firewall
