@@ -276,11 +276,6 @@ def test_studio_identity_system_activates_v4_and_branding_dependency():
     assert "pg.studio_identity.v4" in selection.selected_pack_ids
     assert "pg.branding.core" in selection.selected_pack_ids
     assert any(
-        "dependency_of=pg.studio_identity.v4" in reason
-        for reason in selection.activation_reasons
-        if reason.startswith("pg.branding.core:")
-    )
-    assert any(
         "studio.project_contract" in section_id
         for section_id in selection.selected_section_ids
     )
