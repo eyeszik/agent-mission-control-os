@@ -100,11 +100,11 @@
     },
     {
       "path": "scripts/verify_guidance_registry.py",
-      "git_blob_sha": "d07fb7aacf56fff759163226fbee6c905561611d"
+      "git_blob_sha": "24b08f87f1aeaa4f9aed2b57a28bd717a86c8852"
     },
     {
       "path": "scripts/verify_manifest.py",
-      "git_blob_sha": "2f00ea80cc85a43b63ad3c5ead25b527f6b6f1e4"
+      "git_blob_sha": "7a5250ffce59feba667c1e84229cc24ce2cbcc7c"
     },
     {
       "path": "scripts/verify_ontology_parity.py",
@@ -124,15 +124,19 @@
     },
     {
       "path": "services/langgraph/agency/guidance/__init__.py",
-      "git_blob_sha": "d8bdb157376fbf4731d66bfe80543b3b92c3cb69"
+      "git_blob_sha": "3ea93864b0f960f91e486b11240cbb1b36366ae5"
     },
     {
       "path": "services/langgraph/agency/guidance/models.py",
-      "git_blob_sha": "0844df68054e7bc4058a45de8e2523cef96fa99e"
+      "git_blob_sha": "fec0cf2899762ffebd7cedda7f2578f7fc26025a"
     },
     {
       "path": "services/langgraph/agency/guidance/packs/branding.yaml",
       "git_blob_sha": "3bbd0e16375969d586ab451f0f367df705a7c4f6"
+    },
+    {
+      "path": "services/langgraph/agency/guidance/packs/studio_identity_v4.yaml",
+      "git_blob_sha": "413f2fbbd4da2bb92e003d5c23a29f98131ac8e5"
     },
     {
       "path": "services/langgraph/agency/guidance/registry.py",
@@ -140,7 +144,7 @@
     },
     {
       "path": "services/langgraph/agency/guidance/router.py",
-      "git_blob_sha": "654a94482712da8355741d9c44b9e6da46e19d09"
+      "git_blob_sha": "0510d0becd9fbcf070ca686c5adc23f9f395efe9"
     },
     {
       "path": "services/langgraph/agency/kernel/__init__.py",
@@ -168,7 +172,7 @@
     },
     {
       "path": "services/langgraph/agency/prompt_compiler.py",
-      "git_blob_sha": "71a6f5a6129ba2288655048a38081e5afe9bbad2"
+      "git_blob_sha": "9e8ade11feb1dbb72c17795c8d984b6bf6904360"
     },
     {
       "path": "services/langgraph/agency/skills/dispatcher.py",
