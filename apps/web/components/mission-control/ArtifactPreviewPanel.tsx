@@ -27,7 +27,17 @@ export function ArtifactPreviewPanel() {
   // Optimization: useShallow prevents unnecessary re-renders by returning the same
   // array reference if the content of pendingApprovals hasn't structurally changed,
   // even if other non-pending approvals update in the record.
-  const pendingApprovals = useApprovalStore(useShallow((state) => Object.values(state.approvals).filter(a => a.status === 'pending')));
+  // ⚡ Bolt: Replaced Object.values().filter() with a single-allocation for...in loop
+  // to reduce excessive garbage collection overhead.
+  const pendingApprovals = useApprovalStore(useShallow((state) => {
+    const pending = [];
+    for (const key in state.approvals) {
+      if (state.approvals[key].status === 'pending') {
+        pending.push(state.approvals[key]);
+      }
+    }
+    return pending;
+  }));
   const removeApproval = useApprovalStore((state) => state.removeApproval);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
 
