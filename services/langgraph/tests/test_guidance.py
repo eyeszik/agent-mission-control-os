@@ -80,6 +80,7 @@ def test_default_registry_loads_branding_pack_and_has_stable_hash():
     second = default_registry()
     assert [pack.id for pack in first.packs] == [
         "pg.branding.core",
+        "pg.production_design_system.v1",
         "pg.studio_identity.v4",
     ]
     assert first.registry_hash == second.registry_hash
@@ -379,3 +380,80 @@ def test_studio_compiler_serializes_contextual_channels_and_preserves_firewall()
     assert "Selected advisory token-system guidance" in package.generic_master_prompt
     assert "Selected advisory QA guidance" in package.generic_master_prompt
     assert "PROMPT_PACKAGE_READY" == result.generation_firewall
+
+
+def test_signage_task_routes_production_design_system_and_branding_dependency():
+    requirement = _requirement(
+        family=PromptFamily.image,
+        asset_type="signage",
+        objective="Exterior blade sign announcing the storefront, legible from the street.",
+        channel="signage",
+        destination="Exterior blade mount above the storefront entrance.",
+    )
+    selection = route_guidance(requirement, default_registry())
+
+    assert "pg.production_design_system.v1" in selection.selected_pack_ids
+    assert "pg.branding.core" in selection.selected_pack_ids
+    assert any(
+        "pds.signage_environmental_production" in item
+        for item in selection.selected_section_ids
+    )
+    assert any("pds.color_as_production_token" in item for item in selection.selected_section_ids)
+
+
+def test_packaging_task_routes_production_design_system():
+    requirement = _requirement(
+        family=PromptFamily.print,
+        asset_type="packaging",
+        objective="Structural dieline and artwork for a folding carton.",
+        channel="packaging",
+        destination="Retail shelf packaging.",
+    )
+    selection = route_guidance(requirement, default_registry())
+
+    assert "pg.production_design_system.v1" in selection.selected_pack_ids
+    assert any(
+        "pds.application_family_hierarchy" in item for item in selection.selected_section_ids
+    )
+
+
+def test_one_off_image_does_not_over_trigger_production_design_system_pack():
+    selection = route_guidance(_requirement(), default_registry())
+    assert "pg.production_design_system.v1" not in selection.selected_pack_ids
+
+
+def test_excluding_production_design_system_removes_it_without_breaking_compilation():
+    requirement = _requirement(
+        family=PromptFamily.image,
+        asset_type="signage",
+        objective="Exterior blade sign announcing the storefront.",
+        channel="signage",
+        destination="Exterior blade mount above the storefront entrance.",
+        guidance_overrides={"exclude": ["pg.production_design_system.v1"]},
+    )
+    request = PromptCompilerRequest.model_validate(
+        {
+            "project_name": "Northwind storefront sign",
+            "brand_core": _brand_core(),
+            "asset_requirements": [requirement.model_dump(mode="json")],
+        }
+    )
+
+    result = compile_prompt_packages(request)
+    package = result.prompt_packages[0]
+
+    assert result.final_state is CompilerState.prompt_package_ready
+    assert result.generation_firewall == "PROMPT_PACKAGE_READY"
+    assert not any(
+        item.startswith("pg.production_design_system.v1:")
+        for item in package.context_manifest.included_guidance
+    )
+
+
+def test_production_design_system_never_claims_generation_authority():
+    """The pack must stay advisory: it can shape a prompt, never authorize generation."""
+    registry = default_registry()
+    pack = registry.get("pg.production_design_system.v1")
+    assert pack.authority_class.value == "ADVISORY"
+    section = next(s for s in pack.sections if s.id == "pds.production_aware_prompt_compilation")
+    assert any("does not authorize" in directive for directive in section.directives)
