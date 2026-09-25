@@ -135,6 +135,10 @@
       "git_blob_sha": "3bbd0e16375969d586ab451f0f367df705a7c4f6"
     },
     {
+      "path": "services/langgraph/agency/guidance/packs/production_design_system.yaml",
+      "git_blob_sha": "689022fe259631477323a45c2bb26d1ca392d43b"
+    },
+    {
       "path": "services/langgraph/agency/guidance/packs/studio_identity_v4.yaml",
       "git_blob_sha": "413f2fbbd4da2bb92e003d5c23a29f98131ac8e5"
     },
@@ -284,7 +288,7 @@
     },
     {
       "path": "services/langgraph/tests/test_guidance.py",
-      "git_blob_sha": "eac89838d2f06a7803cc690b6e44d5a39efbd685"
+      "git_blob_sha": "c0e582b2c4bb1238f6bde9a7eb2e32d1a8165ff1"
     },
     {
       "path": "services/langgraph/tests/test_lifecycle_analytics.py",
