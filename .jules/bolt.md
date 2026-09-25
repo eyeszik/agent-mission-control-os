@@ -19,3 +19,6 @@
 ## 2026-10-24 - Zustand Zero-Allocation Selectors
 **Learning:** Using `Object.values().filter()` inside Zustand selectors creates unnecessary intermediate arrays on every state update, leading to excessive garbage collection overhead.
 **Action:** Replace these chains with a zero-allocation or single-allocation `for...in` loop within the selector.
+## 2024-03-24 - Pre-calculating array counts during memoization
+**Learning:** Calling `.filter().length` inline during the React render phase not only runs in O(N) but actively creates and discards temporary arrays every render loop, causing garbage collection pauses.
+**Action:** Always pre-calculate required summary counts (like open queue lengths) inside the `useMemo` block using zero-allocation `for...of` loops, then return those primitive integer counts to the render function.
