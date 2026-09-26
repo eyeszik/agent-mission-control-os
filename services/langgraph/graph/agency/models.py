@@ -2,6 +2,8 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from services.langgraph.agency.design.style_composer import DesignStyleDirection, DesignStyleSelection
+
 
 class CampaignBrief(BaseModel):
     brand_name: str
@@ -19,6 +21,8 @@ class CampaignBrief(BaseModel):
     workflow_idea: Optional[str] = None
     differentiators: List[str] = Field(default_factory=list)
     brand_style_notes: List[str] = Field(default_factory=list)
+    # Design Mode selection; recomposed server-side by the design_brief node.
+    style_selection: Optional[DesignStyleSelection] = None
 
 
 class BrandStrategy(BaseModel):
@@ -47,6 +51,8 @@ class DesignBrief(BaseModel):
     typography_direction: str
     imagery_style: str
     layout_notes: str
+    # The resolved style direction that shaped this brief (artifact lineage).
+    style_direction: Optional[DesignStyleDirection] = None
 
 
 class WorkspaceDocument(BaseModel):

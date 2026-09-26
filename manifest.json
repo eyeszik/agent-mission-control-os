@@ -64,7 +64,7 @@
     },
     {
       "path": "packages/shared/src/schemas/agency.ts",
-      "git_blob_sha": "14cc14bbe657dd696302a498ef524d70d8a51ee4"
+      "git_blob_sha": "1c1ce4c8abfaf084b9d9dfc4af25aacf9954354c"
     },
     {
       "path": "packages/shared/src/schemas/approvals.ts",
@@ -184,7 +184,7 @@
     },
     {
       "path": "services/langgraph/api/routes/agency.py",
-      "git_blob_sha": "336248d1a133c5ad8292e6e8a58dd16f310e87b1"
+      "git_blob_sha": "9b8a824d03daf2b9496265d216e5b254ed5a6902"
     },
     {
       "path": "services/langgraph/api/routes/analytics.py",

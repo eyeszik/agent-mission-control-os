@@ -322,3 +322,152 @@ def test_api_requires_authentication(monkeypatch):
     client = _client()
     assert client.get("/design/styles").status_code == 503
     assert client.post("/design/styles/compose", json={"selections": [{"style_id": "MOD-03"}]}).status_code == 503
+
+
+# --------------------------------------------------------------------------- #
+# Agency workflow integration
+# --------------------------------------------------------------------------- #
+def _node_state(brief: dict, **agency_extra) -> dict:
+    from types import SimpleNamespace
+
+    run = SimpleNamespace(id="run-design-test", tenant_id="tenant-events-test", project_id="proj-1")
+    agency = {"brief": brief, "brand_strategy": {"positioning_statement": "Calm tools for makers."}, **agency_extra}
+    return {"run": run, "extracted_data": {"agency": agency}}
+
+
+def _brief(style_selection=None) -> dict:
+    brief = {
+        "brand_name": "Atelier",
+        "target_audience": "independent designers",
+        "goals": ["launch the studio"],
+        "channels": ["web", "social"],
+    }
+    if style_selection is not None:
+        brief["style_selection"] = style_selection
+    return brief
+
+
+@pytest.fixture
+def captured_prompts(monkeypatch):
+    from services.langgraph.graph.agency import nodes
+    from services.langgraph.graph.agency.llm import GenerationOutcome
+
+    prompts: list[str] = []
+
+    def fake_generate(prompt, fallback, **_kwargs):
+        prompts.append(prompt)
+        return GenerationOutcome(
+            data=dict(fallback), mode="FALLBACK_DEGRADED", provider=None, model=None,
+            schema_version="test", prompt_version="test", prompt_hash="test", attempts=0,
+            started_at="", completed_at="", fallback_used=True,
+        )
+
+    monkeypatch.setattr(nodes, "generate_structured", fake_generate)
+    return prompts
+
+
+def test_design_brief_node_attaches_and_applies_direction(captured_prompts):
+    from services.langgraph.graph.agency.nodes import design_brief_node
+
+    selection = {"selections": _three_layer(), "rationale": "editorial drama"}
+    result = design_brief_node(_node_state(_brief(selection)))
+    direction = result["extracted_data"]["agency"]["design_brief"]["style_direction"]
+    assert direction["applied"] is True
+    assert direction["resolved_dimensions"]["lighting"] == "CLS-01"
+    assert direction["rationale"] == "editorial drama"
+    assert "Follow this resolved style direction" in captured_prompts[0]
+    assert "Lighting (Tenebrism)" in captured_prompts[0]
+
+
+def test_design_brief_node_records_but_never_applies_blocked_direction(captured_prompts):
+    from services.langgraph.graph.agency.nodes import design_brief_node
+
+    selection = {"selections": [{"style_id": "CLS-02", "role": "primary"}, {"style_id": "MOD-01"}]}
+    result = design_brief_node(_node_state(_brief(selection)))
+    direction = result["extracted_data"]["agency"]["design_brief"]["style_direction"]
+    assert direction["blocking"] is True and direction["applied"] is False
+    assert "Follow this resolved style direction" not in captured_prompts[0]
+
+
+def test_design_brief_node_handles_style_missing_from_catalog(captured_prompts):
+    from services.langgraph.graph.agency.nodes import design_brief_node
+
+    # Well-formed id that is not in the catalog (e.g. removed after the run started).
+    selection = {"selections": [{"style_id": "LFS-05"}]}
+    result = design_brief_node(_node_state(_brief(selection)))
+    direction = result["extracted_data"]["agency"]["design_brief"]["style_direction"]
+    assert direction["blocking"] is True and direction["applied"] is False
+    assert any("no longer in the catalog" in c for c in direction["conflicts"])
+
+
+def test_design_brief_node_without_selection_is_unchanged(captured_prompts):
+    from services.langgraph.graph.agency.nodes import design_brief_node
+
+    result = design_brief_node(_node_state(_brief()))
+    assert result["extracted_data"]["agency"]["design_brief"]["style_direction"] is None
+    assert "style direction" not in captured_prompts[0]
+
+
+def test_branding_workspace_exports_direction_lineage():
+    from services.langgraph.graph.agency.models import BrandStrategy, CampaignBrief, DesignBrief
+    from services.langgraph.graph.agency.nodes import _build_branding_workspace
+
+    direction = direction_from_selection({"selections": _three_layer()})
+    design_brief = DesignBrief(
+        palette=["#111111", "#DD0000"], typography_direction="grid sans", imagery_style="editorial",
+        layout_notes="asymmetric", style_direction=direction,
+    )
+    strategy = BrandStrategy(
+        positioning_statement="Calm tools.", brand_pillars=["craft"], tone_of_voice="quiet",
+        target_audience_summary="designers",
+    )
+    workspace = _build_branding_workspace(CampaignBrief(**_brief()), strategy, design_brief, [])
+    lineage = [doc for doc in workspace.internal_assets if doc.path == "branding/raw/style-direction.md"]
+    assert lineage and direction.composition_id in lineage[0].body
+    assert workspace.raw_brand_data["style_direction"]["composition_id"] == direction.composition_id
+    prompt_paths = [doc.path for doc in workspace.visual_asset_prompts]
+    assert prompt_paths[-1] == "branding/prompts/style-direction.prompt.md"  # appended
+    assert prompt_paths[0] == "branding/prompts/logo-mark.prompt.md"  # rebind target unchanged
+
+
+def test_blocked_direction_exports_lineage_but_no_prompt():
+    from services.langgraph.graph.agency.models import BrandStrategy, CampaignBrief, DesignBrief
+    from services.langgraph.graph.agency.nodes import _build_branding_workspace
+
+    blocked = direction_from_selection({"selections": [{"style_id": "CLS-02"}, {"style_id": "MOD-01"}]})
+    design_brief = DesignBrief(
+        palette=["#111111"], typography_direction="t", imagery_style="i", layout_notes="l", style_direction=blocked,
+    )
+    strategy = BrandStrategy(
+        positioning_statement="p", brand_pillars=["x"], tone_of_voice="t", target_audience_summary="a",
+    )
+    workspace = _build_branding_workspace(CampaignBrief(**_brief()), strategy, design_brief, [])
+    assert any(doc.path == "branding/raw/style-direction.md" for doc in workspace.internal_assets)
+    assert all(doc.path != "branding/prompts/style-direction.prompt.md" for doc in workspace.visual_asset_prompts)
+
+
+def test_brand_safety_qa_surfaces_blocked_direction_to_reviewer():
+    from services.langgraph.graph.agency.nodes import brand_safety_qa_node
+
+    blocked = direction_from_selection({"selections": [{"style_id": "CLS-02"}, {"style_id": "MOD-01"}]})
+    package = {
+        "copy_variants": [{"headline": "Calm tools", "body": "Made for makers.", "cta": "Explore"}],
+        "design_brief": {"style_direction": blocked.model_dump(mode="json")},
+    }
+    state = _node_state(_brief(), campaign_package=package, generation_provenance=[])
+    result = brand_safety_qa_node(state)
+    qa = result["extracted_data"]["agency"]["qa_report"]
+    advisories = qa["brand_compliance"]["advisories"]
+    assert any(blocked.composition_id in item for item in advisories)
+    assert result["validation_status"] != "passed"
+
+
+def test_run_request_rejects_unknown_styles():
+    from services.langgraph.api.routes.agency import CampaignBriefRequest
+
+    ok = CampaignBriefRequest(**_brief({"selections": [{"style_id": "MOD-03", "role": "primary"}]}))
+    assert ok.style_selection is not None
+    with pytest.raises(ValidationError):
+        CampaignBriefRequest(**_brief({"selections": [{"style_id": "LFS-05"}]}))
+    with pytest.raises(ValidationError):
+        CampaignBriefRequest(**_brief({"selections": [{"style_id": "MOD-03", "strength": 2}]}))

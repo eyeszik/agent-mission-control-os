@@ -337,8 +337,29 @@ def direction_from_selection(
     )
 
 
+def unresolved_direction(
+    selection: DesignStyleSelection, reason: str, *, catalog_version: str | None = None
+) -> DesignStyleDirection:
+    """A direction that could not be composed (e.g. a style left the catalog).
+
+    Recorded for lineage and human review, never applied to generation.
+    """
+    version = catalog_version or selection.catalog_version
+    return DesignStyleDirection(
+        composition_id=_composition_id(version, selection.selections),
+        catalog_version=version,
+        selections=selection.selections,
+        prompt="",
+        conflicts=[reason],
+        blocking=True,
+        applied=False,
+        rationale=selection.rationale,
+    )
+
+
 __all__ = [
     "COMPOSER_VERSION",
+    "unresolved_direction",
     "ComposedStyle",
     "DesignStyleDirection",
     "DesignStyleSelection",

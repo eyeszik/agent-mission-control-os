@@ -10,6 +10,13 @@ from services.langgraph.agency.assets import (
     render_hero_svg,
     render_logo_svg,
 )
+from services.langgraph.agency.design import InvalidSelectionError, UnknownStyleError
+from services.langgraph.agency.design.style_composer import (
+    DesignStyleDirection,
+    DesignStyleSelection,
+    direction_from_selection,
+    unresolved_direction,
+)
 from services.langgraph.graph.agency.llm import GenerationOutcome, generate_structured
 from services.langgraph.graph.agency.models import (
     AssetExecutionPackage,
@@ -178,6 +185,38 @@ def _build_business_workspace(brief: CampaignBrief, strategy: BrandStrategy, con
     )
 
 
+
+def _style_direction_document(direction: DesignStyleDirection) -> str:
+    lines = [
+        "# Style Direction",
+        "",
+        f"Composition: {direction.composition_id}",
+        f"Catalog version: {direction.catalog_version}",
+        f"Applied to generation: {'yes' if direction.applied else 'no'}",
+        "",
+        "## Layers",
+        *(
+            f"- {layer.style_id} ({layer.role}, strength {layer.strength:.2f}"
+            f"{', locked' if layer.locked else ''}): {', '.join(layer.dimensions) or 'declared dimensions'}"
+            for layer in direction.selections
+        ),
+        "",
+        "## Resolved dimensions",
+        *(f"- {dimension}: {style_id}" for dimension, style_id in direction.resolved_dimensions.items()),
+    ]
+    if direction.rationale:
+        lines += ["", "## Rationale", direction.rationale]
+    if direction.conflicts:
+        lines += ["", "## Blocking conflicts", *(f"- {item}" for item in direction.conflicts)]
+    if direction.warnings:
+        lines += ["", "## Warnings", *(f"- {item}" for item in direction.warnings)]
+    if direction.prompt:
+        lines += ["", "## Compiled prompt", direction.prompt]
+    if direction.negative_prompt:
+        lines += ["", "## Negative prompt", direction.negative_prompt]
+    return "\n".join(lines)
+
+
 def _build_branding_workspace(brief: CampaignBrief, strategy: BrandStrategy, design_brief: DesignBrief, concepts: list[CreativeConcept]) -> BrandingWorkspace:
     raw_brand_data = {
         "brand_name": brief.brand_name,
@@ -265,6 +304,37 @@ def _build_branding_workspace(brief: CampaignBrief, strategy: BrandStrategy, des
             asset_type="hero_illustration",
         ),
     ]
+    direction = design_brief.style_direction
+    if direction is not None:
+        # Lineage: always record the direction, even when it was blocked.
+        raw_brand_data["style_direction"] = direction.model_dump(mode="json")
+        internal_assets.append(
+            _workspace_doc(
+                "branding/raw/style-direction.md",
+                "Style Direction",
+                "document",
+                _style_direction_document(direction),
+                composition_id=direction.composition_id,
+                catalog_version=direction.catalog_version,
+                applied=direction.applied,
+                blocking=direction.blocking,
+            )
+        )
+        if direction.applied:
+            # Appended, never prepended: artifact rebinds edit visual_asset_prompts[0].
+            body = direction.prompt
+            if direction.negative_prompt:
+                body = f"{body}\n\nNegative: {direction.negative_prompt}"
+            visual_asset_prompts.append(
+                _workspace_doc(
+                    "branding/prompts/style-direction.prompt.md",
+                    "Style Direction Prompt",
+                    "prompt",
+                    body,
+                    asset_type="style_direction",
+                    composition_id=direction.composition_id,
+                )
+            )
     return BrandingWorkspace(
         raw_brand_data=raw_brand_data,
         internal_assets=internal_assets,
@@ -648,15 +718,48 @@ def copywriting_node(state: GraphState) -> dict:
     }
 
 
+def _resolve_style_direction(brief: dict) -> DesignStyleDirection | None:
+    """Recompose the brief's Design Mode selection server-side.
+
+    The client's composition is never trusted as-is: the selection is recomposed
+    against the canonical catalog here. A selection that cannot be composed is
+    recorded as a blocking, unapplied direction for human review.
+    """
+    raw = brief.get("style_selection")
+    if not raw:
+        return None
+    selection = DesignStyleSelection.model_validate(raw)
+    context = {
+        "objective": ", ".join(brief.get("goals") or []) or brief.get("business_idea") or brief.get("offer_summary") or "",
+        "audience": brief.get("target_audience") or "",
+        "format": ", ".join(brief.get("channels") or []),
+    }
+    try:
+        return direction_from_selection(selection, context)
+    except UnknownStyleError as exc:
+        return unresolved_direction(selection, f"style {exc.args[0]!r} is no longer in the catalog")
+    except InvalidSelectionError as exc:
+        return unresolved_direction(selection, str(exc))
+
+
 def design_brief_node(state: GraphState) -> dict:
     _log_node(state, "design_brief")
     data, agency = _agency_data(state)
     strategy = agency.get("brand_strategy", {})
     brief = agency.get("brief", {})
+    direction = _resolve_style_direction(brief)
+    style_clause = ""
+    if direction is not None and direction.applied:
+        style_clause = (
+            "\nFollow this resolved style direction. Each dimension is owned by exactly one style; "
+            "do not blend other styles into a dimension:\n"
+            f"{direction.prompt}\nAvoid: {direction.negative_prompt}"
+        )
     prompt = (
         "You are an art director. Produce a JSON design brief with keys 'palette' (array of 3-5 hex colors), "
         "'typography_direction' (string), 'imagery_style' (string), 'layout_notes' (string), consistent with this brand strategy.\n"
         f"Strategy: {json.dumps(strategy)}\nChannels: {brief.get('channels', [])}"
+        f"{style_clause}"
     )
     fallback = {
         "palette": ["#1F2937", "#F59E0B", "#F9FAFB"],
@@ -666,7 +769,10 @@ def design_brief_node(state: GraphState) -> dict:
     }
     outcome = generate_structured(prompt, fallback, schema_version="design-brief-v1")
     result = _record_generation(agency, "design_brief", outcome)
-    design_brief = DesignBrief(**{**fallback, **{k: v for k, v in result.items() if k in fallback}})
+    design_brief = DesignBrief(
+        **{**fallback, **{k: v for k, v in result.items() if k in fallback}},
+        style_direction=direction,
+    )
     agency["design_brief"] = design_brief.model_dump()
     data["agency"] = agency
     return {
@@ -716,7 +822,23 @@ def brand_safety_qa_node(state: GraphState) -> dict:
     quality = evaluate_quality(combined_text or package.get("strategy", {}).get("positioning_statement", ""))
     degraded_tasks = [item.get("task", "unknown") for item in agency.get("generation_provenance", []) if item.get("mode") != "PROVIDER_SUCCESS"]
     release_blocked = bool(degraded_tasks)
-    qa_passed = (not flagged) and quality["threshold_passed"] and not release_blocked
+    # A Design Mode direction travels to the reviewer as an advisory. A blocked
+    # direction means the output does not reflect the requested design, so QA
+    # requires review; the human stays the release authority.
+    design = package.get("design_brief") or agency.get("design_brief") or {}
+    direction = design.get("style_direction") or {}
+    style_blocked = bool(direction.get("blocking"))
+    style_findings: list[str] = []
+    if style_blocked:
+        style_findings.append(
+            f"Style direction {direction.get('composition_id')} was not applied "
+            f"({'; '.join(direction.get('conflicts') or [])}); the output does not reflect the requested design direction."
+        )
+    elif direction.get("warnings"):
+        style_findings.append("Style direction warnings: " + "; ".join(direction["warnings"]))
+    if style_findings:
+        compliance = {**compliance, "advisories": [*(compliance.get("advisories") or []), *style_findings]}
+    qa_passed = (not flagged) and quality["threshold_passed"] and not release_blocked and not style_blocked
     notes = ["No banned-claim heuristic matches detected." if not flagged else f"Flagged terms requiring review: {', '.join(flagged)}"]
     if release_blocked:
         notes.append("Release blocked because one or more generation stages used degraded fallback output; rerun with a configured provider before delivery.")
