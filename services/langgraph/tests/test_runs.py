@@ -94,6 +94,22 @@ def test_run_result_commit_creates_then_revises_protected_artifact_automatically
     assert queue[0]["status"] == "OPEN"
 
 
+def test_false_boolean_provenance_field_counts_as_present_evidence():
+    import services.langgraph.persistence.sqlite_db as sqlite_db
+    from services.langgraph.app.runtime_support import trust_kernel
+    from services.langgraph.persistence.invalidation import derive_event_bindings
+
+    sqlite_db.init_db()
+    trust_kernel().bind_project(tenant_id="tenant_1", project_id="proj_1")
+    bindings = derive_event_bindings(
+        tenant_id="tenant_1",
+        project_id="proj_1",
+        result=_agency_result("Boolean Evidence"),
+    )
+    assert bindings["MODEL_PARAM_CHANGE"]["status"] == "BOUND"
+    assert bindings["MODEL_PARAM_CHANGE"]["payload"]["provenance_items"] == 1
+
+
 def test_run_result_commit_opens_and_discharges_invalidation_obligations():
     import services.langgraph.persistence.sqlite_db as sqlite_db
     from services.langgraph.app.runtime_support import trust_kernel
