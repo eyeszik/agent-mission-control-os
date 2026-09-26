@@ -14,6 +14,7 @@ from services.langgraph.persistence.database import database_backend
 from services.langgraph.persistence.events import record_event
 from services.langgraph.persistence.idempotency import complete_idempotency, fail_idempotency, hash_payload, reserve_idempotency
 from services.langgraph.persistence.invalidation import (
+    AGENCY_PIPELINE_DEMANDED_EVENT_CLASSES,
     discharge_run_obligations,
     list_project_invalidation_obligations,
     record_run_invalidation_bindings,
@@ -274,6 +275,7 @@ def revise_protected_run_artifact(
         run_id=run_id,
         artifact_branch=artifact_id,
         result=record.get("result"),
+        demanded_event_classes=AGENCY_PIPELINE_DEMANDED_EVENT_CLASSES,
     )
     record_event(
         run_id,

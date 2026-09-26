@@ -163,16 +163,22 @@ def test_create_and_resume_agency_run_emits_proof_bundle(monkeypatch):
         f"/agency/runs/{created['run_id']}/resume",
         headers={"Idempotency-Key": str(uuid4())},
     )
-    assert resume.status_code == 409
-    assert "blocked by open invalidation obligations" in resume.json()["detail"].lower()
+    assert resume.status_code == 200
+    resumed = resume.json()
+    assert resumed["status"] == "completed"
+    assert resumed["delivery"]
+    assert resumed["proof"]["summary"]["latest_terminal_candidate"] == "COMPLETE"
+    assert resumed["proof"]["completion_evaluation"]["proof_coverage"] == 1.0
 
     trust = client.get(f"/runtime/projects/{created['project_id']}/trust")
     assert trust.status_code == 200
     trust_payload = trust.json()
-    assert trust_payload["compile_blocked"] is True
-    assert trust_payload["hook_gap_count"] >= 1
+    assert trust_payload["compile_blocked"] is False
+    # Non-applicable MEMORY_WRITE / CLOCK_WINDOW_ADVANCE gaps remain observable,
+    # but are not demanded for this pipeline and therefore cannot authorize/block release.
+    assert trust_payload["hook_gap_count"] == 0
     assert trust_payload["policy_decisions"] >= 1
-    assert trust_payload["delivered_outbox"] == 0
+    assert trust_payload["delivered_outbox"] >= 1
     assert trust_payload["pending_outbox"] == 0
     assert trust_payload["open_recovery_cases"] == 0
-    assert trust_payload["recent_policy_decisions"][0]["action"] in {"agency.create", "approval.decide"}
+    assert trust_payload["recent_policy_decisions"][0]["action"] in {"agency.resume", "approval.decide", "agency.create"}

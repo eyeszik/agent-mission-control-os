@@ -94,6 +94,22 @@ def test_run_result_commit_creates_then_revises_protected_artifact_automatically
     assert queue[0]["status"] == "OPEN"
 
 
+def test_false_boolean_provenance_field_counts_as_present_evidence():
+    import services.langgraph.persistence.sqlite_db as sqlite_db
+    from services.langgraph.app.runtime_support import trust_kernel
+    from services.langgraph.persistence.invalidation import derive_event_bindings
+
+    sqlite_db.init_db()
+    trust_kernel().bind_project(tenant_id="tenant_1", project_id="proj_1")
+    bindings = derive_event_bindings(
+        tenant_id="tenant_1",
+        project_id="proj_1",
+        result=_agency_result("Boolean Evidence"),
+    )
+    assert bindings["MODEL_PARAM_CHANGE"]["status"] == "BOUND"
+    assert bindings["MODEL_PARAM_CHANGE"]["payload"]["provenance_items"] == 1
+
+
 def test_run_result_commit_opens_and_discharges_invalidation_obligations():
     import services.langgraph.persistence.sqlite_db as sqlite_db
     from services.langgraph.app.runtime_support import trust_kernel
@@ -146,9 +162,14 @@ def test_run_result_commit_persists_hook_gap_for_unsourced_classes_and_blocks_co
     open_rows = open_demanded_obligations(run_id=run_id, artifact_branch=f"art-protected-{run_id}")
     by_class = {row["event_class"]: row for row in open_rows}
     latest = latest_branch_obligations(run_id, f"art-protected-{run_id}")
-    assert by_class["MEMORY_WRITE"]["state"] == "HOOK_GAP"
-    assert by_class["CLOCK_WINDOW_ADVANCE"]["state"] == "HOOK_GAP"
+    # Memory/window gaps are retained as explicit evidence but are not demanded
+    # by the current branding pipeline because it has no such dependencies.
+    assert latest["MEMORY_WRITE"]["state"] == "HOOK_GAP"
+    assert not latest["MEMORY_WRITE"]["demanded"]
+    assert latest["CLOCK_WINDOW_ADVANCE"]["state"] == "HOOK_GAP"
+    assert not latest["CLOCK_WINDOW_ADVANCE"]["demanded"]
     assert latest["ACL_SECRET_CHANGE"]["state"] in {"HOOK_GAP", "DISCHARGED_RECOMPUTE"}
+    # Missing generation provenance remains a demanded release blocker.
     assert by_class["SPEC_CHANGE"]["state"] == "HOOK_GAP"
     assert by_class["MODEL_PARAM_CHANGE"]["state"] == "HOOK_GAP"
     assert by_class["SCHEMA_CHANGE"]["state"] == "HOOK_GAP"

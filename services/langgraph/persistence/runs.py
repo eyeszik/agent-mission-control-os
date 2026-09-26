@@ -4,7 +4,10 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from services.langgraph.persistence.idempotency import hash_payload
-from services.langgraph.persistence.invalidation import record_run_invalidation_bindings
+from services.langgraph.persistence.invalidation import (
+    AGENCY_PIPELINE_DEMANDED_EVENT_CLASSES,
+    record_run_invalidation_bindings,
+)
 from services.langgraph.persistence.database import (
     decode_json,
     is_postgres,
@@ -92,6 +95,7 @@ def _sync_protected_run_artifact(run_id: str, tenant_id: str, project_id: str, r
         run_id=run_id,
         artifact_branch=revision["artifact"]["artifact_id"],
         result=result,
+        demanded_event_classes=AGENCY_PIPELINE_DEMANDED_EVENT_CLASSES,
     )
 
 

@@ -1,0 +1,183 @@
+{
+  "schema": "amc-roleos-source-disposition/v1",
+  "generated_for_repo": "eyeszik/agent-mission-control-os",
+  "source_archive_sha256": "d98182dd14b4c1493232d59d2783ce05e8dfb120ebeeb865c88317d06075a757",
+  "source_archive_equivalence": {
+    "agency-role-os-v2(3).zip": "d98182dd14b4c1493232d59d2783ce05e8dfb120ebeeb865c88317d06075a757",
+    "agency-role-os-v2(4).zip": "d98182dd14b4c1493232d59d2783ce05e8dfb120ebeeb865c88317d06075a757"
+  },
+  "base_commit": "64c5a29d66cf6129792e5bb8dc310212ec5efa8c",
+  "release_candidate_branch": "roleos-release-candidate-2026-09-25",
+  "record_count": 28,
+  "reconstruction_note": "Evidence-backed reconstruction because the earlier generated standalone 28-record ledger was unavailable for raw-byte recovery; this does not claim verbatim recovery.",
+  "records": [
+    {
+      "id": "R01",
+      "issue": "Authority labels vs runtime permissions",
+      "disposition": "RESOLVED_POLICY",
+      "resolution": "Source seniority/title never grants runtime permission."
+    },
+    {
+      "id": "R02",
+      "issue": "Self-approval",
+      "disposition": "RESOLVED_POLICY",
+      "resolution": "Orchestrators/roles cannot grant own authority or self-approve high consequence work."
+    },
+    {
+      "id": "R03",
+      "issue": "Creator/reviewer independence",
+      "disposition": "RESOLVED_POLICY",
+      "resolution": "Creation, QA and authenticated HITL remain separate."
+    },
+    {
+      "id": "R04",
+      "issue": "Client/release authority",
+      "disposition": "RESOLVED_POLICY",
+      "resolution": "P11 client acceptance is distinct from P12 external launch."
+    },
+    {
+      "id": "R05",
+      "issue": "Legal/compliance authority",
+      "disposition": "RESOLVED_POLICY",
+      "resolution": "Legal/compliance remains a separate approval domain."
+    },
+    {
+      "id": "R06",
+      "issue": "Retry-limit conflict",
+      "disposition": "RESOLVED_CONSERVATIVE",
+      "resolution": "WorkOrder retry_limit remains 3; non-retryable work is never retried merely because budget remains."
+    },
+    {
+      "id": "R07",
+      "issue": "Numeric confidence thresholds",
+      "disposition": "RESOLVED_POLICY",
+      "resolution": "Confidence is evidence metadata, never release authority."
+    },
+    {
+      "id": "R08",
+      "issue": "Cloudflare bindings",
+      "disposition": "QUARANTINED_UNVERIFIED",
+      "resolution": "No Cloudflare runtime capability is claimed without verified bindings."
+    },
+    {
+      "id": "R09",
+      "issue": "MCP transports",
+      "disposition": "QUARANTINED_UNVERIFIED",
+      "resolution": "Imported MCP transports remain design context until target transports are verified."
+    },
+    {
+      "id": "R10",
+      "issue": "External provider APIs",
+      "disposition": "RESOLVED_CURRENT_REPO",
+      "resolution": "Only current AMC adapters/config are authoritative."
+    },
+    {
+      "id": "R11",
+      "issue": "Payment subsystem",
+      "disposition": "NOT_IMPLEMENTED_NOT_REQUIRED",
+      "resolution": "No payment execution is added by this agency integration."
+    },
+    {
+      "id": "R12",
+      "issue": "Stripe MPP/HTTP 402 claim",
+      "disposition": "QUARANTINED_UNVERIFIED",
+      "resolution": "Source label is not inherited as an AMC capability."
+    },
+    {
+      "id": "R13",
+      "issue": "x402 availability",
+      "disposition": "QUARANTINED_UNVERIFIED",
+      "resolution": "Future/payment design context only."
+    },
+    {
+      "id": "R14",
+      "issue": "Tempo/TIP-20 readiness",
+      "disposition": "QUARANTINED_UNVERIFIED",
+      "resolution": "Source itself requires environment verification."
+    },
+    {
+      "id": "R15",
+      "issue": "OAuth/session-key claim",
+      "disposition": "RESOLVED_SCOPE",
+      "resolution": "Generic OAuth patterns do not prove an AMC provider adapter; production auth remains current Supabase principal/membership."
+    },
+    {
+      "id": "R16",
+      "issue": "Webhook/reconciliation patterns",
+      "disposition": "RESOLVED_SCOPE",
+      "resolution": "Keep implemented idempotency/outbox/recovery only; do not imply absent provider webhooks."
+    },
+    {
+      "id": "R17",
+      "issue": "Payment refund/duplicate recovery",
+      "disposition": "NOT_IMPLEMENTED_NOT_REQUIRED",
+      "resolution": "No payment/refund automation is added."
+    },
+    {
+      "id": "R18",
+      "issue": "Spend authority/payment approval",
+      "disposition": "RESOLVED_FAIL_CLOSED",
+      "resolution": "Paid-media/spend remains disabled; approvals do not activate spend."
+    },
+    {
+      "id": "R19",
+      "issue": "Production deployment readiness",
+      "disposition": "HUMAN_GATE_RETAINED",
+      "resolution": "Production ACTIVE still requires exact production-activation gates on the deployed revision."
+    },
+    {
+      "id": "R20",
+      "issue": "Secret handling",
+      "disposition": "RESOLVED_POLICY",
+      "resolution": "Secrets stay in environment/secret-manager; none are committed or placed in prompts."
+    },
+    {
+      "id": "R21",
+      "issue": "Tool proof log",
+      "disposition": "QUARANTINED_HISTORICAL",
+      "resolution": "Imported tool proof is historical/provenance context, not current execution proof."
+    },
+    {
+      "id": "R22",
+      "issue": "Streaming/SSE assumptions",
+      "disposition": "RESOLVED_TEST_REQUIRED",
+      "resolution": "Current AMC event/SSE tests are authoritative; imported resilience spec is not proof."
+    },
+    {
+      "id": "R23",
+      "issue": "Cloudflare runtime topology",
+      "disposition": "NOT_APPLICABLE_BASELINE",
+      "resolution": "Current candidate does not require Cloudflare runtime primitives."
+    },
+    {
+      "id": "R24",
+      "issue": "Production database ambiguity",
+      "disposition": "RESOLVED_CURRENT_REPO",
+      "resolution": "Production resolves to Postgres; SQLite remains local/CI."
+    },
+    {
+      "id": "R25",
+      "issue": "Observability hooks",
+      "disposition": "RESOLVED_REQUIREMENT_NOT_PROOF",
+      "resolution": "Imported hooks are requirements; current AMC events/proofs/trust projection provide runtime evidence."
+    },
+    {
+      "id": "R26",
+      "issue": "Contract format ambiguity",
+      "disposition": "RESOLVED_CURRENT_REPO",
+      "resolution": "Canonical Pydantic/Zod/OpenAPI contracts remain authoritative."
+    },
+    {
+      "id": "R27",
+      "issue": "Model provider optionality",
+      "disposition": "RESOLVED_FAIL_CLOSED",
+      "resolution": "Fallback-degraded output cannot deliver even with human approval."
+    },
+    {
+      "id": "R28",
+      "issue": "Publication/spend vs internal delivery",
+      "disposition": "RESOLVED_FAIL_CLOSED",
+      "resolution": "Approved internal delivery may complete; external publication/spend remain separately disabled."
+    }
+  ]
+}
