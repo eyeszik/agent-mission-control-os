@@ -2,6 +2,8 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from services.langgraph.agency.ui_ux.models import UIUXDesignIR
+
 
 class CampaignBrief(BaseModel):
     brand_name: str
@@ -47,6 +49,9 @@ class DesignBrief(BaseModel):
     typography_direction: str
     imagery_style: str
     layout_notes: str
+    # Deterministic UI/UX specification compiled inside design_brief for briefs
+    # that describe a digital product (agency/ui_ux). None for non-UI briefs.
+    ui_ux: Optional[UIUXDesignIR] = None
 
 
 class WorkspaceDocument(BaseModel):

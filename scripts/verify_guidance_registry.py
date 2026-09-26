@@ -17,7 +17,7 @@ def main() -> int:
     if not registry.packs:
         raise SystemExit("guidance registry is empty")
 
-    required_pack_ids = {"pg.branding.core", "pg.studio_identity.v4"}
+    required_pack_ids = {"pg.branding.core", "pg.studio_identity.v4", "pg.ui_ux.core"}
     present_pack_ids = {pack.id for pack in registry.packs}
     missing_pack_ids = sorted(required_pack_ids - present_pack_ids)
     if missing_pack_ids:
@@ -37,6 +37,13 @@ def main() -> int:
                 raise SystemExit(
                     "pg.studio_identity.v4: typed directive targets are required"
                 )
+        if pack.id == "pg.ui_ux.core":
+            # The UI/UX pack must stay scoped to UI work and stay advisory: it
+            # shapes prompts, it cannot become a conformance authority.
+            if pack.activation.asset_families != ["UI_UX"]:
+                raise SystemExit("pg.ui_ux.core: must activate for the UI_UX family only")
+            if not all(section.directive_targets for section in pack.sections):
+                raise SystemExit("pg.ui_ux.core: every section needs typed directive targets")
 
     print(
         "Guidance registry verified "

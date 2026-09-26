@@ -415,6 +415,46 @@ def _cmd_cinematic(args: argparse.Namespace) -> int:
     return 0 if produced else 1
 
 
+def _cmd_ui_ux(args: argparse.Namespace) -> int:
+    from services.langgraph.agency.ui_ux import UIUXRequest, UIUXTerminal, compile_uiux
+
+    try:
+        with open(args.input, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except FileNotFoundError as exc:
+        raise BriefError(f"ui-ux request not found: {args.input}") from exc
+    except json.JSONDecodeError as exc:
+        raise BriefError(f"ui-ux request is not valid JSON: {exc}") from exc
+    try:
+        request = UIUXRequest.model_validate(payload)
+    except ValidationError as exc:
+        raise BriefError(f"ui-ux request does not match the expected shape:\n{exc}") from exc
+
+    spec = compile_uiux(request)
+    # Writing is opt-in: without --output/--css this command only prints.
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as handle:
+            handle.write(spec.model_dump_json(indent=2) + "\n")
+    if args.css:
+        with open(args.css, "w", encoding="utf-8") as handle:
+            handle.write(spec.tokens.css)
+
+    if args.json:
+        print(spec.model_dump_json(indent=2))
+    else:
+        unresolved = [f for f in spec.evaluation if not f.repaired and f.severity.value == "BLOCKING"]
+        print(
+            f"{spec.terminal.value}: {spec.mode.value} spec with {len(spec.screens)} screen(s), "
+            f"{len(spec.components)} component(s), {len(spec.states)} state spec(s), "
+            f"{spec.tokens.token_count} DTCG token(s); {len(spec.principles_applied)} principle(s) applied; "
+            f"{spec.repair_iterations} repair iteration(s), {len(unresolved)} unresolved blocking finding(s); "
+            f"confidence={spec.confidence.value:.2f}; spec_hash={spec.spec_hash[:16]}"
+        )
+        for item in spec.approval_required:
+            print(f"  approval: {item}")
+    return 0 if spec.terminal is UIUXTerminal.spec_ready else 1
+
+
 def _cmd_validate(_args: argparse.Namespace) -> int:
     problems = validate_matrices() + validate_registry() + validate_merge_matrix()
     if problems:
@@ -470,6 +510,16 @@ def build_parser() -> argparse.ArgumentParser:
         "-t", "--text", help="A one-line idea to compile instead of a request file."
     )
     cinematic.set_defaults(handler=_cmd_cinematic)
+
+    ui_ux = sub.add_parser(
+        "ui-ux",
+        help="Compile a governed UI/UX specification (IA, flows, tokens, states, a11y) without generating UI.",
+    )
+    ui_ux.add_argument("-i", "--input", required=True, help="Path to a UIUXRequest JSON file.")
+    ui_ux.add_argument("-o", "--output", help="Optional path to write the full spec JSON.")
+    ui_ux.add_argument("--css", help="Optional path to write the spec's generated DTCG token CSS.")
+    ui_ux.add_argument("--json", action="store_true", help="Print the full spec as JSON.")
+    ui_ux.set_defaults(handler=_cmd_ui_ux)
 
     validate = sub.add_parser("validate", help="Run the kernel's structural self-checks.")
     validate.set_defaults(handler=_cmd_validate)

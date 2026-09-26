@@ -82,6 +82,7 @@ def test_default_registry_loads_branding_pack_and_has_stable_hash():
         "pg.branding.core",
         "pg.production_design_system.v1",
         "pg.studio_identity.v4",
+        "pg.ui_ux.core",
     ]
     assert first.registry_hash == second.registry_hash
     assert first.get("pg.branding.core").content_hash

@@ -74,7 +74,12 @@ def test_agency_graph_pauses_before_delivery_and_creates_approval():
     assert agency["campaign_package"]["brief"]["brand_name"] == "Northwind Coffee"
     assert agency["campaign_package"]["business_workspace"]["overview"]["idea_name"] == "Northwind Coffee"
     assert agency["campaign_package"]["branding_workspace"]["raw_brand_data"]["brand_name"] == "Northwind Coffee"
-    assert agency["campaign_package"]["design_system"]["tokens_json"]["brand"]["semantic"]["color"]["bg"]["value"] == "{brand.raw.surface.value}"
+    tokens_json = agency["campaign_package"]["design_system"]["tokens_json"]
+    # DTCG 2025.10: `$value`, aliases name the token path, colors are objects.
+    assert tokens_json["semantic"]["color"]["bg"]["$value"] == "{brand.surface}"
+    assert tokens_json["brand"]["primary"]["$value"]["colorSpace"] == "srgb"
+    assert "--brand-primary: #1f2937;" in agency["campaign_package"]["design_system"]["global_tokens_css"]
+    assert "--semantic-color-bg: var(--brand-surface);" in agency["campaign_package"]["design_system"]["global_tokens_css"]
     assert len(agency["campaign_package"]["asset_execution"]["rendered_assets"]) == 3
     assert agency["campaign_package"]["asset_execution"]["review_queue"]["review_status"] == "pending_review"
     assert len(agency["creative_concepts"]) == 3

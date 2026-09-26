@@ -66,7 +66,43 @@ def env_keys() -> set[str]:
     return keys
 
 
+_SCRIPT_REFERENCE = re.compile(r"\bpython3?\s+((?:scripts/)?[\w./-]+\.py)\b")
+_PNPM_REFERENCE = re.compile(r"pnpm --filter (@amc/[\w-]+) (?:run )?([\w:-]+)")
+_PACKAGE_DIRS = {"@amc/web": "apps/web", "@amc/shared": "packages/shared"}
+_PNPM_BUILTINS = {"exec", "install", "add", "why", "list"}
+
+
+def missing_validator_references(root: Path = ROOT) -> list[str]:
+    """Every validator CI or `make` invokes must exist.
+
+    An active gate that points at a missing script is repository drift, and it
+    is critical: the gate would either crash or -- worse -- be quietly removed.
+    It is reported, never auto-created.
+    """
+    problems: list[str] = []
+    for source in (".github/workflows/ci.yml", "Makefile"):
+        path = root / source
+        if not path.is_file():
+            problems.append(f"{source}: missing (gate definitions cannot be verified)")
+            continue
+        text = path.read_text(encoding="utf-8")
+        for script in sorted(set(_SCRIPT_REFERENCE.findall(text))):
+            if not (root / script).is_file():
+                problems.append(f"{source}: references missing validator/script {script}")
+        for package, script in sorted(set(_PNPM_REFERENCE.findall(text))):
+            if script in _PNPM_BUILTINS:
+                continue
+            manifest = root / _PACKAGE_DIRS.get(package, "") / "package.json"
+            scripts = json.loads(manifest.read_text()).get("scripts", {}) if manifest.is_file() else {}
+            if script not in scripts:
+                problems.append(f"{source}: `pnpm --filter {package} {script}` has no such package script")
+    return problems
+
+
 def main() -> None:
+    missing = missing_validator_references()
+    if missing:
+        raise SystemExit("Active gates reference missing validators:\n" + "\n".join(missing))
     backend = backend_stages()
     shared = shared_stages()
     documented = openapi_stages()
