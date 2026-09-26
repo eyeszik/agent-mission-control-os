@@ -168,7 +168,7 @@ def test_create_and_resume_agency_run_emits_proof_bundle(monkeypatch):
     assert resumed["status"] == "completed"
     assert resumed["delivery"]
     assert resumed["proof"]["summary"]["latest_terminal_candidate"] == "COMPLETE"
-    assert resumed["proof"]["summary"]["proof_coverage"] == 1.0
+    assert resumed["proof"]["completion_evaluation"]["proof_coverage"] == 1.0
 
     trust = client.get(f"/runtime/projects/{created['project_id']}/trust")
     assert trust.status_code == 200
