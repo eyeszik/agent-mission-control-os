@@ -44,7 +44,7 @@ function Swatches({ colors }: { colors: readonly string[] }) {
         <span
           key={`${color}-${index}`}
           className="h-3 w-3 rounded-sm border border-zinc-700/80"
-          style={{ backgroundColor: color }}
+          style={{ backgroundColor: color /* amc-allow-hex: previews catalog palette data, not UI chrome */ }}
         />
       ))}
     </div>

@@ -34,6 +34,14 @@ from services.langgraph.agency.guidance import (
     default_registry,
     route_guidance,
 )
+from services.langgraph.agency.ui_ux import (
+    UIUXDesignIR,
+    UIUXTerminal,
+    compile_uiux,
+    directive_buckets,
+    request_from_asset_requirement,
+    serialize_spec_section,
+)
 
 
 COMPILER_VERSION = "amc-prompt-compiler/v1"
@@ -412,6 +420,10 @@ class PromptPackage(BaseModel):
     prompt_hash: str
     brand_hash: str
     unresolved_gaps: list[str] = Field(default_factory=list)
+    # Present only for PromptFamily.UI_UX: the compiled UI/UX specification the
+    # prompt was derived from (agency/ui_ux). Its terminal is a spec state, never
+    # a generated/deployed one.
+    ui_ux_design: UIUXDesignIR | None = None
     handoff_only: Literal[True] = True
     terminal_state: Literal["PROMPT_PACKAGE_READY"] = GENERATION_FIREWALL
 
@@ -840,7 +852,23 @@ def _guidance_directive_buckets(context: PromptContext) -> dict[str, list[str]]:
     return buckets
 
 
-def compile_prompt_ir(spec: AssetSpec, context: PromptContext) -> PromptIR:
+_UI_UX_BUCKET_MAP = {
+    "composition": "composition",
+    "interaction": "interaction",
+    "accessibility": "accessibility",
+    "tokens": "tokens",
+    "motion": "motion",
+    "engineering": "engineering",
+    "quality": "quality",
+    "governance": "governance",
+}
+
+
+def compile_prompt_ir(
+    spec: AssetSpec,
+    context: PromptContext,
+    ui_ux: UIUXDesignIR | None = None,
+) -> PromptIR:
     brand_directives = [
         f"Canonical brand context ({domain}): {_canonical(context.brand_context[domain])}"
         for domain in context.included_domains
@@ -853,6 +881,12 @@ def compile_prompt_ir(spec: AssetSpec, context: PromptContext) -> PromptIR:
     provenance = [spec.brand_hash, context.context_hash]
     if context.guidance_hash:
         provenance.append(context.guidance_hash)
+    if ui_ux is not None:
+        for source, target in _UI_UX_BUCKET_MAP.items():
+            guidance[target] = list(
+                dict.fromkeys([*guidance[target], *directive_buckets(ui_ux).get(source, [])])
+            )
+        provenance.append(ui_ux.spec_hash)
     return PromptIR(
         asset_id=spec.asset_id,
         family=spec.family,
@@ -886,7 +920,9 @@ def compile_prompt_ir(spec: AssetSpec, context: PromptContext) -> PromptIR:
     )
 
 
-def serialize_generic_prompt(ir: PromptIR, spec: AssetSpec) -> str:
+def serialize_generic_prompt(
+    ir: PromptIR, spec: AssetSpec, ui_ux: UIUXDesignIR | None = None
+) -> str:
     def section(title: str, values: list[str]) -> list[str]:
         if not values:
             return []
@@ -905,6 +941,8 @@ def serialize_generic_prompt(ir: PromptIR, spec: AssetSpec) -> str:
         f"{ir.channel} / {ir.destination}",
         "",
     ]
+    if ui_ux is not None:
+        lines += serialize_spec_section(ui_ux)
     lines += section("Canonical brand directives", ir.brand_directives)
     lines += section("Selected advisory strategy guidance", ir.strategy_directives)
     lines += section("Selected advisory verbal guidance", ir.verbal_directives)
@@ -988,8 +1026,10 @@ def validate_prompt_package(
     context: PromptContext,
     generic_prompt: str,
     provider_prompts: list[ProviderPrompt],
+    ui_ux: UIUXDesignIR | None = None,
 ) -> PromptValidationResult:
     issues: list[str] = []
+    ui_blocked = False
     if spec.brand_hash == "":
         issues.append("brand hash missing")
     if not context.included_domains:
@@ -1007,23 +1047,44 @@ def validate_prompt_package(
                 + ", ".join(provider.unsupported_requirements)
             )
 
+    checked_dimensions = [
+        "EVIDENCE",
+        "BRAND",
+        "CONTENT",
+        "PRODUCTION",
+        "PROVIDER",
+        "ACCESSIBILITY",
+        "SECURITY",
+        "GUIDANCE_AUTHORITY",
+        "PROVENANCE",
+    ]
+    if ui_ux is not None:
+        checked_dimensions.append("UI_UX_SPEC")
+        if ui_ux.terminal is UIUXTerminal.blocked:
+            ui_blocked = True
+            issues.extend(
+                f"UI/UX spec blocked: {finding.engine.value} {finding.subject}: {finding.message}"
+                for finding in ui_ux.evaluation
+                if finding.severity.value == "BLOCKING" and not finding.repaired
+            )
+        elif ui_ux.terminal is UIUXTerminal.requires_approval:
+            issues.extend(
+                f"UI/UX spec requires approval: {item}"
+                for item in ui_ux.approval_required
+                if item.startswith("DECISION:")
+            )
+        if ui_ux.spec_hash not in generic_prompt:
+            issues.append("UI/UX spec hash missing from serialized prompt")
+
     status = PromptValidationStatus.passed
-    if issues:
+    if ui_blocked:
+        status = PromptValidationStatus.blocked
+    elif issues:
         status = PromptValidationStatus.repair
     return PromptValidationResult(
         status=status,
         issues=issues,
-        checked_dimensions=[
-            "EVIDENCE",
-            "BRAND",
-            "CONTENT",
-            "PRODUCTION",
-            "PROVIDER",
-            "ACCESSIBILITY",
-            "SECURITY",
-            "GUIDANCE_AUTHORITY",
-            "PROVENANCE",
-        ],
+        checked_dimensions=checked_dimensions,
     )
 
 
@@ -1216,10 +1277,15 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
             requirement.guidance_overrides,
         )
         context = resolve_prompt_context(spec, request.brand_core, guidance)
-        ir = compile_prompt_ir(spec, context)
-        generic = serialize_generic_prompt(ir, spec)
+        ui_ux = (
+            compile_uiux(request_from_asset_requirement(requirement, request.brand_core))
+            if requirement.family is PromptFamily.ui_ux
+            else None
+        )
+        ir = compile_prompt_ir(spec, context, ui_ux)
+        generic = serialize_generic_prompt(ir, spec, ui_ux)
         provider_prompts = adapt_provider_prompts(ir, generic, request.providers)
-        validation = validate_prompt_package(spec, context, generic, provider_prompts)
+        validation = validate_prompt_package(spec, context, generic, provider_prompts, ui_ux)
         package_id = f"pkg_{stable_hash({'project': request.project_name, 'asset': spec.asset_id})[:16]}"
         packages.append(
             PromptPackage(
@@ -1234,6 +1300,7 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
                 prompt_hash=stable_hash(generic),
                 brand_hash=spec.brand_hash,
                 unresolved_gaps=sorted(unresolved_gap_ids),
+                ui_ux_design=ui_ux,
             )
         )
 

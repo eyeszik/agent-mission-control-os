@@ -8,6 +8,8 @@ import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useDesignStore } from '../../lib/stores/designStore';
+import { summarizeProvenance, type ProvenanceSummary } from '../../lib/ai/provenance';
+import { AITrustEnvelope } from './AITrustEnvelope';
 
 export function CommandInputPanel() {
   const [brandName, setBrandName] = useState('');
@@ -20,6 +22,7 @@ export function CommandInputPanel() {
   const [goals, setGoals] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastProvenance, setLastProvenance] = useState<ProvenanceSummary | null>(null);
 
   const setActiveRun = useRunStore((state) => state.setActiveRun);
   const upsertRun = useRunStore((state) => state.upsertRun);
@@ -82,6 +85,9 @@ export function CommandInputPanel() {
         });
       }
       if (run.pending_approval) upsertApproval(run.pending_approval);
+      setLastProvenance(
+        summarizeProvenance(run.generation_provenance, { pendingApproval: Boolean(run.pending_approval) })
+      );
 
       setBrandName('');
       setTargetAudience('');
@@ -108,6 +114,12 @@ export function CommandInputPanel() {
 
       {error && (
         <div role="alert" className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</div>
+      )}
+
+      {lastProvenance && (
+        <div role="status">
+          <AITrustEnvelope summary={lastProvenance} />
+        </div>
       )}
 
       <div className="flex flex-col gap-2">

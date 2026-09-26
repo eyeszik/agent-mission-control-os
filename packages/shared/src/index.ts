@@ -10,4 +10,5 @@ export * from './schemas/ontology';
 export * from './schemas/lifecycle';
 export * from './schemas/runtime';
 export * from './schemas/styleLibrary';
+export * from './schemas/uiux';
 export * from './types';

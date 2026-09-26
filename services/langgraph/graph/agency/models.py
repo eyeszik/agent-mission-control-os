@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from services.langgraph.agency.design.style_composer import DesignStyleDirection, DesignStyleSelection
+from services.langgraph.agency.ui_ux.models import UIUXDesignIR
 
 
 class CampaignBrief(BaseModel):
@@ -53,6 +54,9 @@ class DesignBrief(BaseModel):
     layout_notes: str
     # The resolved style direction that shaped this brief (artifact lineage).
     style_direction: Optional[DesignStyleDirection] = None
+    # Deterministic UI/UX specification compiled inside design_brief for briefs
+    # that describe a digital product (agency/ui_ux). None for non-UI briefs.
+    ui_ux: Optional[UIUXDesignIR] = None
 
 
 class WorkspaceDocument(BaseModel):

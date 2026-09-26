@@ -37,6 +37,7 @@ Broader product-development, creative-studio, growth, publishing, and paid-media
 - Next.js `16.3.0` with an audited lockfile-pinned production dependency graph.
 - **Browser E2E release gate** using pinned Playwright/Chromium against the real local Next.js + FastAPI stack.
 - CI production-readiness and critical-file integrity gates.
+- Deterministic **UI/UX design compiler** (`agency/ui_ux`) producing governed specs and `UI_UX` prompt packages, with one DTCG 2025.10 token compiler and frontend token gates — see [`docs/ui-ux-design-compiler.md`](docs/ui-ux-design-compiler.md).
 
 ### Live infrastructure already prepared
 
@@ -54,6 +55,7 @@ Broader product-development, creative-studio, growth, publishing, and paid-media
 - Authenticated production smoke testing has therefore not been performed.
 - Live external campaign publication is disabled until a concrete provider adapter is installed and reviewed.
 - Paid-media execution is disabled until a concrete provider adapter, approval policy, budget controls, and execution tests exist.
+- The UI/UX compiler produces specifications and prompt packages only; it does not generate, render, or publish interfaces, and it runs no browser or assistive-technology verification.
 - Initial agency execution remains synchronous; persisted SSE events provide replay/tailing but do not fabricate pre-node start timing.
 
 See [`docs/production-activation.md`](docs/production-activation.md) for the exact activation gate.

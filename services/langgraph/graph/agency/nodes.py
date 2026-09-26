@@ -17,6 +17,9 @@ from services.langgraph.agency.design.style_composer import (
     direction_from_selection,
     unresolved_direction,
 )
+from services.langgraph.agency.design_tokens import TokenError, compile_css, hex_to_color
+from services.langgraph.agency.ui_ux import BrandContext, UIUXRequest, compile_uiux
+from services.langgraph.agency.ui_ux.models import SourceKind, SourceRef
 from services.langgraph.graph.agency.llm import GenerationOutcome, generate_structured
 from services.langgraph.graph.agency.models import (
     AssetExecutionPackage,
@@ -343,30 +346,54 @@ def _build_branding_workspace(brief: CampaignBrief, strategy: BrandStrategy, des
     )
 
 
-def _build_design_system(brief: CampaignBrief, strategy: BrandStrategy, design_brief: DesignBrief) -> DesignSystemPackage:
-    slug = _slugify(brief.brand_name)
-    palette = design_brief.palette or ["#1F2937", "#F59E0B", "#F9FAFB"]
-    tokens = {
-        "$schema": "https://design-tokens.github.io/community-group/format/",
+_FALLBACK_PALETTE = ["#1F2937", "#F59E0B", "#F9FAFB"]
+
+
+def _brand_token_document(palette: list[str], design_brief: DesignBrief, strategy: BrandStrategy) -> dict:
+    """DTCG 2025.10 brand tokens. Qualitative direction (typography, tone) is not
+    a token type, so it travels as $extensions metadata instead of fake values."""
+    primary, secondary, surface = palette[0], palette[1] if len(palette) > 1 else palette[0], palette[-1]
+    return {
         "brand": {
-            "raw": {
-                "primary": {"value": palette[0]},
-                "secondary": {"value": palette[1] if len(palette) > 1 else palette[0]},
-                "surface": {"value": palette[-1]},
-            },
-            "semantic": {
-                "color": {
-                    "bg": {"value": "{brand.raw.surface.value}"},
-                    "fg": {"value": "{brand.raw.primary.value}"},
-                    "accent": {"value": "{brand.raw.secondary.value}"},
-                },
-                "typography": {
-                    "headlineFamily": {"value": design_brief.typography_direction},
-                    "bodyTone": {"value": strategy.tone_of_voice},
-                },
+            "$type": "color",
+            "primary": {"$value": hex_to_color(primary)},
+            "secondary": {"$value": hex_to_color(secondary)},
+            "surface": {"$value": hex_to_color(surface)},
+        },
+        "semantic": {
+            "color": {
+                "$type": "color",
+                "bg": {"$value": "{brand.surface}"},
+                "fg": {"$value": "{brand.primary}"},
+                "accent": {"$value": "{brand.secondary}"},
             },
         },
+        "$extensions": {
+            "amc": {
+                "format": "DTCG 2025.10",
+                "typography_direction": design_brief.typography_direction,
+                "body_tone": strategy.tone_of_voice,
+            }
+        },
     }
+
+
+def _build_design_system(brief: CampaignBrief, strategy: BrandStrategy, design_brief: DesignBrief) -> DesignSystemPackage:
+    slug = _slugify(brief.brand_name)
+    notes: list[str] = []
+    palette = [value for value in (design_brief.palette or []) if isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", value.strip())]
+    dropped = len(design_brief.palette or []) - len(palette)
+    if dropped:
+        notes.append(f"{dropped} palette value(s) were not 6-digit hex colors and were excluded from tokens.")
+    if not palette:
+        palette = list(_FALLBACK_PALETTE)
+        notes.append("No valid palette colors; the fallback palette was used and must be replaced before release.")
+    tokens = _brand_token_document([value.strip().lower() for value in palette], design_brief, strategy)
+    try:
+        _, compiled_css = compile_css(tokens, source_label=f"brand:{slug}")
+    except TokenError as exc:  # pragma: no cover - inputs are validated above
+        compiled_css = ""
+        notes.append(f"Token compilation failed closed: {exc}")
     tailwind = {
         "theme": {
             "extend": {
@@ -378,15 +405,7 @@ def _build_design_system(brief: CampaignBrief, strategy: BrandStrategy, design_b
             }
         }
     }
-    css = "\n".join(
-        [
-            ":root {",
-            f"  --brand-primary: {palette[0]};",
-            f"  --brand-secondary: {palette[1] if len(palette) > 1 else palette[0]};",
-            f"  --brand-surface: {palette[-1]};",
-            "}",
-        ]
-    )
+    css = compiled_css
     components = [
         _workspace_doc(
             "branding/design-system/components/Button.tsx",
@@ -439,6 +458,26 @@ def _build_design_system(brief: CampaignBrief, strategy: BrandStrategy, design_b
             ),
         ),
     ]
+    if design_brief.ui_ux is not None:
+        spec = design_brief.ui_ux
+        asset_recipes += [
+            _workspace_doc(
+                "branding/design-system/ui-ux/design-spec.json",
+                "UI/UX Design Specification",
+                "code",
+                spec.model_dump_json(indent=2),
+                spec_hash=spec.spec_hash,
+                terminal=spec.terminal.value,
+                compiler=spec.compiler_version,
+            ),
+            _workspace_doc(
+                "branding/design-system/ui-ux/tokens.css",
+                "UI/UX Tokens (generated)",
+                "code",
+                spec.tokens.css,
+                source_hash=spec.tokens.source_hash,
+            ),
+        ]
     return DesignSystemPackage(
         tokens_json=tokens,
         tailwind_config=tailwind,
@@ -446,9 +485,11 @@ def _build_design_system(brief: CampaignBrief, strategy: BrandStrategy, design_b
         component_scaffolds=components,
         asset_recipes=asset_recipes,
         validation_notes=[
-            "Contrast and token normalization must be validated before live UI use.",
+            "Tokens are DTCG 2025.10 and compiled by agency/design_tokens.py (aliases verified, cycles and unknown aliases fail closed).",
+            "Contrast must be validated against WCAG 2.2 before live UI use.",
             "Dynamic class names should map to CSS variables or safelisted tokens only.",
-            f"Namespace raw tokens under brand.raw.{slug} if merged into a larger system.",
+            f"Namespace brand tokens under brand.{slug} if merged into a larger system.",
+            *notes,
         ],
     )
 
@@ -744,6 +785,58 @@ def _resolve_style_direction(brief: dict) -> DesignStyleDirection | None:
         return unresolved_direction(selection, str(exc))
 
 
+_UI_PRODUCT_TERMS = (
+    "app", "application", "saas", "software", "website", "web", "landing", "dashboard", "platform",
+    "portal", "mobile", "tool", "marketplace", "assistant", "chatbot", "copilot", "digital product",
+)
+
+
+def _is_ui_brief(brief: dict) -> bool:
+    text = " ".join(
+        str(brief.get(key) or "") for key in ("product_type", "business_idea", "offer_summary", "workflow_idea")
+    ) + " " + " ".join(str(item) for item in brief.get("channels", []))
+    lowered = text.lower()
+    return any(re.search(rf"\b{re.escape(term)}\b", lowered) for term in _UI_PRODUCT_TERMS)
+
+
+def _compile_brief_ui_ux(brief: dict, strategy: dict, design_brief: DesignBrief, *, degraded: bool):
+    """Deterministic UI/UX subprocess of design_brief. Never calls a provider and
+    never changes degraded/release semantics; it only adds a governed spec."""
+    if not _is_ui_brief(brief):
+        return None, {"status": "SKIPPED", "reason": "brief does not describe a digital product"}
+    mode = "FALLBACK_DEGRADED" if degraded else "PROVIDER_SUCCESS"
+    tone = [item.strip() for item in re.split(r"[,;/]", str(strategy.get("tone_of_voice") or brief.get("tone") or "")) if item.strip()]
+    try:
+        request = UIUXRequest(
+            project_ref=_slugify(brief.get("brand_name") or "brand") or "brand",
+            surface_hint=str(brief.get("product_type") or ""),
+            purpose=str(brief.get("business_idea") or brief.get("offer_summary") or ""),
+            primary_user=str(brief.get("target_audience") or ""),
+            primary_task=str(brief.get("workflow_idea") or brief.get("offer_summary") or ""),
+            business_goal="; ".join(str(goal) for goal in brief.get("goals", [])),
+            content_requirements=[str(item) for item in brief.get("differentiators", [])],
+            constraints=[str(item) for item in brief.get("constraints", [])],
+            brand=BrandContext(
+                brand_name=str(brief.get("brand_name") or "Unnamed Brand"),
+                positioning=strategy.get("positioning_statement"),
+                tone_attributes=tone,
+                typography_direction=design_brief.typography_direction,
+                imagery_style=design_brief.imagery_style,
+                palette_hex=list(design_brief.palette),
+                palette_source=SourceKind.design_brief,
+            ),
+            sources=[
+                SourceRef(kind=SourceKind.design_brief, ref="design_brief", detail=mode),
+                SourceRef(kind=SourceKind.strategy, ref="brand_strategy", detail="agency state"),
+            ],
+        )
+        spec = compile_uiux(request)
+    except Exception as exc:  # the spec is an enrichment; a failure is recorded, not hidden
+        logger.exception("ui_ux_compilation_failed")
+        return None, {"status": "FAILED", "reason": type(exc).__name__}
+    return spec, {"status": spec.terminal.value, "spec_hash": spec.spec_hash, "mode": spec.mode.value}
+
+
 def design_brief_node(state: GraphState) -> dict:
     _log_node(state, "design_brief")
     data, agency = _agency_data(state)
@@ -775,7 +868,10 @@ def design_brief_node(state: GraphState) -> dict:
         **{**fallback, **{k: v for k, v in result.items() if k in fallback}},
         style_direction=direction,
     )
-    agency["design_brief"] = design_brief.model_dump()
+    ui_ux, ui_ux_status = _compile_brief_ui_ux(brief, strategy, design_brief, degraded=outcome.degraded)
+    design_brief = design_brief.model_copy(update={"ui_ux": ui_ux})
+    agency["ui_ux_compilation"] = ui_ux_status
+    agency["design_brief"] = design_brief.model_dump(mode="json")
     data["agency"] = agency
     return {
         "current_node": "design_brief",

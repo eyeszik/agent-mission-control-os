@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "f3f1483b94cec215d99dce0372287888b908cf3d"
+      "git_blob_sha": "4923696b957fd61399ca0bbda448956bf8af263f"
     },
     {
       "path": "apps/web/app/login/page.tsx",
@@ -36,7 +36,11 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "25daae5c5ef532b51b4cd1c293b277f130c08b5d"
+      "git_blob_sha": "363eb38054ba250ca77375b49f8a354910fae4a5"
+    },
+    {
+      "path": "apps/web/scripts/verify-ui-ast.mjs",
+      "git_blob_sha": "7114fb0ded4b7b0b57a20709698ee05fb11bd6d0"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -56,7 +60,7 @@
     },
     {
       "path": "package.json",
-      "git_blob_sha": "26fbb8019a0911c278790ddd49947c80a4bf6ba5"
+      "git_blob_sha": "44b6a844cb211d354998c494c580a36582cbc69a"
     },
     {
       "path": "packages/shared/openapi/agent-mission-control.openapi.yaml",
@@ -64,7 +68,7 @@
     },
     {
       "path": "packages/shared/src/schemas/agency.ts",
-      "git_blob_sha": "1c1ce4c8abfaf084b9d9dfc4af25aacf9954354c"
+      "git_blob_sha": "34a02b4af5df3a1ac793436e620ba2b40a8f5b1f"
     },
     {
       "path": "packages/shared/src/schemas/approvals.ts",
@@ -88,7 +92,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "d9ceb0b9d9dbbaa32362146782526a43287fccd2"
+      "git_blob_sha": "372cd25dab6e2c654fbfd9736f52e4dc7027d44a"
     },
     {
       "path": "scripts/verify_auth_bindings.py",
@@ -96,11 +100,11 @@
     },
     {
       "path": "scripts/verify_design_tokens.py",
-      "git_blob_sha": "f704e2505f4c3d74dc115c5fa2fa2c3a31a3815a"
+      "git_blob_sha": "93a3d32f33c9046281dadd3739007d0534dcb78f"
     },
     {
       "path": "scripts/verify_guidance_registry.py",
-      "git_blob_sha": "24b08f87f1aeaa4f9aed2b57a28bd717a86c8852"
+      "git_blob_sha": "82d54b528d69f7a62e08cdf913ef74bd81805767"
     },
     {
       "path": "scripts/verify_manifest.py",
@@ -116,7 +120,7 @@
     },
     {
       "path": "scripts/verify_repository_invariants.py",
-      "git_blob_sha": "a077fc8807a03f07283d6529ab3f74e0ceabb575"
+      "git_blob_sha": "fd1ccdbc2170b72e2fbe1af8ed8ea3e4bb2bf7ed"
     },
     {
       "path": "services/langgraph/agency/exporter.py",
@@ -141,6 +145,10 @@
     {
       "path": "services/langgraph/agency/guidance/packs/studio_identity_v4.yaml",
       "git_blob_sha": "413f2fbbd4da2bb92e003d5c23a29f98131ac8e5"
+    },
+    {
+      "path": "services/langgraph/agency/guidance/packs/ui_ux_core.yaml",
+      "git_blob_sha": "39be36fa031535c1104345b8a3c9767f0f63b95e"
     },
     {
       "path": "services/langgraph/agency/guidance/registry.py",
@@ -176,7 +184,7 @@
     },
     {
       "path": "services/langgraph/agency/prompt_compiler.py",
-      "git_blob_sha": "9e8ade11feb1dbb72c17795c8d984b6bf6904360"
+      "git_blob_sha": "ad19d35237957bdf930d2279bf496664e6a2756f"
     },
     {
       "path": "services/langgraph/agency/skills/dispatcher.py",
@@ -292,7 +300,7 @@
     },
     {
       "path": "services/langgraph/tests/test_guidance.py",
-      "git_blob_sha": "c0e582b2c4bb1238f6bde9a7eb2e32d1a8165ff1"
+      "git_blob_sha": "912caaf0bc7eddbf50e519b5ac492221aa8eaf04"
     },
     {
       "path": "services/langgraph/tests/test_lifecycle_analytics.py",

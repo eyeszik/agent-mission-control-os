@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { UIUXDesignIRSchema } from './uiux';
 import { ApprovalRequestSchema } from './approvals';
 import { DesignStyleDirectionSchema, DesignStyleSelectionSchema } from './styleLibrary';
 
@@ -64,6 +65,8 @@ export const DesignBriefSchema = z.object({
   layout_notes: z.string(),
   // The resolved style direction that shaped this brief (artifact lineage).
   style_direction: DesignStyleDirectionSchema.optional().nullable(),
+  // Deterministic UI/UX spec compiled inside design_brief for digital-product briefs.
+  ui_ux: UIUXDesignIRSchema.optional().nullable(),
 });
 
 export const WorkspaceDocumentSchema = z.object({

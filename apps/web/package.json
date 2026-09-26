@@ -8,7 +8,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run tests",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "verify:ui": "node scripts/verify-ui-ast.mjs"
   },
   "dependencies": {
     "@amc/shared": "workspace:*",

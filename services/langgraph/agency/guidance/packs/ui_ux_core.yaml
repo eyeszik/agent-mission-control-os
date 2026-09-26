@@ -1,0 +1,421 @@
+{
+  "id": "pg.ui_ux.core",
+  "schema_version": "1.0.0",
+  "pack_version": "1.0.0",
+  "domain": "UI_UX",
+  "guidance_class": "METHODOLOGY",
+  "authority_class": "ADVISORY",
+  "description": "Advisory UI/UX methodology for PromptFamily.UI_UX packages. Complements the deterministic UI/UX compiler (agency/ui_ux): the compiler produces the governed spec; this pack shapes how the spec is expressed in a generation prompt. It cannot redefine WCAG 2.2 conformance, DTCG token semantics, brand state, permissions, or terminal states.",
+  "activation": {
+    "asset_families": [
+      "UI_UX"
+    ],
+    "asset_types": [
+      "landing page",
+      "web app",
+      "dashboard",
+      "ai interface",
+      "assistant",
+      "onboarding flow",
+      "checkout",
+      "product ui",
+      "screen",
+      "component",
+      "design system"
+    ],
+    "channels": [
+      "web",
+      "app",
+      "mobile",
+      "desktop",
+      "product"
+    ],
+    "brand_domains": [
+      "visual",
+      "verbal",
+      "motion"
+    ],
+    "capabilities": [
+      "UI_GENERATION",
+      "CODE_GENERATION"
+    ],
+    "task_tags": [
+      "ui",
+      "ux",
+      "interface",
+      "screen",
+      "flow",
+      "usability",
+      "accessibility",
+      "responsive",
+      "component",
+      "states",
+      "tokens"
+    ]
+  },
+  "excludes": {
+    "asset_families": [],
+    "asset_types": [],
+    "channels": [],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": []
+  },
+  "dependencies": [
+    "pg.branding.core"
+  ],
+  "conflicts_with": [],
+  "context_budget": {
+    "max_sections": 8,
+    "max_chars": 20000
+  },
+  "sections": [
+    {
+      "id": "uiux.usability",
+      "purpose": "Keep the primary task obvious and recoverable.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Name the single primary task of each screen and make it the strongest element.",
+        "Every async action shows a pending state and a terminal success or error with a recovery action.",
+        "Destructive actions confirm by naming the affected object."
+      ],
+      "evaluation_criteria": [
+        "A first-time user can state the screen's purpose within five seconds.",
+        "Every error message names cause and recovery."
+      ],
+      "anti_patterns": [
+        "Silent completion of async actions.",
+        "Errors that only say 'Something went wrong'."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "interaction",
+        "quality"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "uiux.hierarchy",
+      "purpose": "Budget visual salience by task priority.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Order regions P0 (primary task) > P1 (support) > P2 (context) > P3 (enhancement).",
+        "Reserve the accent color for the P0 action and critical status.",
+        "Remove P3 regions before compressing P0 content under constraint."
+      ],
+      "evaluation_criteria": [
+        "No P3 element outweighs the P0 element in size, color, or motion."
+      ],
+      "anti_patterns": [
+        "Equal-weight cards competing for attention.",
+        "Decorative elements with higher contrast than the primary action."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "composition",
+        "visual"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "uiux.interaction",
+      "purpose": "Standard, fully specified interactions.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Use native elements (button, a, input, select, dialog) before custom widgets.",
+        "Specify DEFAULT, HOVER, FOCUS_VISIBLE, PRESSED, DISABLED for every control, plus LOADING/EMPTY/ERROR for data.",
+        "Nonstandard gestures need a stated user benefit and a standard keyboard alternative."
+      ],
+      "evaluation_criteria": [
+        "Every interaction has a keyboard path."
+      ],
+      "anti_patterns": [
+        "Hover-only affordances.",
+        "Custom scrolling or gesture-only navigation."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "interaction"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "uiux.responsive",
+      "purpose": "Transform representation, not just scale.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Declare for each region how it transforms when narrow: WRAP, STACK, REORDER, COLLAPSE, SCROLL, MENU, DRAWER, FULL_WIDTH, or PRIORITY_REDUCTION.",
+        "Reflow at 320 CSS px without two-dimensional scrolling; tables use a scroll container.",
+        "Use logical properties (inline/block) so layouts mirror for RTL."
+      ],
+      "evaluation_criteria": [
+        "Layout survives 320px width and 200% text size."
+      ],
+      "anti_patterns": [
+        "Shrinking desktop layouts into unreadable mobile ones."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "composition",
+        "engineering"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "uiux.accessibility",
+      "purpose": "WCAG 2.2 is the normative target.",
+      "directive_class": "EVIDENCE_BOUND_ADVISORY",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Target WCAG 2.2 AA at minimum; body text aims for 7:1 (AAA) where the palette allows.",
+        "Never convey status by color alone: pair color with icon and text.",
+        "Keep focus visible and never fully obscured by sticky regions (SC 2.4.11).",
+        "Respect prefers-reduced-motion and forced-colors."
+      ],
+      "evaluation_criteria": [
+        "Contrast claims cite the WCAG ratio; APCA, if mentioned, is labeled advisory."
+      ],
+      "anti_patterns": [
+        "Presenting APCA Lc as WCAG conformance.",
+        "Claiming AAA or full conformance from a static design alone."
+      ],
+      "evidence_requirements": [
+        "Contrast pass/fail from computed WCAG 2.2 ratios",
+        "Assistive-technology checks marked as required, not assumed"
+      ],
+      "output_targets": [],
+      "directive_targets": [
+        "accessibility",
+        "quality"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "uiux.token_system",
+      "purpose": "Consume tokens through semantic and component tiers.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Reference semantic (T2) and component (T3) tokens only; primitives (T1) live in token definitions.",
+        "Express tokens in DTCG 2025.10 structure with aliases, not duplicated literals.",
+        "No literal hex/rgb/hsl values in component code."
+      ],
+      "evaluation_criteria": [
+        "Every color in a component resolves to a token."
+      ],
+      "anti_patterns": [
+        "Hard-coded colors in components.",
+        "Tokens named by appearance (blue-button) instead of intent (accent)."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "tokens",
+        "engineering"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "uiux.ai_trust",
+      "purpose": "Truthful AI provenance in interfaces.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "ai",
+          "assistant",
+          "chat",
+          "copilot",
+          "generate",
+          "agent",
+          "llm"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Wrap each AI response in one provenance scope stating AI-generated or AI-assisted.",
+        "Show provider/model and sources only when the backend reports them; otherwise say so plainly.",
+        "Show numeric confidence only from a calibrated backend value; otherwise 'Confidence not measured'."
+      ],
+      "evaluation_criteria": [
+        "No invented provenance, sources, or confidence."
+      ],
+      "anti_patterns": [
+        "Decorative sparkle 'AI' badges.",
+        "Confidence percentages without a calibrated source."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "governance",
+        "interaction"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "uiux.anti_generic",
+      "purpose": "Replace template aesthetics with a product-specific signature.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "landing",
+          "homepage",
+          "website",
+          "hero",
+          "marketing",
+          "brand"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Derive one signature element from the brand thesis instead of generic decoration.",
+        "Use real, sourced content; never placeholder testimonials, logos, or metrics."
+      ],
+      "evaluation_criteria": [
+        "A viewer could not mistake the design for a template."
+      ],
+      "anti_patterns": [
+        "Unjustified purple gradients, glows, glassmorphism, floating blobs.",
+        "Card-everything layouts and pill overload.",
+        "Generic SaaS copy (unlock, supercharge, seamless, next-gen)."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "visual",
+        "quality"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "uiux.implementation_realism",
+      "purpose": "Specify what engineering can build and test.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "app",
+          "dashboard",
+          "product",
+          "component",
+          "application",
+          "tool",
+          "portal",
+          "screen"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Map each component to an existing, extended, or proposed implementation.",
+        "Name the data/state contract each component depends on.",
+        "Clean up listeners, observers, streams, and timers on unmount."
+      ],
+      "evaluation_criteria": [
+        "Every material screen traces task -> component -> token -> state -> test."
+      ],
+      "anti_patterns": [
+        "Specs that assume backend data or confidence the product does not have."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "engineering",
+        "quality"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "uiux.quality_gate",
+      "purpose": "Acceptance before handoff.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Check the spec against color removed, motion removed, pointer unavailable, halved viewport, +200% copy, empty data, denied permission, degraded network, and unavailable AI.",
+        "Hand off a specification and prompt package only; generation and release need human approval."
+      ],
+      "evaluation_criteria": [
+        "Each counterfactual has a designed state."
+      ],
+      "anti_patterns": [
+        "Claiming an interface was generated, rendered, or deployed."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "quality",
+        "governance"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    }
+  ],
+  "provenance": {
+    "source": "AMC UI/UX installer v100.1 (repository-authored methodology)",
+    "version": "1.0.0",
+    "author": null,
+    "created_at": null,
+    "updated_at": null,
+    "evidence_refs": [
+      "docs/ui-ux-design-compiler.md"
+    ],
+    "license_or_ip_status": "repository_owned"
+  },
+  "trend": null,
+  "content_hash": ""
+}

@@ -1,0 +1,1776 @@
+{
+  "schema_version": "amc-uiux-ir/v1",
+  "compiler_version": "amc-uiux-compiler/v1",
+  "project_ref": "fixture-assistant",
+  "mode": "AI_INTERFACE",
+  "product_model": {
+    "purpose": "Help support leads draft accurate replies to customer tickets",
+    "platform": "WEB_RESPONSIVE",
+    "primary_user": "Support team leads",
+    "primary_task": "Draft and verify a reply to a ticket",
+    "business_goal": "Reduce time to first accurate reply"
+  },
+  "sources": [
+    {
+      "kind": "REQUEST",
+      "ref": "fixture-assistant",
+      "detail": "UIUXRequest"
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "assume.platform",
+      "statement": "Platform treated as responsive web.",
+      "reason": "No platform was given.",
+      "impact": "Responsive rules cover 320px through desktop."
+    }
+  ],
+  "unknowns": [],
+  "constraints": [
+    "Replies must cite the knowledge-base article used"
+  ],
+  "capabilities": [
+    "ai",
+    "interactive",
+    "long_content",
+    "realtime",
+    "surface:AI_INTERFACE"
+  ],
+  "information_architecture": {
+    "primary_nav": [
+      {
+        "id": "conversation",
+        "label": "Conversation",
+        "purpose": "Work with the assistant",
+        "priority": "P0",
+        "children": []
+      },
+      {
+        "id": "history",
+        "label": "History",
+        "purpose": "Earlier sessions",
+        "priority": "P3",
+        "children": []
+      }
+    ],
+    "hierarchy_depth": 2,
+    "labeling_rule": "Labels name the user's object or task in plain language; no internal jargon."
+  },
+  "flows": [
+    {
+      "id": "ask",
+      "name": "Ask and verify",
+      "goal": "User gets an answer and can see where it came from",
+      "steps": [
+        {
+          "id": "ask.1",
+          "screen_ref": "assistant",
+          "user_action": "Submits a request",
+          "system_response": "Streams the response inside a provenance envelope",
+          "failure_path": "Provider unavailable -> UNAVAILABLE state; input preserved; retry offered"
+        },
+        {
+          "id": "ask.2",
+          "screen_ref": "assistant",
+          "user_action": "Checks provenance",
+          "system_response": "Shows AI involvement, provider/model if known, sources if available",
+          "failure_path": "No sources -> states 'Sources unavailable' explicitly"
+        }
+      ],
+      "success_signal": "Answer reviewed with provenance visible"
+    }
+  ],
+  "territories": [
+    {
+      "id": "quiet-precision",
+      "name": "Quiet Precision",
+      "thesis": "Restrained neutrals, exact alignment, one accent reserved for the primary action.",
+      "score": 0.7,
+      "fit_rationale": "surface fit=yes; tone matches=['calm', 'precise']",
+      "selected": true,
+      "rejection_reason": null
+    },
+    {
+      "id": "editorial-warmth",
+      "name": "Editorial Warmth",
+      "thesis": "Content-led pages with generous type scale and sourced imagery doing the persuading.",
+      "score": 0.0,
+      "fit_rationale": "surface fit=no; tone matches=none",
+      "selected": false,
+      "rejection_reason": "lower fit (0.00) than the selected territory"
+    },
+    {
+      "id": "operational-clarity",
+      "name": "Operational Clarity",
+      "thesis": "Dense, scannable, status-first layouts for people who work in the tool all day.",
+      "score": 0.0,
+      "fit_rationale": "surface fit=no; tone matches=none",
+      "selected": false,
+      "rejection_reason": "lower fit (0.00) than the selected territory"
+    }
+  ],
+  "selected_direction": "Quiet Precision: Restrained neutrals, exact alignment, one accent reserved for the primary action.",
+  "principles_applied": [
+    {
+      "id": "usability.system_status",
+      "name": "Visibility of system status",
+      "family": "HEURISTICS",
+      "user_problem": "Users act blindly when the system hides what it is doing.",
+      "relevance": "triggered by ['interactive']",
+      "application": "Every async action exposes LOADING and a terminal SUCCESS/ERROR with a live-region announcement.",
+      "tradeoff": "More states to design and test.",
+      "a11y_effect": "Status changes are announced via polite live regions.",
+      "responsive_effect": "Status stays visible when layouts collapse (never inside a collapsed drawer only).",
+      "implementation_effect": "Components expose explicit async state props, not implicit spinners.",
+      "changes": [
+        "design_system.state_rules",
+        "components.Composer.states"
+      ]
+    },
+    {
+      "id": "behavioral.fitts",
+      "name": "Fitts's law — target size and distance",
+      "family": "BEHAVIORAL",
+      "user_problem": "Small or distant targets cause missed taps and slow pointing.",
+      "relevance": "triggered by ['interactive']",
+      "application": "Interactive targets are at least 24x24 CSS px (WCAG 2.2 SC 2.5.8), 44x44 for primary touch actions.",
+      "tradeoff": "Larger targets reduce density.",
+      "a11y_effect": "Meets WCAG 2.2 SC 2.5.8 Target Size (Minimum).",
+      "responsive_effect": "Primary actions go FULL_WIDTH on narrow touch viewports.",
+      "implementation_effect": "Buttons enforce a min-block-size token.",
+      "changes": [
+        "accessibility.requirements"
+      ]
+    },
+    {
+      "id": "behavioral.jakob",
+      "name": "Jakob's law — follow platform conventions",
+      "family": "BEHAVIORAL",
+      "user_problem": "Novel interaction patterns force users to relearn basics.",
+      "relevance": "triggered by ['interactive']",
+      "application": "Use native controls and standard placements; nonstandard interactions must justify themselves.",
+      "tradeoff": "Less room for novelty in core controls.",
+      "a11y_effect": "Native elements carry correct roles and keyboard behavior by default.",
+      "responsive_effect": "Standard navigation transforms (MENU/DRAWER) instead of bespoke gestures.",
+      "implementation_effect": "Prefer semantic HTML elements over div-based widgets.",
+      "changes": [
+        "design_system.patterns"
+      ]
+    },
+    {
+      "id": "behavioral.truthful_progress",
+      "name": "Truthful progress",
+      "family": "BEHAVIORAL",
+      "user_problem": "Fake progress bars and invented ETAs destroy trust.",
+      "relevance": "triggered by ['ai', 'realtime']",
+      "application": "Show determinate progress only when the backend reports it; otherwise indeterminate + elapsed time.",
+      "tradeoff": "Less reassuring than a fabricated percentage.",
+      "a11y_effect": "Progress uses role=progressbar with aria-valuenow only when determinate.",
+      "responsive_effect": "Progress stays in the primary region when layouts stack.",
+      "implementation_effect": "Progress components accept `determinate: false` without a value.",
+      "changes": [
+        "design_system.state_rules"
+      ]
+    },
+    {
+      "id": "visual.hierarchy",
+      "name": "Visual hierarchy through salience budget",
+      "family": "VISUAL",
+      "user_problem": "Users cannot find the primary task among decoration.",
+      "relevance": "triggered by ['interactive']",
+      "application": "Salience is budgeted: P0 strongest, P3 never outweighs P0.",
+      "tradeoff": "Decorative elements lose visual weight.",
+      "a11y_effect": "Heading levels mirror the visual hierarchy.",
+      "responsive_effect": "PRIORITY_REDUCTION drops P3 before compressing P0.",
+      "implementation_effect": "Regions carry priority + emphasis metadata.",
+      "changes": [
+        "design_system.patterns",
+        "accessibility.requirements"
+      ]
+    },
+    {
+      "id": "interaction.feedback",
+      "name": "Immediate, proportionate feedback",
+      "family": "INTERACTION",
+      "user_problem": "Actions without feedback get repeated or abandoned.",
+      "relevance": "triggered by ['interactive']",
+      "application": "Every press shows PRESSED within one frame and a result within the async contract.",
+      "tradeoff": "Needs motion/state design per control.",
+      "a11y_effect": "Feedback is perceivable without motion or color.",
+      "responsive_effect": "Feedback anchors to the control, not a region that may collapse.",
+      "implementation_effect": "Controls expose PRESSED and disabled-while-pending states.",
+      "changes": [
+        "components.Composer.states",
+        "design_system.motion_rules"
+      ]
+    },
+    {
+      "id": "interaction.empty_loading_error",
+      "name": "Designed empty, loading, and error states",
+      "family": "INTERACTION",
+      "user_problem": "Blank screens look broken; spinners hide structure.",
+      "relevance": "triggered by ['ai']",
+      "application": "Skeletons mirror final layout; empty states explain and offer the first action; errors offer retry.",
+      "tradeoff": "Three extra designs per data surface.",
+      "a11y_effect": "Skeletons are aria-hidden with a live 'Loading' status.",
+      "responsive_effect": "Empty states keep the primary action visible at every width.",
+      "implementation_effect": "Data components expose SKELETON/EMPTY/ERROR/STALE.",
+      "changes": [
+        "components.MessageList.states"
+      ]
+    },
+    {
+      "id": "platform.responsive_semantic_zoom",
+      "name": "Semantic zoom",
+      "family": "PLATFORM",
+      "user_problem": "Shrinking a desktop layout produces an unusable mobile one.",
+      "relevance": "triggered by ['interactive']",
+      "application": "Responsive changes transform representation (table -> list, sidebar -> drawer), not just scale.",
+      "tradeoff": "More layout variants.",
+      "a11y_effect": "Reflow at 320 CSS px without two-dimensional scrolling (SC 1.4.10).",
+      "responsive_effect": "Each region declares its transform.",
+      "implementation_effect": "Container queries where regions are reused.",
+      "changes": [
+        "accessibility.requirements"
+      ]
+    },
+    {
+      "id": "platform.keyboard",
+      "name": "Full keyboard operability",
+      "family": "PLATFORM",
+      "user_problem": "Keyboard and switch users are locked out.",
+      "relevance": "triggered by ['interactive']",
+      "application": "Every interaction has a keyboard path; focus is always visible and never obscured.",
+      "tradeoff": "Custom widgets need roving tabindex work.",
+      "a11y_effect": "WCAG 2.2 SC 2.1.1 Keyboard, 2.4.7 Focus Visible, 2.4.11 Focus Not Obscured.",
+      "responsive_effect": "Sticky headers must not cover the focused element.",
+      "implementation_effect": "Focus ring uses semantic.color.focus-ring.",
+      "changes": [
+        "interactions.ix.composer.activate.input_modes",
+        "interactions.ix.messagelist.reorder.input_modes",
+        "accessibility.requirements"
+      ]
+    },
+    {
+      "id": "system.ai_trust",
+      "name": "Truthful AI provenance",
+      "family": "SYSTEM",
+      "user_problem": "Users over-trust or mis-attribute machine output.",
+      "relevance": "triggered by ['ai']",
+      "application": "AI output is wrapped in one trust envelope stating involvement, known provider/model, sources, and review status; no decorative confidence.",
+      "tradeoff": "Less 'magical' presentation.",
+      "a11y_effect": "Provenance is text, reachable by keyboard, announced when streaming completes.",
+      "responsive_effect": "The provenance label never collapses away on narrow viewports.",
+      "implementation_effect": "A single AITrustEnvelope scope per AI response.",
+      "changes": [
+        "components.MessageList.states",
+        "components.AITrustEnvelope.states",
+        "components.SourcePanel.states",
+        "design_system.content_rules"
+      ]
+    },
+    {
+      "id": "system.realtime_resilience",
+      "name": "Degraded-network resilience",
+      "family": "SYSTEM",
+      "user_problem": "Live surfaces silently show stale data when the connection drops.",
+      "relevance": "triggered by ['ai', 'realtime']",
+      "application": "OFFLINE and STALE are explicit; reconnection is automatic with a visible manual retry.",
+      "tradeoff": "Extra connection-state UI.",
+      "a11y_effect": "Connection changes announced politely.",
+      "responsive_effect": "Connection status remains visible in collapsed layouts.",
+      "implementation_effect": "Stream/socket clients expose connection state and clean up on unmount.",
+      "changes": [
+        "components.MessageList.states",
+        "performance.requirements"
+      ]
+    },
+    {
+      "id": "system.reduced_motion",
+      "name": "Motion is optional",
+      "family": "SYSTEM",
+      "user_problem": "Motion causes vestibular harm and distracts.",
+      "relevance": "triggered by ['interactive']",
+      "application": "All non-essential motion is disabled under prefers-reduced-motion; meaning never depends on motion.",
+      "tradeoff": "Some delight is lost for those users.",
+      "a11y_effect": "WCAG 2.2 SC 2.3.3 Animation from Interactions (AAA) respected via reduced-motion.",
+      "responsive_effect": "No motion-dependent reveal of content at any width.",
+      "implementation_effect": "Motion reads semantic.motion tokens and a reduced-motion guard.",
+      "changes": [
+        "design_system.motion_rules"
+      ]
+    }
+  ],
+  "design_genome": {
+    "hierarchy": "strict typographic hierarchy; one focal element per view",
+    "density": "MEDIUM",
+    "geometry": "4px-based radius, hairline borders, no shadows as decoration",
+    "typography": "system sans for UI, monospace for data; scale by role not by page",
+    "color": "neutral surfaces; accent reserved for the P0 action",
+    "material": "flat surfaces separated by borders and space",
+    "motion": "short, purposeful state transitions only",
+    "interaction": "native controls, explicit states, keyboard-complete",
+    "signature": "one product-specific element derived from Fixture Co's thesis (not generic decoration)",
+    "genome_hash": "4f64b005ec9a992574ef11c25b1e2ac25ecbb9cc34695f4573174c18a3800688"
+  },
+  "design_system": {
+    "foundations": [
+      "Tokens: DTCG 2025.10, 60 tokens in T1/T2/T3 tiers (prefix --ui-)",
+      "Genome: 4f64b005ec9a",
+      "Territory: Quiet Precision"
+    ],
+    "patterns": [
+      "Core controls are native elements (button, a, input, select, dialog) before any custom widget.",
+      "Salience budget: P0 > P1 > P2 > P3; P3 regions are removed first under constraint."
+    ],
+    "templates": [
+      "assistant"
+    ],
+    "content_rules": [
+      "AI content is labeled AI-generated or AI-assisted; confidence is shown only from a calibrated backend value, otherwise 'Confidence not measured'."
+    ],
+    "state_rules": [
+      "Async actions render LOADING then SUCCESS or ERROR; never a silent completion.",
+      "Determinate progress only from backend-reported values; never a synthetic percentage or ETA."
+    ],
+    "motion_rules": [
+      "Feedback motion <= semantic.motion.duration.feedback; disabled under prefers-reduced-motion.",
+      "prefers-reduced-motion: reduce disables non-essential animation; state changes remain perceivable statically."
+    ],
+    "accessibility_rules": [
+      "WCAG 2.2 SC 1.4.3 Contrast (Minimum): Text meets 4.5:1 (AA); body text targets 7:1 (AAA) where tokens allow.",
+      "Forced colors (Windows High Contrast): Under forced-colors: active, states keep icon + text channels and borders use system colors.",
+      "WCAG 2.2 SC 4.1.2 Name, Role, Value: Every control exposes an accessible name, role, and state.",
+      "WCAG 2.2 SC 1.4.11 Non-text Contrast: Focus indicators, control borders and meaningful graphics reach 3:1.",
+      "WCAG 2.2 SC 1.4.4 Resize Text: Text resizes to 200% without loss of content or function.",
+      "WCAG 2.2 SC 1.4.1 Use of Color: Status and state are never conveyed by color alone.",
+      "WCAG 2.2 SC 1.4.10 Reflow: Content reflows at 320 CSS px without two-dimensional scrolling (data tables excepted with scroll containers).",
+      "WCAG 2.2 SC 2.4.11 Focus Not Obscured (Minimum): Sticky/fixed regions never fully hide the focused element.",
+      "WCAG 2.2 SC 2.4.6 Headings and Labels: Heading structure mirrors the visual hierarchy.",
+      "WCAG 2.2 SC 2.5.8 Target Size (Minimum): Interactive targets are at least 24x24 CSS px; primary touch targets 44x44."
+    ],
+    "responsive_rules": [
+      "assistant.conversation -> FULL_WIDTH",
+      "assistant.composer -> FULL_WIDTH",
+      "assistant.sources -> DRAWER",
+      "assistant.history -> PRIORITY_REDUCTION"
+    ]
+  },
+  "tokens": {
+    "format": "DTCG 2025.10",
+    "tiers": [
+      "primitive",
+      "semantic",
+      "component"
+    ],
+    "css_prefix": "ui",
+    "document": {
+      "primitive": {
+        "color": {
+          "$type": "color",
+          "neutral": {
+            "50": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.9804,
+                  0.9804,
+                  0.9804
+                ],
+                "hex": "#fafafa"
+              }
+            },
+            "100": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.9569,
+                  0.9569,
+                  0.9608
+                ],
+                "hex": "#f4f4f5"
+              }
+            },
+            "200": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.8941,
+                  0.8941,
+                  0.9059
+                ],
+                "hex": "#e4e4e7"
+              }
+            },
+            "300": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.8314,
+                  0.8314,
+                  0.8471
+                ],
+                "hex": "#d4d4d8"
+              }
+            },
+            "400": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.6314,
+                  0.6314,
+                  0.6667
+                ],
+                "hex": "#a1a1aa"
+              }
+            },
+            "500": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.4431,
+                  0.4431,
+                  0.4784
+                ],
+                "hex": "#71717a"
+              }
+            },
+            "600": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.3216,
+                  0.3216,
+                  0.3569
+                ],
+                "hex": "#52525b"
+              }
+            },
+            "700": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.2471,
+                  0.2471,
+                  0.2745
+                ],
+                "hex": "#3f3f46"
+              }
+            },
+            "800": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.1529,
+                  0.1529,
+                  0.1647
+                ],
+                "hex": "#27272a"
+              }
+            },
+            "900": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.0941,
+                  0.0941,
+                  0.1059
+                ],
+                "hex": "#18181b"
+              }
+            },
+            "950": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.0353,
+                  0.0353,
+                  0.0431
+                ],
+                "hex": "#09090b"
+              }
+            }
+          },
+          "status": {
+            "success": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.0157,
+                  0.4706,
+                  0.3412
+                ],
+                "hex": "#047857"
+              }
+            },
+            "warning": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.7059,
+                  0.3255,
+                  0.0353
+                ],
+                "hex": "#b45309"
+              }
+            },
+            "danger": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.7255,
+                  0.1098,
+                  0.1098
+                ],
+                "hex": "#b91c1c"
+              }
+            },
+            "info": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.0118,
+                  0.4118,
+                  0.6314
+                ],
+                "hex": "#0369a1"
+              }
+            }
+          },
+          "accent": {
+            "base": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.1216,
+                  0.1608,
+                  0.2157
+                ],
+                "hex": "#1f2937"
+              }
+            },
+            "on": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.9804,
+                  0.9804,
+                  0.9804
+                ],
+                "hex": "#fafafa"
+              }
+            }
+          },
+          "brand": {
+            "1": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.1216,
+                  0.1608,
+                  0.2157
+                ],
+                "hex": "#1f2937"
+              }
+            },
+            "2": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.9608,
+                  0.6196,
+                  0.0431
+                ],
+                "hex": "#f59e0b"
+              }
+            },
+            "3": {
+              "$value": {
+                "colorSpace": "srgb",
+                "components": [
+                  0.9765,
+                  0.9804,
+                  0.9843
+                ],
+                "hex": "#f9fafb"
+              }
+            }
+          }
+        },
+        "space": {
+          "$type": "dimension",
+          "1": {
+            "$value": {
+              "value": 4,
+              "unit": "px"
+            }
+          },
+          "2": {
+            "$value": {
+              "value": 8,
+              "unit": "px"
+            }
+          },
+          "3": {
+            "$value": {
+              "value": 12,
+              "unit": "px"
+            }
+          },
+          "4": {
+            "$value": {
+              "value": 16,
+              "unit": "px"
+            }
+          },
+          "6": {
+            "$value": {
+              "value": 24,
+              "unit": "px"
+            }
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "sm": {
+            "$value": {
+              "value": 4,
+              "unit": "px"
+            }
+          },
+          "md": {
+            "$value": {
+              "value": 6,
+              "unit": "px"
+            }
+          },
+          "lg": {
+            "$value": {
+              "value": 10,
+              "unit": "px"
+            }
+          }
+        },
+        "duration": {
+          "$type": "duration",
+          "fast": {
+            "$value": {
+              "value": 120,
+              "unit": "ms"
+            }
+          },
+          "base": {
+            "$value": {
+              "value": 200,
+              "unit": "ms"
+            }
+          }
+        }
+      },
+      "semantic": {
+        "color": {
+          "$type": "color",
+          "background": {
+            "$value": "{primitive.color.neutral.50}"
+          },
+          "surface": {
+            "$value": "{primitive.color.neutral.100}"
+          },
+          "surface-raised": {
+            "$value": "{primitive.color.neutral.200}"
+          },
+          "border": {
+            "$value": "{primitive.color.neutral.200}"
+          },
+          "border-strong": {
+            "$value": "{primitive.color.neutral.500}"
+          },
+          "foreground": {
+            "$value": "{primitive.color.neutral.700}"
+          },
+          "foreground-strong": {
+            "$value": "{primitive.color.neutral.950}"
+          },
+          "foreground-muted": {
+            "$value": "{primitive.color.neutral.600}"
+          },
+          "accent": {
+            "$value": "{primitive.color.accent.base}"
+          },
+          "on-accent": {
+            "$value": "{primitive.color.accent.on}"
+          },
+          "focus-ring": {
+            "$value": "{primitive.color.accent.base}"
+          },
+          "status": {
+            "success": {
+              "$value": "{primitive.color.status.success}"
+            },
+            "warning": {
+              "$value": "{primitive.color.status.warning}"
+            },
+            "danger": {
+              "$value": "{primitive.color.status.danger}"
+            },
+            "info": {
+              "$value": "{primitive.color.status.info}"
+            }
+          }
+        },
+        "space": {
+          "$type": "dimension",
+          "inline": {
+            "$value": "{primitive.space.2}"
+          },
+          "stack": {
+            "$value": "{primitive.space.3}"
+          },
+          "panel": {
+            "$value": "{primitive.space.4}"
+          },
+          "section": {
+            "$value": "{primitive.space.6}"
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "control": {
+            "$value": "{primitive.radius.md}"
+          },
+          "panel": {
+            "$value": "{primitive.radius.lg}"
+          }
+        },
+        "motion": {
+          "$type": "duration",
+          "feedback": {
+            "$value": "{primitive.duration.fast}"
+          }
+        }
+      },
+      "component": {
+        "button": {
+          "primary": {
+            "$type": "color",
+            "background": {
+              "$value": "{semantic.color.accent}"
+            },
+            "foreground": {
+              "$value": "{semantic.color.on-accent}"
+            }
+          },
+          "radius": {
+            "$type": "dimension",
+            "$value": "{semantic.radius.control}"
+          }
+        },
+        "focus": {
+          "$type": "color",
+          "ring": {
+            "$value": "{semantic.color.focus-ring}"
+          }
+        },
+        "ai-trust": {
+          "$type": "color",
+          "border": {
+            "$value": "{semantic.color.border-strong}"
+          },
+          "label": {
+            "$value": "{semantic.color.foreground-strong}"
+          },
+          "degraded": {
+            "$value": "{semantic.color.status.warning}"
+          },
+          "unavailable": {
+            "$value": "{semantic.color.status.danger}"
+          }
+        }
+      }
+    },
+    "source_hash": "486b3054b2e12a47ec0a47d0486916b1ff57397542f0fe1f8a078f49457a22a6",
+    "token_count": 60,
+    "css": "/* GENERATED FILE -- do not edit by hand.\n * compiler: amc-dtcg-compiler/v1 (DTCG 2025.10)\n * source: uiux-compiler\n * source-sha256: 486b3054b2e12a47ec0a47d0486916b1ff57397542f0fe1f8a078f49457a22a6\n */\n:root {\n  --ui-component-ai-trust-border: var(--ui-semantic-color-border-strong);\n  --ui-component-ai-trust-degraded: var(--ui-semantic-color-status-warning);\n  --ui-component-ai-trust-label: var(--ui-semantic-color-foreground-strong);\n  --ui-component-ai-trust-unavailable: var(--ui-semantic-color-status-danger);\n  --ui-component-button-primary-background: var(--ui-semantic-color-accent);\n  --ui-component-button-primary-foreground: var(--ui-semantic-color-on-accent);\n  --ui-component-button-radius: var(--ui-semantic-radius-control);\n  --ui-component-focus-ring: var(--ui-semantic-color-focus-ring);\n  --ui-primitive-color-accent-base: #1f2937;\n  --ui-primitive-color-accent-on: #fafafa;\n  --ui-primitive-color-brand-1: #1f2937;\n  --ui-primitive-color-brand-2: #f59e0b;\n  --ui-primitive-color-brand-3: #f9fafb;\n  --ui-primitive-color-neutral-100: #f4f4f5;\n  --ui-primitive-color-neutral-200: #e4e4e7;\n  --ui-primitive-color-neutral-300: #d4d4d8;\n  --ui-primitive-color-neutral-400: #a1a1aa;\n  --ui-primitive-color-neutral-50: #fafafa;\n  --ui-primitive-color-neutral-500: #71717a;\n  --ui-primitive-color-neutral-600: #52525b;\n  --ui-primitive-color-neutral-700: #3f3f46;\n  --ui-primitive-color-neutral-800: #27272a;\n  --ui-primitive-color-neutral-900: #18181b;\n  --ui-primitive-color-neutral-950: #09090b;\n  --ui-primitive-color-status-danger: #b91c1c;\n  --ui-primitive-color-status-info: #0369a1;\n  --ui-primitive-color-status-success: #047857;\n  --ui-primitive-color-status-warning: #b45309;\n  --ui-primitive-duration-base: 200ms;\n  --ui-primitive-duration-fast: 120ms;\n  --ui-primitive-radius-lg: 10px;\n  --ui-primitive-radius-md: 6px;\n  --ui-primitive-radius-sm: 4px;\n  --ui-primitive-space-1: 4px;\n  --ui-primitive-space-2: 8px;\n  --ui-primitive-space-3: 12px;\n  --ui-primitive-space-4: 16px;\n  --ui-primitive-space-6: 24px;\n  --ui-semantic-color-accent: var(--ui-primitive-color-accent-base);\n  --ui-semantic-color-background: var(--ui-primitive-color-neutral-50);\n  --ui-semantic-color-border: var(--ui-primitive-color-neutral-200);\n  --ui-semantic-color-border-strong: var(--ui-primitive-color-neutral-500);\n  --ui-semantic-color-focus-ring: var(--ui-primitive-color-accent-base);\n  --ui-semantic-color-foreground: var(--ui-primitive-color-neutral-700);\n  --ui-semantic-color-foreground-muted: var(--ui-primitive-color-neutral-600);\n  --ui-semantic-color-foreground-strong: var(--ui-primitive-color-neutral-950);\n  --ui-semantic-color-on-accent: var(--ui-primitive-color-accent-on);\n  --ui-semantic-color-status-danger: var(--ui-primitive-color-status-danger);\n  --ui-semantic-color-status-info: var(--ui-primitive-color-status-info);\n  --ui-semantic-color-status-success: var(--ui-primitive-color-status-success);\n  --ui-semantic-color-status-warning: var(--ui-primitive-color-status-warning);\n  --ui-semantic-color-surface: var(--ui-primitive-color-neutral-100);\n  --ui-semantic-color-surface-raised: var(--ui-primitive-color-neutral-200);\n  --ui-semantic-motion-feedback: var(--ui-primitive-duration-fast);\n  --ui-semantic-radius-control: var(--ui-primitive-radius-md);\n  --ui-semantic-radius-panel: var(--ui-primitive-radius-lg);\n  --ui-semantic-space-inline: var(--ui-primitive-space-2);\n  --ui-semantic-space-panel: var(--ui-primitive-space-4);\n  --ui-semantic-space-section: var(--ui-primitive-space-6);\n  --ui-semantic-space-stack: var(--ui-primitive-space-3);\n}\n",
+    "contrast": [
+      {
+        "foreground": "semantic.color.foreground",
+        "background": "semantic.color.background",
+        "foreground_value": "#3f3f46",
+        "background_value": "#fafafa",
+        "wcag_requirement": "AAA_NORMAL",
+        "wcag_ratio": 10.01,
+        "passes": true,
+        "verification": "VERIFIED_STATIC",
+        "apca_lc_advisory": 91.3,
+        "apca_note": "APCA Lc is advisory perceptual analysis, not WCAG 2.2 conformance."
+      },
+      {
+        "foreground": "semantic.color.foreground-strong",
+        "background": "semantic.color.background",
+        "foreground_value": "#09090b",
+        "background_value": "#fafafa",
+        "wcag_requirement": "AAA_NORMAL",
+        "wcag_ratio": 19.06,
+        "passes": true,
+        "verification": "VERIFIED_STATIC",
+        "apca_lc_advisory": 102.9,
+        "apca_note": "APCA Lc is advisory perceptual analysis, not WCAG 2.2 conformance."
+      },
+      {
+        "foreground": "semantic.color.foreground",
+        "background": "semantic.color.surface",
+        "foreground_value": "#3f3f46",
+        "background_value": "#f4f4f5",
+        "wcag_requirement": "AA_NORMAL",
+        "wcag_ratio": 9.5,
+        "passes": true,
+        "verification": "VERIFIED_STATIC",
+        "apca_lc_advisory": 87.7,
+        "apca_note": "APCA Lc is advisory perceptual analysis, not WCAG 2.2 conformance."
+      },
+      {
+        "foreground": "semantic.color.foreground-muted",
+        "background": "semantic.color.background",
+        "foreground_value": "#52525b",
+        "background_value": "#fafafa",
+        "wcag_requirement": "AA_NORMAL",
+        "wcag_ratio": 7.41,
+        "passes": true,
+        "verification": "VERIFIED_STATIC",
+        "apca_lc_advisory": 83.9,
+        "apca_note": "APCA Lc is advisory perceptual analysis, not WCAG 2.2 conformance."
+      },
+      {
+        "foreground": "semantic.color.on-accent",
+        "background": "semantic.color.accent",
+        "foreground_value": "#fafafa",
+        "background_value": "#1f2937",
+        "wcag_requirement": "AA_NORMAL",
+        "wcag_ratio": 14.06,
+        "passes": true,
+        "verification": "VERIFIED_STATIC",
+        "apca_lc_advisory": -101.0,
+        "apca_note": "APCA Lc is advisory perceptual analysis, not WCAG 2.2 conformance."
+      },
+      {
+        "foreground": "semantic.color.focus-ring",
+        "background": "semantic.color.background",
+        "foreground_value": "#1f2937",
+        "background_value": "#fafafa",
+        "wcag_requirement": "NON_TEXT",
+        "wcag_ratio": 14.06,
+        "passes": true,
+        "verification": "VERIFIED_STATIC",
+        "apca_lc_advisory": 98.5,
+        "apca_note": "APCA Lc is advisory perceptual analysis, not WCAG 2.2 conformance."
+      },
+      {
+        "foreground": "semantic.color.border-strong",
+        "background": "semantic.color.background",
+        "foreground_value": "#71717a",
+        "background_value": "#fafafa",
+        "wcag_requirement": "NON_TEXT",
+        "wcag_ratio": 4.63,
+        "passes": true,
+        "verification": "VERIFIED_STATIC",
+        "apca_lc_advisory": 70.6,
+        "apca_note": "APCA Lc is advisory perceptual analysis, not WCAG 2.2 conformance."
+      },
+      {
+        "foreground": "semantic.color.status.warning",
+        "background": "semantic.color.surface",
+        "foreground_value": "#b45309",
+        "background_value": "#f4f4f5",
+        "wcag_requirement": "AA_NORMAL",
+        "wcag_ratio": 4.57,
+        "passes": true,
+        "verification": "VERIFIED_STATIC",
+        "apca_lc_advisory": 67.5,
+        "apca_note": "APCA Lc is advisory perceptual analysis, not WCAG 2.2 conformance."
+      },
+      {
+        "foreground": "semantic.color.status.danger",
+        "background": "semantic.color.surface",
+        "foreground_value": "#b91c1c",
+        "background_value": "#f4f4f5",
+        "wcag_requirement": "AA_NORMAL",
+        "wcag_ratio": 5.89,
+        "passes": true,
+        "verification": "VERIFIED_STATIC",
+        "apca_lc_advisory": 73.7,
+        "apca_note": "APCA Lc is advisory perceptual analysis, not WCAG 2.2 conformance."
+      }
+    ],
+    "palette_resolution": "light scheme; accent from DESIGN_BRIEF palette (3 valid color(s))"
+  },
+  "screens": [
+    {
+      "id": "assistant",
+      "name": "Assistant",
+      "purpose": "Get a trustworthy answer or draft",
+      "user_task": "Draft and verify a reply to a ticket",
+      "priority": "P0",
+      "regions": [
+        {
+          "id": "conversation",
+          "purpose": "Messages with provenance",
+          "parent_layout": "STACK",
+          "axis": "BLOCK",
+          "spacing_token": "semantic.space.stack",
+          "priority": "P0",
+          "emphasis": 3,
+          "overflow": "GROW",
+          "min_inline": "16rem",
+          "max_inline": "80rem",
+          "responsive_transform": "FULL_WIDTH"
+        },
+        {
+          "id": "composer",
+          "purpose": "Write the request",
+          "parent_layout": "STACK",
+          "axis": "BLOCK",
+          "spacing_token": "semantic.space.inline",
+          "priority": "P0",
+          "emphasis": 2,
+          "overflow": "WRAP",
+          "min_inline": "16rem",
+          "max_inline": "80rem",
+          "responsive_transform": "FULL_WIDTH"
+        },
+        {
+          "id": "sources",
+          "purpose": "Sources and context",
+          "parent_layout": "STACK",
+          "axis": "BLOCK",
+          "spacing_token": "semantic.space.stack",
+          "priority": "P2",
+          "emphasis": 1,
+          "overflow": "SCROLL",
+          "min_inline": "16rem",
+          "max_inline": "80rem",
+          "responsive_transform": "DRAWER"
+        },
+        {
+          "id": "history",
+          "purpose": "Past sessions",
+          "parent_layout": "STACK",
+          "axis": "BLOCK",
+          "spacing_token": "semantic.space.stack",
+          "priority": "P3",
+          "emphasis": 1,
+          "overflow": "SCROLL",
+          "min_inline": "16rem",
+          "max_inline": "80rem",
+          "responsive_transform": "PRIORITY_REDUCTION"
+        }
+      ],
+      "components": [
+        "MessageList",
+        "AITrustEnvelope",
+        "Composer",
+        "SourcePanel"
+      ],
+      "trace": {
+        "user_task": "Draft and verify a reply to a ticket",
+        "content": "Get a trustworthy answer or draft; content requirements: Reorder saved reply snippets",
+        "contract": "async state contract for MessageList, AITrustEnvelope, Composer",
+        "component": "MessageList, AITrustEnvelope, Composer",
+        "token": "semantic.space.stack",
+        "state": "DEFAULT, DEGRADED, DISABLED, EMPTY, ERROR, FOCUS_VISIBLE, HOVER, LOADING, OFFLINE, PRESSED, SKELETON, STALE, STREAMING, SUCCESS, UNAVAILABLE",
+        "interaction": "ix.composer.activate, ix.messagelist.reorder",
+        "responsive_rule": "conversation:FULL_WIDTH, composer:FULL_WIDTH, sources:DRAWER, history:PRIORITY_REDUCTION",
+        "a11y_rule": "a11y.contrast, a11y.forced-colors, a11y.name-role-value, a11y.non-text-contrast",
+        "performance_rule": "Prefer semantic HTML and CSS over client JavaScript for layout and state styling.",
+        "implementation_path": "screens/assistant -> components/{MessageList, AITrustEnvelope, Composer}",
+        "test": "e2e: assistant primary task, keyboard-only, 320px reflow",
+        "evidence": "spec-level (compiler quiet-precision); implementation evidence pending"
+      }
+    }
+  ],
+  "components": [
+    {
+      "id": "cmp.messagelist",
+      "name": "MessageList",
+      "semantic_role": "log live region",
+      "purpose": "Conversation history; new messages announced once complete.",
+      "tokens": [
+        "semantic.color.foreground",
+        "semantic.color.surface",
+        "semantic.space.stack",
+        "component.ai-trust.border",
+        "component.ai-trust.label",
+        "component.ai-trust.degraded"
+      ],
+      "states": [
+        "DEFAULT",
+        "LOADING",
+        "SKELETON",
+        "EMPTY",
+        "ERROR",
+        "STALE",
+        "STREAMING",
+        "DEGRADED",
+        "UNAVAILABLE",
+        "OFFLINE"
+      ],
+      "interactions": [
+        "ix.messagelist.reorder"
+      ],
+      "a11y": [],
+      "implementation": "PROPOSED"
+    },
+    {
+      "id": "cmp.aitrustenvelope",
+      "name": "AITrustEnvelope",
+      "semantic_role": "group labeled 'AI provenance'",
+      "purpose": "One truthful provenance scope per AI response.",
+      "tokens": [
+        "semantic.color.foreground",
+        "semantic.color.surface",
+        "semantic.space.stack",
+        "component.ai-trust.border",
+        "component.ai-trust.label",
+        "component.ai-trust.degraded",
+        "semantic.color.status.success",
+        "semantic.color.status.warning",
+        "semantic.color.status.danger"
+      ],
+      "states": [
+        "DEFAULT",
+        "STREAMING",
+        "DEGRADED",
+        "UNAVAILABLE"
+      ],
+      "interactions": [],
+      "a11y": [],
+      "implementation": "PROPOSED"
+    },
+    {
+      "id": "cmp.composer",
+      "name": "Composer",
+      "semantic_role": "form with labeled textarea",
+      "purpose": "Write the prompt/request.",
+      "tokens": [
+        "semantic.color.foreground",
+        "semantic.color.surface",
+        "semantic.space.stack",
+        "component.button.primary.background",
+        "component.button.primary.foreground",
+        "component.focus.ring",
+        "semantic.color.border-strong"
+      ],
+      "states": [
+        "DEFAULT",
+        "HOVER",
+        "FOCUS_VISIBLE",
+        "DISABLED",
+        "LOADING",
+        "SUCCESS",
+        "PRESSED"
+      ],
+      "interactions": [
+        "ix.composer.activate"
+      ],
+      "a11y": [],
+      "implementation": "PROPOSED"
+    },
+    {
+      "id": "cmp.sourcepanel",
+      "name": "SourcePanel",
+      "semantic_role": "complementary landmark",
+      "purpose": "Sources and context behind an AI answer, when available.",
+      "tokens": [
+        "semantic.color.foreground",
+        "semantic.color.surface",
+        "semantic.space.stack",
+        "component.ai-trust.border",
+        "component.ai-trust.label",
+        "component.ai-trust.degraded"
+      ],
+      "states": [
+        "DEFAULT",
+        "EMPTY",
+        "STREAMING",
+        "DEGRADED",
+        "UNAVAILABLE"
+      ],
+      "interactions": [],
+      "a11y": [],
+      "implementation": "PROPOSED"
+    }
+  ],
+  "states": [
+    {
+      "component_ref": "MessageList",
+      "state": "DEFAULT",
+      "trigger": "initial render",
+      "visual_delta": "base tokens",
+      "content_delta": "base content",
+      "semantics": "native role",
+      "keyboard": "reachable in tab order if interactive",
+      "announcement": "none",
+      "motion": "none",
+      "recovery": "n/a",
+      "persistence": "none",
+      "non_color_channel": null
+    },
+    {
+      "component_ref": "MessageList",
+      "state": "LOADING",
+      "trigger": "async request in flight",
+      "visual_delta": "indeterminate indicator; layout reserved",
+      "content_delta": "'Loading…' text",
+      "semantics": "aria-busy=true",
+      "keyboard": "focus retained",
+      "announcement": "polite 'Loading'",
+      "motion": "reduced-motion safe spinner",
+      "recovery": "timeout -> ERROR",
+      "persistence": "none",
+      "non_color_channel": "'Loading…' text"
+    },
+    {
+      "component_ref": "MessageList",
+      "state": "SKELETON",
+      "trigger": "first load of structured data",
+      "visual_delta": "neutral placeholder shapes mirroring layout",
+      "content_delta": "none (aria-hidden)",
+      "semantics": "aria-hidden placeholders + live status",
+      "keyboard": "no focusable placeholders",
+      "announcement": "polite 'Loading'",
+      "motion": "static under reduced motion",
+      "recovery": "timeout -> ERROR",
+      "persistence": "none",
+      "non_color_channel": "status text"
+    },
+    {
+      "component_ref": "MessageList",
+      "state": "EMPTY",
+      "trigger": "no data for the current scope",
+      "visual_delta": "explanatory illustration-free panel",
+      "content_delta": "why it is empty + first action",
+      "semantics": "status region",
+      "keyboard": "first action focusable",
+      "announcement": "result count '0' announced",
+      "motion": "none",
+      "recovery": "primary action / clear filters",
+      "persistence": "none",
+      "non_color_channel": "explanatory text"
+    },
+    {
+      "component_ref": "MessageList",
+      "state": "ERROR",
+      "trigger": "operation failed",
+      "visual_delta": "danger surface + error icon",
+      "content_delta": "what failed, why, what to do",
+      "semantics": "role=alert for blocking errors",
+      "keyboard": "retry control focusable",
+      "announcement": "assertive for blocking, polite otherwise",
+      "motion": "none",
+      "recovery": "retry / alternative path",
+      "persistence": "until dismissed or resolved",
+      "non_color_channel": "error icon + text"
+    },
+    {
+      "component_ref": "MessageList",
+      "state": "STALE",
+      "trigger": "data older than freshness budget",
+      "visual_delta": "clock icon + age label",
+      "content_delta": "'Updated N min ago'",
+      "semantics": "status text",
+      "keyboard": "refresh focusable",
+      "announcement": "polite on transition",
+      "motion": "none",
+      "recovery": "refresh",
+      "persistence": "until refreshed",
+      "non_color_channel": "age label"
+    },
+    {
+      "component_ref": "MessageList",
+      "state": "STREAMING",
+      "trigger": "response arriving incrementally",
+      "visual_delta": "caret/progress indicator on the growing block",
+      "content_delta": "partial content, marked incomplete",
+      "semantics": "aria-busy until complete",
+      "keyboard": "stop control focusable",
+      "announcement": "announce once on completion",
+      "motion": "no per-token motion",
+      "recovery": "stop / retry",
+      "persistence": "none",
+      "non_color_channel": "'Generating…' text"
+    },
+    {
+      "component_ref": "MessageList",
+      "state": "DEGRADED",
+      "trigger": "fallback path used",
+      "visual_delta": "warning icon + 'Degraded' label",
+      "content_delta": "what is reduced and why",
+      "semantics": "status text",
+      "keyboard": "n/a",
+      "announcement": "polite",
+      "motion": "none",
+      "recovery": "retry with full capability",
+      "persistence": "until recovered",
+      "non_color_channel": "icon + text label"
+    },
+    {
+      "component_ref": "MessageList",
+      "state": "UNAVAILABLE",
+      "trigger": "capability/provider not available",
+      "visual_delta": "unavailable icon + reason",
+      "content_delta": "reason + alternative",
+      "semantics": "status text",
+      "keyboard": "alternative focusable",
+      "announcement": "polite",
+      "motion": "none",
+      "recovery": "alternative path",
+      "persistence": "until available",
+      "non_color_channel": "icon + reason text"
+    },
+    {
+      "component_ref": "MessageList",
+      "state": "OFFLINE",
+      "trigger": "network lost",
+      "visual_delta": "offline icon + banner",
+      "content_delta": "what still works, what is queued",
+      "semantics": "status region",
+      "keyboard": "retry focusable",
+      "announcement": "polite",
+      "motion": "none",
+      "recovery": "auto-reconnect + manual retry",
+      "persistence": "until online",
+      "non_color_channel": "icon + banner text"
+    },
+    {
+      "component_ref": "AITrustEnvelope",
+      "state": "DEFAULT",
+      "trigger": "initial render",
+      "visual_delta": "base tokens",
+      "content_delta": "base content",
+      "semantics": "native role",
+      "keyboard": "reachable in tab order if interactive",
+      "announcement": "none",
+      "motion": "none",
+      "recovery": "n/a",
+      "persistence": "none",
+      "non_color_channel": null
+    },
+    {
+      "component_ref": "AITrustEnvelope",
+      "state": "STREAMING",
+      "trigger": "response arriving incrementally",
+      "visual_delta": "caret/progress indicator on the growing block",
+      "content_delta": "partial content, marked incomplete",
+      "semantics": "aria-busy until complete",
+      "keyboard": "stop control focusable",
+      "announcement": "announce once on completion",
+      "motion": "no per-token motion",
+      "recovery": "stop / retry",
+      "persistence": "none",
+      "non_color_channel": "'Generating…' text"
+    },
+    {
+      "component_ref": "AITrustEnvelope",
+      "state": "DEGRADED",
+      "trigger": "fallback path used",
+      "visual_delta": "warning icon + 'Degraded' label",
+      "content_delta": "what is reduced and why",
+      "semantics": "status text",
+      "keyboard": "n/a",
+      "announcement": "polite",
+      "motion": "none",
+      "recovery": "retry with full capability",
+      "persistence": "until recovered",
+      "non_color_channel": "icon + text label"
+    },
+    {
+      "component_ref": "AITrustEnvelope",
+      "state": "UNAVAILABLE",
+      "trigger": "capability/provider not available",
+      "visual_delta": "unavailable icon + reason",
+      "content_delta": "reason + alternative",
+      "semantics": "status text",
+      "keyboard": "alternative focusable",
+      "announcement": "polite",
+      "motion": "none",
+      "recovery": "alternative path",
+      "persistence": "until available",
+      "non_color_channel": "icon + reason text"
+    },
+    {
+      "component_ref": "Composer",
+      "state": "DEFAULT",
+      "trigger": "initial render",
+      "visual_delta": "base tokens",
+      "content_delta": "base content",
+      "semantics": "native role",
+      "keyboard": "reachable in tab order if interactive",
+      "announcement": "none",
+      "motion": "none",
+      "recovery": "n/a",
+      "persistence": "none",
+      "non_color_channel": null
+    },
+    {
+      "component_ref": "Composer",
+      "state": "HOVER",
+      "trigger": "pointer over target",
+      "visual_delta": "surface-raised background",
+      "content_delta": "none",
+      "semantics": "none",
+      "keyboard": "n/a (pointer only; never the sole affordance)",
+      "announcement": "none",
+      "motion": "feedback duration",
+      "recovery": "n/a",
+      "persistence": "none",
+      "non_color_channel": null
+    },
+    {
+      "component_ref": "Composer",
+      "state": "FOCUS_VISIBLE",
+      "trigger": "keyboard focus",
+      "visual_delta": "2px focus-ring outline, offset, never removed",
+      "content_delta": "none",
+      "semantics": "focused element",
+      "keyboard": "Tab / Shift+Tab",
+      "announcement": "accessible name announced",
+      "motion": "none",
+      "recovery": "n/a",
+      "persistence": "none",
+      "non_color_channel": "outline shape"
+    },
+    {
+      "component_ref": "Composer",
+      "state": "DISABLED",
+      "trigger": "action unavailable",
+      "visual_delta": "reduced-contrast control (still >=3:1 border)",
+      "content_delta": "reason text nearby",
+      "semantics": "disabled or aria-disabled with reason",
+      "keyboard": "skipped or focusable with reason",
+      "announcement": "reason on focus",
+      "motion": "none",
+      "recovery": "state what enables it",
+      "persistence": "none",
+      "non_color_channel": "reason text"
+    },
+    {
+      "component_ref": "Composer",
+      "state": "LOADING",
+      "trigger": "async request in flight",
+      "visual_delta": "indeterminate indicator; layout reserved",
+      "content_delta": "'Loading…' text",
+      "semantics": "aria-busy=true",
+      "keyboard": "focus retained",
+      "announcement": "polite 'Loading'",
+      "motion": "reduced-motion safe spinner",
+      "recovery": "timeout -> ERROR",
+      "persistence": "none",
+      "non_color_channel": "'Loading…' text"
+    },
+    {
+      "component_ref": "Composer",
+      "state": "SUCCESS",
+      "trigger": "operation succeeded",
+      "visual_delta": "success icon + message",
+      "content_delta": "what changed",
+      "semantics": "status region",
+      "keyboard": "focus not stolen",
+      "announcement": "polite confirmation",
+      "motion": "reduced-motion safe",
+      "recovery": "undo where supported",
+      "persistence": "transient (toast) or inline",
+      "non_color_channel": "success icon + text"
+    },
+    {
+      "component_ref": "Composer",
+      "state": "PRESSED",
+      "trigger": "activation start",
+      "visual_delta": "inset/darker surface",
+      "content_delta": "none",
+      "semantics": "aria-pressed only for toggles",
+      "keyboard": "Enter / Space",
+      "announcement": "none",
+      "motion": "feedback duration",
+      "recovery": "n/a",
+      "persistence": "none",
+      "non_color_channel": null
+    },
+    {
+      "component_ref": "SourcePanel",
+      "state": "DEFAULT",
+      "trigger": "initial render",
+      "visual_delta": "base tokens",
+      "content_delta": "base content",
+      "semantics": "native role",
+      "keyboard": "reachable in tab order if interactive",
+      "announcement": "none",
+      "motion": "none",
+      "recovery": "n/a",
+      "persistence": "none",
+      "non_color_channel": null
+    },
+    {
+      "component_ref": "SourcePanel",
+      "state": "EMPTY",
+      "trigger": "no data for the current scope",
+      "visual_delta": "explanatory illustration-free panel",
+      "content_delta": "why it is empty + first action",
+      "semantics": "status region",
+      "keyboard": "first action focusable",
+      "announcement": "result count '0' announced",
+      "motion": "none",
+      "recovery": "primary action / clear filters",
+      "persistence": "none",
+      "non_color_channel": "explanatory text"
+    },
+    {
+      "component_ref": "SourcePanel",
+      "state": "STREAMING",
+      "trigger": "response arriving incrementally",
+      "visual_delta": "caret/progress indicator on the growing block",
+      "content_delta": "partial content, marked incomplete",
+      "semantics": "aria-busy until complete",
+      "keyboard": "stop control focusable",
+      "announcement": "announce once on completion",
+      "motion": "no per-token motion",
+      "recovery": "stop / retry",
+      "persistence": "none",
+      "non_color_channel": "'Generating…' text"
+    },
+    {
+      "component_ref": "SourcePanel",
+      "state": "DEGRADED",
+      "trigger": "fallback path used",
+      "visual_delta": "warning icon + 'Degraded' label",
+      "content_delta": "what is reduced and why",
+      "semantics": "status text",
+      "keyboard": "n/a",
+      "announcement": "polite",
+      "motion": "none",
+      "recovery": "retry with full capability",
+      "persistence": "until recovered",
+      "non_color_channel": "icon + text label"
+    },
+    {
+      "component_ref": "SourcePanel",
+      "state": "UNAVAILABLE",
+      "trigger": "capability/provider not available",
+      "visual_delta": "unavailable icon + reason",
+      "content_delta": "reason + alternative",
+      "semantics": "status text",
+      "keyboard": "alternative focusable",
+      "announcement": "polite",
+      "motion": "none",
+      "recovery": "alternative path",
+      "persistence": "until available",
+      "non_color_channel": "icon + reason text"
+    }
+  ],
+  "interactions": [
+    {
+      "id": "ix.composer.activate",
+      "component_ref": "Composer",
+      "trigger": "enter value",
+      "input_modes": [
+        "POINTER",
+        "TOUCH",
+        "SCREEN_READER",
+        "KEYBOARD"
+      ],
+      "feedback": "PRESSED within one frame; outcome via state change and status text",
+      "standard": true,
+      "justification": null,
+      "fallback": null
+    },
+    {
+      "id": "ix.messagelist.reorder",
+      "component_ref": "MessageList",
+      "trigger": "drag to reorder",
+      "input_modes": [
+        "POINTER",
+        "TOUCH",
+        "KEYBOARD",
+        "SCREEN_READER"
+      ],
+      "feedback": "lifted item + drop target outline",
+      "standard": false,
+      "justification": "Requested reordering of items by direct manipulation.",
+      "fallback": "Standard control alternative: 'Move up/down' buttons and a position menu, operable by keyboard."
+    }
+  ],
+  "responsive_rules": [
+    {
+      "region_ref": "assistant.conversation",
+      "condition": "container inline-size < 40rem",
+      "transform": "FULL_WIDTH",
+      "rationale": "P0 region; messages with provenance"
+    },
+    {
+      "region_ref": "assistant.composer",
+      "condition": "container inline-size < 40rem",
+      "transform": "FULL_WIDTH",
+      "rationale": "P0 region; write the request"
+    },
+    {
+      "region_ref": "assistant.sources",
+      "condition": "container inline-size < 40rem",
+      "transform": "DRAWER",
+      "rationale": "P2 region; sources and context"
+    },
+    {
+      "region_ref": "assistant.history",
+      "condition": "container inline-size < 40rem",
+      "transform": "PRIORITY_REDUCTION",
+      "rationale": "P3 region; past sessions"
+    }
+  ],
+  "accessibility": {
+    "target": "WCAG 2.2",
+    "requirements": [
+      {
+        "id": "a11y.contrast",
+        "criterion": "WCAG 2.2 SC 1.4.3 Contrast (Minimum)",
+        "rule": "Text meets 4.5:1 (AA); body text targets 7:1 (AAA) where tokens allow.",
+        "verification": "VERIFIED_STATIC"
+      },
+      {
+        "id": "a11y.forced-colors",
+        "criterion": "Forced colors (Windows High Contrast)",
+        "rule": "Under forced-colors: active, states keep icon + text channels and borders use system colors.",
+        "verification": "REQUIRES_HUMAN_EVALUATION"
+      },
+      {
+        "id": "a11y.name-role-value",
+        "criterion": "WCAG 2.2 SC 4.1.2 Name, Role, Value",
+        "rule": "Every control exposes an accessible name, role, and state.",
+        "verification": "REQUIRES_ASSISTIVE_TECH"
+      },
+      {
+        "id": "a11y.non-text-contrast",
+        "criterion": "WCAG 2.2 SC 1.4.11 Non-text Contrast",
+        "rule": "Focus indicators, control borders and meaningful graphics reach 3:1.",
+        "verification": "VERIFIED_STATIC"
+      },
+      {
+        "id": "a11y.resize",
+        "criterion": "WCAG 2.2 SC 1.4.4 Resize Text",
+        "rule": "Text resizes to 200% without loss of content or function.",
+        "verification": "REQUIRES_HUMAN_EVALUATION"
+      },
+      {
+        "id": "a11y.use-of-color",
+        "criterion": "WCAG 2.2 SC 1.4.1 Use of Color",
+        "rule": "Status and state are never conveyed by color alone.",
+        "verification": "REQUIRES_HUMAN_EVALUATION"
+      },
+      {
+        "id": "a11y.wcag-2-2-sc-1-4-10-reflow",
+        "criterion": "WCAG 2.2 SC 1.4.10 Reflow",
+        "rule": "Content reflows at 320 CSS px without two-dimensional scrolling (data tables excepted with scroll containers).",
+        "verification": "REQUIRES_HUMAN_EVALUATION"
+      },
+      {
+        "id": "a11y.wcag-2-2-sc-2-4-11-focus-not-obscured-minimum",
+        "criterion": "WCAG 2.2 SC 2.4.11 Focus Not Obscured (Minimum)",
+        "rule": "Sticky/fixed regions never fully hide the focused element.",
+        "verification": "REQUIRES_HUMAN_EVALUATION"
+      },
+      {
+        "id": "a11y.wcag-2-2-sc-2-4-6-headings-and-labels",
+        "criterion": "WCAG 2.2 SC 2.4.6 Headings and Labels",
+        "rule": "Heading structure mirrors the visual hierarchy.",
+        "verification": "REQUIRES_HUMAN_EVALUATION"
+      },
+      {
+        "id": "a11y.wcag-2-2-sc-2-5-8-target-size-minimum",
+        "criterion": "WCAG 2.2 SC 2.5.8 Target Size (Minimum)",
+        "rule": "Interactive targets are at least 24x24 CSS px; primary touch targets 44x44.",
+        "verification": "REQUIRES_HUMAN_EVALUATION"
+      }
+    ],
+    "predicted": [
+      "Keyboard-complete flows if native elements are used as specified.",
+      "Reflow at 320px given the declared region transforms."
+    ],
+    "verified": [
+      "semantic.color.foreground on semantic.color.background: 10.01:1 meets AAA_NORMAL (static token check)",
+      "semantic.color.foreground-strong on semantic.color.background: 19.06:1 meets AAA_NORMAL (static token check)",
+      "semantic.color.foreground on semantic.color.surface: 9.5:1 meets AA_NORMAL (static token check)",
+      "semantic.color.foreground-muted on semantic.color.background: 7.41:1 meets AA_NORMAL (static token check)",
+      "semantic.color.on-accent on semantic.color.accent: 14.06:1 meets AA_NORMAL (static token check)",
+      "semantic.color.focus-ring on semantic.color.background: 14.06:1 meets NON_TEXT (static token check)",
+      "semantic.color.border-strong on semantic.color.background: 4.63:1 meets NON_TEXT (static token check)",
+      "semantic.color.status.warning on semantic.color.surface: 4.57:1 meets AA_NORMAL (static token check)",
+      "semantic.color.status.danger on semantic.color.surface: 5.89:1 meets AA_NORMAL (static token check)"
+    ],
+    "risks": [],
+    "tests_required": [
+      "e2e: primary flow keyboard-only",
+      "e2e: 320px reflow and 200% text zoom",
+      "a11y: automated axe scan (partial coverage only)",
+      "a11y: screen reader walkthrough (NVDA + VoiceOver) — requires assistive tech",
+      "visual: forced-colors and prefers-reduced-motion snapshots"
+    ]
+  },
+  "performance": {
+    "requirements": [
+      "Prefer semantic HTML and CSS over client JavaScript for layout and state styling.",
+      "Keep client components at the interaction boundary; render static content on the server.",
+      "Subscribe to the smallest stable store slice a component needs.",
+      "Streams, sockets, observers, and timers are cleaned up on unmount."
+    ],
+    "risks": [
+      "Streaming/live updates can re-render on every chunk; batch updates per animation frame.",
+      "Token-by-token rendering must not re-render the whole conversation."
+    ],
+    "budgets": [
+      {
+        "name": "Largest Contentful Paint",
+        "target": "<= 2.5 s (p75)",
+        "truth": "NOT_MEASURED",
+        "source": "Core Web Vitals target",
+        "formula": "p75 field LCP",
+        "timestamp": null,
+        "freshness": "no measurement exists",
+        "uncertainty": "unmeasured",
+        "fallback": "measure with RUM in staging before any claim"
+      },
+      {
+        "name": "Interaction to Next Paint",
+        "target": "<= 200 ms (p75)",
+        "truth": "NOT_MEASURED",
+        "source": "Core Web Vitals target",
+        "formula": "p75 field INP",
+        "timestamp": null,
+        "freshness": "no measurement exists",
+        "uncertainty": "unmeasured",
+        "fallback": "measure with RUM in staging before any claim"
+      },
+      {
+        "name": "Cumulative Layout Shift",
+        "target": "<= 0.1 (p75)",
+        "truth": "NOT_MEASURED",
+        "source": "Core Web Vitals target",
+        "formula": "p75 field CLS",
+        "timestamp": null,
+        "freshness": "no measurement exists",
+        "uncertainty": "unmeasured",
+        "fallback": "reserve space for async content (skeleton states)"
+      }
+    ]
+  },
+  "ai_trust": {
+    "required": true,
+    "provenance_rules": [
+      "Label every AI output 'AI-generated' or 'AI-assisted' inside a single AITrustEnvelope scope.",
+      "Show provider/model only when the backend reports them; otherwise 'Not disclosed'.",
+      "Degraded or fallback output is labeled as such, never presented as model output."
+    ],
+    "attribution_rules": [
+      "Show sources when the backend returns them; otherwise state 'Sources unavailable'."
+    ],
+    "uncertainty_rules": [
+      "No numeric confidence unless a calibrated backend value exists; display 'Confidence not measured'."
+    ],
+    "feedback_rules": [
+      "Offer feedback/retry only when a backend endpoint records it."
+    ],
+    "confidence_display": "NOT_MEASURED"
+  },
+  "implementation_mapping": {
+    "verified_existing": [],
+    "extend": [],
+    "proposed": [
+      "MessageList",
+      "AITrustEnvelope",
+      "Composer",
+      "SourcePanel"
+    ],
+    "contracts": [
+      "Async action contract: {status: idle|pending|success|error, error?: {message, recovery}}",
+      "AI response contract: {mode, provider?, model?, sources?[], review_status}"
+    ],
+    "state_dependencies": [
+      "MessageList: DEFAULT, LOADING, SKELETON, EMPTY, ERROR, STALE, STREAMING, DEGRADED, UNAVAILABLE, OFFLINE",
+      "AITrustEnvelope: DEFAULT, STREAMING, DEGRADED, UNAVAILABLE",
+      "Composer: DEFAULT, HOVER, FOCUS_VISIBLE, DISABLED, LOADING, SUCCESS, PRESSED",
+      "SourcePanel: DEFAULT, EMPTY, STREAMING, DEGRADED, UNAVAILABLE"
+    ],
+    "events": [
+      "proposed analytics event: ui.assistant.primary_task"
+    ],
+    "tests": [
+      "unit: each component renders every declared state with its non-color channel",
+      "e2e: primary flow keyboard-only",
+      "e2e: 320px reflow and 200% text zoom",
+      "a11y: automated axe scan (partial coverage only)",
+      "a11y: screen reader walkthrough (NVDA + VoiceOver) — requires assistive tech",
+      "visual: forced-colors and prefers-reduced-motion snapshots"
+    ]
+  },
+  "generation_prompts": [
+    "Screen 'Assistant' (P0): Get a trustworthy answer or draft. Regions in priority order: conversation [P0, stack, full_width when narrow]; composer [P0, stack, full_width when narrow]; sources [P2, stack, drawer when narrow]; history [P3, stack, priority_reduction when narrow]. Components: MessageList, AITrustEnvelope, Composer, SourcePanel. Use only --ui-semantic-* and --ui-component-* tokens. Every state keeps a non-color channel. Do not invent testimonials, logos, metrics, or AI confidence."
+  ],
+  "evaluation": [
+    {
+      "engine": "INTERACTION_DEBT",
+      "severity": "BLOCKING",
+      "subject": "ix.messagelist.reorder",
+      "message": "nonstandard interaction has no standard fallback",
+      "repaired": true,
+      "repair_action": "added standard keyboard fallback to ix.messagelist.reorder"
+    }
+  ],
+  "repair_iterations": 1,
+  "validation_checks": [
+    {
+      "id": "schema_strict",
+      "status": "PASS",
+      "evidence": "pydantic extra=forbid on every model"
+    },
+    {
+      "id": "dtcg_tokens_compiled",
+      "status": "PASS",
+      "evidence": "60 tokens, tiered, sha256 486b3054b2e1"
+    },
+    {
+      "id": "wcag_contrast_static",
+      "status": "PASS",
+      "evidence": "9/9 pairs meet their WCAG 2.2 requirement"
+    },
+    {
+      "id": "evaluation_engines",
+      "status": "PASS",
+      "evidence": "1 finding(s), 0 blocking unresolved, 1 repair iteration(s)"
+    },
+    {
+      "id": "principles_selective",
+      "status": "PASS",
+      "evidence": "12 of 12 triggered principles changed the IR"
+    },
+    {
+      "id": "generation_firewall",
+      "status": "PASS",
+      "evidence": "terminal is a spec state; no generated/deployed state exists"
+    },
+    {
+      "id": "browser_and_assistive_tech",
+      "status": "NOT_RUN",
+      "evidence": "spec-level compiler; requires implementation"
+    }
+  ],
+  "approval_required": [
+    "Design lead (design_lead, Department.design) sign-off before implementation (HITL)."
+  ],
+  "confidence": {
+    "value": 0.85,
+    "basis": [
+      "1 assumption(s)",
+      "12 principle(s) applied",
+      "territory quiet-precision"
+    ],
+    "unknowns": []
+  },
+  "handoff_only": true,
+  "terminal": "UIUX_SPEC_READY",
+  "spec_hash": "9ca199d3a9b773fa94c0e959f74aa014a878be91732a04c84e778a1b9c1bfb65"
+}
