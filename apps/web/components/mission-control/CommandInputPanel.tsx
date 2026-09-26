@@ -7,6 +7,7 @@ import { useApprovalStore } from '../../lib/stores/approvalStore';
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { useRunStore } from '../../lib/stores/runStore';
+import { useDesignStore } from '../../lib/stores/designStore';
 
 export function CommandInputPanel() {
   const [brandName, setBrandName] = useState('');
@@ -25,6 +26,11 @@ export function CommandInputPanel() {
   const addArtifact = useArtifactStore((state) => state.addArtifact);
   const upsertApproval = useApprovalStore((state) => state.upsertApproval);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
+  // Stable references: these only change when a direction is attached or detached.
+  const styleSelection = useDesignStore((state) => state.attached?.selection ?? null);
+  const styleLabel = useDesignStore((state) => state.attached?.label ?? null);
+  const styleCompositionId = useDesignStore((state) => state.attached?.compositionId ?? null);
+  const detachStyle = useDesignStore((state) => state.detach);
 
   const handleLaunchCampaign = async () => {
     if (!brandName.trim() || !targetAudience.trim()) return;
@@ -45,6 +51,7 @@ export function CommandInputPanel() {
           brand_style_notes: brandStyleNotes.split(',').map((note) => note.trim()).filter(Boolean),
           channels: [],
           constraints: [],
+          style_selection: styleSelection,
         },
         generateIdempotencyKey()
       );
@@ -127,6 +134,22 @@ export function CommandInputPanel() {
 
         <label className="text-xs text-zinc-500" htmlFor="brand-style-notes">Brand style notes <span className="text-zinc-600">(comma separated)</span></label>
         <input id="brand-style-notes" value={brandStyleNotes} onChange={(event) => setBrandStyleNotes(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        {styleLabel && (
+          <div className="flex items-center justify-between gap-2 text-xs bg-emerald-500/10 border border-emerald-500/20 rounded px-3 py-2">
+            <span className="text-emerald-300 min-w-0 truncate" title={styleCompositionId ?? undefined}>
+              Style direction: {styleLabel}
+            </span>
+            <button
+              type="button"
+              onClick={detachStyle}
+              disabled={loading}
+              className="shrink-0 text-[11px] text-zinc-400 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded"
+            >
+              Detach
+            </button>
+          </div>
+        )}
 
         <div className="flex justify-end pt-1">
           <button
