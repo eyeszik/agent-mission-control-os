@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from services.langgraph.agency.design.style_composer import DesignStyleDirection, DesignStyleSelection
 from services.langgraph.agency.ui_ux.models import UIUXDesignIR
 
 
@@ -21,6 +22,8 @@ class CampaignBrief(BaseModel):
     workflow_idea: Optional[str] = None
     differentiators: List[str] = Field(default_factory=list)
     brand_style_notes: List[str] = Field(default_factory=list)
+    # Design Mode selection; recomposed server-side by the design_brief node.
+    style_selection: Optional[DesignStyleSelection] = None
 
 
 class BrandStrategy(BaseModel):
@@ -49,6 +52,8 @@ class DesignBrief(BaseModel):
     typography_direction: str
     imagery_style: str
     layout_notes: str
+    # The resolved style direction that shaped this brief (artifact lineage).
+    style_direction: Optional[DesignStyleDirection] = None
     # Deterministic UI/UX specification compiled inside design_brief for briefs
     # that describe a digital product (agency/ui_ux). None for non-UI briefs.
     ui_ux: Optional[UIUXDesignIR] = None

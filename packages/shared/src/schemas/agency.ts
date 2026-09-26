@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { UIUXDesignIRSchema } from './uiux';
 import { ApprovalRequestSchema } from './approvals';
+import { DesignStyleDirectionSchema, DesignStyleSelectionSchema } from './styleLibrary';
 
 export const AGENCY_PIPELINE_STAGES = [
   'brief_intake',
@@ -32,6 +33,8 @@ export const CampaignBriefSchema = z.object({
   workflow_idea: z.string().optional().nullable(),
   differentiators: z.array(z.string()).default([]),
   brand_style_notes: z.array(z.string()).default([]),
+  // Design Mode selection; the backend recomposes it against the catalog.
+  style_selection: DesignStyleSelectionSchema.optional().nullable(),
 });
 
 export const BrandStrategySchema = z.object({
@@ -60,6 +63,8 @@ export const DesignBriefSchema = z.object({
   typography_direction: z.string(),
   imagery_style: z.string(),
   layout_notes: z.string(),
+  // The resolved style direction that shaped this brief (artifact lineage).
+  style_direction: DesignStyleDirectionSchema.optional().nullable(),
   // Deterministic UI/UX spec compiled inside design_brief for digital-product briefs.
   ui_ux: UIUXDesignIRSchema.optional().nullable(),
 });

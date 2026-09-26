@@ -3,8 +3,10 @@ from typing import List, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Header, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
+from services.langgraph.agency.design import UnknownStyleError, get_style
+from services.langgraph.agency.design.style_composer import DesignStyleSelection
 from services.langgraph.agency.execution.canonical import canonical_hash
 from services.langgraph.agency.exporter import export_idea_workspace
 from services.langgraph.agency.execution.models import (
@@ -78,6 +80,20 @@ class CampaignBriefRequest(BaseModel):
     workflow_idea: Optional[str] = None
     differentiators: List[str] = Field(default_factory=list)
     brand_style_notes: List[str] = Field(default_factory=list)
+    style_selection: Optional[DesignStyleSelection] = None
+
+    @field_validator("style_selection")
+    @classmethod
+    def _styles_exist(cls, value: Optional[DesignStyleSelection]) -> Optional[DesignStyleSelection]:
+        # Reject unknown styles at the boundary; the design_brief node still
+        # handles a style that disappears from the catalog before it runs.
+        if value is not None:
+            for layer in value.selections:
+                try:
+                    get_style(layer.style_id)
+                except UnknownStyleError as exc:
+                    raise ValueError(f"unknown style {layer.style_id!r}") from exc
+        return value
 
 
 class CreateAgencyRunRequest(BaseModel):
