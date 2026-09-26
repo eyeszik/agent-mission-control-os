@@ -204,7 +204,7 @@
     },
     {
       "path": "services/langgraph/api/routes/runtime.py",
-      "git_blob_sha": "9a9e7605bdd25c91ac2f40173b10b3792bb84323"
+      "git_blob_sha": "73a92e9c0deba43ae04a77fd8af235bf42955cf3"
     },
     {
       "path": "services/langgraph/app/config.py",
@@ -284,7 +284,7 @@
     },
     {
       "path": "services/langgraph/tests/test_delivery_gate.py",
-      "git_blob_sha": "12dab9940ae8ea523997e443c21a4f7d1b5feca4"
+      "git_blob_sha": "2f9614d4df4ee7d11a6b3d104b449f6e7ae3314f"
     },
     {
       "path": "services/langgraph/tests/test_guidance.py",
