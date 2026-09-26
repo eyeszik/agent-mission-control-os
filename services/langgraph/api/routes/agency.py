@@ -80,6 +80,9 @@ class CampaignBriefRequest(BaseModel):
     workflow_idea: Optional[str] = None
     differentiators: List[str] = Field(default_factory=list)
     brand_style_notes: List[str] = Field(default_factory=list)
+    market: Optional[str] = None
+    language: Optional[str] = None
+    locale: Optional[str] = None
     style_selection: Optional[DesignStyleSelection] = None
 
     @field_validator("style_selection")
