@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from services.langgraph.agency.design.style_composer import DesignStyleDirection, DesignStyleSelection
+from services.langgraph.agency.full_service import AgencyOperationsPackage
 from services.langgraph.agency.ui_ux.models import UIUXDesignIR
 
 
@@ -22,6 +23,9 @@ class CampaignBrief(BaseModel):
     workflow_idea: Optional[str] = None
     differentiators: List[str] = Field(default_factory=list)
     brand_style_notes: List[str] = Field(default_factory=list)
+    market: Optional[str] = None
+    language: Optional[str] = None
+    locale: Optional[str] = None
     # Design Mode selection; recomposed server-side by the design_brief node.
     style_selection: Optional[DesignStyleSelection] = None
 
@@ -160,3 +164,4 @@ class CampaignPackage(BaseModel):
     design_system: Optional[DesignSystemPackage] = None
     asset_execution: Optional[AssetExecutionPackage] = None
     workspace_export: Optional[WorkspaceExport] = None
+    agency_operations: Optional[AgencyOperationsPackage] = None
