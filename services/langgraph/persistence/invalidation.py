@@ -24,6 +24,18 @@ DISCHARGED_STATES = {"DISCHARGED_RECOMPUTE", "DISCHARGED_CUTOFF"}
 STATE_VALUES = OPEN_STATES | DISCHARGED_STATES
 PROTECTED_BRANCH_PREFIX = "art-protected-"
 
+# The live branding/marketing pipeline currently depends on generation spec,
+# model parameters, tool results, schemas, and tenant/project authorization.
+# Mutable memory and clock-window leases remain visible as HOOK_GAP evidence,
+# but are not release-blocking until a pipeline explicitly declares them.
+AGENCY_PIPELINE_DEMANDED_EVENT_CLASSES = frozenset({
+    "SPEC_CHANGE",
+    "MODEL_PARAM_CHANGE",
+    "TOOL_RESULT_CHANGE",
+    "SCHEMA_CHANGE",
+    "ACL_SECRET_CHANGE",
+})
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -293,6 +305,7 @@ def record_run_invalidation_bindings(
     result: Optional[dict],
     node_id: str = "delivery",
     demanded: bool = True,
+    demanded_event_classes: set[str] | frozenset[str] | None = None,
 ) -> list[dict]:
     current = latest_branch_obligations(run_id, artifact_branch)
     bindings = derive_event_bindings(tenant_id=tenant_id, project_id=project_id, result=result)
@@ -301,6 +314,11 @@ def record_run_invalidation_bindings(
         if event_class == "HOOK_GAP":
             continue
         binding = bindings[event_class]
+        event_demanded = (
+            event_class in demanded_event_classes
+            if demanded_event_classes is not None
+            else demanded
+        )
         previous = current.get(event_class)
         cause_k = binding["cause_k"]
         payload = {
@@ -326,7 +344,7 @@ def record_run_invalidation_bindings(
                     node_id=node_id,
                     event_class=event_class,
                     state=initial_state,
-                    demanded=demanded,
+                    demanded=event_demanded,
                     cause_k=cause_k,
                     payload=payload,
                 )
@@ -344,7 +362,7 @@ def record_run_invalidation_bindings(
                 node_id=node_id,
                 event_class=event_class,
                 state=next_state,
-                demanded=demanded,
+                demanded=event_demanded,
                 cause_k=cause_k,
                 payload={**payload, "previous_cause_k": previous["cause_k"]},
             )
