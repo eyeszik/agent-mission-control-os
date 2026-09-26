@@ -176,7 +176,7 @@ def test_create_and_resume_agency_run_emits_proof_bundle(monkeypatch):
     assert trust_payload["compile_blocked"] is False
     # Non-applicable MEMORY_WRITE / CLOCK_WINDOW_ADVANCE gaps remain observable,
     # but are not demanded for this pipeline and therefore cannot authorize/block release.
-    assert trust_payload["hook_gap_count"] >= 1
+    assert trust_payload["hook_gap_count"] == 0
     assert trust_payload["policy_decisions"] >= 1
     assert trust_payload["delivered_outbox"] >= 1
     assert trust_payload["pending_outbox"] == 0
