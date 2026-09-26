@@ -146,9 +146,14 @@ def test_run_result_commit_persists_hook_gap_for_unsourced_classes_and_blocks_co
     open_rows = open_demanded_obligations(run_id=run_id, artifact_branch=f"art-protected-{run_id}")
     by_class = {row["event_class"]: row for row in open_rows}
     latest = latest_branch_obligations(run_id, f"art-protected-{run_id}")
-    assert by_class["MEMORY_WRITE"]["state"] == "HOOK_GAP"
-    assert by_class["CLOCK_WINDOW_ADVANCE"]["state"] == "HOOK_GAP"
+    # Memory/window gaps are retained as explicit evidence but are not demanded
+    # by the current branding pipeline because it has no such dependencies.
+    assert latest["MEMORY_WRITE"]["state"] == "HOOK_GAP"
+    assert not latest["MEMORY_WRITE"]["demanded"]
+    assert latest["CLOCK_WINDOW_ADVANCE"]["state"] == "HOOK_GAP"
+    assert not latest["CLOCK_WINDOW_ADVANCE"]["demanded"]
     assert latest["ACL_SECRET_CHANGE"]["state"] in {"HOOK_GAP", "DISCHARGED_RECOMPUTE"}
+    # Missing generation provenance remains a demanded release blocker.
     assert by_class["SPEC_CHANGE"]["state"] == "HOOK_GAP"
     assert by_class["MODEL_PARAM_CHANGE"]["state"] == "HOOK_GAP"
     assert by_class["SCHEMA_CHANGE"]["state"] == "HOOK_GAP"
