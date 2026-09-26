@@ -146,8 +146,12 @@ def test_run_result_commit_persists_hook_gap_for_unsourced_classes_and_blocks_co
     open_rows = open_demanded_obligations(run_id=run_id, artifact_branch=f"art-protected-{run_id}")
     by_class = {row["event_class"]: row for row in open_rows}
     latest = latest_branch_obligations(run_id, f"art-protected-{run_id}")
-    assert by_class["MEMORY_WRITE"]["state"] == "HOOK_GAP"
-    assert by_class["CLOCK_WINDOW_ADVANCE"]["state"] == "HOOK_GAP"
+    assert "MEMORY_WRITE" not in by_class
+    assert "CLOCK_WINDOW_ADVANCE" not in by_class
+    assert latest["MEMORY_WRITE"]["state"] == "DISCHARGED_RECOMPUTE"
+    assert latest["MEMORY_WRITE"]["payload"]["reason"] == "not_applicable_to_run"
+    assert latest["CLOCK_WINDOW_ADVANCE"]["state"] == "DISCHARGED_RECOMPUTE"
+    assert latest["CLOCK_WINDOW_ADVANCE"]["payload"]["reason"] == "not_applicable_to_run"
     assert latest["ACL_SECRET_CHANGE"]["state"] in {"HOOK_GAP", "DISCHARGED_RECOMPUTE"}
     assert by_class["SPEC_CHANGE"]["state"] == "HOOK_GAP"
     assert by_class["MODEL_PARAM_CHANGE"]["state"] == "HOOK_GAP"
@@ -156,6 +160,37 @@ def test_run_result_commit_persists_hook_gap_for_unsourced_classes_and_blocks_co
     gate = run_compile_gate(run_id)
     assert gate["compile_blocked"] is True
     assert any(item["state"] == "HOOK_GAP" for item in gate["open_obligations"])
+
+
+def test_required_memory_and_clock_dependencies_fail_closed_without_sources():
+    import services.langgraph.persistence.sqlite_db as sqlite_db
+    from services.langgraph.app.runtime_support import trust_kernel
+    from services.langgraph.persistence.invalidation import latest_branch_obligations, open_demanded_obligations, run_compile_gate
+    from services.langgraph.persistence.runs import create_run_record, update_run_status
+
+    sqlite_db.init_db()
+
+    run_id = _id("run-required-context")
+    project_id = _id("proj-required-context")
+    trust_kernel().bind_project(tenant_id="tenant_1", project_id=project_id)
+    create_run_record(run_id, "tenant_1", project_id, "branding_marketing_agency", "running", {})
+    result = _agency_result("Northwind")
+    result["agency"]["invalidation_requirements"] = {
+        "MEMORY_WRITE": True,
+        "CLOCK_WINDOW_ADVANCE": True,
+    }
+    update_run_status(run_id, "needs_approval", result)
+
+    open_rows = open_demanded_obligations(run_id=run_id, artifact_branch=f"art-protected-{run_id}")
+    by_class = {row["event_class"]: row for row in open_rows}
+    latest = latest_branch_obligations(run_id, f"art-protected-{run_id}")
+
+    assert by_class["MEMORY_WRITE"]["state"] == "HOOK_GAP"
+    assert by_class["MEMORY_WRITE"]["payload"]["required"] is True
+    assert by_class["CLOCK_WINDOW_ADVANCE"]["state"] == "HOOK_GAP"
+    assert by_class["CLOCK_WINDOW_ADVANCE"]["payload"]["required"] is True
+    assert latest["MODEL_PARAM_CHANGE"]["state"] == "DISCHARGED_RECOMPUTE"
+    assert run_compile_gate(run_id)["compile_blocked"] is True
 
 
 def test_invalidation_snapshot_fold_survives_runtime_restart(monkeypatch, tmp_path):
