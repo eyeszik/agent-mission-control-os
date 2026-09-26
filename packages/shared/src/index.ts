@@ -9,4 +9,5 @@ export * from './schemas/agency';
 export * from './schemas/ontology';
 export * from './schemas/lifecycle';
 export * from './schemas/runtime';
+export * from './schemas/uiux';
 export * from './types';

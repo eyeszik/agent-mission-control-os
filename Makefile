@@ -1,9 +1,11 @@
-.PHONY: help check-env tokens-build brand-plan brand-roles prompt-compile guidance-validate brand-validate setup-agent gates
+.PHONY: help check-env tokens-build tokens-check ui-ux-compile brand-plan brand-roles prompt-compile guidance-validate brand-validate setup-agent gates
 
 help:
 	@echo "Available commands:"
 	@echo "  make check-env                  - Environment pre-flight check"
-	@echo "  make tokens-build               - Compile tokens.json into _tokens.css"
+	@echo "  make tokens-build               - Compile apps/web/tokens/amc.tokens.json (DTCG) into apps/web/app/tokens.css"
+	@echo "  make tokens-check               - Dry run: fail if the generated token CSS is stale (writes nothing)"
+	@echo "  make ui-ux-compile [REQUEST=f]  - Compile a governed UI/UX spec (prints only; generates no UI)"
 	@echo "  make brand-plan [BRIEF=f.json]  - Plan a brief against the agency kernel"
 	@echo "  make brand-roles [DEPT=brand]   - List N3 role contracts"
 	@echo "  make prompt-compile [REQUEST=f]  - Compile validated prompt packages only"
@@ -18,6 +20,13 @@ check-env:
 
 tokens-build:
 	@python3 compile_tokens.py
+
+tokens-check:
+	@python3 compile_tokens.py --check
+
+# Prints a spec summary; pass OUTPUT=path to write the full spec JSON.
+ui-ux-compile:
+	@python3 orchestrate_brand_pipeline.py ui-ux --input $(if $(REQUEST),$(REQUEST),sample_ui_ux_request.json) $(if $(OUTPUT),--output $(OUTPUT),)
 
 # Plans only; generates nothing. Exits non-zero when the kernel blocks the run.
 brand-plan:

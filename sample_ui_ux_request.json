@@ -1,0 +1,20 @@
+{
+  "project_ref": "northwind-orders",
+  "surface_hint": "operations dashboard",
+  "purpose": "Give store managers a live view of today's orders so they can fix problems before customers notice",
+  "primary_user": "Store managers on shift",
+  "primary_task": "Spot a delayed or failed order and act on it",
+  "business_goal": "Fewer late orders reaching customers",
+  "content_requirements": ["order status table", "filters by store and status", "live updates"],
+  "constraints": ["Works on a tablet at the counter", "Status must be readable without color"],
+  "negative_constraints": ["No invented KPIs", "No decorative gradients"],
+  "existing_components": ["DataTable"],
+  "brand": {
+    "brand_name": "Northwind Coffee",
+    "positioning": "Neighbourhood coffee, run with care",
+    "tone_attributes": ["warm", "direct", "reliable"],
+    "typography_direction": "Humanist sans for UI, tabular numerals for data",
+    "palette_hex": ["#1F2937", "#F59E0B", "#F9FAFB"],
+    "palette_source": "BRAND_CORE"
+  }
+}

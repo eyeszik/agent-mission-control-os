@@ -91,6 +91,9 @@ jobs:
       - name: Test web app
         run: pnpm --filter @amc/web test
 
+      - name: Verify UI token consumption (TypeScript AST gate)
+        run: pnpm --filter @amc/web verify:ui
+
       - name: Build web app
         env:
           NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000

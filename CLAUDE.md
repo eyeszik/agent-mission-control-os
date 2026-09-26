@@ -88,6 +88,7 @@ python3 orchestrate_brand_pipeline.py plan --input sample_brief.json            
 python3 orchestrate_brand_pipeline.py roles --department brand                                  # or: make brand-roles DEPT=brand
 python3 orchestrate_brand_pipeline.py validate                                                  # or: make brand-validate
 python3 orchestrate_brand_pipeline.py compile-prompts --input sample_prompt_request.json --json  # or: make prompt-compile
+python3 orchestrate_brand_pipeline.py ui-ux --input sample_ui_ux_request.json                     # or: make ui-ux-compile
 ```
 `plan` **plans against the governance kernel only** — it resolves artifacts to roles, checks evidence floors, and walks the lifecycle guards. `compile-prompts` runs the claims-audit prompt compiler (see Architecture). Neither calls an LLM, and neither touches the real execution pipeline. `plan` exits 0 = clear, 1 = blocked (kernel guard failed), 2 = brief couldn't be interpreted; `compile-prompts` exits 0 only when `final_state == PROMPT_PACKAGE_READY`.
 
@@ -119,6 +120,10 @@ Read together: this is the validated, evidence-grounded input a real image/video
 ### Cinematic capability — routed, not global
 
 `services/langgraph/agency/cinematic/` is a lazily-loaded domain capability that compiles ideas/scripts/storyboards/images into T2I/T2V/I2V/storyboard/brand-motion prompts, with canonical `ProjectIR`/`ShotIR`, source-authority resolution, continuity handshakes, camera/lighting/physics reasoning, an evaluator, and a bounded repair loop. It routes via its own deterministic trigger metadata (`cinematic.route_request`) and honours the same firewall — it terminates at prompts and never invokes a media provider. It is a native module (real schemas/compilers/evaluator, not advisory prose) and its full specification is deliberately kept out of this file; see `docs/cinematic-capability.md` and invoke via `orchestrate_brand_pipeline.py cinematic`.
+
+### UI/UX design compiler and DTCG tokens
+
+`services/langgraph/agency/ui_ux/` compiles product/brand/audience state into a strict `UIUXDesignIR` (IA, flows, genome, tiered DTCG tokens, screens, the full 29-state matrix, responsive transforms, WCAG 2.2 requirements, AI-trust rules, implementation map) — pure, deterministic, terminal `UIUX_SPEC_READY`, never generates UI. It runs as a deterministic subprocess of `design_brief` for digital-product briefs (`DesignBrief.ui_ux`; non-UI briefs get `null`) and inside the prompt compiler for `PromptFamily.UI_UX` (`PromptPackage.ui_ux_design`); other families are byte-identical. WCAG 2.2 is normative for every contrast verdict; APCA is advisory only and never merged with it; vendor design systems are reference-only. `agency/design_tokens.py` is the **only** DTCG 2025.10 compiler (frontend `compile_tokens.py`, runtime `_build_design_system`, UI/UX) — don't add a second. Frontend tokens: edit `apps/web/tokens/amc.tokens.json`, run `pnpm tokens:build`; `apps/web/app/tokens.css` is generated and checked for freshness by `verify_design_tokens.py`; `pnpm --filter @amc/web verify:ui` is a TS-AST gate. `UIUXDesignIR` has a strict Zod twin (`packages/shared/src/schemas/uiux.ts`) whose parity is proven by a compiler-generated fixture — if you change the Pydantic models, regenerate `packages/shared/tests/fixtures/uiux-design-ir.json`. Details: `docs/ui-ux-design-compiler.md`.
 
 ### The fail-closed integration pattern
 

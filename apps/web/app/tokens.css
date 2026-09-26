@@ -1,0 +1,72 @@
+/* GENERATED FILE -- do not edit by hand.
+ * compiler: amc-dtcg-compiler/v1 (DTCG 2025.10)
+ * source: apps/web/tokens/amc.tokens.json
+ * source-sha256: 71bf682bfee4b5350d5ee701c5ad588084ba61329c66e62a7fe8aa6020a81d0f
+ */
+:root {
+  --amc-component-ai-trust-color-border: var(--amc-semantic-color-border-strong);
+  --amc-component-ai-trust-color-degraded: var(--amc-semantic-color-status-warning);
+  --amc-component-ai-trust-color-detail: var(--amc-semantic-color-foreground);
+  --amc-component-ai-trust-color-label: var(--amc-semantic-color-foreground-strong);
+  --amc-component-ai-trust-color-provider: var(--amc-semantic-color-status-info);
+  --amc-component-ai-trust-color-surface: var(--amc-semantic-color-surface);
+  --amc-component-ai-trust-color-unavailable: var(--amc-semantic-color-status-danger);
+  --amc-component-ai-trust-radius-container: var(--amc-semantic-radius-control);
+  --amc-primitive-color-amber-400: #fbbf24;
+  --amc-primitive-color-emerald-400: #34d399;
+  --amc-primitive-color-emerald-500: #10b981;
+  --amc-primitive-color-emerald-900: #064e3b;
+  --amc-primitive-color-red-400: #f87171;
+  --amc-primitive-color-sky-400: #38bdf8;
+  --amc-primitive-color-zinc-100: #f4f4f5;
+  --amc-primitive-color-zinc-200: #e4e4e7;
+  --amc-primitive-color-zinc-400: #a1a1aa;
+  --amc-primitive-color-zinc-50: #fafafa;
+  --amc-primitive-color-zinc-500: #71717a;
+  --amc-primitive-color-zinc-600: #52525b;
+  --amc-primitive-color-zinc-700: #3f3f46;
+  --amc-primitive-color-zinc-800: #27272a;
+  --amc-primitive-color-zinc-900: #18181b;
+  --amc-primitive-color-zinc-950: #09090b;
+  --amc-primitive-duration-base: 200ms;
+  --amc-primitive-duration-fast: 120ms;
+  --amc-primitive-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --amc-primitive-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --amc-primitive-font-family-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --amc-primitive-font-weight-medium: 500;
+  --amc-primitive-font-weight-regular: 400;
+  --amc-primitive-radius-lg: 8px;
+  --amc-primitive-radius-md: 6px;
+  --amc-primitive-radius-sm: 4px;
+  --amc-primitive-radius-xl: 12px;
+  --amc-primitive-space-0: 0px;
+  --amc-primitive-space-1: 4px;
+  --amc-primitive-space-2: 8px;
+  --amc-primitive-space-3: 12px;
+  --amc-primitive-space-4: 16px;
+  --amc-primitive-space-6: 24px;
+  --amc-semantic-color-accent: var(--amc-primitive-color-emerald-500);
+  --amc-semantic-color-accent-strong: var(--amc-primitive-color-emerald-900);
+  --amc-semantic-color-background: var(--amc-primitive-color-zinc-950);
+  --amc-semantic-color-border: var(--amc-primitive-color-zinc-800);
+  --amc-semantic-color-border-strong: var(--amc-primitive-color-zinc-700);
+  --amc-semantic-color-focus-ring: var(--amc-primitive-color-emerald-500);
+  --amc-semantic-color-foreground: var(--amc-primitive-color-zinc-400);
+  --amc-semantic-color-foreground-muted: var(--amc-primitive-color-zinc-500);
+  --amc-semantic-color-foreground-strong: var(--amc-primitive-color-zinc-100);
+  --amc-semantic-color-status-danger: var(--amc-primitive-color-red-400);
+  --amc-semantic-color-status-info: var(--amc-primitive-color-sky-400);
+  --amc-semantic-color-status-success: var(--amc-primitive-color-emerald-400);
+  --amc-semantic-color-status-warning: var(--amc-primitive-color-amber-400);
+  --amc-semantic-color-surface: var(--amc-primitive-color-zinc-900);
+  --amc-semantic-color-surface-raised: var(--amc-primitive-color-zinc-800);
+  --amc-semantic-font-family-body: var(--amc-primitive-font-family-sans);
+  --amc-semantic-font-family-data: var(--amc-primitive-font-family-mono);
+  --amc-semantic-motion-duration-feedback: var(--amc-primitive-duration-fast);
+  --amc-semantic-motion-easing-standard: var(--amc-primitive-easing-standard);
+  --amc-semantic-radius-control: var(--amc-primitive-radius-md);
+  --amc-semantic-radius-panel: var(--amc-primitive-radius-xl);
+  --amc-semantic-space-inline: var(--amc-primitive-space-2);
+  --amc-semantic-space-panel: var(--amc-primitive-space-4);
+  --amc-semantic-space-stack: var(--amc-primitive-space-3);
+}

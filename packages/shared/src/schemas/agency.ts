@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { UIUXDesignIRSchema } from './uiux';
 import { ApprovalRequestSchema } from './approvals';
 
 export const AGENCY_PIPELINE_STAGES = [
@@ -59,6 +60,8 @@ export const DesignBriefSchema = z.object({
   typography_direction: z.string(),
   imagery_style: z.string(),
   layout_notes: z.string(),
+  // Deterministic UI/UX spec compiled inside design_brief for digital-product briefs.
+  ui_ux: UIUXDesignIRSchema.optional().nullable(),
 });
 
 export const WorkspaceDocumentSchema = z.object({
