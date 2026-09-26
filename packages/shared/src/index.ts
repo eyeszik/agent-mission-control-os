@@ -6,6 +6,7 @@ export * from './schemas/colorContrast';
 export * from './schemas/approvals';
 export * from './schemas/quality';
 export * from './schemas/agency';
+export * from './schemas/fullService';
 export * from './schemas/ontology';
 export * from './schemas/lifecycle';
 export * from './schemas/runtime';
