@@ -1,10 +1,883 @@
 {
-  "version":"style-library-v1",
-  "styles":[
-    {"id":"CLS-01","name":"Tenebrism","category":"classical","description":"Severe chiaroscuro, isolated key light, and deep shadow.","design_dimensions":["lighting","texture","composition","palette"],"physics":{"lighting":["1:8 key spotlight","3200K point source"],"spatial":["strong negative space"],"material":["impasto oil texture"],"composition":["dramatic focal isolation"],"motion":["slow reveal"]},"palette":{"colors":["#000000","#1A1A1A","#FFD700","#8B0000"],"semantic_roles":{"background":"#000000","accent":"#FFD700"},"contrast_notes":["high contrast"]},"typography":{"families":["historical serif"],"category":"high-contrast serif","weights":["regular","bold"],"tracking":"tight","hierarchy":"dramatic"},"prompt_tokens":["severe chiaroscuro","3200K key spotlight","pitch-black field","impasto texture"],"negative_tokens":["flat lighting","low contrast"],"compatible_with":["MOD-03","MOD-07"],"incompatible_with":[],"recommended_strength":0.7,"suitable_for":["luxury branding","editorial"],"unsuitable_for":[],"motion_behavior":["slow reveal"],"production_notes":["preserve legibility"],"source_version":"user-style-library-2026-01","status":"active"},
-    {"id":"MOD-03","name":"Bauhaus","category":"modernist","description":"Asymmetric geometric equilibrium with primary color reduction.","design_dimensions":["layout","geometry","palette","typography"],"physics":{"lighting":["controlled daylight"],"spatial":["mathematical rhythm"],"material":["flat color fields"],"composition":["circle triangle square"],"motion":["measured rhythm"]},"palette":{"colors":["#DD0000","#0055A5","#F2C94C","#111111"],"semantic_roles":{"primary":"#DD0000","secondary":"#0055A5"},"contrast_notes":["strong color contrast"]},"typography":{"families":["Futura","Universal Sans"],"category":"geometric sans-serif","weights":["bold","medium"],"tracking":"tight","hierarchy":"geometric"},"prompt_tokens":["Bauhaus poster design","primary geometry","strict grid"],"negative_tokens":["ornamental flourishes","decorative noise"],"compatible_with":["MOD-07","MOD-04"],"incompatible_with":[],"recommended_strength":0.8,"suitable_for":["brand systems","campaigns"],"unsuitable_for":[],"motion_behavior":["measured rhythm"],"production_notes":["discipline geometry"],"source_version":"user-style-library-2026-01","status":"active"},
-    {"id":"MOD-02","name":"Glassmorphism","category":"interface","description":"Translucent layered surfaces with blur and refractive depth.","design_dimensions":["surface","lighting","texture","composition"],"physics":{"lighting":["ambient glow"],"spatial":["frosted depth"],"material":["backdrop blur","translucent stroke"],"composition":["floating layers"],"motion":["soft parallax"]},"palette":{"colors":["rgba(255,255,255,0.15)","#00E5FF","#FF007F"],"semantic_roles":{"glass":"rgba(255,255,255,0.15)","accent":"#00E5FF"},"contrast_notes":["preserve text contrast"]},"typography":{"families":["Swiss neutral sans-serif"],"category":"clean geometric sans","weights":["regular","semibold"],"tracking":"normal","hierarchy":"interface"},"prompt_tokens":["Glassmorphism UI","frosted glass card","40px backdrop blur","soft glow"],"negative_tokens":["visual clutter","unsafe contrast"],"compatible_with":["MOD-03","MOD-04"],"incompatible_with":[],"recommended_strength":0.5,"suitable_for":["product interfaces","dashboards"],"unsuitable_for":[],"motion_behavior":["soft parallax"],"production_notes":["test legibility"],"source_version":"user-style-library-2026-01","status":"active"},
-    {"id":"MOD-07","name":"Modular Typography","category":"modernist","description":"Grid-built letterforms with architectural typographic rhythm.","design_dimensions":["typography","layout","composition"],"physics":{"lighting":["neutral daylight"],"spatial":["rigid grid rhythm"],"material":["paper structure"],"composition":["rhythmic spacing"],"motion":["calm cadence"]},"palette":{"colors":["#000000","#FFFFFF","#0055FF"],"semantic_roles":{"text":"#000000","base":"#FFFFFF","accent":"#0055FF"},"contrast_notes":["high readability"]},"typography":{"families":["experimental modular sans"],"category":"grid-built sans","weights":["regular","bold"],"tracking":"tight","hierarchy":"architectural"},"prompt_tokens":["modular typography","grid-built letterforms","strict spatial rhythm"],"negative_tokens":["messy alignment"],"compatible_with":["MOD-03","CLS-01"],"incompatible_with":[],"recommended_strength":0.9,"suitable_for":["editorial","identity systems"],"unsuitable_for":[],"motion_behavior":["calm cadence"],"production_notes":["maintain clarity"],"source_version":"user-style-library-2026-01","status":"active"},
-    {"id":"MOD-04","name":"Bento Box","category":"modernist","description":"Compartmentalized modular architecture with clean hierarchy.","design_dimensions":["layout","surface","composition"],"physics":{"lighting":["neutral soft shadow"],"spatial":["modular compartments"],"material":["subtle cards"],"composition":["ordered rhythm"],"motion":["contained motion"]},"palette":{"colors":["#F8F9FA","#E9ECEF","#212529"],"semantic_roles":{"surface":"#F8F9FA","text":"#212529"},"contrast_notes":["UI contrast"]},"typography":{"families":["Swiss neutral sans-serif"],"category":"clean UI type","weights":["regular","semibold"],"tracking":"normal","hierarchy":"structured"},"prompt_tokens":["Bento Box UI design","modular containers","subtle shadows"],"negative_tokens":["chaotic collage"],"compatible_with":["MOD-02","MOD-03"],"incompatible_with":[],"recommended_strength":0.6,"suitable_for":["dashboards","portfolio work"],"unsuitable_for":[],"motion_behavior":["gentle transitions"],"production_notes":["keep readable"],"source_version":"user-style-library-2026-01","status":"active"}
+  "version": "style-library-v1",
+  "styles": [
+    {
+      "id": "CLS-01",
+      "name": "Tenebrism",
+      "category": "classical",
+      "description": "Severe chiaroscuro with a single key light and pitch-black field.",
+      "design_dimensions": [
+        "lighting",
+        "texture",
+        "composition",
+        "palette"
+      ],
+      "physics": {
+        "lighting": [
+          "1:8 key spotlight",
+          "3200K point source",
+          "absolute dark field"
+        ],
+        "spatial": [
+          "single focal subject",
+          "strong negative space"
+        ],
+        "material": [
+          "heavy impasto",
+          "oil-paint texture"
+        ],
+        "composition": [
+          "dramatic focal isolation",
+          "high contrast hierarchy"
+        ],
+        "motion": [
+          "slow reveal",
+          "hard light transition"
+        ]
+      },
+      "palette": {
+        "colors": [
+          "#000000",
+          "#1A1A1A",
+          "#FFD700",
+          "#8B0000"
+        ],
+        "semantic_roles": {
+          "background": "#000000",
+          "surface": "#1A1A1A",
+          "accent": "#FFD700",
+          "warning": "#8B0000"
+        },
+        "contrast_notes": [
+          "sharp silhouette separation",
+          "dramatic editorial focus"
+        ]
+      },
+      "typography": {
+        "families": [
+          "historical serif"
+        ],
+        "category": "high-contrast serif",
+        "weights": [
+          "regular",
+          "bold"
+        ],
+        "tracking": "tight",
+        "hierarchy": "dramatic editorial contrast"
+      },
+      "prompt_tokens": [
+        "severe chiaroscuro",
+        "3200K key spotlight",
+        "pitch-black field",
+        "impasto oil texture"
+      ],
+      "negative_tokens": [
+        "flat even lighting",
+        "low contrast",
+        "pastel minimalism"
+      ],
+      "compatible_with": [
+        "MOD-07",
+        "EXP-05",
+        "LFS-01"
+      ],
+      "incompatible_with": [
+        "LFS-05"
+      ],
+      "recommended_strength": 0.7,
+      "suitable_for": [
+        "luxury branding",
+        "editorial campaigns",
+        "dramatic product launches"
+      ],
+      "unsuitable_for": [
+        "soft minimal lifestyle"
+      ],
+      "motion_behavior": [
+        "slow reveal",
+        "hard light transition"
+      ],
+      "production_notes": [
+        "keep the black field controlled and legible"
+      ],
+      "source_version": "user-style-library-2026-01",
+      "status": "active"
+    },
+    {
+      "id": "CLS-02",
+      "name": "Coquette",
+      "category": "lifestyle",
+      "description": "Soft romantic pastel tones with delicate curves and luxe softness.",
+      "design_dimensions": [
+        "palette",
+        "texture",
+        "lighting"
+      ],
+      "physics": {
+        "lighting": [
+          "diffused soft lighting",
+          "pearl-like reflections"
+        ],
+        "spatial": [
+          "delicate silk tension"
+        ],
+        "material": [
+          "satin ribbon",
+          "lace"
+        ],
+        "composition": [
+          "soft romantic balance"
+        ],
+        "motion": [
+          "gentle drift"
+        ]
+      },
+      "palette": {
+        "colors": [
+          "#FFC0CB",
+          "#FFFDD0",
+          "#FFFFFF",
+          "#F4C2C2"
+        ],
+        "semantic_roles": {
+          "base": "#FFFDD0",
+          "accent": "#FFC0CB",
+          "highlight": "#FFFFFF",
+          "warm": "#F4C2C2"
+        },
+        "contrast_notes": [
+          "soft but must retain readability"
+        ]
+      },
+      "typography": {
+        "families": [
+          "dainty serif"
+        ],
+        "category": "delicate serif",
+        "weights": [
+          "light",
+          "regular"
+        ],
+        "tracking": "normal",
+        "hierarchy": "airy editorial contrast"
+      },
+      "prompt_tokens": [
+        "Coquette aesthetic",
+        "baby pink satin ribbon",
+        "antique ivory lace",
+        "lustrous pearls"
+      ],
+      "negative_tokens": [
+        "hard industrial edges",
+        "dark brutal contrast"
+      ],
+      "compatible_with": [
+        "MOD-04",
+        "LFS-02"
+      ],
+      "incompatible_with": [
+        "MOD-01"
+      ],
+      "recommended_strength": 0.65,
+      "suitable_for": [
+        "fashion brands",
+        "beauty campaigns",
+        "luxury lifestyle"
+      ],
+      "unsuitable_for": [
+        "operational dashboards"
+      ],
+      "motion_behavior": [
+        "gentle drift"
+      ],
+      "production_notes": [
+        "keep typography legible over pastel surfaces"
+      ],
+      "source_version": "user-style-library-2026-01",
+      "status": "active"
+    },
+    {
+      "id": "MOD-03",
+      "name": "Bauhaus",
+      "category": "modernist",
+      "description": "Asymmetric geometric equilibrium with elemental shapes and primary reduction.",
+      "design_dimensions": [
+        "layout",
+        "geometry",
+        "palette",
+        "typography"
+      ],
+      "physics": {
+        "lighting": [
+          "controlled daylight",
+          "neutral contrast"
+        ],
+        "spatial": [
+          "asymmetric equilibrium",
+          "mathematical rhythm"
+        ],
+        "material": [
+          "flat color fields",
+          "clean print surfaces"
+        ],
+        "composition": [
+          "circle triangle square",
+          "grid-balance"
+        ],
+        "motion": [
+          "purposeful transitions",
+          "measured rhythm"
+        ]
+      },
+      "palette": {
+        "colors": [
+          "#DD0000",
+          "#0055A5",
+          "#F2C94C",
+          "#111111"
+        ],
+        "semantic_roles": {
+          "primary": "#DD0000",
+          "secondary": "#0055A5",
+          "highlight": "#F2C94C",
+          "neutral": "#111111"
+        },
+        "contrast_notes": [
+          "strong modernist color contrast",
+          "simple block relationships"
+        ]
+      },
+      "typography": {
+        "families": [
+          "Futura",
+          "Universal Sans"
+        ],
+        "category": "geometric sans-serif",
+        "weights": [
+          "bold",
+          "medium"
+        ],
+        "tracking": "tight",
+        "hierarchy": "clear geometric weight contrast"
+      },
+      "prompt_tokens": [
+        "Bauhaus poster design",
+        "primary red blue yellow geometry",
+        "strict grid",
+        "Futura typography"
+      ],
+      "negative_tokens": [
+        "ornamental flourishes",
+        "decorative noise",
+        "soft gradients"
+      ],
+      "compatible_with": [
+        "MOD-07",
+        "MOD-04",
+        "MOD-01"
+      ],
+      "incompatible_with": [
+        "LFS-05"
+      ],
+      "recommended_strength": 0.8,
+      "suitable_for": [
+        "editorial design",
+        "brand systems",
+        "campaign art direction"
+      ],
+      "unsuitable_for": [
+        "highly ornate luxury"
+      ],
+      "motion_behavior": [
+        "measured rhythm",
+        "purposeful transitions"
+      ],
+      "production_notes": [
+        "keep geometry disciplined and readable"
+      ],
+      "source_version": "user-style-library-2026-01",
+      "status": "active"
+    },
+    {
+      "id": "MOD-02",
+      "name": "Glassmorphism",
+      "category": "interface",
+      "description": "Spatial depth through translucent surfaces, blur, and soft refractive glow.",
+      "design_dimensions": [
+        "surface",
+        "depth",
+        "lighting",
+        "material"
+      ],
+      "physics": {
+        "lighting": [
+          "ambient glow",
+          "soft edge highlights",
+          "diffused reflections"
+        ],
+        "spatial": [
+          "frosted depth",
+          "layered cards"
+        ],
+        "material": [
+          "backdrop blur",
+          "translucent stroke"
+        ],
+        "composition": [
+          "floating layers",
+          "subtle focus hierarchy"
+        ],
+        "motion": [
+          "gentle reveal",
+          "soft parallax"
+        ]
+      },
+      "palette": {
+        "colors": [
+          "rgba(255,255,255,0.15)",
+          "rgba(0,0,0,0.4)",
+          "#00E5FF",
+          "#FF007F"
+        ],
+        "semantic_roles": {
+          "glass": "rgba(255,255,255,0.15)",
+          "backdrop": "rgba(0,0,0,0.4)",
+          "highlight": "#00E5FF",
+          "accent": "#FF007F"
+        },
+        "contrast_notes": [
+          "light surfaces require readable text contrast"
+        ]
+      },
+      "typography": {
+        "families": [
+          "Swiss neutral sans-serif"
+        ],
+        "category": "clean geometric sans",
+        "weights": [
+          "regular",
+          "semibold"
+        ],
+        "tracking": "normal",
+        "hierarchy": "clear interface hierarchy"
+      },
+      "prompt_tokens": [
+        "Glassmorphism UI",
+        "frosted glass card",
+        "40px backdrop blur",
+        "soft glow"
+      ],
+      "negative_tokens": [
+        "heavy texture",
+        "visual clutter",
+        "unsafe contrast"
+      ],
+      "compatible_with": [
+        "MOD-04",
+        "MOD-07",
+        "MOD-01"
+      ],
+      "incompatible_with": [
+        "EXP-03"
+      ],
+      "recommended_strength": 0.5,
+      "suitable_for": [
+        "product interfaces",
+        "dashboard design",
+        "luxury software UI"
+      ],
+      "unsuitable_for": [
+        "heavily textured print"
+      ],
+      "motion_behavior": [
+        "gentle reveal",
+        "soft parallax"
+      ],
+      "production_notes": [
+        "ensure text remains legible over translucent layers"
+      ],
+      "source_version": "user-style-library-2026-01",
+      "status": "active"
+    },
+    {
+      "id": "MOD-07",
+      "name": "Modular Typography",
+      "category": "modernist",
+      "description": "Rigid grid-unit letterform construction and architectural rhythm.",
+      "design_dimensions": [
+        "typography",
+        "layout",
+        "composition"
+      ],
+      "physics": {
+        "lighting": [
+          "neutral daylight"
+        ],
+        "spatial": [
+          "rigid grid rhythm",
+          "architectural character"
+        ],
+        "material": [
+          "paper-like structure"
+        ],
+        "composition": [
+          "grid-unit letterforms",
+          "rhythmic spacing"
+        ],
+        "motion": [
+          "calm cadence"
+        ]
+      },
+      "palette": {
+        "colors": [
+          "#000000",
+          "#FFFFFF",
+          "#333333",
+          "#0055FF"
+        ],
+        "semantic_roles": {
+          "text": "#000000",
+          "base": "#FFFFFF",
+          "neutral": "#333333",
+          "accent": "#0055FF"
+        },
+        "contrast_notes": [
+          "high readability",
+          "strong hierarchy"
+        ]
+      },
+      "typography": {
+        "families": [
+          "experimental modular sans"
+        ],
+        "category": "grid-built sans-serif",
+        "weights": [
+          "light",
+          "regular",
+          "bold"
+        ],
+        "tracking": "tight",
+        "hierarchy": "architectural rhythm"
+      },
+      "prompt_tokens": [
+        "modular typography poster",
+        "grid-built letterforms",
+        "strict spatial rhythm"
+      ],
+      "negative_tokens": [
+        "organic handwritten script",
+        "messy alignment"
+      ],
+      "compatible_with": [
+        "MOD-03",
+        "MOD-04",
+        "CLS-01"
+      ],
+      "incompatible_with": [
+        "LFS-05"
+      ],
+      "recommended_strength": 0.9,
+      "suitable_for": [
+        "editorial layout",
+        "campaign headers",
+        "identity systems"
+      ],
+      "unsuitable_for": [
+        "very organic lifestyle motifs"
+      ],
+      "motion_behavior": [
+        "calm cadence"
+      ],
+      "production_notes": [
+        "use modular rhythm to maintain clarity"
+      ],
+      "source_version": "user-style-library-2026-01",
+      "status": "active"
+    },
+    {
+      "id": "MOD-04",
+      "name": "Bento Box",
+      "category": "modernist",
+      "description": "Compartmentalized modular architecture with soft depth and clean hierarchy.",
+      "design_dimensions": [
+        "layout",
+        "surface",
+        "composition"
+      ],
+      "physics": {
+        "lighting": [
+          "neutral soft shadow"
+        ],
+        "spatial": [
+          "modular compartments",
+          "compartmentalized hierarchy"
+        ],
+        "material": [
+          "subtle card surfaces",
+          "soft shadow depth"
+        ],
+        "composition": [
+          "ordered rhythm",
+          "clean information architecture"
+        ],
+        "motion": [
+          "gentle transitions",
+          "contained motion"
+        ]
+      },
+      "palette": {
+        "colors": [
+          "#F8F9FA",
+          "#E9ECEF",
+          "#212529",
+          "#495057"
+        ],
+        "semantic_roles": {
+          "surface": "#F8F9FA",
+          "muted": "#E9ECEF",
+          "text": "#212529",
+          "secondary": "#495057"
+        },
+        "contrast_notes": [
+          "reliable modern UI contrast"
+        ]
+      },
+      "typography": {
+        "families": [
+          "Swiss neutral sans-serif"
+        ],
+        "category": "clean UI type",
+        "weights": [
+          "regular",
+          "semibold"
+        ],
+        "tracking": "normal",
+        "hierarchy": "structured ui hierarchy"
+      },
+      "prompt_tokens": [
+        "Bento Box UI design",
+        "modular rounded containers",
+        "subtle shadows"
+      ],
+      "negative_tokens": [
+        "chaotic collage",
+        "unbounded density"
+      ],
+      "compatible_with": [
+        "MOD-02",
+        "MOD-03",
+        "MOD-07"
+      ],
+      "incompatible_with": [
+        "EXP-03"
+      ],
+      "recommended_strength": 0.6,
+      "suitable_for": [
+        "product dashboards",
+        "portfolio work",
+        "systematic layouts"
+      ],
+      "unsuitable_for": [
+        "chaotic artistic collage"
+      ],
+      "motion_behavior": [
+        "gentle transitions"
+      ],
+      "production_notes": [
+        "keep layout modular and readable"
+      ],
+      "source_version": "user-style-library-2026-01",
+      "status": "active"
+    },
+    {
+      "id": "MOD-01",
+      "name": "Utilitarian",
+      "category": "modernist",
+      "description": "Form follows function with industrial telemetry density and no decorative noise.",
+      "design_dimensions": [
+        "layout",
+        "typography",
+        "palette",
+        "composition"
+      ],
+      "physics": {
+        "lighting": [
+          "flat industrial daylight"
+        ],
+        "spatial": [
+          "high information density",
+          "strict ratio discipline"
+        ],
+        "material": [
+          "industrial surfaces",
+          "neutral utility textures"
+        ],
+        "composition": [
+          "zero ornament",
+          "telemetry logic"
+        ],
+        "motion": [
+          "efficient transitions",
+          "clear readings"
+        ]
+      },
+      "palette": {
+        "colors": [
+          "#3B443B",
+          "#708090",
+          "#1C1C1C",
+          "#E5E5E5"
+        ],
+        "semantic_roles": {
+          "background": "#1C1C1C",
+          "panel": "#3B443B",
+          "soft": "#708090",
+          "text": "#E5E5E5"
+        },
+        "contrast_notes": [
+          "functional, high contrast, industrial readability"
+        ]
+      },
+      "typography": {
+        "families": [
+          "monospaced industrial sans"
+        ],
+        "category": "industrial mono / DIN sans",
+        "weights": [
+          "regular",
+          "semibold"
+        ],
+        "tracking": "tight",
+        "hierarchy": "technical density"
+      },
+      "prompt_tokens": [
+        "Utilitarian technical manual layout",
+        "industrial monospaced type",
+        "strict grid"
+      ],
+      "negative_tokens": [
+        "ornament",
+        "emotional flourish",
+        "decorative gradients"
+      ],
+      "compatible_with": [
+        "MOD-07",
+        "MOD-04"
+      ],
+      "incompatible_with": [
+        "EXP-05",
+        "LFS-01"
+      ],
+      "recommended_strength": 0.75,
+      "suitable_for": [
+        "systems",
+        "operational dashboards",
+        "technical marketing"
+      ],
+      "unsuitable_for": [
+        "romantic luxury editorial"
+      ],
+      "motion_behavior": [
+        "efficient transitions"
+      ],
+      "production_notes": [
+        "do not add decoration that reduces clarity"
+      ],
+      "source_version": "user-style-library-2026-01",
+      "status": "active"
+    },
+    {
+      "id": "EXP-05",
+      "name": "Surrealism",
+      "category": "experimental",
+      "description": "Dreamlike scale distortion and conceptual metaphor.",
+      "design_dimensions": [
+        "imagery",
+        "composition",
+        "lighting"
+      ],
+      "physics": {
+        "lighting": [
+          "dreamlike softness",
+          "unusual shadows"
+        ],
+        "spatial": [
+          "scale distortion",
+          "illogical juxtaposition"
+        ],
+        "material": [
+          "conceptual metaphor",
+          "impossible transitions"
+        ],
+        "composition": [
+          "melting geometry",
+          "disorienting hierarchy"
+        ],
+        "motion": [
+          "dream logic",
+          "slow transformation"
+        ]
+      },
+      "palette": {
+        "colors": [
+          "#E0F7FA",
+          "#FFEBEE",
+          "#212121",
+          "#D81B60"
+        ],
+        "semantic_roles": {
+          "background": "#E0F7FA",
+          "accent": "#D81B60",
+          "ink": "#212121",
+          "highlight": "#FFEBEE"
+        },
+        "contrast_notes": [
+          "keep metaphorical forms readable"
+        ]
+      },
+      "typography": {
+        "families": [
+          "editorial serif"
+        ],
+        "category": "high-contrast editorial serif",
+        "weights": [
+          "regular",
+          "bold"
+        ],
+        "tracking": "tight",
+        "hierarchy": "dramatic but readable"
+      },
+      "prompt_tokens": [
+        "Surrealist artwork",
+        "dreamlike scale distortion",
+        "melting architectural forms"
+      ],
+      "negative_tokens": [
+        "literal realism",
+        "flat default composition"
+      ],
+      "compatible_with": [
+        "CLS-01",
+        "LFS-01"
+      ],
+      "incompatible_with": [
+        "MOD-01"
+      ],
+      "recommended_strength": 0.55,
+      "suitable_for": [
+        "concept campaigns",
+        "editorial art direction",
+        "avant-garde brand work"
+      ],
+      "unsuitable_for": [
+        "strict utility design"
+      ],
+      "motion_behavior": [
+        "dream logic",
+        "slow transformation"
+      ],
+      "production_notes": [
+        "maintain one clear focal point to avoid unreadable surrealism"
+      ],
+      "source_version": "user-style-library-2026-01",
+      "status": "active"
+    },
+    {
+      "id": "LFS-01",
+      "name": "Dark Magic Academia",
+      "category": "lifestyle",
+      "description": "Occult scholarly darkness with candlelight and antique engraving.",
+      "design_dimensions": [
+        "lighting",
+        "typography",
+        "texture",
+        "palette"
+      ],
+      "physics": {
+        "lighting": [
+          "candle flame key light",
+          "gold foil reflection"
+        ],
+        "spatial": [
+          "dim scholarly interior",
+          "architectural depth"
+        ],
+        "material": [
+          "antique copperplate etching",
+          "paper grain"
+        ],
+        "composition": [
+          "ornate framing",
+          "dramatic high contrast"
+        ],
+        "motion": [
+          "slow ritual reveal"
+        ]
+      },
+      "palette": {
+        "colors": [
+          "#0A0A0C",
+          "#1C1917",
+          "#D4AF37",
+          "#4A0404"
+        ],
+        "semantic_roles": {
+          "background": "#0A0A0C",
+          "ink": "#1C1917",
+          "metal": "#D4AF37",
+          "blood": "#4A0404"
+        },
+        "contrast_notes": [
+          "dramatic and scholarly, but must keep text readable"
+        ]
+      },
+      "typography": {
+        "families": [
+          "calligraphic serif",
+          "antique engraved lettering"
+        ],
+        "category": "ornate academic serif",
+        "weights": [
+          "regular",
+          "bold"
+        ],
+        "tracking": "tight",
+        "hierarchy": "ornamented historical hierarchy"
+      },
+      "prompt_tokens": [
+        "Dark Magic Academia",
+        "illuminated spellbook",
+        "antique copperplate etching",
+        "gold calligraphy"
+      ],
+      "negative_tokens": [
+        "flat synthetic lighting",
+        "modernist sterile typography"
+      ],
+      "compatible_with": [
+        "CLS-01",
+        "EXP-05"
+      ],
+      "incompatible_with": [
+        "MOD-01"
+      ],
+      "recommended_strength": 0.65,
+      "suitable_for": [
+        "creative luxury",
+        "fashion editorial",
+        "mystique-driven brands"
+      ],
+      "unsuitable_for": [
+        "clean SaaS product marketing"
+      ],
+      "motion_behavior": [
+        "slow ritual reveal"
+      ],
+      "production_notes": [
+        "candlelight and gold leaf must remain readable in digital use"
+      ],
+      "source_version": "user-style-library-2026-01",
+      "status": "active"
+    }
   ]
 }

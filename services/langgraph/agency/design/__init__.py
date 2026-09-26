@@ -1,477 +1,53 @@
-from services.langgraph.agency.design import analyze_style_compatibility, compose_style_selection, compile_design_prompt
-
-
-def test_style_compatibility_detects_warnings_for_shared_dimension():
-    result = analyze_style_compatibility(['MOD-03', 'MOD-07'])
-    assert isinstance(result['warnings'], list)
-
-
-def test_compose_style_selection_builds_tokens():
-    selections = [
-        {'style_id': 'MOD-03', 'strength': 0.8, 'dimensions': ['layout', 'typography'], 'locked': True},
-        {'style_id': 'CLS-01', 'strength': 0.7, 'dimensions': ['lighting', 'texture'], 'locked': False},
-    ]
-    result = compose_style_selection(selections)
-    assert result['blocking'] is False
-    assert len(result['resolved_tokens']) > 0
-
-
-def test_compile_design_prompt_returns_prompt():
-    composed = {
-        'resolved_tokens': [
-            {'value': 'Bauhaus poster design'},
-            {'value': 'strict grid'},
-            {'value': 'dark key light'},
-        ],
-        'conflicts': [],
-    }
-    prompt = compile_design_prompt({'objective': 'premium campaign art', 'audience': 'buyers', 'format': 'social + landing page'}, composed)
-    assert 'premium campaign art' in prompt
-    assert 'Style system' in prompt
-
-
-def test_known_styles_resolve():
-    from services.langgraph.agency.design.style_registry import get_style
-
-    assert get_style('MOD-03').name == 'Bauhaus'
-    assert get_style('CLS-01').name == 'Tenebrism'
-    assert get_style('MOD-01').name == 'Utilitarian'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+"""Reusable design-style library: catalog, compatibility, composition, prompts.
+
+Styles combine *by dimension* (layout, lighting, typography, ...), never by
+concatenating whole prompts. The package compiles text only; it never invokes a
+media provider or writes an asset.
+"""
+
+from __future__ import annotations
+
+from .compatibility import analyze_style_compatibility
+from .prompt_compiler import compile_design_prompt, compile_negative_prompt
+from .style_composer import (
+    ComposedStyle,
+    DesignStyleDirection,
+    DesignStyleSelection,
+    InvalidSelectionError,
+    StyleSelection,
+    compose_style_selection,
+    direction_from_selection,
+)
+from .style_registry import (
+    STYLE_DIMENSIONS,
+    StyleDefinition,
+    StyleLibrary,
+    UnknownStyleError,
+    get_style,
+    load_style_library,
+    load_style_registry,
+    pending_references,
+    style_catalog_snapshot,
+)
+
+__all__ = [
+    "STYLE_DIMENSIONS",
+    "ComposedStyle",
+    "DesignStyleDirection",
+    "DesignStyleSelection",
+    "InvalidSelectionError",
+    "StyleDefinition",
+    "StyleLibrary",
+    "StyleSelection",
+    "UnknownStyleError",
+    "analyze_style_compatibility",
+    "compile_design_prompt",
+    "compile_negative_prompt",
+    "compose_style_selection",
+    "direction_from_selection",
+    "get_style",
+    "load_style_library",
+    "load_style_registry",
+    "pending_references",
+    "style_catalog_snapshot",
+]
