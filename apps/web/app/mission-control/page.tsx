@@ -34,9 +34,9 @@ export default function MissionControlPage() {
   return (
     <main className="min-h-[100dvh] p-4 lg:p-6 flex flex-col gap-4 max-w-[1920px] mx-auto">
       <MissionControlProvider />
-      <header className="flex justify-between items-center pb-2 border-b border-zinc-800/50">
-        <div className="flex items-center gap-4">
-          <h1 className="text-zinc-100 font-medium tracking-tight">Mission Control</h1>
+      <header className="flex flex-wrap justify-between items-center gap-x-4 gap-y-2 pb-2 border-b border-zinc-800/50">
+        <div className="flex items-center gap-4 shrink-0">
+          <h1 className="text-zinc-100 font-medium tracking-tight whitespace-nowrap">Mission Control</h1>
           <div role="group" aria-label="Mission Control mode" className="flex rounded-md border border-zinc-800 p-0.5 bg-zinc-900/60">
             {([["operations", "Operations"], ["design", "Design Mode"]] as const).map(([value, label]) => (
               <button
@@ -44,14 +44,14 @@ export default function MissionControlPage() {
                 type="button"
                 aria-pressed={mode === value}
                 onClick={() => setMode(value)}
-                className={`text-xs px-2.5 py-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 ${mode === value ? "bg-zinc-100 text-zinc-900" : "text-zinc-400 hover:text-zinc-100"}`}
+                className={`text-xs px-2.5 py-1 rounded whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 ${mode === value ? "bg-zinc-100 text-zinc-900" : "text-zinc-400 hover:text-zinc-100"}`}
               >
                 {label}
               </button>
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-3 min-w-0">
           <QualityScorePanel />
           <TrustStatusPanel />
           <div className="h-6 w-px bg-zinc-800" />

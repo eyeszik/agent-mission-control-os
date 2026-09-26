@@ -615,6 +615,8 @@ def brief_intake_node(state: GraphState) -> dict:
         workflow_idea=raw_brief.get("workflow_idea"),
         differentiators=raw_brief.get("differentiators", []),
         brand_style_notes=raw_brief.get("brand_style_notes", []),
+        # Validated at the API boundary; carried through so design_brief can recompose it.
+        style_selection=raw_brief.get("style_selection"),
     )
     data, agency = _agency_data(state)
     agency["brief"] = brief.model_dump()

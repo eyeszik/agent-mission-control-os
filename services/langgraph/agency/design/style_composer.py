@@ -245,7 +245,14 @@ def compose_style_selection(
                 other.style_id in winning_style.compatible_with
                 or winner.style_id in other_style.compatible_with
             )
-            if not declared:
+            if winner.locked and not other.locked:
+                # Locks claim every dimension of their layer; make an overridden
+                # assignment visible rather than silently dropping it.
+                warnings.append(
+                    f"{dimension}: locked '{winning_style.name}' overrides the assignment to "
+                    f"'{other_style.name}'; unassign {dimension} from '{winning_style.name}' to hand it over"
+                )
+            elif not declared:
                 warnings.append(
                     f"{dimension}: '{winning_style.name}' takes precedence over "
                     f"'{other_style.name}' (no declared compatibility between them)"

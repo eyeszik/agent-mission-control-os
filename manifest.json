@@ -16,7 +16,7 @@
     },
     {
       "path": "apps/web/app/mission-control/page.tsx",
-      "git_blob_sha": "1f7b78898216c0cb11c2ca23eab8035f7a77519c"
+      "git_blob_sha": "b0398780dd7304753b5e7f99b7bcb6d826c5ec10"
     },
     {
       "path": "apps/web/e2e/agency-smoke.spec.ts",

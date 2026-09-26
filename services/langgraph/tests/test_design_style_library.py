@@ -471,3 +471,36 @@ def test_run_request_rejects_unknown_styles():
         CampaignBriefRequest(**_brief({"selections": [{"style_id": "LFS-05"}]}))
     with pytest.raises(ValidationError):
         CampaignBriefRequest(**_brief({"selections": [{"style_id": "MOD-03", "strength": 2}]}))
+
+
+def test_style_selection_survives_brief_intake_into_design_brief(captured_prompts):
+    """Regression: brief_intake rebuilt the brief field-by-field and dropped
+    style_selection, so the real pipeline never reached design_brief with it."""
+    from types import SimpleNamespace
+
+    from services.langgraph.graph.agency.nodes import brief_intake_node, design_brief_node
+
+    raw = _brief({"selections": _three_layer(), "rationale": "editorial drama"})
+    run = SimpleNamespace(
+        id="run-intake-test", tenant_id="tenant-events-test", project_id="proj-1",
+        metadata={"input_data": {"brief": raw}},
+    )
+    state = {"run": run, "extracted_data": {}}
+    state["extracted_data"] = brief_intake_node(state)["extracted_data"]
+    assert state["extracted_data"]["agency"]["brief"]["style_selection"]["selections"][0]["style_id"] == "MOD-03"
+
+    state["extracted_data"]["agency"]["brand_strategy"] = {"positioning_statement": "Calm tools."}
+    result = design_brief_node(state)
+    direction = result["extracted_data"]["agency"]["design_brief"]["style_direction"]
+    assert direction is not None and direction["applied"] is True
+
+
+def test_lock_override_of_an_assignment_is_reported():
+    composed = compose_style_selection(
+        [
+            {"style_id": "MOD-03", "role": "primary", "dimensions": ["layout", "typography"], "locked": True},
+            {"style_id": "MOD-07", "strength": 1.0, "dimensions": ["typography"]},
+        ]
+    )
+    assert composed.resolved_dimensions["typography"] == "MOD-03"
+    assert any("locked 'Bauhaus' overrides the assignment to 'Modular Typography'" in w for w in composed.warnings)
