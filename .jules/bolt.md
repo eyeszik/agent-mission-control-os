@@ -19,3 +19,6 @@
 ## 2026-10-24 - Zustand Zero-Allocation Selectors
 **Learning:** Using `Object.values().filter()` inside Zustand selectors creates unnecessary intermediate arrays on every state update, leading to excessive garbage collection overhead.
 **Action:** Replace these chains with a zero-allocation or single-allocation `for...in` loop within the selector.
+## 2026-10-25 - React Component Derived Metrics Rendering Optimization
+**Learning:** Returning freshly allocated arrays merely to determine their lengths, via patterns like `array.filter().length` inline in React functional component renders, triggers redundant garbage collection loops during state updates.
+**Action:** Derived counting should be precomputed efficiently (via `reduce` or loops) within `useMemo` blocks and returned as primitives (e.g. integer counts). This avoids allocating and traversing throwaway arrays during the render cycle.

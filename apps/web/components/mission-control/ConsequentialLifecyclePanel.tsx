@@ -223,6 +223,10 @@ export function ConsequentialLifecyclePanel() {
         staleApprovals: [],
         activeRunLineageRemediations: [],
         activeRunObligations: [],
+        openLineageRemediationsCount: 0,
+        resolvedLineageRemediationsCount: 0,
+        openObligationsCount: 0,
+        hookGapObligationsCount: 0,
         retryableRecoveries: [],
         compensatableRecoveries: [],
       };
@@ -259,6 +263,12 @@ export function ConsequentialLifecyclePanel() {
       staleApprovals: (run.approvals ?? []).filter((approval) => approval.status === 'stale'),
       activeRunLineageRemediations: trust.recent_lineage_remediations.filter((item) => item.run_id === run.run_id),
       activeRunObligations: trust.recent_invalidation_obligations.filter((item) => item.run_id === run.run_id),
+      // ⚡ Bolt: Derived counts precomputed to eliminate intermediate array allocations inside the component render loop.
+      // Doing this here directly using the full array (or the active slice) instead of `.filter(condition).length` later reduces GC pressure.
+      openLineageRemediationsCount: trust.recent_lineage_remediations.reduce((acc, item) => item.run_id === run.run_id && item.status === 'OPEN' ? acc + 1 : acc, 0),
+      resolvedLineageRemediationsCount: trust.recent_lineage_remediations.reduce((acc, item) => item.run_id === run.run_id && item.status !== 'OPEN' ? acc + 1 : acc, 0),
+      openObligationsCount: trust.recent_invalidation_obligations.reduce((acc, item) => item.run_id === run.run_id && item.state === 'OPEN' ? acc + 1 : acc, 0),
+      hookGapObligationsCount: trust.recent_invalidation_obligations.reduce((acc, item) => item.run_id === run.run_id && item.state === 'HOOK_GAP' ? acc + 1 : acc, 0),
       retryableRecoveries: trust.recent_recovery_cases.filter(
         (recovery) =>
           recovery.status === 'OPEN' &&
@@ -294,6 +304,10 @@ export function ConsequentialLifecyclePanel() {
     staleApprovals,
     activeRunLineageRemediations,
     activeRunObligations,
+    openLineageRemediationsCount,
+    resolvedLineageRemediationsCount,
+    openObligationsCount,
+    hookGapObligationsCount,
     retryableRecoveries,
     compensatableRecoveries,
   } = derivedData;
@@ -314,8 +328,8 @@ export function ConsequentialLifecyclePanel() {
         <Section
           title="Lineage Remediation Queue"
           rows={[
-            { label: 'open queue', value: String(activeRunLineageRemediations.filter((item) => item.status === 'OPEN').length), tone: activeRunLineageRemediations.some((item) => item.status === 'OPEN') ? 'warn' : 'default' },
-            { label: 'resolved queue', value: String(activeRunLineageRemediations.filter((item) => item.status !== 'OPEN').length), tone: activeRunLineageRemediations.some((item) => item.status !== 'OPEN') ? 'success' : 'default' },
+            { label: 'open queue', value: String(openLineageRemediationsCount), tone: openLineageRemediationsCount > 0 ? 'warn' : 'default' },
+            { label: 'resolved queue', value: String(resolvedLineageRemediationsCount), tone: resolvedLineageRemediationsCount > 0 ? 'success' : 'default' },
           ]}
         />
         <div className="flex justify-end">
@@ -353,8 +367,8 @@ export function ConsequentialLifecyclePanel() {
           rows={[
             { label: 'run status', value: run.status },
             { label: 'compile gate', value: trust.compile_blocked ? 'BLOCKED' : 'CLEAR', tone: trust.compile_blocked ? 'warn' : 'success' },
-            { label: 'open obligations', value: String(activeRunObligations.filter((item) => item.state === 'OPEN').length), tone: activeRunObligations.some((item) => item.state === 'OPEN') ? 'warn' : 'default' },
-            { label: 'hook gaps', value: String(activeRunObligations.filter((item) => item.state === 'HOOK_GAP').length), tone: activeRunObligations.some((item) => item.state === 'HOOK_GAP') ? 'danger' : 'default' },
+            { label: 'open obligations', value: String(openObligationsCount), tone: openObligationsCount > 0 ? 'warn' : 'default' },
+            { label: 'hook gaps', value: String(hookGapObligationsCount), tone: hookGapObligationsCount > 0 ? 'danger' : 'default' },
             { label: 'open retry paths', value: String(retryableRecoveries.length), tone: retryableRecoveries.length > 0 ? 'warn' : 'default' },
             { label: 'ambiguous recoveries', value: String(compensatableRecoveries.length), tone: compensatableRecoveries.length > 0 ? 'warn' : 'default' },
             { label: 'stale approvals', value: String(staleApprovals.length), tone: staleApprovals.length > 0 ? 'warn' : 'default' },
