@@ -90,7 +90,13 @@ def _provenance_witness(
 
     missing: list[dict[str, object]] = []
     for item in provenance:
-        absent = [field for field in required_fields if not item.get(field)]
+        absent = [
+            field
+            for field in required_fields
+            if field not in item
+            or item[field] is None
+            or (isinstance(item[field], str) and not item[field].strip())
+        ]
         if absent:
             missing.append(
                 {
