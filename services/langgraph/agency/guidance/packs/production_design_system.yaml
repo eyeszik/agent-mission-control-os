@@ -1,0 +1,529 @@
+{
+  "id": "pg.production_design_system.v1",
+  "schema_version": "1.0.0",
+  "pack_version": "1.0.0",
+  "domain": "GRAPHIC_DESIGN",
+  "guidance_class": "METHODOLOGY",
+  "authority_class": "ADVISORY",
+  "description": "Physical and cross-medium production methodology for compiling visual, print, packaging, signage, merchandise, and email deliverables from a canonical brand system: visual grammar, metaphor-driven identity translation, anti-generic quality control, color modeled as a semantic production token rather than a single hex value, application-family hierarchy, and medium-specific production preflight knowledge. Extends pg.studio_identity.v4's cross-modal prompt compiler with the physical-production dependencies (dieline, bleed, ICC, verified spot color, real-world scale, fabrication spec) that a rendered image alone cannot supply.",
+  "activation": {
+    "asset_families": [],
+    "asset_types": [
+      "print collateral",
+      "stationery",
+      "packaging",
+      "signage",
+      "environmental graphics",
+      "wayfinding system",
+      "merchandise",
+      "apparel",
+      "email campaign",
+      "campaign system",
+      "poster",
+      "brochure",
+      "label",
+      "vehicle graphics",
+      "exhibition display"
+    ],
+    "channels": [
+      "print",
+      "packaging",
+      "signage",
+      "email",
+      "merch"
+    ],
+    "brand_domains": [],
+    "capabilities": [
+      "art_direction"
+    ],
+    "task_tags": [
+      "print production",
+      "packaging",
+      "dieline",
+      "signage",
+      "wayfinding",
+      "fabrication",
+      "merch",
+      "screenprint",
+      "embroidery",
+      "dtg",
+      "email html",
+      "pantone",
+      "spot color",
+      "cmyk",
+      "preflight",
+      "production dependencies",
+      "text to image prompt",
+      "mockup",
+      "production ready"
+    ]
+  },
+  "excludes": {
+    "asset_families": [],
+    "asset_types": [],
+    "channels": [],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": []
+  },
+  "dependencies": [
+    "pg.branding.core"
+  ],
+  "conflicts_with": [],
+  "context_budget": {
+    "max_sections": 10,
+    "max_chars": 40000
+  },
+  "sections": [
+    {
+      "id": "pds.visual_grammar",
+      "purpose": "Apply a consistent hierarchy-first visual grammar across every medium instead of an ad hoc layout per deliverable.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Order layout decisions as hierarchy, then negative space, then grid or alignment, then optical balance, then rhythm, then scale, then focal order.",
+        "Classify linework into structural weight (primary structure), secondary weight (dividers, framing), and microdetail weight (hatching, fine texture), and keep the classes consistent within one deliverable.",
+        "Treat frame or crop grammar as a set of related transformations (primary frame, secondary inset, tertiary detail) rather than unrelated ad hoc crops.",
+        "Support the format the deliverable actually needs (portrait, landscape, square, circular, panoramic, micro, environmental) rather than defaulting to one canonical aspect ratio."
+      ],
+      "evaluation_criteria": [
+        "hierarchy is legible before color or decoration is considered",
+        "line-weight classes are used consistently within a deliverable"
+      ],
+      "anti_patterns": [
+        "applying one fixed grid or aspect ratio regardless of the medium",
+        "using decorative linework that does not map to a declared weight class"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "layout hierarchy",
+        "grammar specification"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "layout hierarchy",
+        "grammar specification"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "visual",
+        "composition"
+      ]
+    },
+    {
+      "id": "pds.metaphor_engine",
+      "purpose": "Derive identity assets from one project-specific visual metaphor instead of independently inventing each asset.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "metaphor",
+          "symbol",
+          "mark",
+          "icon system",
+          "pattern"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Translate the brand's core visual metaphor through one or more of: abstract, diagrammatic, typographic, geometric, architectural, organic, procedural, symbolic, modular, material, spatial, or kinetic logic, chosen for fit rather than novelty.",
+        "Seed a single abstraction outward through symbol, monogram, badge, icon set, pattern, illustration style, campaign device, motion behavior, and environmental application so later assets read as one family.",
+        "Prefer abstraction derived from the specific project (its name, product, audience, or material context) over generic category shorthand shared with competitors."
+      ],
+      "evaluation_criteria": [
+        "downstream assets trace back to the same seed abstraction",
+        "the metaphor is specific enough to distinguish the brand from category peers"
+      ],
+      "anti_patterns": [
+        "choosing a metaphor for trend appeal rather than brand fit",
+        "letting each asset invent its own unrelated visual logic"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "metaphor translation map"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "metaphor translation map"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "visual",
+        "strategy"
+      ]
+    },
+    {
+      "id": "pds.anti_generic",
+      "purpose": "Detect and replace category-cliche design moves with choices derived from the project's own meaning, audience, and constraints.",
+      "directive_class": "QUALITY_CRITERION",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Treat category cliches, generic geometric shapes with no derivation, decorative gradients, unexplained celestial or abstract symbolism, complexity with no communicative purpose, trend effects adopted without a strategic reason, stock imagery, default AI-composition framing, weak or interchangeable typography, and literal one-to-one metaphors as defects to resolve, not stylistic options.",
+        "Replace a flagged default with logic derived from the brand's meaning, audience, real constraints, application context, material, language, geometry, behavior, or production method -- not with a different default."
+      ],
+      "evaluation_criteria": [
+        "each visual decision has a stated reason beyond 'it looks good' or 'it is common in this category'",
+        "removing the brand name from the asset would still leave it recognizably distinct from category peers"
+      ],
+      "anti_patterns": [
+        "category cliches presented as strategic choices",
+        "stock or default-AI compositions used as final creative direction",
+        "literal, on-the-nose metaphors with no interpretive distance"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "anti-generic review",
+        "revised direction"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "anti-generic review"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "visual",
+        "quality"
+      ]
+    },
+    {
+      "id": "pds.color_as_production_token",
+      "purpose": "Model color as a semantic production token with per-medium values and a verification-first authority order, not as a single hex value.",
+      "directive_class": "EVIDENCE_BOUND_ADVISORY",
+      "activate_when": {
+        "any": [
+          "color",
+          "pantone",
+          "spot",
+          "cmyk",
+          "print",
+          "packaging",
+          "signage",
+          "merch"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Represent a brand color as a token carrying a role and per-medium values: digital (HEX, RGB, sRGB), print (CMYK plus ICC profile, and spot/Pantone only when verified against a real reference), and fabrication (material, paint, or film reference) as applicable -- never as one hex value asserted to be correct everywhere.",
+        "Apply this authority order for a color value: verified brand standard, then printer or fabricator specification, then ICC or output profile, then an approved physical proof, then an approved digital specification, then a calculated conversion, then an estimate.",
+        "Never invent or assert a specific Pantone number without a verified source; when a critical spot color has no verified source, mark it [PHYSICAL COLOR PROOF REQUIRED] rather than supplying a plausible-looking number.",
+        "Treat RGB-to-CMYK-to-spot conversions as requiring source and destination color profiles and a gamut check; flag a conversion that falls outside the destination gamut as [OUT_OF_GAMUT] instead of silently clipping it.",
+        "Distinguish text black, line-art black, rich black, and registration black in print production, and state which one applies to a given element."
+      ],
+      "evaluation_criteria": [
+        "every color reference states which medium's value it is",
+        "no spot/Pantone value is asserted without a verified source",
+        "out-of-gamut conversions are flagged, not silently approximated"
+      ],
+      "anti_patterns": [
+        "treating a single hex value as the brand color across digital, print, and fabrication",
+        "inventing a plausible Pantone number",
+        "converting RGB to CMYK without naming the profiles used"
+      ],
+      "evidence_requirements": [
+        "a spot/Pantone value used for production requires a verified source or an explicit [PHYSICAL COLOR PROOF REQUIRED] flag"
+      ],
+      "output_targets": [
+        "color token specification",
+        "conversion record"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "color token specification",
+        "conversion record"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "tokens",
+        "production",
+        "quality"
+      ]
+    },
+    {
+      "id": "pds.application_family_hierarchy",
+      "purpose": "Apply the hierarchy convention appropriate to each application family instead of one hierarchy for every deliverable.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "stationery",
+          "campaign",
+          "packaging",
+          "social",
+          "merch"
+        ],
+        "all": []
+      },
+      "directives": [
+        "For stationery, order hierarchy as function, then identity, then support, then ornament, then texture.",
+        "For a campaign family, vary scale, crop, hierarchy, rhythm, grid density, and metaphor expression across pieces while keeping the underlying brand DNA constant -- variation is the point, drift is not.",
+        "For packaging, define structure, dieline, bleed and safe area, cut/crease/perforation lines, white-ink and spot layers, foil or varnish, embossing or debossing, windows, and substrate/finish content zones before finalizing artwork.",
+        "For social, use platform-correct dimensions and templates (static, carousel, story, reel, cover, avatar) rather than one universal export.",
+        "For merchandise, adapt artwork to the production method (screenprint, embroidery, direct-to-garment, engraving) rather than applying flat digital art unchanged."
+      ],
+      "evaluation_criteria": [
+        "the hierarchy convention matches the application family",
+        "campaign variation still traces back to the canonical brand system"
+      ],
+      "anti_patterns": [
+        "applying campaign-poster hierarchy to a business card",
+        "exporting flat digital artwork directly to a production method without adapting it"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "application specification"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "application specification"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "production",
+        "composition"
+      ]
+    },
+    {
+      "id": "pds.print_preflight",
+      "purpose": "Preflight print production dependencies before treating a deliverable as print-ready.",
+      "directive_class": "QUALITY_CRITERION",
+      "activate_when": {
+        "any": [
+          "print",
+          "brochure",
+          "poster",
+          "stationery",
+          "label"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Determine finished dimensions, trim, bleed, safe area, color model (CMYK, spot, CMYK plus spot, or grayscale), ICC profile, substrate, print process, finish, ink coverage, black strategy, overprint behavior, transparency flattening, font status, effective image PPI, vector status, and any special layers before calling a file print-ready.",
+        "Preserve logos, type, cut paths, and other technical geometry as vector wherever the production workflow permits; rasterize or flatten only when the target process requires it.",
+        "Keep the editable master file separate from the production export.",
+        "State explicitly that a PDF existing is not the same as a PDF being print-ready, and that the deliverable is not PRINT_READY until preflight checks above have actually been run."
+      ],
+      "evaluation_criteria": [
+        "every print-ready claim is backed by an explicit preflight check, not file existence alone",
+        "master and production-export files are kept distinct"
+      ],
+      "anti_patterns": [
+        "calling a file print-ready because a PDF was exported",
+        "flattening vector logos or type before the workflow requires it"
+      ],
+      "evidence_requirements": [
+        "a PRINT_READY claim requires the preflight items above to have been checked, not assumed"
+      ],
+      "output_targets": [
+        "print production spec",
+        "preflight report"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "print production spec",
+        "preflight report"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "production",
+        "quality"
+      ]
+    },
+    {
+      "id": "pds.signage_environmental_production",
+      "purpose": "Ground signage and environmental graphics in verified real-world dimensions and fabrication constraints rather than a scaled-up digital mockup.",
+      "directive_class": "EVIDENCE_BOUND_ADVISORY",
+      "activate_when": {
+        "any": [
+          "signage",
+          "wayfinding",
+          "environmental",
+          "mural",
+          "exhibition",
+          "vehicle graphics"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Collect sign type, location, interior or exterior placement, surface and sign dimensions, safe and bleed area, edge clearance, installation height, viewing distance and angle, obstructions, environment, and expected service life before producing artwork.",
+        "Calculate real size against document size and declare the scale ratio explicitly (1:1 when practical, otherwise a stated ratio such as 1:5 or 1:20); never silently rescale artwork without stating the ratio.",
+        "Order wayfinding hierarchy as regulatory or safety information first, then destination, then direction, then identification, then support information, then brand expression, then atmosphere -- and evaluate it against decision point, viewing distance, letter scale, contrast, line length, and density.",
+        "Treat a measured flat artwork file as the production-controlling document; treat a perspective render as communicating intent only, not as a source of production measurements.",
+        "Mark structural, electrical, and permit-sensitive requirements [FABRICATOR/ENGINEER VERIFICATION REQUIRED] or [CODE/PERMIT VERIFICATION REQUIRED] rather than asserting they are resolved."
+      ],
+      "evaluation_criteria": [
+        "every physical dimension traces to a stated source (site survey, provided spec, or explicit verification flag)",
+        "the declared scale ratio is stated, not implied",
+        "safety- and code-relevant items are flagged for professional verification rather than resolved by inference"
+      ],
+      "anti_patterns": [
+        "producing fabrication artwork from an uncalibrated perspective photo or render",
+        "silently rescaling artwork without declaring the ratio",
+        "resolving a structural, electrical, or permit question without flagging it for verification"
+      ],
+      "evidence_requirements": [
+        "physical fabrication dimensions require a verified source before BLOCK_PHYSICAL_PRODUCTION can be cleared",
+        "structural or code-relevant claims require named professional verification before installation proceeds"
+      ],
+      "output_targets": [
+        "signage production spec",
+        "fabrication spec",
+        "dimension table"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "signage production spec",
+        "fabrication spec"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "production",
+        "governance"
+      ]
+    },
+    {
+      "id": "pds.merch_material_production",
+      "purpose": "Adapt artwork to the physical constraints of the chosen merchandise production method instead of reusing flat digital art unchanged.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "merch",
+          "apparel",
+          "screenprint",
+          "embroidery",
+          "dtg",
+          "engraving"
+        ],
+        "all": []
+      },
+      "directives": [
+        "State the target production method (screenprint, embroidery, direct-to-garment, engraving, or similar) before finalizing artwork, since each method constrains color count, minimum detail size, line weight, and gradient handling differently.",
+        "Reduce color count and simplify fine detail for screenprint and embroidery specifically; embroidery additionally requires stitch-direction-aware simplification that flat vector art does not provide automatically.",
+        "Name the target material and finish (fabric type, garment color, substrate) since it affects visible ink or thread color, not just the nominal brand color value."
+      ],
+      "evaluation_criteria": [
+        "artwork complexity matches what the stated production method can actually reproduce",
+        "material and finish are named, not assumed"
+      ],
+      "anti_patterns": [
+        "sending full-color gradient artwork to a screenprint or embroidery process unchanged",
+        "specifying ink or thread color without accounting for the underlying material"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "merch production spec"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "merch production spec"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "production"
+      ]
+    },
+    {
+      "id": "pds.email_html_production",
+      "purpose": "Compile email visuals into robust, client-compatible HTML rather than assuming general web layout techniques render correctly in email clients.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "email",
+          "newsletter",
+          "email campaign"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Structure an email as preheader, header, hero, message, supporting modules, call to action, secondary content, then footer.",
+        "Use table-based structural layout and inlined critical styles where the target client set requires it, explicit image dimensions, alt text on every image, and fallback fonts, since email clients do not reliably support the same CSS as browsers.",
+        "Translate complex web interaction into a robust static or minimally-interactive email equivalent rather than assuming it will render as designed.",
+        "Check subject line, preheader, hierarchy, call-to-action clarity, links, alt text, image references, responsive behavior, dark-mode appearance, and contrast before calling an email ready; mark it [RENDER TEST REQUIRED] when it has not actually been tested in real email clients."
+      ],
+      "evaluation_criteria": [
+        "layout relies on structures known to work across common email clients rather than modern browser-only CSS",
+        "an untested render is marked as untested, not asserted as verified"
+      ],
+      "anti_patterns": [
+        "using modern flexbox or grid layout as the primary structure without a table-based fallback",
+        "asserting an email renders correctly across clients without having tested it"
+      ],
+      "evidence_requirements": [
+        "a cross-client render claim requires actual client testing or an explicit [RENDER TEST REQUIRED] flag"
+      ],
+      "output_targets": [
+        "email production spec",
+        "email HTML"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "email production spec"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "production",
+        "quality"
+      ]
+    },
+    {
+      "id": "pds.production_aware_prompt_compilation",
+      "purpose": "Carry physical-production dependencies into compiled prompts explicitly instead of letting a generated image stand in for a production file.",
+      "directive_class": "QUALITY_CRITERION",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "When a compiled prompt targets a physical medium (print, packaging, signage, merch), name its production dependencies explicitly in the prompt package -- dieline, bleed, substrate, real-world viewing distance or scale, production method -- as unresolved requirements rather than omitting them because a generated image cannot itself carry that information.",
+        "State plainly that a generated visual, mockup, or render is not a production file: a mockup is not a print-ready file, a rendered signage image is not a fabrication drawing, and a generated packaging visual is not a dieline.",
+        "This repository's prompt compiler terminates at a validated prompt package and does not itself invoke a media provider or produce a manufacturing artifact; guidance here informs what a compiled prompt should specify, it does not authorize this module to generate, export, or fabricate anything."
+      ],
+      "evaluation_criteria": [
+        "physical-production prompts name their unresolved production dependencies rather than silently dropping them",
+        "no compiled output is described as production-ready without the applicable preflight or fabrication verification"
+      ],
+      "anti_patterns": [
+        "presenting a generated image as equivalent to a print-ready file, a dieline, or a fabrication drawing",
+        "treating this guidance pack as authorization to call a media provider or write a production artifact"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "production-aware prompt package"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "production-aware prompt package"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "production",
+        "quality",
+        "governance"
+      ]
+    }
+  ],
+  "provenance": {
+    "source": "User-supplied MASTER_PROMPT: UNIVERSAL_BRAND_DNA_DESIGN_PRODUCTION_OS",
+    "version": "2026.09",
+    "author": null,
+    "created_at": null,
+    "updated_at": null,
+    "evidence_refs": [],
+    "license_or_ip_status": "user_supplied"
+  },
+  "trend": null,
+  "content_hash": ""
+}
