@@ -37,7 +37,7 @@ def test_amc_profile_compiles_all_stages_to_sealed_role_os_roles():
         if index == 0:
             assert work_order["dependency_refs"] == []
         else:
-            previous_stage = AGENCY_STAGE_PIPELINE[index - 1] if False else AGENCY_PIPELINE_STAGES[index - 1]
+            previous_stage = AGENCY_PIPELINE_STAGES[index - 1]
             assert work_order["dependency_refs"] == [compiled.task_to_work_order[previous_stage]]
 
 
