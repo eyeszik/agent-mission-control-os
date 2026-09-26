@@ -176,8 +176,10 @@ def test_strength_decides_unlocked_contention_and_primary_breaks_ties():
 def test_layer_strength_scales_contribution():
     weak = compose_style_selection([{"style_id": "CLS-01", "strength": 0.1, "dimensions": ["lighting"]}])
     strong = compose_style_selection([{"style_id": "CLS-01", "strength": 1.0, "dimensions": ["lighting"]}])
-    count = lambda c: sum(1 for t in c.resolved_tokens if t.dimension == "lighting")
-    assert count(weak) < count(strong)
+    def lighting_tokens(composed):
+        return sum(1 for t in composed.resolved_tokens if t.dimension == "lighting")
+
+    assert lighting_tokens(weak) < lighting_tokens(strong)
 
 
 def test_double_lock_on_one_dimension_is_blocking():
@@ -257,3 +259,66 @@ def test_direction_applies_only_when_not_blocking():
     assert ok.rationale == "editorial drama"
     blocked = direction_from_selection({"selections": [{"style_id": "CLS-02"}, {"style_id": "MOD-01"}]})
     assert blocked.applied is False and blocked.blocking is True
+
+
+# --------------------------------------------------------------------------- #
+# Design Mode API
+# --------------------------------------------------------------------------- #
+def _client():
+    from fastapi.testclient import TestClient
+
+    from services.langgraph.app.main import app
+
+    return TestClient(app)
+
+
+def test_api_lists_catalog_with_pending_references():
+    response = _client().get("/design/styles")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["version"] == "style-library-v1"
+    assert {style["id"] for style in body["styles"]} >= {"CLS-01", "CLS-02", "MOD-03"}
+    assert body["pending_references"] == pending_references()
+
+
+def test_api_composes_by_dimension():
+    response = _client().post(
+        "/design/styles/compose",
+        json={"selections": _three_layer(), "brief": {"objective": "launch key visual"}},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["blocking"] is False
+    assert body["resolved_dimensions"]["lighting"] == "CLS-01"
+    assert "launch key visual" in body["prompt"]
+
+
+def test_api_reports_blocking_conflicts_without_erroring():
+    response = _client().post(
+        "/design/styles/compose",
+        json={"selections": [{"style_id": "CLS-02", "role": "primary"}, {"style_id": "MOD-01"}]},
+    )
+    assert response.status_code == 200
+    assert response.json()["blocking"] is True
+
+
+def test_api_rejects_invalid_selections():
+    client = _client()
+    unknown = client.post("/design/styles/compose", json={"selections": [{"style_id": "ZZZ-99"}]})
+    assert unknown.status_code == 422
+    two_primaries = client.post(
+        "/design/styles/compose",
+        json={"selections": [{"style_id": "MOD-03", "role": "primary"}, {"style_id": "MOD-04", "role": "primary"}]},
+    )
+    assert two_primaries.status_code == 422
+    malformed = client.post("/design/styles/compose", json={"selections": [{"style_id": "bauhaus"}]})
+    assert malformed.status_code == 422
+    empty = client.post("/design/styles/compose", json={"selections": []})
+    assert empty.status_code == 422
+
+
+def test_api_requires_authentication(monkeypatch):
+    monkeypatch.setenv("AMC_AUTH_MODE", "disabled")
+    client = _client()
+    assert client.get("/design/styles").status_code == 503
+    assert client.post("/design/styles/compose", json={"selections": [{"style_id": "MOD-03"}]}).status_code == 503
