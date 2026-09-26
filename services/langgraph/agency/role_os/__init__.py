@@ -17,6 +17,8 @@ __all__ = [
     "MissionWorkOrderAdapter", "MissionAdapterError", "CompiledMissionWorkOrders",
     "NextBestActionEngine", "NextActionError", "ProjectExecutionState",
     "ActionScore", "NextActionSelection",
+    "AgencyStageBinding", "AGENCY_STAGE_BINDINGS", "AGENCY_STAGE_IDS", "AGENCY_PHASE_MAP",
+    "build_agency_role_os_mission", "compile_agency_role_os_work_orders",
 ]
 
 from .amc_profile import (
