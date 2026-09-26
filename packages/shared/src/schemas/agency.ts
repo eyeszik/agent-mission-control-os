@@ -2,6 +2,14 @@ import { z } from 'zod';
 import { UIUXDesignIRSchema } from './uiux';
 import { ApprovalRequestSchema } from './approvals';
 import { DesignStyleDirectionSchema, DesignStyleSelectionSchema } from './styleLibrary';
+import {
+  AccessibilityCheckInputSchema,
+  AssetRightsInputSchema,
+  ClaimProofInputSchema,
+  FullServicePlanSchema,
+  MediaPlanningInputSchema,
+  ResearchEvidenceInputSchema,
+} from './fullService';
 
 export const AGENCY_PIPELINE_STAGES = [
   'brief_intake',
@@ -33,6 +41,16 @@ export const CampaignBriefSchema = z.object({
   workflow_idea: z.string().optional().nullable(),
   differentiators: z.array(z.string()).default([]),
   brand_style_notes: z.array(z.string()).default([]),
+  market: z.string().optional().nullable(),
+  language: z.string().optional().nullable(),
+  locale: z.string().optional().nullable(),
+  research_evidence: z.array(ResearchEvidenceInputSchema).default([]),
+  claim_proofs: z.array(ClaimProofInputSchema).default([]),
+  asset_rights: z.array(AssetRightsInputSchema).default([]),
+  regulatory_context: z.array(z.string()).default([]),
+  counsel_source_refs: z.array(z.string()).default([]),
+  accessibility_evidence: z.array(AccessibilityCheckInputSchema).default([]),
+  media: MediaPlanningInputSchema.optional().nullable(),
   // Design Mode selection; the backend recomposes it against the catalog.
   style_selection: DesignStyleSelectionSchema.optional().nullable(),
 });
@@ -213,6 +231,7 @@ export const QAReportSchema = z.object({
   notes: z.string(),
   release_blocked: z.boolean().default(false),
   degradation_reasons: z.array(z.string()).default([]),
+  hard_block_reasons: z.array(z.string()).default([]),
 });
 
 export const CampaignPackageSchema = z.object({
@@ -226,6 +245,7 @@ export const CampaignPackageSchema = z.object({
   branding_workspace: BrandingWorkspaceSchema.optional(),
   design_system: DesignSystemPackageSchema.optional(),
   asset_execution: AssetExecutionPackageSchema.optional(),
+  full_service: FullServicePlanSchema.optional(),
   workspace_export: WorkspaceExportSchema.nullable().optional(),
 });
 
