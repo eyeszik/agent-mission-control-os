@@ -78,7 +78,13 @@ def _provenance_witness(
 
     missing: list[dict[str, object]] = []
     for item in provenance:
-        absent = [field for field in required_fields if not item.get(field)]
+        absent = [
+            field
+            for field in required_fields
+            if field not in item
+            or item[field] is None
+            or (isinstance(item[field], str) and not item[field].strip())
+        ]
         if absent:
             missing.append(
                 {
@@ -112,6 +118,12 @@ def derive_event_bindings(*, tenant_id: str, project_id: str, result: Optional[d
     agency = (result or {}).get("agency") if isinstance(result, dict) else {}
     agency = agency if isinstance(agency, dict) else {}
     provenance = _generation_provenance(result)
+    invalidation_requirements = agency.get("invalidation_requirements")
+    invalidation_requirements = invalidation_requirements if isinstance(invalidation_requirements, dict) else {}
+    memory_write_required = invalidation_requirements.get("MEMORY_WRITE") is True
+    clock_window_required = invalidation_requirements.get("CLOCK_WINDOW_ADVANCE") is True
+    memory_reason = "no_persisted_memory_source" if memory_write_required else "not_applicable_to_run"
+    clock_reason = "missing_window_lease_source" if clock_window_required else "not_applicable_to_run"
 
     spec_snapshot = [
         {
@@ -193,14 +205,31 @@ def derive_event_bindings(*, tenant_id: str, project_id: str, result: Optional[d
             "status": acl_status,
         },
         "MEMORY_WRITE": {
-            "cause_k": hash_payload({"event_class": "MEMORY_WRITE", "reason": "no_persisted_memory_source"}),
-            "payload": {"reason": "no_persisted_memory_source"},
-            "status": "HOOK_GAP",
+            "cause_k": hash_payload({
+                "event_class": "MEMORY_WRITE",
+                "reason": memory_reason,
+                "required": memory_write_required,
+            }),
+            "payload": {
+                "reason": memory_reason,
+                "required": memory_write_required,
+                "applicability_source": "agency.invalidation_requirements",
+            },
+            "status": "HOOK_GAP" if memory_write_required else "BOUND",
         },
         "CLOCK_WINDOW_ADVANCE": {
-            "cause_k": hash_payload({"event_class": "CLOCK_WINDOW_ADVANCE", "reason": "missing_window_lease_source"}),
-            "payload": {"reason": "missing_window_lease_source", "window_lease": None},
-            "status": "HOOK_GAP",
+            "cause_k": hash_payload({
+                "event_class": "CLOCK_WINDOW_ADVANCE",
+                "reason": clock_reason,
+                "required": clock_window_required,
+            }),
+            "payload": {
+                "reason": clock_reason,
+                "required": clock_window_required,
+                "window_lease": None,
+                "applicability_source": "agency.invalidation_requirements",
+            },
+            "status": "HOOK_GAP" if clock_window_required else "BOUND",
         },
     }
 
