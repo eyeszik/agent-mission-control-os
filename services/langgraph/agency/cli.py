@@ -384,6 +384,37 @@ def _cmd_compile_prompts(args: argparse.Namespace) -> int:
     return 0 if result.final_state is CompilerState.prompt_package_ready else 1
 
 
+def _cmd_cinematic(args: argparse.Namespace) -> int:
+    # Imported lazily: the cinematic capability is a heavy domain module and must
+    # not load for unrelated CLI commands.
+    from services.langgraph.agency.cinematic import run_pipeline
+    from services.langgraph.agency.cinematic.schemas import CinematicRequest
+
+    if args.input:
+        try:
+            with open(args.input, "r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except FileNotFoundError as exc:
+            raise BriefError(f"cinematic request not found: {args.input}") from exc
+        except json.JSONDecodeError as exc:
+            raise BriefError(f"cinematic request is not valid JSON: {exc}") from exc
+        try:
+            request = CinematicRequest.model_validate(payload)
+        except ValidationError as exc:
+            raise BriefError(f"cinematic request does not match the expected shape:\n{exc}") from exc
+    elif args.text:
+        request = CinematicRequest(text=args.text)
+    else:
+        raise BriefError("cinematic: provide --input <file> or --text <idea>")
+
+    result = run_pipeline(request)
+    print(result.model_dump_json(indent=2))
+    # Exit 0 when the capability produced a usable result (prompts, a storyboard,
+    # or a capability manifest); non-zero only when nothing could be produced.
+    produced = bool(result.prompts or result.storyboard or result.capability)
+    return 0 if produced else 1
+
+
 def _cmd_validate(_args: argparse.Namespace) -> int:
     problems = validate_matrices() + validate_registry() + validate_merge_matrix()
     if problems:
@@ -427,6 +458,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print the compiled result as JSON."
     )
     compile_prompts.set_defaults(handler=_cmd_compile_prompts)
+
+    cinematic = sub.add_parser(
+        "cinematic",
+        help="Compile cinematic prompts (T2I/T2V/I2V/storyboard) without generating assets.",
+    )
+    cinematic.add_argument(
+        "-i", "--input", help="Path to a cinematic request JSON file."
+    )
+    cinematic.add_argument(
+        "-t", "--text", help="A one-line idea to compile instead of a request file."
+    )
+    cinematic.set_defaults(handler=_cmd_cinematic)
 
     validate = sub.add_parser("validate", help="Run the kernel's structural self-checks.")
     validate.set_defaults(handler=_cmd_validate)

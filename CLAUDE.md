@@ -116,6 +116,10 @@ This is the one thing that isn't obvious from browsing individual files, and it 
 
 Read together: this is the validated, evidence-grounded input a real image/video generation skill would consume — it is not that skill. Wiring an actual provider behind `PROMPT_PACKAGE_READY` output is still open work, same as the rest of the kernel-to-Layer-1 integration gap above.
 
+### Cinematic capability — routed, not global
+
+`services/langgraph/agency/cinematic/` is a lazily-loaded domain capability that compiles ideas/scripts/storyboards/images into T2I/T2V/I2V/storyboard/brand-motion prompts, with canonical `ProjectIR`/`ShotIR`, source-authority resolution, continuity handshakes, camera/lighting/physics reasoning, an evaluator, and a bounded repair loop. It routes via its own deterministic trigger metadata (`cinematic.route_request`) and honours the same firewall — it terminates at prompts and never invokes a media provider. It is a native module (real schemas/compilers/evaluator, not advisory prose) and its full specification is deliberately kept out of this file; see `docs/cinematic-capability.md` and invoke via `orchestrate_brand_pipeline.py cinematic`.
+
 ### The fail-closed integration pattern
 
 `integrations/publication.py`, `integrations/paid_media.py`, `integrations/zo.py` all follow the same shape: a mode env switch (`AMC_PUBLICATION_MODE`, `AMC_PAID_MEDIA_MODE`, `AMC_ZO_MODE`) defaults to `"disabled"`, and anything beyond `disabled`/`dry_run` for publication or beyond `disabled` for paid-media fails `verify_production_readiness.py`. There is no live executor for either — extending one means installing a real provider adapter deliberately, not flipping the switch.
