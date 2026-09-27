@@ -14,6 +14,9 @@ import { AITrustEnvelope } from './AITrustEnvelope';
 export function CommandInputPanel() {
   const [brandName, setBrandName] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
+  const [market, setMarket] = useState('');
+  const [language, setLanguage] = useState('');
+  const [locale, setLocale] = useState('');
   const [businessIdea, setBusinessIdea] = useState('');
   const [offerSummary, setOfferSummary] = useState('');
   const [productType, setProductType] = useState('app');
@@ -48,6 +51,9 @@ export function CommandInputPanel() {
           offer_summary: offerSummary.trim() || null,
           product_type: productType.trim() || null,
           target_audience: targetAudience.trim(),
+          market: market.trim() || null,
+          language: language.trim() || null,
+          locale: locale.trim() || null,
           workflow_idea: workflowIdea.trim() || null,
           goals: goals.split(',').map((goal) => goal.trim()).filter(Boolean),
           differentiators: [],
@@ -91,6 +97,9 @@ export function CommandInputPanel() {
 
       setBrandName('');
       setTargetAudience('');
+      setMarket('');
+      setLanguage('');
+      setLocale('');
       setBusinessIdea('');
       setOfferSummary('');
       setProductType('app');
@@ -134,6 +143,21 @@ export function CommandInputPanel() {
 
         <label className="text-xs text-zinc-500" htmlFor="target-audience">Target audience</label>
         <input id="target-audience" value={targetAudience} onChange={(event) => setTargetAudience(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-zinc-500" htmlFor="market">Market</label>
+            <input id="market" value={market} onChange={(event) => setMarket(event.target.value)} disabled={loading} placeholder="e.g. Los Angeles" className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 placeholder:text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-zinc-500" htmlFor="language">Language</label>
+            <input id="language" value={language} onChange={(event) => setLanguage(event.target.value)} disabled={loading} placeholder="e.g. English" className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 placeholder:text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-zinc-500" htmlFor="locale">Locale</label>
+            <input id="locale" value={locale} onChange={(event) => setLocale(event.target.value)} disabled={loading} placeholder="e.g. en-US" className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 placeholder:text-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+          </div>
+        </div>
 
         <label className="text-xs text-zinc-500" htmlFor="product-type">Product type</label>
         <input id="product-type" value={productType} onChange={(event) => setProductType(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
