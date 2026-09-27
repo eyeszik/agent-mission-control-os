@@ -368,11 +368,22 @@ components:
       properties:
         brand_name: { type: string }
         industry: { type: string, nullable: true }
+        business_idea: { type: string, nullable: true }
+        offer_summary: { type: string, nullable: true }
+        product_type: { type: string, nullable: true }
         goals: { type: array, items: { type: string }, default: [] }
         target_audience: { type: string }
         tone: { type: string, nullable: true }
         channels: { type: array, items: { type: string }, default: [] }
         constraints: { type: array, items: { type: string }, default: [] }
+        business_model: { type: string, nullable: true }
+        affiliate_model: { type: boolean, nullable: true }
+        workflow_idea: { type: string, nullable: true }
+        differentiators: { type: array, items: { type: string }, default: [] }
+        brand_style_notes: { type: array, items: { type: string }, default: [] }
+        market: { type: string, nullable: true }
+        language: { type: string, nullable: true }
+        locale: { type: string, nullable: true }
     CreateAgencyRunRequest:
       type: object
       required: [project_id, brief]
@@ -508,6 +519,114 @@ components:
         copy_variants: { type: array, items: { $ref: '#/components/schemas/CopyVariant' } }
         design_brief: { $ref: '#/components/schemas/DesignBrief' }
         qa_report: { $ref: '#/components/schemas/QAReport' }
+        agency_operations: { $ref: '#/components/schemas/AgencyOperationsPackage' }
+    ResearchCoverage:
+      type: object
+      required: [audience_brief, interview_guide, competitive_audit, stakeholder_map, perception_gaps, category_language, evidence_refs, unresolved]
+      properties:
+        audience_brief: { type: string }
+        interview_guide: { type: array, items: { type: string } }
+        competitive_audit: { type: array, items: { type: string } }
+        stakeholder_map: { type: array, items: { type: object, additionalProperties: { type: string } } }
+        perception_gaps: { type: array, items: { type: string } }
+        category_language: { type: array, items: { type: string } }
+        evidence_refs: { type: array, items: { type: string } }
+        unresolved: { type: array, items: { type: string } }
+    ClaimProofRecord:
+      type: object
+      required: [claim_id, text, status, release_note]
+      properties:
+        claim_id: { type: string }
+        text: { type: string }
+        status: { type: string, enum: [PROVED, UNPROVED, UNKNOWN] }
+        source_ref: { type: string, nullable: true }
+        release_note: { type: string }
+    RightsRecord:
+      type: object
+      required: [asset_ref, owner, license_status, portfolio_permission, territory, offboarding_status, contact]
+      properties:
+        asset_ref: { type: string }
+        owner: { type: string }
+        license_status: { type: string }
+        portfolio_permission: { type: string }
+        territory: { type: string }
+        expiry: { type: string, nullable: true }
+        access_expiry: { type: string, nullable: true }
+        offboarding_status: { type: string }
+        contact: { type: string }
+    AccessibilityEvidence:
+      type: object
+      required: [standard_ref, contrast, keyboard, semantics, assistive_technology, evidence_refs, status]
+      properties:
+        standard_ref: { type: string }
+        contrast: { type: string, enum: [MEASURED, NOT_MEASURED] }
+        keyboard: { type: string, enum: [MEASURED, NOT_MEASURED] }
+        semantics: { type: string, enum: [MEASURED, NOT_MEASURED] }
+        assistive_technology: { type: string, enum: [MEASURED, NOT_MEASURED] }
+        evidence_refs: { type: array, items: { type: string } }
+        status: { type: string, enum: [SOURCE_ATTACHED, GAP, COUNSEL_REQUIRED] }
+    MediaPlanningHandoff:
+      type: object
+      required: [audience, flight, market, budget, kpis, creative_specs, trafficking_sheet, execution_mode]
+      properties:
+        audience: { type: string }
+        flight: { type: string }
+        market: { type: string }
+        budget: { type: string }
+        kpis: { type: array, items: { type: string } }
+        creative_specs: { type: array, items: { type: string } }
+        trafficking_sheet: { type: array, items: { type: object, additionalProperties: { type: string } } }
+        execution_mode: { type: string, enum: [PLANNING_ONLY] }
+    ObservabilityContract:
+      type: object
+      required: [required_signals, service_identity, owner, retention_policy, alert_conditions, runtime_binding_status]
+      properties:
+        required_signals: { type: array, items: { type: string, enum: [logs, metrics, traces] } }
+        service_identity: { type: string }
+        owner: { type: string }
+        retention_policy: { type: string }
+        alert_conditions: { type: array, items: { type: string } }
+        runtime_binding_status: { type: string, enum: [UNVERIFIED_EXTERNAL_BINDING] }
+    SLORecord:
+      type: object
+      required: [name, target, status]
+      properties:
+        name: { type: string }
+        target: { type: string }
+        measurement_ref: { type: string, nullable: true }
+        status: { type: string, enum: [GAP_NO_BASELINE, SOURCE_ATTACHED] }
+    ModelCardRecord:
+      type: object
+      required: [task, mode, evaluation_status, limitations]
+      properties:
+        task: { type: string }
+        provider: { type: string, nullable: true }
+        model: { type: string, nullable: true }
+        mode: { type: string }
+        prompt_version: { type: string, nullable: true }
+        schema_version: { type: string, nullable: true }
+        evaluation_status: { type: string, enum: [NOT_MEASURED, SOURCE_ATTACHED] }
+        limitations: { type: array, items: { type: string } }
+    AgencyOperationsPackage:
+      type: object
+      required: [schema_version, market, language, locale, research, claims, rights_handoff, accessibility, media, observability, slos, model_cards, legal_readiness, required_reviewers, unresolved_gaps, external_release_blockers]
+      properties:
+        schema_version: { type: string, enum: [amc-agency-operations/v1] }
+        market: { type: string }
+        language: { type: string }
+        locale: { type: string }
+        research: { $ref: '#/components/schemas/ResearchCoverage' }
+        claims: { type: array, items: { $ref: '#/components/schemas/ClaimProofRecord' } }
+        rights_handoff: { type: array, items: { $ref: '#/components/schemas/RightsRecord' } }
+        accessibility: { $ref: '#/components/schemas/AccessibilityEvidence' }
+        media: { $ref: '#/components/schemas/MediaPlanningHandoff' }
+        observability: { $ref: '#/components/schemas/ObservabilityContract' }
+        slos: { type: array, items: { $ref: '#/components/schemas/SLORecord' } }
+        model_cards: { type: array, items: { $ref: '#/components/schemas/ModelCardRecord' } }
+        legal_readiness: { type: string, enum: [SOURCE_ATTACHED, GAP, COUNSEL_REQUIRED] }
+        required_reviewers: { type: array, items: { type: string } }
+        unresolved_gaps: { type: array, items: { type: string } }
+        external_release_blockers: { type: array, items: { type: string } }
     GenerationProvenance:
       type: object
       required: [task, mode, schema_version, prompt_version, prompt_hash, attempts, started_at, completed_at, fallback_used]
