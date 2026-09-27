@@ -39,7 +39,6 @@ export function CommandInputPanel() {
   const detachStyle = useDesignStore((state) => state.detach);
 
   const handleLaunchCampaign = async () => {
-    if (!brandName.trim() || !targetAudience.trim()) return;
     setLoading(true);
     setError(null);
     try {
@@ -191,7 +190,7 @@ export function CommandInputPanel() {
           <button
             type="button"
             onClick={handleLaunchCampaign}
-            disabled={loading || !brandName.trim() || !targetAudience.trim()}
+            disabled={loading}
             className="px-4 py-1.5 bg-zinc-100 text-zinc-900 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
           >
             {loading ? 'Running pipeline…' : 'Compile Idea Workspace'}
