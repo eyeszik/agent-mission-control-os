@@ -1228,10 +1228,17 @@ def resume_agency_run(
     stored_package = stored_agency.get("campaign_package")
     runtime_package = agency_data.get("campaign_package")
     if isinstance(stored_package, dict):
+        runtime_package_dict = runtime_package if isinstance(runtime_package, dict) else {}
         merged_package = {
             **stored_package,
-            **(runtime_package if isinstance(runtime_package, dict) else {}),
+            **runtime_package_dict,
         }
+        # workspace_export is materialized after the graph pauses at HITL, so
+        # the checkpoint legitimately carries a null placeholder. A null
+        # checkpoint value must not erase the persisted export that was part of
+        # the approved subject hash.
+        if runtime_package_dict.get("workspace_export") is None and stored_package.get("workspace_export") is not None:
+            merged_package["workspace_export"] = stored_package["workspace_export"]
         agency_data = {**stored_agency, **agency_data, "campaign_package": merged_package}
     else:
         agency_data = {**stored_agency, **agency_data}
