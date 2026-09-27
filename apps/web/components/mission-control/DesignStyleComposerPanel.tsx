@@ -238,7 +238,9 @@ function ComposedResult({ composed, index }: { composed: ComposedStyle; index: S
       <div>
         <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-1">Resolved dimensions</div>
         <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">
-          {STYLE_DIMENSIONS.filter((dimension) => composed.resolved_dimensions[dimension]).map((dimension) => {
+          {/* ⚡ Bolt: Removed .filter().map() chain to prevent intermediate array allocation on every render */}
+          {STYLE_DIMENSIONS.map((dimension) => {
+            if (!composed.resolved_dimensions[dimension]) return null;
             const owner = composed.resolved_dimensions[dimension] ?? '';
             return (
               <div key={dimension} className="flex justify-between gap-2 text-xs">
