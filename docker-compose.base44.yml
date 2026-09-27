@@ -1,0 +1,61 @@
+# Base44 development compose — runs the app from cloned source with live reload.
+# Do not use the repo's own compose (if any); this one is purpose-built for the edit loop.
+services:
+  api:
+    image: python:3.12-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - AMC_ENV=local
+      - AMC_AUTH_MODE=local
+      - AMC_DATABASE_BACKEND=sqlite
+      - AMC_DB_PATH=/app/amc_local.db
+      - AMC_LOCAL_USER_ID=local-operator
+      - AMC_LOCAL_TENANT_ID=tenant_1
+      - AMC_LOCAL_PROJECT_IDS=proj_1
+      - AMC_LOCAL_ROLE=operator
+      - AMC_PUBLICATION_MODE=disabled
+      - AMC_PAID_MEDIA_MODE=disabled
+      - AMC_CORS_ALLOWED_ORIGINS=https://3000-${BASE44_PUBLIC_HOST_SUFFIX},http://localhost:3000,http://127.0.0.1:3000
+      - BASE44_PUBLIC_HOST_SUFFIX
+    env_file:
+      - /run/base44/app.env
+    command:
+      - sh
+      - -c
+      - pip install --no-cache-dir -e services/langgraph && python -m uvicorn services.langgraph.app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir services/langgraph
+    ports:
+      - "8000:8000"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 90s
+
+  web:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=https://8000-${BASE44_PUBLIC_HOST_SUFFIX}
+      - NEXT_PUBLIC_AUTH_MODE=local
+      - BASE44_PUBLIC_HOST_SUFFIX
+    env_file:
+      - /run/base44/app.env
+    command:
+      - sh
+      - -c
+      - corepack enable && pnpm install && pnpm --filter @amc/shared build && cd apps/web && npx next dev -H 0.0.0.0 -p 3000
+    ports:
+      - "3000:3000"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 120s
