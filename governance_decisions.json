@@ -117,6 +117,11 @@
     ],
     "overall_governance_status": "PASS_WITH_NOTES",
     "overall_confidence": 0.73,
-    "release_readiness": "not_release_ready_without_repo_audit_and_stage_4_validation"
+    "release_readiness": "CURRENT_STATUS_IN_docs/audit-remediation-2026-09-26.md",
+    "provenance": {
+      "record_status": "HISTORICAL_SUPERSEDED",
+      "superseded_by": "docs/audit-remediation-2026-09-26.md",
+      "note": "This record predates live repository verification. Preserve it as provenance; repository-availability statements are not current runtime facts."
+    }
   }
 }
