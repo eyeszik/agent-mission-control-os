@@ -33,6 +33,9 @@ export const CampaignBriefSchema = z.object({
   workflow_idea: z.string().optional().nullable(),
   differentiators: z.array(z.string()).default([]),
   brand_style_notes: z.array(z.string()).default([]),
+  market: z.string().optional().nullable(),
+  language: z.string().optional().nullable(),
+  locale: z.string().optional().nullable(),
   // Design Mode selection; the backend recomposes it against the catalog.
   style_selection: DesignStyleSelectionSchema.optional().nullable(),
 });
@@ -215,6 +218,104 @@ export const QAReportSchema = z.object({
   degradation_reasons: z.array(z.string()).default([]),
 });
 
+export const ResearchCoverageSchema = z.object({
+  audience_brief: z.string(),
+  interview_guide: z.array(z.string()).default([]),
+  competitive_audit: z.array(z.string()).default([]),
+  stakeholder_map: z.array(z.record(z.string())).default([]),
+  perception_gaps: z.array(z.string()).default([]),
+  category_language: z.array(z.string()).default([]),
+  evidence_refs: z.array(z.string()).default([]),
+  unresolved: z.array(z.string()).default([]),
+});
+
+export const ClaimProofRecordSchema = z.object({
+  claim_id: z.string(),
+  text: z.string(),
+  status: z.enum(['PROVED', 'UNPROVED', 'UNKNOWN']),
+  source_ref: z.string().nullable().optional(),
+  release_note: z.string(),
+});
+
+export const RightsRecordSchema = z.object({
+  asset_ref: z.string(),
+  owner: z.string(),
+  license_status: z.string(),
+  portfolio_permission: z.string(),
+  territory: z.string(),
+  expiry: z.string().nullable().optional(),
+  access_expiry: z.string().nullable().optional(),
+  offboarding_status: z.string(),
+  contact: z.string(),
+});
+
+export const AccessibilityEvidenceSchema = z.object({
+  standard_ref: z.string(),
+  contrast: z.enum(['MEASURED', 'NOT_MEASURED']),
+  keyboard: z.enum(['MEASURED', 'NOT_MEASURED']),
+  semantics: z.enum(['MEASURED', 'NOT_MEASURED']),
+  assistive_technology: z.enum(['MEASURED', 'NOT_MEASURED']),
+  evidence_refs: z.array(z.string()).default([]),
+  status: z.enum(['SOURCE_ATTACHED', 'GAP', 'COUNSEL_REQUIRED']),
+});
+
+export const MediaPlanningHandoffSchema = z.object({
+  audience: z.string(),
+  flight: z.string(),
+  market: z.string(),
+  budget: z.string(),
+  kpis: z.array(z.string()).default([]),
+  creative_specs: z.array(z.string()).default([]),
+  trafficking_sheet: z.array(z.record(z.string())).default([]),
+  execution_mode: z.literal('PLANNING_ONLY'),
+});
+
+export const ObservabilityContractSchema = z.object({
+  required_signals: z.array(z.enum(['logs', 'metrics', 'traces'])),
+  service_identity: z.string(),
+  owner: z.string(),
+  retention_policy: z.string(),
+  alert_conditions: z.array(z.string()).default([]),
+  runtime_binding_status: z.literal('UNVERIFIED_EXTERNAL_BINDING'),
+});
+
+export const SLORecordSchema = z.object({
+  name: z.string(),
+  target: z.string(),
+  measurement_ref: z.string().nullable().optional(),
+  status: z.enum(['GAP_NO_BASELINE', 'SOURCE_ATTACHED']),
+});
+
+export const ModelCardRecordSchema = z.object({
+  task: z.string(),
+  provider: z.string().nullable().optional(),
+  model: z.string().nullable().optional(),
+  mode: z.string(),
+  prompt_version: z.string().nullable().optional(),
+  schema_version: z.string().nullable().optional(),
+  evaluation_status: z.enum(['NOT_MEASURED', 'SOURCE_ATTACHED']),
+  limitations: z.array(z.string()).default([]),
+});
+
+export const AgencyOperationsPackageSchema = z.object({
+  schema_version: z.literal('amc-agency-operations/v1'),
+  market: z.string(),
+  language: z.string(),
+  locale: z.string(),
+  research: ResearchCoverageSchema,
+  claims: z.array(ClaimProofRecordSchema).default([]),
+  rights_handoff: z.array(RightsRecordSchema).default([]),
+  accessibility: AccessibilityEvidenceSchema,
+  media: MediaPlanningHandoffSchema,
+  observability: ObservabilityContractSchema,
+  slos: z.array(SLORecordSchema).default([]),
+  model_cards: z.array(ModelCardRecordSchema).default([]),
+  legal_readiness: z.enum(['SOURCE_ATTACHED', 'GAP', 'COUNSEL_REQUIRED']),
+  required_reviewers: z.array(z.string()).default([]),
+  unresolved_gaps: z.array(z.string()).default([]),
+  external_release_blockers: z.array(z.string()).default([]),
+});
+
 export const CampaignPackageSchema = z.object({
   brief: CampaignBriefSchema,
   strategy: BrandStrategySchema,
@@ -227,6 +328,7 @@ export const CampaignPackageSchema = z.object({
   design_system: DesignSystemPackageSchema.optional(),
   asset_execution: AssetExecutionPackageSchema.optional(),
   workspace_export: WorkspaceExportSchema.nullable().optional(),
+  agency_operations: AgencyOperationsPackageSchema.optional(),
 });
 
 export const GenerationProvenanceSchema = z.object({
@@ -390,6 +492,7 @@ export type DesignBrief = z.infer<typeof DesignBriefSchema>;
 export type BrandCompliance = z.infer<typeof BrandComplianceSchema>;
 export type QAReport = z.infer<typeof QAReportSchema>;
 export type CampaignPackage = z.infer<typeof CampaignPackageSchema>;
+export type AgencyOperationsPackage = z.infer<typeof AgencyOperationsPackageSchema>;
 export type WorkspaceDocument = z.infer<typeof WorkspaceDocumentSchema>;
 export type BusinessWorkspace = z.infer<typeof BusinessWorkspaceSchema>;
 export type BrandingWorkspace = z.infer<typeof BrandingWorkspaceSchema>;

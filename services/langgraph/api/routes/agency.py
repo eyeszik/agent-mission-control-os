@@ -80,6 +80,9 @@ class CampaignBriefRequest(BaseModel):
     workflow_idea: Optional[str] = None
     differentiators: List[str] = Field(default_factory=list)
     brand_style_notes: List[str] = Field(default_factory=list)
+    market: Optional[str] = None
+    language: Optional[str] = None
+    locale: Optional[str] = None
     style_selection: Optional[DesignStyleSelection] = None
 
     @field_validator("style_selection")
@@ -240,6 +243,7 @@ def _workspace_artifact_specs(*, run_id: str, workspace_export: dict, package: d
                 "concepts": package.get("concepts", []),
                 "copy_variants": package.get("copy_variants", []),
                 "design_brief": package.get("design_brief"),
+                "agency_operations": package.get("agency_operations"),
                 "workspace_export": workspace_export,
             },
             "depends_on": [
@@ -1068,14 +1072,10 @@ def resume_agency_run(
         fail_idempotency(scope, idempotency_key, "approval_stale")
         raise HTTPException(status_code=409, detail="Approval is stale because the protected run output changed")
 
-    compile_gate = run_compile_gate(run_id)
-    if compile_gate["compile_blocked"]:
-        fail_idempotency(scope, idempotency_key, "compile_blocked")
-        raise HTTPException(
-            status_code=409,
-            detail="Run delivery is blocked by open invalidation obligations or stale approvals",
-        )
-
+    # Release invariants that are intrinsic to the generated payload are
+    # evaluated before derived compile/invalidation state. This preserves the
+    # stable error contract for degraded provider output while still allowing
+    # invalidation/staleness to block an otherwise releasable run.
     # Delivery is gated by the declared N2 release guards rather than by ad-hoc
     # checks, so the transition matrix stays the single authority on what may
     # reach a client. The guard codes map onto this route's existing error
@@ -1096,6 +1096,14 @@ def resume_agency_run(
             )
         fail_idempotency(scope, idempotency_key, blocker.code)
         raise HTTPException(status_code=409, detail=_DELIVERY_BLOCK_DETAIL[blocker.code](latest))
+
+    compile_gate = run_compile_gate(run_id)
+    if compile_gate["compile_blocked"]:
+        fail_idempotency(scope, idempotency_key, "compile_blocked")
+        raise HTTPException(
+            status_code=409,
+            detail="Run delivery is blocked by open invalidation obligations or stale approvals",
+        )
 
     trust.record_policy_decision(
         tenant_id=record["tenant_id"],
@@ -1211,6 +1219,30 @@ def resume_agency_run(
         result_ref=run_id,
     )
     agency_data = _agency_payload(state)
+
+    # The graph checkpoint contains the canonical generated payload, while the
+    # persisted run may also contain deterministic post-generation enrichment
+    # (workspace export metadata and artifact bindings). Delivery must not
+    # discard that enrichment: doing so changes the protected subject hash
+    # after approval and incorrectly stales the approval on successful resume.
+    stored_package = stored_agency.get("campaign_package")
+    runtime_package = agency_data.get("campaign_package")
+    if isinstance(stored_package, dict):
+        runtime_package_dict = runtime_package if isinstance(runtime_package, dict) else {}
+        merged_package = {
+            **stored_package,
+            **runtime_package_dict,
+        }
+        # workspace_export is materialized after the graph pauses at HITL, so
+        # the checkpoint legitimately carries a null placeholder. A null
+        # checkpoint value must not erase the persisted export that was part of
+        # the approved subject hash.
+        if runtime_package_dict.get("workspace_export") is None and stored_package.get("workspace_export") is not None:
+            merged_package["workspace_export"] = stored_package["workspace_export"]
+        agency_data = {**stored_agency, **agency_data, "campaign_package": merged_package}
+    else:
+        agency_data = {**stored_agency, **agency_data}
+
     completed = update_run_status(run_id, "completed", {"agency": agency_data})
     _record_observation_phase(
         run_id=run_id,

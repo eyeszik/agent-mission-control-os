@@ -18,6 +18,8 @@ from services.langgraph.agency.design.style_composer import (
     unresolved_direction,
 )
 from services.langgraph.agency.design_tokens import TokenError, compile_css, hex_to_color
+from services.langgraph.agency.full_service import compile_agency_operations
+from services.langgraph.agency.kernel import ArtifactType, assert_role_may_produce, get_role
 from services.langgraph.agency.ui_ux import BrandContext, UIUXRequest, compile_uiux
 from services.langgraph.agency.ui_ux.models import SourceKind, SourceRef
 from services.langgraph.graph.agency.llm import GenerationOutcome, generate_structured
@@ -58,6 +60,43 @@ AGENCY_PIPELINE_STAGES = [
     "hitl_gate",
     "delivery",
 ]
+
+LIVE_STAGE_ROLE_BINDINGS = {
+    "brief_intake": "market_researcher",
+    "brand_strategy": "brand_strategist",
+    "creative_concepting": "creative_director",
+    "copywriting": "copywriter",
+    "design_brief": "design_lead",
+    "campaign_assembly": "growth_lead",
+    "brand_safety_qa": "brand_safety_reviewer",
+    "hitl_gate": "release_manager",
+    "delivery": "release_manager",
+}
+
+LIVE_STAGE_ARTIFACTS = {
+    "brand_strategy": ArtifactType.positioning_statement,
+    "creative_concepting": ArtifactType.creative_concept,
+    "copywriting": ArtifactType.copy_variant,
+    "design_brief": ArtifactType.design_brief,
+    "campaign_assembly": ArtifactType.campaign_package,
+    "brand_safety_qa": ArtifactType.qa_report,
+    "delivery": ArtifactType.release_record,
+}
+
+
+def _assert_live_stage_contract(stage: str) -> str:
+    """Resolve every live stage through the N3 registry before it executes.
+
+    This is deliberately a guard, not a permission grant: role titles never
+    create external authority. Artifact-producing stages additionally prove
+    that the bound role is allowed to emit that canonical artifact type.
+    """
+    role_id = LIVE_STAGE_ROLE_BINDINGS[stage]
+    get_role(role_id)
+    artifact_type = LIVE_STAGE_ARTIFACTS.get(stage)
+    if artifact_type is not None:
+        assert_role_may_produce(role_id, artifact_type)
+    return role_id
 
 
 def _slugify(value: str) -> str:
@@ -638,6 +677,7 @@ def _log_node(state: GraphState, node_id: str) -> None:
 
 def brief_intake_node(state: GraphState) -> dict:
     _log_node(state, "brief_intake")
+    _assert_live_stage_contract("brief_intake")
     raw_input = state["run"].metadata.get("input_data", {}) if state["run"].metadata else {}
     raw_brief = quarantine_payload(sanitize_deep(raw_input)).get("brief", {})
     brief = CampaignBrief(
@@ -656,6 +696,9 @@ def brief_intake_node(state: GraphState) -> dict:
         workflow_idea=raw_brief.get("workflow_idea"),
         differentiators=raw_brief.get("differentiators", []),
         brand_style_notes=raw_brief.get("brand_style_notes", []),
+        market=raw_brief.get("market"),
+        language=raw_brief.get("language"),
+        locale=raw_brief.get("locale"),
         # Validated at the API boundary; carried through so design_brief can recompose it.
         style_selection=raw_brief.get("style_selection"),
     )
@@ -674,6 +717,7 @@ def brief_intake_node(state: GraphState) -> dict:
 
 def brand_strategy_node(state: GraphState) -> dict:
     _log_node(state, "brand_strategy")
+    _assert_live_stage_contract("brand_strategy")
     data, agency = _agency_data(state)
     brief = agency.get("brief", {})
     prompt = (
@@ -704,6 +748,7 @@ def brand_strategy_node(state: GraphState) -> dict:
 
 def creative_concepting_node(state: GraphState) -> dict:
     _log_node(state, "creative_concepting")
+    _assert_live_stage_contract("creative_concepting")
     data, agency = _agency_data(state)
     brief = agency.get("brief", {})
     strategy = agency.get("brand_strategy", {})
@@ -735,6 +780,7 @@ def creative_concepting_node(state: GraphState) -> dict:
 
 def copywriting_node(state: GraphState) -> dict:
     _log_node(state, "copywriting")
+    _assert_live_stage_contract("copywriting")
     data, agency = _agency_data(state)
     concepts = agency.get("creative_concepts", [])
     strategy = agency.get("brand_strategy", {})
@@ -839,6 +885,7 @@ def _compile_brief_ui_ux(brief: dict, strategy: dict, design_brief: DesignBrief,
 
 def design_brief_node(state: GraphState) -> dict:
     _log_node(state, "design_brief")
+    _assert_live_stage_contract("design_brief")
     data, agency = _agency_data(state)
     strategy = agency.get("brand_strategy", {})
     brief = agency.get("brief", {})
@@ -883,6 +930,7 @@ def design_brief_node(state: GraphState) -> dict:
 
 def campaign_assembly_node(state: GraphState) -> dict:
     _log_node(state, "campaign_assembly")
+    _assert_live_stage_contract("campaign_assembly")
     data, agency = _agency_data(state)
     brief = CampaignBrief(**agency.get("brief", {}))
     strategy = BrandStrategy(**agency.get("brand_strategy", {}))
@@ -902,13 +950,35 @@ def campaign_assembly_node(state: GraphState) -> dict:
         design_system=design_system,
     )
     package.asset_execution = _build_asset_execution(brief, strategy, package)
-    agency["campaign_package"] = package.model_dump()
+    operations = compile_agency_operations(
+        brief=brief.model_dump(mode="json"),
+        strategy=strategy.model_dump(mode="json"),
+        copy_variants=[item.model_dump(mode="json") for item in package.copy_variants],
+        asset_execution=package.asset_execution.model_dump(mode="json"),
+        generation_provenance=[
+            item for item in agency.get("generation_provenance", []) if isinstance(item, dict)
+        ],
+    )
+    package.agency_operations = operations
+    if package.business_workspace is not None:
+        package.business_workspace.production_docs.append(
+            _workspace_doc(
+                "business/operations/agency-operations.json",
+                "Full-Service Agency Operations",
+                "code",
+                operations.model_dump_json(indent=2),
+                schema_version=operations.schema_version,
+                legal_readiness=operations.legal_readiness,
+            )
+        )
+    agency["campaign_package"] = package.model_dump(mode="json")
     data["agency"] = agency
     return {"current_node": "campaign_assembly", "extracted_data": data, "messages": [AIMessage(content="Campaign package assembled from all agency workstreams.")]}
 
 
 def brand_safety_qa_node(state: GraphState) -> dict:
     _log_node(state, "brand_safety_qa")
+    _assert_live_stage_contract("brand_safety_qa")
     data, agency = _agency_data(state)
     package = agency.get("campaign_package", {})
     combined_text = " ".join(
@@ -936,6 +1006,26 @@ def brand_safety_qa_node(state: GraphState) -> dict:
         style_findings.append("Style direction warnings: " + "; ".join(direction["warnings"]))
     if style_findings:
         compliance = {**compliance, "advisories": [*(compliance.get("advisories") or []), *style_findings]}
+
+    operations = package.get("agency_operations") or {}
+    operations_advisories: list[str] = []
+    unresolved = operations.get("unresolved_gaps") or []
+    external_blockers = operations.get("external_release_blockers") or []
+    if unresolved:
+        operations_advisories.append(
+            "Full-service evidence gaps remain explicit: " + ", ".join(str(item) for item in unresolved)
+        )
+    if external_blockers:
+        operations_advisories.append(
+            "External release remains blocked on: " + ", ".join(str(item) for item in external_blockers)
+        )
+    if operations.get("legal_readiness") == "COUNSEL_REQUIRED":
+        operations_advisories.append("Counsel review is required before external release.")
+    if operations_advisories:
+        compliance = {
+            **compliance,
+            "advisories": [*(compliance.get("advisories") or []), *operations_advisories],
+        }
     qa_passed = (not flagged) and quality["threshold_passed"] and not release_blocked and not style_blocked
     notes = ["No banned-claim heuristic matches detected." if not flagged else f"Flagged terms requiring review: {', '.join(flagged)}"]
     if release_blocked:
@@ -964,6 +1054,7 @@ def brand_safety_qa_node(state: GraphState) -> dict:
 
 def hitl_gate_node(state: GraphState) -> dict:
     _log_node(state, "hitl_gate")
+    _assert_live_stage_contract("hitl_gate")
     data, agency = _agency_data(state)
     qa_report = agency.get("qa_report", {})
     run = state["run"]
@@ -979,6 +1070,10 @@ def hitl_gate_node(state: GraphState) -> dict:
     advisories = (qa_report.get("brand_compliance") or {}).get("advisories") or []
     if advisories:
         reason = f"{reason} Advisory findings: {' '.join(advisories)}"
+    operations = ((agency.get("campaign_package") or {}).get("agency_operations") or {})
+    reviewers = operations.get("required_reviewers") or []
+    if reviewers:
+        reason = f"{reason} Required review roles: {', '.join(str(item) for item in reviewers)}."
     approval = create_approval_request(
         run_id=str(run.id),
         tenant_id=run.tenant_id,
@@ -993,6 +1088,7 @@ def hitl_gate_node(state: GraphState) -> dict:
 
 def delivery_node(state: GraphState) -> dict:
     _log_node(state, "delivery")
+    _assert_live_stage_contract("delivery")
     data, agency = _agency_data(state)
     if (agency.get("qa_report") or {}).get("release_blocked"):
         raise RuntimeError("Delivery blocked because generation is degraded")
