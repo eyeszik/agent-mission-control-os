@@ -22,3 +22,6 @@
 ## 2026-10-25 - React Component Derived Metrics Rendering Optimization
 **Learning:** Returning freshly allocated arrays merely to determine their lengths, via patterns like `array.filter().length` inline in React functional component renders, triggers redundant garbage collection loops during state updates.
 **Action:** Derived counting should be precomputed efficiently (via `reduce` or loops) within `useMemo` blocks and returned as primitives (e.g. integer counts). This avoids allocating and traversing throwaway arrays during the render cycle.
+## 2026-10-26 - React Component Inline Filter Map Optimization
+**Learning:** Chaining `.filter().map()` on arrays inside a React functional component render body allocates an intermediate array on every render, causing unnecessary garbage collection pressure and degraded performance.
+**Action:** Remove the `.filter()` step and map directly over the array, conditionally returning `null` early for items that should be filtered out. React natively ignores `null` elements during rendering with zero allocation penalty.
