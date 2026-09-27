@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ipaddress
 import os
 from dataclasses import dataclass
 from typing import FrozenSet
@@ -28,9 +29,19 @@ def _required_env(name: str) -> str:
     return value
 
 
+def _is_local_network_client(host: str) -> bool:
+    if host in {"localhost", "testclient"}:
+        return True
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return ip.is_loopback or ip.is_private
+
+
 def _local_principal(request: Request) -> Principal:
     host = request.client.host if request.client else ""
-    if host not in {"127.0.0.1", "::1", "localhost", "testclient"}:
+    if not _is_local_network_client(host):
         raise HTTPException(status_code=403, detail="Local authentication mode accepts loopback clients only")
     projects = frozenset(p.strip() for p in _required_env("AMC_LOCAL_PROJECT_IDS").split(",") if p.strip())
     if not projects:
