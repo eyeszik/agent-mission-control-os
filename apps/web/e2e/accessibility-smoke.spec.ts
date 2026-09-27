@@ -14,7 +14,7 @@ test.describe('Mission Control accessibility smoke', () => {
         const id = (node as HTMLElement).id;
         counts.set(id, (counts.get(id) ?? 0) + 1);
       }
-      return [...counts.entries()].filter(([, count]) => count > 1).map(([id]) => id);
+      return Array.from(counts.entries()).filter(([, count]) => count > 1).map(([id]) => id);
     });
     expect(duplicateIds).toEqual([]);
 
