@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { AgentRunSchema, RunStateSchema } from '../src/schemas/run';
 import { ApprovalRequestSchema } from '../src/schemas/approvals';
-import { AgencyRunSchema, CampaignBriefSchema } from '../src/schemas/agency';
+import { AgencyOperationsPackageSchema, AgencyRunSchema, CampaignBriefSchema } from '../src/schemas/agency';
 import { BrandCoreSchema, MINIMUM_COLOR_STORY_DISTINCTION_RATIO } from '../src/schemas/brand';
 import { contrastRatio } from '../src/schemas/colorContrast';
 
@@ -79,6 +79,91 @@ describe('Shared Schemas', () => {
       expect(parsed.goals).toEqual([]);
       expect(parsed.channels).toEqual([]);
       expect(parsed.constraints).toEqual([]);
+      expect(parsed.market).toBeUndefined();
+      expect(parsed.language).toBeUndefined();
+      expect(parsed.locale).toBeUndefined();
+    });
+  });
+
+  describe('AgencyOperationsPackageSchema', () => {
+    it('preserves explicit GAP and UNKNOWN evidence states', () => {
+      const result = AgencyOperationsPackageSchema.safeParse({
+        schema_version: 'amc-agency-operations/v1',
+        market: 'UNKNOWN',
+        language: 'UNKNOWN',
+        locale: 'UNKNOWN',
+        research: {
+          audience_brief: 'Developers',
+          interview_guide: ['What problem are you solving?'],
+          competitive_audit: [],
+          stakeholder_map: [{ stakeholder: 'primary_audience', evidence_ref: 'brief.target_audience' }],
+          perception_gaps: [],
+          category_language: [],
+          evidence_refs: ['brief.target_audience'],
+          unresolved: ['competitive_audit_requires_external_evidence'],
+        },
+        claims: [{
+          claim_id: 'claim-1',
+          text: 'A generated claim',
+          status: 'UNKNOWN',
+          source_ref: null,
+          release_note: 'Attach proof before factual release.',
+        }],
+        rights_handoff: [{
+          asset_ref: 'asset-1',
+          owner: 'UNKNOWN',
+          license_status: 'UNKNOWN',
+          portfolio_permission: 'UNKNOWN',
+          territory: 'UNKNOWN',
+          expiry: null,
+          access_expiry: null,
+          offboarding_status: 'GAP',
+          contact: 'UNKNOWN',
+        }],
+        accessibility: {
+          standard_ref: 'WCAG 2.2',
+          contrast: 'NOT_MEASURED',
+          keyboard: 'NOT_MEASURED',
+          semantics: 'NOT_MEASURED',
+          assistive_technology: 'NOT_MEASURED',
+          evidence_refs: [],
+          status: 'GAP',
+        },
+        media: {
+          audience: 'Developers',
+          flight: 'UNSPECIFIED',
+          market: 'UNKNOWN',
+          budget: 'UNSPECIFIED',
+          kpis: [],
+          creative_specs: [],
+          trafficking_sheet: [],
+          execution_mode: 'PLANNING_ONLY',
+        },
+        observability: {
+          required_signals: ['logs', 'metrics', 'traces'],
+          service_identity: 'amc-api',
+          owner: 'operations',
+          retention_policy: 'UNKNOWN',
+          alert_conditions: [],
+          runtime_binding_status: 'UNVERIFIED_EXTERNAL_BINDING',
+        },
+        slos: [{ name: 'latency', target: 'UNSET', measurement_ref: null, status: 'GAP_NO_BASELINE' }],
+        model_cards: [{
+          task: 'brand_strategy',
+          provider: 'test-provider',
+          model: 'test-model',
+          mode: 'PROVIDER_SUCCESS',
+          prompt_version: 'test-v1',
+          schema_version: 'v1',
+          evaluation_status: 'NOT_MEASURED',
+          limitations: ['No benchmark attached.'],
+        }],
+        legal_readiness: 'COUNSEL_REQUIRED',
+        required_reviewers: ['brand_owner', 'counsel'],
+        unresolved_gaps: ['market_missing'],
+        external_release_blockers: ['unproved_or_unknown_factual_claims'],
+      });
+      expect(result.success).toBe(true);
     });
   });
 
