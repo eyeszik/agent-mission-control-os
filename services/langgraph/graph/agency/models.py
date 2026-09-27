@@ -3,6 +3,14 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from services.langgraph.agency.design.style_composer import DesignStyleDirection, DesignStyleSelection
+from services.langgraph.agency.full_service import (
+    AccessibilityCheckInput,
+    AssetRightsInput,
+    ClaimProofInput,
+    FullServicePlan,
+    MediaPlanningInput,
+    ResearchEvidenceInput,
+)
 from services.langgraph.agency.ui_ux.models import UIUXDesignIR
 
 
@@ -22,6 +30,16 @@ class CampaignBrief(BaseModel):
     workflow_idea: Optional[str] = None
     differentiators: List[str] = Field(default_factory=list)
     brand_style_notes: List[str] = Field(default_factory=list)
+    market: Optional[str] = None
+    language: Optional[str] = None
+    locale: Optional[str] = None
+    research_evidence: List[ResearchEvidenceInput] = Field(default_factory=list)
+    claim_proofs: List[ClaimProofInput] = Field(default_factory=list)
+    asset_rights: List[AssetRightsInput] = Field(default_factory=list)
+    regulatory_context: List[str] = Field(default_factory=list)
+    counsel_source_refs: List[str] = Field(default_factory=list)
+    accessibility_evidence: List[AccessibilityCheckInput] = Field(default_factory=list)
+    media: Optional[MediaPlanningInput] = None
     # Design Mode selection; recomposed server-side by the design_brief node.
     style_selection: Optional[DesignStyleSelection] = None
 
@@ -146,6 +164,7 @@ class QAReport(BaseModel):
     notes: str
     release_blocked: bool = False
     degradation_reasons: List[str] = Field(default_factory=list)
+    hard_block_reasons: List[str] = Field(default_factory=list)
 
 
 class CampaignPackage(BaseModel):
@@ -159,4 +178,5 @@ class CampaignPackage(BaseModel):
     branding_workspace: Optional[BrandingWorkspace] = None
     design_system: Optional[DesignSystemPackage] = None
     asset_execution: Optional[AssetExecutionPackage] = None
+    full_service: Optional[FullServicePlan] = None
     workspace_export: Optional[WorkspaceExport] = None
