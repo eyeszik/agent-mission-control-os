@@ -634,13 +634,14 @@ def _delivery_context(stored_agency: dict, approval: Optional[dict]) -> Transiti
         approval_decision=(approval or {}).get("decision"),
         brand_safety_passed=bool(qa_report.get("brand_safety_passed")),
         brand_safety_advisory=True,
+        unmet_hard_dependencies=tuple(qa_report.get("hard_block_reasons") or []),
     )
 
 
 # Guard codes that represent a substantive release block worth recording in
 # lifecycle analytics, as opposed to a run simply awaiting its approval
 # decision. Matches the pre-refactor emission behavior.
-_ANALYTICS_REPORTED_BLOCKS = frozenset({"degraded_release_block", "brand_safety_failed", "spend_unauthorized"})
+_ANALYTICS_REPORTED_BLOCKS = frozenset({"degraded_release_block", "brand_safety_failed", "unmet_hard_dependencies", "spend_unauthorized"})
 
 _DELIVERY_BLOCK_DETAIL = {
     "degraded_release_block": lambda _approval: (
@@ -654,6 +655,9 @@ _DELIVERY_BLOCK_DETAIL = {
     ),
     "brand_safety_failed": lambda _approval: (
         "Run failed brand-safety review and cannot be delivered"
+    ),
+    "unmet_hard_dependencies": lambda _approval: (
+        "Run has unresolved hard prerequisites and cannot be delivered"
     ),
     "spend_unauthorized": lambda _approval: (
         "Delivery requires an explicit spend/publication authorization"
