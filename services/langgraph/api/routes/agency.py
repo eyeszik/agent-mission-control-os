@@ -243,6 +243,7 @@ def _workspace_artifact_specs(*, run_id: str, workspace_export: dict, package: d
                 "concepts": package.get("concepts", []),
                 "copy_variants": package.get("copy_variants", []),
                 "design_brief": package.get("design_brief"),
+                "agency_operations": package.get("agency_operations"),
                 "workspace_export": workspace_export,
             },
             "depends_on": [
