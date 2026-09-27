@@ -137,16 +137,17 @@ def _guard_spend_authorized(context: TransitionContext) -> str | None:
 # Guards applied to any transition entering a client-visible state. Each carries
 # a stable code so a call site can map a failure onto its own error contract
 # without string matching.
+DEPENDENCY_GUARD_CODE = "unmet_hard_dependencies"
+
 RELEASE_GUARDS: tuple[tuple[str, Any], ...] = (
     ("degraded_release_block", _guard_not_degraded),
     ("approval_missing", _guard_approval_exists),
     ("approval_pending", _guard_approval_resolved),
     ("approval_not_approved", _guard_approval_decision),
     ("brand_safety_failed", _guard_brand_safety),
+    (DEPENDENCY_GUARD_CODE, _guard_dependencies_met),
     ("spend_unauthorized", _guard_spend_authorized),
 )
-
-DEPENDENCY_GUARD_CODE = "unmet_hard_dependencies"
 
 
 def release_guard_failures(context: TransitionContext) -> list[GuardFailure]:
