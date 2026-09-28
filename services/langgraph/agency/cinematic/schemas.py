@@ -517,6 +517,9 @@ class BrandMotion(BaseModel):
     amplitude: str | None = None
     timing: str | None = None
     allow_spring_bounce: bool = False
+    # Accessibility: the behaviour to use when the viewer prefers reduced motion
+    # (e.g. "cross-fade only, no parallax"). Emitted only when declared.
+    reduced_motion_variant: str | None = None
 
     model_config = {"extra": "forbid"}
 

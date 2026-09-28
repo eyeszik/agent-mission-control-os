@@ -1,0 +1,288 @@
+{
+  "id": "pg.visual_prompting.v1",
+  "schema_version": "1.0.0",
+  "pack_version": "1.0.0",
+  "domain": "GRAPHIC_DESIGN",
+  "guidance_class": "METHODOLOGY",
+  "authority_class": "ADVISORY",
+  "description": "Advisory methodology for compiling graphic and image prompts for key art, posters, social series, carousels, display/OOH advertising, infographics and similar surfaces: prompt ordering, reference roles, exact-text reliability, series behaviour and surface frameworks. Production geometry and print/merch preflight stay in pg.production_design_system.v1. It cannot redefine BrandCore, provider capability truth, or terminal states.",
+  "activation": {
+    "asset_families": [],
+    "asset_types": [
+      "poster",
+      "key art",
+      "campaign key art",
+      "typographic poster",
+      "editorial graphic",
+      "social graphic",
+      "social static",
+      "carousel",
+      "display ad",
+      "billboard",
+      "ooh",
+      "infographic",
+      "data visualization",
+      "icon family",
+      "pattern",
+      "collage",
+      "illustration",
+      "email graphic",
+      "presentation slide",
+      "event graphic",
+      "retail display"
+    ],
+    "channels": [
+      "ooh",
+      "social",
+      "advertising",
+      "print"
+    ],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": [
+      "poster",
+      "carousel",
+      "infographic",
+      "typographic",
+      "keyart",
+      "series",
+      "billboard",
+      "reference",
+      "references",
+      "layout"
+    ]
+  },
+  "excludes": {
+    "asset_families": [
+      "UI_UX",
+      "COPY",
+      "VIDEO",
+      "MOTION",
+      "STORYBOARD"
+    ],
+    "asset_types": [],
+    "channels": [],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": []
+  },
+  "dependencies": [
+    "pg.branding.core"
+  ],
+  "conflicts_with": [],
+  "context_budget": {
+    "max_sections": 6,
+    "max_chars": 16000
+  },
+  "sections": [
+    {
+      "id": "vis.prompt_order",
+      "purpose": "Order an image or graphic prompt from purpose to constraints.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Order the prompt as purpose, visual thesis, subject, action or state, environment, composition, camera or perspective, light, colour, material and texture, typography (if any), brand device, rendering language, output specification, references, negative constraints.",
+        "Specify relationships, hierarchy, alignment, spacing and zones rather than asking for vague 'good design'.",
+        "State the concept thesis before any styling detail."
+      ],
+      "evaluation_criteria": [
+        "the visual thesis is stated before style",
+        "layout is specified as relationships and zones"
+      ],
+      "anti_patterns": [
+        "adjective lists without a thesis",
+        "asking for 'good graphic design' without hierarchy"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "visual",
+        "composition"
+      ]
+    },
+    {
+      "id": "vis.exact_text_reliability",
+      "purpose": "Keep exact text out of generative imagery.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "headline",
+          "text",
+          "copy",
+          "logo",
+          "price",
+          "legal",
+          "disclosure",
+          "label",
+          "chart",
+          "typographic",
+          "tagline",
+          "cta"
+        ],
+        "all": []
+      },
+      "directives": [
+        "For exact headlines, logos, prices, legal lines, UI, chart labels or dense typography: generate imagery or background without lettering, then compose the exact text deterministically in a layout stage.",
+        "Validate composed text character-for-character and against safe areas before approval.",
+        "Reserve copy-safe zones in the generated visual for the text that will be composed later."
+      ],
+      "evaluation_criteria": [
+        "exact text is never delegated to a generator",
+        "composed text matches the source verbatim"
+      ],
+      "anti_patterns": [
+        "asking an image model to render legal copy or prices",
+        "approving an asset without checking text character-for-character"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "typography",
+        "production",
+        "quality"
+      ]
+    },
+    {
+      "id": "vis.reference_roles",
+      "purpose": "Give every reference an explicit role and precedence.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "reference",
+          "references",
+          "moodboard",
+          "image to image",
+          "image-to-image",
+          "edit",
+          "restyle",
+          "start frame"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Assign each reference one role: IDENTITY (who or what the subject is), CONTENT (required visible object), COMPOSITION (spatial organisation), STYLE (transferable aesthetic attributes), START_FRAME or END_FRAME (literal temporal endpoints), MOTION or AUDIO.",
+        "When references conflict, IDENTITY outranks CONTENT, which outranks COMPOSITION, which outranks STYLE.",
+        "A style reference supplies attributes; it never becomes a mandate to reproduce the reference literally."
+      ],
+      "evaluation_criteria": [],
+      "anti_patterns": [
+        "using a style reference as a literal copy target",
+        "unlabelled references with competing intents"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "visual",
+        "governance"
+      ]
+    },
+    {
+      "id": "vis.series_system",
+      "purpose": "Hold a series recognizably together while each piece brings a new idea.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "series",
+          "carousel",
+          "campaign",
+          "family",
+          "set of",
+          "variants",
+          "collection"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Freeze the series invariants (voice, visual thesis, palette behaviour, type behaviour, layout grammar, signature device, image treatment) before varying anything.",
+        "Vary high-level concept variables (metaphor, subject, environment, composition) before cosmetic ones (lighting, material, crop).",
+        "Keep a recognizable opening device and repeatable type hierarchy across a social series, with a platform-safe crop and a series index.",
+        "Apply the genericity test: if the piece would be equally plausible for five unrelated competitors, strengthen the brand-specific mechanism, proof or signature device."
+      ],
+      "evaluation_criteria": [
+        "invariants are identical across the series",
+        "consecutive pieces differ in a high-level concept variable"
+      ],
+      "anti_patterns": [
+        "cosmetic-only variation presented as new concepts",
+        "series drift away from the campaign anchor"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "visual",
+        "composition",
+        "strategy"
+      ]
+    },
+    {
+      "id": "vis.surface_frameworks",
+      "purpose": "Apply the framework that fits the surface.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "poster",
+          "carousel",
+          "ooh",
+          "billboard",
+          "infographic",
+          "key art",
+          "keyart",
+          "data",
+          "chart"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Poster: one thesis, one dominant visual, controlled type hierarchy, one signature device, secondary information, production geometry.",
+        "Carousel: cover hook, context, mechanism, proof or example, implication, CTA -- preserving narrative and visual progression across cards.",
+        "OOH and billboard: one message, instant recognition, extreme hierarchy, distance-legible typography, minimal cognitive load.",
+        "Infographic: question, verified dataset, hierarchy, visual encoding, legend and labels, annotation, source, accessibility -- decoration never overrides semantic accuracy.",
+        "Key art: a single ownable image idea that can crop across the campaign's formats without losing its thesis."
+      ],
+      "evaluation_criteria": [],
+      "anti_patterns": [],
+      "evidence_requirements": [
+        "infographic figures must come from a verified dataset with a cited source"
+      ],
+      "directive_targets": [
+        "composition",
+        "typography",
+        "visual"
+      ]
+    },
+    {
+      "id": "vis.accessibility",
+      "purpose": "Keep graphic output accessible.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Meet contrast requirements for any composed text; never communicate meaning by colour alone.",
+        "Provide alt text intent for every image and a reading order for multi-element layouts.",
+        "Keep minimum usable type sizes for the viewing distance of the surface."
+      ],
+      "evaluation_criteria": [
+        "alt text intent provided",
+        "no colour-only meaning"
+      ],
+      "anti_patterns": [],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "accessibility"
+      ]
+    }
+  ],
+  "provenance": {
+    "source": "User-supplied SYSTEM L100.UNIVERSAL_BRAND_CONTENT_VISUAL_PROMPT_OS v10.0 (visual prompt, graphic compiler and series sections)",
+    "version": "10.0.0",
+    "author": "project owner",
+    "created_at": "2026-09-28T00:00:00Z",
+    "updated_at": "2026-09-28T00:00:00Z",
+    "evidence_refs": [
+      "docs/imported-specs/universal-brand-content-visual-prompt-os-v10.md"
+    ],
+    "license_or_ip_status": "user_supplied"
+  },
+  "content_hash": ""
+}

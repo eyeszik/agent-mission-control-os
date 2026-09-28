@@ -51,6 +51,13 @@ _API_HINT = re.compile(r"\b(api|sdk|endpoint|webhook|mcp|provider|model)\b", re.
 _METRIC_HINT = re.compile(r"\b\d+(?:\.\d+)?\s*(?:%|x|ms|s|seconds?|minutes?|hours?|days?|users?|requests?|usd|\$)\b", re.I)
 _MARKET_HINT = re.compile(r"\b(market|competitor|industry|audience|customer|tam|sam|som|share)\b", re.I)
 _LEGAL_HINT = re.compile(r"\b(legal|law|regulation|compliance|licensed|copyright|trademark|wcag|privacy)\b", re.I)
+# Comparative or superiority claims ("faster than X", "#1", "industry-leading")
+# are market claims: they need substantiation before they can ship.
+_COMPARATIVE_HINT = re.compile(
+    r"\b(?:better|faster|cheaper|stronger|safer|smarter|easier|healthier|cleaner|quieter)\s+than\b"
+    r"|#1\b|\bnumber[- ]one\b|\bindustry[- ]leading\b|\bmarket[- ]leading\b|\bmarket leader\b",
+    re.I,
+)
 
 
 class ClaimType(str, Enum):
@@ -195,6 +202,81 @@ class SourceClass(str, Enum):
     user = "USER"
 
 
+class FreshnessClass(str, Enum):
+    """How quickly a researched fact decays. Static guidance never carries
+    VOLATILE or REALTIME facts; those arrive as runtime evidence."""
+
+    static = "STATIC"
+    slow_changing = "SLOW_CHANGING"
+    volatile = "VOLATILE"
+    realtime = "REALTIME"
+
+
+class ReferenceRole(str, Enum):
+    """What a supplied reference is allowed to control (source spec §14)."""
+
+    identity = "IDENTITY"
+    content = "CONTENT"
+    composition = "COMPOSITION"
+    style = "STYLE"
+    start_frame = "START_FRAME"
+    end_frame = "END_FRAME"
+    motion = "MOTION"
+    audio = "AUDIO"
+
+
+# Precedence when references conflict: identity controls who/what the subject
+# is, content controls required visible objects, composition controls spatial
+# organisation, style supplies transferable attributes only.
+REFERENCE_PRECEDENCE: tuple[ReferenceRole, ...] = (
+    ReferenceRole.identity,
+    ReferenceRole.content,
+    ReferenceRole.composition,
+    ReferenceRole.style,
+    ReferenceRole.start_frame,
+    ReferenceRole.end_frame,
+    ReferenceRole.motion,
+    ReferenceRole.audio,
+)
+_TEMPORAL_REFERENCE_ROLES = {
+    ReferenceRole.start_frame,
+    ReferenceRole.end_frame,
+    ReferenceRole.motion,
+    ReferenceRole.audio,
+}
+
+
+class ReferenceSpec(BaseModel):
+    ref_id: str = Field(min_length=1)
+    role: ReferenceRole
+    priority: int = Field(default=1, ge=1, le=10)
+    note: str | None = None
+
+    model_config = {"extra": "forbid"}
+
+
+class SeriesBinding(BaseModel):
+    """Links one asset to a reusable prompt family (agency/prompt_families).
+
+    Invariants are held fixed across the series; ``variation`` names what this
+    instance deliberately changes. The binding is descriptive: it cannot widen
+    brand authority or override canonical BrandCore.
+    """
+
+    family_id: str = Field(min_length=1)
+    family_version: str = Field(min_length=1)
+    instance_id: str = Field(min_length=1)
+    campaign_ref: str | None = None
+    concept_thesis: str = Field(min_length=1)
+    emotional_function: str | None = None
+    signature_devices: list[str] = Field(default_factory=list)
+    series_invariants: list[str] = Field(default_factory=list)
+    variation: dict[str, str] = Field(default_factory=dict)
+    concept_signature: str = Field(min_length=1)
+
+    model_config = {"extra": "forbid"}
+
+
 class ClaimSeed(BaseModel):
     text: str = Field(min_length=1)
     claim_type: ClaimType = ClaimType.user_assertion
@@ -242,6 +324,55 @@ class SourceEvidence(BaseModel):
     published_at: str | None = None
     accessed_at: str | None = None
     summary: str = Field(min_length=1)
+    # The retrieval query that produced this evidence, when it came from search.
+    query: str | None = None
+    freshness_class: FreshnessClass | None = None
+
+    model_config = {"extra": "forbid"}
+
+
+class ComputationEvidence(BaseModel):
+    """A deterministic computation (arithmetic, units, statistics, symbolic).
+
+    Computation is a distinct provenance class from empirical evidence: a
+    correct result says nothing about whether its input premises are true, so a
+    computation can never mark a claim VERIFIED. Derived claims become DERIVED
+    only when every empirical input claim is itself verified.
+    """
+
+    computation_id: str = Field(min_length=1)
+    question: str = Field(min_length=1)
+    expression_or_operation: str = Field(min_length=1)
+    inputs: dict[str, str] = Field(default_factory=dict)
+    units: dict[str, str] = Field(default_factory=dict)
+    assumptions: list[str] = Field(default_factory=list)
+    tool_or_engine: str = Field(min_length=1)
+    engine_version: str | None = None
+    result: str = Field(min_length=1)
+    precision: str | None = None
+    uncertainty: str | None = None
+    executed_at: str | None = None
+    provenance: str = Field(min_length=1)
+    reproducible: bool = False
+    input_claim_ids: list[str] = Field(default_factory=list)
+    derived_claim_ids: list[str] = Field(default_factory=list)
+
+    model_config = {"extra": "forbid"}
+
+
+class ComputationStatus(str, Enum):
+    derived_from_verified_inputs = "DERIVED_FROM_VERIFIED_INPUTS"
+    no_empirical_inputs = "NO_EMPIRICAL_INPUTS"
+    premises_unverified = "PREMISES_UNVERIFIED"
+    invalid_reference = "INVALID_REFERENCE"
+
+
+class ComputationAssessment(BaseModel):
+    computation_id: str
+    status: ComputationStatus
+    derived_claim_ids: list[str] = Field(default_factory=list)
+    unverified_inputs: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
 
     model_config = {"extra": "forbid"}
 
@@ -291,6 +422,12 @@ class AssetRequirement(BaseModel):
     quality_constraints: list[str] = Field(default_factory=list)
     production: ProductionSpec = Field(default_factory=ProductionSpec)
     guidance_overrides: GuidanceOverride = Field(default_factory=GuidanceOverride)
+    # Text that must survive character-for-character (headlines, legal lines,
+    # prices, disclosures). Visual families route it to a deterministic layout
+    # stage instead of asking a generator to render lettering.
+    exact_text: list[str] = Field(default_factory=list)
+    references: list[ReferenceSpec] = Field(default_factory=list)
+    series: SeriesBinding | None = None
 
     model_config = {"extra": "forbid"}
 
@@ -311,6 +448,9 @@ class AssetSpec(BaseModel):
     quality_constraints: list[str]
     production: ProductionSpec
     validation_rules: list[str]
+    exact_text: list[str] = Field(default_factory=list)
+    references: list[ReferenceSpec] = Field(default_factory=list)
+    series: SeriesBinding | None = None
 
     model_config = {"extra": "forbid"}
 
@@ -374,6 +514,11 @@ class PromptIR(BaseModel):
     quality_constraints: list[str]
     required_capabilities: list[ProviderCapabilityName]
     provenance_refs: list[str]
+    exact_text: list[str] = Field(default_factory=list)
+    references: list[ReferenceSpec] = Field(default_factory=list)
+    render_stages: list[str] = Field(default_factory=list)
+    series: SeriesBinding | None = None
+    evidence_directives: list[str] = Field(default_factory=list)
 
     model_config = {"extra": "forbid"}
 
@@ -458,6 +603,7 @@ class PromptCompilerRequest(BaseModel):
     brand_core: BrandCore | None = None
     asset_requirements: list[AssetRequirement] = Field(default_factory=list)
     providers: list[ProviderCapability] = Field(default_factory=list)
+    computations: list[ComputationEvidence] = Field(default_factory=list)
     extract_content_claims: bool = True
 
     model_config = {"extra": "forbid"}
@@ -485,6 +631,7 @@ class PromptCompilerResult(BaseModel):
     prompt_packages: list[PromptPackage]
     voids: list[str] = Field(default_factory=list)
     speculative_inferences: list[str] = Field(default_factory=list)
+    computations: list[ComputationAssessment] = Field(default_factory=list)
     generation_firewall: Literal["PROMPT_PACKAGE_READY"] = GENERATION_FIREWALL
 
     model_config = {"extra": "forbid"}
@@ -511,7 +658,7 @@ def _infer_claim_type(text: str) -> ClaimType:
         return ClaimType.metric
     if _LEGAL_HINT.search(text):
         return ClaimType.legal_claim
-    if _MARKET_HINT.search(text):
+    if _MARKET_HINT.search(text) or _COMPARATIVE_HINT.search(text):
         return ClaimType.market_claim
     return ClaimType.fact
 
@@ -658,6 +805,125 @@ def validate_claims(
     return validated
 
 
+_VERIFIED_STATUSES = {ClaimStatus.verified, ClaimStatus.partially_verified}
+
+
+def assess_computations(
+    claims: list[ClaimRecord], computations: list[ComputationEvidence]
+) -> list[ComputationAssessment]:
+    """Classify each computation without ever upgrading an empirical premise.
+
+    ``DERIVED_FROM_VERIFIED_INPUTS`` requires every input claim to be verified
+    by empirical evidence. A computation over unverified inputs is recorded as
+    ``PREMISES_UNVERIFIED`` and its derived claims stay unresolved.
+    """
+    by_id = {claim.claim_id: claim for claim in claims}
+    assessments: list[ComputationAssessment] = []
+    for computation in sorted(computations, key=lambda item: item.computation_id):
+        unknown = sorted(
+            ref for ref in [*computation.input_claim_ids, *computation.derived_claim_ids] if ref not in by_id
+        )
+        if unknown:
+            assessments.append(
+                ComputationAssessment(
+                    computation_id=computation.computation_id,
+                    status=ComputationStatus.invalid_reference,
+                    derived_claim_ids=sorted(computation.derived_claim_ids),
+                    notes=[f"unknown claim reference: {ref}" for ref in unknown],
+                )
+            )
+            continue
+        unverified = sorted(
+            ref for ref in computation.input_claim_ids if by_id[ref].status not in _VERIFIED_STATUSES
+        )
+        if unverified:
+            status = ComputationStatus.premises_unverified
+            notes = ["A correct computation does not verify its input premises."]
+        elif computation.input_claim_ids:
+            status = ComputationStatus.derived_from_verified_inputs
+            notes = []
+        else:
+            status = ComputationStatus.no_empirical_inputs
+            notes = ["Result depends only on stated inputs and assumptions, not on empirical claims."]
+        if computation.assumptions:
+            notes.append("Assumptions remain assumptions: " + "; ".join(computation.assumptions))
+        assessments.append(
+            ComputationAssessment(
+                computation_id=computation.computation_id,
+                status=status,
+                derived_claim_ids=sorted(computation.derived_claim_ids),
+                unverified_inputs=unverified,
+                notes=notes,
+            )
+        )
+    return assessments
+
+
+def sound_derived_claim_ids(assessments: list[ComputationAssessment]) -> set[str]:
+    sound = {ComputationStatus.derived_from_verified_inputs, ComputationStatus.no_empirical_inputs}
+    return {ref for item in assessments if item.status in sound for ref in item.derived_claim_ids}
+
+
+def apply_computations(
+    claims: list[ClaimRecord],
+    assessments: list[ComputationAssessment],
+    computations: list[ComputationEvidence],
+) -> list[ClaimRecord]:
+    """Mark soundly derived claims DERIVED. Never VERIFIED; inputs untouched."""
+    item_inputs = {item.computation_id: list(item.input_claim_ids) for item in computations}
+    sound = sound_derived_claim_ids(assessments)
+    by_id = {claim.claim_id: claim for claim in claims}
+    updated: list[ClaimRecord] = []
+    for claim in claims:
+        if claim.claim_id in sound and claim.status not in _VERIFIED_STATUSES:
+            inputs = [
+                by_id[ref].confidence
+                for item in assessments
+                if claim.claim_id in item.derived_claim_ids
+                for ref in item_inputs.get(item.computation_id, [])
+                if ref in by_id
+            ]
+            confidence = min([0.8, *inputs]) if inputs else 0.8
+            claim = claim.model_copy(update={"status": ClaimStatus.derived, "confidence": confidence})
+        updated.append(claim)
+    return updated
+
+
+def evidence_directives(
+    claims: list[ClaimRecord], evidence: list[SourceEvidence], assessments: list[ComputationAssessment]
+) -> list[str]:
+    """Carry the evidence ceiling into the prompt: what may be stated, and what may not."""
+    sources: dict[str, list[str]] = {}
+    for item in evidence:
+        if item.supports:
+            for ref in item.claim_ids:
+                sources.setdefault(ref, []).append(item.source_id)
+    derived_from: dict[str, list[str]] = {}
+    for item in assessments:
+        for ref in item.derived_claim_ids:
+            derived_from.setdefault(ref, []).append(item.computation_id)
+    material = {
+        ClaimType.api_claim,
+        ClaimType.metric,
+        ClaimType.legal_claim,
+        ClaimType.market_claim,
+        ClaimType.promise,
+    }
+    lines: list[str] = []
+    for claim in claims:
+        if claim.status in _VERIFIED_STATUSES:
+            refs = ", ".join(sorted(sources.get(claim.claim_id, []))) or "linked evidence"
+            lines.append(f"Supported claim ({claim.status.value}; evidence: {refs}): {claim.text}")
+        elif claim.status is ClaimStatus.derived:
+            refs = ", ".join(sorted(derived_from.get(claim.claim_id, [])))
+            lines.append(f"Derived claim (computed from verified inputs; computation: {refs}): {claim.text}")
+        elif claim.claim_type in material:
+            lines.append(
+                f"Not verified — do not state as fact; qualify or omit ({claim.status.value}): {claim.text}"
+            )
+    return lines
+
+
 def _confidence_band(score: float) -> ConfidenceBand:
     if score >= 0.90:
         return ConfidenceBand.verified_high
@@ -705,6 +971,10 @@ def compile_asset_spec(requirement: AssetRequirement, brand: BrandCore) -> Asset
         "Respect destination, accessibility, and production constraints.",
         "Return a result suitable for independent downstream validation.",
     ]
+    if requirement.exact_text:
+        rules.append("Reproduce every exact_text string character-for-character.")
+    if requirement.series is not None:
+        rules.append("Hold series invariants fixed; vary only the declared variation axes.")
     return AssetSpec(
         asset_id=requirement.asset_id,
         family=requirement.family,
@@ -721,6 +991,9 @@ def compile_asset_spec(requirement: AssetRequirement, brand: BrandCore) -> Asset
         quality_constraints=list(requirement.quality_constraints),
         production=requirement.production,
         validation_rules=rules,
+        exact_text=list(requirement.exact_text),
+        references=list(requirement.references),
+        series=requirement.series,
     )
 
 
@@ -864,10 +1137,43 @@ _UI_UX_BUCKET_MAP = {
 }
 
 
+_VISUAL_TEXT_FAMILIES = {PromptFamily.image, PromptFamily.print, PromptFamily.presentation}
+_TEMPORAL_FAMILIES = {PromptFamily.video, PromptFamily.motion, PromptFamily.storyboard}
+
+
+def render_stages_for(spec: AssetSpec) -> list[str]:
+    """Separate generative imagery from deterministic typography (source spec §15).
+
+    Exact headlines, logos, prices, legal lines and disclosures are not asked of
+    a generator; they are composed in a deterministic layout stage and checked
+    character-for-character.
+    """
+    if not spec.exact_text:
+        return []
+    if spec.family in _VISUAL_TEXT_FAMILIES:
+        return [
+            "GENERATIVE_VISUAL: produce imagery only; render no lettering; reserve copy-safe zones for the exact text.",
+            "DETERMINISTIC_LAYOUT: typeset exact text, logos and disclosures in a layout tool; verify character-for-character and against safe areas.",
+        ]
+    if spec.family in _TEMPORAL_FAMILIES:
+        return [
+            "GENERATIVE_MOTION: produce footage or motion without rendered lettering.",
+            "EDIT_COMPOSITING: apply exact on-screen text in the edit or compositing stage; verify character-for-character.",
+        ]
+    return ["VERBATIM_COPY: include every exact text string unchanged in the delivered copy."]
+
+
+def _ordered_references(references: list[ReferenceSpec]) -> list[ReferenceSpec]:
+    rank = {role: index for index, role in enumerate(REFERENCE_PRECEDENCE)}
+    return sorted(references, key=lambda ref: (rank[ref.role], -ref.priority, ref.ref_id))
+
+
 def compile_prompt_ir(
     spec: AssetSpec,
     context: PromptContext,
     ui_ux: UIUXDesignIR | None = None,
+    *,
+    evidence_lines: list[str] | None = None,
 ) -> PromptIR:
     brand_directives = [
         f"Canonical brand context ({domain}): {_canonical(context.brand_context[domain])}"
@@ -881,6 +1187,8 @@ def compile_prompt_ir(
     provenance = [spec.brand_hash, context.context_hash]
     if context.guidance_hash:
         provenance.append(context.guidance_hash)
+    if spec.series is not None:
+        provenance.append(spec.series.concept_signature)
     if ui_ux is not None:
         for source, target in _UI_UX_BUCKET_MAP.items():
             guidance[target] = list(
@@ -917,6 +1225,11 @@ def compile_prompt_ir(
         quality_constraints=list(spec.quality_constraints),
         required_capabilities=list(spec.required_capabilities),
         provenance_refs=provenance,
+        exact_text=list(spec.exact_text),
+        references=_ordered_references(spec.references),
+        render_stages=render_stages_for(spec),
+        series=spec.series,
+        evidence_directives=list(evidence_lines or []),
     )
 
 
@@ -960,7 +1273,35 @@ def serialize_generic_prompt(
     lines += section("Selected advisory governance guidance", ir.governance_directives)
     lines += section("Selected advisory QA guidance", ir.qa_directives)
     lines += section("Selected advisory production guidance", ir.production_guidance_directives)
+    if ir.series is not None:
+        binding = ir.series
+        series_lines = [
+            f"family={binding.family_id}@{binding.family_version}; instance={binding.instance_id}",
+            f"concept thesis: {binding.concept_thesis}",
+        ]
+        if binding.campaign_ref:
+            series_lines.append(f"campaign anchor: {binding.campaign_ref}")
+        if binding.emotional_function:
+            series_lines.append(f"emotional function: {binding.emotional_function}")
+        series_lines += [f"signature device: {item}" for item in binding.signature_devices]
+        series_lines += [f"hold fixed: {item}" for item in binding.series_invariants]
+        series_lines += [f"this instance varies {axis}: {value}" for axis, value in sorted(binding.variation.items())]
+        series_lines.append(f"concept signature: {binding.concept_signature}")
+        lines += section("Series binding", series_lines)
+    lines += section("Evidence ceiling", ir.evidence_directives)
     lines += section("Required content", ir.content_directives)
+    lines += section(
+        "Exact text (reproduce character-for-character)",
+        [json.dumps(text, ensure_ascii=False) for text in ir.exact_text],
+    )
+    lines += section("Render stages", ir.render_stages)
+    lines += section(
+        "Reference roles (precedence: IDENTITY > CONTENT > COMPOSITION > STYLE > START/END FRAME > MOTION > AUDIO)",
+        [
+            f"{ref.ref_id}: {ref.role.value} (priority {ref.priority})" + (f" — {ref.note}" if ref.note else "")
+            for ref in ir.references
+        ],
+    )
     lines += section("Production specification", ir.production_directives)
     lines += section("Quality constraints", ir.quality_constraints)
     lines += section("Negative constraints", ir.negative_constraints)
@@ -1040,6 +1381,14 @@ def validate_prompt_package(
         issues.append("audience missing from serialized prompt")
     if context.included_guidance and not context.guidance_hash:
         issues.append("selected guidance missing deterministic hash")
+    text_corrupted = False
+    for text in spec.exact_text:
+        if json.dumps(text, ensure_ascii=False) not in generic_prompt:
+            issues.append(f"required text not preserved verbatim: {text}")
+            text_corrupted = True
+    for ref in spec.references:
+        if ref.role in _TEMPORAL_REFERENCE_ROLES and spec.family not in _TEMPORAL_FAMILIES:
+            issues.append(f"reference {ref.ref_id} role {ref.role.value} is temporal but family is {spec.family.value}")
     for provider in provider_prompts:
         if provider.status is AdapterStatus.blocked:
             issues.append(
@@ -1076,8 +1425,12 @@ def validate_prompt_package(
         if ui_ux.spec_hash not in generic_prompt:
             issues.append("UI/UX spec hash missing from serialized prompt")
 
+    if spec.exact_text:
+        checked_dimensions.append("EXACT_TEXT")
+    if spec.references:
+        checked_dimensions.append("REFERENCE_ROLES")
     status = PromptValidationStatus.passed
-    if ui_blocked:
+    if ui_blocked or text_corrupted:
         status = PromptValidationStatus.blocked
     elif issues:
         status = PromptValidationStatus.repair
@@ -1174,6 +1527,12 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
 
     unresolved_gap_ids = {gap.gap_id for gap in gaps}
     evidence_claim_ids = {claim_id for item in request.evidence for claim_id in item.claim_ids}
+    # Computations resolve a derived claim's gap only when every empirical input
+    # is itself verified; they never stand in for the inputs' own evidence.
+    computation_assessments = assess_computations(
+        validate_claims(claims, request.evidence), request.computations
+    )
+    evidence_claim_ids |= sound_derived_claim_ids(computation_assessments)
     for gap in gaps:
         if any(ref in evidence_claim_ids for ref in gap.claim_refs):
             unresolved_gap_ids.discard(gap.gap_id)
@@ -1189,7 +1548,9 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
         )
     )
 
-    validated_claims = validate_claims(claims, request.evidence)
+    validated_claims = apply_computations(
+        validate_claims(claims, request.evidence), computation_assessments, request.computations
+    )
     passes.append(
         PassResult(pass_name="VALIDATE", status="COMPLETE", produced=len(validated_claims))
     )
@@ -1218,6 +1579,7 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
             ),
             prompt_packages=[],
             voids=sorted(unresolved_gap_ids),
+            computations=computation_assessments,
         )
 
     if not request.asset_requirements:
@@ -1239,6 +1601,7 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
             ),
             prompt_packages=[],
             voids=["[VOID_DETECTED:ASSET_REQUIREMENTS]"],
+            computations=computation_assessments,
         )
 
     blocking_unresolved = [
@@ -1265,6 +1628,7 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
             ),
             prompt_packages=[],
             voids=[f"[VOID_DETECTED:{gap.gap_id}]" for gap in blocking_unresolved],
+            computations=computation_assessments,
         )
 
     packages: list[PromptPackage] = []
@@ -1282,7 +1646,12 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
             if requirement.family is PromptFamily.ui_ux
             else None
         )
-        ir = compile_prompt_ir(spec, context, ui_ux)
+        ir = compile_prompt_ir(
+            spec,
+            context,
+            ui_ux,
+            evidence_lines=evidence_directives(validated_claims, request.evidence, computation_assessments),
+        )
         generic = serialize_generic_prompt(ir, spec, ui_ux)
         provider_prompts = adapt_provider_prompts(ir, generic, request.providers)
         validation = validate_prompt_package(spec, context, generic, provider_prompts, ui_ux)
@@ -1349,6 +1718,7 @@ def compile_prompt_packages(request: PromptCompilerRequest) -> PromptCompilerRes
         acceptance=acceptance,
         prompt_packages=packages,
         voids=[f"[VOID_DETECTED:{gap_id}]" for gap_id in sorted(unresolved_gap_ids)],
+        computations=computation_assessments,
     )
 
 

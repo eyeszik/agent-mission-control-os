@@ -1,0 +1,89 @@
+{
+  "project_name": "northwind-merch",
+  "brand_core": {
+    "brand_name": "Northwind Coffee",
+    "positioning_essence": "Coffee for people who take their mornings seriously.",
+    "voice": {
+      "tone_attributes": [
+        "confident",
+        "warm",
+        "direct"
+      ],
+      "writing_dos": [
+        "Use short, concrete sentences."
+      ],
+      "writing_donts": [
+        "Do not use hype."
+      ]
+    },
+    "color_story": [
+      {
+        "role": "primary",
+        "description": "Deep indigo used as the authority color.",
+        "reference_hex": "#1a2b4c"
+      },
+      {
+        "role": "accent",
+        "description": "Warm amber used for emphasis.",
+        "reference_hex": "#e08a2c"
+      }
+    ],
+    "typography_direction": "Humanist serif headlines with a neutral grotesk body.",
+    "imagery_style": "Natural light, tactile materials, documentary framing.",
+    "motion": {
+      "pace": "Brisk with confident deceleration.",
+      "emphasis_moments": [
+        "primary CTA activation"
+      ],
+      "reduced_motion_fallback": "Cross-fade only."
+    },
+    "logo_lockups": [
+      {
+        "lockup_id": "primary",
+        "lockup_type": "primary",
+        "usage_context": "Default digital and print mark.",
+        "minimum_size": "24px digital / 0.5in print",
+        "clear_space_rule": "One cap-height around the full mark.",
+        "placement_notes": "Prefer top-left on digital surfaces.",
+        "generation_reference": "Indigo wordmark with a compact compass-needle symbol."
+      }
+    ]
+  },
+  "family": {
+    "family_id": "northwind.merch.tote",
+    "version": "1.0.0",
+    "business_objective": "Flat artwork for a limited tote run celebrating the autumn blend.",
+    "audience": "Existing subscribers.",
+    "surface_family": "PRINT",
+    "asset_type": "merchandise artwork",
+    "channel": "merch",
+    "destination": "Tote bag print area (vendor to confirm)",
+    "invariants": {
+      "visual_thesis": "one bold emblem, two inks",
+      "signature_devices": [
+        "amber horizon line"
+      ]
+    },
+    "variation_axes": {
+      "concept_metaphor": [
+        "sunrise over a cup rim",
+        "a coffee bean as a compass"
+      ],
+      "graphic_device": [
+        "single-weight line",
+        "solid silhouette"
+      ]
+    },
+    "exact_text": [
+      "NORTHWIND"
+    ],
+    "production": {
+      "medium": "MERCH",
+      "background": "TRANSPARENT",
+      "export": {
+        "format": "png"
+      }
+    },
+    "instance_count": 2
+  }
+}

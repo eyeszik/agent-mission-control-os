@@ -71,7 +71,7 @@
   ],
   "conflicts_with": [],
   "context_budget": {
-    "max_sections": 10,
+    "max_sections": 11,
     "max_chars": 40000
   },
   "sections": [
@@ -309,7 +309,8 @@
         "Determine finished dimensions, trim, bleed, safe area, color model (CMYK, spot, CMYK plus spot, or grayscale), ICC profile, substrate, print process, finish, ink coverage, black strategy, overprint behavior, transparency flattening, font status, effective image PPI, vector status, and any special layers before calling a file print-ready.",
         "Preserve logos, type, cut paths, and other technical geometry as vector wherever the production workflow permits; rasterize or flatten only when the target process requires it.",
         "Keep the editable master file separate from the production export.",
-        "State explicitly that a PDF existing is not the same as a PDF being print-ready, and that the deliverable is not PRINT_READY until preflight checks above have actually been run."
+        "State explicitly that a PDF existing is not the same as a PDF being print-ready, and that the deliverable is not PRINT_READY until preflight checks above have actually been run.",
+        "Treat the named printer or vendor specification as controlling; where it has not been supplied, record trim, bleed, colour profile, resolution and output format as UNKNOWN rather than substituting generic defaults."
       ],
       "evaluation_criteria": [
         "every print-ready claim is backed by an explicit preflight check, not file existence alone",
@@ -320,7 +321,8 @@
         "flattening vector logos or type before the workflow requires it"
       ],
       "evidence_requirements": [
-        "a PRINT_READY claim requires the preflight items above to have been checked, not assumed"
+        "a PRINT_READY claim requires the preflight items above to have been checked, not assumed",
+        "print settings require the vendor specification or an explicit UNKNOWN marker; no universal default is asserted"
       ],
       "output_targets": [
         "print production spec",
@@ -434,6 +436,53 @@
       ]
     },
     {
+      "id": "pds.merch_artwork_vs_product",
+      "purpose": "Keep printable artwork separate from product mockups and from any product-creation or ordering step.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "merch",
+          "apparel",
+          "print on demand",
+          "print-on-demand",
+          "mockup",
+          "sticker",
+          "t-shirt",
+          "tee",
+          "tote",
+          "mug",
+          "hoodie",
+          "printify"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Compile merchandise prompts for flat, standalone, product-independent artwork: clear silhouette, strong hierarchy, printable detail density and sufficient resolution for the stated print area.",
+        "State the background behaviour explicitly (transparent or a named solid) and reproduce any requested text exactly.",
+        "Treat a product mockup as a separate downstream visualisation of approved artwork, never as the artwork itself.",
+        "Artwork prompt compilation never creates, lists, prices or orders a product; any print-on-demand or storefront step belongs downstream of approved artwork and explicit external-action authorization."
+      ],
+      "evaluation_criteria": [
+        "artwork is described independently of any product mockup",
+        "background behaviour and exact text are stated"
+      ],
+      "anti_patterns": [
+        "baking a garment, mug or mockup scene into the artwork itself",
+        "treating prompt compilation as authorization to create or order a product"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "production",
+        "visual",
+        "governance"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
       "id": "pds.email_html_production",
       "purpose": "Compile email visuals into robust, client-compatible HTML rather than assuming general web layout techniques render correctly in email clients.",
       "directive_class": "ADVISORY_METHOD",
@@ -521,7 +570,9 @@
     "author": null,
     "created_at": null,
     "updated_at": null,
-    "evidence_refs": [],
+    "evidence_refs": [
+      "docs/imported-specs/universal-brand-content-visual-prompt-os-v10.md"
+    ],
     "license_or_ip_status": "user_supplied"
   },
   "trend": null,

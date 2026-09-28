@@ -1,0 +1,97 @@
+{
+  "project_name": "northwind-paid",
+  "brand_core": {
+    "brand_name": "Northwind Coffee",
+    "positioning_essence": "Coffee for people who take their mornings seriously.",
+    "voice": {
+      "tone_attributes": [
+        "confident",
+        "warm",
+        "direct"
+      ],
+      "writing_dos": [
+        "Use short, concrete sentences."
+      ],
+      "writing_donts": [
+        "Do not use hype."
+      ]
+    },
+    "color_story": [
+      {
+        "role": "primary",
+        "description": "Deep indigo used as the authority color.",
+        "reference_hex": "#1a2b4c"
+      },
+      {
+        "role": "accent",
+        "description": "Warm amber used for emphasis.",
+        "reference_hex": "#e08a2c"
+      }
+    ],
+    "typography_direction": "Humanist serif headlines with a neutral grotesk body.",
+    "imagery_style": "Natural light, tactile materials, documentary framing.",
+    "motion": {
+      "pace": "Brisk with confident deceleration.",
+      "emphasis_moments": [
+        "primary CTA activation"
+      ],
+      "reduced_motion_fallback": "Cross-fade only."
+    },
+    "logo_lockups": [
+      {
+        "lockup_id": "primary",
+        "lockup_type": "primary",
+        "usage_context": "Default digital and print mark.",
+        "minimum_size": "24px digital / 0.5in print",
+        "clear_space_rule": "One cap-height around the full mark.",
+        "placement_notes": "Prefer top-left on digital surfaces.",
+        "generation_reference": "Indigo wordmark with a compact compass-needle symbol."
+      }
+    ]
+  },
+  "family": {
+    "family_id": "northwind.paid.display",
+    "version": "1.0.0",
+    "business_objective": "Display ad artwork for the subscription offer.",
+    "audience": "Busy professionals.",
+    "surface_family": "IMAGE",
+    "asset_type": "display ad",
+    "channel": "advertising",
+    "destination": "300x600 display placement",
+    "variation_axes": {
+      "concept_metaphor": [
+        "the first sip as a pause button",
+        "a calendar page turning to morning"
+      ]
+    },
+    "exact_text": [
+      "Start your first box"
+    ],
+    "instance_count": 2
+  },
+  "hooks": [
+    {
+      "hook_id": "hk-a",
+      "territory": "outcome",
+      "text": "Your calmest five minutes.",
+      "status": "APPROVED_FOR_TEST",
+      "approval_ref": "appr-hook-a",
+      "creative_score": 0.6
+    }
+  ],
+  "paid_media": [
+    {
+      "objective": "Subscription starts",
+      "audience": "Busy professionals",
+      "hook": "Your calmest five minutes.",
+      "title": "Mornings, deliberately.",
+      "cta": "Start your first box",
+      "landing_page_alignment": "/subscribe hero repeats the same promise",
+      "image_prompt_ref": "northwind.paid.display.01",
+      "disclosures": [
+        "Subscription renews monthly until cancelled."
+      ],
+      "measurement_intent": "cost per subscription start over a 14-day window"
+    }
+  ]
+}

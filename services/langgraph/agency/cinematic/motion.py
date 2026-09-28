@@ -28,6 +28,8 @@ def compile_brand_motion(brand: BrandMotion) -> str:
         parts.append(f"timing {brand.timing}")
     if not brand.allow_spring_bounce:
         parts.append("no spring or bounce easing")
+    if brand.reduced_motion_variant:
+        parts.append(f"reduced-motion variant: {brand.reduced_motion_variant}")
     return "; ".join(parts)
 
 

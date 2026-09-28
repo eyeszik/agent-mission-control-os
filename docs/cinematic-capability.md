@@ -113,3 +113,14 @@ continuity, storyboard generation, storyboard-to-video, image-to-video, entropy
 control, conflicting sources, brand motion, capability-only, unknown model) plus
 focused unit tests for routing discipline, camera validation, and bounded
 repair.
+
+
+## v10 prompt-OS mapping
+
+The v10 specification's `VIDEO_PROMPT_IR`, shot grammar, `STORYBOARD_FRAME`
+and `CONTINUITY_LEDGER` map onto the existing `ProjectIR` / `ShotIR`,
+`StoryboardPanel`, `Canon`, `MemoryPacket` and `FinalFrameHandshake`. No second
+video compiler was added. The one genuinely missing field was a reduced-motion
+behaviour for brand motion. `BrandMotion.reduced_motion_variant` is emitted only
+when declared, so existing prompts are unchanged. Reference roles for still
+images live on `AssetRequirement.references` in the prompt compiler.
