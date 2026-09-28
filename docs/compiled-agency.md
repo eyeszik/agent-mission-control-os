@@ -117,9 +117,11 @@ external publish. It exits 2 on invalid input.
 
 ## Residual gaps and open integration work
 
-* **Layer 1 is not wired to this planner.** The live LangGraph pipeline does
-  not consume compiled plans. That is a deliberate integration task, as it
-  already is for the N1–N4 kernel.
+* **Layer 1 does not consume compiled plans.** The live LangGraph pipeline
+  already enforces N2 release guards and N3 `assert_role_may_produce` per stage
+  (`graph/agency/nodes.py` `LIVE_STAGE_ROLE_BINDINGS`), but it does not execute
+  from compiled work orders, cells or waves. Driving it from a compiled plan is
+  deliberate integration work.
 * **Approvals are not bound to compiled node ids.** Persisted approvals bind
   run results. Until a server-side mapping exists the API ignores approvals and
   grants (fail-closed).
