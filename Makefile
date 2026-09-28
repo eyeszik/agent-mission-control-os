@@ -1,4 +1,4 @@
-.PHONY: help check-env tokens-build tokens-check ui-ux-compile brand-plan brand-roles prompt-compile guidance-validate brand-validate setup-agent gates
+.PHONY: help check-env tokens-build tokens-check ui-ux-compile compiled-plan compiled-twin brand-plan brand-roles prompt-compile guidance-validate brand-validate setup-agent gates
 
 help:
 	@echo "Available commands:"
@@ -6,6 +6,8 @@ help:
 	@echo "  make tokens-build               - Compile apps/web/tokens/amc.tokens.json (DTCG) into apps/web/app/tokens.css"
 	@echo "  make tokens-check               - Dry run: fail if the generated token CSS is stale (writes nothing)"
 	@echo "  make ui-ux-compile [REQUEST=f]  - Compile a governed UI/UX spec (prints only; generates no UI)"
+	@echo "  make compiled-plan [REQUEST=f]  - Compile a Compiled Agency plan (plans only; executes nothing)"
+	@echo "  make compiled-twin              - Run the digital-twin shadow scenarios S1-S13"
 	@echo "  make brand-plan [BRIEF=f.json]  - Plan a brief against the agency kernel"
 	@echo "  make brand-roles [DEPT=brand]   - List N3 role contracts"
 	@echo "  make prompt-compile [REQUEST=f]  - Compile validated prompt packages only"
@@ -27,6 +29,13 @@ tokens-check:
 # Prints a spec summary; pass OUTPUT=path to write the full spec JSON.
 ui-ux-compile:
 	@python3 orchestrate_brand_pipeline.py ui-ux --input $(if $(REQUEST),$(REQUEST),sample_ui_ux_request.json) $(if $(OUTPUT),--output $(OUTPUT),)
+
+# Plans only; exits non-zero when a structural blocker (not a human gate) exists.
+compiled-plan:
+	@python3 orchestrate_brand_pipeline.py compiled-plan --input $(if $(REQUEST),$(REQUEST),sample_compiled_request.json)
+
+compiled-twin:
+	@python3 orchestrate_brand_pipeline.py compiled-twin
 
 # Plans only; generates nothing. Exits non-zero when the kernel blocks the run.
 brand-plan:

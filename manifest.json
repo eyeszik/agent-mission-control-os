@@ -12,7 +12,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "372cd25dab6e2c654fbfd9736f52e4dc7027d44a"
+      "git_blob_sha": "e8fa8ea68c6d3f32d4e6b3b40f6427349b37b8a6"
     },
     {
       "path": "apps/web/app/login/page.tsx",
@@ -139,6 +139,22 @@
       "git_blob_sha": "fd1ccdbc2170b72e2fbe1af8ed8ea3e4bb2bf7ed"
     },
     {
+      "path": "services/langgraph/agency/compiled/authority.py",
+      "git_blob_sha": "016039e2b595bb7e28324979e0998ddf99c7227b"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/change_control.py",
+      "git_blob_sha": "76172b8d398912280b1e195278dcd14fc1ca8fe6"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/data/source_disposition.json",
+      "git_blob_sha": "a02b5e7b34a2a7715a706d3683100897b38aa8e3"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/role_sources.py",
+      "git_blob_sha": "244f07e952c35ab8982b743b4825b488df7d9cf9"
+    },
+    {
       "path": "services/langgraph/agency/exporter.py",
       "git_blob_sha": "278b12e36bebb39ca6d36fdcef37a725f2d58773"
     },
@@ -223,6 +239,10 @@
       "git_blob_sha": "9224da0cc18244217908752fd1257773cb7f04f0"
     },
     {
+      "path": "services/langgraph/api/routes/compiled_agency.py",
+      "git_blob_sha": "736a42f20c3ca15cd83cd18bf02d4f64d34e8fc0"
+    },
+    {
       "path": "services/langgraph/api/routes/design.py",
       "git_blob_sha": "efff2ea68fcd7ddd4b2e6380657aae2b45080b6a"
     },
@@ -244,7 +264,7 @@
     },
     {
       "path": "services/langgraph/app/main.py",
-      "git_blob_sha": "46c917f79ff3347355793290c5f2f639512cc3c3"
+      "git_blob_sha": "3b35f5c00760ca0b1dc783aafd7487c88295d687"
     },
     {
       "path": "services/langgraph/graph/agency/models.py",
@@ -304,7 +324,7 @@
     },
     {
       "path": "services/langgraph/pyproject.toml",
-      "git_blob_sha": "3462d2b722f51856efc4f9c75ac8a97509e1e024"
+      "git_blob_sha": "7568057c17f9784a9df76335dec13b4fac6f6b24"
     },
     {
       "path": "services/langgraph/quality/brand_safety.py",

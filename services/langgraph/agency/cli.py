@@ -466,6 +466,67 @@ def _cmd_validate(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_compiled_plan(args: argparse.Namespace) -> int:
+    """Compile a Compiled Agency plan: pure, no generation, no external action."""
+    from services.langgraph.agency.compiled.planner import CompiledAgencyRequest, compile_agency_plan
+    from services.langgraph.agency.compiled.role_sources import JITSkillLoader, default_role_source_index
+    from services.langgraph.app.runtime_support import role_os_registry
+
+    try:
+        with open(args.input, encoding="utf-8") as handle:
+            request = CompiledAgencyRequest.model_validate(json.load(handle))
+    except (OSError, ValueError, ValidationError) as exc:
+        raise BriefError(f"could not read compiled-agency request: {exc}") from exc
+    index = default_role_source_index()
+    loader = JITSkillLoader(index, args.source_archive) if args.source_archive else None
+    plan = compile_agency_plan(request, registry=role_os_registry(), source_index=index, jit_loader=loader)
+    structural = {
+        node: [r for r in reasons if not r.startswith("WAIT_HUMAN_DECISION")]
+        for node, reasons in plan.blocked.items()
+    }
+    structural = {k: v for k, v in structural.items() if v}
+    if args.json:
+        print(plan.model_dump_json(indent=2))
+    else:
+        summary = plan.summary()
+        print(f"compiled plan {summary['plan_hash'][:16]}: {summary['work_nodes']} work node(s), "
+              f"{summary['cells']} cell(s), {summary['waves']} wave(s), {summary['held_cells']} held; "
+              f"{summary['activated_specialists']} specialist(s) active, {summary['dormant_specialists']} dormant")
+        for wave in plan.waves.waves:
+            print(f"  wave {wave.index}: {', '.join(wave.cells)}" + (f" [{wave.serialized_reason}]" if wave.serialized_reason else ""))
+        for gate in plan.human_gates:
+            print(f"  human gate: {gate}")
+        for node, reasons in sorted(structural.items()):
+            print(f"  BLOCKED {node}: {', '.join(reasons)}")
+        for root, codes in sorted(plan.release_readiness.items()):
+            print(f"  release {root}: {'READY' if not codes else ', '.join(codes)}")
+        if plan.jit_skills:
+            print(f"  JIT skills: {sorted(set(plan.jit_skills.values()))}")
+    return 1 if structural else 0
+
+
+def _cmd_compiled_twin(args: argparse.Namespace) -> int:
+    from services.langgraph.agency.compiled.twin import run_digital_twin
+    from services.langgraph.app.runtime_support import role_os_registry
+
+    results = run_digital_twin(role_os_registry())
+    if args.json:
+        print(json.dumps([r.model_dump(mode="json") for r in results], indent=2))
+    else:
+        for r in results:
+            print(f"{r.id} {r.status} {r.name}")
+            for check in r.checks:
+                if not check.passed:
+                    print(f"    FAIL {check.name}: {check.detail}")
+    return 0 if all(r.status == "PASS" for r in results) else 1
+
+
+def _cmd_source_disposition(args: argparse.Namespace) -> int:
+    from services.langgraph.agency.compiled.role_sources import main as disposition_main
+
+    return disposition_main(["--archive", args.archive] + (["--check"] if args.check else []))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agency",
@@ -520,6 +581,26 @@ def build_parser() -> argparse.ArgumentParser:
     ui_ux.add_argument("--css", help="Optional path to write the spec's generated DTCG token CSS.")
     ui_ux.add_argument("--json", action="store_true", help="Print the full spec as JSON.")
     ui_ux.set_defaults(handler=_cmd_ui_ux)
+
+    compiled_plan = sub.add_parser(
+        "compiled-plan",
+        help="Compile a Compiled Agency plan (backchain, authority, PCWOs, cells, waves). Never executes work.",
+    )
+    compiled_plan.add_argument("-i", "--input", required=True, help="Path to a CompiledAgencyRequest JSON file.")
+    compiled_plan.add_argument("--source-archive", help="Verified agency-role-os-v2 ZIP for JIT SKILL loading.")
+    compiled_plan.add_argument("--json", action="store_true", help="Print the full plan as JSON.")
+    compiled_plan.set_defaults(handler=_cmd_compiled_plan)
+
+    compiled_twin = sub.add_parser("compiled-twin", help="Run digital-twin shadow scenarios S1-S13.")
+    compiled_twin.add_argument("--json", action="store_true", help="Print scenario results as JSON.")
+    compiled_twin.set_defaults(handler=_cmd_compiled_twin)
+
+    source_disposition = sub.add_parser(
+        "source-disposition", help="Rebuild (or --check) the RoleOS source disposition ledger from the archive."
+    )
+    source_disposition.add_argument("--archive", required=True, help="Path to agency-role-os-v2 ZIP.")
+    source_disposition.add_argument("--check", action="store_true", help="Exit 1 if the committed ledger differs.")
+    source_disposition.set_defaults(handler=_cmd_source_disposition)
 
     validate = sub.add_parser("validate", help="Run the kernel's structural self-checks.")
     validate.set_defaults(handler=_cmd_validate)

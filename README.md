@@ -38,6 +38,7 @@ Broader product-development, creative-studio, growth, publishing, and paid-media
 - **Browser E2E release gate** using pinned Playwright/Chromium against the real local Next.js + FastAPI stack.
 - CI production-readiness and critical-file integrity gates.
 - Deterministic **UI/UX design compiler** (`agency/ui_ux`) producing governed specs and `UI_UX` prompt packages, with one DTCG 2025.10 token compiler and frontend token gates — see [`docs/ui-ux-design-compiler.md`](docs/ui-ux-design-compiler.md).
+- Deterministic **Compiled Agency planner** (`agency/compiled`) — deliverable backchain, RoleOS×N3 authority bridge, proof-carrying work orders, decision spine, mission cells/waves, causal invalidation and delta approval, S1–S13 digital twin; plans only, never executes — see [`docs/compiled-agency.md`](docs/compiled-agency.md).
 
 ### Live infrastructure already prepared
 
