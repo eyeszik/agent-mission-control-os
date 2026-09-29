@@ -324,11 +324,22 @@ class ProductionTrustKernel:
                 ))
         return tuple(created)
 
-    def resolve_recovery(self, *, recovery_id: str, status: RecoveryStatus, evidence_refs: tuple[str, ...] = ()) -> RecoveryCase:
+    def resolve_recovery(
+        self,
+        *,
+        tenant_id: str,
+        project_id: str,
+        recovery_id: str,
+        status: RecoveryStatus,
+        evidence_refs: tuple[str, ...] = (),
+    ) -> RecoveryCase:
         if status == RecoveryStatus.OPEN:
             raise ReliabilityError("RECOVERY_RESOLUTION_MUST_BE_TERMINAL")
+        self.assert_scope(tenant_id=tenant_id, project_id=project_id)
         current = self.store.state.recovery.get(recovery_id)
-        if current is None:
+        # A case owned by another tenant or project is indistinguishable from a
+        # missing one, so recovery ids cannot be probed across scopes.
+        if current is None or current.tenant_id != tenant_id or current.project_id != project_id:
             raise ReliabilityError("UNKNOWN_RECOVERY_CASE")
         updated = current.model_copy(update={
             "status": status,

@@ -115,3 +115,107 @@ def test_rejection_uses_server_reviewer_and_terminal_run_state():
 
     record = get_run_record(body["run_id"])
     assert record["status"] == "rejected"
+
+
+def _foreign_recovery_case():
+    """A recovery case owned by another tenant, plus a project the caller owns."""
+    from services.langgraph.app.runtime_support import trust_kernel
+
+    victim_run = f"run-victim-{uuid4()}"
+    victim_project = f"proj-victim-{uuid4()}"
+    create_run_record(victim_run, "tenant-victim", victim_project, "branding_marketing_agency", "failed", {})
+    kernel = trust_kernel()
+    kernel.bind_project(tenant_id="tenant-victim", project_id=victim_project)
+    case = kernel.open_recovery_case(
+        tenant_id="tenant-victim",
+        project_id=victim_project,
+        operation_id=f"agency.resume:{victim_run}",
+        reason="EXECUTION_WITHOUT_OBSERVATION",
+        execution_ref=victim_run,
+    )
+    own_project = f"proj-own-{uuid4()}"
+    # Reading the trust view binds the caller's own project, as the UI does.
+    assert client.get(f"/runtime/projects/{own_project}/trust").status_code == 200
+    return kernel, case, victim_run, own_project
+
+
+def test_foreign_recovery_case_cannot_be_resolved_from_own_project():
+    from services.langgraph.agency.reliability.models import RecoveryStatus
+    from services.langgraph.persistence.events import list_events_for_run
+
+    kernel, case, victim_run, own_project = _foreign_recovery_case()
+
+    response = client.post(
+        f"/runtime/projects/{own_project}/trust/recovery/{case.recovery_id}/resolve",
+        json={"status": "RECONCILED"},
+        headers=_idem(),
+    )
+
+    assert response.status_code == 404
+    assert kernel.store.state.recovery[case.recovery_id].status == RecoveryStatus.OPEN
+    assert list_events_for_run(victim_run) == []
+
+
+def test_foreign_run_id_cannot_receive_operator_events():
+    from services.langgraph.agency.reliability.models import RecoveryStatus
+    from services.langgraph.persistence.events import list_events_for_run
+
+    kernel, case, victim_run, own_project = _foreign_recovery_case()
+    own_run = f"run-own-{uuid4()}"
+    create_run_record(own_run, "tenant-events-test", own_project, "branding_marketing_agency", "failed", {})
+    own_case = kernel.open_recovery_case(
+        tenant_id="tenant-events-test",
+        project_id=own_project,
+        operation_id=f"agency.resume:{own_run}",
+        reason="EXECUTION_WITHOUT_OBSERVATION",
+        execution_ref=own_run,
+    )
+
+    response = client.post(
+        f"/runtime/projects/{own_project}/trust/recovery/{own_case.recovery_id}/resolve",
+        json={"status": "RECONCILED", "run_id": victim_run},
+        headers=_idem(),
+    )
+
+    assert response.status_code == 404
+    assert kernel.store.state.recovery[own_case.recovery_id].status == RecoveryStatus.OPEN
+    assert list_events_for_run(victim_run) == []
+
+
+def test_foreign_outbox_message_cannot_be_replayed_or_signalled():
+    from services.langgraph.persistence.events import list_events_for_run
+
+    kernel, _case, victim_run, own_project = _foreign_recovery_case()
+    message = kernel.enqueue_outbox(
+        tenant_id="tenant-victim",
+        project_id=kernel.store.state.recovery[_case.recovery_id].project_id,
+        message_id=f"outbox-{uuid4()}",
+        topic="agency.delivery.completed",
+        payload={"run_id": victim_run},
+        payload_ref=victim_run,
+        idempotency_key=str(uuid4()),
+    )
+
+    replay = client.post(
+        f"/runtime/projects/{own_project}/trust/outbox/{message.message_id}/replay",
+        json={},
+        headers=_idem(),
+    )
+    assert replay.status_code == 404
+
+    own_message = kernel.enqueue_outbox(
+        tenant_id="tenant-events-test",
+        project_id=own_project,
+        message_id=f"outbox-{uuid4()}",
+        topic="agency.delivery.completed",
+        payload={},
+        payload_ref="not-a-run",
+        idempotency_key=str(uuid4()),
+    )
+    injected = client.post(
+        f"/runtime/projects/{own_project}/trust/outbox/{own_message.message_id}/replay",
+        json={"run_id": victim_run},
+        headers=_idem(),
+    )
+    assert injected.status_code == 404
+    assert list_events_for_run(victim_run) == []

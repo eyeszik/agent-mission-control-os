@@ -17,6 +17,7 @@ from services.langgraph.agency.design.style_composer import (
     direction_from_selection,
     unresolved_direction,
 )
+from services.langgraph.agency import design_corpus
 from services.langgraph.agency.design_tokens import TokenError, compile_css, hex_to_color
 from services.langgraph.agency.full_service import compile_agency_operations
 from services.langgraph.agency.kernel import ArtifactType, assert_role_may_produce, get_role
@@ -746,16 +747,39 @@ def brand_strategy_node(state: GraphState) -> dict:
     }
 
 
+# Brief/strategy fields that describe the work. The client's brand name is
+# deliberately excluded so retrieval never steers toward a namesake third-party
+# brand; the query itself is never stored.
+_CORPUS_BRIEF_FIELDS = (
+    "industry", "business_idea", "offer_summary", "product_type", "goals", "target_audience",
+    "tone", "channels", "brand_style_notes", "differentiators", "market", "workflow_idea",
+)
+
+
+def _retrieve_design_corpus(brief: dict, strategy: dict) -> dict:
+    """Rights-bounded design-corpus context for concepting and the design brief."""
+    inputs = sanitize_deep({
+        "brief": {key: brief.get(key) for key in _CORPUS_BRIEF_FIELDS},
+        "strategy": {key: strategy.get(key) for key in ("brand_pillars", "tone_of_voice")},
+    })
+    fields = [*inputs["brief"].values(), *inputs["strategy"].values()]
+    return design_corpus.retrieve(fields)
+
+
 def creative_concepting_node(state: GraphState) -> dict:
     _log_node(state, "creative_concepting")
     _assert_live_stage_contract("creative_concepting")
     data, agency = _agency_data(state)
     brief = agency.get("brief", {})
     strategy = agency.get("brand_strategy", {})
+    corpus_context = _retrieve_design_corpus(brief, strategy)
+    agency["design_corpus"] = corpus_context
+    agency["design_corpus_provenance"] = design_corpus.provenance(corpus_context)
     prompt = (
         "You are a creative director. Given this brand strategy and brief, return a JSON object with key "
         "'concepts': an array of exactly 3 objects, each with 'id', 'name', 'tagline', and 'rationale'.\n"
         f"Brand strategy: {json.dumps(strategy)}\nBrief: {json.dumps(brief)}"
+        f"{design_corpus.prompt_block(corpus_context)}"
     )
     pillar = (strategy.get("brand_pillars") or ["Clarity"])[0]
     fallback = {
@@ -902,6 +926,7 @@ def design_brief_node(state: GraphState) -> dict:
         "'typography_direction' (string), 'imagery_style' (string), 'layout_notes' (string), consistent with this brand strategy.\n"
         f"Strategy: {json.dumps(strategy)}\nChannels: {brief.get('channels', [])}"
         f"{style_clause}"
+        f"{design_corpus.prompt_block(agency.get('design_corpus') or {})}"
     )
     fallback = {
         "palette": ["#1F2937", "#F59E0B", "#F9FAFB"],

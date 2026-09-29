@@ -575,6 +575,15 @@ def _record_completion(
     return put_completion_evaluation(run_id, tenant_id, project_id, evaluation)
 
 
+def _node_event_payload(node_id: str, delta) -> Optional[dict]:
+    """Safe, query-free provenance attached to selected node_complete events."""
+    if node_id != "creative_concepting" or not isinstance(delta, dict):
+        return None
+    agency = ((delta.get("extracted_data") or {}).get("agency") or {})
+    corpus = agency.get("design_corpus_provenance")
+    return {"design_corpus": corpus} if corpus else None
+
+
 def _run_and_record_events(graph, input_state, config: dict, run: AgentRun) -> dict:
     """
     Execute synchronously and persist causally honest completion observations.
@@ -595,6 +604,7 @@ def _run_and_record_events(graph, input_state, config: dict, run: AgentRun) -> d
                 run.project_id,
                 node_id,
                 "node_complete",
+                safe_payload=_node_event_payload(node_id, _delta),
                 observed_at=completed_at,
                 completed_at=completed_at,
             )

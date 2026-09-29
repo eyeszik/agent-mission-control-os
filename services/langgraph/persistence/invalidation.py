@@ -463,11 +463,38 @@ def open_demanded_obligations(
     return [_row_to_record(row) for row in rows if row]
 
 
+def blocking_stale_approvals(approvals: list[dict]) -> list[dict]:
+    """Stale approvals that still block delivery.
+
+    A stale approval is superseded once a later, non-stale approval exists for
+    the same run and subject (the regenerated approval). The superseded record
+    stays in the ledger as evidence, but only the newest approval for a subject
+    governs release; otherwise regenerate -> approve -> resume could never pass.
+    """
+
+    def subject(approval: dict) -> tuple:
+        return (approval.get("run_id"), approval.get("subject_ref") or approval.get("run_id"))
+
+    live = [approval for approval in approvals if approval.get("status") != "stale"]
+    blocking: list[dict] = []
+    for approval in approvals:
+        if approval.get("status") != "stale":
+            continue
+        created_at = str(approval.get("created_at") or "")
+        superseded = any(
+            subject(other) == subject(approval) and str(other.get("created_at") or "") > created_at
+            for other in live
+        )
+        if not superseded:
+            blocking.append(approval)
+    return blocking
+
+
 def run_compile_gate(run_id: str) -> dict:
     artifact_branch = f"{PROTECTED_BRANCH_PREFIX}{run_id}"
     obligations = open_demanded_obligations(run_id=run_id, artifact_branch=artifact_branch)
     approvals = get_approvals_for_run(run_id)
-    stale_approvals = [approval for approval in approvals if approval.get("status") == "stale"]
+    stale_approvals = blocking_stale_approvals(approvals)
     lineage_remediations: list[dict] = []
     with transaction() as db:
         run_row = db.execute(
@@ -493,13 +520,13 @@ def project_snapshot_state(*, tenant_id: str, project_id: str, run_id: str | Non
     obligations = list_project_invalidation_obligations(project_id, tenant_id, run_id=run_id, limit=200)
     approvals: list[dict] = []
     with transaction() as db:
-        query = f"SELECT * FROM {table('approvals')} WHERE tenant_id = ? AND project_id = ? AND status = 'stale' ORDER BY approval_id"
+        query = f"SELECT * FROM {table('approvals')} WHERE tenant_id = ? AND project_id = ? ORDER BY approval_id"
         params: list[object] = [tenant_id, project_id]
         if run_id:
-            query = f"SELECT * FROM {table('approvals')} WHERE tenant_id = ? AND project_id = ? AND run_id = ? AND status = 'stale' ORDER BY approval_id"
+            query = f"SELECT * FROM {table('approvals')} WHERE tenant_id = ? AND project_id = ? AND run_id = ? ORDER BY approval_id"
             params.append(run_id)
         rows = db.execute(query, params).fetchall()
-        approvals = [normalize_record(row) for row in rows]
+        approvals = blocking_stale_approvals([normalize_record(row) for row in rows])
     lineage = list_project_lineage_remediations(project_id, tenant_id, limit=200)
     if run_id:
         lineage = [item for item in lineage if item["run_id"] == run_id]
