@@ -14,6 +14,9 @@ from typing import Iterable
 
 ASGIApp = object
 
+# Request-state key set only after a body signature has been verified.
+HMAC_VERIFIED_STATE_KEY = "amc_hmac_verified"
+
 
 class HMACVerificationError(ValueError):
     """Raised when a supplied signature cannot be verified."""
@@ -118,6 +121,10 @@ class HMACIngressMiddleware:
         if not valid:
             await self._reject_401(send)
             return
+
+        # Tell the route layer this request's body was authenticated here, so
+        # protected routes can fall back to principal auth when it was not.
+        scope.setdefault("state", {})[HMAC_VERIFIED_STATE_KEY] = True
 
         sent = False
 

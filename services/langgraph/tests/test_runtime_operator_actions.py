@@ -263,3 +263,51 @@ def test_resume_delivery_blocks_on_hook_gap_and_trust_projection_matches():
     assert payload["compile_blocked"] is True
     assert payload["hook_gap_count"] >= 1
     assert any(item["run_id"] == run_id and item["state"] == "HOOK_GAP" for item in payload["recent_invalidation_obligations"])
+
+
+def test_regenerated_and_approved_approval_clears_the_compile_gate():
+    from services.langgraph.persistence.invalidation import run_compile_gate
+
+    run_id = f"run-approval-{uuid4()}"
+    project_id = f"proj-approval-{uuid4()}"
+    create_run_record(
+        run_id,
+        "tenant-events-test",
+        project_id,
+        "branding_marketing_agency",
+        "needs_approval",
+        {"agency": {"campaign_package": {"brief": {"brand_name": "Northwind"}}, "qa_report": {"brand_safety_passed": True}, "generation_provenance": [], "degraded": False}},
+    )
+    approval = create_approval_request(run_id, "tenant-events-test", project_id, "review payload hash", 0.5)
+    mark_approval_stale(approval["approval_id"], "content changed")
+    assert run_compile_gate(run_id)["compile_blocked"] is True
+
+    response = client.post(
+        f"/runtime/runs/{run_id}/remediation/regenerate-approval",
+        json={"approval_id": approval["approval_id"]},
+        headers={"Idempotency-Key": str(uuid4())},
+    )
+    assert response.status_code == 200
+    regenerated_id = response.json()["pending_approval"]["approval_id"]
+    resolve_approval(regenerated_id, "test-reviewer", "approve")
+
+    gate = run_compile_gate(run_id)
+    assert gate["compile_blocked"] is False
+    assert gate["stale_approvals"] == []
+
+
+def test_stale_approval_without_a_successor_still_blocks_the_compile_gate():
+    from services.langgraph.persistence.invalidation import run_compile_gate
+
+    run_id = f"run-approval-{uuid4()}"
+    project_id = f"proj-approval-{uuid4()}"
+    create_run_record(run_id, "tenant-events-test", project_id, "branding_marketing_agency", "needs_approval", {})
+    first = create_approval_request(run_id, "tenant-events-test", project_id, "first review", 0.5)
+    second = create_approval_request(run_id, "tenant-events-test", project_id, "second review", 0.5)
+    # The newest approval going stale is not superseded by an older one.
+    mark_approval_stale(second["approval_id"], "content changed")
+
+    gate = run_compile_gate(run_id)
+    assert gate["compile_blocked"] is True
+    assert [item["approval_id"] for item in gate["stale_approvals"]] == [second["approval_id"]]
+    assert first["approval_id"] not in [item["approval_id"] for item in gate["stale_approvals"]]

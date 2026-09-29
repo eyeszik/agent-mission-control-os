@@ -276,7 +276,7 @@
     },
     {
       "path": "services/langgraph/api/routes/runtime.py",
-      "git_blob_sha": "73a92e9c0deba43ae04a77fd8af235bf42955cf3"
+      "git_blob_sha": "676d3f58b6671b435a7ee8fa153cb1938453a16b"
     },
     {
       "path": "services/langgraph/app/config.py",

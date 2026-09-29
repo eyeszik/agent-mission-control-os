@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffect
 from services.langgraph.agency.reliability.models import OutboxStatus, RecoveryStatus
 from services.langgraph.agency.reliability.outbox import OutboxDispatcher
+from services.langgraph.agency.reliability.service import ReliabilityError
 from services.langgraph.app.in_memory_queue import DuplicateOperationError, QueueFullError
 from services.langgraph.app.runtime_support import role_os_registry, runtime_queue, trust_kernel
 from services.langgraph.persistence.agency_kernel import create_or_revise_protected_run_artifact
@@ -23,6 +24,7 @@ from services.langgraph.persistence.invalidation import (
 from services.langgraph.persistence.lineage import list_project_lineage_remediations, resolve_lineage_remediation_for_run
 from services.langgraph.persistence.runs import get_run_record, update_run_status
 from services.langgraph.security.auth import Principal, authorize_project, authorize_resource, get_principal
+from services.langgraph.security.hmac_ingress import HMAC_VERIFIED_STATE_KEY
 
 router = APIRouter()
 IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
@@ -92,6 +94,30 @@ def _recovery_for_run(*, run_id: str, recovery_id: str, tenant_id: str, project_
     if run_id not in refs and f":{run_id}" not in recovery.operation_id:
         raise HTTPException(status_code=409, detail="Recovery case does not belong to the requested run")
     return kernel, recovery
+
+
+def _require_owned_run_id(principal: Principal, project_id: str, run_id: str | None) -> None:
+    """Reject a client-supplied run_id that is not a run in the caller's project.
+
+    Operator routes use it only as the event-stream target, so a foreign run_id
+    would let one tenant append events to another tenant's run stream.
+    """
+    if run_id is None:
+        return
+    record = get_run_record(run_id)
+    if not record or record["tenant_id"] != principal.tenant_id or record["project_id"] != project_id:
+        raise HTTPException(status_code=404, detail="Run not found in the authorized project scope")
+
+
+def _owned_event_run_id(principal: Principal, project_id: str, candidates: tuple[str | None, ...]) -> str | None:
+    """First candidate that names a run owned by the caller's project, if any."""
+    for candidate in candidates:
+        if not candidate:
+            continue
+        record = get_run_record(str(candidate))
+        if record and record["tenant_id"] == principal.tenant_id and record["project_id"] == project_id:
+            return str(candidate)
+    return None
 
 
 def _record_recovery_event(run_id: str, tenant_id: str, project_id: str, recovery) -> None:
@@ -194,7 +220,13 @@ def get_role_os_manifest(principal: Principal = Depends(get_principal)):
 
 @router.post("/ingest", status_code=202)
 async def enqueue_runtime_work(request: Request):
+    signed = bool(getattr(request.state, HMAC_VERIFIED_STATE_KEY, False))
+    # Without a verified HMAC signature this is an ordinary API call and needs
+    # an authenticated principal scoped to the target project.
+    principal = None if signed else get_principal(request)
     body = RuntimeIngressRequest.model_validate(await request.json())
+    if principal is not None:
+        authorize_project(principal, body.project_id)
     queue = runtime_queue()
     try:
         envelope = queue.put_nowait(operation_id=body.operation_id, payload=body.model_dump())
@@ -306,6 +338,7 @@ def resolve_project_recovery(
     principal: Principal = Depends(get_principal),
 ):
     authorize_project(principal, project_id)
+    _require_owned_run_id(principal, project_id, body.run_id)
     scope = _operator_scope(principal, project_id, f"recovery.resolve:{recovery_id}")
     request_hash = hash_payload({"recovery_id": recovery_id, "status": body.status, "run_id": body.run_id})
     reservation = reserve_idempotency(scope, idempotency_key, request_hash, IDEMPOTENCY_TTL_SECONDS)
@@ -318,18 +351,29 @@ def resolve_project_recovery(
 
     kernel = trust_kernel()
     try:
-        kernel.assert_scope(tenant_id=principal.tenant_id, project_id=project_id)
         updated = kernel.resolve_recovery(
+            tenant_id=principal.tenant_id,
+            project_id=project_id,
             recovery_id=recovery_id,
             status=RecoveryStatus(body.status),
             evidence_refs=(f"operator:{principal.user_id}",),
         )
+    except ReliabilityError as exc:
+        fail_idempotency(scope, idempotency_key, str(exc))
+        if str(exc) == "UNKNOWN_RECOVERY_CASE":
+            raise HTTPException(status_code=404, detail="Recovery case not found") from exc
+        raise HTTPException(status_code=409, detail=f"Recovery resolution failed: {exc}") from exc
     except Exception as exc:
         fail_idempotency(scope, idempotency_key, type(exc).__name__)
         raise HTTPException(status_code=409, detail=f"Recovery resolution failed: {type(exc).__name__}") from exc
 
-    run_id = str(body.run_id or updated.execution_ref or updated.observation_ref or updated.operation_id)
-    _record_recovery_event(run_id, principal.tenant_id, project_id, updated)
+    run_id = _owned_event_run_id(
+        principal,
+        project_id,
+        (body.run_id, updated.execution_ref, updated.observation_ref, updated.operation_id),
+    )
+    if run_id is not None:
+        _record_recovery_event(run_id, principal.tenant_id, project_id, updated)
     response = updated.model_dump(mode="json")
     if not complete_idempotency(scope, idempotency_key, response):
         raise HTTPException(status_code=500, detail="Failed to finalize recovery idempotency record")
@@ -345,6 +389,10 @@ def replay_project_outbox(
     principal: Principal = Depends(get_principal),
 ):
     authorize_project(principal, project_id)
+    _require_owned_run_id(principal, project_id, body.run_id)
+    existing = trust_kernel().store.state.outbox.get(message_id)
+    if existing is None or existing.tenant_id != principal.tenant_id or existing.project_id != project_id:
+        raise HTTPException(status_code=404, detail="Outbox message not found")
     scope = _operator_scope(principal, project_id, f"outbox.replay:{message_id}")
     request_hash = hash_payload({"message_id": message_id, "run_id": body.run_id})
     reservation = reserve_idempotency(scope, idempotency_key, request_hash, IDEMPOTENCY_TTL_SECONDS)
@@ -369,20 +417,25 @@ def replay_project_outbox(
         raise HTTPException(status_code=409, detail=f"Outbox replay failed: {type(exc).__name__}") from exc
 
     message = kernel.store.state.outbox.get(message_id)
-    run_id = str(body.run_id or (message.payload_ref if message else None) or message_id)
-    record_event(
-        run_id,
-        principal.tenant_id,
+    run_id = _owned_event_run_id(
+        principal,
         project_id,
-        "trust",
-        "outbox_updated",
-        safe_payload={
-            "message_id": message_id,
-            "status": result.status,
-            "result_ref": result.result_ref,
-            "error": result.error,
-        },
+        (body.run_id, message.payload_ref if message else None),
     )
+    if run_id is not None:
+        record_event(
+            run_id,
+            principal.tenant_id,
+            project_id,
+            "trust",
+            "outbox_updated",
+            safe_payload={
+                "message_id": message_id,
+                "status": result.status,
+                "result_ref": result.result_ref,
+                "error": result.error,
+            },
+        )
     response = {
         "message_id": result.message_id,
         "status": result.status,
@@ -503,6 +556,8 @@ def retry_run_from_recovery(
         raise
 
     updated_recovery = kernel.resolve_recovery(
+        tenant_id=record["tenant_id"],
+        project_id=record["project_id"],
         recovery_id=body.recovery_id,
         status=RecoveryStatus.RECONCILED,
         evidence_refs=(f"operator:{principal.user_id}", run_id),
@@ -628,6 +683,8 @@ def compensate_run_recovery(
         request={"run_id": run_id, "recovery_id": body.recovery_id},
     )
     updated_recovery = kernel.resolve_recovery(
+        tenant_id=record["tenant_id"],
+        project_id=record["project_id"],
         recovery_id=body.recovery_id,
         status=RecoveryStatus.COMPENSATED,
         evidence_refs=(f"operator:{principal.user_id}", run_id),
