@@ -320,7 +320,7 @@
     },
     {
       "path": "services/langgraph/persistence/database.py",
-      "git_blob_sha": "045c18f028d2c21b7b6c85a623af00799edfcaa1"
+      "git_blob_sha": "1b4fb6911abcebc89aac63e636ea9a149a9ddfb2"
     },
     {
       "path": "services/langgraph/persistence/idempotency.py",
@@ -336,7 +336,7 @@
     },
     {
       "path": "services/langgraph/persistence/sqlite_db.py",
-      "git_blob_sha": "6ca82860118bd1be3f69df38419b2d2a73901416"
+      "git_blob_sha": "67f025b9e72f0d587eb523d9d569f968cf35dc81"
     },
     {
       "path": "services/langgraph/persistence/trust_kernel.py",
@@ -380,7 +380,7 @@
     },
     {
       "path": "services/langgraph/tests/test_production_foundation.py",
-      "git_blob_sha": "fa165a3da75c6d31ed91ceadbbdf87db9d5f0dd1"
+      "git_blob_sha": "a220e0eab09fdf49b0143e504455bf94d48f1366"
     },
     {
       "path": "services/langgraph/vercel.json",

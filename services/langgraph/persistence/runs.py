@@ -24,32 +24,6 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def init_runs_table() -> None:
-    if is_postgres():
-        return
-    with transaction(write=True) as db:
-        db.execute(
-            """
-            CREATE TABLE IF NOT EXISTS runs (
-                run_id TEXT PRIMARY KEY,
-                tenant_id TEXT NOT NULL,
-                project_id TEXT NOT NULL,
-                pipeline TEXT NOT NULL,
-                status TEXT NOT NULL,
-                metadata TEXT,
-                result TEXT,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            )
-            """
-        )
-        db.execute("CREATE INDEX IF NOT EXISTS idx_runs_tenant_project ON runs (tenant_id, project_id)")
-        db.execute("CREATE INDEX IF NOT EXISTS idx_runs_status_updated ON runs (status, updated_at DESC)")
-
-
-init_runs_table()
-
-
 def _row_to_record(row) -> dict:
     record = normalize_record(row)
     record["metadata"] = decode_json(record.get("metadata"), {})

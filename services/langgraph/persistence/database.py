@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Any, Iterator
 from uuid import UUID
 
-from services.langgraph.persistence.sqlite_db import DB_PATH, init_db
+from services.langgraph.persistence import sqlite_db
 
 _VALID_BACKENDS = {"sqlite", "postgres"}
 
@@ -84,8 +84,10 @@ class DBSession:
 def transaction(*, write: bool = False) -> Iterator[DBSession]:
     postgres = is_postgres()
     if not postgres:
-        init_db()
-        conn = sqlite3.connect(DB_PATH, isolation_level=None)
+        # Resolve the path at call time so init_db() and this connection always
+        # target the same file, even if sqlite_db.DB_PATH was repointed.
+        sqlite_db.init_db()
+        conn = sqlite3.connect(sqlite_db.DB_PATH, isolation_level=None)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
         conn.execute("PRAGMA busy_timeout = 5000")

@@ -472,6 +472,21 @@ _MIGRATIONS = [
         );
         CREATE INDEX IF NOT EXISTS idx_projects_tenant ON projects(tenant_id);
     """),
+    (12, """
+        CREATE TABLE IF NOT EXISTS runs (
+            run_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            pipeline TEXT NOT NULL,
+            status TEXT NOT NULL,
+            metadata TEXT,
+            result TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_runs_tenant_project ON runs (tenant_id, project_id);
+        CREATE INDEX IF NOT EXISTS idx_runs_status_updated ON runs (status, updated_at DESC);
+    """),
 ]
 
 
