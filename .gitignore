@@ -41,3 +41,8 @@ scratch/
 *.db-journal
 *.db-wal
 *.db-shm
+
+# FreeVideoForge local runtime (state, scene clips, rendered output)
+.freevideoforge/
+out/
+.venv-fvf/

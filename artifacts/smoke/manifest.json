@@ -1,0 +1,433 @@
+{
+  "run_id": "run-20260915-011010-999588",
+  "version": "1.0.0",
+  "created_at": 1789434610.914758,
+  "completed_at": 1789434624.408326,
+  "config_hash": "5f89ea3e9c9f52813aa68177e8c0c26f10121bf2aec74c0ec92c62a8d15d9159",
+  "project": {
+    "run_id": "run-20260915-011010-999588",
+    "topic": "Why the moon changes shape",
+    "brief": "",
+    "intent": "educate",
+    "audience": "curious general audience",
+    "format": "short-form explainer",
+    "duration": 9.0,
+    "aspect": "9:16",
+    "style_system": "editorial",
+    "narration_strategy": "single narrator, second person, plain language",
+    "language": "en",
+    "seed": 2026,
+    "scenes": [
+      {
+        "id": "s01",
+        "index": 0,
+        "duration": 4.6,
+        "content": {
+          "narrative_function": "hook",
+          "voiceover": "Why the Moon Changes Shape?",
+          "text_overlay": "Why the Moon Changes Shape?",
+          "kicker": "START HERE",
+          "key_point": "Why the Moon Changes Shape?"
+        },
+        "visual": {
+          "visual_subject": "opening title card for 'Why the moon changes shape'",
+          "environment": "calm, considered, print-like; soft key from upper left, deep falloff",
+          "composition": "centered, generous negative space above",
+          "shot_size": "wide establishing",
+          "lighting": "soft key from upper left, deep falloff",
+          "palette": [
+            "#0B1020",
+            "#161E38",
+            "#F5C451",
+            "#F7F5EF",
+            "#8E9BB7"
+          ],
+          "motif": "orbit",
+          "continuity": "continues from: cold open, screen at rest",
+          "media_prompt": "wide establishing abstract orbit composition, opening title card for 'Why the moon changes shape', calm, considered, print-like, soft key from upper left, deep falloff, palette #0B1020 #161E38 #F5C451, centered, generous negative space above, no text",
+          "negative_constraints": [
+            "no text artifacts",
+            "no watermark",
+            "no photoreal human faces",
+            "no brand marks",
+            "no illegible small type"
+          ]
+        },
+        "motion": {
+          "camera": "rise",
+          "motion": "tilt_up",
+          "zoom_start": 1.05,
+          "zoom_end": 1.09,
+          "pan_x": 0.0,
+          "pan_y": 0.05,
+          "parallax": 0.332,
+          "transition": "fade",
+          "transition_seconds": 0.45
+        },
+        "seed": 2026000,
+        "clip_path": "<run work dir>/clips/s01.mp4",
+        "audio_path": "<run work dir>/audio/s01.wav",
+        "audio_duration": 2.303401,
+        "state": "DONE",
+        "attempts": 1,
+        "error": null,
+        "input_hash": "e3bd2a236cade4f3919aff0789429975281e589f75b77b5f14e649c5e1676437"
+      },
+      {
+        "id": "s02",
+        "index": 1,
+        "duration": 4.4,
+        "content": {
+          "narrative_function": "payoff",
+          "voiceover": "If you remember one thing, make it that.",
+          "text_overlay": "Remember One Thing",
+          "kicker": "REMEMBER THIS",
+          "key_point": "Remember One Thing"
+        },
+        "visual": {
+          "visual_subject": "closing statement card, composition at rest",
+          "environment": "calm, considered, print-like; soft key from upper left, deep falloff",
+          "composition": "centered, calm, everything settled",
+          "shot_size": "wide resolve",
+          "lighting": "soft key from upper left, deep falloff",
+          "palette": [
+            "#0B1020",
+            "#161E38",
+            "#F5C451",
+            "#F7F5EF",
+            "#8E9BB7"
+          ],
+          "motif": "strata",
+          "continuity": "continues from: orbit field settled at 1.09x zoom, accent colour holding centre",
+          "media_prompt": "wide resolve abstract strata composition, closing statement card, composition at rest, calm, considered, print-like, soft key from upper left, deep falloff, palette #0B1020 #161E38 #F5C451, centered, calm, everything settled, no text",
+          "negative_constraints": [
+            "no text artifacts",
+            "no watermark",
+            "no photoreal human faces",
+            "no brand marks",
+            "no illegible small type"
+          ]
+        },
+        "motion": {
+          "camera": "settle down",
+          "motion": "tilt_down",
+          "zoom_start": 1.09,
+          "zoom_end": 1.04,
+          "pan_x": 0.0,
+          "pan_y": -0.04,
+          "parallax": 0.459,
+          "transition": "dip_to_ink",
+          "transition_seconds": 0.45
+        },
+        "seed": 2026001,
+        "clip_path": "<run work dir>/clips/s02.mp4",
+        "audio_path": "<run work dir>/audio/s02.wav",
+        "audio_duration": 3.391701,
+        "state": "DONE",
+        "attempts": 1,
+        "error": null,
+        "input_hash": "0fa176c81bcebc9cd45a9d5be988a291620630d4583b646dbd3d4a1c3e435edc"
+      }
+    ],
+    "render": {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30,
+      "video_codec": "libx264",
+      "audio_codec": "aac",
+      "crf": 20,
+      "preset": "medium",
+      "pixel_format": "yuv420p",
+      "audio_sample_rate": 44100,
+      "audio_bitrate": "160k",
+      "burn_captions": true
+    },
+    "providers": {
+      "script": "template",
+      "storyboard": "deterministic",
+      "speech": "espeak",
+      "captions": "script_derived",
+      "render": "ffmpeg_motion",
+      "visual_tier": "ffmpeg_motion"
+    }
+  },
+  "providers": {
+    "resolved": {
+      "script": "template",
+      "storyboard": "deterministic",
+      "speech": "espeak",
+      "captions": "script_derived",
+      "render": "ffmpeg_motion",
+      "visual_tier": "ffmpeg_motion"
+    },
+    "visual_tier": "ffmpeg_motion",
+    "capability_tier": "C",
+    "active": [
+      {
+        "name": "script_derived",
+        "kind": "captions",
+        "available": true,
+        "detail": "Caption timing derived from narration text and measured scene audio durations.",
+        "remediation": "",
+        "requires_payment": false,
+        "requires_large_download": false,
+        "version": "1.0.0",
+        "metadata": {
+          "technique": "script_derived",
+          "alignment": "proportional"
+        }
+      },
+      {
+        "name": "structural",
+        "kind": "quality",
+        "available": true,
+        "detail": "Deterministic structural validation via ffprobe and a full decode pass.",
+        "remediation": "Install FFmpeg (which provides ffprobe): sudo apt-get install -y ffmpeg",
+        "requires_payment": false,
+        "requires_large_download": false,
+        "version": "6.1.1-3ubuntu5",
+        "metadata": {}
+      },
+      {
+        "name": "ffmpeg_motion",
+        "kind": "render",
+        "available": true,
+        "detail": "Procedural motion-graphics renderer. CPU only, no model, no network.",
+        "remediation": "",
+        "requires_payment": false,
+        "requires_large_download": false,
+        "version": "6.1.1-3ubuntu5",
+        "metadata": {
+          "ffmpeg": "/usr/bin/ffmpeg",
+          "ffprobe": "/usr/bin/ffprobe",
+          "technique": "procedural_ffmpeg",
+          "display_font": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+          "font_degraded": false,
+          "has_libx264": true
+        }
+      },
+      {
+        "name": "template",
+        "kind": "script",
+        "available": true,
+        "detail": "Deterministic narrative-structure compiler. No model, no network, no credentials.",
+        "remediation": "",
+        "requires_payment": false,
+        "requires_large_download": false,
+        "version": "1.0.0",
+        "metadata": {
+          "words_per_second": 2.45
+        }
+      },
+      {
+        "name": "espeak",
+        "kind": "speech",
+        "available": true,
+        "detail": "Local formant-synthesis TTS. Offline, free, no model download.",
+        "remediation": "",
+        "requires_payment": false,
+        "requires_large_download": false,
+        "version": "eSpeak NG text-to-speech: 1.51  Data at: /usr/lib/x86_64-linux-gnu/espeak-ng-data",
+        "metadata": {
+          "binary": "/usr/bin/espeak-ng",
+          "voice_quality": "formant_synthesis"
+        }
+      },
+      {
+        "name": "silence",
+        "kind": "speech",
+        "available": true,
+        "detail": "Timed silence. Always available; produces no narration. Install a local TTS engine for real voiceover.",
+        "remediation": "Free local speech engines:\n  * espeak-ng : sudo apt-get install espeak-ng | brew install espeak-ng\n  * Piper     : pip install piper-tts, then download one ONNX voice",
+        "requires_payment": false,
+        "requires_large_download": false,
+        "version": "1.0.0",
+        "metadata": {}
+      },
+      {
+        "name": "deterministic",
+        "kind": "storyboard",
+        "available": true,
+        "detail": "Seeded shot planner with explicit content/visual/motion separation.",
+        "remediation": "",
+        "requires_payment": false,
+        "requires_large_download": false,
+        "version": "1.0.0",
+        "metadata": {
+          "style_systems": [
+            "clean",
+            "editorial",
+            "neon",
+            "slate",
+            "warm"
+          ]
+        }
+      }
+    ],
+    "unavailable": [
+      {
+        "name": "local_image",
+        "kind": "image",
+        "available": false,
+        "detail": "No local image backend responded at http://127.0.0.1:8188.",
+        "remediation": "Tier B (local image generation + animation) needs a running local image backend (e.g. ComfyUI on http://127.0.0.1:8188) with a checkpoint you have downloaded and licensed, plus FVF_LOCAL_IMAGE_WORKFLOW pointing at an exported workflow. FreeVideoForge downloads nothing on your behalf.",
+        "requires_payment": false,
+        "requires_large_download": true,
+        "version": null,
+        "metadata": {
+          "accelerator": {
+            "cuda": false,
+            "mps": false,
+            "device": null,
+            "vram_mb": 0
+          },
+          "endpoint": "http://127.0.0.1:8188"
+        }
+      },
+      {
+        "name": "ollama",
+        "kind": "script",
+        "available": false,
+        "detail": "No Ollama runtime responded at http://127.0.0.1:11434.",
+        "remediation": "Optional. To enable local LLM scripting:\n  1. Install Ollama (free, runs locally): https://ollama.com\n  2. Pull a small model, e.g. `ollama pull llama3.2:3b` (a multi-GB download you choose to make).\n  3. Optionally set FVF_OLLAMA_MODEL.\nWithout it, the deterministic template engine is used.",
+        "requires_payment": false,
+        "requires_large_download": true,
+        "version": null,
+        "metadata": {
+          "endpoint": "http://127.0.0.1:11434"
+        }
+      },
+      {
+        "name": "piper",
+        "kind": "speech",
+        "available": false,
+        "detail": "The `piper` executable is not on PATH.",
+        "remediation": "Piper is free and offline (MIT licensed). To enable it:\n  1. pip install piper-tts\n  2. Download one voice (~20-120 MB) from the Piper voices release\n     and point FVF_PIPER_MODEL at the .onnx file.\nFreeVideoForge will not download a voice model for you.",
+        "requires_payment": false,
+        "requires_large_download": true,
+        "version": null,
+        "metadata": {}
+      },
+      {
+        "name": "local_video",
+        "kind": "video",
+        "available": false,
+        "detail": "No local video backend responded at http://127.0.0.1:8188.",
+        "remediation": "Tier A (local generative video) needs all of:\n  1. A GPU with enough VRAM for the chosen model.\n  2. A running local backend, e.g. ComfyUI on http://127.0.0.1:8188.\n  3. A model checkpoint you have downloaded and whose licence you have read.\nFreeVideoForge will not download checkpoints or start services for you. Once a backend is running, re-run `freevideoforge doctor`.",
+        "requires_payment": false,
+        "requires_large_download": true,
+        "version": null,
+        "metadata": {
+          "accelerator": {
+            "cuda": false,
+            "mps": false,
+            "device": null,
+            "vram_mb": 0
+          },
+          "endpoint": "http://127.0.0.1:8188"
+        }
+      }
+    ],
+    "technique": "procedural_ffmpeg",
+    "technique_note": "Scene media is procedural motion graphics rendered on the CPU. It is not diffusion video and is not labelled as such.",
+    "script_content_source": "scaffold",
+    "caption_technique": "script_derived",
+    "narration_is_speech": true
+  },
+  "assets": [
+    {
+      "kind": "scene_clip",
+      "scene_id": "s01",
+      "path": "<run work dir>/clips/s01.mp4",
+      "sha256": "9c48f954e51fb64932e66c8b89f01244a08d5ebc13abd3fa33bf09e19f809b86",
+      "bytes": 951419,
+      "provider": "ffmpeg_motion",
+      "duration": 4.6,
+      "seed": 2026000,
+      "input_hash": "e3bd2a236cade4f3919aff0789429975281e589f75b77b5f14e649c5e1676437"
+    },
+    {
+      "kind": "scene_audio",
+      "scene_id": "s01",
+      "path": "<run work dir>/audio/s01.wav",
+      "sha256": "ebb7602fc0ecb30cad22e4d442a362985d22b4a6ace5468e47fc60caa2e438a9",
+      "bytes": 101624,
+      "provider": "espeak",
+      "duration": 2.303401,
+      "seed": 2026000,
+      "input_hash": "e3bd2a236cade4f3919aff0789429975281e589f75b77b5f14e649c5e1676437"
+    },
+    {
+      "kind": "scene_clip",
+      "scene_id": "s02",
+      "path": "<run work dir>/clips/s02.mp4",
+      "sha256": "6cb04b20626be36b7f748f28f45094570a3119a900c3c9a3a526828b7d320ca7",
+      "bytes": 888566,
+      "provider": "ffmpeg_motion",
+      "duration": 4.4,
+      "seed": 2026001,
+      "input_hash": "0fa176c81bcebc9cd45a9d5be988a291620630d4583b646dbd3d4a1c3e435edc"
+    },
+    {
+      "kind": "scene_audio",
+      "scene_id": "s02",
+      "path": "<run work dir>/audio/s02.wav",
+      "sha256": "61e12fc05babdbcb1e5e22adcc0abc0f6d15df95f75b50bd341b373dfe24ae2d",
+      "bytes": 149618,
+      "provider": "espeak",
+      "duration": 3.391701,
+      "seed": 2026001,
+      "input_hash": "0fa176c81bcebc9cd45a9d5be988a291620630d4583b646dbd3d4a1c3e435edc"
+    }
+  ],
+  "outputs": {
+    "final_video": "<run output dir>/final.mp4",
+    "thumbnail": "<run output dir>/thumbnail.jpg",
+    "script": "<run output dir>/script.json",
+    "storyboard": "<run output dir>/storyboard.json",
+    "captions": "<run output dir>/captions.srt",
+    "manifest": "<run output dir>/manifest.json",
+    "audio": "<run work dir>/audio/master.wav"
+  },
+  "environment": {
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "cpu_count": 4,
+    "render_workers": 3
+  },
+  "zero_paid_api_spend": true,
+  "credentials_used": [],
+  "schema_version": "freevideoforge/manifest/v1",
+  "requested": {
+    "topic": "Why the moon changes shape",
+    "brief": "",
+    "duration": 9.0,
+    "aspect": "9:16",
+    "preset": "ffmpeg_motion",
+    "style": "auto",
+    "scenes": null,
+    "fps": 30,
+    "height": null,
+    "voice": "auto",
+    "music": "ambient",
+    "seed": 2026,
+    "language": "en",
+    "burn_captions": true,
+    "output_dir": null,
+    "run_id": null,
+    "allow_paid": false,
+    "script_provider": "auto",
+    "speech_provider": "auto",
+    "quality_preset": "balanced"
+  },
+  "duration": {
+    "requested": 9.0,
+    "planned": 9.0,
+    "rendered": 9.0,
+    "drift_seconds": 0.0,
+    "note": "Scene durations were extended where narration needed more time than the requested duration allowed."
+  },
+  "warnings": [],
+  "remote_fetching_enabled": false
+}

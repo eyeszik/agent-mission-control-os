@@ -1,0 +1,133 @@
+{
+  "schema_version": "freevideoforge/storyboard/v1",
+  "run_id": "run-20260915-011010-999588",
+  "topic": "Why the moon changes shape",
+  "style_system": "editorial",
+  "aspect": "9:16",
+  "render": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "video_codec": "libx264",
+    "audio_codec": "aac",
+    "crf": 20,
+    "preset": "medium",
+    "pixel_format": "yuv420p",
+    "audio_sample_rate": 44100,
+    "audio_bitrate": "160k",
+    "burn_captions": true
+  },
+  "total_duration": 9.0,
+  "scenes": [
+    {
+      "id": "s01",
+      "index": 0,
+      "duration": 4.6,
+      "content": {
+        "narrative_function": "hook",
+        "voiceover": "Why the Moon Changes Shape?",
+        "text_overlay": "Why the Moon Changes Shape?",
+        "kicker": "START HERE",
+        "key_point": "Why the Moon Changes Shape?"
+      },
+      "visual": {
+        "visual_subject": "opening title card for 'Why the moon changes shape'",
+        "environment": "calm, considered, print-like; soft key from upper left, deep falloff",
+        "composition": "centered, generous negative space above",
+        "shot_size": "wide establishing",
+        "lighting": "soft key from upper left, deep falloff",
+        "palette": [
+          "#0B1020",
+          "#161E38",
+          "#F5C451",
+          "#F7F5EF",
+          "#8E9BB7"
+        ],
+        "motif": "orbit",
+        "continuity": "continues from: cold open, screen at rest",
+        "media_prompt": "wide establishing abstract orbit composition, opening title card for 'Why the moon changes shape', calm, considered, print-like, soft key from upper left, deep falloff, palette #0B1020 #161E38 #F5C451, centered, generous negative space above, no text",
+        "negative_constraints": [
+          "no text artifacts",
+          "no watermark",
+          "no photoreal human faces",
+          "no brand marks",
+          "no illegible small type"
+        ]
+      },
+      "motion": {
+        "camera": "rise",
+        "motion": "tilt_up",
+        "zoom_start": 1.05,
+        "zoom_end": 1.09,
+        "pan_x": 0.0,
+        "pan_y": 0.05,
+        "parallax": 0.332,
+        "transition": "fade",
+        "transition_seconds": 0.45
+      },
+      "seed": 2026000,
+      "clip_path": null,
+      "audio_path": "/tmp/claude-0/smoke/.freevideoforge/work/run-20260915-011010-999588/audio/s01.wav",
+      "audio_duration": 2.303401,
+      "state": "PENDING",
+      "attempts": 0,
+      "error": null,
+      "input_hash": null
+    },
+    {
+      "id": "s02",
+      "index": 1,
+      "duration": 4.4,
+      "content": {
+        "narrative_function": "payoff",
+        "voiceover": "If you remember one thing, make it that.",
+        "text_overlay": "Remember One Thing",
+        "kicker": "REMEMBER THIS",
+        "key_point": "Remember One Thing"
+      },
+      "visual": {
+        "visual_subject": "closing statement card, composition at rest",
+        "environment": "calm, considered, print-like; soft key from upper left, deep falloff",
+        "composition": "centered, calm, everything settled",
+        "shot_size": "wide resolve",
+        "lighting": "soft key from upper left, deep falloff",
+        "palette": [
+          "#0B1020",
+          "#161E38",
+          "#F5C451",
+          "#F7F5EF",
+          "#8E9BB7"
+        ],
+        "motif": "strata",
+        "continuity": "continues from: orbit field settled at 1.09x zoom, accent colour holding centre",
+        "media_prompt": "wide resolve abstract strata composition, closing statement card, composition at rest, calm, considered, print-like, soft key from upper left, deep falloff, palette #0B1020 #161E38 #F5C451, centered, calm, everything settled, no text",
+        "negative_constraints": [
+          "no text artifacts",
+          "no watermark",
+          "no photoreal human faces",
+          "no brand marks",
+          "no illegible small type"
+        ]
+      },
+      "motion": {
+        "camera": "settle down",
+        "motion": "tilt_down",
+        "zoom_start": 1.09,
+        "zoom_end": 1.04,
+        "pan_x": 0.0,
+        "pan_y": -0.04,
+        "parallax": 0.459,
+        "transition": "dip_to_ink",
+        "transition_seconds": 0.45
+      },
+      "seed": 2026001,
+      "clip_path": null,
+      "audio_path": "/tmp/claude-0/smoke/.freevideoforge/work/run-20260915-011010-999588/audio/s02.wav",
+      "audio_duration": 3.391701,
+      "state": "PENDING",
+      "attempts": 0,
+      "error": null,
+      "input_hash": null
+    }
+  ]
+}
