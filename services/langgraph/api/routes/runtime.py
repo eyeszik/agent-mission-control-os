@@ -23,6 +23,7 @@ from services.langgraph.persistence.invalidation import (
 )
 from services.langgraph.persistence.lineage import list_project_lineage_remediations, resolve_lineage_remediation_for_run
 from services.langgraph.persistence.runs import get_run_record, update_run_status
+from services.langgraph.persistence.tenancy import ProjectOwnershipError
 from services.langgraph.security.auth import Principal, authorize_project, authorize_resource, get_principal
 from services.langgraph.security.hmac_ingress import HMAC_VERIFIED_STATE_KEY
 
@@ -261,6 +262,8 @@ def get_project_trust(project_id: str, principal: Principal = Depends(get_princi
     authorize_project(principal, project_id)
     try:
         return _project_trust_details(project_id, principal.tenant_id)
+    except ProjectOwnershipError:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"trust projection unavailable: {type(exc).__name__}") from exc
 
@@ -270,6 +273,8 @@ def get_project_outbox(project_id: str, principal: Principal = Depends(get_princ
     authorize_project(principal, project_id)
     try:
         return _project_trust_details(project_id, principal.tenant_id)["recent_outbox_messages"]
+    except ProjectOwnershipError:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"trust outbox unavailable: {type(exc).__name__}") from exc
 
@@ -279,6 +284,8 @@ def get_project_recovery(project_id: str, principal: Principal = Depends(get_pri
     authorize_project(principal, project_id)
     try:
         return _project_trust_details(project_id, principal.tenant_id)["recent_recovery_cases"]
+    except ProjectOwnershipError:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"trust recovery unavailable: {type(exc).__name__}") from exc
 

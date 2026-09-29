@@ -3,6 +3,8 @@ from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
+from services.langgraph.persistence.runs import create_run_record
+
 from services.langgraph.agency.execution.models import (
     CompletionCriterionResult,
     CompletionEvaluation,
@@ -31,6 +33,7 @@ def test_proof_bundle_round_trip():
     tenant_id = "tenant_1"
     project_id = "proj_1"
     now = datetime.now(timezone.utc)
+    create_run_record(run_id, tenant_id, project_id, "branding_marketing_agency", "running", {})
 
     put_dispatch_permit(
         run_id,

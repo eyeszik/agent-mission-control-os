@@ -104,6 +104,10 @@ NEXT_PUBLIC_AUTH_MODE=local
 
 Set `OPENAI_API_KEY` only if real provider generation is desired. Without it, generation is explicitly degraded and delivery remains blocked.
 
+Approvals are role-gated and separated from authorship: only `AMC_APPROVER_ROLES` (default `reviewer,approver,admin,owner`) may decide an approval, and the user who started a run cannot approve it. To approve your own runs in single-user local development, set `AMC_LOCAL_ROLE=admin` and `AMC_ALLOW_SELF_APPROVAL=true`; production configuration rejects the self-approval switch.
+
+Every provider call has a timeout (`AMC_LLM_TIMEOUT_SECONDS`) and output cap (`AMC_LLM_MAX_OUTPUT_TOKENS`), token usage is recorded per call, and each run has a token budget (`AMC_MAX_TOKENS_PER_RUN`) that retries also draw from; an exhausted budget degrades generation, which blocks release. Run creation is limited per tenant (`AMC_MAX_RUNS_PER_TENANT_PER_HOUR`, `AMC_MAX_ACTIVE_RUNS_PER_TENANT`) and returns `429` with `Retry-After` when exceeded.
+
 ### 2. Install
 
 ```bash

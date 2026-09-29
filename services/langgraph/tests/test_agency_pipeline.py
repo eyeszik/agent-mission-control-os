@@ -6,6 +6,7 @@ from services.langgraph.graph.agency.llm import GenerationOutcome
 from services.langgraph.graph.models import AgentRun
 from services.langgraph.agency.exporter import export_idea_workspace, resolve_export_root
 from services.langgraph.persistence.approvals import get_approvals_for_run, resolve_approval
+from services.langgraph.persistence.runs import create_run_record
 from services.langgraph.quality.brand_safety import evaluate_brand_compliance
 
 
@@ -21,7 +22,7 @@ def _make_run(**metadata_overrides) -> AgentRun:
         "constraints": ["No health claims"],
     }
     brief.update(metadata_overrides)
-    return AgentRun(
+    run = AgentRun(
         id=uuid4(),
         tenant_id="tenant-agency-test",
         project_id="proj-agency-test",
@@ -30,6 +31,10 @@ def _make_run(**metadata_overrides) -> AgentRun:
         updated_at=now,
         metadata={"input_data": {"brief": brief}},
     )
+    # The API always persists the run before invoking the graph; approvals and
+    # events reference it (enforced by foreign keys on PostgreSQL).
+    create_run_record(str(run.id), run.tenant_id, run.project_id, "branding_marketing_agency", "running", run.metadata)
+    return run
 
 
 def _initial_state(run: AgentRun) -> dict:

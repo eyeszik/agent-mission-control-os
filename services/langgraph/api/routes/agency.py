@@ -49,6 +49,7 @@ from services.langgraph.persistence.proofs import (
     put_observation_receipt,
 )
 from services.langgraph.persistence.runs import (
+    RunLimitExceeded,
     compare_and_set_run_status,
     create_run_record,
     get_run_record,
@@ -717,7 +718,7 @@ def create_agency_run(
         request={"project_id": req.project_id, "brief": safe_brief},
     )
     now = datetime.now(timezone.utc)
-    metadata = {"input_data": {"brief": safe_brief}}
+    metadata = {"input_data": {"brief": safe_brief}, "initiated_by": principal.user_id}
     run = AgentRun(
         id=run_id,
         tenant_id=principal.tenant_id,
@@ -727,7 +728,18 @@ def create_agency_run(
         updated_at=now,
         metadata=metadata,
     )
-    create_run_record(run_id, principal.tenant_id, req.project_id, PIPELINE_NAME, "running", metadata)
+    try:
+        create_run_record(
+            run_id, principal.tenant_id, req.project_id, PIPELINE_NAME, "running", metadata, enforce_limits=True
+        )
+    except RunLimitExceeded as exc:
+        fail_idempotency(scope, idempotency_key, "run_limit_exceeded")
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=None, status=IdempotencyStatus.FAILED)
+        raise HTTPException(
+            status_code=429,
+            detail=exc.reason,
+            headers={"Retry-After": str(exc.retry_after_seconds)},
+        ) from exc
     emit_lifecycle_event(
         principal.tenant_id,
         req.project_id,

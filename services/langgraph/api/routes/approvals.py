@@ -16,6 +16,7 @@ from services.langgraph.persistence.idempotency import (
 )
 from services.langgraph.persistence.runs import compare_and_set_run_status, get_run_record
 from services.langgraph.security.auth import Principal, authorize_resource, get_principal
+from services.langgraph.security.approval_authority import assert_may_decide_approval
 
 router = APIRouter()
 IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
@@ -53,6 +54,10 @@ def decide_approval(
     if not approval:
         raise HTTPException(status_code=404, detail="Approval not found")
     authorize_resource(principal, approval["tenant_id"], approval["project_id"])
+    approval_run = get_run_record(approval["run_id"])
+    if approval_run is not None:
+        # Role and separation-of-duties checks run before any state changes.
+        assert_may_decide_approval(principal, approval_run, body.decision)
 
     scope = _scope(principal, approval_id)
     reservation = reserve_idempotency(

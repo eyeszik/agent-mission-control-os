@@ -19,6 +19,7 @@ from services.langgraph.app.config import (
 from services.langgraph.security.hmac_ingress import HMACIngressConfig, HMACIngressMiddleware
 from services.langgraph.persistence.checkpoints import close_checkpointer
 from services.langgraph.persistence.database import database_backend, ping_database
+from services.langgraph.persistence.tenancy import ProjectOwnershipError
 
 API_VERSION = "0.2.0"
 
@@ -36,6 +37,14 @@ app = FastAPI(
     description="LangGraph execution and workflow manager with local and production persistence modes",
     lifespan=lifespan,
 )
+
+
+
+@app.exception_handler(ProjectOwnershipError)
+async def _project_ownership_error(_request, _exc: ProjectOwnershipError):
+    # A project id registered to another tenant must never be written into.
+    return JSONResponse(status_code=403, content={"detail": "Project belongs to a different tenant"})
+
 
 _startup_config = load_runtime_config()
 app.add_middleware(

@@ -13,10 +13,15 @@ from services.langgraph.agency.reliability.models import (
 )
 from services.langgraph.agency.reliability.store import ReliabilityState, ReliabilityStoreError
 from services.langgraph.persistence.database import json_param, table, transaction
+from services.langgraph.persistence.tenancy import ensure_tenant_project
 
 
-def _payload_to_model(model_cls, payload: str):
-    return model_cls.model_validate_json(payload)
+def _payload_to_model(model_cls, payload):
+    # SQLite returns the stored JSON text; PostgreSQL returns jsonb already
+    # decoded into Python objects.
+    if isinstance(payload, (str, bytes, bytearray)):
+        return model_cls.model_validate_json(payload)
+    return model_cls.model_validate(payload)
 
 
 class DatabaseReliabilityStore:
@@ -50,6 +55,7 @@ class DatabaseReliabilityStore:
 
     @staticmethod
     def put_binding(tx, value: TenantProjectBinding) -> None:
+        ensure_tenant_project(tx, value.tenant_id, value.project_id)
         tx.execute(
             f"""
             INSERT INTO {table('tenant_project_bindings')}

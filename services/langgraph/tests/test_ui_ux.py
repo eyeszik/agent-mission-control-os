@@ -362,9 +362,13 @@ def _run(**brief_overrides):
     brief = {"brand_name": "Northwind Coffee", "goals": ["Grow awareness"], "target_audience": "Urban professionals",
              "tone": "warm and confident", "channels": ["instagram", "email"], "constraints": ["No health claims"]}
     brief.update(brief_overrides)
+    from services.langgraph.persistence.runs import create_run_record
+
     now = datetime.utcnow()
-    return AgentRun(id=uuid4(), tenant_id="tenant-uiux", project_id="proj-uiux", status="running",
-                    created_at=now, updated_at=now, metadata={"input_data": {"brief": brief}})
+    run = AgentRun(id=uuid4(), tenant_id="tenant-uiux", project_id="proj-uiux", status="running",
+                   created_at=now, updated_at=now, metadata={"input_data": {"brief": brief}})
+    create_run_record(str(run.id), run.tenant_id, run.project_id, "branding_marketing_agency", "running", run.metadata)
+    return run
 
 
 def _invoke(run):

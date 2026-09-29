@@ -15,6 +15,7 @@ def test_production_config_accepts_fail_closed_fixture(monkeypatch):
     monkeypatch.setenv("AMC_CORS_ALLOWED_ORIGINS", "https://mission.example.com")
     monkeypatch.setenv("AMC_PUBLICATION_MODE", "disabled")
     monkeypatch.setenv("AMC_PAID_MEDIA_MODE", "disabled")
+    monkeypatch.delenv("AMC_ALLOW_SELF_APPROVAL", raising=False)
 
     from services.langgraph.app.config import production_config_errors
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi.testclient import TestClient
 
 from services.langgraph.app.main import app
+from services.langgraph.persistence.database import database_backend
 
 client = TestClient(app)
 
@@ -20,7 +21,7 @@ def test_ready_is_200_with_valid_local_config():
     body = response.json()
     assert body["ready"] is True
     assert body["errors"] == []
-    assert body["database_backend"] == "sqlite"
+    assert body["database_backend"] == database_backend()
 
 
 def test_ready_is_503_with_invalid_cors_configuration(monkeypatch):

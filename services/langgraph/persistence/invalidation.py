@@ -258,7 +258,7 @@ def create_invalidation_obligation(
                 node_id,
                 event_class,
                 state,
-                1 if demanded else 0,
+                bool(demanded),
                 cause_k,
                 json_param(payload),
                 now,
@@ -451,9 +451,9 @@ def open_demanded_obligations(
 ) -> list[dict]:
     query = f"""
         SELECT * FROM {table('invalidation_obligations')}
-        WHERE run_id = ? AND demanded = 1 AND state IN ('OPEN', 'HOOK_GAP')
+        WHERE run_id = ? AND demanded = ? AND state IN ('OPEN', 'HOOK_GAP')
     """
-    params: list[object] = [run_id]
+    params: list[object] = [run_id, True]
     if artifact_branch:
         query += " AND artifact_branch = ?"
         params.append(artifact_branch)

@@ -6,6 +6,7 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Any, Iterator
+from uuid import UUID
 
 from services.langgraph.persistence.sqlite_db import DB_PATH, init_db
 
@@ -49,7 +50,10 @@ def json_param(value: Any) -> Any:
 def decode_json(value: Any, default: Any = None) -> Any:
     if value is None:
         return default
-    if isinstance(value, str):
+    # SQLite stores JSON as text. psycopg already decodes json/jsonb columns,
+    # so on PostgreSQL a str is a JSON string value (e.g. jsonb '"Option A"')
+    # and must not be parsed a second time.
+    if isinstance(value, str) and not is_postgres():
         return json.loads(value)
     return value
 
@@ -59,6 +63,10 @@ def normalize_record(row: Any) -> dict:
     for key, value in list(record.items()):
         if isinstance(value, datetime):
             record[key] = value.isoformat()
+        elif isinstance(value, UUID):
+            # PostgreSQL uuid columns decode to uuid.UUID; SQLite stores text.
+            # Normalize so records serialize identically on both backends.
+            record[key] = str(value)
     return record
 
 

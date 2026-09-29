@@ -458,6 +458,20 @@ _MIGRATIONS = [
         CREATE INDEX IF NOT EXISTS idx_invalidation_obligations_branch
           ON invalidation_obligations(run_id, artifact_branch, event_class, updated_at DESC);
     """),
+    (11, """
+        CREATE TABLE IF NOT EXISTS tenants (
+            tenant_id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS projects (
+            project_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            name TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_projects_tenant ON projects(tenant_id);
+    """),
 ]
 
 

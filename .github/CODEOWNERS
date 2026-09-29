@@ -1,0 +1,12 @@
+# Changes to security, persistence, schema, CI and integrity files need the
+# repository owner's review. Takes effect when the master branch ruleset
+# requires code-owner review.
+*                                         @eyeszik
+/services/langgraph/security/             @eyeszik
+/services/langgraph/persistence/          @eyeszik
+/services/langgraph/app/config.py         @eyeszik
+/services/langgraph/api/routes/           @eyeszik
+/supabase/                                @eyeszik
+/scripts/verify_*.py                      @eyeszik
+/.github/                                 @eyeszik
+/manifest.json                            @eyeszik
