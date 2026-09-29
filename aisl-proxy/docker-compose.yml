@@ -1,0 +1,80 @@
+name: aisl-proxy
+
+services:
+  aisl-proxy:
+    build:
+      context: .
+      target: runner
+      # Empty unless AISL_PROXY_CA_FILE points at a CA bundle; see Dockerfile.
+      secrets:
+        - proxy_ca
+    image: aisl-proxy-gateway:latest
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      PORT: 8080
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+      DATABASE_URL: postgresql://aisl:${POSTGRES_PASSWORD:-aisl}@postgres:5432/aisl_db
+      REDIS_URL: redis://redis:6379
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?STRIPE_SECRET_KEY is required}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?STRIPE_WEBHOOK_SECRET is required}
+      STRIPE_API_VERSION: ${STRIPE_API_VERSION:-2026-04-22.preview}
+      AISL_ATTRIBUTION_SALT: ${AISL_ATTRIBUTION_SALT:?AISL_ATTRIBUTION_SALT is required}
+      AISL_CREDENTIAL_ENCRYPTION_KEY: ${AISL_CREDENTIAL_ENCRYPTION_KEY:?AISL_CREDENTIAL_ENCRYPTION_KEY is required}
+      AISL_AGENT_API_KEYS: ${AISL_AGENT_API_KEYS:?AISL_AGENT_API_KEYS is required}
+      ACP_TOKEN_TTL_SECONDS: ${ACP_TOKEN_TTL_SECONDS:-86400}
+      CATALOG_CACHE_TTL_SECONDS: ${CATALOG_CACHE_TTL_SECONDS:-60}
+      WEBHOOK_DEDUPE_TTL_SECONDS: ${WEBHOOK_DEDUPE_TTL_SECONDS:-604800}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aisl
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aisl}
+      POSTGRES_DB: aisl_db
+    volumes:
+      - aisl-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aisl -d aisl_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # appendonly keeps webhook dedupe keys across a restart; losing them would
+    # let an in-flight Stripe retry reprocess an already-applied event.
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - aisl-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  aisl-postgres:
+  aisl-redis:
+
+secrets:
+  # Build-time only: a TLS-inspecting egress proxy's CA. Defaults to an empty
+  # source, which makes the Dockerfile's npm install a plain one.
+  proxy_ca:
+    file: ${AISL_PROXY_CA_FILE:-/dev/null}
