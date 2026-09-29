@@ -384,6 +384,40 @@ def _cmd_compile_prompts(args: argparse.Namespace) -> int:
     return 0 if result.final_state is CompilerState.prompt_package_ready else 1
 
 
+def _cmd_prompt_family(args: argparse.Namespace) -> int:
+    """Compile a reusable prompt family. Generates no media, creates no ads or
+    products, publishes nothing and spends nothing."""
+    from services.langgraph.agency.prompt_families import PromptFamilyRequest, compile_prompt_family
+
+    try:
+        with open(args.input, "r", encoding="utf-8") as handle:
+            request = PromptFamilyRequest.model_validate(json.load(handle))
+    except FileNotFoundError as exc:
+        raise BriefError(f"prompt family request not found: {args.input}") from exc
+    except json.JSONDecodeError as exc:
+        raise BriefError(f"prompt family request is not valid JSON: {exc}") from exc
+    except ValidationError as exc:
+        raise BriefError(f"prompt family request does not match the expected shape:\n{exc}") from exc
+
+    result = compile_prompt_family(request)
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as handle:
+            handle.write(result.model_dump_json(indent=2) + "\n")
+    if args.json or not args.output:
+        print(result.model_dump_json(indent=2))
+    else:
+        evaluation = result.evaluation
+        print(
+            f"{result.terminal_state}: family {result.family_id}@{result.family_version} "
+            f"({result.family_hash[:16]}); {evaluation.accepted_instances} instance(s) accepted, "
+            f"{evaluation.rejected_duplicates} duplicate(s) rejected, {evaluation.repairs} repair(s)"
+        )
+        for reason in result.blocked_reasons:
+            print(f"  blocked: {reason}")
+        print(f"  {result.execution_statement}")
+    return 0 if result.terminal_state == "PROMPT_PACKAGE_READY" else 1
+
+
 def _cmd_cinematic(args: argparse.Namespace) -> int:
     # Imported lazily: the cinematic capability is a heavy domain module and must
     # not load for unrelated CLI commands.
@@ -559,6 +593,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print the compiled result as JSON."
     )
     compile_prompts.set_defaults(handler=_cmd_compile_prompts)
+
+    prompt_family = sub.add_parser(
+        "prompt-family",
+        help="Compile a reusable prompt family (invariants, variation axes, concept ledger). "
+        "Generates no media, creates no ads or products, publishes nothing, spends nothing.",
+    )
+    prompt_family.add_argument("-i", "--input", required=True, help="Path to a PromptFamilyRequest JSON file.")
+    prompt_family.add_argument("-o", "--output", help="Optional path for the full result JSON.")
+    prompt_family.add_argument("--json", action="store_true", help="Print the full result as JSON.")
+    prompt_family.set_defaults(handler=_cmd_prompt_family)
 
     cinematic = sub.add_parser(
         "cinematic",

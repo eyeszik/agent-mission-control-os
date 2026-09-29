@@ -1,4 +1,4 @@
-.PHONY: help check-env tokens-build tokens-check ui-ux-compile compiled-plan compiled-twin brand-plan brand-roles prompt-compile guidance-validate brand-validate setup-agent gates
+.PHONY: help check-env tokens-build tokens-check ui-ux-compile prompt-family compiled-plan compiled-twin brand-plan brand-roles prompt-compile guidance-validate brand-validate setup-agent gates
 
 help:
 	@echo "Available commands:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make brand-plan [BRIEF=f.json]  - Plan a brief against the agency kernel"
 	@echo "  make brand-roles [DEPT=brand]   - List N3 role contracts"
 	@echo "  make prompt-compile [REQUEST=f]  - Compile validated prompt packages only"
+	@echo "  make prompt-family [REQUEST=f]   - Compile a reusable prompt family (no media, ads, products, publication or spend)"
 	@echo "  make guidance-validate          - Validate repository guidance packs"
 	@echo "  make brand-validate             - Run the kernel's structural self-checks"
 	@echo "  make setup-agent                - Run workspace setup script"
@@ -46,6 +47,9 @@ brand-roles:
 
 prompt-compile:
 	@python3 orchestrate_brand_pipeline.py compile-prompts --input $(if $(REQUEST),$(REQUEST),sample_prompt_request.json) --json
+
+prompt-family:
+	@python3 orchestrate_brand_pipeline.py prompt-family --input $(if $(REQUEST),$(REQUEST),sample_prompt_family_request.json) --output /dev/null
 
 guidance-validate:
 	@python3 scripts/verify_guidance_registry.py

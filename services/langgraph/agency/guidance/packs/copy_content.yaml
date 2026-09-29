@@ -1,0 +1,360 @@
+{
+  "id": "pg.copy_content.v1",
+  "schema_version": "1.0.0",
+  "pack_version": "1.0.0",
+  "domain": "COPYWRITING",
+  "guidance_class": "METHODOLOGY",
+  "authority_class": "ADVISORY",
+  "description": "Advisory copywriting, editing, content-design and content-strategy methodology for COPY-family prompt packages, extracted from the Universal Brand/Content/Visual Prompt OS v10 specification. Minimum-sufficient: only the base copy rules always apply; framework, messaging, long-form, UX-writing, SEO, repurposing and rewrite-preservation sections activate from request terms. It cannot redefine BrandCore voice, verified evidence, claims status, or terminal states.",
+  "activation": {
+    "asset_families": [
+      "COPY"
+    ],
+    "asset_types": [
+      "landing page copy",
+      "web copy",
+      "product copy",
+      "sales copy",
+      "email",
+      "newsletter",
+      "article",
+      "blog post",
+      "guide",
+      "script",
+      "ad copy",
+      "social caption",
+      "ux microcopy",
+      "onboarding copy",
+      "error message",
+      "press release",
+      "manifesto",
+      "tagline",
+      "headline",
+      "messaging framework"
+    ],
+    "channels": [
+      "web",
+      "email",
+      "social",
+      "advertising",
+      "product",
+      "blog",
+      "press"
+    ],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": [
+      "copy",
+      "copywriting",
+      "rewrite",
+      "edit",
+      "article",
+      "seo",
+      "localize",
+      "repurpose",
+      "microcopy",
+      "headline",
+      "messaging"
+    ]
+  },
+  "excludes": {
+    "asset_families": [
+      "VIDEO",
+      "MOTION",
+      "STORYBOARD",
+      "IMAGE",
+      "PRINT",
+      "UI_UX"
+    ],
+    "asset_types": [],
+    "channels": [],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": []
+  },
+  "dependencies": [
+    "pg.branding.core"
+  ],
+  "conflicts_with": [],
+  "context_budget": {
+    "max_sections": 5,
+    "max_chars": 14000
+  },
+  "sections": [
+    {
+      "id": "copy.rules",
+      "purpose": "Keep persuasive copy specific, supported and reader-centred.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Prefer specific language to generic language and proof to unsupported superlatives.",
+        "Lead with reader value rather than brand self-description.",
+        "Carry one dominant message per unit of copy instead of a pile of messages.",
+        "Prefer strong exact verbs to weak modifiers; keep meaningful rhythm rather than artificial variation.",
+        "Persuade credibly: never manipulate through false urgency, hidden terms, or implied claims the evidence does not support."
+      ],
+      "evaluation_criteria": [
+        "one dominant message is identifiable",
+        "every factual or comparative statement is supported by the evidence ceiling"
+      ],
+      "anti_patterns": [
+        "unsupported superlatives",
+        "message piles with no hierarchy",
+        "brand-centred self-description in place of reader value"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "verbal"
+      ]
+    },
+    {
+      "id": "copy.framework_router",
+      "purpose": "Choose one persuasion framework from the communication objective.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "landing",
+          "sales",
+          "ad ",
+          "advert",
+          "email",
+          "offer",
+          "conversion",
+          "campaign",
+          "persuasive"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Select exactly one framework from the objective: AIDA for attention-to-action, PAS for a pain or problem resolution, BAB for transformation, FAB for feature/advantage/benefit, P4 for promise/picture/proof/push, ACCA for awareness/comprehension/conviction/action, STORY for narrative persuasion, PAPA for problem/advantage/proof/action.",
+        "State which framework was chosen and why; never stack several frameworks in one piece."
+      ],
+      "evaluation_criteria": [],
+      "anti_patterns": [
+        "applying every framework at once",
+        "choosing a framework for fashion rather than objective"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "verbal",
+        "strategy"
+      ]
+    },
+    {
+      "id": "copy.rewrite_preservation",
+      "purpose": "Rewrite and edit without changing material meaning.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "rewrite",
+          "edit",
+          "shorten",
+          "tighten",
+          "simplify",
+          "proofread",
+          "polish",
+          "revise"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Preserve every number, date, name, quotation, qualification, warning and legal line exactly unless the request explicitly changes it.",
+        "Edit in order: structural edit, fact and claim edit, brand/voice edit, then line edit.",
+        "Split overloaded sentences, remove repeated meaning, prefer precise familiar vocabulary, use active voice where agency matters -- without deleting evidence, nuance or technical meaning."
+      ],
+      "evaluation_criteria": [
+        "no material number, quote or qualification changed",
+        "meaning is preserved after simplification"
+      ],
+      "anti_patterns": [
+        "changing a number or quote while editing for style",
+        "deleting a qualification to make a sentence shorter"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "verbal",
+        "quality"
+      ]
+    },
+    {
+      "id": "copy.messaging_system",
+      "purpose": "Structure messaging as a hierarchy that design and channels can inherit.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "messaging",
+          "message house",
+          "landing",
+          "homepage",
+          "campaign",
+          "value proposition",
+          "positioning"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Build a message house: core narrative, elevator statement, three to five pillars each carrying message, benefit, proof, likely objection and response.",
+        "Order proof from strongest verified evidence downward and map each claim to its required disclosure.",
+        "Define a CTA ladder from low-commitment to high-commitment actions rather than one universal CTA."
+      ],
+      "evaluation_criteria": [],
+      "anti_patterns": [],
+      "evidence_requirements": [
+        "pillar proof points must reference verified evidence or be marked as proposed"
+      ],
+      "directive_targets": [
+        "strategy",
+        "verbal"
+      ]
+    },
+    {
+      "id": "copy.long_form_pipeline",
+      "purpose": "Plan long-form content before drafting.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "article",
+          "blog",
+          "guide",
+          "whitepaper",
+          "long form",
+          "long-form",
+          "report",
+          "ebook"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Work goal, then reader and job-to-be-done, then information need, evidence, message, angle, outline, draft, and only then edit passes.",
+        "Outline the information or narrative architecture before writing body copy.",
+        "Use headings that state the reader's answer, not internal labels."
+      ],
+      "evaluation_criteria": [
+        "an outline exists before the draft",
+        "each section answers a reader question"
+      ],
+      "anti_patterns": [],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "strategy",
+        "verbal",
+        "composition"
+      ]
+    },
+    {
+      "id": "copy.ux_writing",
+      "purpose": "Write interface language that describes actual product behaviour.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "ux",
+          "microcopy",
+          "onboarding",
+          "error",
+          "button",
+          "tooltip",
+          "empty state",
+          "form",
+          "interface"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Name controls by the action they perform; keep labels short, specific and consistent across screens.",
+        "Error messages state what happened, why if known, and the recovery action -- without blame.",
+        "Empty states and onboarding explain the next useful step rather than decorate.",
+        "Never describe product behaviour the product does not have."
+      ],
+      "evaluation_criteria": [],
+      "anti_patterns": [
+        "vague button labels such as 'Submit' when a specific action exists",
+        "blaming the user in error text"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "verbal",
+        "interaction",
+        "accessibility"
+      ]
+    },
+    {
+      "id": "copy.seo",
+      "purpose": "Separate semantic keyword ideation from measured search opportunity.",
+      "directive_class": "EVIDENCE_BOUND_ADVISORY",
+      "activate_when": {
+        "any": [
+          "seo",
+          "search",
+          "keyword",
+          "serp",
+          "organic"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Map real search intent (informational, navigational, commercial, transactional) before choosing an angle.",
+        "Treat keyword ideas generated without search data as hypotheses; label measured volume, difficulty or ranking only when supplied as runtime evidence with a date and source.",
+        "Write for the reader's question first; never stuff keywords at the cost of clarity."
+      ],
+      "evaluation_criteria": [],
+      "anti_patterns": [
+        "presenting guessed keyword volume as measured data",
+        "keyword stuffing"
+      ],
+      "evidence_requirements": [
+        "search volume, difficulty and ranking claims require dated runtime evidence"
+      ],
+      "directive_targets": [
+        "strategy",
+        "governance"
+      ]
+    },
+    {
+      "id": "copy.repurpose_localize",
+      "purpose": "Adapt a canonical factual core across channels and locales without claim drift.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "repurpose",
+          "adapt",
+          "localize",
+          "localise",
+          "translate",
+          "transcreate",
+          "channel version"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Freeze the factual core (claims, numbers, disclosures) before adapting length, tone, format or locale.",
+        "Localize meaning, idiom and cultural reference rather than translating word-for-word; keep required legal text and units correct for the target market.",
+        "Flag any claim whose substantiation or disclosure differs between markets instead of silently reusing it."
+      ],
+      "evaluation_criteria": [],
+      "anti_patterns": [
+        "changing a claim while shortening for a channel",
+        "word-for-word translation of idioms"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "verbal",
+        "governance"
+      ]
+    }
+  ],
+  "provenance": {
+    "source": "User-supplied SYSTEM L100.UNIVERSAL_BRAND_CONTENT_VISUAL_PROMPT_OS v10.0 (copy, content and editing sections)",
+    "version": "10.0.0",
+    "author": "project owner",
+    "created_at": "2026-09-28T00:00:00Z",
+    "updated_at": "2026-09-28T00:00:00Z",
+    "evidence_refs": [
+      "docs/imported-specs/universal-brand-content-visual-prompt-os-v10.md"
+    ],
+    "license_or_ip_status": "user_supplied"
+  },
+  "content_hash": ""
+}

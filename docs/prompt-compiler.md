@@ -61,3 +61,25 @@ See docs/guidance-system.md for the pack contract and extension model.
 Compiler results include an `AcceptanceReport` with `PASS`, `PARTIAL`, `BLOCKED`, or `FAIL`. The existing numeric confidence field remains a compatibility heuristic and does not authorize release or override failed mandatory gates.
 
 System-level guidance such as `pg.studio_identity.v4` may add trend, token, interaction, accessibility, engineering, governance, QA, and production directives. These remain advisory and are serialized separately from canonical brand constraints.
+
+
+## Exact text, references, series and computation
+
+`AssetRequirement` accepts additive, optional fields that serialize only when
+they are supplied:
+
+- `exact_text`: reproduced verbatim. A missing string blocks the package. For
+  visual families the text goes to a `DETERMINISTIC_LAYOUT` stage and is not
+  rendered by a generator.
+- `references`: typed `ReferenceRole`s (IDENTITY, CONTENT, COMPOSITION,
+  STYLE, START_FRAME, END_FRAME, MOTION, AUDIO), serialized in precedence
+  order.
+- `series`: a `SeriesBinding` from a prompt family.
+
+Verified claims, derived claims and unverified material claims are carried into
+the prompt as an **Evidence ceiling** section. `ComputationEvidence` is a
+separate provenance class: it can make a claim `DERIVED`, but only from
+verified inputs, and never `VERIFIED`. Comparative superiority claims are
+classified as market claims.
+
+See `docs/brand-content-visual-prompt-os.md`.

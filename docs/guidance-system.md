@@ -144,3 +144,24 @@ The repository therefore treats media providers, external API transports, and
 terminal clients as optional execution surfaces downstream from prompt
 compilation. The prompt compiler itself still stops at
 `PROMPT_PACKAGE_READY`.
+
+
+## Copy, attention and visual-prompting packs (v10 integration)
+
+- `pg.copy_content.v1` (COPYWRITING, ADVISORY) covers the COPY family. Only
+  `copy.rules` is always on. Rewrite preservation, the framework router,
+  messaging, long form, UX writing, SEO (evidence-bound) and
+  repurpose/localize are gated by request terms.
+- `pg.attention.hooks.v1` (ADVERTISING, EVIDENCE_BOUND_ADVISORY) covers
+  social, ads, short-form openings, thumbnails, OOH and subject lines. It
+  never applies to brand guidelines, UX microcopy or legal copy. Performance
+  language requires measured evidence.
+- `pg.visual_prompting.v1` (GRAPHIC_DESIGN, ADVISORY) covers key art,
+  posters, social series, carousels, display/OOH ads and infographics. It
+  supplies prompt ordering, exact-text reliability, reference roles, series
+  behaviour and surface frameworks.
+- `pg.production_design_system.v1` now also covers merch artwork vs product
+  mockups and vendor-spec-or-UNKNOWN print settings.
+
+Routing examples and the full capability disposition are in
+`docs/brand-content-visual-prompt-os.md`.

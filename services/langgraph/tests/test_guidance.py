@@ -79,10 +79,13 @@ def test_default_registry_loads_branding_pack_and_has_stable_hash():
     first = default_registry()
     second = default_registry()
     assert [pack.id for pack in first.packs] == [
+        "pg.attention.hooks.v1",
         "pg.branding.core",
+        "pg.copy_content.v1",
         "pg.production_design_system.v1",
         "pg.studio_identity.v4",
         "pg.ui_ux.core",
+        "pg.visual_prompting.v1",
     ]
     assert first.registry_hash == second.registry_hash
     assert first.get("pg.branding.core").content_hash

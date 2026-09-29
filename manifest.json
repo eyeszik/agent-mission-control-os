@@ -12,7 +12,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "e8fa8ea68c6d3f32d4e6b3b40f6427349b37b8a6"
+      "git_blob_sha": "f7439e7249ff9c0a04d1315f1959642d7e07d33d"
     },
     {
       "path": "apps/web/app/login/page.tsx",
@@ -171,12 +171,20 @@
       "git_blob_sha": "fec0cf2899762ffebd7cedda7f2578f7fc26025a"
     },
     {
+      "path": "services/langgraph/agency/guidance/packs/attention_hooks.yaml",
+      "git_blob_sha": "663ab6249f9ea9615f40e096758bd66f0c8d8959"
+    },
+    {
       "path": "services/langgraph/agency/guidance/packs/branding.yaml",
       "git_blob_sha": "3bbd0e16375969d586ab451f0f367df705a7c4f6"
     },
     {
+      "path": "services/langgraph/agency/guidance/packs/copy_content.yaml",
+      "git_blob_sha": "40aa9d37ad407440da2f644bd8ace82b4bae017b"
+    },
+    {
       "path": "services/langgraph/agency/guidance/packs/production_design_system.yaml",
-      "git_blob_sha": "689022fe259631477323a45c2bb26d1ca392d43b"
+      "git_blob_sha": "dae7f57a065fc0f123abe4d5ffe03e0977f92243"
     },
     {
       "path": "services/langgraph/agency/guidance/packs/studio_identity_v4.yaml",
@@ -185,6 +193,10 @@
     {
       "path": "services/langgraph/agency/guidance/packs/ui_ux_core.yaml",
       "git_blob_sha": "39be36fa031535c1104345b8a3c9767f0f63b95e"
+    },
+    {
+      "path": "services/langgraph/agency/guidance/packs/visual_prompting.yaml",
+      "git_blob_sha": "2f2a1075334c0b865aff77b17bd76179a111d42d"
     },
     {
       "path": "services/langgraph/agency/guidance/registry.py",
@@ -220,7 +232,15 @@
     },
     {
       "path": "services/langgraph/agency/prompt_compiler.py",
-      "git_blob_sha": "ad19d35237957bdf930d2279bf496664e6a2756f"
+      "git_blob_sha": "3981288a7b5fd7f6deebe0e1a8cc56d6e933fede"
+    },
+    {
+      "path": "services/langgraph/agency/prompt_families/compiler.py",
+      "git_blob_sha": "61e3322d262832dd759159cfa0ea19f0496a4524"
+    },
+    {
+      "path": "services/langgraph/agency/prompt_families/models.py",
+      "git_blob_sha": "00ccbac232e9cb46faf4a8d17467461c6e1cc672"
     },
     {
       "path": "services/langgraph/agency/skills/dispatcher.py",
@@ -352,7 +372,7 @@
     },
     {
       "path": "services/langgraph/tests/test_guidance.py",
-      "git_blob_sha": "912caaf0bc7eddbf50e519b5ac492221aa8eaf04"
+      "git_blob_sha": "861995cc4c5d6523796c45caa8fe81c0d509285b"
     },
     {
       "path": "services/langgraph/tests/test_lifecycle_analytics.py",
