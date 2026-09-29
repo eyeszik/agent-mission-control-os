@@ -1,0 +1,50 @@
+name: Headless campaign
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Dry run uses no provider. Live uses configured OpenAI credentials and may incur provider charges.
+        type: choice
+        options: [dry-run, live]
+        default: dry-run
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: headless-campaign-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  campaign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.mode == 'live' && 'campaign-generation' || 'campaign-dry-run' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install backend
+        run: python -m pip install -e './services/langgraph[dev]'
+      - name: Test headless boundary
+        run: python -m pytest services/langgraph/tests/test_headless_campaign.py -q
+      - name: Execute campaign to review gate
+        env:
+          CAMPAIGN_MODE: ${{ inputs.mode }}
+          OPENAI_API_KEY: ${{ inputs.mode == 'live' && secrets.OPENAI_API_KEY || '' }}
+          AMC_OPENAI_MODEL: ${{ vars.AMC_OPENAI_MODEL || 'gpt-4o-mini' }}
+        run: python scripts/run_campaign_headless.py --mode "$CAMPAIGN_MODE" --output scratch/campaign
+      - name: Upload campaign evidence (not approval or publication)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: black-feather-ceremony-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            scratch/campaign/execution.json
+            scratch/campaign/readiness.json
+            scratch/campaign/campaign.json
+            scratch/campaign/failure.json
+            scratch/campaign/exports/
+          retention-days: 7
+          if-no-files-found: warn
