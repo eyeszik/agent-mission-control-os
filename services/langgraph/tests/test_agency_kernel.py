@@ -34,7 +34,7 @@ def _confidence() -> dict:
 
 def test_agency_kernel_persists_and_selectively_invalidates():
     sqlite_db, kernel = _kernel()
-    assert sqlite_db.current_schema_version() == 10
+    assert sqlite_db.current_schema_version() == sqlite_db._MIGRATIONS[-1][0]
 
     engagement_id = _id("eng")
     workstream_id = _id("ws-strategy")
@@ -212,6 +212,9 @@ def test_artifact_revision_auto_stales_bound_approvals_and_opens_lineage_remedia
     engagement_id = _id("eng-lineage")
     artifact_id = _id("art-lineage")
     run_id = _id("run-lineage")
+    from services.langgraph.persistence.runs import create_run_record
+
+    create_run_record(run_id, "tenant_1", "proj_1", "branding_marketing_agency", "needs_approval", {})
     kernel.create_engagement(engagement_id, "tenant_1", "proj_1", "Protect artifact", "Keep lineage canonical")
     kernel.create_artifact(
         artifact_id,

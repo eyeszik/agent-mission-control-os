@@ -20,6 +20,7 @@ def _parse_sse_events(body: str) -> list:
 
 def test_record_and_list_events_are_ordered_by_sequence():
     run_id = f"run-events-{uuid4()}"
+    create_run_record(run_id, "tenant-events-test", "proj-events-test", "branding_marketing_agency", "running", {})
     record_event(run_id, "tenant-events-test", "proj-events-test", "brief_intake", "node_complete")
     record_event(run_id, "tenant-events-test", "proj-events-test", "brand_strategy", "node_complete")
     events = list_events_for_run(run_id)

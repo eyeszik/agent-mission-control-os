@@ -15,6 +15,7 @@ def test_production_config_accepts_fail_closed_fixture(monkeypatch):
     monkeypatch.setenv("AMC_CORS_ALLOWED_ORIGINS", "https://mission.example.com")
     monkeypatch.setenv("AMC_PUBLICATION_MODE", "disabled")
     monkeypatch.setenv("AMC_PAID_MEDIA_MODE", "disabled")
+    monkeypatch.delenv("AMC_ALLOW_SELF_APPROVAL", raising=False)
 
     from services.langgraph.app.config import production_config_errors
 
@@ -52,7 +53,7 @@ def test_publication_live_mode_has_no_provider_executor(monkeypatch, tmp_path):
     monkeypatch.setenv("AMC_PUBLICATION_MODE", "live")
 
     import services.langgraph.persistence.sqlite_db as sqlite_db
-    sqlite_db.DB_PATH = str(tmp_path / "publication.db")
+    monkeypatch.setattr(sqlite_db, "DB_PATH", str(tmp_path / "publication.db"))
     sqlite_db.init_db()
 
     from services.langgraph.integrations.publication import prepare_publication
@@ -67,7 +68,7 @@ def test_first_party_analytics_persists_locally(monkeypatch, tmp_path):
     monkeypatch.setenv("AMC_DB_PATH", db_path)
 
     import services.langgraph.persistence.sqlite_db as sqlite_db
-    sqlite_db.DB_PATH = db_path
+    monkeypatch.setattr(sqlite_db, "DB_PATH", db_path)
     sqlite_db.init_db()
 
     import services.langgraph.persistence.analytics as analytics

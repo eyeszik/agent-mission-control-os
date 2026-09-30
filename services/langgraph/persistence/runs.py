@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+import os
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from services.langgraph.persistence.idempotency import hash_payload
@@ -8,6 +9,7 @@ from services.langgraph.persistence.invalidation import (
     AGENCY_PIPELINE_DEMANDED_EVENT_CLASSES,
     record_run_invalidation_bindings,
 )
+from services.langgraph.persistence.tenancy import ensure_tenant_project
 from services.langgraph.persistence.database import (
     decode_json,
     is_postgres,
@@ -20,32 +22,6 @@ from services.langgraph.persistence.database import (
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
-
-
-def init_runs_table() -> None:
-    if is_postgres():
-        return
-    with transaction(write=True) as db:
-        db.execute(
-            """
-            CREATE TABLE IF NOT EXISTS runs (
-                run_id TEXT PRIMARY KEY,
-                tenant_id TEXT NOT NULL,
-                project_id TEXT NOT NULL,
-                pipeline TEXT NOT NULL,
-                status TEXT NOT NULL,
-                metadata TEXT,
-                result TEXT,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
-            )
-            """
-        )
-        db.execute("CREATE INDEX IF NOT EXISTS idx_runs_tenant_project ON runs (tenant_id, project_id)")
-        db.execute("CREATE INDEX IF NOT EXISTS idx_runs_status_updated ON runs (status, updated_at DESC)")
-
-
-init_runs_table()
 
 
 def _row_to_record(row) -> dict:
@@ -99,9 +75,83 @@ def _sync_protected_run_artifact(run_id: str, tenant_id: str, project_id: str, r
     )
 
 
-def create_run_record(run_id: str, tenant_id: str, project_id: str, pipeline: str, status: str, metadata: dict) -> dict:
+class RunLimitExceeded(RuntimeError):
+    """A tenant has hit its run-creation rate or concurrency limit."""
+
+    def __init__(self, reason: str, retry_after_seconds: int) -> None:
+        super().__init__(reason)
+        self.reason = reason
+        self.retry_after_seconds = retry_after_seconds
+
+
+DEFAULT_MAX_RUNS_PER_TENANT_PER_HOUR = 60
+DEFAULT_MAX_ACTIVE_RUNS_PER_TENANT = 5
+# A run still "running"/"delivering" but untouched for this long no longer
+# counts as active, so a crashed run cannot lock its tenant out forever.
+ACTIVE_RUN_WINDOW_SECONDS = 15 * 60
+_ACTIVE_STATUSES = ("running", "delivering")
+
+
+def _limit(name: str, default: int) -> int:
+    raw = (os.environ.get(name) or "").strip()
+    if not raw:
+        return default
+    try:
+        return max(0, int(raw))
+    except ValueError:
+        return default
+
+
+def run_limits() -> dict[str, int]:
+    """Per-tenant run limits; 0 disables a limit explicitly."""
+    return {
+        "per_hour": _limit("AMC_MAX_RUNS_PER_TENANT_PER_HOUR", DEFAULT_MAX_RUNS_PER_TENANT_PER_HOUR),
+        "active": _limit("AMC_MAX_ACTIVE_RUNS_PER_TENANT", DEFAULT_MAX_ACTIVE_RUNS_PER_TENANT),
+    }
+
+
+def _enforce_run_limits(db, tenant_id: str) -> None:
+    limits = run_limits()
+    if not limits["per_hour"] and not limits["active"]:
+        return
+    if is_postgres():
+        # Serialize limit checks per tenant so concurrent creates cannot both
+        # squeeze under the limit (SQLite's BEGIN IMMEDIATE already serializes).
+        db.execute("SELECT pg_advisory_xact_lock(hashtextextended(?, 0))", (f"amc-run-limits|{tenant_id}",))
+    now = datetime.now(timezone.utc)
+    if limits["active"]:
+        active_since = (now - timedelta(seconds=ACTIVE_RUN_WINDOW_SECONDS)).isoformat()
+        row = db.execute(
+            f"SELECT COUNT(*) AS n FROM {table('runs')} WHERE tenant_id = ? AND status IN (?, ?) AND updated_at >= ?",
+            (tenant_id, *_ACTIVE_STATUSES, active_since),
+        ).fetchone()
+        if int(row["n"]) >= limits["active"]:
+            raise RunLimitExceeded("Too many runs are already in progress for this tenant", 30)
+    if limits["per_hour"]:
+        hour_ago = (now - timedelta(hours=1)).isoformat()
+        row = db.execute(
+            f"SELECT COUNT(*) AS n FROM {table('runs')} WHERE tenant_id = ? AND created_at >= ?",
+            (tenant_id, hour_ago),
+        ).fetchone()
+        if int(row["n"]) >= limits["per_hour"]:
+            raise RunLimitExceeded("Hourly run limit reached for this tenant", 300)
+
+
+def create_run_record(
+    run_id: str,
+    tenant_id: str,
+    project_id: str,
+    pipeline: str,
+    status: str,
+    metadata: dict,
+    *,
+    enforce_limits: bool = False,
+) -> dict:
     now = _now()
     with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
+        if enforce_limits:
+            _enforce_run_limits(db, tenant_id)
         db.execute(
             f"INSERT INTO {table('runs')} (run_id, tenant_id, project_id, pipeline, status, metadata, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (run_id, tenant_id, project_id, pipeline, status, json_param(metadata), now, now),

@@ -73,7 +73,9 @@ def test_nested_control_language_is_sanitized_recursively():
 
 
 def test_approval_terminal_decision_cannot_be_overwritten():
-    approval = create_approval_request("run-cas", "tenant-events-test", "proj-security", "review", 0.5)
+    run_id = f"run-cas-{uuid4()}"
+    create_run_record(run_id, "tenant-events-test", "proj-security", "branding_marketing_agency", "needs_approval", {})
+    approval = create_approval_request(run_id, "tenant-events-test", "proj-security", "review", 0.5)
     first = resolve_approval(approval["approval_id"], "first-reviewer", "approve")
     second = resolve_approval(approval["approval_id"], "second-reviewer", "reject")
     persisted = get_approval(approval["approval_id"])
@@ -219,3 +221,19 @@ def test_foreign_outbox_message_cannot_be_replayed_or_signalled():
     )
     assert injected.status_code == 404
     assert list_events_for_run(victim_run) == []
+
+
+def test_project_registered_to_another_tenant_cannot_be_written_into():
+    from services.langgraph.persistence.tenancy import ProjectOwnershipError
+
+    project_id = f"proj-owned-{uuid4()}"
+    create_run_record(f"run-{uuid4()}", "tenant-owner", project_id, "branding_marketing_agency", "running", {})
+
+    import pytest
+
+    with pytest.raises(ProjectOwnershipError):
+        create_run_record(f"run-{uuid4()}", "tenant-events-test", project_id, "branding_marketing_agency", "running", {})
+
+    # Through the API the same squatting attempt is a 403, not a 500 or a bind.
+    response = client.get(f"/runtime/projects/{project_id}/trust")
+    assert response.status_code == 403

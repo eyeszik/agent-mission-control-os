@@ -18,6 +18,8 @@ def _set_valid_production_env(monkeypatch, **overrides):
     values.update(overrides)
     for key, value in values.items():
         monkeypatch.setenv(key, value)
+    # Local-only development switches must never be part of a production fixture.
+    monkeypatch.delenv("AMC_ALLOW_SELF_APPROVAL", raising=False)
 
 
 class TestCorsDefaults:

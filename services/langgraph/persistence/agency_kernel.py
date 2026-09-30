@@ -10,6 +10,7 @@ from services.langgraph.agency.kernel.ontology import (
     resolve_department,
 )
 from services.langgraph.agency.reliability import PolicyEffect, ProductionTrustKernel
+from services.langgraph.persistence.tenancy import ensure_tenant_project
 from services.langgraph.persistence.database import (
     decode_json,
     json_param,
@@ -91,6 +92,7 @@ def create_engagement(
 ) -> dict:
     now = _now()
     with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
         db.execute(
             f"""
             INSERT INTO {table('engagements')}
@@ -164,6 +166,7 @@ def create_workstream(
     department = resolve_department(department).value
     now = _now()
     with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
         db.execute(
             f"""
             INSERT INTO {table('workstreams')}
@@ -224,6 +227,7 @@ def create_evidence(
     _assert_engagement_scope(engagement_id, tenant_id, project_id)
     collected_at = collected_at or _now()
     with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
         db.execute(
             f"""
             INSERT INTO {table('agency_evidence')}
@@ -275,6 +279,7 @@ def create_decision(
     _assert_engagement_scope(engagement_id, tenant_id, project_id)
     now = _now()
     with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
         db.execute(
             f"""
             INSERT INTO {table('agency_decisions')}
@@ -342,6 +347,7 @@ def create_artifact(
             raise ValueError("workstream_id must belong to the artifact engagement")
     now = _now()
     with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
         db.execute(
             f"""
             INSERT INTO {table('agency_artifacts')}

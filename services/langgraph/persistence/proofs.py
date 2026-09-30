@@ -74,7 +74,7 @@ def put_observation_receipt(run_id: str, tenant_id: str, project_id: str, receip
                 project_id,
                 json_param(receipt.model_dump(mode="json")),
                 receipt.observed_at.isoformat(),
-                1 if receipt.matches else 0,
+                bool(receipt.matches),
             ),
         )
     return {
