@@ -33,6 +33,7 @@ from services.langgraph.persistence.agency_kernel import (
 from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import bind_approval_subject, get_approvals_for_run, mark_approval_stale
 from services.langgraph.persistence.events import record_event
+from services.langgraph.persistence.projects import mirror_run_export, record_run_activity
 from services.langgraph.persistence.idempotency import (
     complete_idempotency,
     fail_idempotency,
@@ -747,6 +748,16 @@ def create_agency_run(
         {"pipeline": PIPELINE_NAME, "status": "running"},
         run_id,
     )
+    # Runs are executions within a project: the run starts in the project's
+    # activity stream, and a legacy run-only project gets its workspace now.
+    record_run_activity(
+        tenant_id=principal.tenant_id,
+        project_id=req.project_id,
+        run_id=run_id,
+        actor=principal.user_id,
+        event_type="WORK_STARTED",
+        payload={"pipeline": PIPELINE_NAME},
+    )
 
     graph = build_agency_workflow()
     config = _run_config(run_id)
@@ -841,6 +852,9 @@ def create_agency_run(
         package=agency_data.get("campaign_package") or {},
         workspace_export=workspace_export,
     )
+    agency_data["project_workspace"] = mirror_run_export(
+        tenant_id=run.tenant_id, project_id=run.project_id, run_id=run_id, workspace_export=workspace_export
+    )
     record = update_run_status(run_id, "needs_approval", {"agency": agency_data})
     run_approvals = get_approvals_for_run(run_id)
     subject_hash = _agency_subject_hash(agency_data)
@@ -870,6 +884,14 @@ def create_agency_run(
             policy_version="amc-approval/v1",
         )
         run_approvals = get_approvals_for_run(run_id)
+        record_run_activity(
+            tenant_id=principal.tenant_id,
+            project_id=req.project_id,
+            run_id=run_id,
+            actor=principal.user_id,
+            event_type="APPROVAL_REQUIRED",
+            payload={"approval_id": run_approvals[0]["approval_id"], "subject_version_ref": protected_version_ref},
+        )
         record_event(
             run_id,
             principal.tenant_id,
@@ -905,6 +927,7 @@ def create_agency_run(
         "campaign_package": agency_data.get("campaign_package"),
         "workspace_export": agency_data.get("campaign_package", {}).get("workspace_export"),
         "artifact_bindings": agency_data.get("artifact_bindings", []),
+        "project_workspace": agency_data.get("project_workspace"),
         "qa_report": agency_data.get("qa_report"),
         "pending_approval": run_approvals[0] if run_approvals else None,
         "degraded": bool(agency_data.get("degraded")),
@@ -959,6 +982,7 @@ def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
         "campaign_package": agency_data.get("campaign_package"),
         "workspace_export": agency_data.get("campaign_package", {}).get("workspace_export"),
         "artifact_bindings": agency_data.get("artifact_bindings", []),
+        "project_workspace": agency_data.get("project_workspace"),
         "qa_report": agency_data.get("qa_report"),
         "delivery": agency_data.get("delivery"),
         "approvals": get_approvals_for_run(run_id),
@@ -999,6 +1023,9 @@ def rebind_agency_run_artifact(
         package=agency_data.get("campaign_package") or {},
         workspace_export=workspace_export,
     )
+    agency_data["project_workspace"] = mirror_run_export(
+        tenant_id=record["tenant_id"], project_id=record["project_id"], run_id=run_id, workspace_export=workspace_export
+    )
     updated = update_run_status(run_id, record["status"], {"agency": agency_data})
     binding = next(
         (item for item in agency_data.get("artifact_bindings", []) if item["artifact_key"] == req.artifact_key),
@@ -1026,6 +1053,7 @@ def rebind_agency_run_artifact(
         "campaign_package": agency_data.get("campaign_package"),
         "workspace_export": agency_data.get("campaign_package", {}).get("workspace_export"),
         "artifact_bindings": agency_data.get("artifact_bindings", []),
+        "project_workspace": agency_data.get("project_workspace"),
         "qa_report": agency_data.get("qa_report"),
         "pending_approval": None,
         "degraded": bool(agency_data.get("degraded")),

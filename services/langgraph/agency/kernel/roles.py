@@ -136,7 +136,7 @@ ROLE_REGISTRY: dict[str, RoleContract] = {
             Department.creative,
             "Generate campaign concepts and the reproducible prompts that realize them.",
             (Capability.concepting, Capability.art_direction),
-            (ArtifactType.creative_concept, ArtifactType.asset_prompt_set),
+            (ArtifactType.creative_concept, ArtifactType.asset_prompt_set, ArtifactType.media_asset),
             consumes=(
                 ArtifactType.brand_platform,
                 ArtifactType.positioning_statement,

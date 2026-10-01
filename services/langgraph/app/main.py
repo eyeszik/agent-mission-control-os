@@ -7,7 +7,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from services.langgraph.api.routes import agency, analytics, approvals, compiled_agency, design, events, operations, runtime
+from services.langgraph.api.routes import (
+    agency,
+    analytics,
+    approvals,
+    compiled_agency,
+    design,
+    events,
+    operations,
+    portfolio,
+    project_ops,
+    projects,
+    runtime,
+)
 from services.langgraph.app.config import (
     assert_runtime_configuration,
     hmac_ingress_enabled,
@@ -73,6 +85,9 @@ app.include_router(operations.router, prefix="/operations", tags=["Operations"])
 app.include_router(runtime.router, prefix="/runtime", tags=["Runtime"])
 app.include_router(design.router, prefix="/design", tags=["Design Mode"])
 app.include_router(compiled_agency.router, prefix="/compiled-agency", tags=["Compiled Agency"])
+app.include_router(projects.router, prefix="/projects", tags=["Projects"])
+app.include_router(project_ops.router, prefix="/projects", tags=["Project Operations"])
+app.include_router(portfolio.router, tags=["Portfolio, Memory and Knowledge"])
 
 
 @app.get("/health")

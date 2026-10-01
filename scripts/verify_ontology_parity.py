@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 
 ONTOLOGY_TS = ROOT / "packages/shared/src/schemas/ontology.ts"
 LIFECYCLE_TS = ROOT / "packages/shared/src/schemas/lifecycle.ts"
+PROJECT_OS_TS = ROOT / "packages/shared/src/schemas/projectOs.ts"
 
 
 class ParityError(SystemExit):
@@ -168,15 +169,77 @@ def check_n2(problems: list[str]) -> None:
     )
 
 
+def check_project_os(problems: list[str]) -> None:
+    """Project OS vocabularies: folders, lifecycles, memory authority, stages."""
+    from services.langgraph.agency.project_os import vocabulary as v
+
+    text = _read(PROJECT_OS_TS)
+    version = re.search(r"PROJECT_OS_VERSION\s*=\s*'([^']+)'", text)
+    if not version or version.group(1) != v.PROJECT_OS_VERSION:
+        problems.append(
+            f"project OS version: Python={v.PROJECT_OS_VERSION} "
+            f"TypeScript={version.group(1) if version else 'missing'}"
+        )
+    ordered = {
+        "WORKSPACE_FOLDERS": list(v.WORKSPACE_FOLDERS),
+        "SYSTEM_FOLDERS": list(v.SYSTEM_FOLDERS),
+        "MEMORY_AUTHORITY_ORDER": list(v.MEMORY_AUTHORITY_ORDER),
+        "KNOWLEDGE_STAGES": list(v.KNOWLEDGE_STAGES),
+        "ROUTING_TIERS": list(v.ROUTING_TIERS),
+        "LEARNING_PROMOTION_STAGES": list(v.LEARNING_PROMOTION_STAGES),
+    }
+    for name, python_value in ordered.items():
+        # Order is semantic here (authority ranking, pipeline order).
+        problems += _compare(f"project OS {name}", python_value, _string_array(text, name, PROJECT_OS_TS))
+    unordered = {
+        "PROJECT_LIFECYCLE_STATES": v.ProjectLifecycle,
+        "STORAGE_BACKENDS": v.StorageBackend,
+        "STORAGE_OBJECT_STATUSES": v.StorageObjectStatus,
+        "ACTIVITY_TYPES": v.ActivityType,
+        "CONTENT_STATES": v.ContentState,
+        "CONTENT_KINDS": v.ContentKind,
+        "SCHEDULED_JOB_KINDS": v.ScheduledJobKind,
+        "SCHEDULED_JOB_STATUSES": v.ScheduledJobStatus,
+        "PUBLICATION_STATES": v.PublicationState,
+        "PROVIDER_MODES": v.ProviderMode,
+        "MEMORY_SCOPES": v.MemoryScope,
+        "MEMORY_STATUSES": v.MemoryStatus,
+        "RIGHTS_CLASSES": v.RightsClass,
+        "KNOWLEDGE_STATUSES": v.KnowledgeStatus,
+        "CAPABILITY_STATUSES": v.CapabilityStatus,
+    }
+    for name, enum_cls in unordered.items():
+        problems += _compare(
+            f"project OS {name}",
+            sorted(item.value for item in enum_cls),
+            sorted(_string_array(text, name, PROJECT_OS_TS)),
+        )
+    problems += _compare(
+        "project OS APPROVAL_BOUND_CONTENT_STATES",
+        sorted(v.APPROVAL_BOUND_CONTENT_STATES),
+        sorted(_string_array(text, "APPROVAL_BOUND_CONTENT_STATES", PROJECT_OS_TS)),
+    )
+    for name, transitions in (("CONTENT_TRANSITIONS", v.CONTENT_TRANSITIONS), ("PROJECT_TRANSITIONS", v.PROJECT_TRANSITIONS)):
+        problems += _compare(
+            f"project OS {name}",
+            {state: sorted(targets) for state, targets in transitions.items()},
+            {state: sorted(targets) for state, targets in _record_of_arrays(text, name, PROJECT_OS_TS).items()},
+        )
+    horizons = re.search(r"CALENDAR_HORIZON_DAYS\s*=\s*\[([^\]]*)\]", text)
+    ts_horizons = [int(x) for x in re.findall(r"\d+", horizons.group(1))] if horizons else []
+    problems += _compare("project OS CALENDAR_HORIZON_DAYS", list(v.CALENDAR_HORIZON_DAYS), ts_horizons)
+
+
 def main() -> None:
     problems: list[str] = []
     check_n1(problems)
     check_n2(problems)
+    check_project_os(problems)
     if problems:
         for problem in problems:
             print(f"  - {problem}", file=sys.stderr)
         raise ParityError(f"{len(problems)} ontology parity violation(s) between Python and TypeScript")
-    print("ontology-parity: N1 department ontology and N2 lifecycle matrices agree across Python and TypeScript")
+    print("ontology-parity: N1 department ontology, N2 lifecycle matrices and project OS vocabularies agree across Python and TypeScript")
 
 
 if __name__ == "__main__":

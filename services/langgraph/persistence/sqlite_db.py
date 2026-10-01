@@ -487,6 +487,357 @@ _MIGRATIONS = [
         CREATE INDEX IF NOT EXISTS idx_runs_tenant_project ON runs (tenant_id, project_id);
         CREATE INDEX IF NOT EXISTS idx_runs_status_updated ON runs (status, updated_at DESC);
     """),
+    (13, """
+        -- Project OS: PROJECT is the durable unit of state. Mirrors
+        -- supabase/migrations/20261001_amc_project_os_v1.sql.
+        CREATE TABLE IF NOT EXISTS project_workspaces (
+            project_id TEXT PRIMARY KEY REFERENCES projects(project_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            slug TEXT NOT NULL,
+            display_name TEXT NOT NULL,
+            description TEXT NOT NULL DEFAULT '',
+            lifecycle_state TEXT NOT NULL CHECK (lifecycle_state IN ('ACTIVE','PAUSED','ARCHIVED')),
+            brand_id TEXT,
+            brand_name TEXT,
+            workspace_schema_version TEXT NOT NULL,
+            manifest TEXT NOT NULL,
+            manifest_hash TEXT NOT NULL,
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE (tenant_id, slug)
+        );
+        CREATE TABLE IF NOT EXISTS project_events (
+            event_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            sequence INTEGER NOT NULL CHECK (sequence > 0),
+            event_type TEXT NOT NULL,
+            actor TEXT NOT NULL,
+            thread_id TEXT,
+            subject_ref TEXT,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE (project_id, sequence)
+        );
+        CREATE TABLE IF NOT EXISTS storage_objects (
+            object_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            backend TEXT NOT NULL CHECK (backend IN ('LOCAL','R2')),
+            storage_uri TEXT NOT NULL,
+            content_hash TEXT NOT NULL,
+            byte_size INTEGER NOT NULL CHECK (byte_size >= 0),
+            mime_type TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('PRESENT','MISSING','UNVERIFIED')),
+            created_at TEXT NOT NULL,
+            verified_at TEXT,
+            UNIQUE (project_id, backend, content_hash)
+        );
+        CREATE TABLE IF NOT EXISTS artifact_versions (
+            artifact_id TEXT NOT NULL REFERENCES agency_artifacts(artifact_id) ON DELETE CASCADE,
+            version INTEGER NOT NULL CHECK (version > 0),
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            content_hash TEXT,
+            content_location TEXT,
+            semantic_fingerprint TEXT,
+            metadata TEXT NOT NULL,
+            change_kind TEXT NOT NULL CHECK (change_kind IN ('create','revise','restore','replace_master')),
+            restored_from_version INTEGER,
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            PRIMARY KEY (artifact_id, version)
+        );
+        CREATE TABLE IF NOT EXISTS asset_rights (
+            rights_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            artifact_id TEXT NOT NULL REFERENCES agency_artifacts(artifact_id) ON DELETE CASCADE,
+            license TEXT NOT NULL,
+            territory TEXT NOT NULL,
+            usage_scope TEXT NOT NULL,
+            attribution TEXT,
+            source_ref TEXT,
+            expires_at TEXT,
+            status TEXT NOT NULL CHECK (status IN ('active','expired','revoked')),
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS conversation_threads (
+            thread_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            campaign_id TEXT,
+            title TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('open','archived')),
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS conversation_messages (
+            message_id TEXT PRIMARY KEY,
+            thread_id TEXT NOT NULL REFERENCES conversation_threads(thread_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            author TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN ('user','agent','system')),
+            activity_type TEXT NOT NULL,
+            body TEXT NOT NULL,
+            artifact_refs TEXT NOT NULL,
+            event_id TEXT,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS artifact_comments (
+            comment_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            artifact_id TEXT NOT NULL REFERENCES agency_artifacts(artifact_id) ON DELETE CASCADE,
+            version_ref TEXT NOT NULL,
+            author TEXT NOT NULL,
+            body TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS artifact_edit_requests (
+            request_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            artifact_id TEXT NOT NULL REFERENCES agency_artifacts(artifact_id) ON DELETE CASCADE,
+            base_version_ref TEXT NOT NULL,
+            instruction TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('open','applied','rejected','stale')),
+            requested_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            resolved_at TEXT
+        );
+        CREATE TABLE IF NOT EXISTS content_atoms (
+            atom_id TEXT NOT NULL,
+            version INTEGER NOT NULL CHECK (version > 0),
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            campaign_id TEXT,
+            title TEXT NOT NULL,
+            claims TEXT NOT NULL,
+            source_refs TEXT NOT NULL,
+            content_hash TEXT NOT NULL,
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            PRIMARY KEY (atom_id, version)
+        );
+        CREATE TABLE IF NOT EXISTS content_items (
+            content_item_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            campaign_id TEXT,
+            atom_id TEXT,
+            atom_version INTEGER,
+            artifact_id TEXT,
+            kind TEXT NOT NULL,
+            channel TEXT NOT NULL,
+            title TEXT NOT NULL,
+            state TEXT NOT NULL CHECK (state IN ('IDEA','PLANNED','IN_PRODUCTION','REVIEW','APPROVED','READY','SCHEDULED','DUE','PUBLISHING','PUBLISHED','VERIFIED','MEASURED','REFRESH_DUE','ARCHIVED')),
+            version INTEGER NOT NULL CHECK (version > 0),
+            body TEXT NOT NULL,
+            claim_refs TEXT NOT NULL,
+            rights_ref TEXT,
+            approved_version INTEGER,
+            approval_ref TEXT,
+            evidence_fresh_until TEXT,
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS calendars (
+            calendar_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            name TEXT NOT NULL,
+            timezone TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS schedule_slots (
+            slot_id TEXT PRIMARY KEY,
+            calendar_id TEXT NOT NULL REFERENCES calendars(calendar_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            content_item_id TEXT REFERENCES content_items(content_item_id) ON DELETE SET NULL,
+            channel TEXT NOT NULL,
+            scheduled_for TEXT NOT NULL,
+            state TEXT NOT NULL CHECK (state IN ('open','filled','released','cancelled')),
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS scheduled_jobs (
+            job_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            slot_id TEXT,
+            content_item_id TEXT,
+            job_kind TEXT NOT NULL CHECK (job_kind IN ('PUBLISH','REFRESH','LIFECYCLE')),
+            due_at TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('PENDING','BLOCKED','ENQUEUED','DELIVERED','FAILED','CANCELLED')),
+            idempotency_key TEXT NOT NULL UNIQUE,
+            outbox_message_id TEXT,
+            block_reasons TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            attempts INTEGER NOT NULL DEFAULT 0 CHECK (attempts >= 0),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS publication_attempts (
+            attempt_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            job_id TEXT,
+            content_item_id TEXT NOT NULL,
+            provider TEXT NOT NULL,
+            mode TEXT NOT NULL CHECK (mode IN ('DISABLED','DRY_RUN','LIVE')),
+            state TEXT NOT NULL CHECK (state IN ('SPEC','VALIDATED','AUTHORIZED','APPROVED','EXECUTING','READBACK','RECONCILED','VERIFIED','BLOCKED','FAILED','UNCERTAIN')),
+            request_hash TEXT NOT NULL,
+            idempotency_key TEXT NOT NULL,
+            external_ref TEXT,
+            readback TEXT NOT NULL,
+            error TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE (provider, idempotency_key)
+        );
+        CREATE TABLE IF NOT EXISTS publication_receipts (
+            receipt_id TEXT PRIMARY KEY,
+            attempt_id TEXT NOT NULL REFERENCES publication_attempts(attempt_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            kind TEXT NOT NULL CHECK (kind IN ('dispatch_permit','execution','observation')),
+            payload TEXT NOT NULL,
+            receipt_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS memory_records (
+            memory_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            project_id TEXT REFERENCES projects(project_id) ON DELETE CASCADE,
+            thread_id TEXT,
+            scope TEXT NOT NULL CHECK (scope IN ('M0_AGENCY','M1_BRAND_CANON','M2_PROJECT','M3_CONVERSATION','M4_EVIDENCE','M5_PERFORMANCE','M6_LEARNING')),
+            authority TEXT NOT NULL CHECK (authority IN ('BRAND_CANON','APPROVED_PROJECT_DECISION','VERIFIED_EVIDENCE','WORKING_CONTEXT','LEARNING_SIGNAL')),
+            subject_key TEXT NOT NULL,
+            body TEXT NOT NULL,
+            source_refs TEXT NOT NULL,
+            fresh_until TEXT,
+            status TEXT NOT NULL CHECK (status IN ('ACTIVE','SUPERSEDED','INVALIDATED','QUARANTINED')),
+            supersedes TEXT,
+            content_hash TEXT NOT NULL,
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS knowledge_items (
+            item_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            project_id TEXT REFERENCES projects(project_id) ON DELETE CASCADE,
+            domain TEXT NOT NULL,
+            source_uri TEXT NOT NULL,
+            rights_class TEXT NOT NULL,
+            stage TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('IN_PIPELINE','AWAITING_REVIEW','PROMOTED','REJECTED')),
+            claims TEXT NOT NULL,
+            evidence_score REAL NOT NULL,
+            rejection_reasons TEXT NOT NULL,
+            content_hash TEXT NOT NULL,
+            fetched_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS prompt_records (
+            prompt_id TEXT NOT NULL,
+            version INTEGER NOT NULL CHECK (version > 0),
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            artifact_target TEXT,
+            department TEXT NOT NULL,
+            family TEXT,
+            campaign_id TEXT,
+            status TEXT NOT NULL,
+            prompt_hash TEXT NOT NULL,
+            body TEXT NOT NULL,
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            PRIMARY KEY (prompt_id, version)
+        );
+        CREATE TABLE IF NOT EXISTS provider_profiles (
+            profile_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            provider TEXT NOT NULL,
+            model TEXT NOT NULL,
+            task TEXT NOT NULL,
+            mode TEXT NOT NULL CHECK (mode IN ('DISABLED','DRY_RUN','LIVE')),
+            body TEXT NOT NULL,
+            last_verified_at TEXT,
+            created_at TEXT NOT NULL,
+            UNIQUE (tenant_id, provider, model, task)
+        );
+        CREATE TABLE IF NOT EXISTS growth_experiments (
+            experiment_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            hypothesis TEXT NOT NULL,
+            target_metric TEXT NOT NULL,
+            segment TEXT NOT NULL,
+            intervention TEXT NOT NULL,
+            asset_refs TEXT NOT NULL,
+            start_at TEXT,
+            end_at TEXT,
+            sample_requirement INTEGER NOT NULL CHECK (sample_requirement > 0),
+            status TEXT NOT NULL CHECK (status IN ('DRAFT','RUNNING','CONCLUDED','ABANDONED')),
+            observed_result TEXT,
+            decision TEXT,
+            learning_signal_id TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS learning_signals (
+            signal_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            seq INTEGER NOT NULL CHECK (seq > 0),
+            status TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            prev_hash TEXT NOT NULL,
+            hash TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE (tenant_id, seq)
+        );
+        CREATE TABLE IF NOT EXISTS learning_promotions (
+            promotion_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            signal_id TEXT NOT NULL REFERENCES learning_signals(signal_id) ON DELETE CASCADE,
+            stage TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('IN_PROGRESS','AWAITING_HUMAN_APPROVAL','PROMOTED','ROLLED_BACK','REJECTED')),
+            evidence TEXT NOT NULL,
+            approved_by TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_project_workspaces_tenant ON project_workspaces(tenant_id, updated_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_project_events_cursor ON project_events(project_id, sequence);
+        CREATE INDEX IF NOT EXISTS idx_storage_objects_project ON storage_objects(project_id, status);
+        CREATE INDEX IF NOT EXISTS idx_artifact_versions_project ON artifact_versions(project_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_asset_rights_artifact ON asset_rights(artifact_id, status);
+        CREATE INDEX IF NOT EXISTS idx_asset_rights_expiry ON asset_rights(project_id, expires_at);
+        CREATE INDEX IF NOT EXISTS idx_threads_project ON conversation_threads(project_id, updated_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_messages_thread ON conversation_messages(thread_id, created_at);
+        CREATE INDEX IF NOT EXISTS idx_comments_artifact ON artifact_comments(artifact_id, created_at);
+        CREATE INDEX IF NOT EXISTS idx_edit_requests_artifact ON artifact_edit_requests(artifact_id, status);
+        CREATE INDEX IF NOT EXISTS idx_content_atoms_project ON content_atoms(project_id, atom_id);
+        CREATE INDEX IF NOT EXISTS idx_content_items_project ON content_items(project_id, state, updated_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_calendars_project ON calendars(project_id);
+        CREATE INDEX IF NOT EXISTS idx_slots_calendar ON schedule_slots(calendar_id, scheduled_for);
+        CREATE INDEX IF NOT EXISTS idx_jobs_due ON scheduled_jobs(status, due_at);
+        CREATE INDEX IF NOT EXISTS idx_jobs_project ON scheduled_jobs(project_id, due_at);
+        CREATE INDEX IF NOT EXISTS idx_publication_attempts_item ON publication_attempts(content_item_id, created_at);
+        CREATE INDEX IF NOT EXISTS idx_publication_receipts_attempt ON publication_receipts(attempt_id);
+        CREATE INDEX IF NOT EXISTS idx_memory_scope ON memory_records(tenant_id, project_id, scope, subject_key, status);
+        CREATE INDEX IF NOT EXISTS idx_knowledge_tenant ON knowledge_items(tenant_id, project_id, status);
+        CREATE INDEX IF NOT EXISTS idx_knowledge_hash ON knowledge_items(tenant_id, content_hash);
+        CREATE INDEX IF NOT EXISTS idx_prompt_records_project ON prompt_records(project_id, prompt_id);
+        CREATE INDEX IF NOT EXISTS idx_growth_experiments_project ON growth_experiments(project_id, status);
+        CREATE INDEX IF NOT EXISTS idx_learning_promotions_signal ON learning_promotions(signal_id);
+    """),
 ]
 
 

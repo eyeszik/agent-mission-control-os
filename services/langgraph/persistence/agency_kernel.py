@@ -532,7 +532,10 @@ def propagate_artifact_change(artifact_id: str) -> list[dict]:
             )
     if severity:
         _record_trust_policy(
-            decision_id=f"policy-artifact-propagation-{artifact_id}-{hash_payload(severity)}",
+            # Bound to the source version: revising the same upstream twice
+            # invalidates the same descendants, and an unversioned id collided
+            # with the first (immutable) decision.
+            decision_id=f"policy-artifact-propagation-{artifact_id}-v{source['version']}-{hash_payload(severity)}",
             tenant_id=source["tenant_id"],
             project_id=source["project_id"],
             subject_ref=artifact_id,
@@ -547,29 +550,41 @@ def propagate_artifact_change(artifact_id: str) -> list[dict]:
     ]
 
 
+class StaleArtifactVersionError(ValueError):
+    """A revision was based on a version that is no longer the head."""
+
+
 def record_artifact_revision(
     artifact_id: str,
     *,
     content_hash: Optional[str] = None,
     semantic_fingerprint: Optional[str] = None,
     content_location: Optional[str] = None,
+    expected_version: Optional[int] = None,
 ) -> dict:
     source = get_artifact(artifact_id)
     if not source:
         raise ValueError("Artifact not found")
+    base_version = int(source["version"]) if expected_version is None else int(expected_version)
+    if base_version != int(source["version"]):
+        raise StaleArtifactVersionError(
+            f"artifact {artifact_id} is at v{source['version']}, edit was based on v{base_version}"
+        )
 
-    next_version = int(source["version"]) + 1
+    next_version = base_version + 1
     changed_version_ref = f"{artifact_id}:v{next_version}"
     now = _now()
     with transaction(write=True) as db:
-        db.execute(
+        # Compare-and-set on the version: two concurrent edits based on the
+        # same head cannot both win. The losing writer sees rowcount 0.
+        cursor = db.execute(
             f"""
             UPDATE {table('agency_artifacts')}
             SET version = ?, status = ?, content_hash = COALESCE(?, content_hash),
                 semantic_fingerprint = COALESCE(?, semantic_fingerprint),
                 content_location = COALESCE(?, content_location),
                 updated_at = ?
-            WHERE artifact_id = ?
+            WHERE artifact_id = ? AND version = ?
             """,
             (
                 next_version,
@@ -579,8 +594,13 @@ def record_artifact_revision(
                 content_location,
                 now,
                 artifact_id,
+                base_version,
             ),
         )
+        if cursor.rowcount != 1:
+            raise StaleArtifactVersionError(
+                f"artifact {artifact_id} changed concurrently; edit was based on v{base_version}"
+            )
 
     updated = get_artifact(artifact_id)
     if updated is None:

@@ -93,6 +93,12 @@ class ArtifactType(str, Enum):
     automation_spec = "automation_spec"
     knowledge_capsule = "knowledge_capsule"
 
+    # --- project OS --------------------------------------------------------
+    # A rendered or ingested media master (image, video, audio) or one of its
+    # channel derivatives. Prompts that produced it stay asset_prompt_set; the
+    # rendered bytes live in object storage, referenced by content hash.
+    media_asset = "media_asset"
+
 
 class DepartmentDefinition(BaseModel):
     """The authoritative description of one department."""
@@ -164,7 +170,7 @@ DEPARTMENT_REGISTRY: dict[Department, DepartmentDefinition] = {
             Department.creative,
             "Translate strategy into distinct campaign concepts.",
             (Capability.concepting, Capability.art_direction),
-            (ArtifactType.creative_concept, ArtifactType.asset_prompt_set),
+            (ArtifactType.creative_concept, ArtifactType.asset_prompt_set, ArtifactType.media_asset),
             (Department.quality,),
         ),
         _definition(

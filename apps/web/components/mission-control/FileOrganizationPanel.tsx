@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import type { ArtifactBinding, AgencyRun } from "@amc/shared";
+import type { ArtifactBinding, AgencyRun, ProjectWorkspaceMirror } from "@amc/shared";
 import { getAgencyRun } from "../../lib/api/agency";
 import { globalBus } from "../../lib/events/bus";
 import { useRunStore } from "../../lib/stores/runStore";
+import { useProjectStore } from "../../lib/stores/projectStore";
 
 type WorkspaceExport = NonNullable<AgencyRun["workspace_export"]>;
 
@@ -48,6 +49,8 @@ export function FileOrganizationPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
   const [workspaceExport, setWorkspaceExport] = useState<WorkspaceExport | null>(null);
   const [artifactBindings, setArtifactBindings] = useState<ArtifactBinding[]>([]);
+  const [projectMirror, setProjectMirror] = useState<ProjectWorkspaceMirror | null>(null);
+  const setActiveProject = useProjectStore((state) => state.setActiveProject);
 
   // ⚡ Bolt: Wrapped derived workspace calculation in useMemo to prevent redundant
   // array allocations and derivations when unrelated state triggers re-renders.
@@ -59,6 +62,7 @@ export function FileOrganizationPanel() {
     if (!activeRunId) {
       setWorkspaceExport(null);
       setArtifactBindings([]);
+      setProjectMirror(null);
       return;
     }
     let cancelled = false;
@@ -68,6 +72,9 @@ export function FileOrganizationPanel() {
         if (!cancelled) {
           setWorkspaceExport((run.workspace_export as WorkspaceExport | null | undefined) ?? null);
           setArtifactBindings(run.artifact_bindings ?? []);
+          setProjectMirror(run.project_workspace ?? null);
+          // A run is an execution inside a project: follow it to its project.
+          if (run.project_id) setActiveProject(run.project_id);
         }
       } catch {
         if (!cancelled) setWorkspaceExport(null);
@@ -83,7 +90,7 @@ export function FileOrganizationPanel() {
       cancelled = true;
       globalBus.off("lifecycle_event_received", onLifecycle as any);
     };
-  }, [activeRunId]);
+  }, [activeRunId, setActiveProject]);
 
   return (
     <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-3 min-h-[360px]">
@@ -160,6 +167,22 @@ export function FileOrganizationPanel() {
               )}
             </div>
           </div>
+
+          {projectMirror ? (
+            <div data-testid="project-workspace-mirror" className="pt-2 border-t border-zinc-800/40 flex flex-col gap-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Project workspace</span>
+              {projectMirror.ok ? (
+                <>
+                  <div className="font-mono break-all text-zinc-400">{projectMirror.run_root}</div>
+                  <div className={projectMirror.hashes_verified ? "text-emerald-300" : "text-amber-300"}>
+                    {projectMirror.file_count ?? 0} files mirrored · {projectMirror.hashes_verified ? "hashes verified" : "hash mismatch"}
+                  </div>
+                </>
+              ) : (
+                <div className="text-amber-300">Mirror unavailable ({projectMirror.error ?? "unknown"}); canonical state is unaffected.</div>
+              )}
+            </div>
+          ) : null}
 
           <div className="pt-2 border-t border-zinc-800/40">
             <div className="text-zinc-500 mb-1">files written</div>

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffect
 from services.langgraph.app.runtime_support import trust_kernel
+from services.langgraph.persistence.projects import record_run_activity
 from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import get_approval, list_pending_approvals, resolve_approval
 from services.langgraph.persistence.events import record_event
@@ -137,6 +138,14 @@ def decide_approval(
             approval["run_id"],
         )
 
+    record_run_activity(
+        tenant_id=approval["tenant_id"],
+        project_id=approval["project_id"],
+        run_id=approval["run_id"],
+        actor=principal.user_id,
+        event_type="APPROVED" if body.decision == "approve" else "REJECTED",
+        payload={"approval_id": approval_id},
+    )
     emit_lifecycle_event(
         approval["tenant_id"],
         approval["project_id"],

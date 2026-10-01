@@ -1,0 +1,498 @@
+{
+  "ArtifactDiff": {
+    "artifact_id": "a1",
+    "content_changed": true,
+    "fingerprint_changed": true,
+    "from_version_ref": "a1:v1",
+    "location_changed": true,
+    "metadata_changes": {
+      "channel": {
+        "from": null,
+        "to": "x"
+      }
+    },
+    "text_diff": [
+      "-a",
+      "+b"
+    ],
+    "to_version_ref": "a1:v2",
+    "visual_diff": null
+  },
+  "ArtifactMetadataV2": {
+    "approval_state": "pending",
+    "artifact_id": "a1",
+    "artifact_key": "hero-ig",
+    "artifact_type": "media_asset",
+    "campaign_id": null,
+    "channel": "instagram",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "dependency_refs": [
+      "a0"
+    ],
+    "dimensions": "1080x1350",
+    "duration_seconds": null,
+    "evidence_refs": [],
+    "language": null,
+    "locale": null,
+    "master_artifact_id": "a0",
+    "media_type": "image",
+    "mime_type": "image/png",
+    "owner_department": "creative",
+    "parent_artifact_id": null,
+    "preview_uri": null,
+    "project_id": "p1",
+    "prompt_refs": [
+      "prm-1"
+    ],
+    "provenance_ref": null,
+    "rights_ref": null,
+    "source_refs": [],
+    "status": "draft",
+    "storage_uri": null,
+    "subtype": null,
+    "thumbnail_uri": null,
+    "variant_of": "a0",
+    "version": 1,
+    "version_ref": "a1:v1"
+  },
+  "ArtifactVersionRecord": {
+    "artifact_id": "a1",
+    "change_kind": "restore",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "content_location": null,
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "created_by": "u1",
+    "restored_from_version": 1,
+    "semantic_fingerprint": null,
+    "version": 2,
+    "version_ref": "a1:v2"
+  },
+  "AssetRights": {
+    "artifact_id": "a1",
+    "attribution": null,
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "expires_at": "2026-10-01T00:00:00+00:00",
+    "license": "stock",
+    "project_id": "p1",
+    "rights_id": "r1",
+    "source_ref": null,
+    "status": "active",
+    "tenant_id": "t1",
+    "territory": "UNSPECIFIED",
+    "usage_scope": "UNSPECIFIED"
+  },
+  "BrandDriftReport": {
+    "autonomous_overwrites": 0,
+    "brand_core_ref": null,
+    "findings": [
+      {
+        "artifact_id": "a1",
+        "category": "colors",
+        "detail": "off palette",
+        "evidence": [
+          "#ff0000"
+        ],
+        "severity": "warning"
+      }
+    ],
+    "not_evaluated": [
+      "logo_misuse"
+    ],
+    "project_id": "p1",
+    "refresh_candidates": [
+      "a1"
+    ],
+    "report_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "tenant_id": "t1"
+  },
+  "Calendar": {
+    "calendar_id": "cal1",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "name": "Editorial",
+    "project_id": "p1",
+    "tenant_id": "t1",
+    "timezone": "UTC"
+  },
+  "ContentAtom": {
+    "atom_id": "at1",
+    "campaign_id": null,
+    "claims": [
+      {
+        "claim_id": "c1",
+        "evidence_refs": [
+          "ev:log"
+        ],
+        "text": "Roasted within 48h",
+        "verification": "VERIFIED"
+      }
+    ],
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "project_id": "p1",
+    "source_refs": [],
+    "tenant_id": "t1",
+    "title": "Fresh roast",
+    "version": 1
+  },
+  "ContentItem": {
+    "approval_ref": "content-approval:ci1:v1:u2",
+    "approved_version": 1,
+    "artifact_id": "a1",
+    "atom_id": "at1",
+    "campaign_id": null,
+    "channel": "linkedin",
+    "claim_refs": [
+      "c1"
+    ],
+    "content_item_id": "ci1",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "created_by": "u1",
+    "evidence_fresh_until": null,
+    "kind": "social_post",
+    "project_id": "p1",
+    "rights_ref": null,
+    "state": "SCHEDULED",
+    "tenant_id": "t1",
+    "title": "Post",
+    "updated_at": "2026-10-01T00:00:00+00:00",
+    "version": 1
+  },
+  "ContentVariantSpec": {
+    "atom_id": "at1",
+    "atom_version": 1,
+    "channel": "instagram",
+    "claim_refs": [
+      "c1"
+    ],
+    "constraints": [
+      "<=10 slides"
+    ],
+    "kind": "carousel",
+    "release_blockers": [],
+    "sections": [
+      "cover_slide",
+      "claim:c1",
+      "cta_slide"
+    ],
+    "title": "Fresh roast \u2014 carousel"
+  },
+  "ConversationMessage": {
+    "activity_type": "ARTIFACT_CREATED",
+    "artifact_refs": [
+      {
+        "artifact_id": "a1",
+        "relation": "created",
+        "version_ref": "a1:v1"
+      }
+    ],
+    "author": "u1",
+    "body": "Here it is",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "message_id": "m1",
+    "project_id": "p1",
+    "role": "user",
+    "tenant_id": "t1",
+    "thread_id": "th1"
+  },
+  "ConversationThread": {
+    "campaign_id": null,
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "created_by": "u1",
+    "project_id": "p1",
+    "status": "open",
+    "tenant_id": "t1",
+    "thread_id": "th1",
+    "title": "Launch",
+    "updated_at": "2026-10-01T00:00:00+00:00"
+  },
+  "GrowthExperiment": {
+    "asset_refs": [],
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "decision": "INCONCLUSIVE",
+    "end_at": null,
+    "experiment_id": "x1",
+    "hypothesis": "h",
+    "intervention": "i",
+    "learning_signal_id": null,
+    "observed_result": {
+      "lift": 0.1
+    },
+    "project_id": "p1",
+    "sample_requirement": 1000,
+    "segment": "all",
+    "start_at": null,
+    "status": "CONCLUDED",
+    "target_metric": "ctr",
+    "tenant_id": "t1",
+    "updated_at": "2026-10-01T00:00:00+00:00"
+  },
+  "KnowledgeCapsuleMeta": {
+    "claims": [
+      {
+        "contradicted_by": [],
+        "corroborating_sources": [
+          "https://b"
+        ],
+        "observed_date": null,
+        "text": "claim"
+      }
+    ],
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "domain": "search",
+    "evidence_score": 0.7,
+    "fetched_at": null,
+    "item_id": "k1",
+    "project_id": "p1",
+    "rejection_reasons": [],
+    "rights_class": "OPEN_LICENSE",
+    "source_uri": "https://example.org",
+    "stage": "REVIEW",
+    "status": "AWAITING_REVIEW",
+    "tenant_id": "t1",
+    "updated_at": "2026-10-01T00:00:00+00:00"
+  },
+  "MemoryRecord": {
+    "authority": "BRAND_CANON",
+    "body": {
+      "value": "x"
+    },
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "created_by": "u1",
+    "fresh_until": null,
+    "memory_id": "mem1",
+    "project_id": "p1",
+    "scope": "M1_BRAND_CANON",
+    "source_refs": [
+      "a1:v3"
+    ],
+    "status": "ACTIVE",
+    "subject_key": "brand.tagline",
+    "supersedes": null,
+    "tenant_id": "t1",
+    "thread_id": null
+  },
+  "ProjectEvent": {
+    "actor": "u1",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "event_id": "e1",
+    "event_type": "PROJECT_CREATED",
+    "payload": {
+      "slug": "acme-launch"
+    },
+    "project_id": "p1",
+    "sequence": 1,
+    "subject_ref": "project:p1",
+    "tenant_id": "t1",
+    "thread_id": null
+  },
+  "ProjectManifest": {
+    "artifact_index_ref": "db://a",
+    "authority_note": "The relational store is canonical. This manifest and the workspace mirror are materialized views and are never transactional authority.",
+    "brand_id": null,
+    "display_name": "Acme Launch",
+    "folders": [
+      "00_admin",
+      "04_brand"
+    ],
+    "lifecycle_state": "ACTIVE",
+    "memory_namespace": "memory://t1/p1",
+    "project_id": "p1",
+    "rights_registry_ref": "db://r",
+    "schema_version": "amc-workspace/v2",
+    "slug": "acme-launch",
+    "source_registry_ref": "db://s",
+    "system_folders": [
+      "runs"
+    ],
+    "tenant_id": "t1"
+  },
+  "ProjectSnapshot": {
+    "artifact_heads": [
+      {
+        "artifact_id": "a1",
+        "artifact_type": "brand_core",
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "draft",
+        "version": 2,
+        "version_ref": "a1:v2"
+      }
+    ],
+    "lifecycle_state": "ACTIVE",
+    "open_approval_count": 1,
+    "project_id": "p1",
+    "run_ids": [
+      "r1"
+    ],
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "stale_artifact_count": 0,
+    "tenant_id": "t1"
+  },
+  "ProjectWorkspaceV2": {
+    "brand_id": null,
+    "brand_name": "Acme",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "created_by": "u1",
+    "description": "",
+    "display_name": "Acme Launch",
+    "lifecycle_state": "ACTIVE",
+    "manifest_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "project_id": "p1",
+    "slug": "acme-launch",
+    "tenant_id": "t1",
+    "updated_at": "2026-10-01T00:00:00+00:00",
+    "workspace_schema_version": "amc-workspace/v2"
+  },
+  "ProviderCapabilityProfile": {
+    "acceptance_rate": {
+      "evidence_ref": "bench:2026-09",
+      "sample_size": 120,
+      "status": "OBSERVED",
+      "unit": "ratio",
+      "value": 0.42
+    },
+    "benchmark_refs": [],
+    "cost_per_unit": {
+      "evidence_ref": null,
+      "sample_size": 0,
+      "status": "UNKNOWN",
+      "unit": "usd",
+      "value": null
+    },
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "failure_rate": {
+      "evidence_ref": null,
+      "sample_size": 0,
+      "status": "UNKNOWN",
+      "unit": "usd",
+      "value": null
+    },
+    "formats": [
+      "mp4"
+    ],
+    "last_verified_at": null,
+    "latency_p95_ms": {
+      "evidence_ref": null,
+      "sample_size": 0,
+      "status": "UNKNOWN",
+      "unit": "usd",
+      "value": null
+    },
+    "locality": "local",
+    "mode": "DRY_RUN",
+    "model": "local",
+    "profile_id": "pr1",
+    "provider": "freevideoforge",
+    "rights_constraints": [],
+    "task": "short_video",
+    "tenant_id": "t1"
+  },
+  "PublicationAttempt": {
+    "attempt_id": "pa1",
+    "content_item_id": "ci1",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "error": null,
+    "external_ref": "dryrun:x",
+    "idempotency_key": "k",
+    "job_id": "j1",
+    "mode": "DRY_RUN",
+    "project_id": "p1",
+    "provider": "dry-run",
+    "readback": {
+      "request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "state": "VERIFIED",
+    "tenant_id": "t1",
+    "updated_at": "2026-10-01T00:00:00+00:00"
+  },
+  "PublicationReceipt": {
+    "attempt_id": "pa1",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "kind": "observation",
+    "payload": {
+      "matches": true
+    },
+    "project_id": "p1",
+    "receipt_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "receipt_id": "rc1",
+    "tenant_id": "t1"
+  },
+  "ReproducibilityRecord": {
+    "environment_signature": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "execution_args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "generation_config_hash": null,
+    "guarantee": "SEEDED_BEST_EFFORT",
+    "input_artifact_refs": [],
+    "model": null,
+    "output_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "prompt_hashes": [],
+    "provider": "freevideoforge",
+    "schema_version": "1.0.0",
+    "seed": 7,
+    "source_hashes": [
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "subject_ref": "freevideoforge:r1",
+    "tool_contract_version": null
+  },
+  "ScheduleCadence": {
+    "channel": "linkedin",
+    "hour_utc": 15,
+    "kind": "social_post",
+    "posts_per_week": 3.0,
+    "weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "ScheduleSlot": {
+    "calendar_id": "cal1",
+    "channel": "linkedin",
+    "content_item_id": null,
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "project_id": "p1",
+    "scheduled_for": "2026-10-01T00:00:00+00:00",
+    "slot_id": "s1",
+    "state": "open",
+    "tenant_id": "t1"
+  },
+  "ScheduledJob": {
+    "attempts": 0,
+    "block_reasons": [
+      "RIGHTS_EXPIRED"
+    ],
+    "content_item_id": "ci1",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "due_at": "2026-10-01T00:00:00+00:00",
+    "idempotency_key": "publish:ci1:v1",
+    "job_id": "j1",
+    "job_kind": "PUBLISH",
+    "outbox_message_id": null,
+    "payload": {
+      "version": 1
+    },
+    "project_id": "p1",
+    "slot_id": null,
+    "status": "BLOCKED",
+    "tenant_id": "t1",
+    "updated_at": "2026-10-01T00:00:00+00:00"
+  },
+  "StorageObject": {
+    "backend": "LOCAL",
+    "byte_size": 12,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "created_at": "2026-10-01T00:00:00+00:00",
+    "mime_type": "text/plain",
+    "object_id": "o1",
+    "project_id": "p1",
+    "status": "PRESENT",
+    "storage_uri": "local://t1/p1/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "tenant_id": "t1",
+    "verified_at": "2026-10-01T00:00:00+00:00"
+  }
+}

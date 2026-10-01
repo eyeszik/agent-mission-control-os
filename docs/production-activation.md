@@ -213,3 +213,15 @@ Live campaign publishing and paid-media spend are not part of baseline productio
 - incident rollback
 
 No adapter may change `AMC_PUBLICATION_MODE` or `AMC_PAID_MEDIA_MODE` to live until these controls have executable tests and a reviewed release gate.
+
+## 12. Project OS activation items
+
+Baseline activation (§1–§10) covers the Project OS schema: apply `supabase/migrations/20261001_amc_project_os_v1.sql` with the other migrations. The following are **separate** activation steps, each EXTERNAL_ACTIVATION_REQUIRED:
+
+- **Object storage.** Production defaults to `AMC_OBJECT_STORAGE_BACKEND=local`, which is only durable on a persistent volume — serverless function filesystems are ephemeral. `r2` is rejected by production configuration until a reviewed R2 adapter with contract tests replaces the fail-closed `R2StorageAdapter`.
+- **Scheduler worker.** Deploy a worker or cron that calls `run_scheduler_tick` (or `POST /projects/{id}/scheduler/tick` with a service principal). It only enqueues to the outbox; it never calls providers.
+- **Publication providers.** Per channel, follow `docs/publishing-providers.md` and §11.
+- **Video rendering.** Install Pillow + FFmpeg (with ffprobe) on the render host and set `AMC_VIDEO_INGEST_ROOT` to the directory FreeVideoForge writes into.
+- **Knowledge fetching.** No fetch adapter exists; sources are submitted as already-fetched text.
+- **SLO objectives.** Set `AMC_SLO_<SERVICE>_<METRIC>` only after measuring baselines (`GET /project-os/status` reports `GAP_NO_BASELINE` until then).
+
