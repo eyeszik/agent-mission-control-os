@@ -25,3 +25,6 @@
 ## 2026-10-26 - React Component Inline Filter Map Optimization
 **Learning:** Chaining `.filter().map()` on arrays inside a React functional component render body allocates an intermediate array on every render, causing unnecessary garbage collection pressure and degraded performance.
 **Action:** Remove the `.filter()` step and map directly over the array, conditionally returning `null` early for items that should be filtered out. React natively ignores `null` elements during rendering with zero allocation penalty.
+## 2026-10-27 - Object Values Reduce Optimization
+**Learning:** Using `Object.values().reduce()` inside a React component render function allocates an intermediate array on every render just to calculate a single number.
+**Action:** Replace `Object.values().reduce()` with a zero-allocation `for...in` loop to avoid allocating throwaway arrays.
