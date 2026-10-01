@@ -34,7 +34,7 @@ Runs execute *inside* durable **projects** (the Project OS, [`docs/project-os.md
 - Paid-media authorization ledger; no live spend executor is installed.
 - Canonical OpenAPI coverage for agency, approval, event, analytics, and operations APIs.
 - Vercel deployment manifests for frontend/backend project roots.
-- Next.js `16.3.0` with an audited lockfile-pinned production dependency graph.
+- Next.js `16.3.8` (exact pin; patched for GHSA-vcvr-r3jv-pc5j) with an audited lockfile-pinned production dependency graph.
 - **Browser E2E release gate** using pinned Playwright/Chromium against the real local Next.js + FastAPI stack.
 - CI production-readiness and critical-file integrity gates.
 - Deterministic **UI/UX design compiler** (`agency/ui_ux`) producing governed specs and `UI_UX` prompt packages, with one DTCG 2025.10 token compiler and frontend token gates — see [`docs/ui-ux-design-compiler.md`](docs/ui-ux-design-compiler.md).
