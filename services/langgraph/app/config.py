@@ -161,6 +161,8 @@ def _production_errors(
         errors.append("AMC_PAID_MEDIA_MODE must remain disabled until a concrete provider adapter is installed")
     if (_env("AMC_ALLOW_SELF_APPROVAL") or "").lower() in {"1", "true", "yes", "on"}:
         errors.append("AMC_ALLOW_SELF_APPROVAL must not be enabled in production")
+    if (_env("AMC_OBJECT_STORAGE_BACKEND") or "local").lower() not in {"local"}:
+        errors.append("AMC_OBJECT_STORAGE_BACKEND has no reviewed remote adapter; R2 stays fail-closed")
     return errors
 
 

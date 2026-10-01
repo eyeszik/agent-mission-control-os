@@ -14,6 +14,10 @@ import { ConsequentialLifecyclePanel } from "../../components/mission-control/Co
 import { ArtifactPreviewPanel } from "../../components/mission-control/ArtifactPreviewPanel";
 import { FileOrganizationPanel } from "../../components/mission-control/FileOrganizationPanel";
 import { DesignStyleComposerPanel } from "../../components/mission-control/DesignStyleComposerPanel";
+import { ProjectWorkspacePanel } from "../../components/mission-control/ProjectWorkspacePanel";
+import { ProjectActivityPanel } from "../../components/mission-control/ProjectActivityPanel";
+import { ContentCalendarPanel } from "../../components/mission-control/ContentCalendarPanel";
+import { PortfolioCommandCenter } from "../../components/mission-control/PortfolioCommandCenter";
 import { readSession } from "../../lib/auth/session";
 import { signOut } from "../../lib/auth/supabase";
 
@@ -21,7 +25,7 @@ export default function MissionControlPage() {
   const router = useRouter();
   const productionAuth = process.env.NEXT_PUBLIC_AUTH_MODE === 'supabase';
   const [ready, setReady] = useState(!productionAuth);
-  const [mode, setMode] = useState<'operations' | 'design'>('operations');
+  const [mode, setMode] = useState<'operations' | 'projects' | 'design'>('operations');
 
   useEffect(() => {
     if (!productionAuth) return;
@@ -38,7 +42,7 @@ export default function MissionControlPage() {
         <div className="flex items-center gap-4 shrink-0">
           <h1 className="text-zinc-100 font-medium tracking-tight whitespace-nowrap">Mission Control</h1>
           <div role="group" aria-label="Mission Control mode" className="flex rounded-md border border-zinc-800 p-0.5 bg-zinc-900/60">
-            {([["operations", "Operations"], ["design", "Design Mode"]] as const).map(([value, label]) => (
+            {([["operations", "Operations"], ["projects", "Projects"], ["design", "Design Mode"]] as const).map(([value, label]) => (
               <button
                 key={value}
                 type="button"
@@ -63,6 +67,11 @@ export default function MissionControlPage() {
         <div className="lg:col-span-3 flex flex-col gap-4"><CommandInputPanel /><ConsequentialLifecyclePanel /></div>
         {mode === 'design' ? (
           <div className="lg:col-span-9 flex flex-col gap-4 min-h-0"><DesignStyleComposerPanel /></div>
+        ) : mode === 'projects' ? (
+          <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-2 gap-4 min-h-0">
+            <div className="flex flex-col gap-4 min-h-0"><ProjectWorkspacePanel /><ContentCalendarPanel /></div>
+            <div className="flex flex-col gap-4 min-h-0"><ProjectActivityPanel /><PortfolioCommandCenter /></div>
+          </div>
         ) : (
           <>
         <div className="lg:col-span-5 flex flex-col gap-4">

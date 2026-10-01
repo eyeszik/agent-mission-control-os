@@ -134,3 +134,8 @@ external publish. It exits 2 on invalid input.
   this layer can publish, deploy, send or spend.
 * **Optional UI (T25) not built**, and there is no Zod twin for the plan
   response yet.
+
+## Reuse by the Project OS
+
+The Project OS (`docs/project-os.md`) consumes compiled-agency primitives rather than re-implementing them: the `LearningLedger` is persisted per tenant (`learning_signals`) and every append still goes through `LearningLedger.append`, so the quarantine, protected-target and evidence rules are identical; the governed promotion flow refuses protected targets before they can enter it. Project-level change propagation uses the N4 registry's hard/soft invalidation (the runtime counterpart of the planner's `BlastRadiusCertificate`), and stale approvals plus a remediation queue follow from it. Layer 1 still does not consume compiled plans.
+

@@ -42,24 +42,33 @@ def run_initiator(run: dict) -> str | None:
     return value or None
 
 
-def assert_may_decide_approval(principal: Principal, run: dict, decision: str) -> None:
+def assert_may_decide(principal: Principal, initiator: str | None, decision: str, *, subject: str = "run") -> None:
+    """Role check for any decision; separation of duties for approvals.
+
+    ``initiator`` is whoever created the subject (a run, a content item). An
+    unknown initiator cannot prove separation, so approval is refused.
+    """
     if principal.role.strip().lower() not in approver_roles():
         raise HTTPException(status_code=403, detail="Deciding approvals requires an approver role")
     if decision != "approve" or self_approval_allowed():
         return
-    initiator = run_initiator(run)
-    if initiator is None:
+    if not initiator:
         raise HTTPException(
             status_code=403,
-            detail="Run initiator is not recorded, so separation of duties cannot be verified",
+            detail=f"{subject.capitalize()} initiator is not recorded, so separation of duties cannot be verified",
         )
     if initiator == principal.user_id:
-        raise HTTPException(status_code=403, detail="The principal who started a run cannot approve it")
+        raise HTTPException(status_code=403, detail=f"The principal who started a {subject} cannot approve it")
+
+
+def assert_may_decide_approval(principal: Principal, run: dict, decision: str) -> None:
+    assert_may_decide(principal, run_initiator(run), decision, subject="run")
 
 
 __all__ = [
     "DEFAULT_APPROVER_ROLES",
     "approver_roles",
+    "assert_may_decide",
     "assert_may_decide_approval",
     "run_initiator",
     "self_approval_allowed",

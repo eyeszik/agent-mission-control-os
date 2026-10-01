@@ -73,7 +73,9 @@ export const AGENCY_ARTIFACT_TYPES = [
   'offer_definition',
   'app_build_spec',
   'automation_spec',
-  'knowledge_capsule'
+  'knowledge_capsule',
+  // Project OS: rendered/ingested media masters and their channel derivatives.
+  'media_asset'
 ] as const;
 
 export const DepartmentSchema = z.enum(DEPARTMENTS);
@@ -127,7 +129,8 @@ export const ARTIFACT_TYPE_OWNER: Record<AgencyArtifactType, Department> = {
   offer_definition: 'strategy',
   app_build_spec: 'engineering',
   automation_spec: 'engineering',
-  knowledge_capsule: 'research'
+  knowledge_capsule: 'research',
+  media_asset: 'creative'
 };
 
 export function owningDepartment(artifactType: AgencyArtifactType): Department {

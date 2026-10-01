@@ -10,7 +10,7 @@ The currently implemented agency workflow is:
 
 `brief_intake → brand_strategy → creative_concepting → copywriting → design_brief → campaign_assembly → brand_safety_qa → hitl_gate → delivery`
 
-Broader product-development, creative-studio, growth, publishing, and paid-media departments are subsequent agency-expansion layers built on this control plane.
+Runs execute *inside* durable **projects** (the Project OS, [`docs/project-os.md`](docs/project-os.md)): every run, conversation, artifact version, content item, schedule, publication attempt and memory record is scoped to `tenant → project`. Product-development, creative-studio, content, search, social, growth, CRM and web/app work are represented as governed workstreams over the same artifact graph; publication is dry-run only and paid media is planning-only until reviewed provider adapters exist.
 
 ## Current implementation status
 
@@ -39,6 +39,7 @@ Broader product-development, creative-studio, growth, publishing, and paid-media
 - CI production-readiness and critical-file integrity gates.
 - Deterministic **UI/UX design compiler** (`agency/ui_ux`) producing governed specs and `UI_UX` prompt packages, with one DTCG 2025.10 token compiler and frontend token gates — see [`docs/ui-ux-design-compiler.md`](docs/ui-ux-design-compiler.md).
 - Deterministic **prompt families** (`agency/prompt_families`) and selectively routed copy, attention-hook and visual-prompting guidance built from the v10 brand/content/visual prompt spec: series invariants, variation axes, concept ledger, exact-text render stages, evidence ceiling and computation provenance. Compiles prompts only; no media, ads, products, publication or spend. See [`docs/brand-content-visual-prompt-os.md`](docs/brand-content-visual-prompt-os.md).
+- **Project OS** — durable project workspaces (idempotent initializer, lifecycle, activity stream), artifact graph v2 over the N4 registry (compare-and-set versions, compare/restore/branch/merge, one-master-many-derivatives, dependency invalidation with a remediation queue), content-addressed local object storage, a hash-verified `projects/<tenant>/<project>/` workspace mirror that dual-materializes legacy run exports, project conversations, a prompt ledger, ContentAtoms with claim-lineage-preserving derivatives, a months-ahead calendar and **one** outbox-driven scheduler (publish, refresh, CRM journeys), scoped memory with an explicit authority order, KnowledgeOps, a persisted learning ledger with governed promotion, DAM with rights radar, a cinematic → FreeVideoForge bridge, workstream templates, brand drift reports, paid-media planning, a cost × quality router and a portfolio view — see [`docs/project-os.md`](docs/project-os.md).
 - Deterministic **Compiled Agency planner** (`agency/compiled`) — deliverable backchain, RoleOS×N3 authority bridge, proof-carrying work orders, decision spine, mission cells/waves, causal invalidation and delta approval, S1–S13 digital twin; plans only, never executes — see [`docs/compiled-agency.md`](docs/compiled-agency.md).
 
 ### Live infrastructure already prepared
@@ -58,6 +59,7 @@ Broader product-development, creative-studio, growth, publishing, and paid-media
 - Live external campaign publication is disabled until a concrete provider adapter is installed and reviewed.
 - Paid-media execution is disabled until a concrete provider adapter, approval policy, budget controls, and execution tests exist.
 - The UI/UX compiler produces specifications and prompt packages only; it does not generate, render, or publish interfaces, and it runs no browser or assistive-technology verification.
+- Project OS external execution: publication runs only through the dry-run provider (no live publisher is registered), CRM journeys never send, paid media plans but never mutates or spends, R2 object storage is an unverified binding that fails closed, knowledge *fetching* has no adapter, and video rendering needs Pillow + FFmpeg on the host (`LOCAL_ONLY`). No always-on scheduler worker is deployed; ticks run via `POST /projects/{id}/scheduler/tick` or `run_scheduler_tick`.
 - Initial agency execution remains synchronous; persisted SSE events provide replay/tailing but do not fabricate pre-node start timing.
 
 See [`docs/production-activation.md`](docs/production-activation.md) for the exact activation gate.
@@ -73,6 +75,8 @@ See [`docs/production-activation.md`](docs/production-activation.md) for the exa
 - `scripts/verify_production_readiness.py` — fail-closed production-configuration and capability checks.
 - `scripts/verify_manifest.py` + `manifest.json` — critical-runtime integrity verification.
 - `docs/production-activation.md` — external activation and production smoke-test runbook.
+- `services/langgraph/agency/project_os/` — Project OS contracts and policies (workspace, storage, content, calendar, publishing, memory, knowledge, video bridge, routing, brand drift, workstreams); persistence in `persistence/project*.py` + `persistence/portfolio.py`; routes in `api/routes/{projects,project_ops,portfolio}.py`.
+- `services/freevideoforge/` — local, zero-paid-API video renderer, bridged into projects (not imported) by `agency/project_os/video.py`.
 
 ## Local setup
 

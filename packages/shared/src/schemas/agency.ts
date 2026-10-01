@@ -151,6 +151,19 @@ export const WorkspaceExportSchema = z.object({
   files_written: z.array(z.string()).default([]),
 });
 
+/** Dual-materialized copy of a run export under the project workspace
+ * (`projects/<tenant>/<project>/`). Additive: legacy `workspace_export` is unchanged. */
+export const ProjectWorkspaceMirrorSchema = z.object({
+  ok: z.boolean(),
+  project_root: z.string().optional(),
+  run_root: z.string().optional(),
+  file_count: z.number().int().min(0).optional(),
+  hashes_verified: z.boolean().optional(),
+  mismatches: z.array(z.string()).optional(),
+  folders: z.array(z.string()).optional(),
+  error: z.string().optional(),
+});
+
 export const ArtifactBindingSchema = z.object({
   artifact_key: z.string(),
   artifact_id: z.string(),
@@ -465,6 +478,7 @@ export const AgencyRunSchema = z.object({
   pending_next_node: z.array(z.string()).optional(),
   campaign_package: CampaignPackageSchema.nullable().optional(),
   workspace_export: WorkspaceExportSchema.nullable().optional(),
+  project_workspace: ProjectWorkspaceMirrorSchema.nullable().optional(),
   artifact_bindings: z.array(ArtifactBindingSchema).default([]),
   qa_report: QAReportSchema.nullable().optional(),
   pending_approval: ApprovalRequestSchema.nullable().optional(),
@@ -502,6 +516,7 @@ export type AssetReviewQueue = z.infer<typeof AssetReviewQueueSchema>;
 export type PublishingAdapter = z.infer<typeof PublishingAdapterSchema>;
 export type AssetExecutionPackage = z.infer<typeof AssetExecutionPackageSchema>;
 export type WorkspaceExport = z.infer<typeof WorkspaceExportSchema>;
+export type ProjectWorkspaceMirror = z.infer<typeof ProjectWorkspaceMirrorSchema>;
 export type ArtifactBinding = z.infer<typeof ArtifactBindingSchema>;
 export type GenerationProvenance = z.infer<typeof GenerationProvenanceSchema>;
 export type AgencyRunStatus = z.infer<typeof AgencyRunStatusSchema>;
