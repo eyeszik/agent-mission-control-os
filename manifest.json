@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "032e4a5dd3afc483818eb900d9f0e5dd3a2b393e"
+      "git_blob_sha": "c7e48b6f865218f0e254475b822d631ac005c6f2"
     },
     {
       "path": "README.md",
@@ -48,7 +48,7 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "843954ce2b7777bedbacec4760455f6215ab6777"
+      "git_blob_sha": "82344b96683555a5732231dc3ed7295594005e0a"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -108,7 +108,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "a40ad5f446eb682eb0d027b6483c00f79bc8a740"
+      "git_blob_sha": "e9f1dac0462a69d48ed30dd29c8b8eae8c5364a6"
     },
     {
       "path": "scripts/verify_auth_bindings.py",
