@@ -5,7 +5,14 @@ import { getPortfolio, type Portfolio, type PortfolioProject } from '../../lib/a
 import { useProjectStore } from '../../lib/stores/projectStore';
 
 function PortfolioRow({ project, onOpen }: { project: PortfolioProject; onOpen: (id: string) => void }) {
-  const queue = Object.values(project.publication_queue).reduce((sum, n) => sum + n, 0);
+  // ⚡ Bolt: Replaced Object.values().reduce() with a zero-allocation for...in loop
+  // to prevent intermediate array allocations on every render cycle.
+  let queue = 0;
+  for (const key in project.publication_queue) {
+    if (Object.prototype.hasOwnProperty.call(project.publication_queue, key)) {
+      queue += project.publication_queue[key as keyof typeof project.publication_queue];
+    }
+  }
   return (
     <tr className="border-b border-zinc-800/40 last:border-0">
       <th scope="row" className="text-left font-normal py-1.5 pr-2">
