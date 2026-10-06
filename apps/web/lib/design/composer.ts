@@ -93,7 +93,9 @@ export function precheck(layers: readonly StyleSelection[], index: StyleIndex): 
   const warnings: string[] = [];
   const nameOf = (id: string) => index.get(id)?.name ?? id;
 
-  if (layers.filter((layer) => layer.role === 'primary').length > 1) {
+  // ⚡ Bolt: Use a zero-allocation reduce instead of .filter().length
+  const primaryCount = layers.reduce((acc, layer) => layer.role === 'primary' ? acc + 1 : acc, 0);
+  if (primaryCount > 1) {
     conflicts.push('Only one primary style is allowed.');
   }
   if (layers.length > MAX_LAYERS) conflicts.push(`At most ${MAX_LAYERS} styles can be layered.`);
