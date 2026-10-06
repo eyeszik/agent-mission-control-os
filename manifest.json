@@ -108,7 +108,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "f923eaf50b277646d899d3ca097bb069fbd0bf1b"
+      "git_blob_sha": "ed6bf5d6ff0b59c497d39ba5d001c12040c69649"
     },
     {
       "path": "scripts/verify_auth_bindings.py",
@@ -136,7 +136,7 @@
     },
     {
       "path": "scripts/verify_repository_invariants.py",
-      "git_blob_sha": "b918511b7d63e6de156202a986ee336e545d11d1"
+      "git_blob_sha": "9fd7b3db9b2410547fb2d77ec11008aecb39975a"
     },
     {
       "path": "services/langgraph/agency/compiled/authority.py",

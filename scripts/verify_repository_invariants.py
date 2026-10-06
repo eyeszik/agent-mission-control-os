@@ -144,7 +144,7 @@ def main() -> None:
     lockfile = (ROOT / "pnpm-lock.yaml").read_text(encoding="utf-8")
     for required in [
         "specifier: 16.3.8",
-        "sharp@0.35.4",
+        "sharp@0.35.5",
         "postcss@8.5.28",
         "'@playwright/test@1.61.0'",
         "playwright-core@1.61.0",
