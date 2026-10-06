@@ -4,7 +4,7 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "607d68f7c9b974c79bbd7e98e6ce76c879cd5121"
+      "git_blob_sha": "083bc0a3ed70eebf32134ffab808d4f76a6651fb"
     },
     {
       "path": ".github/workflows/ci.yml",
@@ -12,7 +12,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "a2c913b63d6239b4e013a8f58daef7385e8c79a2"
+      "git_blob_sha": "ad8e5eaaa4ace8cb7cf24379d9c58e5cb1f82d39"
     },
     {
       "path": "apps/web/app/login/page.tsx",
@@ -260,7 +260,7 @@
     },
     {
       "path": "services/langgraph/api/routes/agency.py",
-      "git_blob_sha": "2b7c7863182cf22c464d4c272515375ebf3518f0"
+      "git_blob_sha": "c99f61f62d7587816479d7cbd27080f82779adf7"
     },
     {
       "path": "services/langgraph/api/routes/analytics.py",
@@ -304,7 +304,7 @@
     },
     {
       "path": "services/langgraph/app/config.py",
-      "git_blob_sha": "65247e5791f7634a453867a724d7e547fb34cfba"
+      "git_blob_sha": "7021b9b31815f6e9dd69082d744b9618e22bdddb"
     },
     {
       "path": "services/langgraph/app/main.py",
@@ -332,7 +332,7 @@
     },
     {
       "path": "services/langgraph/persistence/agency_kernel.py",
-      "git_blob_sha": "4f3ed6e4090781d85f48e4d6517d6aa28d8c1790"
+      "git_blob_sha": "a4714f3707df8b4bd1c147a7ec0beccc4b17b2db"
     },
     {
       "path": "services/langgraph/persistence/analytics.py",
@@ -376,7 +376,7 @@
     },
     {
       "path": "services/langgraph/persistence/projects.py",
-      "git_blob_sha": "e029b51d57534c1ca22a40e05a1b89f18c0b7087"
+      "git_blob_sha": "09107cc42ebf1f1a2d41a76bedf8057b181f4af1"
     },
     {
       "path": "services/langgraph/persistence/sqlite_db.py",
@@ -457,6 +457,30 @@
     {
       "path": "supabase/migrations/20261001_amc_project_os_v1.sql",
       "git_blob_sha": "b6e326224b8c06c08f8729161ccd2a5b1936b4eb"
+    },
+    {
+      "path": "services/langgraph/agency/delivery/contract.py",
+      "git_blob_sha": "f2a051914245c6a9f06d685aa1391df647559360"
+    },
+    {
+      "path": "services/langgraph/agency/delivery/critic.py",
+      "git_blob_sha": "85608fb23a823a146f99eb9446ff3a8903dc51e0"
+    },
+    {
+      "path": "services/langgraph/agency/delivery/release.py",
+      "git_blob_sha": "896f0f3708aab8a8c62d255589d031960c5bc72b"
+    },
+    {
+      "path": "services/langgraph/agency/delivery/workflow.py",
+      "git_blob_sha": "4bb16194b5d564a9bd7a8b96fe3d44a8a523a95e"
+    },
+    {
+      "path": "services/langgraph/graph/agency/contract_check.py",
+      "git_blob_sha": "9fa7cfcc29a5a124e9b3859ed493f147520e15d9"
+    },
+    {
+      "path": "services/langgraph/persistence/delivery.py",
+      "git_blob_sha": "1e6292020602c89e94aead3d689344afbabf7878"
     }
   ]
 }

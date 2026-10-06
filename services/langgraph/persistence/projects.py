@@ -810,6 +810,7 @@ def revise_project_artifact(
             "changed_ref": revision["changed_version_ref"],
             "affected": revision["affected"],
             "remediation_requests": remediation,
+            "certificate": revision["certificate"],
         },
     }
 

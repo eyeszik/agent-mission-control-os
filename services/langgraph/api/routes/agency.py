@@ -5,6 +5,38 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
+from services.langgraph.agency.delivery.contract import (
+    ContractValidationError,
+    DeliveryContract,
+    contract_hash,
+    validate_contract_for_execution,
+)
+from services.langgraph.agency.delivery.critic import ContractResult
+from services.langgraph.agency.delivery.crg import PIPELINE_INVARIANT, CRGInconsistency, build_crg
+from services.langgraph.agency.delivery.release import (
+    RELEASE_POLICY_VERSION,
+    ArtifactRef,
+    ReleaseCandidateManifest,
+    ReleaseFacts,
+    ReleaseReceiptMismatch,
+    approval_subject_hash,
+    build_candidate_manifest,
+    build_release_receipt,
+    candidate_manifest_hash,
+    dependency_snapshot_hash,
+    evaluate_release_predicate,
+    release_receipt_hash,
+    safe_attributes,
+)
+from services.langgraph.agency.delivery.workflow import (
+    CONTRACT_CHECK_NODE,
+    WorkflowPin,
+    WorkflowPinError,
+    assert_pin_current,
+    contract_mode_from_env,
+    pin_for_new_run,
+    pinned_workflow,
+)
 from services.langgraph.agency.design import UnknownStyleError, get_style
 from services.langgraph.agency.design.style_composer import DesignStyleSelection
 from services.langgraph.agency.execution.canonical import canonical_hash
@@ -22,6 +54,7 @@ from services.langgraph.agency.kernel.lifecycle import TransitionContext, releas
 from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffect
 from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
+from services.langgraph.graph.agency.nodes import LIVE_STAGE_ROLE_BINDINGS
 from services.langgraph.graph.models import AgentRun
 from services.langgraph.persistence.agency_kernel import (
     create_engagement,
@@ -32,6 +65,12 @@ from services.langgraph.persistence.agency_kernel import (
 )
 from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import bind_approval_subject, get_approvals_for_run, mark_approval_stale
+from services.langgraph.persistence.delivery import (
+    current_artifact_refs,
+    dependency_edges,
+    evaluate_run_contract,
+    execution_lineage_hash,
+)
 from services.langgraph.persistence.events import record_event
 from services.langgraph.persistence.projects import mirror_run_export, record_run_activity
 from services.langgraph.persistence.idempotency import (
@@ -105,6 +144,9 @@ class CreateAgencyRunRequest(BaseModel):
     tenant_id: Optional[str] = None
     project_id: str
     brief: CampaignBriefRequest
+    # Accepted only when AMC_CONTRACT_MODE is shadow or enforce; required in
+    # enforce. See agency/delivery/contract.py.
+    delivery_contract: Optional[DeliveryContract] = None
 
 
 class RebindArtifactRequest(BaseModel):
@@ -579,7 +621,19 @@ def _record_completion(
 
 def _node_event_payload(node_id: str, delta) -> Optional[dict]:
     """Safe, query-free provenance attached to selected node_complete events."""
-    if node_id != "creative_concepting" or not isinstance(delta, dict):
+    if not isinstance(delta, dict):
+        return None
+    if node_id == CONTRACT_CHECK_NODE:
+        evaluation = (((delta.get("extracted_data") or {}).get("agency") or {}).get("contract_evaluation") or {})
+        return {
+            "contract_check": safe_attributes(
+                node_id=node_id,
+                contract_hash=evaluation.get("contract_hash"),
+                critic_verdict=evaluation.get("dod") or evaluation.get("status"),
+                contract_mode=evaluation.get("contract_mode"),
+            )
+        }
+    if node_id != "creative_concepting":
         return None
     agency = ((delta.get("extracted_data") or {}).get("agency") or {})
     corpus = agency.get("design_corpus_provenance")
@@ -680,6 +734,125 @@ def _reserve_or_replay(scope: str, key: str, request_hash: str) -> Optional[dict
     return None
 
 
+def _resolve_contract_pin(req: CreateAgencyRunRequest) -> tuple[WorkflowPin, Optional[DeliveryContract]]:
+    """Pick the topology a new run is pinned to and validate its contract."""
+    try:
+        mode = contract_mode_from_env()
+    except WorkflowPinError as exc:
+        raise HTTPException(status_code=503, detail="AMC_CONTRACT_MODE is invalid") from exc
+    contract = req.delivery_contract
+    if contract is not None and mode == "off":
+        raise HTTPException(status_code=422, detail="delivery_contract requires AMC_CONTRACT_MODE=shadow or enforce")
+    if contract is None and mode == "enforce":
+        raise HTTPException(status_code=422, detail="AMC_CONTRACT_MODE=enforce requires a delivery_contract")
+    if contract is not None:
+        try:
+            validate_contract_for_execution(contract)
+        except ContractValidationError as exc:
+            raise HTTPException(status_code=422, detail={"code": exc.code, "detail": exc.detail}) from exc
+    return pin_for_new_run(mode), contract
+
+
+def _initial_extracted_data(pin: WorkflowPin, contract: Optional[DeliveryContract]) -> dict:
+    if not pin.uses_contract:
+        return {}
+    return {
+        "delivery_contract": contract.model_dump(mode="json") if contract is not None else None,
+        "contract_mode": pin.contract_mode,
+    }
+
+
+def _run_pin(record: dict) -> WorkflowPin:
+    """The run's own pin, verified against the code's current topology."""
+    pin = pinned_workflow(record.get("metadata"))
+    assert_pin_current(pin)
+    return pin
+
+
+def _candidate_artifact_ids(agency_data: dict, protected_artifact_id: str) -> list[str]:
+    ids = [binding["artifact_id"] for binding in agency_data.get("artifact_bindings") or []]
+    return sorted({*ids, protected_artifact_id})
+
+
+def _compose_candidate(
+    *,
+    run_id: str,
+    project_id: str,
+    contract_hash_value: str,
+    result_hash_value: str,
+    artifact_refs: tuple[ArtifactRef, ...],
+) -> ReleaseCandidateManifest:
+    ids = [ref.artifact_id for ref in artifact_refs]
+    return build_candidate_manifest(
+        run_id=run_id,
+        project_id=project_id,
+        contract_hash=contract_hash_value,
+        artifact_refs=artifact_refs,
+        contract_result_refs=[result_hash_value],
+        dependency_snapshot_hash=dependency_snapshot_hash(dependency_edges(ids)),
+    )
+
+
+def _seal_release_candidate(
+    *,
+    run_id: str,
+    tenant_id: str,
+    project_id: str,
+    agency_data: dict,
+    protected_artifact_id: str,
+    contract_payload: Optional[dict],
+    contract_mode: str,
+) -> dict:
+    """Seal the exact release payload before anyone can approve it.
+
+    The critic is re-run on the stored package (after workspace export and
+    artifact binding), which is exactly what the release gate re-checks; the
+    graph-time verdict stays on the contract_check event. The sealed result
+    replaces ``contract_evaluation`` so the reviewer sees what is bound.
+    """
+    evaluation = evaluate_run_contract(
+        contract_payload,
+        agency_data.get("campaign_package") or {},
+        tenant_id=tenant_id,
+        project_id=project_id,
+        contract_mode=contract_mode,
+    )
+    agency_data["contract_evaluation"] = evaluation
+    if not evaluation.get("contract_hash") or not evaluation.get("result_hash"):
+        return {"status": "NOT_SEALED", "reason": evaluation.get("status") or "NOT_EVALUATED"}
+    candidate = _compose_candidate(
+        run_id=run_id,
+        project_id=project_id,
+        contract_hash_value=evaluation["contract_hash"],
+        result_hash_value=evaluation["result_hash"],
+        artifact_refs=current_artifact_refs(_candidate_artifact_ids(agency_data, protected_artifact_id)),
+    )
+    sealed_hash = candidate_manifest_hash(candidate)
+    return {
+        "status": "SEALED",
+        "manifest": candidate.model_dump(mode="json"),
+        "candidate_manifest_hash": sealed_hash,
+        "protected_artifact_id": protected_artifact_id,
+        "approval_subject_hash": approval_subject_hash(
+            candidate_manifest_hash=sealed_hash,
+            contract_hash=candidate.contract_hash,
+            policy_version=candidate.policy_version,
+        ),
+    }
+
+
+def _contract_view(pin: WorkflowPin, agency_data: dict) -> dict:
+    """Response fields only contract-pinned runs carry (legacy shape unchanged)."""
+    if not pin.uses_contract:
+        return {}
+    return {
+        "workflow": pin.as_metadata(),
+        "contract_evaluation": agency_data.get("contract_evaluation"),
+        "release_candidate": agency_data.get("release_candidate"),
+        "release_receipt": agency_data.get("release_receipt"),
+    }
+
+
 @router.post("/runs", status_code=201)
 def create_agency_run(
     req: CreateAgencyRunRequest,
@@ -690,9 +863,13 @@ def create_agency_run(
     if req.tenant_id is not None and req.tenant_id != principal.tenant_id:
         raise HTTPException(status_code=403, detail="tenant_id does not match authenticated principal")
 
+    pin, contract = _resolve_contract_pin(req)
     safe_brief = _safe_brief(req)
     scope = _idempotency_scope(principal, "agency.create", req.project_id)
-    request_hash = hash_payload({"project_id": req.project_id, "brief": safe_brief})
+    request_payload = {"project_id": req.project_id, "brief": safe_brief}
+    if contract is not None:
+        request_payload["delivery_contract_hash"] = contract_hash(contract)
+    request_hash = hash_payload(request_payload)
     replay = _reserve_or_replay(scope, idempotency_key, request_hash)
     if replay is not None:
         return replay
@@ -719,7 +896,10 @@ def create_agency_run(
         request={"project_id": req.project_id, "brief": safe_brief},
     )
     now = datetime.now(timezone.utc)
-    metadata = {"input_data": {"brief": safe_brief}, "initiated_by": principal.user_id}
+    metadata = {"input_data": {"brief": safe_brief}, "initiated_by": principal.user_id, "workflow": pin.as_metadata()}
+    if contract is not None:
+        metadata["delivery_contract"] = contract.model_dump(mode="json")
+        metadata["delivery_contract_hash"] = contract_hash(contract)
     run = AgentRun(
         id=run_id,
         tenant_id=principal.tenant_id,
@@ -759,7 +939,7 @@ def create_agency_run(
         payload={"pipeline": PIPELINE_NAME},
     )
 
-    graph = build_agency_workflow()
+    graph = build_agency_workflow(pin.workflow_version)
     config = _run_config(run_id)
     _issue_dispatch_permit(
         run_id=run_id,
@@ -771,7 +951,7 @@ def create_agency_run(
         "run": run,
         "current_node": "start",
         "messages": [],
-        "extracted_data": {},
+        "extracted_data": _initial_extracted_data(pin, contract),
         "validation_status": "pending",
     }
     started_at = datetime.now(timezone.utc)
@@ -875,15 +1055,39 @@ def create_agency_run(
             approval_id=run_approvals[0]["approval_id"],
             subject_hash=subject_hash,
         )
+        bound_subject_hash, bound_policy_version = subject_hash, "amc-approval/v1"
+        if pin.uses_contract:
+            sealed = _seal_release_candidate(
+                run_id=run_id,
+                tenant_id=run.tenant_id,
+                project_id=run.project_id,
+                agency_data=agency_data,
+                protected_artifact_id=protected_artifact_id,
+                contract_payload=metadata.get("delivery_contract"),
+                contract_mode=pin.contract_mode,
+            )
+            agency_data["release_candidate"] = {**sealed, "contract_mode": pin.contract_mode}
+            record = update_run_status(run_id, "needs_approval", {"agency": agency_data})
+            # Shadow records the candidate but keeps the legacy approval
+            # subject, so the release path is unchanged. Enforce binds the
+            # approval to the sealed candidate.
+            if pin.enforces_contract and sealed["status"] == "SEALED":
+                bound_subject_hash = sealed["approval_subject_hash"]
+                bound_policy_version = RELEASE_POLICY_VERSION
         bind_approval_subject(
             run_approvals[0]["approval_id"],
-            subject_hash=subject_hash,
+            subject_hash=bound_subject_hash,
             subject_ref=protected_artifact_id,
             subject_version_ref=protected_version_ref,
             authority_ref="human-review",
-            policy_version="amc-approval/v1",
+            policy_version=bound_policy_version,
         )
         run_approvals = get_approvals_for_run(run_id)
+        if pin.enforces_contract and run_approvals[0]["status"] != "pending":
+            # A decision recorded before the candidate was sealed did not see
+            # this candidate, so it cannot authorize it.
+            mark_approval_stale(run_approvals[0]["approval_id"], "decided_before_release_candidate_sealed")
+            run_approvals = get_approvals_for_run(run_id)
         record_run_activity(
             tenant_id=principal.tenant_id,
             project_id=req.project_id,
@@ -932,7 +1136,8 @@ def create_agency_run(
         "pending_approval": run_approvals[0] if run_approvals else None,
         "degraded": bool(agency_data.get("degraded")),
         "generation_provenance": agency_data.get("generation_provenance", []),
-        }
+        **_contract_view(pin, agency_data),
+    }
     if not complete_idempotency(scope, idempotency_key, response):
         raise HTTPException(status_code=500, detail="Failed to finalize idempotency record")
     _record_completion(
@@ -960,7 +1165,11 @@ def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
         raise HTTPException(status_code=404, detail="Run not found")
     _authorize_run(principal, record)
 
-    graph = build_agency_workflow()
+    try:
+        pin = _run_pin(record)
+    except WorkflowPinError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    graph = build_agency_workflow(pin.workflow_version)
     snapshot = graph.get_state(_run_config(run_id))
     agency_data = _agency_payload(dict(snapshot.values)) if snapshot and snapshot.values else {}
     stored_agency = (record.get("result") or {}).get("agency", {})
@@ -989,7 +1198,53 @@ def get_agency_run(run_id: str, principal: Principal = Depends(get_principal)):
         "degraded": bool(agency_data.get("degraded")),
         "generation_provenance": agency_data.get("generation_provenance", []),
         "proof": get_run_proof_bundle(run_id),
+        **_contract_view(pin, agency_data),
     }
+
+
+@router.get("/runs/{run_id}/contract")
+def get_agency_run_contract(run_id: str, principal: Principal = Depends(get_principal)):
+    """Read-only view: the run's contract, critic result, sealed candidate,
+    receipt and the derived Contract Requirement Graph. Nothing here mutates."""
+    record = get_run_record(run_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Run not found")
+    _authorize_run(principal, record)
+    try:
+        pin = _run_pin(record)
+    except WorkflowPinError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    stored_agency = (record.get("result") or {}).get("agency", {})
+    metadata = record.get("metadata") or {}
+    view = {
+        "run_id": run_id,
+        "project_id": record["project_id"],
+        "workflow": pin.as_metadata(),
+        "delivery_contract": metadata.get("delivery_contract"),
+        "delivery_contract_hash": metadata.get("delivery_contract_hash"),
+        "contract_evaluation": stored_agency.get("contract_evaluation"),
+        "release_candidate": stored_agency.get("release_candidate"),
+        "release_receipt": stored_agency.get("release_receipt"),
+        "crg": None,
+    }
+    evaluation = stored_agency.get("contract_evaluation") or {}
+    sealed = stored_agency.get("release_candidate") or {}
+    if metadata.get("delivery_contract") and evaluation.get("result") and sealed.get("status") == "SEALED":
+        candidate = ReleaseCandidateManifest.model_validate(sealed["manifest"])
+        try:
+            view["crg"] = build_crg(
+                contract=DeliveryContract.model_validate(metadata["delivery_contract"]),
+                result=ContractResult.model_validate(evaluation["result"]),
+                candidate=candidate,
+                work_order_refs=[
+                    {"stage": stage, "role_id": role_id, "justified_by": PIPELINE_INVARIANT}
+                    for stage, role_id in LIVE_STAGE_ROLE_BINDINGS.items()
+                ],
+                dependency_edges=dependency_edges([ref.artifact_id for ref in candidate.artifact_refs]),
+            )
+        except CRGInconsistency as exc:
+            raise HTTPException(status_code=409, detail=f"Contract requirement graph is inconsistent: {exc}") from exc
+    return view
 
 
 @router.post("/runs/{run_id}/artifacts/rebind")
@@ -1062,6 +1317,129 @@ def rebind_agency_run_artifact(
     }
 
 
+# Release blocks meaning the approved candidate no longer describes what would
+# ship. The approval is staled, exactly as a legacy subject-hash change does.
+_CANDIDATE_DRIFT_CODES = frozenset(
+    {"ARTIFACTS_CHANGED", "DEPENDENCIES_CHANGED", "CONTRACT_RESULT_CHANGED", "APPROVAL_SUBJECT_MISMATCH"}
+)
+
+
+def _evaluate_release_gate(
+    *,
+    run_id: str,
+    record: dict,
+    stored_agency: dict,
+    approval: Optional[dict],
+    pin: WorkflowPin,
+    compile_blocked: bool,
+) -> dict:
+    """Facts for the release predicate, each read from its owning authority."""
+    sealed_info = stored_agency.get("release_candidate") or {}
+    if sealed_info.get("status") != "SEALED":
+        from services.langgraph.agency.delivery.release import ReleaseBlock
+
+        return {
+            "blocks": [ReleaseBlock("CANDIDATE_NOT_SEALED", "contract", "no sealed release candidate")],
+            "candidate": None,
+            "candidate_manifest_hash": None,
+            "contract_hash": None,
+            "dod": None,
+        }
+    sealed = ReleaseCandidateManifest.model_validate(sealed_info["manifest"])
+    # The critic is re-run on the stored payload now: a result computed for
+    # different content, or evidence that has since gone stale, cannot release.
+    evaluation = evaluate_run_contract(
+        (record.get("metadata") or {}).get("delivery_contract"),
+        stored_agency.get("campaign_package") or {},
+        tenant_id=record["tenant_id"],
+        project_id=record["project_id"],
+        contract_mode=pin.contract_mode,
+    )
+    current_refs = current_artifact_refs([ref.artifact_id for ref in sealed.artifact_refs])
+    current = _compose_candidate(
+        run_id=run_id,
+        project_id=record["project_id"],
+        contract_hash_value=evaluation["contract_hash"] or "missing",
+        result_hash_value=evaluation["result_hash"] or "missing",
+        artifact_refs=current_refs,
+    )
+    gate_approval = dict(approval) if approval else None
+    if gate_approval is not None and not pin.enforces_contract:
+        # In shadow the approval binds the legacy subject; judge the candidate
+        # as if the approval had been bound to it, without changing anything.
+        gate_approval["subject_hash"] = sealed_info["approval_subject_hash"]
+    facts = ReleaseFacts(
+        n2_failure_codes=tuple(f.code for f in release_guard_failures(_delivery_context(stored_agency, approval))),
+        contract_dod=evaluation["dod"],
+        contract_result_hash=evaluation["result_hash"],
+        approval=gate_approval,
+        expected_approval_subject_hash=approval_subject_hash(
+            candidate_manifest_hash=candidate_manifest_hash(current),
+            contract_hash=current.contract_hash,
+            policy_version=current.policy_version,
+        ),
+        sealed_candidate=sealed,
+        current_artifact_refs=current_refs,
+        current_dependency_snapshot_hash=current.dependency_snapshot_hash,
+        compile_blocked=compile_blocked,
+    )
+    return {
+        "blocks": evaluate_release_predicate(facts),
+        "candidate": sealed,
+        "candidate_manifest_hash": sealed_info["candidate_manifest_hash"],
+        "protected_artifact_id": sealed_info.get("protected_artifact_id"),
+        "contract_hash": sealed.contract_hash,
+        "dod": evaluation["dod"],
+    }
+
+
+def _seal_release_receipt(*, run_id: str, agency_data: dict, approval: dict, candidate: ReleaseCandidateManifest):
+    """Receipt for what is actually about to be released.
+
+    The protected run artifact's content is the run payload, so its released
+    hash is taken from the final payload rather than the stored row: delivery
+    that altered the approved payload is caught here, before completion.
+    """
+    protected_id = f"art-protected-{run_id}"
+    final_subject = _agency_subject_hash(agency_data)
+    released = tuple(
+        ref.model_copy(update={"content_hash": final_subject}) if ref.artifact_id == protected_id else ref
+        for ref in current_artifact_refs([ref.artifact_id for ref in candidate.artifact_refs])
+    )
+    return build_release_receipt(
+        candidate=candidate,
+        approval=approval,
+        released_artifact_refs=released,
+        delivery_receipt_ref=f"outbox-delivery-{run_id}",
+        released_at=_now(),
+        execution_lineage_hash=execution_lineage_hash(run_id),
+    )
+
+
+def _record_release_gate_event(run_id: str, record: dict, pin: WorkflowPin, context: dict, *, outcome: str) -> None:
+    blocks = context.get("blocks") or []
+    record_event(
+        run_id,
+        record["tenant_id"],
+        record["project_id"],
+        "release_gate",
+        "node_complete",
+        safe_payload={
+            "release_gate": safe_attributes(
+                node_id="release_gate",
+                workflow_version=pin.workflow_version,
+                contract_mode=pin.contract_mode,
+                candidate_manifest_hash=context.get("candidate_manifest_hash"),
+                contract_hash=context.get("contract_hash"),
+                critic_verdict=context.get("dod"),
+                authority_result=outcome,
+                block_codes=[block.code for block in blocks],
+                failure_class=blocks[0].failure_class if blocks else None,
+            )
+        },
+    )
+
+
 @router.post("/runs/{run_id}/resume")
 def resume_agency_run(
     run_id: str,
@@ -1105,11 +1483,28 @@ def resume_agency_run(
         fail_idempotency(scope, idempotency_key, f"invalid_status:{record['status']}")
         raise HTTPException(status_code=409, detail=f"Run is not awaiting delivery (status={record['status']})")
 
+    # Resume rebuilds the graph the run was created with. A run whose pinned
+    # topology no longer matches the code refuses to replay through a
+    # different graph.
+    try:
+        pin = _run_pin(record)
+    except WorkflowPinError as exc:
+        fail_idempotency(scope, idempotency_key, "workflow_pin_mismatch")
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
     stored_agency = (record.get("result") or {}).get("agency", {})
     run_approvals = get_approvals_for_run(run_id)
     latest = run_approvals[0] if run_approvals else None
     current_subject_hash = _agency_subject_hash(stored_agency)
-    if latest and latest.get("subject_hash") and latest["subject_hash"] != current_subject_hash:
+    # Under enforce the approval binds the sealed release candidate, which the
+    # release predicate below checks; the legacy hash comparison is for runs
+    # whose approval binds the raw run output.
+    if (
+        not pin.enforces_contract
+        and latest
+        and latest.get("subject_hash")
+        and latest["subject_hash"] != current_subject_hash
+    ):
         mark_approval_stale(latest["approval_id"], "run_result_hash_changed")
         trust_kernel().open_recovery_case(
             tenant_id=record["tenant_id"],
@@ -1121,6 +1516,10 @@ def resume_agency_run(
         )
         fail_idempotency(scope, idempotency_key, "approval_stale")
         raise HTTPException(status_code=409, detail="Approval is stale because the protected run output changed")
+
+    if pin.enforces_contract and latest and latest.get("status") == "stale":
+        fail_idempotency(scope, idempotency_key, "approval_stale")
+        raise HTTPException(status_code=409, detail="Approval is stale because the approved release candidate changed")
 
     # Release invariants that are intrinsic to the generated payload are
     # evaluated before derived compile/invalidation state. This preserves the
@@ -1148,6 +1547,42 @@ def resume_agency_run(
         raise HTTPException(status_code=409, detail=_DELIVERY_BLOCK_DETAIL[blocker.code](latest))
 
     compile_gate = run_compile_gate(run_id)
+    release_context = None
+    if pin.uses_contract:
+        try:
+            release_context = _evaluate_release_gate(
+                run_id=run_id,
+                record=record,
+                stored_agency=stored_agency,
+                approval=latest,
+                pin=pin,
+                compile_blocked=bool(compile_gate["compile_blocked"]),
+            )
+        except Exception as exc:
+            # Shadow must never change the release path; enforce fails closed.
+            if pin.enforces_contract:
+                fail_idempotency(scope, idempotency_key, "release_gate_unavailable")
+                raise HTTPException(status_code=409, detail="Release gate could not be evaluated") from exc
+            release_context = None
+        if release_context is not None:
+            try:
+                _record_release_gate_event(
+                    run_id,
+                    record,
+                    pin,
+                    release_context,
+                    outcome=("BLOCKED" if release_context["blocks"] else "PERMITTED") if pin.enforces_contract else "SHADOW_VERDICT",
+                )
+            except Exception as exc:
+                if pin.enforces_contract:
+                    fail_idempotency(scope, idempotency_key, "release_gate_unrecorded")
+                    raise HTTPException(status_code=409, detail="Release gate verdict could not be recorded") from exc
+        if pin.enforces_contract and release_context["blocks"]:
+            codes = [block.code for block in release_context["blocks"]]
+            if latest and latest.get("status") != "stale" and set(codes) & _CANDIDATE_DRIFT_CODES:
+                mark_approval_stale(latest["approval_id"], "release_candidate_changed")
+            fail_idempotency(scope, idempotency_key, codes[0])
+            raise HTTPException(status_code=409, detail=f"Release blocked: {', '.join(codes)}")
     if compile_gate["compile_blocked"]:
         fail_idempotency(scope, idempotency_key, "compile_blocked")
         raise HTTPException(
@@ -1197,7 +1632,7 @@ def resume_agency_run(
         authority_refs=("human-review",),
     )
 
-    graph = build_agency_workflow()
+    graph = build_agency_workflow(pin.workflow_version)
     config = _run_config(run_id)
     run_model = AgentRun(
         id=run_id,
@@ -1293,6 +1728,33 @@ def resume_agency_run(
     else:
         agency_data = {**stored_agency, **agency_data}
 
+    if pin.enforces_contract and release_context is not None:
+        try:
+            receipt = _seal_release_receipt(
+                run_id=run_id,
+                agency_data=agency_data,
+                approval=latest,
+                candidate=release_context["candidate"],
+            )
+        except ReleaseReceiptMismatch as exc:
+            update_run_status(run_id, "failed", {"agency": stored_agency, "error": "release_receipt_mismatch"})
+            trust.open_recovery_case(
+                tenant_id=record["tenant_id"],
+                project_id=record["project_id"],
+                operation_id=f"agency.resume:{run_id}",
+                reason="OBSERVATION_MISMATCH",
+                observation_ref=run_id,
+                evidence_refs=(release_context["candidate_manifest_hash"],),
+            )
+            _record_release_gate_event(run_id, record, pin, release_context, outcome="RECEIPT_MISMATCH")
+            fail_idempotency(scope, idempotency_key, "release_receipt_mismatch")
+            trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id, status=IdempotencyStatus.FAILED)
+            raise HTTPException(status_code=409, detail="Released artifacts differ from the approved candidate") from exc
+        agency_data["release_receipt"] = {
+            **receipt.model_dump(mode="json"),
+            "release_receipt_hash": release_receipt_hash(receipt),
+        }
+
     completed = update_run_status(run_id, "completed", {"agency": agency_data})
     _record_observation_phase(
         run_id=run_id,
@@ -1329,6 +1791,9 @@ def resume_agency_run(
     trust.mark_outbox_delivered(message_id=outbox_message.message_id)
     response = {"run_id": run_id, "status": "completed", "delivery": agency_data.get("delivery")}
     response["project_id"] = record["project_id"]
+    if release_context is not None:
+        _record_release_gate_event(run_id, record, pin, release_context, outcome="RELEASED")
+    response.update(_contract_view(pin, agency_data))
     if not complete_idempotency(scope, idempotency_key, response):
         raise HTTPException(status_code=500, detail="Failed to finalize idempotency record")
     _record_completion(

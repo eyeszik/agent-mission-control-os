@@ -159,6 +159,8 @@ def _production_errors(
         errors.append("AMC_PUBLICATION_MODE cannot be live until a concrete provider adapter is installed")
     if paid_media.mode != "disabled":
         errors.append("AMC_PAID_MEDIA_MODE must remain disabled until a concrete provider adapter is installed")
+    if (_env("AMC_CONTRACT_MODE") or "off").strip().lower() not in {"off", "shadow", "enforce"}:
+        errors.append("AMC_CONTRACT_MODE must be off, shadow or enforce")
     if (_env("AMC_ALLOW_SELF_APPROVAL") or "").lower() in {"1", "true", "yes", "on"}:
         errors.append("AMC_ALLOW_SELF_APPROVAL must not be enabled in production")
     if (_env("AMC_OBJECT_STORAGE_BACKEND") or "local").lower() not in {"local"}:
