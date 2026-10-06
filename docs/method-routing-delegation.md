@@ -174,7 +174,7 @@ No generic executor consumes compiled work orders or mission cells in this codeb
 - `compile_method_mission`;
 - `orchestrate_brand_pipeline.py method-plan`.
 
-No executor was added to fake completeness.
+No executor was added to fake completeness. The execution fabric ([`execution-fabric.md`](execution-fabric.md)) now consumes these waves without changing this module: method cells hold no N3 role contract and need an authored-text provider, so it reports them as `BLOCKED_AUTHORITY` (with `PROVIDER_GAP:llm_drafting` among the reasons) rather than executing them.
 
 ## Bounded control
 

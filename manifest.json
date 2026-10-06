@@ -12,7 +12,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "6a4a0a830d3cac61ac93afd050a234058c2c0b1e"
+      "git_blob_sha": "76bb0049892180fa4f607add38c07ebf8bcc0cd0"
     },
     {
       "path": "apps/web/app/login/page.tsx",
@@ -252,7 +252,7 @@
     },
     {
       "path": "services/langgraph/agency/skills/dispatcher.py",
-      "git_blob_sha": "b56e656dfcee86cd70f715dacc5ea50c256386f6"
+      "git_blob_sha": "b0151c8880f2c9f9beaa9916fc78d19cfe62b3c6"
     },
     {
       "path": "services/langgraph/api/routes/_project_common.py",
@@ -489,6 +489,22 @@
     {
       "path": "services/langgraph/agency/compiled/data/method_catalog.v1.json",
       "git_blob_sha": "8369692050c39f9ce06da19ddba01562b41ba376"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/contracts.py",
+      "git_blob_sha": "5141dd68b7e73aed20c1d9fc1176cd036b20dd15"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/consumer.py",
+      "git_blob_sha": "da75d68389beb0294b9462421ac0738f98fca964"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/skills.py",
+      "git_blob_sha": "52780564ff7e9de9436a27d3f56ca7eba2744431"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/adapters/code_sandbox.py",
+      "git_blob_sha": "78a1af2fb1869ffdee770e64b141599abb203350"
     }
   ]
 }
