@@ -539,6 +539,68 @@ def _cmd_compiled_plan(args: argparse.Namespace) -> int:
     return 1 if structural else 0
 
 
+def _cmd_method_plan(args: argparse.Namespace) -> int:
+    """Route an objective to a minimal method stack and compile its work orders.
+
+    Pure: no generation, no execution (the result is EXECUTOR_GAP by design).
+    Exit 0 = compiled with nothing blocked or unresolved, 1 = blocked or
+    unresolved items reported, 2 = unreadable input.
+    """
+    from services.langgraph.agency.compiled.method_mission import MethodCompileError, compile_method_mission
+    from services.langgraph.agency.compiled.method_models import ObjectiveRequest
+    from services.langgraph.agency.compiled.method_router import compile_method_plan
+    from services.langgraph.app.runtime_support import role_os_registry
+
+    try:
+        with open(args.input, encoding="utf-8") as handle:
+            request = ObjectiveRequest.model_validate(json.load(handle))
+    except (OSError, ValueError, ValidationError) as exc:
+        raise BriefError(f"could not read objective request: {exc}") from exc
+    plan = compile_method_plan(request)
+    compiled = None
+    error = None
+    if plan.delegation_envelopes:
+        try:
+            compiled = compile_method_mission(plan, registry=role_os_registry(), project_id=args.project_id)
+        except MethodCompileError as exc:
+            error = str(exc)
+    if args.json:
+        payload = {"plan": plan.model_dump(mode="json"), "compile_error": error}
+        if compiled is not None:
+            payload["mission"] = {
+                "phase_map": compiled.phase_map,
+                "work_orders": list(compiled.work_orders),
+                "waves": [w.model_dump(mode="json") for w in compiled.wave_plan.waves],
+                "blocked": {k: list(v) for k, v in compiled.blocked_nodes.items()},
+                "executor_status": compiled.executor_status,
+            }
+        print(json.dumps(payload, indent=2, default=str))
+    else:
+        stack = plan.method_stack
+        print(f"method plan {plan.plan_hash[:16]}: families {', '.join(plan.problem_signature.problem_families) or 'none'}")
+        for label, ids in (("macro", stack.macro_methodologies), ("diagnose", stack.diagnostic_methods),
+                           ("decide", stack.decision_methods), ("execute", stack.execution_methods),
+                           ("control", stack.control_methods), ("learn", stack.learning_methods)):
+            if ids:
+                print(f"  {label}: {', '.join(ids)}")
+        for cert in plan.minimality_certificates:
+            print(f"  necessary {cert.method_id}: {', '.join(cert.necessary_for)}")
+        for gate in plan.human_gates:
+            print(f"  human gate {gate.kind}: {gate.node_id or ''} requires {', '.join(gate.requires)}")
+        for item in plan.unresolved:
+            print(f"  unresolved: {item}")
+        if compiled is not None:
+            for wave in compiled.wave_plan.waves:
+                print(f"  wave {wave.index}: {', '.join(wave.cells)}" + (f" [{wave.serialized_reason}]" if wave.serialized_reason else ""))
+            for cell, reasons in sorted(compiled.blocked_nodes.items()):
+                print(f"  BLOCKED {cell}: {', '.join(reasons)}")
+            print(f"  executor: {compiled.executor_status}")
+        if error:
+            print(f"  compile error: {error}")
+    blocked = bool(error) or bool(plan.unresolved) or bool(compiled and compiled.blocked_nodes)
+    return 1 if blocked else 0
+
+
 def _cmd_compiled_twin(args: argparse.Namespace) -> int:
     from services.langgraph.agency.compiled.twin import run_digital_twin
     from services.langgraph.app.runtime_support import role_os_registry
@@ -634,6 +696,15 @@ def build_parser() -> argparse.ArgumentParser:
     compiled_plan.add_argument("--source-archive", help="Verified agency-role-os-v2 ZIP for JIT SKILL loading.")
     compiled_plan.add_argument("--json", action="store_true", help="Print the full plan as JSON.")
     compiled_plan.set_defaults(handler=_cmd_compiled_plan)
+
+    method_plan = sub.add_parser(
+        "method-plan",
+        help="Route an objective to a minimal method stack and compile canonical work orders (no execution).",
+    )
+    method_plan.add_argument("-i", "--input", required=True, help="Path to an ObjectiveRequest JSON file.")
+    method_plan.add_argument("--project-id", default="proj-method-plan", help="Project id for work-order identity.")
+    method_plan.add_argument("--json", action="store_true", help="Emit the full plan and mission as JSON.")
+    method_plan.set_defaults(handler=_cmd_method_plan)
 
     compiled_twin = sub.add_parser("compiled-twin", help="Run digital-twin shadow scenarios S1-S13.")
     compiled_twin.add_argument("--json", action="store_true", help="Print scenario results as JSON.")
