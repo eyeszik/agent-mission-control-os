@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@amc/shared": "workspace:*",
-    "framer-motion": "^11.0.0",
+    "framer-motion": "^13.5.0",
     "lucide-react": "^0.300.0",
     "next": "16.3.8",
     "react": "19.0.0",
