@@ -10,9 +10,15 @@ export interface MockStripeState {
     token: string | null;
     idempotencyKey: string | null;
     stripeAccount: string | null;
+    applicationFeeAmount: number | null;
     chargeId: string;
   }>;
-  refunds: Array<{ id: string; paymentIntentId: string }>;
+  refunds: Array<{
+    id: string;
+    paymentIntentId: string;
+    stripeAccount: string | null;
+    refundApplicationFee: boolean;
+  }>;
   transfers: Array<{
     id: string;
     amount: number;
@@ -84,6 +90,32 @@ export async function startMockStripe(): Promise<MockStripe> {
           });
         }
 
+        // Stripe only accepts an application fee on a charge made against a
+        // connected account, and only below the charge amount. Enforcing both
+        // here means a regression fails a test instead of a live payment.
+        const feeRaw = form.get('application_fee_amount');
+        const connectedAccount = header(request.headers['stripe-account']);
+        if (feeRaw !== null) {
+          if (!connectedAccount) {
+            return json(response, 400, {
+              error: {
+                type: 'invalid_request_error',
+                code: 'parameter_unknown',
+                message: 'Can only apply an application_fee_amount when the PaymentIntent is on a connected account.',
+              },
+            });
+          }
+          if (Number(feeRaw) >= Number(form.get('amount') ?? 0)) {
+            return json(response, 400, {
+              error: {
+                type: 'invalid_request_error',
+                code: 'parameter_invalid_integer',
+                message: 'application_fee_amount must be less than the charge amount.',
+              },
+            });
+          }
+        }
+
         sequence += 1;
         const id = `pi_test_${String(sequence).padStart(6, '0')}`;
         const chargeId = `ch_test_${String(sequence).padStart(6, '0')}`;
@@ -96,7 +128,8 @@ export async function startMockStripe(): Promise<MockStripe> {
           currency,
           token,
           idempotencyKey: header(request.headers['idempotency-key']),
-          stripeAccount: header(request.headers['stripe-account']),
+          stripeAccount: connectedAccount,
+          applicationFeeAmount: feeRaw === null ? null : Number(feeRaw),
           chargeId,
         });
 
@@ -108,6 +141,7 @@ export async function startMockStripe(): Promise<MockStripe> {
           currency,
           status: 'succeeded',
           latest_charge: chargeId,
+          ...(feeRaw === null ? {} : { application_fee_amount: Number(feeRaw) }),
         });
       }
 
@@ -117,9 +151,29 @@ export async function startMockStripe(): Promise<MockStripe> {
             error: { type: 'invalid_request_error', code: 'charge_already_refunded', message: 'refund unavailable' },
           });
         }
+        // A direct charge is invisible from the platform account; a refund
+        // that forgets Stripe-Account looks up a PaymentIntent that is not
+        // there. Reproduce that rather than refunding anything on request.
+        const refundAccount = header(request.headers['stripe-account']);
+        const intent = state.paymentIntents.find((candidate) => candidate.id === form.get('payment_intent'));
+        if (intent && intent.stripeAccount !== refundAccount) {
+          return json(response, 404, {
+            error: {
+              type: 'invalid_request_error',
+              code: 'resource_missing',
+              message: `No such payment_intent: '${form.get('payment_intent') ?? ''}'`,
+            },
+          });
+        }
+
         sequence += 1;
         const id = `re_test_${String(sequence).padStart(6, '0')}`;
-        state.refunds.push({ id, paymentIntentId: form.get('payment_intent') ?? '' });
+        state.refunds.push({
+          id,
+          paymentIntentId: form.get('payment_intent') ?? '',
+          stripeAccount: refundAccount,
+          refundApplicationFee: form.get('refund_application_fee') === 'true',
+        });
         return json(response, 200, { id, object: 'refund', status: 'succeeded' });
       }
 

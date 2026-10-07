@@ -15,6 +15,7 @@ function serviceWith(thresholds?: { pendingSettlementMinutes?: number; stalePayo
     db: harness.db,
     conversions: new ConversionRepository(harness.db),
     payouts: new PayoutRepository(harness.db),
+    merchants: harness.deps.repositories.merchants,
     ...(thresholds ? { thresholds } : {}),
   });
 }
@@ -152,6 +153,36 @@ describe('reconciliation', () => {
     const finding = report.findings.find((candidate) => candidate.check === 'balance_unpayable');
     expect(finding).toMatchObject({ severity: 'warning', count: 1 });
     expect(finding?.samples[0]).toContain('agent_nowhere');
+  });
+
+  it('flags an enabled merchant whose commission could never be collected', async () => {
+    const stranded = await harness.deps.repositories.merchants.create({
+      name: 'Uncollectable Co',
+      commissionRateBps: 500,
+      aislCutBps: 80,
+      credentials: {
+        platform: 'shopify',
+        store_domain: 'uncollectable.myshopify.com',
+        storefront_token: 'shpstf_x',
+        storefront_api_version: '2026-01',
+        admin_api_version: '2026-01',
+        // No stripe_account_id, so no application fee can be charged.
+      },
+    });
+
+    try {
+      const report = await service.run();
+      const finding = report.findings.find((candidate) => candidate.check === 'merchant_cannot_collect');
+      expect(finding).toMatchObject({ severity: 'critical', count: 1 });
+      expect(finding?.samples[0]).toContain(stranded.id);
+
+      // Disabling it removes the finding: it is no longer reachable.
+      await harness.deps.repositories.merchants.setEnabled(stranded.id, false);
+      const after = await service.run();
+      expect(after.findings.map((f) => f.check)).not.toContain('merchant_cannot_collect');
+    } finally {
+      await harness.deps.repositories.merchants.setEnabled(stranded.id, false);
+    }
   });
 
   it('serves the operator probe with a status a monitor can alert on', async () => {

@@ -194,6 +194,7 @@ function registerDiscoveryRoutes(app: FastifyInstance, deps: AppDependencies): v
       db: deps.db,
       conversions: deps.repositories.conversions,
       payouts: deps.repositories.payouts,
+      merchants: deps.repositories.merchants,
     }).run();
 
     reply.status(report.healthy ? 200 : 503).send(report);
