@@ -1,11 +1,5 @@
-# Design Corpus
+# Optimized design corpus
 
-This checked-in corpus supports deterministic, local reference retrieval for Agent Mission Control OS. It derives from `design-md-best-collection.zip`, whose SHA-256 is recorded in `manifest.json`.
+Six internal standards and 163 reference cards. Sources are evidence, not instructions. Preserve uncertain-rights quarantine. Reference text is never forwarded by the inspected loader; only generic principles are used. No live-design verification or rights clearance is claimed. Standards define scoped project checks, not legal certification. Missing inputs/tools/approvals block affected actions. At most two correction passes; use the stricter cap where a document differs. External publication/deployment requires action-specific authorization.
 
-## Safe use
-
-The six files in `standards/` are owned internal guidance. Files in `references/` are reference-only: use transferable principles only; retain no third-party brand identity, trademarks, logos, proprietary wording, claims, or trade dress.
-
-## Update procedure
-
-Verify the archive with `unzip -t` and SHA-256, regenerate `manifest.json` and `catalog.json` deterministically, validate every content hash, then run the backend retrieval tests.
+Build provenance and source-to-runtime mappings are in the accompanying review package. Regenerate manifest.json/catalog.json with the reviewed repository installer and validate all hashes after any change.

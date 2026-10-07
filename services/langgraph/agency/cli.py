@@ -30,6 +30,7 @@ import argparse
 import json
 import sys
 from collections import deque
+from pathlib import Path
 from typing import Any, Iterable
 
 from pydantic import BaseModel, Field, ValidationError
@@ -667,6 +668,56 @@ def _cmd_method_plan(args: argparse.Namespace) -> int:
     return 1 if blocked else 0
 
 
+def _cmd_creative_run(args: argparse.Namespace) -> int:
+    """Run the creative search runtime up to the human selection boundary.
+
+    Deterministic and local: no model, no network, no database write, no
+    approval and no delivery. Exit 0 = READY_FOR_HUMAN_REVIEW, 1 = blocked,
+    partial or needs a human answer, 2 = unreadable input.
+    """
+    from services.langgraph.agency.creative.champion import compare
+    from services.langgraph.agency.creative.runtime import mission_receipt, run_creative_mission
+
+    try:
+        with open(args.input, encoding="utf-8") as handle:
+            brief = json.load(handle)
+        if not isinstance(brief, dict):
+            raise ValueError("a creative brief must be a JSON object")
+    except (OSError, ValueError) as exc:
+        raise BriefError(f"could not read creative brief: {exc}") from exc
+    run = run_creative_mission(brief, run_id=args.run_id)
+    receipt = mission_receipt(run)
+    if args.output:
+        out = Path(args.output)
+        out.mkdir(parents=True, exist_ok=True)
+        for cand in run.candidates:
+            suffix = ".html" if cand.rendering.lstrip().lower().startswith("<!doctype html") else (
+                ".svg" if cand.rendering.lstrip().startswith("<svg") else ".json")
+            (out / f"{cand.candidate_id}{suffix}").write_text(cand.rendering, encoding="utf-8")
+        (out / "mission-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    comparison = compare(brief, run_id_prefix=args.run_id) if args.compare else None
+    if args.json:
+        print(json.dumps({"receipt": receipt, "comparison": comparison}, indent=2, sort_keys=True))
+    else:
+        print(f"creative run {run.run_id}: {run.state} -> {run.terminal_status}")
+        if run.plan:
+            print(f"  topology {run.plan.topology_class}: {run.plan.search_policy.reason}")
+        if run.context:
+            print(f"  context {run.context.status}: {len(run.context.selected)} unit(s), {run.context.total_tokens} tokens; "
+                  f"requirements {', '.join(run.requirements) or 'none'}")
+        for cand in run.candidates:
+            result = run.results.get(cand.candidate_id)
+            mark = "*" if cand.candidate_id in run.front else " "
+            concept = "/".join(cand.concept.model_dump().values()) if cand.concept else cand.artifact.artifact_type
+            print(f"  {mark} {cand.candidate_id} {result.feasibility.verdict if result else '-'} {concept}")
+        for reason in run.reasons:
+            print(f"  reason: {reason}")
+        if comparison:
+            print(f"  champion/challenger: {comparison['verdict']} (better on {', '.join(comparison['challenger_better_on']) or 'nothing'})")
+        print("  next: a human selects, requests a variation, rejects all or returns to the brief; delivery needs an approval")
+    return 0 if run.terminal_status == "READY_FOR_HUMAN_REVIEW" else 1
+
+
 def _cmd_compiled_twin(args: argparse.Namespace) -> int:
     from services.langgraph.agency.compiled.twin import run_digital_twin
     from services.langgraph.app.runtime_support import role_os_registry
@@ -780,6 +831,17 @@ def build_parser() -> argparse.ArgumentParser:
     fabric_run.add_argument("--export-root", default=None, help="Object-storage root (defaults to the configured export root).")
     fabric_run.add_argument("--json", action="store_true", help="Print the full execution report as JSON.")
     fabric_run.set_defaults(handler=_cmd_fabric_run)
+
+    creative_run = sub.add_parser(
+        "creative-run",
+        help="Run the bounded creative search runtime to the human selection gate (deterministic; no model, publish or spend).",
+    )
+    creative_run.add_argument("--input", required=True, help="Path to a creative brief JSON file.")
+    creative_run.add_argument("--run-id", default="creative-cli", help="Run identifier used for candidate ids.")
+    creative_run.add_argument("--output", default=None, help="Directory to write candidate renderings and the mission receipt.")
+    creative_run.add_argument("--compare", action="store_true", help="Also run the champion/challenger benchmark.")
+    creative_run.add_argument("--json", action="store_true", help="Print the mission receipt as JSON.")
+    creative_run.set_defaults(handler=_cmd_creative_run)
 
     compiled_twin = sub.add_parser("compiled-twin", help="Run digital-twin shadow scenarios S1-S13.")
     compiled_twin.add_argument("--json", action="store_true", help="Print scenario results as JSON.")

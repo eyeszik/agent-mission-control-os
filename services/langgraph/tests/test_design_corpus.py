@@ -93,7 +93,7 @@ def _rewrite_catalog(root: Path, mutate) -> None:
 
 def test_installed_corpus_validates_with_expected_counts_and_rights():
     manifest, loaded = load_validated_corpus()
-    assert manifest["source_archive"]["sha256"] == "24da647211f94d49788baeaefc5483f9357dbb950b00c4f59bc286058c402acf"
+    assert manifest["source_archive"]["sha256"] == "6ed6dde8fa4ab43f5090e9ea0a25a7f20c4882bcaf5c8c3630f7114fcade8674"
     assert len(loaded) == 169
     assert manifest["counts"] == {
         "documents": 169,
@@ -330,7 +330,7 @@ def test_agency_run_records_safe_corpus_provenance_in_node_event():
     concepting = next(e for e in events if e["node_id"] == "creative_concepting")
     corpus_record = concepting["safe_payload"]["design_corpus"]
     assert corpus_record["status"] == "OK"
-    assert corpus_record["archive_sha256"] == "24da647211f94d49788baeaefc5483f9357dbb950b00c4f59bc286058c402acf"
+    assert corpus_record["archive_sha256"] == "6ed6dde8fa4ab43f5090e9ea0a25a7f20c4882bcaf5c8c3630f7114fcade8674"
     assert corpus_record["selected"]
     assert marker not in json.dumps(concepting["safe_payload"])
     other_nodes = [e for e in events if e["node_id"] != "creative_concepting"]
