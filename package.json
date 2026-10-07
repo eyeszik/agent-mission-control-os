@@ -2,6 +2,11 @@
   "name": "agent-mission-control-os",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
   "engines": {
     "node": ">=20.9.0"
   },

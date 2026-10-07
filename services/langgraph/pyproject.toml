@@ -29,4 +29,4 @@ dev = ["pytest>=8.2.0"]
 include = ["agency/guidance/packs/*.yaml", "agency/compiled/data/*.json"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["app", "api", "agency", "graph", "persistence", "quality", "security", "integrations"]
+packages = ["app", "api", "agency", "core", "graph", "persistence", "quality", "security", "integrations"]

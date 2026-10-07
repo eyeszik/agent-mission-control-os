@@ -4,15 +4,15 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "083bc0a3ed70eebf32134ffab808d4f76a6651fb"
+      "git_blob_sha": "b3d677836d9b0bdde81233767a2f31bef77276f2"
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "599330d8e7797662d8a84866a0a053ad3416799f"
+      "git_blob_sha": "0a0ff565fa5a9ed7a882a1c68677116adef07b00"
     },
     {
       "path": "README.md",
-      "git_blob_sha": "76bb0049892180fa4f607add38c07ebf8bcc0cd0"
+      "git_blob_sha": "8d7c4bc5a4277762df98bfa6495bb8dd545592dd"
     },
     {
       "path": "apps/web/app/login/page.tsx",
@@ -20,11 +20,11 @@
     },
     {
       "path": "apps/web/app/mission-control/page.tsx",
-      "git_blob_sha": "531b5f16c8deec05458b2579de787e8919296d73"
+      "git_blob_sha": "75d4431662b15ffd729795507c597772a5966370"
     },
     {
       "path": "apps/web/components/mission-control/CommandInputPanel.tsx",
-      "git_blob_sha": "7d89eb985caf7fce7087475df987f4c838b0dc38"
+      "git_blob_sha": "685d751794f61a2289fbc7a3374fb42eba03f3b6"
     },
     {
       "path": "apps/web/e2e/accessibility-smoke.spec.ts",
@@ -36,7 +36,7 @@
     },
     {
       "path": "apps/web/lib/api/client.ts",
-      "git_blob_sha": "53824a79245d8371a77af1df9502344520ced283"
+      "git_blob_sha": "9fe9fa45c16500a73a822a83acfe517f97da1a3c"
     },
     {
       "path": "apps/web/lib/auth/session.ts",
@@ -44,11 +44,11 @@
     },
     {
       "path": "apps/web/lib/auth/supabase.ts",
-      "git_blob_sha": "7cb3cdca65734779deaf21ca3ba111eaed2243b4"
+      "git_blob_sha": "7436fe0de9c5285b0e5347a5a9e4e5adc3438a95"
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "706e6169bea801944fb1054b1df71c346aa470cf"
+      "git_blob_sha": "54fc1e135bdd57ede3140ea02f7a707fd66095d6"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -80,7 +80,7 @@
     },
     {
       "path": "package.json",
-      "git_blob_sha": "44b6a844cb211d354998c494c580a36582cbc69a"
+      "git_blob_sha": "f33738b02229911e6df75e1a398914fa3c92e9d7"
     },
     {
       "path": "packages/shared/openapi/agent-mission-control.openapi.yaml",
@@ -108,7 +108,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "f97d18250bbb7e6397561582d80d162888c0acd2"
+      "git_blob_sha": "0651f1d6ee5541e3b550f475e13fd8f0c1ca1f97"
     },
     {
       "path": "scripts/verify_auth_bindings.py",
@@ -252,7 +252,7 @@
     },
     {
       "path": "services/langgraph/agency/skills/dispatcher.py",
-      "git_blob_sha": "b0151c8880f2c9f9beaa9916fc78d19cfe62b3c6"
+      "git_blob_sha": "f82a7fdadd956ba4cbc3928cde46728cb062eaa5"
     },
     {
       "path": "services/langgraph/api/routes/_project_common.py",
@@ -304,11 +304,11 @@
     },
     {
       "path": "services/langgraph/app/config.py",
-      "git_blob_sha": "7021b9b31815f6e9dd69082d744b9618e22bdddb"
+      "git_blob_sha": "fbf78fe0f3392c6087faf63bde987ec2ccc855e5"
     },
     {
       "path": "services/langgraph/app/main.py",
-      "git_blob_sha": "76b131ed9bbb3dc0b102c1284ef70ef4c47657d0"
+      "git_blob_sha": "98bbfcbee6c74139706b177e94e885ce48cb3f4d"
     },
     {
       "path": "services/langgraph/graph/agency/models.py",
@@ -316,7 +316,7 @@
     },
     {
       "path": "services/langgraph/graph/agency/nodes.py",
-      "git_blob_sha": "fa5a5a259789deb466c02a20496be687f7195cc7"
+      "git_blob_sha": "d2d4e73809b1ccff4465a5a906b7af67dad6d97e"
     },
     {
       "path": "services/langgraph/integrations/paid_media.py",
@@ -336,7 +336,7 @@
     },
     {
       "path": "services/langgraph/persistence/analytics.py",
-      "git_blob_sha": "d9e133c918b0c0cc3a6f01ccc1d806186f4625aa"
+      "git_blob_sha": "e2bbb70087f27121448f735d908a9ae00acc63a5"
     },
     {
       "path": "services/langgraph/persistence/checkpoints.py",
@@ -344,7 +344,7 @@
     },
     {
       "path": "services/langgraph/persistence/database.py",
-      "git_blob_sha": "1b4fb6911abcebc89aac63e636ea9a149a9ddfb2"
+      "git_blob_sha": "c252e7ecb8fcd87e5e1d335af787a5430729094a"
     },
     {
       "path": "services/langgraph/persistence/idempotency.py",
@@ -392,7 +392,7 @@
     },
     {
       "path": "services/langgraph/pyproject.toml",
-      "git_blob_sha": "7568057c17f9784a9df76335dec13b4fac6f6b24"
+      "git_blob_sha": "e5c271e9fdbe117cd7dbd5668f8ad47f36235677"
     },
     {
       "path": "services/langgraph/quality/brand_safety.py",
@@ -400,11 +400,11 @@
     },
     {
       "path": "services/langgraph/security/approval_authority.py",
-      "git_blob_sha": "25dc5e28f38b8b0f1b14165195bac2d79bdb0544"
+      "git_blob_sha": "4150dcb7c915f9b9aaf339467d83a4c369fe8fde"
     },
     {
       "path": "services/langgraph/security/auth.py",
-      "git_blob_sha": "16bffbd8800a0368111d314f8714dd44656a0482"
+      "git_blob_sha": "f52da9e48f82e3e8b74951607602b6b4ce1afa69"
     },
     {
       "path": "services/langgraph/tests/test_agency_kernel.py",
@@ -505,6 +505,18 @@
     {
       "path": "services/langgraph/agency/execution_fabric/adapters/code_sandbox.py",
       "git_blob_sha": "78a1af2fb1869ffdee770e64b141599abb203350"
+    },
+    {
+      "path": "services/langgraph/core/constants.py",
+      "git_blob_sha": "126265e094c9baea9fe11b6fa1fc4ed57cf8f779"
+    },
+    {
+      "path": "services/langgraph/core/config.py",
+      "git_blob_sha": "c2d2682ae0479042f2ad0463e6d4b761aa8d3d0f"
+    },
+    {
+      "path": "services/langgraph/core/errors.py",
+      "git_blob_sha": "f7a5099f882178e856528e195f1e2bee5c4d9917"
     }
   ]
 }

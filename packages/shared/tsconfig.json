@@ -1,13 +1,11 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "declaration": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "lib": ["ES2022"],
+    "declarationMap": false,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": false,
+    "isolatedModules": false,
     "outDir": "./dist",
     "rootDir": "./src"
   },

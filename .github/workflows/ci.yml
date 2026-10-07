@@ -130,6 +130,17 @@ jobs:
       - name: Test shared package
         run: pnpm --filter @amc/shared test
 
+      # Tier-1 workspace packages (@amc/errors, config, logger, constants, db,
+      # testing); pnpm runs them in dependency order.
+      - name: Build workspace packages
+        run: pnpm --filter "./packages/*" --filter "!@amc/shared" build
+
+      - name: Typecheck workspace packages
+        run: pnpm --filter "./packages/*" --filter "!@amc/shared" typecheck
+
+      - name: Test workspace packages
+        run: pnpm --filter "./packages/*" --filter "!@amc/shared" test
+
       - name: Typecheck web app
         run: pnpm --filter @amc/web typecheck
 
@@ -167,6 +178,7 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm --filter @amc/shared build
+          pnpm --filter "./packages/*" --filter "!@amc/shared" build
           python -m pip install -e "./services/langgraph[dev]"
 
       - name: Install Chromium runtime

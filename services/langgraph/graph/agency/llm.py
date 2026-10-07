@@ -1,12 +1,13 @@
 import hashlib
 import json
-import logging
 import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional
 
-logger = logging.getLogger(__name__)
+from services.langgraph.core.config import get_logger
+
+logger = get_logger(__name__)
 
 DEFAULT_MODEL = "gpt-4o-mini"
 PROMPT_TEMPLATE_VERSION = "agency-v1"

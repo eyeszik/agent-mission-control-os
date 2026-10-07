@@ -12,6 +12,7 @@ import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { generateIdempotencyKey } from '../../lib/utils/idempotency';
 import { globalBus } from '../../lib/events/bus';
 import type { AgencyRun, TrustSnapshot } from '@amc/shared';
+import { getLogger } from '../../lib/logger';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
@@ -124,7 +125,7 @@ export function ArtifactPreviewPanel() {
 
       removeApproval(approvalId);
     } catch (err) {
-      console.error('Failed to resolve approval', err);
+      getLogger().error('Failed to resolve approval', { err });
       setError(err instanceof Error ? err.message : 'Failed to resolve approval');
     } finally {
       setResolvingId(null);

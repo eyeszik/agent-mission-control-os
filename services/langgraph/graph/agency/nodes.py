@@ -1,5 +1,4 @@
 import json
-import logging
 import re
 from datetime import datetime, timezone
 
@@ -47,8 +46,9 @@ from services.langgraph.quality.brand_safety import evaluate_brand_compliance
 from services.langgraph.quality.evaluator import evaluate_quality
 from services.langgraph.security.pii import quarantine_payload
 from services.langgraph.security.preprocess import sanitize_deep
+from services.langgraph.core.config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 AGENCY_PIPELINE_STAGES = [
     "brief_intake",

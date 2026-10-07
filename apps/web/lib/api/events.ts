@@ -2,6 +2,8 @@ import { RunEventSchema, type RunEvent } from '@amc/shared';
 import { ensureAccessToken } from '../auth/supabase';
 import { readSession } from '../auth/session';
 import { EventEmitter } from '../events/bus';
+import { getAppConfig, usesSupabaseAuth } from '../config';
+import { getLogger } from '../logger';
 
 const MAX_RECONNECT_ATTEMPTS = 6;
 const BASE_RECONNECT_MS = 500;
@@ -45,12 +47,13 @@ export class SSEClient {
   private async openStream() {
     const controller = new AbortController();
     this.streamController = controller;
-    const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    const config = getAppConfig();
+    const base = config.apiBaseUrl;
     const cursor = encodeURIComponent(String(this.lastSequence));
     const headers = new Headers({ Accept: 'text/event-stream' });
 
     try {
-      if (process.env.NEXT_PUBLIC_AUTH_MODE === 'supabase') {
+      if (usesSupabaseAuth(config)) {
         const token = await ensureAccessToken();
         if (!token) throw new Error('Authentication required for event stream');
         headers.set('Authorization', `Bearer ${token}`);
@@ -102,7 +105,7 @@ export class SSEClient {
       }
     } catch (err) {
       if (!controller.signal.aborted) {
-        console.error('SSE stream failed', err);
+        getLogger().error('SSE stream failed', { run_id: this.runId, err });
         this.scheduleReconnect();
       }
     } finally {
@@ -115,7 +118,7 @@ export class SSEClient {
       const decoded: unknown = JSON.parse(payload);
       const parsed = RunEventSchema.safeParse(decoded);
       if (!parsed.success) {
-        console.error('Rejected invalid SSE payload', parsed.error.flatten());
+        getLogger().error('Rejected invalid SSE payload', { run_id: this.runId, issues: parsed.error.flatten() });
         return;
       }
       const data: RunEvent = parsed.data;
@@ -123,14 +126,14 @@ export class SSEClient {
       this.persistSequence(data.sequence);
       this.bus.emit('run_event_received', data);
     } catch (err) {
-      console.error('Failed to parse SSE message', err);
+      getLogger().error('Failed to parse SSE message', { run_id: this.runId, err });
     }
   }
 
   private scheduleReconnect() {
     if (this.stopped || this.reconnectTimer) return;
     if (this.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-      console.error('SSE reconnect limit reached');
+      getLogger().error('SSE reconnect limit reached', { run_id: this.runId });
       return;
     }
     const exponent = Math.min(this.reconnectAttempts, 5);

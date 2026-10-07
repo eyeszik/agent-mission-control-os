@@ -1,0 +1,20 @@
+{
+  "name": "@amc/errors",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Typed AMC error hierarchy and a stable JSON error envelope.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

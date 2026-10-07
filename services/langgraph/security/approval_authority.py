@@ -19,9 +19,10 @@ import os
 
 from fastapi import HTTPException
 
+from services.langgraph.core.constants import AMC_APPROVER_ROLES, ENV_LOCAL
 from services.langgraph.security.auth import Principal
 
-DEFAULT_APPROVER_ROLES = frozenset({"reviewer", "approver", "admin", "owner"})
+DEFAULT_APPROVER_ROLES = frozenset(AMC_APPROVER_ROLES)
 _TRUTHY = {"1", "true", "yes", "on"}
 
 
@@ -32,7 +33,7 @@ def approver_roles() -> frozenset[str]:
 
 
 def self_approval_allowed() -> bool:
-    environment = (os.environ.get("AMC_ENV") or "local").strip().lower()
+    environment = (os.environ.get("AMC_ENV") or ENV_LOCAL).strip().lower()
     flag = (os.environ.get("AMC_ALLOW_SELF_APPROVAL") or "").strip().lower() in _TRUTHY
     return flag and environment != "production"
 

@@ -15,6 +15,7 @@ Read `README.md` first — it is current and states the real implementation stat
 ```bash
 pnpm install --frozen-lockfile
 pnpm --filter @amc/shared build      # must run before typecheck/build elsewhere — apps/web imports @amc/shared's dist output
+pnpm --filter "./packages/*" build   # also builds the tier-1 packages (@amc/errors, config, logger, constants, db, testing) in dependency order
 python -m pip install -e "./services/langgraph[dev]"
 ```
 
@@ -67,7 +68,7 @@ python scripts/verify_guidance_registry.py
 
 ### Critical-file integrity manifest
 
-`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 126 as of the execution-fabric change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
+`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 129 as of the tier-1 packages change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
 
 ```python
 import hashlib, json
@@ -103,6 +104,10 @@ This is the one thing that isn't obvious from browsing individual files, and it 
 **Layer 2 — the governance kernel** (`services/langgraph/agency/kernel/`: `ontology.py` N1, `lifecycle.py` N2, `roles.py` N3, `registry.py` N4). A closed, typed vocabulary: 28 `ArtifactType`s owned by `Department`s (N1; `media_asset` was added for rendered/uploaded media); a transition matrix per entity (`engagement`/`workstream`/`artifact`) with guarded, fail-closed release states (N2); 13 `RoleContract`s declaring `produces`/`consumes`/`min_evidence`/`requires_human_approval`/`external_side_effect` per role (N3); an artifact registry with branch/merge semantics (N4). Every Pydantic model here has a Zod twin in `packages/shared/src/schemas/` and `verify_ontology_parity.py` enforces they agree.
 
 **Layer 1 now enforces the N2/N3 governance seams directly.** `api/routes/agency.py` uses N2 `TransitionContext`/`release_guard_failures` for release gating. `graph/agency/nodes.py` declares `LIVE_STAGE_ROLE_BINDINGS`; every live stage resolves its N3 role with `get_role()`, and every artifact-producing stage calls `assert_role_may_produce()` before emitting its canonical artifact type. Campaign exports are still persisted through the N1/N4-backed artifact binding layer. This does **not** mean the generic skill dispatcher is automatically used for every stage: `agency/skills/dispatcher.py` remains a separate capability-gated execution surface, and role identity never grants external publish/spend authority. The CLI remains useful for isolated kernel planning, but N3 output authorization is no longer planner-only.
+
+### Workspace packages and the backend core — same semantics, no cross-language imports
+
+`packages/{errors,config,logger,constants,db,testing}` (TypeScript, built from root `tsconfig.base.json`, Node16 resolution, CommonJS output except the ESM-only test helper `@amc/testing`) and `services/langgraph/core/{constants,errors,config}.py` are sibling implementations of the same vocabularies, error envelope (`{detail, error: {code, message, status, details?}}`) and config/logging conventions; `tests/test_core.py` reads `packages/constants/src/index.ts` to keep the vocabularies in step. `apps/web/lib/config.ts` must keep reading each `NEXT_PUBLIC_*` variable as a literal `process.env` expression (Next.js only inlines literal references into browser bundles); `@amc/config` loaders take that explicit record and never read `process.env` themselves. `app/config.py` is still the single owner of runtime configuration and the production gates — `core.config` is a typed view that imports it lazily (it imports `core.constants`, so an eager import would cycle). `@amc/db` is a driver-agnostic contract only; the web app has no database access. Details: `docs/workspace-packages.md`.
 
 ### Skill dispatcher — capability gating, not a plugin system yet
 

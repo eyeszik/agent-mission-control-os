@@ -1,0 +1,24 @@
+{
+  "name": "@amc/db",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Driver-agnostic database client, transaction and config contracts.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@amc/constants": "workspace:*",
+    "@amc/errors": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

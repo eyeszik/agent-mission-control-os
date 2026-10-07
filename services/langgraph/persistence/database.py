@@ -8,20 +8,21 @@ from datetime import datetime
 from typing import Any, Iterator
 from uuid import UUID
 
+from services.langgraph.core.constants import AMC_DATABASE_BACKENDS, DB_BACKEND_POSTGRES, DB_BACKEND_SQLITE
 from services.langgraph.persistence import sqlite_db
 
-_VALID_BACKENDS = {"sqlite", "postgres"}
+_VALID_BACKENDS = frozenset(AMC_DATABASE_BACKENDS)
 
 
 def database_backend() -> str:
-    value = (os.environ.get("AMC_DATABASE_BACKEND") or "sqlite").strip().lower()
+    value = (os.environ.get("AMC_DATABASE_BACKEND") or DB_BACKEND_SQLITE).strip().lower()
     if value not in _VALID_BACKENDS:
         raise RuntimeError(f"Unsupported AMC_DATABASE_BACKEND={value!r}")
     return value
 
 
 def is_postgres() -> bool:
-    return database_backend() == "postgres"
+    return database_backend() == DB_BACKEND_POSTGRES
 
 
 def require_database_url() -> str:

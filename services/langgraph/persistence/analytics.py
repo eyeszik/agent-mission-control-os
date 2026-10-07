@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import json
-import logging
 from datetime import datetime, timezone
 from uuid import uuid4
 
 from services.langgraph.persistence.database import json_param, normalize_record, table, transaction
+from services.langgraph.core.config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def record_analytics_event(
