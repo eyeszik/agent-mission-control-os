@@ -4,15 +4,15 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "607d68f7c9b974c79bbd7e98e6ce76c879cd5121"
+      "git_blob_sha": "083bc0a3ed70eebf32134ffab808d4f76a6651fb"
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "c7e48b6f865218f0e254475b822d631ac005c6f2"
+      "git_blob_sha": "599330d8e7797662d8a84866a0a053ad3416799f"
     },
     {
       "path": "README.md",
-      "git_blob_sha": "a2c913b63d6239b4e013a8f58daef7385e8c79a2"
+      "git_blob_sha": "76bb0049892180fa4f607add38c07ebf8bcc0cd0"
     },
     {
       "path": "apps/web/app/login/page.tsx",
@@ -48,7 +48,7 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "35bc4e6394fff4a8c0dd6bd3f6b54c7d0c6e2355"
+      "git_blob_sha": "706e6169bea801944fb1054b1df71c346aa470cf"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -108,7 +108,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "f923eaf50b277646d899d3ca097bb069fbd0bf1b"
+      "git_blob_sha": "f97d18250bbb7e6397561582d80d162888c0acd2"
     },
     {
       "path": "scripts/verify_auth_bindings.py",
@@ -136,7 +136,7 @@
     },
     {
       "path": "scripts/verify_repository_invariants.py",
-      "git_blob_sha": "b918511b7d63e6de156202a986ee336e545d11d1"
+      "git_blob_sha": "86672ee42f5bb7e8b41bfcbe6aa5412833299535"
     },
     {
       "path": "services/langgraph/agency/compiled/authority.py",
@@ -252,7 +252,7 @@
     },
     {
       "path": "services/langgraph/agency/skills/dispatcher.py",
-      "git_blob_sha": "b56e656dfcee86cd70f715dacc5ea50c256386f6"
+      "git_blob_sha": "b0151c8880f2c9f9beaa9916fc78d19cfe62b3c6"
     },
     {
       "path": "services/langgraph/api/routes/_project_common.py",
@@ -260,7 +260,7 @@
     },
     {
       "path": "services/langgraph/api/routes/agency.py",
-      "git_blob_sha": "2b7c7863182cf22c464d4c272515375ebf3518f0"
+      "git_blob_sha": "c99f61f62d7587816479d7cbd27080f82779adf7"
     },
     {
       "path": "services/langgraph/api/routes/analytics.py",
@@ -304,7 +304,7 @@
     },
     {
       "path": "services/langgraph/app/config.py",
-      "git_blob_sha": "65247e5791f7634a453867a724d7e547fb34cfba"
+      "git_blob_sha": "7021b9b31815f6e9dd69082d744b9618e22bdddb"
     },
     {
       "path": "services/langgraph/app/main.py",
@@ -332,7 +332,7 @@
     },
     {
       "path": "services/langgraph/persistence/agency_kernel.py",
-      "git_blob_sha": "4f3ed6e4090781d85f48e4d6517d6aa28d8c1790"
+      "git_blob_sha": "a4714f3707df8b4bd1c147a7ec0beccc4b17b2db"
     },
     {
       "path": "services/langgraph/persistence/analytics.py",
@@ -376,7 +376,7 @@
     },
     {
       "path": "services/langgraph/persistence/projects.py",
-      "git_blob_sha": "e029b51d57534c1ca22a40e05a1b89f18c0b7087"
+      "git_blob_sha": "09107cc42ebf1f1a2d41a76bedf8057b181f4af1"
     },
     {
       "path": "services/langgraph/persistence/sqlite_db.py",
@@ -457,6 +457,54 @@
     {
       "path": "supabase/migrations/20261001_amc_project_os_v1.sql",
       "git_blob_sha": "b6e326224b8c06c08f8729161ccd2a5b1936b4eb"
+    },
+    {
+      "path": "services/langgraph/agency/delivery/contract.py",
+      "git_blob_sha": "f2a051914245c6a9f06d685aa1391df647559360"
+    },
+    {
+      "path": "services/langgraph/agency/delivery/critic.py",
+      "git_blob_sha": "85608fb23a823a146f99eb9446ff3a8903dc51e0"
+    },
+    {
+      "path": "services/langgraph/agency/delivery/release.py",
+      "git_blob_sha": "896f0f3708aab8a8c62d255589d031960c5bc72b"
+    },
+    {
+      "path": "services/langgraph/agency/delivery/workflow.py",
+      "git_blob_sha": "4bb16194b5d564a9bd7a8b96fe3d44a8a523a95e"
+    },
+    {
+      "path": "services/langgraph/graph/agency/contract_check.py",
+      "git_blob_sha": "9fa7cfcc29a5a124e9b3859ed493f147520e15d9"
+    },
+    {
+      "path": "services/langgraph/persistence/delivery.py",
+      "git_blob_sha": "1e6292020602c89e94aead3d689344afbabf7878"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/method_mission.py",
+      "git_blob_sha": "74dfad4adb4c6184b3842ef3a4be13e4e334286c"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/data/method_catalog.v1.json",
+      "git_blob_sha": "8369692050c39f9ce06da19ddba01562b41ba376"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/contracts.py",
+      "git_blob_sha": "5141dd68b7e73aed20c1d9fc1176cd036b20dd15"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/consumer.py",
+      "git_blob_sha": "da75d68389beb0294b9462421ac0738f98fca964"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/skills.py",
+      "git_blob_sha": "52780564ff7e9de9436a27d3f56ca7eba2744431"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/adapters/code_sandbox.py",
+      "git_blob_sha": "78a1af2fb1869ffdee770e64b141599abb203350"
     }
   ]
 }

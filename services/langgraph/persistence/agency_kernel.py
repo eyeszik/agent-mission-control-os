@@ -490,6 +490,10 @@ def artifact_dependency_graph(engagement_id: str) -> dict:
     }
 
 
+def _propagation_decision_id(artifact_id: str, version: int, severity: dict[str, str]) -> str:
+    return f"policy-artifact-propagation-{artifact_id}-v{version}-{hash_payload(severity)}"
+
+
 def propagate_artifact_change(artifact_id: str) -> list[dict]:
     source = get_artifact(artifact_id)
     if not source:
@@ -535,7 +539,7 @@ def propagate_artifact_change(artifact_id: str) -> list[dict]:
             # Bound to the source version: revising the same upstream twice
             # invalidates the same descendants, and an unversioned id collided
             # with the first (immutable) decision.
-            decision_id=f"policy-artifact-propagation-{artifact_id}-v{source['version']}-{hash_payload(severity)}",
+            decision_id=_propagation_decision_id(artifact_id, int(source["version"]), severity),
             tenant_id=source["tenant_id"],
             project_id=source["project_id"],
             subject_ref=artifact_id,
@@ -614,6 +618,7 @@ def record_artifact_revision(
 
     approvals = list_approvals_for_subject_refs(updated["project_id"], impacted_ids)
     approvals_by_subject = {approval["subject_ref"]: approval for approval in approvals}
+    staled_approval_ids: list[str] = []
 
     for impacted_id in impacted_ids:
         impacted = get_artifact(impacted_id)
@@ -630,6 +635,7 @@ def record_artifact_revision(
                 approval_id,
                 f"artifact_version_changed:{changed_version_ref}",
             )
+            staled_approval_ids.append(approval_id)
         create_lineage_remediation(
             tenant_id=updated["tenant_id"],
             project_id=updated["project_id"],
@@ -663,10 +669,30 @@ def record_artifact_revision(
             "affected_artifact_ids": impacted_ids,
         },
     )
+    from services.langgraph.agency.delivery.blast_radius import blast_radius_certificate
+    from services.langgraph.persistence.delivery import dependency_edges
+
+    decision_refs = [f"policy-artifact-revision-{artifact_id}-v{next_version}"]
+    if affected:
+        decision_refs.append(
+            _propagation_decision_id(artifact_id, next_version, {item["artifact_id"]: item["status"] for item in affected})
+        )
     return {
         "artifact": updated,
         "changed_version_ref": changed_version_ref,
         "affected": affected,
+        # A record of the decision above, built after it was made; it cannot
+        # change what was invalidated.
+        "certificate": blast_radius_certificate(
+            changed_artifact_id=artifact_id,
+            changed_version_ref=changed_version_ref,
+            before_hash=source.get("content_hash"),
+            after_hash=updated.get("content_hash"),
+            affected=affected,
+            reason_edges=dependency_edges(impacted_ids),
+            staled_approval_ids=staled_approval_ids,
+            projectos_decision_refs=decision_refs,
+        ),
     }
 
 

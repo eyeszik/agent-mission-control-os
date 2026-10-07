@@ -1,4 +1,4 @@
-.PHONY: help check-env tokens-build tokens-check ui-ux-compile prompt-family compiled-plan compiled-twin brand-plan brand-roles prompt-compile guidance-validate brand-validate setup-agent gates
+.PHONY: help check-env tokens-build tokens-check ui-ux-compile prompt-family compiled-plan compiled-twin fabric-run brand-plan brand-roles prompt-compile guidance-validate brand-validate setup-agent gates
 
 help:
 	@echo "Available commands:"
@@ -8,6 +8,7 @@ help:
 	@echo "  make ui-ux-compile [REQUEST=f]  - Compile a governed UI/UX spec (prints only; generates no UI)"
 	@echo "  make compiled-plan [REQUEST=f]  - Compile a Compiled Agency plan (plans only; executes nothing)"
 	@echo "  make compiled-twin              - Run the digital-twin shadow scenarios S1-S13"
+	@echo "  make fabric-run [REQUEST=f]     - Execute a mission through the execution fabric (LOCAL; writes ProjectOS artifacts)"
 	@echo "  make brand-plan [BRIEF=f.json]  - Plan a brief against the agency kernel"
 	@echo "  make brand-roles [DEPT=brand]   - List N3 role contracts"
 	@echo "  make prompt-compile [REQUEST=f]  - Compile validated prompt packages only"
@@ -37,6 +38,10 @@ compiled-plan:
 
 compiled-twin:
 	@python3 orchestrate_brand_pipeline.py compiled-twin
+
+# Executes eligible cells locally and stops at the human approval boundary.
+fabric-run:
+	@python3 orchestrate_brand_pipeline.py fabric-run --input $(if $(REQUEST),$(REQUEST),sample_fabric_mission.json)
 
 # Plans only; generates nothing. Exits non-zero when the kernel blocks the run.
 brand-plan:

@@ -56,6 +56,13 @@ logger = logging.getLogger(__name__)
 
 SKILL_RUNTIME_VERSION = "amc-agency-skills/v1"
 
+SIDE_EFFECT_CLASSES = frozenset({"PURE", "DRAFT", "REVERSIBLE_WRITE", "IRREVERSIBLE_WRITE"})
+# NONE: in-process and pure. PROCESS: a resource-limited subprocess with a
+# scrubbed environment. NETWORK_ISOLATED: a subprocess inside a network
+# namespace; the fabric refuses the skill where none can be created.
+SANDBOX_REQUIREMENTS = frozenset({"NONE", "PROCESS", "NETWORK_ISOLATED"})
+TIMEOUT_SECONDS: dict[str, float] = {"FAST": 5.0, "STANDARD": 30.0, "LONG": 300.0}
+
 
 class SkillDispatchError(RuntimeError):
     """Raised when a skill cannot be dispatched: unknown skill, or the
@@ -81,6 +88,27 @@ class Skill:
     # reachable (credentialed + enabled) -- distinct from whether the skill is
     # *registered*. None means "no such check is meaningful for this skill."
     availability_check: Callable[[], bool] | None = None
+    # Execution metadata the execution fabric (``agency/execution_fabric``)
+    # reads before it will schedule a skill. Dispatch authorization below is
+    # unchanged by these fields: they narrow *where and how* an authorized
+    # call may run, they never grant anything.
+    side_effect_class: str = "PURE"
+    sandbox_requirement: str = "NONE"
+    # Named provider the handler needs (None: self-contained). The fabric maps
+    # an absent provider to PROVIDER_GAP rather than calling the handler.
+    provider_requirement: str | None = None
+    validator_ids: tuple[str, ...] = ()
+    timeout_class: str = "STANDARD"
+
+    def __post_init__(self) -> None:
+        if self.side_effect_class not in SIDE_EFFECT_CLASSES:
+            raise SkillDispatchError(f"skill '{self.skill_id}': unknown side_effect_class '{self.side_effect_class}'")
+        if self.sandbox_requirement not in SANDBOX_REQUIREMENTS:
+            raise SkillDispatchError(f"skill '{self.skill_id}': unknown sandbox_requirement '{self.sandbox_requirement}'")
+        if self.timeout_class not in TIMEOUT_SECONDS:
+            raise SkillDispatchError(f"skill '{self.skill_id}': unknown timeout_class '{self.timeout_class}'")
+        if self.side_effect_class in {"REVERSIBLE_WRITE", "IRREVERSIBLE_WRITE"} and not self.provider_requirement:
+            raise SkillDispatchError(f"skill '{self.skill_id}': a consequential skill must name its provider")
 
 
 @dataclass(frozen=True)
@@ -149,9 +177,24 @@ SKILL_REGISTRY: dict[str, Skill] = {
             description="Ask zo.computer's Mission Control endpoint a question.",
             handler=_ask_zo_handler,
             availability_check=zo_available,
+            # Read-only query: no mutation, but it needs the zo integration.
+            provider_requirement="zo",
         ),
     )
 }
+
+
+def register_skill(skill: Skill) -> Skill:
+    """Add ``skill`` to the registry. Re-registering the identical skill is a
+    no-op; redefining an id with anything else raises, so a later import can
+    never silently swap a handler or widen a skill's metadata."""
+    existing = SKILL_REGISTRY.get(skill.skill_id)
+    if existing is not None:
+        if existing != skill:
+            raise SkillDispatchError(f"Skill '{skill.skill_id}' is already registered with a different definition")
+        return existing
+    SKILL_REGISTRY[skill.skill_id] = skill
+    return skill
 
 
 def get_skill(skill_id: str) -> Skill:
@@ -225,6 +268,11 @@ def skill_registry_snapshot() -> dict[str, Any]:
                 "capability": skill.capability.value,
                 "description": skill.description,
                 "available": skill.availability_check() if skill.availability_check else None,
+                "side_effect_class": skill.side_effect_class,
+                "sandbox_requirement": skill.sandbox_requirement,
+                "provider_requirement": skill.provider_requirement,
+                "validator_ids": list(skill.validator_ids),
+                "timeout_class": skill.timeout_class,
             }
             for skill in sorted(SKILL_REGISTRY.values(), key=lambda item: item.skill_id)
         ],

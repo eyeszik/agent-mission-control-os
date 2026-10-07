@@ -539,6 +539,134 @@ def _cmd_compiled_plan(args: argparse.Namespace) -> int:
     return 1 if structural else 0
 
 
+class FabricMissionRequest(BaseModel):
+    """Input to ``fabric-run``: a compiled-agency request plus the brand capsule."""
+
+    model_config = {"extra": "forbid"}
+
+    tenant_id: str = Field(min_length=1, max_length=200)
+    project_id: str = Field(min_length=1, max_length=200)
+    mode: str = "LOCAL"
+    as_of: str
+    brand: dict[str, Any]
+    deliverables: list[dict[str, Any]] = Field(min_length=1)
+    existing_artifacts: dict[str, str] = Field(default_factory=dict)
+    volatile_constraints: list[dict[str, Any]] = Field(default_factory=list)
+    node_inputs: dict[str, dict[str, Any]] = Field(default_factory=dict)
+
+
+def _cmd_fabric_run(args: argparse.Namespace) -> int:
+    """Plan with the compiled-agency planner, then execute through the fabric.
+
+    Unlike the planning commands this one writes: ProjectOS artifacts, receipts
+    and events go to the configured database (LOCAL/SANDBOX modes only; there
+    is no live mode). Exit 0 = every cell succeeded and every deliverable
+    stopped at the human approval boundary, 1 = anything blocked, failed or a
+    provider gap, 2 = unreadable input.
+    """
+    from pathlib import Path
+
+    from services.langgraph.agency.compiled.planner import CompiledAgencyRequest, compile_agency_plan
+    from services.langgraph.agency.execution_fabric.capsules import BrandContextCapsule
+    from services.langgraph.agency.execution_fabric.consumer import execute_mission
+    from services.langgraph.agency.execution_fabric.contracts import ExecutionContext, ExecutionModeError
+    from services.langgraph.agency.execution_fabric.schedule import from_compiled_agency_plan
+    from services.langgraph.agency.exporter import resolve_export_root
+    from services.langgraph.app.runtime_support import role_os_registry
+
+    try:
+        with open(args.input, encoding="utf-8") as handle:
+            request = FabricMissionRequest.model_validate(json.load(handle))
+        plan_request = CompiledAgencyRequest(
+            project_id=request.project_id, as_of=request.as_of, deliverables=request.deliverables,
+            existing_artifacts=request.existing_artifacts, volatile_constraints=request.volatile_constraints,
+        )
+        brand = BrandContextCapsule.model_validate(request.brand)
+        context = ExecutionContext.from_server(
+            tenant_id=request.tenant_id, project_id=request.project_id, actor="cli:fabric-run", mode=request.mode,
+            export_root=Path(args.export_root) if args.export_root else resolve_export_root(),
+        )
+    except (OSError, ValueError, ValidationError, ExecutionModeError) as exc:
+        raise BriefError(f"could not read fabric mission request: {exc}") from exc
+    schedule = from_compiled_agency_plan(compile_agency_plan(plan_request, registry=role_os_registry()))
+    report = execute_mission(schedule, context, brand=brand, node_inputs=request.node_inputs)
+    clean = all(o.state.value == "SUCCEEDED" for o in report.cells.values()) and all(
+        b["state"] == "NEEDS_HUMAN" for b in report.release_boundary.values()
+    )
+    if args.json:
+        print(json.dumps({**report.model_dump(mode="json"), "outcome_hash": report.outcome_hash}, indent=2, default=str))
+    else:
+        print(f"fabric run {report.run_id} ({report.mode}): {report.summary}")
+        for cell_id, outcome in report.cells.items():
+            detail = outcome.artifact_ref or ", ".join(outcome.reasons)
+            print(f"  {outcome.state.value:<20} {cell_id}  {detail}")
+        for root, boundary in report.release_boundary.items():
+            print(f"  boundary {root}: {boundary['state']} ({', '.join(boundary['release_guard_failures'])})")
+    return 0 if clean else 1
+
+
+def _cmd_method_plan(args: argparse.Namespace) -> int:
+    """Route an objective to a minimal method stack and compile its work orders.
+
+    Pure: no generation, no execution (the result is EXECUTOR_GAP by design).
+    Exit 0 = compiled with nothing blocked or unresolved, 1 = blocked or
+    unresolved items reported, 2 = unreadable input.
+    """
+    from services.langgraph.agency.compiled.method_mission import MethodCompileError, compile_method_mission
+    from services.langgraph.agency.compiled.method_models import ObjectiveRequest
+    from services.langgraph.agency.compiled.method_router import compile_method_plan
+    from services.langgraph.app.runtime_support import role_os_registry
+
+    try:
+        with open(args.input, encoding="utf-8") as handle:
+            request = ObjectiveRequest.model_validate(json.load(handle))
+    except (OSError, ValueError, ValidationError) as exc:
+        raise BriefError(f"could not read objective request: {exc}") from exc
+    plan = compile_method_plan(request)
+    compiled = None
+    error = None
+    if plan.delegation_envelopes:
+        try:
+            compiled = compile_method_mission(plan, registry=role_os_registry(), project_id=args.project_id)
+        except MethodCompileError as exc:
+            error = str(exc)
+    if args.json:
+        payload = {"plan": plan.model_dump(mode="json"), "compile_error": error}
+        if compiled is not None:
+            payload["mission"] = {
+                "phase_map": compiled.phase_map,
+                "work_orders": list(compiled.work_orders),
+                "waves": [w.model_dump(mode="json") for w in compiled.wave_plan.waves],
+                "blocked": {k: list(v) for k, v in compiled.blocked_nodes.items()},
+                "executor_status": compiled.executor_status,
+            }
+        print(json.dumps(payload, indent=2, default=str))
+    else:
+        stack = plan.method_stack
+        print(f"method plan {plan.plan_hash[:16]}: families {', '.join(plan.problem_signature.problem_families) or 'none'}")
+        for label, ids in (("macro", stack.macro_methodologies), ("diagnose", stack.diagnostic_methods),
+                           ("decide", stack.decision_methods), ("execute", stack.execution_methods),
+                           ("control", stack.control_methods), ("learn", stack.learning_methods)):
+            if ids:
+                print(f"  {label}: {', '.join(ids)}")
+        for cert in plan.minimality_certificates:
+            print(f"  necessary {cert.method_id}: {', '.join(cert.necessary_for)}")
+        for gate in plan.human_gates:
+            print(f"  human gate {gate.kind}: {gate.node_id or ''} requires {', '.join(gate.requires)}")
+        for item in plan.unresolved:
+            print(f"  unresolved: {item}")
+        if compiled is not None:
+            for wave in compiled.wave_plan.waves:
+                print(f"  wave {wave.index}: {', '.join(wave.cells)}" + (f" [{wave.serialized_reason}]" if wave.serialized_reason else ""))
+            for cell, reasons in sorted(compiled.blocked_nodes.items()):
+                print(f"  BLOCKED {cell}: {', '.join(reasons)}")
+            print(f"  executor: {compiled.executor_status}")
+        if error:
+            print(f"  compile error: {error}")
+    blocked = bool(error) or bool(plan.unresolved) or bool(compiled and compiled.blocked_nodes)
+    return 1 if blocked else 0
+
+
 def _cmd_compiled_twin(args: argparse.Namespace) -> int:
     from services.langgraph.agency.compiled.twin import run_digital_twin
     from services.langgraph.app.runtime_support import role_os_registry
@@ -634,6 +762,24 @@ def build_parser() -> argparse.ArgumentParser:
     compiled_plan.add_argument("--source-archive", help="Verified agency-role-os-v2 ZIP for JIT SKILL loading.")
     compiled_plan.add_argument("--json", action="store_true", help="Print the full plan as JSON.")
     compiled_plan.set_defaults(handler=_cmd_compiled_plan)
+
+    method_plan = sub.add_parser(
+        "method-plan",
+        help="Route an objective to a minimal method stack and compile canonical work orders (no execution).",
+    )
+    method_plan.add_argument("-i", "--input", required=True, help="Path to an ObjectiveRequest JSON file.")
+    method_plan.add_argument("--project-id", default="proj-method-plan", help="Project id for work-order identity.")
+    method_plan.add_argument("--json", action="store_true", help="Emit the full plan and mission as JSON.")
+    method_plan.set_defaults(handler=_cmd_method_plan)
+
+    fabric_run = sub.add_parser(
+        "fabric-run",
+        help="Plan and execute a mission through the execution fabric (LOCAL/SANDBOX; writes ProjectOS artifacts).",
+    )
+    fabric_run.add_argument("--input", required=True, help="Path to a fabric mission request JSON file.")
+    fabric_run.add_argument("--export-root", default=None, help="Object-storage root (defaults to the configured export root).")
+    fabric_run.add_argument("--json", action="store_true", help="Print the full execution report as JSON.")
+    fabric_run.set_defaults(handler=_cmd_fabric_run)
 
     compiled_twin = sub.add_parser("compiled-twin", help="Run digital-twin shadow scenarios S1-S13.")
     compiled_twin.add_argument("--json", action="store_true", help="Print scenario results as JSON.")
