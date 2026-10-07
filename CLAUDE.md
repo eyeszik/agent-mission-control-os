@@ -68,7 +68,7 @@ python scripts/verify_guidance_registry.py
 
 ### Critical-file integrity manifest
 
-`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 129 as of the tier-1 packages change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
+`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 136 as of the creative runtime change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
 
 ```python
 import hashlib, json
@@ -90,6 +90,7 @@ python3 orchestrate_brand_pipeline.py roles --department brand                  
 python3 orchestrate_brand_pipeline.py validate                                                  # or: make brand-validate
 python3 orchestrate_brand_pipeline.py compile-prompts --input sample_prompt_request.json --json  # or: make prompt-compile
 python3 orchestrate_brand_pipeline.py ui-ux --input sample_ui_ux_request.json                     # or: make ui-ux-compile
+python3 orchestrate_brand_pipeline.py creative-run --input sample_creative_mission.json --compare  # or: make creative-run
 ```
 `plan` **plans against the governance kernel only** — it resolves artifacts to roles, checks evidence floors, and walks the lifecycle guards. `compile-prompts` runs the claims-audit prompt compiler (see Architecture). Neither calls an LLM, and neither touches the real execution pipeline. `plan` exits 0 = clear, 1 = blocked (kernel guard failed), 2 = brief couldn't be interpreted; `compile-prompts` exits 0 only when `final_state == PROMPT_PACKAGE_READY`.
 
@@ -141,6 +142,19 @@ Read together: this is the validated, evidence-grounded input a real image/video
 ### Cinematic capability — routed, not global
 
 `services/langgraph/agency/cinematic/` is a lazily-loaded domain capability that compiles ideas/scripts/storyboards/images into T2I/T2V/I2V/storyboard/brand-motion prompts, with canonical `ProjectIR`/`ShotIR`, source-authority resolution, continuity handshakes, camera/lighting/physics reasoning, an evaluator, and a bounded repair loop. It routes via its own deterministic trigger metadata (`cinematic.route_request`) and honours the same firewall — it terminates at prompts and never invokes a media provider. It is a native module (real schemas/compilers/evaluator, not advisory prose) and its full specification is deliberately kept out of this file; see `docs/cinematic-capability.md` and invoke via `orchestrate_brand_pipeline.py cinematic`.
+
+### Creative search runtime — bounded search, human-gated
+
+`services/langgraph/agency/creative/` runs a brief through `MissionIR → ExecutionPlan → context portfolio → candidates → hard gate → blind critics → Pareto front → HUMAN → ≤1 correction + TriDiff → approval → delivery gate`. It is deterministic: there are no model calls, and model-backed types (image, video, social, brand identity) plan `BLOCKED` as `provider_gap`.
+
+- **Capability registry.** `knowledge/creative-capabilities/registry.json` (hash-pinned guides, dispositions) is loaded by `capabilities.py`.
+- **Topology.** `organization.py` picks the smallest topology (T0–T4). T4 search runs only when the brief asks for exploration and `max_candidates > 1`. The caps are schema-enforced: population ≤ 4, generations ≤ 2, corrections ≤ 1.
+- **Context.** `context.py` reads the design corpus only through `load_validated_corpus`. References contribute abstract principles only; unknown rights are excluded. `derive_requirements` maps the owned accessibility contract into renderer requirements.
+- **Critics.** They see a lineage-free `BlindView`. `ConstraintValidator` is non-compensable.
+- **HITL.** It reuses `create_approval_request(subject_hash=<ArtifactIR hash>)`: no graph change, no migration. `delivery_gate` fails closed on pending, rejected, stale or hash-mismatched approvals and never performs delivery.
+- **Recorder.** `recorder.py` refuses free text and secrets.
+
+CLI: `creative-run`. Details: `docs/creative-runtime.md`.
 
 ### Prompt families and v10 prompt OS — decomposed, not injected
 

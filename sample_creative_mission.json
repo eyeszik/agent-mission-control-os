@@ -1,0 +1,26 @@
+{
+  "business_goal": "Grow qualified demo requests for a premium cybersecurity SaaS",
+  "user_goal": "Understand whether Sentinel Grid fits their security programme",
+  "audience": "security leaders at mid-market companies",
+  "desired_action": "Book a security demo",
+  "artifact_type": "landing_page",
+  "channel": "web",
+  "brand": {"name": "Sentinel Grid", "palette": {"primary": "#1f3a5f", "secondary": "#2f7d6d", "surface": "#ffffff", "text": "#16181d"},
+            "heading_font": "Inter", "body_font": "Inter"},
+  "requirements": {"required_sections": ["proof", "security", "cta"], "forbidden_phrases": ["guaranteed", "unhackable"],
+                   "verified_claims": ["SOC 2 Type II audited"], "max_headline_words": 10},
+  "cta": {"destination": "https://example.com/demo", "integration_status": "unverified"},
+  "assets": [
+    {"asset_id": "value-1", "kind": "copy", "ref": "See your external attack surface the way an attacker does, and decide what to fix first.", "verified": true, "rights": "owned"},
+    {"asset_id": "problem-1", "kind": "copy", "ref": "Security teams lose time reconciling alerts from tools that do not share context.", "verified": true, "rights": "owned"},
+    {"asset_id": "solution-1", "kind": "copy", "ref": "Sentinel Grid correlates exposure, identity and asset data into one prioritised queue.", "verified": true, "rights": "owned"},
+    {"asset_id": "feature-1", "kind": "copy", "ref": "Continuous external exposure monitoring", "verified": true, "rights": "owned"},
+    {"asset_id": "feature-2", "kind": "copy", "ref": "Identity-aware risk prioritisation", "verified": true, "rights": "owned"},
+    {"asset_id": "feature-3", "kind": "copy", "ref": "Exportable evidence for audits", "verified": true, "rights": "owned"},
+    {"asset_id": "security-1", "kind": "copy", "ref": "Customer data is encrypted in transit and at rest, and access is role-based.", "verified": true, "rights": "owned"},
+    {"asset_id": "step-1", "kind": "copy", "ref": "Connect a read-only data source", "verified": true, "rights": "owned"},
+    {"asset_id": "step-2", "kind": "copy", "ref": "Review the prioritised exposure queue", "verified": true, "rights": "owned"},
+    {"asset_id": "faq-1", "kind": "copy", "ref": "Does Sentinel Grid need agents installed? No, the demo uses read-only connectors.", "verified": true, "rights": "owned"}
+  ],
+  "brief_text": "Create a premium cybersecurity SaaS landing page"
+}

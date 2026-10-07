@@ -52,6 +52,16 @@ make brand-validate
 make gates                         # every CI verifier gate
 ```
 
+`creative-run` runs the creative search runtime to the human selection gate. It is
+deterministic, writes nothing without `--output`, and never calls a model, publishes or
+spends. `--compare` adds the champion/challenger benchmark. It exits 0 only on
+`READY_FOR_HUMAN_REVIEW`. See [`creative-runtime.md`](creative-runtime.md).
+
+```bash
+python3 orchestrate_brand_pipeline.py creative-run --input sample_creative_mission.json --compare
+make creative-run                  # uses sample_creative_mission.json
+```
+
 `validate` runs the kernel's own structural self-checks — `validate_matrices()`,
 `validate_registry()`, and `validate_merge_matrix()` — which otherwise only run
 inside the test suite.
