@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from services.langgraph.core.errors import register_error_handlers
 from services.langgraph.api.routes import (
     agency,
     analytics,
@@ -49,6 +50,7 @@ app = FastAPI(
     description="LangGraph execution and workflow manager with local and production persistence modes",
     lifespan=lifespan,
 )
+register_error_handlers(app)
 
 
 

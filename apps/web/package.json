@@ -12,6 +12,10 @@
     "verify:ui": "node scripts/verify-ui-ast.mjs"
   },
   "dependencies": {
+    "@amc/config": "workspace:*",
+    "@amc/constants": "workspace:*",
+    "@amc/errors": "workspace:*",
+    "@amc/logger": "workspace:*",
     "@amc/shared": "workspace:*",
     "framer-motion": "^13.5.0",
     "lucide-react": "^0.300.0",
@@ -21,6 +25,7 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@amc/testing": "workspace:*",
     "@playwright/test": "1.63.0",
     "@types/node": "^20.0.0",
     "@types/react": "19.3.0",

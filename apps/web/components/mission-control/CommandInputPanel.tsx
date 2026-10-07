@@ -10,6 +10,7 @@ import { useRunStore } from '../../lib/stores/runStore';
 import { useDesignStore } from '../../lib/stores/designStore';
 import { summarizeProvenance, type ProvenanceSummary } from '../../lib/ai/provenance';
 import { AITrustEnvelope } from './AITrustEnvelope';
+import { getLogger } from '../../lib/logger';
 
 export function CommandInputPanel() {
   const [brandName, setBrandName] = useState('');
@@ -107,7 +108,7 @@ export function CommandInputPanel() {
       setBrandStyleNotes('');
       setGoals('');
     } catch (err) {
-      console.error('Failed to launch campaign', err);
+      getLogger().error('Failed to launch campaign', { err });
       setError(err instanceof Error ? err.message : 'Failed to launch campaign');
     } finally {
       setLoading(false);

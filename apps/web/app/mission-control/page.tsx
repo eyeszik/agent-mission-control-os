@@ -20,10 +20,11 @@ import { ContentCalendarPanel } from "../../components/mission-control/ContentCa
 import { PortfolioCommandCenter } from "../../components/mission-control/PortfolioCommandCenter";
 import { readSession } from "../../lib/auth/session";
 import { signOut } from "../../lib/auth/supabase";
+import { usesSupabaseAuth } from "../../lib/config";
 
 export default function MissionControlPage() {
   const router = useRouter();
-  const productionAuth = process.env.NEXT_PUBLIC_AUTH_MODE === 'supabase';
+  const productionAuth = usesSupabaseAuth();
   const [ready, setReady] = useState(!productionAuth);
   const [mode, setMode] = useState<'operations' | 'projects' | 'design'>('operations');
 

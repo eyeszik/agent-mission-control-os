@@ -43,7 +43,6 @@ module deliberately leaves open.
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable
@@ -51,8 +50,9 @@ from typing import Any, Callable
 from services.langgraph.agency.kernel.ontology import Capability
 from services.langgraph.agency.kernel.roles import RoleContractError, get_role
 from services.langgraph.integrations.zo import ask_zo, zo_available
+from services.langgraph.core.config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 SKILL_RUNTIME_VERSION = "amc-agency-skills/v1"
 

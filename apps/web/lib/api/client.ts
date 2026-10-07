@@ -1,9 +1,12 @@
+import { AMCError, errorFromResponse } from '@amc/errors';
 import { ensureAccessToken } from '../auth/supabase';
 import { readSession } from '../auth/session';
+import { getAppConfig, usesSupabaseAuth } from '../config';
 
-export class ServiceError extends Error {
-  constructor(public status: number, public code: string, message: string) {
-    super(message);
+/** An API failure. An AMCError, so `isAMCError` and the envelope helpers apply. */
+export class ServiceError extends AMCError {
+  constructor(status: number, code: string, message: string) {
+    super(message, { status, code });
     this.name = 'ServiceError';
   }
 }
@@ -21,7 +24,8 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}, 
   headers.set('Content-Type', 'application/json');
   if (options.idempotencyKey) headers.set('Idempotency-Key', options.idempotencyKey);
 
-  if (process.env.NEXT_PUBLIC_AUTH_MODE === 'supabase') {
+  const config = getAppConfig();
+  if (usesSupabaseAuth(config)) {
     const token = await ensureAccessToken();
     if (!token) throw new ServiceError(401, 'AUTH_REQUIRED', 'Authentication required');
     headers.set('Authorization', `Bearer ${token}`);
@@ -29,15 +33,13 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}, 
     if (tenantId) headers.set('X-AMC-Tenant', tenantId);
   }
 
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-  const response = await fetch(`${base}${endpoint}`, { ...options, headers });
+  const response = await fetch(`${config.apiBaseUrl}${endpoint}`, { ...options, headers });
   if (!response.ok) {
-    let errorData: Record<string, unknown> = {};
-    try { errorData = (await response.json()) as Record<string, unknown>; } catch { errorData = {}; }
-    const detail = typeof errorData.detail === 'string' ? errorData.detail : undefined;
-    const message = typeof errorData.message === 'string' ? errorData.message : undefined;
-    const code = typeof errorData.code === 'string' ? errorData.code : 'UNKNOWN';
-    throw new ServiceError(response.status, code, detail || message || response.statusText || 'API request failed');
+    let errorData: unknown = {};
+    try { errorData = await response.json(); } catch { errorData = {}; }
+    // Accepts FastAPI's { detail } and the AMC envelope { error: { code, message } }.
+    const typed = errorFromResponse(response.status, errorData, response.statusText || 'API request failed');
+    throw new ServiceError(response.status, typed.code, typed.message);
   }
   const data: unknown = await response.json();
   if (schema) return schema.parse(data);

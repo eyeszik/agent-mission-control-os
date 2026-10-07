@@ -8,6 +8,7 @@ import { getPendingApprovals } from '../../lib/api/approvals';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { useRunStore } from '../../lib/stores/runStore';
+import { getLogger } from '../../lib/logger';
 
 declare global {
   interface Window {
@@ -96,7 +97,7 @@ export function MissionControlProvider() {
         if (!cancelled) setApprovals(approvals);
       })
       .catch((err) => {
-        console.warn('Initial approval sync failed', err);
+        getLogger().warn('Initial approval sync failed', { err });
       });
     return () => {
       cancelled = true;
