@@ -11,7 +11,7 @@ the code that implements it and the test that proves it.
 | `POST /v1/agent/intent` returns real-time catalog prices with bound SubID tracking tokens | `gateway.e2e.test.ts` → "returns live catalogue results bound to UUIDv7 attribution tokens": every result's price is compared against the merchant catalogue, and `sub_id_1`/`sub_id_2` round-trip. |
 | `POST /v1/agent/checkout` executes an atomic delegated payment token reservation | `gateway.e2e.test.ts` → "redeems the shared payment token, places the order, and books a balanced ledger": asserts the SPT reached Stripe in the documented parameter, on the connected account, under an idempotency key. |
 | `POST /v1/webhooks/stripe-acp` reconciles the ledger with 0% dropped events | `gateway.e2e.test.ts` → settlement, duplicate, concurrent-duplicate, clawback, dispute, late-settlement, orphan and unhandled-type cases. Every path answers 200 so Stripe never retries a decided event. |
-| 100% passing automated integration suite across mock agent and mock Shopify/Stripe APIs | `npm test`: 5 unit files + 5 integration files, 117 tests. |
+| 100% passing automated integration suite across mock agent and mock Shopify/Stripe APIs | `npm test`: 5 unit files + 6 integration files, 125 tests. |
 
 ## Task 1 — Repository scaffold and protocol manifest
 
@@ -122,7 +122,7 @@ the code that implements it and the test that proves it.
   (gateway + `postgres:16-alpine` + `redis:7-alpine`, health-gated startup),
   `tests/e2e/gateway.e2e.test.ts`.
 - **Evidence:**
-  - `npm test` → 117 passed, 0 failed.
+  - `npm test` → 125 passed, 0 failed.
   - `docker compose up -d --build` → all three containers reported healthy;
     `/ready` returned `{"status":"ready","database":true,"cache":true}`;
     migrations `001_init.sql` and `002_settlement_extensions.sql` present in
@@ -187,3 +187,31 @@ against an in-process REST v3 stand-in: normalisation, stock-status mapping,
 Basic auth, per-merchant currency caching, zero-decimal currency handling, order
 creation with the attribution trail, and the auth-failure path. It is still
 **not** exercised against a live WooCommerce store.
+
+## Commission collection
+
+The blueprint specifies how commission is *calculated* and never says how it is
+*collected*. Implemented as-coded that gap was not neutral: the charge is a
+direct charge on the merchant's connected account, so the gross landed with the
+merchant, while the payout engine paid the agent from the platform balance. The
+platform lost the agent's share on every sale and its books showed a profit.
+
+- **Implementation:** `application_fee_amount` on the PaymentIntent, sized to
+  the whole commission (`src/connectors/stripe/delegatedPayments.ts`,
+  `src/services/checkoutService.ts`).
+- **Evidence:** `commissionCollection.e2e.test.ts` (7 tests). The decisive one
+  is "ends a settled-and-paid cycle with the platform up by exactly its own
+  fee": it runs a real checkout, settles it, runs a real payout, and asserts
+  `collected − transferred == aisl_fee` and that the figure is positive. Before
+  this change it was negative by the agent's payout.
+- **Deviations:**
+  - The fee is taken on the quoted charge amount; commission is booked on
+    `min(order total, captured)`. When a store bills less than quoted, the fee
+    is a few cents more than the booked commission, and that overage is logged
+    (`application fee was collected on a larger charge than the settled gross`).
+  - A merchant with commission but no `stripe_account_id` now fails checkout
+    rather than transacting at a loss, and is reported by reconciliation as
+    `merchant_cannot_collect`.
+  - The compensating refund now targets the connected account and sets
+    `refund_application_fee`; previously it would have failed to find a direct
+    charge at all.

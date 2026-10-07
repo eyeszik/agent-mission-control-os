@@ -1,6 +1,7 @@
 import type { Database } from '../db/pool.js';
 import type { ConversionRepository } from '../db/repositories/conversions.js';
 import type { PayoutRepository } from '../db/repositories/payouts.js';
+import type { MerchantRepository } from '../db/repositories/merchants.js';
 
 export type ReconciliationSeverity = 'critical' | 'warning';
 
@@ -36,6 +37,8 @@ export interface ReconciliationDeps {
   db: Database;
   conversions: ConversionRepository;
   payouts: PayoutRepository;
+  /** Optional: enables the merchant-collectability pre-flight check. */
+  merchants?: MerchantRepository;
   thresholds?: Partial<ReconciliationThresholds>;
 }
 
@@ -67,6 +70,7 @@ export class ReconciliationService {
         this.stuckSettlements(),
         this.stalePayouts(),
         this.unpayableBalances(),
+        this.uncollectableMerchants(),
       ])
     ).filter((finding): finding is ReconciliationFinding => finding !== null);
 
@@ -188,6 +192,41 @@ export class ReconciliationService {
       count: stale.length,
       detail: `Payouts have been IN_FLIGHT for over ${this.thresholds.stalePayoutMinutes} minutes. Confirm against Stripe whether each transfer landed before releasing or retrying it; the idempotency key on the payout row makes a safe retry possible.`,
       samples: stale.map((payout) => `${payout.id} (${payout.amountCents} ${payout.currency})`),
+    };
+  }
+
+  /**
+   * Merchants whose commission could never be collected.
+   *
+   * A direct charge routes the platform's cut through `application_fee_amount`,
+   * which Stripe only accepts on a connected account. A merchant with
+   * commission configured but no `stripe_account_id` therefore fails at
+   * checkout — deliberately, since the alternative is charging the buyer and
+   * losing the commission. Catching it here means an operator finds out before
+   * a customer does.
+   */
+  private async uncollectableMerchants(): Promise<ReconciliationFinding | null> {
+    const repository = this.deps.merchants;
+    if (!repository) return null;
+
+    const broken: string[] = [];
+    for (const merchant of await repository.listAll()) {
+      if (!merchant.enabled || merchant.commissionRateBps <= 0) continue;
+      const credentials = merchant.credentials;
+      const account = 'stripe_account_id' in credentials ? credentials.stripe_account_id : null;
+      if (!account) {
+        broken.push(`${merchant.id} (${merchant.name}, ${merchant.commissionRateBps}bps)`);
+      }
+    }
+    if (broken.length === 0) return null;
+
+    return {
+      check: 'merchant_cannot_collect',
+      severity: 'critical',
+      count: broken.length,
+      detail:
+        'Enabled merchants charge commission but have no stripe_account_id, so no checkout against them can succeed. Add the connected account with the merchant CLI, or set their commission to zero.',
+      samples: broken.slice(0, SAMPLE_LIMIT),
     };
   }
 

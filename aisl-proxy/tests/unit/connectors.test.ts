@@ -130,6 +130,8 @@ describe('ShopifyAdminOrderDispatcher', () => {
           status: 'succeeded',
           amountCents: 39_998,
           currency: 'USD',
+          applicationFeeCents: 0,
+          stripeAccount: null,
         },
       });
 

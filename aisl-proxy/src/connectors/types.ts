@@ -36,6 +36,19 @@ export interface PaymentAuthorizationRequest {
   idempotencyKey: string;
   description: string;
   metadata: Record<string, string>;
+  /**
+   * Commission to route to the platform out of this charge.
+   *
+   * On a direct charge against the merchant's connected account the gross
+   * lands in the merchant's balance, so this is the only point at which the
+   * platform's cut is collected. It must cover the whole commission — the
+   * platform's own fee *and* the agent's payout — because the payout engine
+   * later transfers the agent's share from the platform balance.
+   *
+   * Zero means collect nothing, which is correct only when the charge is
+   * created on the platform's own account.
+   */
+  applicationFeeCents: number;
 }
 
 export interface PaymentAuthorizationResult {
@@ -45,14 +58,26 @@ export interface PaymentAuthorizationResult {
   status: string;
   amountCents: number;
   currency: string;
+  /** What the rail actually routed to the platform, as reported back. */
+  applicationFeeCents: number;
+  /** The connected account the charge lives on, if any. A refund must target it. */
+  stripeAccount: string | null;
 }
 
 /** Redeems a delegated payment credential against the merchant's payment rail. */
 export interface PaymentProcessor {
   readonly name: string;
   authorize(request: PaymentAuthorizationRequest): Promise<PaymentAuthorizationResult>;
-  /** Compensating action when the order cannot be placed after a successful charge. */
-  refund(request: { paymentIntentId: string; reason: string }): Promise<{ refundId: string }>;
+  /**
+   * Compensating action when the order cannot be placed after a successful
+   * charge. `stripeAccount` must be the account the charge was created on — a
+   * direct charge is invisible from the platform account.
+   */
+  refund(request: {
+    paymentIntentId: string;
+    reason: string;
+    stripeAccount?: string | null;
+  }): Promise<{ refundId: string }>;
 }
 
 export interface OrderDispatchRequest {
