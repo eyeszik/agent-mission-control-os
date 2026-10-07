@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "c7e48b6f865218f0e254475b822d631ac005c6f2"
+      "git_blob_sha": "599330d8e7797662d8a84866a0a053ad3416799f"
     },
     {
       "path": "README.md",
@@ -48,7 +48,7 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "35bc4e6394fff4a8c0dd6bd3f6b54c7d0c6e2355"
+      "git_blob_sha": "706e6169bea801944fb1054b1df71c346aa470cf"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -108,7 +108,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "ed6bf5d6ff0b59c497d39ba5d001c12040c69649"
+      "git_blob_sha": "f97d18250bbb7e6397561582d80d162888c0acd2"
     },
     {
       "path": "scripts/verify_auth_bindings.py",
@@ -136,7 +136,7 @@
     },
     {
       "path": "scripts/verify_repository_invariants.py",
-      "git_blob_sha": "9fd7b3db9b2410547fb2d77ec11008aecb39975a"
+      "git_blob_sha": "86672ee42f5bb7e8b41bfcbe6aa5412833299535"
     },
     {
       "path": "services/langgraph/agency/compiled/authority.py",

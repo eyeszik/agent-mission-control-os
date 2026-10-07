@@ -10,21 +10,25 @@ import { useProjectStore } from '../../lib/stores/projectStore';
 const OPERATOR_TARGETS: ContentState[] = ['PLANNED', 'IN_PRODUCTION', 'REVIEW', 'APPROVED', 'READY', 'ARCHIVED'];
 
 function ItemRow({ item, onMove }: { item: ContentItem; onMove: (item: ContentItem, target: ContentState) => void }) {
-  const targets = CONTENT_TRANSITIONS[item.state].filter((target) => OPERATOR_TARGETS.includes(target));
+  // ⚡ Bolt: Removed .filter().map() chain to prevent intermediate array allocation on every render
+  const hasTargets = CONTENT_TRANSITIONS[item.state].some((target) => OPERATOR_TARGETS.includes(target));
   return (
     <li className="text-xs border-b border-zinc-800/40 py-1.5 last:border-0 flex flex-col gap-1">
       <div className="flex justify-between gap-2">
         <span className="text-zinc-200 truncate">{item.title}</span>
         <span className="font-mono text-zinc-400 shrink-0">{item.state} · v{item.version}</span>
       </div>
-      {targets.length > 0 && (
+      {hasTargets && (
         <div className="flex flex-wrap gap-1">
-          {targets.map((target) => (
-            <button key={target} type="button" onClick={() => onMove(item, target)}
-              className="px-1.5 py-0.5 rounded border border-zinc-700 text-zinc-300 hover:text-zinc-100">
-              → {target}
-            </button>
-          ))}
+          {CONTENT_TRANSITIONS[item.state].map((target) => {
+            if (!OPERATOR_TARGETS.includes(target)) return null;
+            return (
+              <button key={target} type="button" onClick={() => onMove(item, target)}
+                className="px-1.5 py-0.5 rounded border border-zinc-700 text-zinc-300 hover:text-zinc-100">
+                → {target}
+              </button>
+            );
+          })}
         </div>
       )}
     </li>
@@ -54,14 +58,19 @@ export function ContentCalendarPanel() {
   }, [refresh]);
 
   // ⚡ Bolt: upcoming window computed once per payload.
-  const upcoming = useMemo(() => {
+  // ⚡ Bolt: Derived counts precomputed to eliminate intermediate array allocations inside the component render loop.
+  const upcomingCount = useMemo(() => {
     const now = Date.now();
     const horizon = now + 14 * 24 * 3600 * 1000;
-    return (view?.slots ?? []).filter((slot) => {
+    return (view?.slots ?? []).reduce((count, slot) => {
       const at = Date.parse(slot.scheduled_for);
-      return at >= now && at < horizon && slot.state !== 'cancelled';
-    });
+      if (at >= now && at < horizon && slot.state !== 'cancelled') {
+         return count + 1;
+      }
+      return count;
+    }, 0);
   }, [view]);
+
   const blocked = useMemo(() => (view?.jobs ?? []).filter((job) => job.status === 'BLOCKED'), [view]);
 
   const onMove = async (item: ContentItem, target: ContentState) => {
@@ -81,7 +90,7 @@ export function ContentCalendarPanel() {
       <h2 id="content-calendar-heading" className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Content &amp; Calendar</h2>
       {error && <p role="alert" className="text-xs text-rose-300">{error}</p>}
       <div className="grid grid-cols-2 gap-2 text-xs">
-        <div><p className="text-zinc-500">Next 14 days</p><p className="text-zinc-100 font-mono">{upcoming.length} slots</p></div>
+        <div><p className="text-zinc-500">Next 14 days</p><p className="text-zinc-100 font-mono">{upcomingCount} slots</p></div>
         <div><p className="text-zinc-500">Blocked jobs</p><p className={`font-mono ${blocked.length ? 'text-amber-300' : 'text-zinc-100'}`}>{blocked.length}</p></div>
       </div>
       {blocked.length > 0 && (

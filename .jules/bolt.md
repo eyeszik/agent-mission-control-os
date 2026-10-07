@@ -28,3 +28,6 @@
 ## 2026-10-27 - React Component Zero-Allocation Aggregation
 **Learning:** Using `Object.values().reduce()` to aggregate or sum object values inside a React functional component render body allocates an intermediate array on every render, causing unnecessary garbage collection pressure and degraded performance.
 **Action:** Replace `Object.values().reduce()` with a zero-allocation `for...in` loop. Always include a `.hasOwnProperty()` check within the loop to avoid iterating over inherited prototype properties.
+## 2026-10-28 - Composer Array Length Check Optimization
+**Learning:** Checking the presence of multiple specific elements in an array using `.filter(condition).length > 1` forces the allocation of an intermediate array which creates unnecessary GC pressure.
+**Action:** Replace `.filter(condition).length` with a zero-allocation `.reduce()` count.

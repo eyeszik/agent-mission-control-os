@@ -37,7 +37,7 @@ jobs:
         run: python scripts/run_campaign_headless.py --mode "$CAMPAIGN_MODE" --output scratch/campaign
       - name: Upload campaign evidence (not approval or publication)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: black-feather-ceremony-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
