@@ -56,12 +56,30 @@ export class PayoutService {
       );
     }
 
+    // ⚡ Bolt: Replaced four separate array iterations and three intermediate .filter()
+    // allocations with a single pass to eliminate redundant calculations and reduce GC pressure.
+    let paidCents = 0;
+    let paidCount = 0;
+    let failedCount = 0;
+    let skippedCount = 0;
+
+    for (const o of outcomes) {
+      if (o.status === 'paid') {
+        paidCents += o.payout.amountCents;
+        paidCount++;
+      } else if (o.status === 'failed') {
+        failedCount++;
+      } else if (o.status === 'skipped') {
+        skippedCount++;
+      }
+    }
+
     return {
       outcomes,
-      paidCents: outcomes.reduce((sum, o) => (o.status === 'paid' ? sum + o.payout.amountCents : sum), 0),
-      paidCount: outcomes.filter((o) => o.status === 'paid').length,
-      failedCount: outcomes.filter((o) => o.status === 'failed').length,
-      skippedCount: outcomes.filter((o) => o.status === 'skipped').length,
+      paidCents,
+      paidCount,
+      failedCount,
+      skippedCount,
     };
   }
 
