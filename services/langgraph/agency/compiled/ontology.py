@@ -248,6 +248,7 @@ ARTIFACT_STAGE: dict[ArtifactType, str] = {
     ArtifactType.brand_guidelines_doc: "S20",
     ArtifactType.creative_concept: "S12",
     ArtifactType.asset_prompt_set: "S14",
+    ArtifactType.media_asset: "S14",
     ArtifactType.copy_variant: "S14",
     ArtifactType.design_brief: "S11",
     ArtifactType.design_system_spec: "S14",

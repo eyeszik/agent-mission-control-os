@@ -274,7 +274,11 @@ class _Builder:
         self._expanding.add(key)
         inputs = [self.accepted(c, f"work:{key}", domains, live) for c in sorted(producer.consumes, key=lambda a: a.value)]
         self._expanding.discard(key)
-        stage = ARTIFACT_STAGE[artifact]
+        stage = ARTIFACT_STAGE.get(artifact)
+        if stage is None:
+            # An N1 type the stage map has not caught up with blocks truthfully
+            # instead of crashing the whole plan.
+            return self.blocker("ARTIFACT_STAGE_UNMODELED", key, satisfies)
         work_id = self.add(
             f"work:{key}",
             type=NodeType.EXECUTABLE_WORK,
