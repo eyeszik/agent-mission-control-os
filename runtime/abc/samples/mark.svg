@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" role="img" aria-label="Maison Velune logo mark">
+  <rect width="1200" height="1200" rx="240" fill="#ece6da"/>
+  <circle cx="600" cy="600" r="360" fill="#665d52" opacity="0.15"/>
+  <path d="M300 840 L600 240 L900 840 Z" fill="#5b1a22"/>
+  <circle cx="600" cy="610" r="110" fill="#ece6da"/>
+  <text x="600" y="645" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="140" font-weight="700" fill="#5b1a22">MV</text>
+  <text x="600" y="1030" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="44" letter-spacing="6" fill="#5b1a22">geometric mark · canonical render</text>
+</svg>

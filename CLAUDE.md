@@ -68,7 +68,7 @@ python scripts/verify_guidance_registry.py
 
 ### Critical-file integrity manifest
 
-`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 140 as of the governed intake change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
+`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 156 as of the ABC-v6 visual engine and durable runtime change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
 
 ```python
 import hashlib, json
@@ -178,6 +178,48 @@ CLI: `creative-run`. Details: `docs/creative-runtime.md`.
 - **External effects.** Publish, spend and send are never dispatched. Each gets a `NonActionReceipt` that states its own limits.
 
 The slice adds no route, UI, table, event type or migration. It is Python-only; the tests drive the real approval route. Details: `docs/intake-mission.md`.
+
+### Local visual engine and durable runtime — real local renders, bounded ticks
+
+`services/langgraph/agency/visual/` renders on the host only (no hosted image/video API):
+
+- **R1 Blender Cycles.** `blender_runner.py`, run under `python -I` and, where possible, `unshare -rn`.
+- **R5 FFmpeg turntables.** Encoded only from frames that R1 rendered.
+- **R4 vector mark.** The unchanged `agency.assets` SVG.
+- **R2 offline diffusion.** Needs local weights plus an `amc-model.json` licence record.
+- **R3 Three.js.** `three_renderer_for` picks WebGPU vs WebGL by shader architecture.
+
+R2 and R3 are probed and **blocked** when absent; never substitute another route. Outputs become `media_asset`
+artifacts. `verify.verify_media` reopens the stored bytes for Q0–Q4. Q5–Q7 are always `human_required`, and a
+check that could not run is `INCONCLUSIVE`, never `PASSED`. `browser.py`/`browser_runner.cjs` drive local Chromium
+for WebGL/SVG evidence.
+
+`agency/intake/release.py` is the shared approval binding + release verdict, used by intake, visual and durable jobs.
+
+`services/langgraph/agency/durable/` + `persistence/durable_runs.py` (migration 14 / `20261009_amc_durable_runtime_v1.sql`):
+
+- **FSM.** A 20-state run FSM (`fsm.py`, pure). `transition()` is the only writer. It is fenced on `lease_token`
+  and allowlists the columns it may set.
+- **Ticks.** `ticks.run_tick` does: lease → precheck → write-ahead intent with pre-image → dispatch → readback →
+  verify → fenced commit → telemetry.
+- **Recovery.** Crash recovery adopts or redoes from the pre-image.
+- **Guarantee.** At-least-once, **not** exactly-once.
+- **Not always on.** No worker is deployed; `RuntimeActive` stays false.
+
+Also in that package:
+
+- **Genome and DAG.** `genome.py` (MissionGenome admission, contradiction engine, proof debt) and `build_dag.py`
+  (A00–A11, three separate predicates).
+- **Governance.** `governance.py` holds G0–G4; G3/G4 are never allowed.
+- **Proofs and observability.** `proofs.py` and `observability.py` (computed only from rows; `NOT_MEASURED` /
+  `BASELINE_UNKNOWN` instead of invented numbers).
+
+`runtime/abc/*.yaml` are generated: edit code, then run `python scripts/compile_abc_manifests.py --write`.
+`test_t19_abc_manifests_match_code` checks them. `scripts/seal_abc_build.py` writes the unsigned verification
+seal from real command results.
+
+Details: `docs/local-visual-engine.md`, `docs/durable-runtime.md`, `docs/abc-v6-traceability.md`,
+`docs/abc-v6-runbook.md`.
 
 ### Prompt families and v10 prompt OS — decomposed, not injected
 
