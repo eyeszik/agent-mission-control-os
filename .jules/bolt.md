@@ -31,6 +31,6 @@
 ## 2026-10-28 - Composer Array Length Check Optimization
 **Learning:** Checking the presence of multiple specific elements in an array using `.filter(condition).length > 1` forces the allocation of an intermediate array which creates unnecessary GC pressure.
 **Action:** Replace `.filter(condition).length` with a zero-allocation `.reduce()` count.
-## 2024-11-20 - Schema Array Length Check Optimization
-**Learning:** Using `.filter(condition).length` within Zod refinement functions (or other hot paths) forces the allocation of an intermediate array solely to count elements, creating unnecessary garbage collection pressure on validation.
-**Action:** Replace `.filter(condition).length` with a zero-allocation `.reduce()` count.
+## 2026-10-29 - O(N) Array Iteration Optimization
+**Learning:** Running four separate passes over an array (using `.reduce()` and `.filter().length`) performs redundant iterations and allocates unnecessary intermediate filtered arrays, causing increased GC pressure.
+**Action:** Replace multiple passes with a single `for...of` loop or `.reduce()` to compute multiple aggregations simultaneously.
