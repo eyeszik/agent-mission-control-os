@@ -34,3 +34,6 @@
 ## 2026-10-29 - O(N) Array Iteration Optimization
 **Learning:** Running four separate passes over an array (using `.reduce()` and `.filter().length`) performs redundant iterations and allocates unnecessary intermediate filtered arrays, causing increased GC pressure.
 **Action:** Replace multiple passes with a single `for...of` loop or `.reduce()` to compute multiple aggregations simultaneously.
+## 2026-10-30 - React Component Inline Filter Map Optimization in Component Render
+**Learning:** Extracting an intermediate filtered array via `artifacts.filter()` inside a functional component's render body, and then mapping over it, forces a new array allocation on every single render cycle. This increases memory pressure and garbage collection overhead unnecessarily.
+**Action:** Replace chains like `.filter(condition).map(render)` with a single `.map(item => condition(item) ? render(item) : null)` inside the render body. React natively ignores `null` nodes without rendering empty DOM wrappers, enabling zero-allocation conditional rendering.
