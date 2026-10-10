@@ -15,6 +15,7 @@ from services.langgraph.api.routes import (
     compiled_agency,
     design,
     events,
+    foundry,
     operations,
     portfolio,
     project_ops,
@@ -86,6 +87,7 @@ app.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
 app.include_router(operations.router, prefix="/operations", tags=["Operations"])
 app.include_router(runtime.router, prefix="/runtime", tags=["Runtime"])
 app.include_router(design.router, prefix="/design", tags=["Design Mode"])
+app.include_router(foundry.router, prefix="/foundry", tags=["Creative Foundry"])
 app.include_router(compiled_agency.router, prefix="/compiled-agency", tags=["Compiled Agency"])
 app.include_router(projects.router, prefix="/projects", tags=["Projects"])
 app.include_router(project_ops.router, prefix="/projects", tags=["Project Operations"])

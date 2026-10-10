@@ -24,6 +24,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.2.0"]
+# Local visual engine (docs/local-visual-engine.md). Pillow decodes PNG renders for verification;
+# bpy is Blender as a Python module (wheels exist for CPython 3.11 only). FFmpeg is a system package.
+visual = ["Pillow>=10.0", "bpy==4.2.0; python_version == '3.11'"]
 
 [tool.hatch.build]
 include = ["agency/guidance/packs/*.yaml", "agency/compiled/data/*.json"]

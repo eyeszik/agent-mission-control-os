@@ -45,3 +45,24 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}, 
   if (schema) return schema.parse(data);
   return data as T;
 }
+
+/** Authenticated binary fetch (artifact bytes). Returns the blob and the server-recorded hash header. */
+export async function apiFetchBlob(endpoint: string): Promise<{ blob: Blob; sha256: string | null; version: string | null }> {
+  const headers = new Headers();
+  const config = getAppConfig();
+  if (usesSupabaseAuth(config)) {
+    const token = await ensureAccessToken();
+    if (!token) throw new ServiceError(401, 'AUTH_REQUIRED', 'Authentication required');
+    headers.set('Authorization', `Bearer ${token}`);
+    const tenantId = readSession()?.tenant_id;
+    if (tenantId) headers.set('X-AMC-Tenant', tenantId);
+  }
+  const response = await fetch(`${config.apiBaseUrl}${endpoint}`, { method: 'GET', headers });
+  if (!response.ok) {
+    let errorData: unknown = {};
+    try { errorData = await response.json(); } catch { errorData = {}; }
+    const typed = errorFromResponse(response.status, errorData, response.statusText || 'API request failed');
+    throw new ServiceError(response.status, typed.code, typed.message);
+  }
+  return { blob: await response.blob(), sha256: response.headers.get('X-AMC-Content-SHA256'), version: response.headers.get('X-AMC-Artifact-Version') };
+}

@@ -48,6 +48,7 @@ from .contracts import (
     SideEffect,
 )
 from .intent import compile_intent
+from .release import approval_run_id, artifact_release_verdict, open_artifact_approval
 from .resolver import resolve_project
 
 RUN_PIPELINE = "intake_mission"
@@ -344,50 +345,22 @@ def run_mission(
 
 
 def mission_run_id(mission_id: str) -> str:
-    return "mission-" + canonical_hash({"mission": mission_id})[:24]
+    return approval_run_id(mission_id)
 
 
 def request_release_approval(principal: Principal, mission: MissionContract, verification: ArtifactVerification) -> dict:
-    """Open (or reuse) a pending approval bound to the exact verified artifact hash.
-
-    Pending approvals for the same artifact with a different hash are marked
-    stale, so an approval can never carry over to changed content.
-    """
-    from services.langgraph.persistence.approvals import (
-        create_approval_request,
-        get_approvals_for_run,
-        list_approvals_for_subject_refs,
-        mark_approval_stale,
-    )
-    from services.langgraph.persistence.runs import create_run_record, get_run_record
-
+    """Open (or reuse) a pending approval bound to the exact verified artifact hash."""
     if mission.execution_mode is not ExecutionMode.REAL_EXECUTION:
         raise MissionNotReleasable("a simulated mission cannot request a release approval")
     if verification.status != "PASSED" or not verification.content_hash:
         raise MissionNotReleasable("only a verified artifact can be put up for approval")
-    subject = verification.content_hash
-    for existing in list_approvals_for_subject_refs(mission.project_id, [verification.artifact_id]):
-        if existing.get("status") == "pending" and existing.get("subject_hash") != subject:
-            mark_approval_stale(existing["approval_id"], "superseded: artifact content changed")
-    run_id = mission_run_id(mission.mission_id)
-    if get_run_record(run_id) is None:
-        create_run_record(run_id, mission.tenant_id, mission.project_id, RUN_PIPELINE, "needs_approval", {
-            "initiated_by": principal.user_id, "mission_id": mission.mission_id, "contract_hash": mission.contract_hash,
-            "artifact_id": verification.artifact_id, "artifact_version": verification.version, "artifact_hash": subject,
-            "intake_version": mission.intake_version,
-        })
-    for existing in get_approvals_for_run(run_id):
-        if existing.get("status") == "pending" and existing.get("subject_hash") == subject:
-            return existing
-    approval = create_approval_request(
-        run_id, mission.tenant_id, mission.project_id, "Verified mission artifact requires human approval before release", None,
-        subject_type="MISSION_ARTIFACT", subject_ref=verification.artifact_id,
-        subject_version_ref=str(verification.version), subject_hash=subject,
-        authority_ref="human-review", policy_version=APPROVAL_POLICY_VERSION,
+    return open_artifact_approval(
+        principal, tenant_id=mission.tenant_id, project_id=mission.project_id, mission_id=mission.mission_id,
+        contract_hash=mission.contract_hash, artifact_id=verification.artifact_id, version=verification.version,
+        content_hash=verification.content_hash, run_pipeline=RUN_PIPELINE, policy_version=APPROVAL_POLICY_VERSION,
+        subject_type="MISSION_ARTIFACT", reason="Verified mission artifact requires human approval before release",
+        metadata={"intake_version": mission.intake_version},
     )
-    _event(principal, mission.project_id, ActivityType.APPROVAL_REQUIRED, f"{verification.artifact_id}:v{verification.version}",
-           {"mission_id": mission.mission_id, "approval_id": approval["approval_id"], "subject_hash": subject})
-    return approval
 
 
 def release_gate(outcome: MissionOutcome, *, approval_id: Optional[str] = None) -> ReleaseVerdict:
@@ -395,51 +368,18 @@ def release_gate(outcome: MissionOutcome, *, approval_id: Optional[str] = None) 
 
     It never performs a release or any external effect.
     """
-    from services.langgraph.persistence.agency_kernel import get_artifact
-    from services.langgraph.persistence.approvals import get_approval
-    from services.langgraph.persistence.runs import get_run_record
-    from services.langgraph.security.approval_authority import run_initiator, self_approval_allowed
-
-    reasons: list[str] = []
     verification = outcome.verification
-    if outcome.simulation or (outcome.mission and outcome.mission.execution_mode is ExecutionMode.SIMULATION):
-        reasons.append("SIMULATION_NOT_RELEASABLE")
-    if verification is None or verification.status != "PASSED":
-        reasons.append("VERIFICATION_NOT_PASSED")
-    head = get_artifact(verification.artifact_id) if verification else None
-    head_hash = head.get("content_hash") if head else None
-    head_version = int(head["version"]) if head else None
-    if verification is not None and head is None:
-        reasons.append("ARTIFACT_MISSING")
-    elif verification is not None and (head_version != verification.version or head_hash != verification.content_hash):
-        reasons.append("VERIFICATION_STALE: the artifact changed after it was verified")
-    target = approval_id or (outcome.approval or {}).get("approval_id")
-    approval = get_approval(target) if target else None
-    if approval is None:
-        reasons.append("NO_APPROVAL")
-    else:
-        if outcome.mission and (approval.get("tenant_id"), approval.get("project_id")) != (outcome.mission.tenant_id, outcome.mission.project_id):
-            reasons.append("APPROVAL_SCOPE_MISMATCH")
-        status, decision = approval.get("status"), approval.get("decision")
-        if status == "stale":
-            reasons.append("APPROVAL_STALE")
-        elif status != "resolved":
-            reasons.append("APPROVAL_PENDING")
-        elif decision != "approve":
-            reasons.append("APPROVAL_REJECTED")
-        if approval.get("subject_hash") != head_hash:
-            reasons.append("SUBJECT_HASH_MISMATCH")
-        run = get_run_record(approval["run_id"]) if approval.get("run_id") else None
-        initiator = run_initiator(run) if run else None
-        if status == "resolved" and decision == "approve" and not self_approval_allowed():
-            if initiator is None:
-                reasons.append("INITIATOR_UNKNOWN")
-            elif approval.get("reviewer") == initiator:
-                reasons.append("SEPARATION_OF_DUTIES")
-    return ReleaseVerdict(allowed=not reasons, reasons=tuple(reasons),
-                          artifact_id=verification.artifact_id if verification else None,
-                          artifact_version=head_version, artifact_hash=head_hash,
-                          approval_id=(approval or {}).get("approval_id"))
+    mission = outcome.mission
+    return artifact_release_verdict(
+        simulated=outcome.simulation or bool(mission and mission.execution_mode is ExecutionMode.SIMULATION),
+        verification_passed=verification is not None and verification.status == "PASSED",
+        artifact_id=verification.artifact_id if verification else None,
+        verified_version=verification.version if verification else None,
+        verified_hash=verification.content_hash if verification else None,
+        approval_id=approval_id or (outcome.approval or {}).get("approval_id"),
+        tenant_id=mission.tenant_id if mission else None,
+        project_id=mission.project_id if mission else None,
+    )
 
 
 __all__ = [

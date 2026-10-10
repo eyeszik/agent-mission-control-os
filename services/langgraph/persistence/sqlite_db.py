@@ -838,6 +838,81 @@ _MIGRATIONS = [
         CREATE INDEX IF NOT EXISTS idx_growth_experiments_project ON growth_experiments(project_id, status);
         CREATE INDEX IF NOT EXISTS idx_learning_promotions_signal ON learning_promotions(signal_id);
     """),
+    (14, """
+        -- Durable run runtime: leases, fencing, write-ahead intents and a
+        -- transition log. Mirrors supabase/migrations/20261009_amc_durable_runtime_v1.sql.
+        CREATE TABLE IF NOT EXISTS durable_jobs (
+            job_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            kind TEXT NOT NULL,
+            spec TEXT NOT NULL,
+            spec_hash TEXT NOT NULL,
+            requested_by TEXT NOT NULL,
+            state TEXT NOT NULL,
+            logical_tick INTEGER NOT NULL DEFAULT 0 CHECK (logical_tick >= 0),
+            version INTEGER NOT NULL DEFAULT 1 CHECK (version >= 1),
+            lease_owner TEXT,
+            lease_token INTEGER NOT NULL DEFAULT 0 CHECK (lease_token >= 0),
+            lease_expires_at TEXT,
+            attempts INTEGER NOT NULL DEFAULT 0 CHECK (attempts >= 0),
+            max_attempts INTEGER NOT NULL DEFAULT 3 CHECK (max_attempts BETWEEN 1 AND 3),
+            recurrence_seconds INTEGER,
+            next_due_at TEXT NOT NULL,
+            last_reasons TEXT NOT NULL DEFAULT '[]',
+            failure_fingerprints TEXT NOT NULL DEFAULT '{}',
+            result TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS durable_intents (
+            idempotency_key TEXT PRIMARY KEY,
+            job_id TEXT NOT NULL REFERENCES durable_jobs(job_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            logical_tick INTEGER NOT NULL,
+            operation TEXT NOT NULL,
+            target TEXT NOT NULL,
+            input_hash TEXT NOT NULL,
+            contract_version TEXT NOT NULL,
+            retry_class TEXT NOT NULL CHECK (retry_class IN ('RETRY_SAFE','COMPENSATABLE','NON_RETRYABLE')),
+            pre_image TEXT NOT NULL DEFAULT '{}',
+            status TEXT NOT NULL CHECK (status IN ('INTENT','COMMITTED','ABANDONED')),
+            fencing_token INTEGER NOT NULL,
+            receipt TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            committed_at TEXT
+        );
+        CREATE TABLE IF NOT EXISTS durable_transitions (
+            transition_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id TEXT NOT NULL REFERENCES durable_jobs(job_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            from_state TEXT NOT NULL,
+            to_state TEXT NOT NULL,
+            fencing_token INTEGER NOT NULL,
+            logical_tick INTEGER NOT NULL,
+            reason TEXT NOT NULL DEFAULT '',
+            trace_id TEXT,
+            observed_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS durable_ticks (
+            trace_id TEXT PRIMARY KEY,
+            job_id TEXT,
+            tenant_id TEXT,
+            project_id TEXT,
+            worker_id TEXT NOT NULL,
+            logical_tick INTEGER,
+            outcome TEXT NOT NULL,
+            telemetry TEXT NOT NULL,
+            started_at TEXT NOT NULL,
+            finished_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_durable_jobs_due ON durable_jobs(state, next_due_at);
+        CREATE INDEX IF NOT EXISTS idx_durable_jobs_project ON durable_jobs(project_id, state);
+        CREATE INDEX IF NOT EXISTS idx_durable_intents_job ON durable_intents(job_id, logical_tick);
+        CREATE INDEX IF NOT EXISTS idx_durable_transitions_job ON durable_transitions(job_id, transition_id);
+    """),
 ]
 
 
