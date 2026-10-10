@@ -158,7 +158,7 @@ export const StyleComposeRequestSchema = z
       .default({}),
   })
   .superRefine((request, ctx) => {
-    // ⚡ Bolt: Use a zero-allocation reduce instead of .filter().length to prevent unnecessary GC pressure
+    // ⚡ Bolt: Use a zero-allocation reduce instead of .filter().length
     const primaries = request.selections.reduce((acc, s) => (s.role === 'primary' ? acc + 1 : acc), 0);
     if (primaries > 1) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'at most one primary style is allowed' });
