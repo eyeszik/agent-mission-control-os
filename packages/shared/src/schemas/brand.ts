@@ -83,9 +83,11 @@ export const BrandCoreSchema = z
   )
   .refine(
     (brandCore) => {
-      const primaryCount = brandCore.logo_lockups.filter(
-        (lockup) => lockup.lockup_type === 'primary'
-      ).length;
+      // ⚡ Bolt: Use a zero-allocation reduce instead of .filter().length to prevent unnecessary GC pressure
+      const primaryCount = brandCore.logo_lockups.reduce(
+        (acc, lockup) => (lockup.lockup_type === 'primary' ? acc + 1 : acc),
+        0
+      );
       return primaryCount === 1;
     },
     { message: 'logo_lockups must contain exactly one primary lockup', path: ['logo_lockups'] }
