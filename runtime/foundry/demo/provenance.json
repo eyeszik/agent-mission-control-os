@@ -1,0 +1,1289 @@
+{
+  "approval_status": "NONE REQUESTED: every artifact stops at VERIFIED until a human reviewer decides",
+  "assumptions": [
+    {
+      "field": "brand_constraints.palette",
+      "reason": "no palette supplied; derived from seed with contrast floors",
+      "value": {
+        "accent": "#ae2986",
+        "accent_2": "#389443",
+        "ink": "#261724",
+        "muted": "#d2c6d0",
+        "paper": "#f6f1f5"
+      }
+    }
+  ],
+  "capabilities": [
+    {
+      "blockers": [],
+      "capability_id": "vector.svg",
+      "installed_version": "amc-foundry/v1",
+      "status": "AVAILABLE"
+    },
+    {
+      "blockers": [],
+      "capability_id": "raster.chromium",
+      "installed_version": "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+      "status": "AVAILABLE"
+    },
+    {
+      "blockers": [],
+      "capability_id": "web.html_css",
+      "installed_version": null,
+      "status": "AVAILABLE"
+    },
+    {
+      "blockers": [],
+      "capability_id": "web.design_tokens",
+      "installed_version": "amc-dtcg-compiler/v1",
+      "status": "AVAILABLE"
+    },
+    {
+      "blockers": [],
+      "capability_id": "raster.pillow",
+      "installed_version": null,
+      "status": "AVAILABLE"
+    },
+    {
+      "blockers": [
+        "MISSING_DEPENDENCY:imagemagick (not used; Chromium rasterizes)"
+      ],
+      "capability_id": "raster.imagemagick",
+      "installed_version": null,
+      "status": "MISSING"
+    },
+    {
+      "blockers": [],
+      "capability_id": "spatial.blender",
+      "installed_version": "4.2.0",
+      "status": "AVAILABLE"
+    },
+    {
+      "blockers": [
+        "MISSING_DEPENDENCY:three (not a declared apps/web dependency)",
+        "MISSING_DEPENDENCY:three (not installed)"
+      ],
+      "capability_id": "spatial.threejs",
+      "installed_version": null,
+      "status": "MISSING"
+    },
+    {
+      "blockers": [],
+      "capability_id": "motion.ffmpeg",
+      "installed_version": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+      "status": "AVAILABLE"
+    },
+    {
+      "blockers": [],
+      "capability_id": "motion.freevideoforge",
+      "installed_version": null,
+      "status": "AVAILABLE"
+    },
+    {
+      "blockers": [
+        "MISSING_DEPENDENCY:paper (not installed; not required by the shipped routes)"
+      ],
+      "capability_id": "vector.paperjs",
+      "installed_version": null,
+      "status": "MISSING"
+    },
+    {
+      "blockers": [
+        "MISSING_DEPENDENCY:@svgdotjs/svg.js (not installed; not required by the shipped routes)"
+      ],
+      "capability_id": "vector.svgjs",
+      "installed_version": null,
+      "status": "MISSING"
+    },
+    {
+      "blockers": [
+        "MISSING_DEPENDENCY:roughjs (not installed; not required by the shipped routes)"
+      ],
+      "capability_id": "vector.roughjs",
+      "installed_version": null,
+      "status": "MISSING"
+    },
+    {
+      "blockers": [
+        "MISSING_DEPENDENCY:p5 (not installed; not required by the shipped routes)"
+      ],
+      "capability_id": "procedural.p5",
+      "installed_version": null,
+      "status": "MISSING"
+    },
+    {
+      "blockers": [
+        "MISSING_DEPENDENCY:pixi.js (not installed; not required by the shipped routes)"
+      ],
+      "capability_id": "procedural.pixi",
+      "installed_version": null,
+      "status": "MISSING"
+    },
+    {
+      "blockers": [
+        "MISSING_DEPENDENCY:@react-three/fiber (not installed; not required by the shipped routes)"
+      ],
+      "capability_id": "spatial.r3f",
+      "installed_version": null,
+      "status": "MISSING"
+    },
+    {
+      "blockers": [
+        "MISSING_DEPENDENCY:remotion (not installed; not required by the shipped routes)"
+      ],
+      "capability_id": "motion.remotion",
+      "installed_version": null,
+      "status": "MISSING"
+    },
+    {
+      "blockers": [
+        "MISSING_DEPENDENCY:@motion-canvas/core (not installed; not required by the shipped routes)"
+      ],
+      "capability_id": "motion.motioncanvas",
+      "installed_version": null,
+      "status": "MISSING"
+    }
+  ],
+  "capability_gaps": [],
+  "disclaimer": "FICTIONAL DEMONSTRATION BRAND. 'Halden & Fen', its offering, audience and copy are invented for this demo. No real company, customer research, participants, sales or performance data exist or are implied.",
+  "external_effects": "none: no publication, purchase, deployment, send or third-party account action",
+  "files": [
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-genome",
+      "bytes": 3775,
+      "compiled_ir_hash": "23b679d52ddf064d423c15cac1eb0ec8339fa2ff7044c26b6af5800d72f83c46",
+      "deliverable": "genome",
+      "elapsed_ms": 0,
+      "file": "genome.json",
+      "matches_stored_hash": true,
+      "mime_type": "application/json",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "agency.foundry.genome",
+      "renderer_version": "amc-foundry/v1",
+      "sha256": "c1edfeb3eec77fda00e9a917a50c02145167a452b9eb5dba61a1c57f2d2c91cb",
+      "validations": [
+        {
+          "check": "json_parse",
+          "detail": "3775 bytes",
+          "level": "Q1",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-tokens-json",
+      "bytes": 3098,
+      "compiled_ir_hash": "61d3ae0624b25d86819fb89ff6a845235cc58f55b2818f55c7c2d8aec093c48f",
+      "deliverable": "design_tokens",
+      "elapsed_ms": 0,
+      "file": "tokens.json",
+      "matches_stored_hash": true,
+      "mime_type": "application/json",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "agency.design_tokens",
+      "renderer_version": "amc-dtcg-compiler/v1",
+      "sha256": "eeb2957049a72583ffd3a10826a4db7cd389692ff04ace9d652b6d8bbd6caf4c",
+      "validations": [
+        {
+          "check": "json_parse",
+          "detail": "3098 bytes",
+          "level": "Q1",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-tokens-css",
+      "bytes": 1031,
+      "compiled_ir_hash": "61d3ae0624b25d86819fb89ff6a845235cc58f55b2818f55c7c2d8aec093c48f",
+      "deliverable": "design_tokens",
+      "elapsed_ms": 0,
+      "file": "tokens.css",
+      "matches_stored_hash": true,
+      "mime_type": "text/css",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "agency.design_tokens",
+      "renderer_version": "amc-dtcg-compiler/v1",
+      "sha256": "5ee5b9ad9c5656f3de4c9e72bdaec499df93f4f41588968760708cc2362f1616",
+      "validations": [
+        {
+          "check": "dtcg_compile",
+          "detail": "source 61d3ae0624b25d86",
+          "level": "Q2",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-mark-svg",
+      "bytes": 436,
+      "compiled_ir_hash": "25b496406b4e255aa6da94505b3c79ee20f97d33adfa09abf510a895a2e00dcc",
+      "deliverable": "logo_family",
+      "elapsed_ms": 0,
+      "file": "mark.svg",
+      "matches_stored_hash": true,
+      "mime_type": "image/svg+xml",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "agency.foundry.compose",
+      "renderer_version": "amc-foundry/v1",
+      "sha256": "02373d92373df178b66f9942375f36af0c8e54c74aa58b190e976056e8545f9d",
+      "validations": [
+        {
+          "check": "svg_root",
+          "detail": "starts with <svg or <?xml",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "svg_safety",
+          "detail": "well-formed SVG without active content or external references",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "viewbox",
+          "detail": "0 0 256 256",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "geometry_present",
+          "detail": "3 geometry element(s)",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "palette_conformance",
+          "detail": "2 colour(s) within dE76<=2.3 of the palette",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "multi_size_render",
+          "detail": "chromium rendered [32, 128]: decoded, non-blank",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-lockup-svg",
+      "bytes": 684,
+      "compiled_ir_hash": "44d6a787420769b41dbd04190064ec3a96f7c593a06e967e86d59e7c9baeea2d",
+      "deliverable": "logo_family",
+      "elapsed_ms": 0,
+      "file": "lockup.svg",
+      "matches_stored_hash": true,
+      "mime_type": "image/svg+xml",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "agency.foundry.compose",
+      "renderer_version": "amc-foundry/v1",
+      "sha256": "51969c205ecc87b7c05f5c3c05095977ae4683e26a44810ad329046d6a2a964d",
+      "validations": [
+        {
+          "check": "svg_root",
+          "detail": "starts with <svg or <?xml",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "svg_safety",
+          "detail": "well-formed SVG without active content or external references",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "viewbox",
+          "detail": "0 0 1200 360",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "geometry_present",
+          "detail": "4 geometry element(s)",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "palette_conformance",
+          "detail": "3 colour(s) within dE76<=2.3 of the palette",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-lockup-dark-svg",
+      "bytes": 684,
+      "compiled_ir_hash": "bbecf1ee232f804d01ab6624c1a90569c1c4a0d324d84feac7c6a69068157c24",
+      "deliverable": "logo_family",
+      "elapsed_ms": 0,
+      "file": "lockup-dark.svg",
+      "matches_stored_hash": true,
+      "mime_type": "image/svg+xml",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "agency.foundry.compose",
+      "renderer_version": "amc-foundry/v1",
+      "sha256": "6a3253a2473adabcf6e3cfbe2dfc11bbee5805aebc12cbce9082374e01402bae",
+      "validations": [
+        {
+          "check": "svg_root",
+          "detail": "starts with <svg or <?xml",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "svg_safety",
+          "detail": "well-formed SVG without active content or external references",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "viewbox",
+          "detail": "0 0 1200 360",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "geometry_present",
+          "detail": "4 geometry element(s)",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "palette_conformance",
+          "detail": "3 colour(s) within dE76<=2.3 of the palette",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-app-icon-512-png",
+      "bytes": 7515,
+      "compiled_ir_hash": "3e9a968dc9045e565192f661d2867329e3489b0b3ea32e4cf4fee4246c768fd6",
+      "deliverable": "logo_family",
+      "elapsed_ms": 0,
+      "file": "app-icon-512.png",
+      "matches_stored_hash": true,
+      "mime_type": "image/png",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "raster.chromium",
+      "renderer_version": "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+      "sha256": "853a982a6bcdc13aa8ff3b75de8908878d1bbda0eb470379d465e0947c166c44",
+      "validations": [
+        {
+          "check": "png_magic",
+          "detail": "first 8 bytes",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "pillow_decode",
+          "detail": "PNG RGB",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "dimensions_format",
+          "detail": "512x512 PNG vs 512x512 PNG",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "tonal_variation",
+          "detail": "luma mean 209.7, stddev 62.7, unique colours (256px sample) 217",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-icons-svg",
+      "bytes": 1829,
+      "compiled_ir_hash": "b016ce14da7c2861ef46c823350762f486b23c3755dd4c06883a4804ffd38762",
+      "deliverable": "icon_family",
+      "elapsed_ms": 0,
+      "file": "icons.svg",
+      "matches_stored_hash": true,
+      "mime_type": "image/svg+xml",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "agency.foundry.compose",
+      "renderer_version": "amc-foundry/v1",
+      "sha256": "3cbfbeb3775bb7e94fcb4090745db075b124ad7df0abf0efc320b8dd86070f40",
+      "validations": [
+        {
+          "check": "svg_root",
+          "detail": "starts with <svg or <?xml",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "svg_safety",
+          "detail": "well-formed SVG without active content or external references",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "viewbox",
+          "detail": "0 0 192 24",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "geometry_present",
+          "detail": "6 geometry element(s)",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "palette_conformance",
+          "detail": "1 colour(s) within dE76<=2.3 of the palette",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-poster-svg",
+      "bytes": 2259,
+      "compiled_ir_hash": "8d395d6a1243c8574543f36a469ce776b7f53fe48a22beb120b06e00a5b7d462",
+      "deliverable": "poster",
+      "elapsed_ms": 0,
+      "file": "poster.svg",
+      "matches_stored_hash": true,
+      "mime_type": "image/svg+xml",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "agency.foundry.compose",
+      "renderer_version": "amc-foundry/v1",
+      "sha256": "b5d7363251a7cb0d114a2617fb401deabf65060b967c5382869981a5e6a8320f",
+      "validations": [
+        {
+          "check": "svg_root",
+          "detail": "starts with <svg or <?xml",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "svg_safety",
+          "detail": "well-formed SVG without active content or external references",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "viewbox",
+          "detail": "0 0 1200 1600",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "geometry_present",
+          "detail": "14 geometry element(s)",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "palette_conformance",
+          "detail": "4 colour(s) within dE76<=2.3 of the palette",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-poster-png",
+      "bytes": 63260,
+      "compiled_ir_hash": "8d395d6a1243c8574543f36a469ce776b7f53fe48a22beb120b06e00a5b7d462",
+      "deliverable": "poster",
+      "elapsed_ms": 1119,
+      "file": "poster.png",
+      "matches_stored_hash": true,
+      "mime_type": "image/png",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "raster.chromium",
+      "renderer_version": "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+      "sha256": "02665e00abd5c54eca69576358a778ab65a2cd429efe5dd1aec924a46be6a538",
+      "validations": [
+        {
+          "check": "png_magic",
+          "detail": "first 8 bytes",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "pillow_decode",
+          "detail": "PNG RGB",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "dimensions_format",
+          "detail": "1200x1600 PNG vs 1200x1600 PNG",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "tonal_variation",
+          "detail": "luma mean 217.7, stddev 60.2, unique colours (256px sample) 1061",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-direction-0-png",
+      "bytes": 27394,
+      "compiled_ir_hash": "a863cb33f2d38f3e790c69edabb9854dd98809638bc1eedfcba397811a852a60",
+      "deliverable": "variants",
+      "elapsed_ms": 0,
+      "file": "direction-0.png",
+      "matches_stored_hash": true,
+      "mime_type": "image/png",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "raster.chromium",
+      "renderer_version": "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+      "sha256": "f7d5cd05d5d50736649c843ae60051e06116023d9326293b0affb72c7b6a87b1",
+      "validations": [
+        {
+          "check": "png_magic",
+          "detail": "first 8 bytes",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "pillow_decode",
+          "detail": "PNG RGB",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "dimensions_format",
+          "detail": "600x800 PNG vs 600x800 PNG",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "tonal_variation",
+          "detail": "luma mean 217.6, stddev 59.9, unique colours (256px sample) 1128",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-direction-1-png",
+      "bytes": 32219,
+      "compiled_ir_hash": "06a8b00d40b5b38192811917e83d951fa6daf8c86515e80fa87b4141ed56a2b7",
+      "deliverable": "variants",
+      "elapsed_ms": 0,
+      "file": "direction-1.png",
+      "matches_stored_hash": true,
+      "mime_type": "image/png",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "raster.chromium",
+      "renderer_version": "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+      "sha256": "99eb0078701aedae83458eda883d701f821e3315c5ccacc756c0574dc11eb0cb",
+      "validations": [
+        {
+          "check": "png_magic",
+          "detail": "first 8 bytes",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "pillow_decode",
+          "detail": "PNG RGB",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "dimensions_format",
+          "detail": "600x800 PNG vs 600x800 PNG",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "tonal_variation",
+          "detail": "luma mean 220.0, stddev 55.6, unique colours (256px sample) 1478",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-direction-2-png",
+      "bytes": 28267,
+      "compiled_ir_hash": "46407b60c3f6074eeb5f59e14b2d207a91dfa4886705da4646845d9b96da4359",
+      "deliverable": "variants",
+      "elapsed_ms": 0,
+      "file": "direction-2.png",
+      "matches_stored_hash": true,
+      "mime_type": "image/png",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "raster.chromium",
+      "renderer_version": "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+      "sha256": "3fb31f900605e4e2a048354601318c45a89ef3f39f64bc6435b9608c4bacc73d",
+      "validations": [
+        {
+          "check": "png_magic",
+          "detail": "first 8 bytes",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "pillow_decode",
+          "detail": "PNG RGB",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "dimensions_format",
+          "detail": "600x800 PNG vs 600x800 PNG",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "tonal_variation",
+          "detail": "luma mean 195.7, stddev 72.2, unique colours (256px sample) 1146",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-lineage-json",
+      "bytes": 2065,
+      "compiled_ir_hash": "d29de958c2dc701ce20a3922716ff598c7caee5480ffe0b4384ddaaf55606ee7",
+      "deliverable": "variants",
+      "elapsed_ms": 0,
+      "file": "lineage.json",
+      "matches_stored_hash": true,
+      "mime_type": "application/json",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "agency.foundry.variants",
+      "renderer_version": "amc-foundry/v1",
+      "sha256": "52d6c1af878ada1276d23a4e637d8b6c6678b4dd3cdc012782805e31b0acb045",
+      "validations": [
+        {
+          "check": "json_parse",
+          "detail": "2065 bytes",
+          "level": "Q1",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-section-html",
+      "bytes": 10340,
+      "compiled_ir_hash": "464059e78292ed69a8a594b5c7513b4b60264f7e5884e7e272f663b63284c646",
+      "deliverable": "website_section",
+      "elapsed_ms": 5434,
+      "file": "section.html",
+      "matches_stored_hash": true,
+      "mime_type": "text/html",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "web.html_css",
+      "renderer_version": "141.0.7390.37",
+      "sha256": "1a6f7a7285d5b4b8192798498de6093a10a7d9abaa69b71cb7a105466c69ce46",
+      "validations": [
+        {
+          "check": "scenario:first_use",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:keyboard_only",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:invalid_input",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:returning_user",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:network_interruption",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:permission_denied",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:empty_data",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:long_content",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:small_viewport",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:large_text",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:reduced_motion",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "scenario:font_fallback",
+          "detail": "",
+          "level": "TASK",
+          "passed": true
+        },
+        {
+          "check": "audit.contrast",
+          "detail": "computed WCAG 2.x ratios of rendered text",
+          "level": "WCAG",
+          "passed": true
+        },
+        {
+          "check": "audit.labels",
+          "detail": "every form control has a label",
+          "level": "WCAG",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-experience-report-json",
+      "bytes": 16398,
+      "compiled_ir_hash": "0e8639ae2952efd114177adab4dd08f1177860fe9739e6c867bedd996042bc86",
+      "deliverable": "website_section",
+      "elapsed_ms": 0,
+      "file": "experience-report.json",
+      "matches_stored_hash": true,
+      "mime_type": "application/json",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "raster.chromium",
+      "renderer_version": "141.0.7390.37",
+      "sha256": "0271ebf4849735b5e7bd5c7731f82cfbd0533d95afcd20deffd8476e6e238ea2",
+      "validations": [
+        {
+          "check": "json_parse",
+          "detail": "16398 bytes",
+          "level": "Q1",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-package-scene-png",
+      "bytes": 964715,
+      "compiled_ir_hash": "8a587fcc929f557365e73aa2453cd006c1806c3d9cf65bcff7939b0d2f8b3a6c",
+      "deliverable": "product_scene",
+      "elapsed_ms": 143234,
+      "file": "package-scene.png",
+      "matches_stored_hash": true,
+      "mime_type": "image/png",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "spatial.blender",
+      "renderer_version": "4.2.0",
+      "sha256": "1d748aa8ddc7064a7496d139db17a81caa22fe6be78125819a65b737f715d0af",
+      "validations": [
+        {
+          "check": "png_magic",
+          "detail": "first 8 bytes",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "pillow_decode",
+          "detail": "PNG RGB",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "dimensions_format",
+          "detail": "960x1200 PNG vs 960x1200 PNG",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "tonal_variation",
+          "detail": "luma mean 197.7, stddev 23.2, unique colours (256px sample) 1690",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-logo-reveal-mp4",
+      "bytes": 25285,
+      "compiled_ir_hash": "2ee3c0646d607b1771a61ea8c3e32b2d1f3bced5b5f3b9cd8f57c4e99502d789",
+      "deliverable": "motion",
+      "elapsed_ms": 4341,
+      "file": "logo-reveal.mp4",
+      "matches_stored_hash": true,
+      "mime_type": "video/mp4",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "motion.ffmpeg",
+      "renderer_version": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+      "sha256": "8b5313cecb98fab25d35fc2ea50acb3ce952092709d7a581ddfc129cbdc28a42",
+      "validations": [
+        {
+          "check": "mp4_ftyp_box",
+          "detail": "bytes 4-8",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "ffprobe",
+          "detail": "h264 60 frames",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "dims_fps_frames_codec",
+          "detail": "960x540 24.0fps 60f h264 vs 960x540 24fps 60f h264",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "nonzero_duration",
+          "detail": "2.5s",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-logo-reveal-reduced-motion-png",
+      "bytes": 10782,
+      "compiled_ir_hash": "2ee3c0646d607b1771a61ea8c3e32b2d1f3bced5b5f3b9cd8f57c4e99502d789",
+      "deliverable": "motion",
+      "elapsed_ms": 0,
+      "file": "logo-reveal-reduced-motion.png",
+      "matches_stored_hash": true,
+      "mime_type": "image/png",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "raster.chromium",
+      "renderer_version": "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+      "sha256": "1e1a6850445d2c59c8ad43b79339348ddb55a30860935f5367c4c4d5dbd01d58",
+      "validations": [
+        {
+          "check": "png_magic",
+          "detail": "first 8 bytes",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "pillow_decode",
+          "detail": "PNG RGB",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "dimensions_format",
+          "detail": "960x540 PNG vs 960x540 PNG",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "tonal_variation",
+          "detail": "luma mean 236.7, stddev 32.8, unique colours (256px sample) 738",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        },
+        {
+          "check": "verify_media.status",
+          "detail": "PASSED",
+          "level": "SUMMARY",
+          "passed": true
+        }
+      ],
+      "version": 1
+    },
+    {
+      "artifact_id": "art-prj-foundry-demo-foundry-manifest-json",
+      "bytes": 62639,
+      "compiled_ir_hash": "1302f9b633196cbd2d5f68e9e70fa122284938ae7bce6e34689b2835cf4132df",
+      "deliverable": "genome",
+      "elapsed_ms": 0,
+      "file": "manifest.json",
+      "matches_stored_hash": true,
+      "mime_type": "application/json",
+      "next_proof": "NO_APPROVAL_REQUESTED",
+      "proof_state": "VERIFIED",
+      "renderer": "agency.foundry.studio",
+      "renderer_version": "amc-foundry/v1",
+      "sha256": "dfc4681e2b899a7fbbfbd0245edd32774153fcf33d8ce88f89b559e591df01a4",
+      "validations": [
+        {
+          "check": "json_parse",
+          "detail": "62639 bytes",
+          "level": "Q1",
+          "passed": true
+        }
+      ],
+      "version": 1
+    }
+  ],
+  "generated_at": "2026-10-10T00:46:51.044110+00:00",
+  "genome_hash": "23b679d52ddf064d423c15cac1eb0ec8339fa2ff7044c26b6af5800d72f83c46",
+  "quality": "standard",
+  "routes": [
+    {
+      "deliverable": "genome",
+      "evidence": {},
+      "rejected": [
+        {
+          "reason": "decided at persistence time: unchanged bytes are reused, not re-versioned",
+          "route": "reuse_existing_artifact"
+        },
+        {
+          "reason": "no owned source assets referenced",
+          "route": "compose_owned_assets"
+        }
+      ],
+      "selected": "procedural_local",
+      "status": "SELECTED"
+    },
+    {
+      "deliverable": "design_tokens",
+      "evidence": {
+        "web.design_tokens": "AVAILABLE"
+      },
+      "rejected": [
+        {
+          "reason": "decided at persistence time: unchanged bytes are reused, not re-versioned",
+          "route": "reuse_existing_artifact"
+        },
+        {
+          "reason": "no owned source assets referenced",
+          "route": "compose_owned_assets"
+        }
+      ],
+      "selected": "procedural_local",
+      "status": "SELECTED"
+    },
+    {
+      "deliverable": "logo_family",
+      "evidence": {
+        "vector.svg": "AVAILABLE"
+      },
+      "rejected": [
+        {
+          "reason": "decided at persistence time: unchanged bytes are reused, not re-versioned",
+          "route": "reuse_existing_artifact"
+        },
+        {
+          "reason": "no owned source assets referenced",
+          "route": "compose_owned_assets"
+        }
+      ],
+      "selected": "procedural_local",
+      "status": "SELECTED"
+    },
+    {
+      "deliverable": "poster",
+      "evidence": {
+        "vector.svg": "AVAILABLE"
+      },
+      "rejected": [
+        {
+          "reason": "decided at persistence time: unchanged bytes are reused, not re-versioned",
+          "route": "reuse_existing_artifact"
+        },
+        {
+          "reason": "no owned source assets referenced",
+          "route": "compose_owned_assets"
+        }
+      ],
+      "selected": "procedural_local",
+      "status": "SELECTED"
+    },
+    {
+      "deliverable": "variants",
+      "evidence": {
+        "raster.chromium": "AVAILABLE",
+        "vector.svg": "AVAILABLE"
+      },
+      "rejected": [
+        {
+          "reason": "decided at persistence time: unchanged bytes are reused, not re-versioned",
+          "route": "reuse_existing_artifact"
+        },
+        {
+          "reason": "no owned source assets referenced",
+          "route": "compose_owned_assets"
+        }
+      ],
+      "selected": "procedural_local",
+      "status": "SELECTED"
+    },
+    {
+      "deliverable": "website_section",
+      "evidence": {
+        "web.design_tokens": "AVAILABLE",
+        "web.html_css": "AVAILABLE"
+      },
+      "rejected": [
+        {
+          "reason": "decided at persistence time: unchanged bytes are reused, not re-versioned",
+          "route": "reuse_existing_artifact"
+        },
+        {
+          "reason": "no owned source assets referenced",
+          "route": "compose_owned_assets"
+        }
+      ],
+      "selected": "procedural_local",
+      "status": "SELECTED"
+    },
+    {
+      "deliverable": "product_scene",
+      "evidence": {
+        "raster.chromium": "AVAILABLE",
+        "spatial.blender": "AVAILABLE"
+      },
+      "rejected": [
+        {
+          "reason": "decided at persistence time: unchanged bytes are reused, not re-versioned",
+          "route": "reuse_existing_artifact"
+        },
+        {
+          "reason": "no owned source assets referenced",
+          "route": "compose_owned_assets"
+        }
+      ],
+      "selected": "local_scene_render",
+      "status": "SELECTED"
+    },
+    {
+      "deliverable": "motion",
+      "evidence": {
+        "motion.ffmpeg": "AVAILABLE",
+        "raster.chromium": "AVAILABLE",
+        "vector.svg": "AVAILABLE"
+      },
+      "rejected": [
+        {
+          "reason": "decided at persistence time: unchanged bytes are reused, not re-versioned",
+          "route": "reuse_existing_artifact"
+        },
+        {
+          "reason": "no owned source assets referenced",
+          "route": "compose_owned_assets"
+        }
+      ],
+      "selected": "local_scene_render",
+      "status": "SELECTED"
+    }
+  ],
+  "schema_version": "amc-foundry-demo/v1"
+}

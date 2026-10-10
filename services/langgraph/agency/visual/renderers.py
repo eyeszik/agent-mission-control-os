@@ -73,10 +73,11 @@ def scene_spec(intent: VisualIntent) -> dict:
     }
 
 
-def render_blender(intent: VisualIntent, out_dir: Path, *, logical_tick: Optional[int] = None,
-                   timeout_s: int = BLENDER_TIMEOUT_S) -> RenderReceipt:
+def render_blender_spec(spec: dict, out_dir: Path, *, seed: int, samples: int, geometry: str, lights: tuple[str, ...],
+                        source_assets: tuple = (), logical_tick: Optional[int] = None,
+                        timeout_s: int = BLENDER_TIMEOUT_S) -> RenderReceipt:
+    """Run ``blender_runner.py`` on a scene spec in its own isolated process and collect what it wrote."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    spec = scene_spec(intent)
     spec_path = out_dir / "scene-spec.json"
     spec_path.write_text(json.dumps(spec, indent=2, sort_keys=True))
     cmd, isolated = _isolated([sys.executable, "-I", str(HERE / "blender_runner.py"), str(spec_path), str(out_dir)])
@@ -98,14 +99,21 @@ def render_blender(intent: VisualIntent, out_dir: Path, *, logical_tick: Optiona
                     for f in scene["frames"])
     genome = VisualGenome(
         route=Route.BLENDER_CYCLES, renderer="blender_cycles", renderer_version=scene["blender_version"],
-        scene_spec_sha256=_sha(spec_path), geometry="procedural spool, thread, needle, folded wool, plaster wall",
-        materials=tuple(scene["materials"]), camera=spec["camera"], lights=("area 'north window' key", "world fill"),
-        seed=intent.seed, samples=intent.samples, source_assets=intent.source_assets, hardware=hardware(),
+        scene_spec_sha256=_sha(spec_path), geometry=geometry, materials=tuple(scene["materials"]), camera=spec["camera"],
+        lights=lights, seed=seed, samples=samples, source_assets=source_assets, hardware=hardware(),
         color_management={k: scene["render"].get(k) for k in ("view_transform", "look", "denoiser")},
     )
     return RenderReceipt(route=Route.BLENDER_CYCLES, status="SUCCEEDED", outputs=outputs, genome=genome,
                          command=tuple(cmd), exit_code=0, wall_ms=wall_ms, observed_at=_now(),
                          logical_tick=logical_tick, network_isolated=isolated)
+
+
+def render_blender(intent: VisualIntent, out_dir: Path, *, logical_tick: Optional[int] = None,
+                   timeout_s: int = BLENDER_TIMEOUT_S) -> RenderReceipt:
+    return render_blender_spec(scene_spec(intent), out_dir, seed=intent.seed, samples=intent.samples,
+                               geometry="procedural spool, thread, needle, folded wool, plaster wall",
+                               lights=("area 'north window' key", "world fill"), source_assets=intent.source_assets,
+                               logical_tick=logical_tick, timeout_s=timeout_s)
 
 
 def encode_video(frames: list[Path], out_path: Path, *, fps: int, logical_tick: Optional[int] = None) -> RenderReceipt:
@@ -174,4 +182,4 @@ def render_vector_mark(intent: VisualIntent, out_dir: Path, *, logical_tick: Opt
                          outputs=({"path": str(out), "sha256": _sha(out), "bytes": out.stat().st_size},),
                          wall_ms=int((time.monotonic() - start) * 1000), observed_at=_now(), network_isolated=None)
 
-__all__ = ["encode_video", "render_blender", "render_diffusion", "render_vector_mark", "scene_spec"]
+__all__ = ["encode_video", "render_blender", "render_blender_spec", "render_diffusion", "render_vector_mark", "scene_spec"]

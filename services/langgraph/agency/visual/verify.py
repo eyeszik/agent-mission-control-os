@@ -77,7 +77,8 @@ def _image_checks(data: bytes, expect: dict) -> tuple[list[dict], Optional[Quali
     luma = ImageStat.Stat(rgb.convert("L"))
     stddev, mean = luma.stddev[0], luma.mean[0]
     unique = len(rgb.resize((min(256, rgb.width), min(256, rgb.height))).getcolors(1 << 16) or []) or 1 << 16
-    nonblank = stddev >= MIN_STDDEV and unique >= MIN_UNIQUE_COLOURS and 2.0 < mean < 253.0
+    min_unique = int(expect.get("min_unique_colours", MIN_UNIQUE_COLOURS))  # flat vector art legitimately has few
+    nonblank = stddev >= MIN_STDDEV and unique >= min_unique and 2.0 < mean < 253.0
     ok(QualityLevel.Q3_NONBLANK, "tonal_variation", nonblank,
        f"luma mean {mean:.1f}, stddev {stddev:.1f}, unique colours (256px sample) {unique}")
     return checks, highest, findings

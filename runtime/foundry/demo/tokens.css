@@ -1,0 +1,30 @@
+/* GENERATED FILE -- do not edit by hand.
+ * compiler: amc-dtcg-compiler/v1 (DTCG 2025.10)
+ * source: creative-genome:23b679d52ddf064d
+ * source-sha256: 61d3ae0624b25d86819fb89ff6a845235cc58f55b2818f55c7c2d8aec093c48f
+ */
+:root {
+  --amc-color-accent: #ae2986;
+  --amc-color-accent-2: #389443;
+  --amc-color-ink: #261724;
+  --amc-color-muted: #d2c6d0;
+  --amc-color-paper: #f6f1f5;
+  --amc-focus-ring: 3px;
+  --amc-font-display: "Inter Display", Inter, "Helvetica Neue", Arial, sans-serif;
+  --amc-font-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, monospace;
+  --amc-font-text: Inter, "Helvetica Neue", Arial, sans-serif;
+  --amc-motion-duration: 320ms;
+  --amc-motion-easing: cubic-bezier(0.2, 0, 0, 1);
+  --amc-radius-control: 5.58px;
+  --amc-radius-panel: 8.37px;
+  --amc-space-s1: 0.25rem;
+  --amc-space-s2: 0.5rem;
+  --amc-space-s3: 1rem;
+  --amc-space-s4: 1.5rem;
+  --amc-space-s5: 2rem;
+  --amc-space-s6: 3rem;
+  --amc-space-s7: 4rem;
+  --amc-target-min: 44px;
+  --amc-weight-display: 700;
+  --amc-weight-text: 400;
+}

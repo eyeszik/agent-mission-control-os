@@ -1,0 +1,174 @@
+{
+  "accessibility_constraints": {
+    "min_graphic_contrast": 3.0,
+    "min_text_contrast": 4.5,
+    "reduced_motion_required": true,
+    "reflow_min_width_px": 320,
+    "standard": [
+      "WCAG 2.2 AA"
+    ],
+    "text_scaling_to": "200%"
+  },
+  "assumptions": [
+    {
+      "field": "brand_constraints.palette",
+      "reason": "no palette supplied; derived from seed with contrast floors",
+      "value": {
+        "accent": "#ae2986",
+        "accent_2": "#389443",
+        "ink": "#261724",
+        "muted": "#d2c6d0",
+        "paper": "#f6f1f5"
+      }
+    }
+  ],
+  "brand_canon_hash": null,
+  "brand_name": "Halden & Fen",
+  "color_rules": {
+    "contrast": {
+      "accent/paper": 5.44,
+      "accent_2/paper": 3.43,
+      "ink/paper": 15.29,
+      "paper/accent": 5.44,
+      "paper/ink": 15.29
+    },
+    "locked": false,
+    "palette": {
+      "accent": "#ae2986",
+      "accent_2": "#389443",
+      "ink": "#261724",
+      "muted": "#d2c6d0",
+      "paper": "#f6f1f5"
+    },
+    "usage": {
+      "graphics": "accent, accent_2 at >= 3:1",
+      "never": "text on accent below 4.5:1",
+      "text": "ink on paper (or paper on ink)"
+    }
+  },
+  "composition_rules": {
+    "density": 0.42,
+    "dominant_grammar": "swiss_editorial",
+    "headline_scale": 0.103
+  },
+  "deterministic_seed": 4242,
+  "geometry_rules": {
+    "angle": -1.21,
+    "corner_radius": 5.58,
+    "mark": "triangle_notch",
+    "primitives": [
+      "bar",
+      "circle",
+      "line",
+      "rect",
+      "triangle"
+    ],
+    "stroke": 3.04
+  },
+  "grammar_weights": {
+    "bauhaus_geometry": 0.35,
+    "swiss_editorial": 0.65
+  },
+  "imagery_rules": {
+    "photography": "not generated; synthetic renders are labelled synthetic",
+    "source": "procedural and owned assets only; licensed imagery only when a licence is recorded"
+  },
+  "interaction_rules": {
+    "focus_ring_px": 3,
+    "min_target_px": 44,
+    "states": [
+      "default",
+      "hover",
+      "focus",
+      "active",
+      "disabled",
+      "loading",
+      "error",
+      "success"
+    ]
+  },
+  "invariants": [
+    "brand_name",
+    "geometry_rules.mark"
+  ],
+  "layout_rules": {
+    "baseline": 8,
+    "columns": 12,
+    "gutter": 0.0235,
+    "margin": 0.0765
+  },
+  "material_rules": {
+    "accent_finish": {
+      "metallic": 0.0,
+      "roughness": 0.3
+    },
+    "package": {
+      "metallic": 0.0,
+      "roughness": 0.45
+    },
+    "plinth": {
+      "metallic": 0.0,
+      "roughness": 0.65
+    }
+  },
+  "motion_rules": {
+    "base_duration_s": 2.5,
+    "easing": "ease_out",
+    "energy": 0.3,
+    "reduced_motion": "static final frame; no parallax, no looping",
+    "stagger_s": 0.18
+  },
+  "novelty_constraints": {
+    "max_candidates": 4,
+    "max_generations": 2,
+    "min_parameter_distance": 0.08,
+    "mutable_dimensions": [
+      "geometry",
+      "spacing",
+      "proportion",
+      "typography",
+      "grid",
+      "color",
+      "texture",
+      "material",
+      "composition",
+      "motion",
+      "lighting",
+      "visual_metaphor"
+    ],
+    "source": "agency.creative.ir.ResourceBudget"
+  },
+  "project_ref": "prj-foundry-demo",
+  "schema_version": "amc-creative-genome/v1",
+  "source_evidence_refs": [],
+  "typography_rules": {
+    "case": "sentence",
+    "display_weight": 700,
+    "fallback_required": true,
+    "family": "display",
+    "min_body_px": 16,
+    "scale_ratio": 1.333,
+    "stacks": {
+      "display": [
+        "Inter Display",
+        "Inter",
+        "Helvetica Neue",
+        "Arial",
+        "sans-serif"
+      ],
+      "mono": [
+        "JetBrains Mono",
+        "DejaVu Sans Mono",
+        "Menlo",
+        "monospace"
+      ],
+      "text": [
+        "Inter",
+        "Helvetica Neue",
+        "Arial",
+        "sans-serif"
+      ]
+    },
+    "tracking": -0.02
+  }
+}

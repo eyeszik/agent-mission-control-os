@@ -85,6 +85,87 @@ def add(obj_op, *, name: str, material: bpy.types.Material, **kw) -> bpy.types.O
     return obj
 
 
+class SceneInputError(ValueError):
+    """A required scene input is missing or unsafe; the run fails before rendering anything."""
+
+
+def local_input(spec_dir: Path, name: str) -> Path:
+    """Inputs must be plain files inside the spec's own directory: no absolute paths, no '..'."""
+    candidate = Path(name)
+    if candidate.is_absolute() or ".." in candidate.parts or not name:
+        raise SceneInputError(f"unsafe input path {name!r}")
+    path = (spec_dir / candidate).resolve()
+    if spec_dir.resolve() not in path.parents or not path.is_file():
+        raise SceneInputError(f"missing scene input {name!r}")
+    return path
+
+
+def build_package_scene(spec: dict, spec_dir: Path) -> dict:
+    """A printed box on a plinth. The box's front label is the supplied artwork (e.g. a generated poster)."""
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    pal = spec["palette"]
+    art = local_input(spec_dir, spec["texture"])
+    card = principled("box_card", pal["paper"], roughness=0.5, bump_scale=60.0, bump_strength=0.02)
+    plinth_m = principled("plinth", pal["muted"], roughness=float(spec.get("plinth_roughness", 0.65)))
+    floor_m = principled("floor", pal["paper"], roughness=0.9)
+    wall_m = principled("wall", pal["paper"], roughness=0.95, bump_scale=8.0, bump_strength=0.04)
+    label = bpy.data.materials.new("label_artwork")
+    label.use_nodes = True
+    nodes, links = label.node_tree.nodes, label.node_tree.links
+    bsdf = nodes["Principled BSDF"]
+    bsdf.inputs["Roughness"].default_value = float(spec.get("label_roughness", 0.45))
+    img = nodes.new("ShaderNodeTexImage")
+    img.image = bpy.data.images.load(str(art))
+    links.new(img.outputs["Color"], bsdf.inputs["Base Color"])
+
+    add(bpy.ops.mesh.primitive_plane_add, name="floor", material=floor_m, size=14)
+    add(bpy.ops.mesh.primitive_plane_add, name="wall", material=wall_m, size=14, location=(0, 3.0, 3.0), rotation=(math.radians(90), 0, 0))
+    plinth = add(bpy.ops.mesh.primitive_cylinder_add, name="plinth", material=plinth_m, vertices=128, radius=0.62, depth=0.5,
+                 location=(0, 0.2, 0.25))
+    plinth.modifiers.new("bevel", "BEVEL").width = 0.01
+    w, d, h = 0.6, 0.24, 0.8
+    box = add(bpy.ops.mesh.primitive_cube_add, name="box", material=card, size=1, location=(0, 0.2, 0.5 + h / 2))
+    box.scale = (w, d, h)
+    box.modifiers.new("bevel", "BEVEL").width = 0.004
+    front = add(bpy.ops.mesh.primitive_plane_add, name="label", material=label, size=1,
+                location=(0, 0.2 - d / 2 - 0.0015, 0.5 + h / 2), rotation=(math.radians(90), 0, 0))
+    front.scale = (w * 0.985, h * 0.985, 1)
+    for o in (plinth, box):
+        bpy.context.view_layer.objects.active = o
+        bpy.ops.object.shade_smooth()
+
+    bpy.ops.object.light_add(type="AREA", location=(-2.2, -2.0, 2.6))
+    key = bpy.context.active_object
+    key.data.size, key.data.energy = 2.0, float(spec.get("key_energy", 650.0))
+    key.rotation_euler = (math.radians(48), 0, math.radians(-42))
+    bpy.ops.object.light_add(type="AREA", location=(2.4, 1.6, 2.2))
+    rim = bpy.context.active_object
+    rim.data.size, rim.data.energy = 1.2, float(spec.get("rim_energy", 220.0))
+    rim.rotation_euler = (math.radians(-40), math.radians(30), math.radians(140))
+    world = bpy.data.worlds.new("world")
+    scene.world = world
+    world.use_nodes = True
+    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.3
+
+    cam_spec = spec.get("camera", {})
+    bpy.ops.object.camera_add()
+    cam = bpy.context.active_object
+    cam.data.lens = float(cam_spec.get("focal_mm", 50))
+    cam.data.dof.use_dof = True
+    cam.data.dof.aperture_fstop = float(cam_spec.get("fstop", 5.6))
+    target = bpy.data.objects.new("focus", None)
+    target.location = (0.0, 0.2 - d / 2, 0.5 + h / 2)
+    bpy.context.collection.objects.link(target)
+    cam.data.dof.focus_object = target
+    track = cam.constraints.new("TRACK_TO")
+    track.target, track.track_axis, track.up_axis = target, "TRACK_NEGATIVE_Z", "UP_Y"
+    scene.camera = cam
+    art_sha = hashlib.sha256(art.read_bytes()).hexdigest()
+    return {"camera": cam, "target": target, "materials": [m.name for m in bpy.data.materials],
+            "inputs": [{"name": spec["texture"], "sha256": art_sha}]}
+
+
 def build_scene(spec: dict) -> dict:
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -197,7 +278,12 @@ def main(spec_path: str, out_dir: str) -> int:
     spec = json.loads(Path(spec_path).read_text())
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    built = build_scene(spec)
+    try:
+        built = build_package_scene(spec, Path(spec_path).parent) if spec.get("scene") == "package_on_plinth" else build_scene(spec)
+    except SceneInputError as exc:
+        (out / "error.json").write_text(json.dumps({"error": "SCENE_INPUT", "detail": str(exc)}))
+        print(f"SCENE_INPUT: {exc}", file=sys.stderr)
+        return 3
     render_info = configure_render(spec)
     cam_spec = spec.get("camera", {})
     frames = int(spec.get("frames", 1))
@@ -218,7 +304,7 @@ def main(spec_path: str, out_dir: str) -> int:
         "frames": files,
         "scene_spec_sha256": hashlib.sha256(Path(spec_path).read_bytes()).hexdigest(),
         "materials": sorted(built["materials"]),
-        "assets": "procedural only (no external textures, HDRIs or models)",
+        "assets": built.get("inputs") or "procedural only (no external textures, HDRIs or models)",
         "render": {**spec["render"], **render_info},
         "wall_seconds": round(time.time() - started, 2),
     }

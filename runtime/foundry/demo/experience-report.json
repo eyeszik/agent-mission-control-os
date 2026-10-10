@@ -1,0 +1,660 @@
+{
+  "counterfactual_skins": {
+    "alternate_dark": {
+      "accepted": true,
+      "contrast_failures": 0,
+      "findings": [],
+      "passed_scenarios": 12,
+      "regressions": [],
+      "status": "PASSED",
+      "total": 12
+    },
+    "canonical": {
+      "accepted": true,
+      "contrast_failures": 0,
+      "findings": [],
+      "passed_scenarios": 12,
+      "regressions": [],
+      "status": "PASSED",
+      "total": 12
+    },
+    "unstyled": {
+      "accepted": true,
+      "contrast_failures": 0,
+      "findings": [],
+      "passed_scenarios": 12,
+      "regressions": [],
+      "status": "PASSED",
+      "total": 12
+    }
+  },
+  "evaluation": {
+    "blocked_requests": [],
+    "browser": "141.0.7390.37",
+    "findings": [],
+    "network_isolated": true,
+    "scenarios": [
+      {
+        "audit": {
+          "contrast_checked": 20,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": "first_use.png",
+        "id": "first_use",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "expect_visible",
+            "detail": "visible=true",
+            "ok": true,
+            "selector": "#hero-title"
+          },
+          {
+            "action": "expect_visible",
+            "detail": "visible=false",
+            "ok": true,
+            "selector": "#greeting"
+          },
+          {
+            "action": "expect_text",
+            "detail": "Everyday plates\n\nStoneware made in small batches.\n\nServing bowls\n\nDeep, glazed and dishwasher safe.\n\nRepairs\n\nWe mend wh",
+            "ok": true,
+            "selector": "#offering-list"
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 21,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": null,
+        "id": "keyboard_only",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "tab",
+            "ok": true
+          },
+          {
+            "action": "expect_focus",
+            "detail": "focused=true indicator=outline",
+            "ok": true,
+            "selector": "a.skip"
+          },
+          {
+            "action": "tab_until",
+            "detail": "reached after 4 Tab presses",
+            "ok": true,
+            "selector": "#email"
+          },
+          {
+            "action": "expect_focus",
+            "detail": "focused=true indicator=outline",
+            "ok": true,
+            "selector": "#email"
+          },
+          {
+            "action": "type",
+            "ok": true
+          },
+          {
+            "action": "tab_until",
+            "detail": "reached after 1 Tab presses",
+            "ok": true,
+            "selector": "#consent"
+          },
+          {
+            "action": "press",
+            "ok": true
+          },
+          {
+            "action": "tab_until",
+            "detail": "reached after 1 Tab presses",
+            "ok": true,
+            "selector": "#submit"
+          },
+          {
+            "action": "expect_focus",
+            "detail": "focused=true indicator=outline",
+            "ok": true,
+            "selector": "#submit"
+          },
+          {
+            "action": "press",
+            "ok": true
+          },
+          {
+            "action": "wait",
+            "ok": true
+          },
+          {
+            "action": "expect_text",
+            "detail": "Thanks. You're on the list.",
+            "ok": true,
+            "selector": "#status"
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 23,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": null,
+        "id": "invalid_input",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "tab_until",
+            "detail": "reached after 5 Tab presses",
+            "ok": true,
+            "selector": "#email"
+          },
+          {
+            "action": "type",
+            "ok": true
+          },
+          {
+            "action": "tab_until",
+            "detail": "reached after 2 Tab presses",
+            "ok": true,
+            "selector": "#submit"
+          },
+          {
+            "action": "press",
+            "ok": true
+          },
+          {
+            "action": "wait",
+            "ok": true
+          },
+          {
+            "action": "expect_text",
+            "detail": "Error: Enter a valid email address, like name@example.com",
+            "ok": true,
+            "selector": "#email-error"
+          },
+          {
+            "action": "expect_attr",
+            "detail": "aria-invalid=true",
+            "ok": true,
+            "selector": "#email"
+          },
+          {
+            "action": "expect_focus",
+            "detail": "focused=true indicator=outline",
+            "ok": true,
+            "selector": "#email"
+          },
+          {
+            "action": "expect_text",
+            "detail": "Error: Tick the box to agree to be contacted",
+            "ok": true,
+            "selector": "#consent-error"
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 21,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": null,
+        "id": "returning_user",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "set",
+            "ok": true
+          },
+          {
+            "action": "call",
+            "ok": true
+          },
+          {
+            "action": "expect_text",
+            "detail": "Welcome back. Your preferences are saved.",
+            "ok": true,
+            "selector": "#greeting"
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 21,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": null,
+        "id": "network_interruption",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "set",
+            "ok": true
+          },
+          {
+            "action": "fill",
+            "ok": true,
+            "selector": "#email"
+          },
+          {
+            "action": "click",
+            "ok": true,
+            "selector": "#consent"
+          },
+          {
+            "action": "click",
+            "ok": true,
+            "selector": "#submit"
+          },
+          {
+            "action": "wait",
+            "ok": true
+          },
+          {
+            "action": "expect_text",
+            "detail": "We couldn't reach the server. Check your connection and try again.",
+            "ok": true,
+            "selector": "#status"
+          },
+          {
+            "action": "expect_visible",
+            "detail": "visible=true",
+            "ok": true,
+            "selector": "#retry"
+          },
+          {
+            "action": "set",
+            "ok": true
+          },
+          {
+            "action": "click",
+            "ok": true,
+            "selector": "#retry"
+          },
+          {
+            "action": "wait",
+            "ok": true
+          },
+          {
+            "action": "expect_text",
+            "detail": "Thanks. You're on the list.",
+            "ok": true,
+            "selector": "#status"
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 21,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": null,
+        "id": "permission_denied",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "set",
+            "ok": true
+          },
+          {
+            "action": "fill",
+            "ok": true,
+            "selector": "#email"
+          },
+          {
+            "action": "click",
+            "ok": true,
+            "selector": "#consent"
+          },
+          {
+            "action": "click",
+            "ok": true,
+            "selector": "#submit"
+          },
+          {
+            "action": "wait",
+            "ok": true
+          },
+          {
+            "action": "expect_text",
+            "detail": "You're not allowed to join this list from here.",
+            "ok": true,
+            "selector": "#status"
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 15,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": null,
+        "id": "empty_data",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "set",
+            "ok": true
+          },
+          {
+            "action": "call",
+            "ok": true
+          },
+          {
+            "action": "expect_visible",
+            "detail": "visible=true",
+            "ok": true,
+            "selector": "#offerings-empty"
+          },
+          {
+            "action": "expect_text",
+            "detail": "No offerings yet. Check back soon.",
+            "ok": true,
+            "selector": "#offerings-empty"
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 22,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": null,
+        "id": "long_content",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "set",
+            "ok": true
+          },
+          {
+            "action": "call",
+            "ok": true
+          },
+          {
+            "action": "expect_no_overflow",
+            "detail": "scrollWidth=360 viewport=360",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 20,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": "small_viewport.png",
+        "id": "small_viewport",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "expect_no_overflow",
+            "detail": "scrollWidth=320 viewport=320",
+            "ok": true
+          },
+          {
+            "action": "expect_visible",
+            "detail": "visible=true",
+            "ok": true,
+            "selector": "#submit"
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 20,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": null,
+        "id": "large_text",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "expect_no_overflow",
+            "detail": "scrollWidth=1280 viewport=1280",
+            "ok": true
+          },
+          {
+            "action": "expect_visible",
+            "detail": "visible=true",
+            "ok": true,
+            "selector": "#email"
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 20,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": null,
+        "id": "reduced_motion",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "expect_no_animation",
+            "detail": "none|0s|0s",
+            "ok": true,
+            "selector": ".hero-mark"
+          }
+        ]
+      },
+      {
+        "audit": {
+          "contrast_checked": 20,
+          "contrast_failures": [],
+          "horizontal_overflow": false,
+          "landmarks": 8,
+          "unlabeled_controls": []
+        },
+        "capture": null,
+        "id": "font_fallback",
+        "page_errors": [],
+        "passed": true,
+        "steps": [
+          {
+            "action": "expect_font_fallback",
+            "detail": "primary_available=false width=832 family=\"Inter Display\", Inter, \"Helvetica Neue\", Arial, sans-serif",
+            "ok": true,
+            "selector": "#hero-title"
+          }
+        ]
+      }
+    ],
+    "status": "PASSED",
+    "wall_ms": 5433
+  },
+  "experience_ir": {
+    "components": [
+      {
+        "component_id": "skip_link",
+        "error": "n/a",
+        "focus": "visible when focused",
+        "keyboard": "first Tab stop; Enter moves focus to main",
+        "loading": "n/a",
+        "props": [
+          "href"
+        ],
+        "responsive": "fixed position",
+        "role": "navigation",
+        "states": [
+          "hidden",
+          "focused"
+        ],
+        "tokens": [
+          "color.ink",
+          "color.paper"
+        ],
+        "validation": "n/a"
+      },
+      {
+        "component_id": "hero",
+        "error": "n/a",
+        "focus": "CTA ring",
+        "keyboard": "CTA reachable by Tab",
+        "loading": "n/a",
+        "props": [
+          "headline",
+          "subhead",
+          "cta"
+        ],
+        "responsive": "fluid type clamp(2rem,6vw,4rem)",
+        "role": "region",
+        "states": [
+          "first_use",
+          "returning"
+        ],
+        "tokens": [
+          "font.display",
+          "weight.display",
+          "motion.duration"
+        ],
+        "validation": "n/a"
+      },
+      {
+        "component_id": "offering_list",
+        "error": "empty state text",
+        "focus": "n/a",
+        "keyboard": "not interactive",
+        "loading": "n/a",
+        "props": [
+          "items"
+        ],
+        "responsive": "auto-fit grid, min(100%,16rem)",
+        "role": "list",
+        "states": [
+          "populated",
+          "empty",
+          "long_content"
+        ],
+        "tokens": [
+          "color.accent",
+          "radius.panel"
+        ],
+        "validation": "n/a"
+      },
+      {
+        "component_id": "signup_form",
+        "error": "role=status message; retry button for network errors",
+        "focus": "first invalid field receives focus",
+        "keyboard": "Tab through email, consent (Space), submit (Enter)",
+        "loading": "button disabled + aria-busy + 'Sending\u2026'",
+        "props": [
+          "email",
+          "consent"
+        ],
+        "responsive": "single column, max 32rem",
+        "role": "form",
+        "states": [
+          "idle",
+          "invalid",
+          "loading",
+          "success",
+          "network_error",
+          "permission_denied"
+        ],
+        "tokens": [
+          "radius.control",
+          "target.min",
+          "focus.ring"
+        ],
+        "validation": "email format and consent required; errors in text, not colour alone"
+      }
+    ],
+    "copy_text": {
+      "action": "Join the studio list",
+      "cta": "Join the studio list",
+      "headline": "Made slowly, used daily",
+      "subhead": "Stoneware for the everyday table"
+    },
+    "genome_hash": "23b679d52ddf064d423c15cac1eb0ec8339fa2ff7044c26b6af5800d72f83c46",
+    "information_architecture": [
+      "header: wordmark + primary nav",
+      "hero",
+      "offerings",
+      "signup",
+      "footer"
+    ],
+    "jobs_to_be_done": [
+      "Understand what Halden & Fen offers",
+      "Join the studio list"
+    ],
+    "state_matrix": {
+      "hero": [
+        "first_use",
+        "returning"
+      ],
+      "offering_list": [
+        "populated",
+        "empty",
+        "long_content"
+      ],
+      "signup_form": [
+        "idle",
+        "invalid",
+        "loading",
+        "success",
+        "network_error",
+        "permission_denied"
+      ],
+      "skip_link": [
+        "hidden",
+        "focused"
+      ]
+    },
+    "user_flow": [
+      "land",
+      "scan offerings",
+      "enter email",
+      "consent",
+      "submit",
+      "confirmation"
+    ]
+  }
+}

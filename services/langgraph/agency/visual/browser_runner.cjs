@@ -1,4 +1,5 @@
-// Real-browser render and capture for the R3 (WebGL) and R4 (SVG multi-size) routes.
+// Real-browser render and capture: R3 WebGL, R4 SVG multi-size, exact-size SVG rasterization,
+// motion frame sequences and scripted interaction scenarios for generated interfaces.
 //
 // Usage: node browser_runner.cjs <spec.json> <out_dir>
 // Launches the locally installed Chromium headless, aborts every non-data:
@@ -93,6 +94,110 @@ const SVG_PAGE = (svg, size) => `<!doctype html><html><body style="margin:0;back
   if (img.complete) done(); else { img.onload = done; img.onerror = () => resolve({ complete: false, error: "DECODE_FAILED" }); }
 });</script></body></html>`;
 
+const RASTER_PAGE = (svg, width, height) => `<!doctype html><html><body style="margin:0;background:transparent">
+<img id="i" width="${width}" height="${height}" style="display:block" src="data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}">
+<script>window.__result = new Promise((resolve) => {
+  const img = document.getElementById("i");
+  const done = () => resolve({ complete: img.complete && img.naturalWidth > 0, natural: [img.naturalWidth, img.naturalHeight] });
+  if (img.complete) done(); else { img.onload = done; img.onerror = () => resolve({ complete: false, error: "DECODE_FAILED" }); }
+});</script></body></html>`;
+
+// In-page audit of the rendered document: labels, focus visibility, contrast, reflow.
+async function auditPage(page) {
+  return page.evaluate(() => {
+    const lum = (rgb) => {
+      const c = rgb.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    };
+    const parse = (s) => { const m = s.match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(",").map(Number); return { rgb: p.slice(0, 3), a: p.length > 3 ? p[3] : 1 }; };
+    const bgOf = (el) => { for (let e = el; e; e = e.parentElement) { const c = parse(getComputedStyle(e).backgroundColor); if (c && c.a > 0.99) return c.rgb; } return [255, 255, 255]; };
+    const contrast = [];
+    for (const el of document.querySelectorAll("body *")) {
+      const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+      const cs = getComputedStyle(el);
+      if (!own || cs.visibility === "hidden" || cs.display === "none") continue;
+      const fg = parse(cs.color); if (!fg) continue;
+      const a = lum(fg.rgb), b = lum(bgOf(el));
+      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      const size = parseFloat(cs.fontSize), weight = parseInt(cs.fontWeight, 10) || 400;
+      const large = size >= 24 || (size >= 18.66 && weight >= 700);
+      contrast.push({ text: el.textContent.trim().slice(0, 40), ratio: Math.round(ratio * 100) / 100, required: large ? 3 : 4.5 });
+    }
+    const unlabeled = [...document.querySelectorAll("input, select, textarea")].filter((el) => {
+      if (el.type === "hidden") return false;
+      return !(el.labels && el.labels.length) && !el.getAttribute("aria-label") && !el.getAttribute("aria-labelledby");
+    }).map((el) => el.name || el.id || el.type);
+    return {
+      contrast_failures: contrast.filter((c) => c.ratio < c.required),
+      contrast_checked: contrast.length,
+      unlabeled_controls: unlabeled,
+      horizontal_overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+      landmarks: [...document.querySelectorAll("main, header, footer, nav, section[aria-labelledby], form")].length,
+    };
+  });
+}
+
+async function runStep(page, step) {
+  const el = step.selector ? page.locator(step.selector) : null;
+  switch (step.action) {
+    case "tab": for (let i = 0; i < (step.times || 1); i++) await page.keyboard.press(step.shift ? "Shift+Tab" : "Tab"); return { ok: true };
+    case "press": await page.keyboard.press(step.value); return { ok: true };
+    case "type": await page.keyboard.type(step.value); return { ok: true };
+    case "fill": await el.fill(step.value); return { ok: true };
+    case "click": await el.click(); return { ok: true };
+    case "backend": await page.evaluate((mode) => { window.__amcBackend = mode; }, step.value); return { ok: true };
+    case "wait": await page.waitForTimeout(step.value || 50); return { ok: true };
+    case "set": await page.evaluate(([k, v]) => { window[k] = v; }, [step.name, step.value]); return { ok: true };
+    case "call": {
+      const exists = await page.evaluate((fn) => typeof window[fn] === "function", step.value);
+      if (!exists) return { ok: false, detail: `NO_FUNCTION:${step.value}` };
+      await page.evaluate((fn) => window[fn](), step.value); return { ok: true };
+    }
+    case "tab_until": {
+      for (let i = 0; i < (step.max || 25); i++) {
+        await page.keyboard.press("Tab");
+        if (await page.evaluate((sel) => document.activeElement && document.activeElement.matches(sel), step.selector)) {
+          return { ok: true, detail: `reached after ${i + 1} Tab presses` };
+        }
+      }
+      return { ok: false, detail: "not reachable by keyboard" };
+    }
+    case "expect_no_overflow": {
+      const o = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
+      return { ok: o[0] <= o[1] + 1, detail: `scrollWidth=${o[0]} viewport=${o[1]}` };
+    }
+    case "expect_font_fallback": {
+      const r = await el.evaluate((node, primary) => {
+        const rect = node.getBoundingClientRect();
+        // A font is available only if it changes measured width against both generic fallbacks
+        // (document.fonts.check() returns true for fonts it has nothing to load, so it cannot tell).
+        const ctx = document.createElement("canvas").getContext("2d");
+        const sample = "mmmmmmmmmmlli1WQ@#";
+        const width = (font) => { ctx.font = font; return ctx.measureText(sample).width; };
+        const available = ["monospace", "serif"].some((g) => width(`32px "${primary}", ${g}`) !== width(`32px ${g}`));
+        return { primary_available: available, width: rect.width, family: getComputedStyle(node).fontFamily };
+      }, step.value);
+      return { ok: r.width > 0, detail: `primary_available=${r.primary_available} width=${Math.round(r.width)} family=${r.family}` };
+    }
+    case "expect_focus": {
+      const ok = await el.evaluate((node) => node === document.activeElement);
+      const ring = await page.evaluate(() => { const a = document.activeElement; if (!a) return "none"; const cs = getComputedStyle(a); return cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) > 0 ? "outline" : (cs.boxShadow !== "none" ? "shadow" : "none"); });
+      return { ok: ok && ring !== "none", detail: `focused=${ok} indicator=${ring}` };
+    }
+    case "expect_text": { const t = (await el.innerText()).trim(); return { ok: t.includes(step.value), detail: t.slice(0, 120) }; }
+    case "expect_attr": { const v = await el.getAttribute(step.name); return { ok: v === step.value, detail: `${step.name}=${v}` }; }
+    case "expect_visible": { const v = await el.isVisible(); return { ok: v === (step.value !== false), detail: `visible=${v}` }; }
+    case "expect_no_animation": {
+      const d = await el.evaluate((node) => { const cs = getComputedStyle(node); return [cs.animationName, cs.animationDuration, cs.transitionDuration].join("|"); });
+      const [name, ad, td] = d.split("|");
+      const zero = (v) => v.split(",").every((x) => parseFloat(x) === 0);
+      const still = (name === "none" || zero(ad)) && zero(td);
+      return { ok: still, detail: d };
+    }
+    default: return { ok: false, detail: `UNKNOWN_ACTION:${step.action}` };
+  }
+}
+
 async function main() {
   const [specPath, outDir] = process.argv.slice(2);
   const spec = JSON.parse(fs.readFileSync(specPath, "utf8"));
@@ -101,6 +206,11 @@ async function main() {
   if (!pw) {
     fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify({ error: "PLAYWRIGHT_NOT_INSTALLED" }));
     process.exit(3);
+  }
+  if (spec.mode === "probe") {
+    const executable = spec.executable_path || pw.chromium.executablePath();
+    fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify({ mode: "probe", executable, exists: fs.existsSync(executable) }));
+    return;
   }
   const browser = await pw.chromium.launch({
     headless: true,
@@ -135,6 +245,49 @@ async function main() {
         const file = `svg-${size}.png`;
         await page.locator("#i").screenshot({ path: path.join(outDir, file) });
         result.sizes.push({ size, ...r, capture: file });
+      }
+    } else if (spec.mode === "raster") {
+      await page.setViewportSize({ width: spec.width, height: spec.height });
+      await page.setContent(RASTER_PAGE(spec.svg, spec.width, spec.height));
+      result.raster = await page.evaluate(() => window.__result);
+      await page.screenshot({ path: path.join(outDir, "raster.png"), clip: { x: 0, y: 0, width: spec.width, height: spec.height }, omitBackground: true });
+      result.raster.capture = "raster.png";
+    } else if (spec.mode === "frames") {
+      await page.setViewportSize({ width: spec.width, height: spec.height });
+      result.frames = [];
+      for (let i = 0; i < spec.frames.length; i++) {
+        await page.setContent(RASTER_PAGE(spec.frames[i], spec.width, spec.height));
+        const r = await page.evaluate(() => window.__result);
+        const file = `frame_${String(i + 1).padStart(4, "0")}.png`;
+        await page.screenshot({ path: path.join(outDir, file), clip: { x: 0, y: 0, width: spec.width, height: spec.height } });
+        result.frames.push({ file, complete: r.complete });
+      }
+    } else if (spec.mode === "experience") {
+      result.scenarios = [];
+      for (const scenario of spec.scenarios) {
+        const ctx = await browser.newContext({ viewport: scenario.viewport || { width: 1280, height: 900 },
+                                               reducedMotion: scenario.reduced_motion ? "reduce" : "no-preference" });
+        await ctx.route("**/*", (route) => {
+          const url = route.request().url();
+          if (url.startsWith("data:") || url === "about:blank") return route.continue();
+          result.blocked_requests.push(url);
+          return route.abort();
+        });
+        const sp = await ctx.newPage();
+        const errors = [];
+        sp.on("pageerror", (e) => errors.push(String(e)));
+        await sp.setContent(spec.html);
+        if (scenario.text_scale) await sp.addStyleTag({ content: `html{font-size:${scenario.text_scale * 100}%}` });
+        const steps = [];
+        for (const step of scenario.steps) {
+          try { steps.push({ ...step, ...(await runStep(sp, step)) }); }
+          catch (e) { steps.push({ ...step, ok: false, detail: String(e).slice(0, 200) }); }
+        }
+        const audit = await auditPage(sp);
+        if (scenario.capture) await sp.screenshot({ path: path.join(outDir, `${scenario.id}.png`), fullPage: true });
+        result.scenarios.push({ id: scenario.id, steps, audit, page_errors: errors, capture: scenario.capture ? `${scenario.id}.png` : null,
+                                passed: steps.every((s) => s.ok) && errors.length === 0 });
+        await ctx.close();
       }
     } else {
       result.error = `UNKNOWN_MODE:${spec.mode}`;
