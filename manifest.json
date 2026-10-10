@@ -392,7 +392,7 @@
     },
     {
       "path": "services/langgraph/pyproject.toml",
-      "git_blob_sha": "fda53589cdd56696a94cbfce5674ae7b5f6a164c"
+      "git_blob_sha": "4512fdea73f1d87471a40937e99ad719354c1536"
     },
     {
       "path": "services/langgraph/quality/brand_safety.py",
