@@ -131,7 +131,8 @@ function BriefEditor({ caps, busy, onRun }: { caps: CapabilitiesResponse | null;
         <label className="text-xs text-zinc-400">Blend with
           <select className={inputClass} value={secondary} onChange={(e) => setSecondary(e.target.value)}>
             <option value="">Nothing</option>
-            {grammars.filter((g) => g.grammar_id !== primary).map((g) => <option key={g.grammar_id} value={g.grammar_id}>{g.name}</option>)}
+            {/* ⚡ Bolt: Removed .filter() to prevent intermediate array allocation on every render */}
+            {grammars.map((g) => g.grammar_id !== primary ? <option key={g.grammar_id} value={g.grammar_id}>{g.name}</option> : null)}
           </select>
         </label>
       </div>
@@ -171,7 +172,6 @@ function Artboard({ artifacts, urls, selectedId, onSelect, size, filter }: {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const drag = useRef<{ x: number; y: number } | null>(null);
-  const visual = artifacts.filter((a) => ['image', 'video'].includes(isPreviewable(a.mime_type)));
   const onKey = (e: React.KeyboardEvent) => {
     const step = 40;
     if (e.key === '+' || e.key === '=') setZoom((z) => clampZoom(z * 1.2));
@@ -201,18 +201,21 @@ function Artboard({ artifacts, urls, selectedId, onSelect, size, filter }: {
         className="relative h-[28rem] overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 cursor-grab"
       >
         <div className="absolute left-4 top-4 flex flex-wrap gap-4 origin-top-left" style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, width: '1600px' }}>
-          {visual.map((a) => (
-            <button key={a.artifact_id} type="button" onClick={() => onSelect(a.artifact_id)} aria-pressed={selectedId === a.artifact_id}
-              className={`${SIZE_CLASS[size]} flex flex-col gap-1 text-left rounded-lg border p-2 bg-zinc-900/80 ${selectedId === a.artifact_id ? 'border-emerald-500' : 'border-zinc-800'}`}>
-              {urls[a.artifact_id]
-                ? (isPreviewable(a.mime_type) === 'video'
-                  ? <video src={urls[a.artifact_id]} className={`w-full ${filter}`} muted loop playsInline controls aria-label={`${a.name} preview`} />
-                  // eslint-disable-next-line @next/next/no-img-element
-                  : <img src={urls[a.artifact_id]} alt={`${a.name}, version ${a.version}`} className={`w-full bg-zinc-100 ${filter}`} draggable={false} />)
-                : <span className="text-[11px] text-zinc-500">Preview unavailable</span>}
-              <span className="text-[11px] text-zinc-300 truncate">{a.name}</span>
-              <span className={`text-[10px] font-mono border rounded px-1 w-fit ${toneClass[proofTone(a.proof_state)]}`}>{a.proof_state}</span>
-            </button>
+          {/* ⚡ Bolt: Removed .filter() to prevent intermediate array allocation on every render */}
+          {artifacts.map((a) => (
+            ['image', 'video'].includes(isPreviewable(a.mime_type)) ? (
+              <button key={a.artifact_id} type="button" onClick={() => onSelect(a.artifact_id)} aria-pressed={selectedId === a.artifact_id}
+                className={`${SIZE_CLASS[size]} flex flex-col gap-1 text-left rounded-lg border p-2 bg-zinc-900/80 ${selectedId === a.artifact_id ? 'border-emerald-500' : 'border-zinc-800'}`}>
+                {urls[a.artifact_id]
+                  ? (isPreviewable(a.mime_type) === 'video'
+                    ? <video src={urls[a.artifact_id]} className={`w-full ${filter}`} muted loop playsInline controls aria-label={`${a.name} preview`} />
+                    // eslint-disable-next-line @next/next/no-img-element
+                    : <img src={urls[a.artifact_id]} alt={`${a.name}, version ${a.version}`} className={`w-full bg-zinc-100 ${filter}`} draggable={false} />)
+                  : <span className="text-[11px] text-zinc-500">Preview unavailable</span>}
+                <span className="text-[11px] text-zinc-300 truncate">{a.name}</span>
+                <span className={`text-[10px] font-mono border rounded px-1 w-fit ${toneClass[proofTone(a.proof_state)]}`}>{a.proof_state}</span>
+              </button>
+            ) : null
           ))}
         </div>
       </div>
@@ -320,11 +323,14 @@ export function CreativeFoundryPanel() {
         <Artboard artifacts={artifacts} urls={urls} selectedId={selectedId} onSelect={setSelectedId} size={size} filter={filter} />
         {artifacts.some((a) => !['image', 'video'].includes(isPreviewable(a.mime_type))) && (
           <div role="group" aria-label="Source, web and report artifacts" className="flex flex-wrap gap-2">
-            {artifacts.filter((a) => !['image', 'video'].includes(isPreviewable(a.mime_type))).map((a) => (
-              <button key={a.artifact_id} type="button" aria-pressed={selectedId === a.artifact_id} onClick={() => setSelectedId(a.artifact_id)}
-                className={`${buttonClass} ${selectedId === a.artifact_id ? 'bg-zinc-800' : ''}`}>
-                {a.name} <span className={`ml-1 font-mono ${toneClass[proofTone(a.proof_state)].split(' ')[0]}`}>{a.proof_state}</span>
-              </button>
+            {/* ⚡ Bolt: Removed .filter() to prevent intermediate array allocation on every render */}
+            {artifacts.map((a) => (
+              !['image', 'video'].includes(isPreviewable(a.mime_type)) ? (
+                <button key={a.artifact_id} type="button" aria-pressed={selectedId === a.artifact_id} onClick={() => setSelectedId(a.artifact_id)}
+                  className={`${buttonClass} ${selectedId === a.artifact_id ? 'bg-zinc-800' : ''}`}>
+                  {a.name} <span className={`ml-1 font-mono ${toneClass[proofTone(a.proof_state)].split(' ')[0]}`}>{a.proof_state}</span>
+                </button>
+              ) : null
             ))}
           </div>
         )}
