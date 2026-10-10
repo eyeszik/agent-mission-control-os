@@ -1,0 +1,28 @@
+name: VNEXUS Brand Genome Validation
+on:
+  pull_request:
+    paths:
+      - 'apps/web/lib/design/brand-genome.ts'
+      - 'apps/web/tests/brand-genome.test.ts'
+      - '.github/workflows/vnexus-brand-genome.yml'
+  workflow_dispatch:
+jobs:
+  genome-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.29.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: VNEXUS unit tests
+        run: pnpm --filter @amc/web exec vitest run tests/brand-genome.test.ts
+      - name: Web typecheck
+        run: pnpm --filter @amc/web typecheck
