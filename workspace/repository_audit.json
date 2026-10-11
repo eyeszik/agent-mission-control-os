@@ -22,7 +22,8 @@
         "tests/test_brand_production_foundation.py",
         "docs/brand-production/architecture-audit.md"
       ],
-      "finding": "tests/test_brand_production_foundation.py sits at repo root; CI runs only services/langgraph/tests, so it never runs in CI"
+      "finding": "tests/test_brand_production_foundation.py sits at repo root; CI runs only services/langgraph/tests, so it never runs in CI",
+      "resolution": "moved to services/langgraph/tests/test_brand_production_foundation.py in the VNEXUS change (6 passed locally); CI's backend jobs now run it"
     },
     "127": {
       "state": "OPEN_DRAFT",

@@ -1,0 +1,26 @@
+{
+  "observed_at": "2026-10-11",
+  "merge_eligible": "NO until CI is green on the final head and a human reviews and approves the draft PR",
+  "merged": false,
+  "deployed": false,
+  "requires_human_authorization": [
+    "review and merge of the draft PR into master",
+    "applying migration 15 to the production database",
+    "any hosted media provider adapter, credentials or paid call",
+    "supplying the 14 original source prompts",
+    "approval of every genome version and produced artifact (only humans decide approvals)"
+  ],
+  "blocked": [
+    "hosted media generation (ADAPTER_NOT_IMPLEMENTED, NO_CREDENTIALS, PAID_CALLS_NOT_AUTHORIZED)",
+    "14 original prompts (SOURCE_REQUIRED)"
+  ],
+  "known_limitations": [
+    "provider jobs run synchronously; no worker deployed",
+    "dashboard and web-application experiences are specification only",
+    "graph read access follows the brand owner project",
+    "browser/Pillow/FFmpeg checks report NOT_RUN where the dependency is absent",
+    "art-direction and immune checks are deterministic heuristics, not a substitute for human review",
+    "on this host the repo's Playwright 1.63 needs an executablePath override for the installed Chromium (not committed)"
+  ],
+  "rollback": "Revert the merge commit. Migration 15 is additive (new tables only); dropping the amc.vnexus_* tables restores the prior schema and touches no existing table."
+}

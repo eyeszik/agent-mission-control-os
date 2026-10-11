@@ -1,6 +1,6 @@
 # VNEXUS ACE v9 — Brand Genome & Autonomous Creative Intelligence OS
 
-Status: **foundation only / not production-complete**. The companion pure TypeScript module implements approved inheritance, immutable constraints, branch comparison, transitive dependency impact and evidence-gated asset claims. No provider calls, migrations, production UI, approval persistence, or payments are enabled by this change.
+Status: **superseded by the persisted implementation in [`vnexus-ace.md`](vnexus-ace.md).** This page is the original v9 foundation note, kept for provenance; the pure TypeScript resolver it describes is still used by the frontend and its behaviour is checked against the Python resolver by a recorded parity fixture. Statements below about what is "not implemented" describe the v9 foundation, not the current state.
 
 ## Integration boundary
 

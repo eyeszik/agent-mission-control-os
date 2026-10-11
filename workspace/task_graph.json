@@ -391,10 +391,14 @@
       "expected_results": [
         "cross-tenant and unauthorized writes denied"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "security sweep 6 passed: every /vnexus route as another tenant, viewer, unauthenticated; authority fields 422"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_security.py"
+      ]
     },
     {
       "task_id": "TASK-14.0",
@@ -415,10 +419,14 @@
       "expected_results": [
         "no regressions"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "full backend 1096 passed/2 skipped on SQLite and Postgres 16; shared 135; web 76; gates 7/7"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "workspace/test_evidence.json"
+      ]
     },
     {
       "task_id": "TASK-15.0",
@@ -439,10 +447,15 @@
       "expected_results": [
         "draft PR with evidence"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "docs/vnexus-ace.md, README, CLAUDE.md, evidence files; draft PR updated"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "docs/vnexus-ace.md",
+        "workspace/release_readiness.json"
+      ]
     }
   ]
 }
