@@ -72,7 +72,7 @@ export interface BranchComparison {
 export function compareBranches(a: CreativeBranch, b: CreativeBranch): BranchComparison {
   const keys = new Set([...Object.keys(a.changes), ...Object.keys(b.changes)]);
   const changedKeys: string[] = [], addedKeys: string[] = [], removedKeys: string[] = [];
-  for (const key of [...keys].sort()) {
+  for (const key of Array.from(keys).sort()) {
     const inA = OWN.call(a.changes, key), inB = OWN.call(b.changes, key);
     if (!inA) addedKeys.push(key);
     else if (!inB) removedKeys.push(key);
