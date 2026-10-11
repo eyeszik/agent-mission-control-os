@@ -262,6 +262,12 @@ async function main() {
         await page.screenshot({ path: path.join(outDir, file), clip: { x: 0, y: 0, width: spec.width, height: spec.height } });
         result.frames.push({ file, complete: r.complete });
       }
+    } else if (spec.mode === "pdf") {
+      await page.setContent(spec.html);
+      await page.emulateMedia({ media: "print" });
+      await page.pdf({ path: path.join(outDir, "document.pdf"), width: `${spec.width_px}px`, height: `${spec.height_px}px`,
+                       printBackground: true, margin: { top: "0", right: "0", bottom: "0", left: "0" } });
+      result.pdf = { capture: "document.pdf", pages: await page.evaluate(() => document.querySelectorAll("[data-page]").length || 1) };
     } else if (spec.mode === "experience") {
       result.scenarios = [];
       for (const scenario of spec.scenarios) {

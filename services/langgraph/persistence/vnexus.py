@@ -439,10 +439,90 @@ def list_branch_evaluations(branch_id: str) -> list[dict]:
             (branch_id,)).fetchall()]
 
 
+
+# --------------------------------------------------------------------------- media jobs
+
+_JOB_JSON = (("request", {}), ("estimate", {}), ("artifact", {}), ("qc", {}))
+_JOB_FIELDS = frozenset({"estimate", "budget_ceiling_minor", "currency", "authorized_by", "authorized_at", "attempts", "provider_job_ref",
+                         "artifact", "qc", "error"})
+_JOB_JSON_FIELDS = frozenset({"estimate", "artifact", "qc"})
+
+
+def get_media_job(job_id: str) -> Optional[dict]:
+    with transaction() as db:
+        return _rec(db.execute(f"SELECT * FROM {table('vnexus_media_jobs')} WHERE job_id = ?", (job_id,)).fetchone(), _JOB_JSON)
+
+
+def create_media_job(*, tenant_id: str, project_id: str, provider_id: str, capability: str, request: dict, request_hash: str,
+                     idempotency_key: str, budget_ceiling_minor: int, max_attempts: int, actor: str) -> tuple[dict, bool]:
+    """Returns (job, created). The same key with the same request returns the existing job; a different request conflicts."""
+    stamp = now_iso()
+    with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
+        existing = _rec(db.execute(f"SELECT * FROM {table('vnexus_media_jobs')} WHERE tenant_id = ? AND idempotency_key = ?",
+                                   (tenant_id, idempotency_key)).fetchone(), _JOB_JSON)
+        if existing is not None:
+            if existing["request_hash"] != request_hash or existing["project_id"] != project_id or existing["provider_id"] != provider_id:
+                raise VnexusConflict("idempotency key was already used for a different media request")
+            return existing, False
+        job_id = f"mjob-{uuid4().hex}"
+        db.execute(
+            f"""INSERT INTO {table('vnexus_media_jobs')} (job_id, tenant_id, project_id, provider_id, capability, request, request_hash,
+            idempotency_key, state, budget_ceiling_minor, max_attempts, created_by, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PLANNED', ?, ?, ?, ?, ?)""",
+            (job_id, tenant_id, project_id, provider_id, capability, json_param(request), request_hash, idempotency_key,
+             budget_ceiling_minor, max_attempts, actor, stamp, stamp))
+        db.execute(f"""INSERT INTO {table('vnexus_media_job_transitions')} (job_id, tenant_id, from_state, to_state, reason, actor,
+                   observed_at) VALUES (?, ?, 'NONE', 'PLANNED', 'created', ?, ?)""", (job_id, tenant_id, actor, stamp))
+    return get_media_job(job_id), True
+
+
+def transition_media_job(job_id: str, *, expected_version: int, from_state: str, to_state: str, actor: str, reason: str,
+                         **fields: Any) -> dict:
+    bad = set(fields) - _JOB_FIELDS
+    if bad:
+        raise ValueError(f"cannot set {sorted(bad)} on a media job")
+    stamp = now_iso()
+    sets = ["state = ?", "version = version + 1", "updated_at = ?"] + [f"{k} = ?" for k in sorted(fields)]
+    params: list[Any] = [to_state, stamp] + [json_param(fields[k]) if k in _JOB_JSON_FIELDS else fields[k] for k in sorted(fields)]
+    params += [job_id, expected_version, from_state]
+    with transaction(write=True) as db:
+        cur = db.execute(f"UPDATE {table('vnexus_media_jobs')} SET {', '.join(sets)} WHERE job_id = ? AND version = ? AND state = ?",
+                         params)
+        if cur.rowcount != 1:
+            raise VnexusConflict(f"media job {job_id} changed concurrently or is not {from_state}")
+        row = _rec(db.execute(f"SELECT * FROM {table('vnexus_media_jobs')} WHERE job_id = ?", (job_id,)).fetchone(), _JOB_JSON)
+        db.execute(f"""INSERT INTO {table('vnexus_media_job_transitions')} (job_id, tenant_id, from_state, to_state, reason, actor,
+                   observed_at) VALUES (?, ?, ?, ?, ?, ?, ?)""", (job_id, row["tenant_id"], from_state, to_state, reason[:500], actor, stamp))
+    return row
+
+
+def list_media_jobs(project_id: str, *, limit: int = 200) -> list[dict]:
+    with transaction() as db:
+        return [_rec(r, _JOB_JSON) for r in db.execute(
+            f"SELECT * FROM {table('vnexus_media_jobs')} WHERE project_id = ? ORDER BY created_at DESC LIMIT ?", (project_id, limit)).fetchall()]
+
+
+def media_job_transitions(job_id: str) -> list[dict]:
+    with transaction() as db:
+        return [_rec(r, ()) for r in db.execute(
+            f"SELECT * FROM {table('vnexus_media_job_transitions')} WHERE job_id = ? ORDER BY transition_id", (job_id,)).fetchall()]
+
+
+def recent_runs(tenant_id: str, provider_id: str, since: str) -> int:
+    with transaction() as db:
+        row = db.execute(
+            f"""SELECT COUNT(*) AS n FROM {table('vnexus_media_job_transitions')} t JOIN {table('vnexus_media_jobs')} j ON j.job_id = t.job_id
+            WHERE t.tenant_id = ? AND j.provider_id = ? AND t.to_state = 'RUNNING' AND t.observed_at >= ?""",
+            (tenant_id, provider_id, since)).fetchone()
+    return int(normalize_record(row)["n"])
+
+
 __all__ = [
     "GenomeImmutable", "VnexusConflict", "VnexusNotFound", "append_audit", "approved_version", "create_brand", "create_version",
     "get_brand", "get_version", "list_audit", "list_brands", "list_versions", "now_iso", "transition_version",
     "update_version_document", "verify_audit_chain", "add_branch_evaluation", "close_edge", "close_node",
     "create_branch", "find_node_by_ref", "get_branch", "get_node", "insert_edge", "insert_node", "list_branch_evaluations",
-    "list_branches", "list_graph", "load_graph", "update_branch",
+    "list_branches", "list_graph", "load_graph", "update_branch", "create_media_job", "get_media_job", "list_media_jobs",
+    "media_job_transitions", "recent_runs", "transition_media_job",
 ]

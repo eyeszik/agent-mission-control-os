@@ -608,11 +608,11 @@
     },
     {
       "path": "services/langgraph/agency/visual/browser.py",
-      "git_blob_sha": "f8ce54da7314868435b703037313b4fc201138e3"
+      "git_blob_sha": "4fc9f3cde4217acd0d89c34aa4ac6facd12bdf8d"
     },
     {
       "path": "services/langgraph/agency/visual/browser_runner.cjs",
-      "git_blob_sha": "1dc89a275d2617c344f2823f4cdd541314adc85a"
+      "git_blob_sha": "034a6d981924fce3b3324abedbdfabd80bd1543a"
     },
     {
       "path": "scripts/compile_abc_manifests.py",
@@ -656,11 +656,11 @@
     },
     {
       "path": "services/langgraph/persistence/vnexus.py",
-      "git_blob_sha": "fee7ba6bb22a38bb62057941205b91a153ce78e1"
+      "git_blob_sha": "6340a2954628a4b73722826e12278824f765bd11"
     },
     {
       "path": "services/langgraph/api/routes/vnexus.py",
-      "git_blob_sha": "eed046889b9381aea2698ac3ebd20f9bc9ad9011"
+      "git_blob_sha": "748135da6eceb786fb6e1ad46212b053fc1e44f6"
     },
     {
       "path": "supabase/migrations/20261011_amc_vnexus_v1.sql",
@@ -669,6 +669,18 @@
     {
       "path": "services/langgraph/agency/vnexus/creative_service.py",
       "git_blob_sha": "bde7fa422399d770d5d0d5fcd0bcc2266329c339"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/fabric_service.py",
+      "git_blob_sha": "5b13cd8aa030b9c7fbf9fdcae3cd77fc65e0f750"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/media_fabric.py",
+      "git_blob_sha": "d69ef3361e0568db27062f761340ee9b1055acb7"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/production.py",
+      "git_blob_sha": "ca3afb74b9766c1d40f4543529ae93b2d3a9a7b5"
     }
   ]
 }

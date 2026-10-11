@@ -16,7 +16,10 @@ from typing import Any, Callable, Optional
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from services.langgraph.agency.vnexus import creative_service, service
+from services.langgraph.agency.vnexus import creative_service, fabric_service, media_fabric, production, service
+from services.langgraph.agency.vnexus.art_director import ArtDirectionRequest
+from services.langgraph.agency.vnexus.experience import ExperienceRequest
+from services.langgraph.agency.vnexus.video import VideoBrief
 from services.langgraph.agency.vnexus.genome import GenomeDocument, GenomeTransitionError, Scope
 from services.langgraph.agency.vnexus.graph import EdgeKind, GraphError, NodeKind
 from services.langgraph.agency.vnexus.multiverse import BranchTransitionError, ChangeSet
@@ -34,6 +37,7 @@ _VNEXUS_ERRORS: tuple[tuple[type[BaseException], int], ...] = (
     (service.GenomeIntegrityError, 409),
     (GraphError, 409),
     (BranchTransitionError, 409),
+    (LookupError, 404),
 )
 
 
@@ -46,6 +50,8 @@ def vnexus_errors(handler: Callable[..., Any]) -> Callable[..., Any]:
             return handler(*args, **kwargs)
         except service.GenomeBlocked as exc:
             raise HTTPException(status_code=409, detail={"message": str(exc), "readiness": exc.report}) from exc
+        except fabric_service.RateLimited as exc:
+            raise HTTPException(status_code=429, detail=str(exc)) from exc
         except creative_service.MergeConflict as exc:
             raise HTTPException(status_code=409, detail={"message": str(exc), "report": exc.report}) from exc
         except HTTPException:
@@ -424,3 +430,138 @@ def archive_branch(branch_id: str, principal: Principal = Depends(get_principal)
 
 def _jsonable(result: dict) -> dict:
     return {"branch": result["branch"], "proposal": _public(result["proposal"])}
+
+
+# --------------------------------------------------------------------------- media fabric
+
+
+class MediaJobCreate(BaseModel):
+    provider_id: str = Field(min_length=1, max_length=80)
+    request: media_fabric.MediaRequest
+    budget_ceiling_minor: int = Field(default=0, ge=0, le=10_000_000)
+    run: bool = True
+
+    model_config = {"extra": "forbid"}
+
+
+@router.get("/fabric/providers")
+@vnexus_errors
+def providers(principal: Principal = Depends(get_principal)) -> dict:
+    return {"providers": media_fabric.discover(), "fabric_version": media_fabric.FABRIC_VERSION,
+            "hosted_generation": "DISABLED: no hosted adapter is implemented or authorized"}
+
+
+@router.post("/projects/{project_id}/media-jobs", status_code=201)
+@vnexus_errors
+def create_media_job(project_id: str, req: MediaJobCreate, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                     principal: Principal = Depends(get_principal)) -> dict:
+    if req.run:
+        row = fabric_service.execute(principal, project_id, provider_id=req.provider_id, request=req.request,
+                                     idempotency_key=idempotency_key, budget_ceiling_minor=req.budget_ceiling_minor)
+    else:
+        row = fabric_service.plan(principal, project_id, provider_id=req.provider_id, request=req.request,
+                                  idempotency_key=idempotency_key, budget_ceiling_minor=req.budget_ceiling_minor)
+        row = fabric_service.validate(principal, row["job_id"])
+    return {"job": fabric_service.public(row)}
+
+
+@router.get("/projects/{project_id}/media-jobs")
+@vnexus_errors
+def list_media_jobs(project_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"jobs": fabric_service.list_jobs(principal, project_id)}
+
+
+@router.get("/media-jobs/{job_id}")
+@vnexus_errors
+def get_media_job(job_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"job": fabric_service.get_job(principal, job_id)}
+
+
+@router.post("/media-jobs/{job_id}/authorize")
+@vnexus_errors
+def authorize_media_job(job_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"job": fabric_service.public(fabric_service.authorize(principal, job_id))}
+
+
+@router.post("/media-jobs/{job_id}/run")
+@vnexus_errors
+def run_media_job(job_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"job": fabric_service.public(fabric_service.run(principal, job_id))}
+
+
+@router.post("/media-jobs/{job_id}/retry")
+@vnexus_errors
+def retry_media_job(job_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"job": fabric_service.public(fabric_service.retry(principal, job_id))}
+
+
+@router.post("/media-jobs/{job_id}/cancel")
+@vnexus_errors
+def cancel_media_job(job_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"job": fabric_service.public(fabric_service.cancel(principal, job_id))}
+
+
+# --------------------------------------------------------------------------- production from an approved genome
+
+
+class ProductionTarget(BaseModel):
+    scope: Scope
+    scope_ref: str = Field(min_length=1, max_length=300)
+    project_id: str = Field(min_length=1, max_length=120)
+
+    model_config = {"extra": "forbid"}
+
+
+class IdentityProduction(ProductionTarget):
+    deliverables: list[str] = Field(min_length=1, max_length=11)
+    copy_text: dict[str, str] = Field(default_factory=dict)
+
+
+class ExperienceProduction(ProductionTarget):
+    request: ExperienceRequest
+
+
+class ArtDirectionProduction(ProductionTarget):
+    request: ArtDirectionRequest
+
+
+class VideoProduction(ProductionTarget):
+    brief: VideoBrief
+
+
+@router.post("/brands/{brand_id}/production/identity")
+@vnexus_errors
+def produce_identity(brand_id: str, req: IdentityProduction, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                     principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "production.identity", idempotency_key, payload, lambda: production.produce_identity(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, deliverables=tuple(req.deliverables),
+        copy={k: v[:200] for k, v in req.copy_text.items()}, run_key=f"identity:{idempotency_key}"))
+
+
+@router.post("/brands/{brand_id}/production/experience")
+@vnexus_errors
+def produce_experience(brand_id: str, req: ExperienceProduction, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                       principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "production.experience", idempotency_key, payload, lambda: production.produce_experience(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, request=req.request))
+
+
+@router.post("/brands/{brand_id}/production/art-direction")
+@vnexus_errors
+def produce_art_direction(brand_id: str, req: ArtDirectionProduction, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                          principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "production.art_direction", idempotency_key, payload, lambda: production.art_direction(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, request=req.request))
+
+
+@router.post("/brands/{brand_id}/production/video")
+@vnexus_errors
+def produce_video(brand_id: str, req: VideoProduction, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                  principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "production.video", idempotency_key, payload, lambda: production.produce_video(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, brief=req.brief,
+        run_key=f"video:{idempotency_key}"))

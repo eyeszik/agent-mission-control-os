@@ -206,12 +206,12 @@ def _submit_valid(backend: str) -> list[dict]:
             {"action": "wait", "value": 400}]
 
 
-def scenarios(*, primary_font: str) -> list[dict]:
+def scenarios(*, primary_font: str, first_offering: str = "Everyday") -> list[dict]:
     """The scenario matrix from the brief. Every step is executed by the browser, not asserted here."""
     return [
         {"id": "first_use", "capture": True, "steps": [
             {"action": "expect_visible", "selector": "#hero-title"}, {"action": "expect_visible", "selector": "#greeting", "value": False},
-            {"action": "expect_text", "selector": "#offering-list", "value": "Everyday"}]},
+            {"action": "expect_text", "selector": "#offering-list", "value": first_offering}]},
         {"id": "keyboard_only", "steps": [
             {"action": "tab", "times": 1}, {"action": "expect_focus", "selector": "a.skip"},
             {"action": "tab_until", "selector": "#email"}, {"action": "expect_focus", "selector": "#email"},
@@ -254,11 +254,11 @@ def scenarios(*, primary_font: str) -> list[dict]:
     ]
 
 
-def evaluate(html: str, *, out_dir: Path, primary_font: str) -> dict:
+def evaluate(html: str, *, out_dir: Path, primary_font: str, first_offering: str = "Everyday") -> dict:
     """Run every scenario in local Chromium and fold the page audits into one verdict."""
     from services.langgraph.agency.visual.browser import run_experience
 
-    run = run_experience(html, scenarios(primary_font=primary_font), out_dir=out_dir)
+    run = run_experience(html, scenarios(primary_font=primary_font, first_offering=first_offering), out_dir=out_dir)
     audit_findings = []
     for sc in run["scenarios"]:
         a = sc["audit"]

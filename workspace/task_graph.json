@@ -162,10 +162,14 @@
       "expected_results": [
         "deterministic compiled experience + Chromium-verified HTML where available"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "experience compiler: 9 hashed stages over ui_ux + DTCG + foundry twin; landing page verified in Chromium (12/12 scenarios, network isolated); SaaS/web app SPEC_ONLY"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_production.py"
+      ]
     },
     {
       "task_id": "TASK-06.0",
@@ -185,10 +189,14 @@
       "expected_results": [
         "claim classes + rubric"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "art director: 4 claim classes, rights-unknown references excluded, presets labelled INFERRED, rubric MEASURED vs HUMAN_REQUIRED"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_production.py"
+      ]
     },
     {
       "task_id": "TASK-07.0",
@@ -209,10 +217,14 @@
       "expected_results": [
         "format probes + deterministic validators on real outputs"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "identity: 11 deliverables via local SVG/PNG/WebP/PDF providers; transparency, min reproduction, stroke, palette, contrast, safe area, crop checks on real outputs"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_production.py"
+      ]
     },
     {
       "task_id": "TASK-08.0",
@@ -232,10 +244,14 @@
       "expected_results": [
         "truthful render lifecycle"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "video: script/storyboard/shots/assets/animation -> Chromium frames + FFmpeg master, WebVTT, reduced-motion still, licensed audio mux; AI shots BLOCKED by disabled hosted providers"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_production.py"
+      ]
     },
     {
       "task_id": "TASK-09.0",
@@ -279,8 +295,10 @@
       "expected_results": [
         "mock/local/disabled adapters; budget; idempotency"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "media fabric done (5 local, 3 disabled hosted, mock gated; lifecycle, idempotency, budget, spend approval, retry, integrity, rate limit); prompt genome pending"
+      ],
+      "status": "IN_PROGRESS",
       "retry_count": 0,
       "evidence_paths": []
     },
