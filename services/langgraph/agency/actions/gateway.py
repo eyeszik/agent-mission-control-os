@@ -181,6 +181,10 @@ def _plan(principal: Principal, *, capability_id: str, project_id: str, environm
     except ValueError as exc:
         raise InvalidRequest("UNKNOWN_ENVIRONMENT", environment) from exc
     broker.authorize_scope(principal, project_id, write=True)
+    client_id = db.client_for_project(project_id)
+    client = db.get_client(client_id) if client_id else None
+    if client is not None and client["status"] != "ACTIVE":
+        raise GatewayError("CLIENT_NOT_ACTIVE", f"the client is {client['status']}: no new actions start")
     if env is Environment.LIVE:
         raise LiveGated("LIVE_GATED", "LIVE execution is disabled", details=live_enablement())
     adapter = _adapter_for(descriptor)

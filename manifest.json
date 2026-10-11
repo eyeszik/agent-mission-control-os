@@ -308,7 +308,7 @@
     },
     {
       "path": "services/langgraph/app/main.py",
-      "git_blob_sha": "888fc2b1358784d9b8f21f57c749efb45b6557eb"
+      "git_blob_sha": "c4e937803872c50f512a402fef029b1cee728587"
     },
     {
       "path": "services/langgraph/graph/agency/models.py",
@@ -688,7 +688,7 @@
     },
     {
       "path": "services/langgraph/agency/actions/gateway.py",
-      "git_blob_sha": "bca2a9948d7b69d2f88f79850cffa6d41df67e10"
+      "git_blob_sha": "b942234a923ba49a63408918c36cc71f3287c820"
     },
     {
       "path": "services/langgraph/agency/actions/broker.py",
@@ -725,6 +725,10 @@
     {
       "path": "supabase/migrations/20261012_amc_actions_v1.sql",
       "git_blob_sha": "7bdd18c625f0324c0b665b7bb775d039426bb607"
+    },
+    {
+      "path": "services/langgraph/api/routes/agency_os.py",
+      "git_blob_sha": "5a91cb9b51835f190f0baefb2b2a04bc03f1766a"
     }
   ]
 }
