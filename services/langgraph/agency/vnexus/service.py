@@ -281,9 +281,14 @@ def settle_version(principal: Principal, version_id: str) -> dict:
             # An ancestor changed while this version was in review; it can no longer be approved as is.
             return db.transition_version(version_id, from_status="IN_REVIEW", to_status="DRAFT", actor="system", action="refuse",
                                          detail={"reason": "ancestor genome changed during review", "readiness": report})
-    return db.transition_version(version_id, from_status="IN_REVIEW", to_status=target.value, actor=reviewer or "unknown",
-                                 action=action, detail={"approval_id": approval["approval_id"]},
-                                 decided_by=reviewer, decided_at=approval.get("decided_at") or db.now_iso())
+    settled = db.transition_version(version_id, from_status="IN_REVIEW", to_status=target.value, actor=reviewer or "unknown",
+                                    action=action, detail={"approval_id": approval["approval_id"]},
+                                    decided_by=reviewer, decided_at=approval.get("decided_at") or db.now_iso())
+    if action == "approve":
+        from .creative_service import record_genome_decision
+
+        record_genome_decision(settled, approval)
+    return settled
 
 
 def compare_versions(principal: Principal, a_id: str, b_id: str) -> dict:

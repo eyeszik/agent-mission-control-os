@@ -80,9 +80,10 @@
         "immutable approved versions, inheritance, conflicts, approval via existing approvals route, tenant isolation"
       ],
       "actual_results": [
-        "genome core+persistence+API+approval: 15/15 SQLite, 15/15 PostgreSQL 16 (all 11 migrations applied); TS parity 10/10; 7 gates pass"
+        "genome core+persistence+API+approval: 15/15 SQLite, 15/15 PostgreSQL 16 (all 11 migrations applied); TS parity 10/10; 7 gates pass",
+        "M2 verified on SQLite and PostgreSQL"
       ],
-      "status": "IN_PROGRESS",
+      "status": "COMPLETE",
       "retry_count": 0,
       "evidence_paths": [
         "services/langgraph/tests/test_vnexus_genome.py"
@@ -106,10 +107,14 @@
       "expected_results": [
         "typed nodes/edges, cycle rejection, impact, snapshot diff, evidence"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "graph: typed edges, lineage-cycle rejection, supersession history, as_of reads, impact paths, evidence, snapshot diff; 10 tests SQLite+PG"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_graph_multiverse.py"
+      ]
     },
     {
       "task_id": "TASK-04.0",
@@ -130,10 +135,14 @@
       "expected_results": [
         "fork/compare/review/promote-through-approval/reject/conflict report"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "branches: fork/sub-branch/compare/merge-conflict report/rebase/evaluations/feedback/promotion through approval/reject/archive"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_graph_multiverse.py"
+      ]
     },
     {
       "task_id": "TASK-05.0",

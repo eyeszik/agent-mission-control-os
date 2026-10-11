@@ -249,8 +249,200 @@ def transition_version(version_id: str, *, from_status: str, to_status: str, act
     return get_version(version_id)
 
 
+
+# --------------------------------------------------------------------------- knowledge graph
+
+_NODE_JSON = (("attributes", {}),)
+_EDGE_JSON = (("provenance", {}),)
+
+
+def insert_node(*, tenant_id: str, brand_id: str, kind: str, label: str, attributes: dict, content_hash: str, actor: str,
+                node_id: Optional[str] = None, db: Any = None) -> dict:
+    node_id = node_id or f"node-{uuid4().hex}"
+    stamp = now_iso()
+
+    def run(conn: Any) -> None:
+        conn.execute(
+            f"""INSERT INTO {table('vnexus_graph_nodes')} (node_id, tenant_id, brand_id, kind, label, attributes, content_hash,
+            valid_from, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (node_id, tenant_id, brand_id, kind, label, json_param(attributes), content_hash, stamp, actor, stamp))
+        append_audit(conn, tenant_id=tenant_id, chain_ref=brand_id, subject_type="graph_node", subject_id=node_id, action="create",
+                     actor=actor, to_state="VALID", detail={"kind": kind, "content_hash": content_hash})
+
+    if db is not None:
+        run(db)
+    else:
+        with transaction(write=True) as conn:
+            run(conn)
+    return {"node_id": node_id, "tenant_id": tenant_id, "brand_id": brand_id, "kind": kind, "label": label, "attributes": attributes,
+            "content_hash": content_hash, "valid_from": stamp, "valid_to": None, "superseded_by": None, "created_by": actor,
+            "created_at": stamp}
+
+
+def insert_edge(*, tenant_id: str, brand_id: str, kind: str, src: str, dst: str, provenance: dict, actor: str, db: Any = None) -> dict:
+    edge_id = f"edge-{uuid4().hex}"
+    stamp = now_iso()
+
+    def run(conn: Any) -> None:
+        conn.execute(
+            f"""INSERT INTO {table('vnexus_graph_edges')} (edge_id, tenant_id, brand_id, kind, src_node_id, dst_node_id, provenance,
+            valid_from, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (edge_id, tenant_id, brand_id, kind, src, dst, json_param(provenance), stamp, actor, stamp))
+        append_audit(conn, tenant_id=tenant_id, chain_ref=brand_id, subject_type="graph_edge", subject_id=edge_id, action="create",
+                     actor=actor, to_state="VALID", detail={"kind": kind, "src": src, "dst": dst})
+
+    if db is not None:
+        run(db)
+    else:
+        with transaction(write=True) as conn:
+            run(conn)
+    return {"edge_id": edge_id, "kind": kind, "src_node_id": src, "dst_node_id": dst, "provenance": provenance, "valid_from": stamp,
+            "valid_to": None}
+
+
+def close_node(db: Any, *, node_id: str, superseded_by: Optional[str], actor: str) -> None:
+    stamp = now_iso()
+    row = _rec(db.execute(f"SELECT * FROM {table('vnexus_graph_nodes')} WHERE node_id = ?", (node_id,)).fetchone(), _NODE_JSON)
+    cur = db.execute(f"UPDATE {table('vnexus_graph_nodes')} SET valid_to = ?, superseded_by = ? WHERE node_id = ? AND valid_to IS NULL",
+                     (stamp, superseded_by, node_id))
+    if cur.rowcount != 1:
+        raise VnexusConflict(f"node {node_id} is not currently valid")
+    append_audit(db, tenant_id=row["tenant_id"], chain_ref=row["brand_id"], subject_type="graph_node", subject_id=node_id,
+                 action="supersede" if superseded_by else "retire", actor=actor, from_state="VALID", to_state="CLOSED",
+                 detail={"superseded_by": superseded_by})
+
+
+def close_edge(edge_id: str, *, actor: str) -> None:
+    stamp = now_iso()
+    with transaction(write=True) as db:
+        row = _rec(db.execute(f"SELECT * FROM {table('vnexus_graph_edges')} WHERE edge_id = ?", (edge_id,)).fetchone(), _EDGE_JSON)
+        if row is None:
+            raise VnexusNotFound(f"edge {edge_id} not found")
+        cur = db.execute(f"UPDATE {table('vnexus_graph_edges')} SET valid_to = ? WHERE edge_id = ? AND valid_to IS NULL", (stamp, edge_id))
+        if cur.rowcount != 1:
+            raise VnexusConflict(f"edge {edge_id} is already closed")
+        append_audit(db, tenant_id=row["tenant_id"], chain_ref=row["brand_id"], subject_type="graph_edge", subject_id=edge_id,
+                     action="retire", actor=actor, from_state="VALID", to_state="CLOSED")
+
+
+def get_node(node_id: str) -> Optional[dict]:
+    with transaction() as db:
+        return _rec(db.execute(f"SELECT * FROM {table('vnexus_graph_nodes')} WHERE node_id = ?", (node_id,)).fetchone(), _NODE_JSON)
+
+
+def load_graph(db: Any, brand_id: str, *, lock: bool = False) -> tuple[list[dict], list[dict]]:
+    """Nodes and edges of one brand, read inside the caller's transaction (``lock`` serializes graph writers)."""
+    if lock:
+        _lock_chain(db, f"graph:{brand_id}")
+    nodes = [_rec(r, _NODE_JSON) for r in db.execute(
+        f"SELECT * FROM {table('vnexus_graph_nodes')} WHERE brand_id = ? ORDER BY created_at, node_id", (brand_id,)).fetchall()]
+    edges = [_rec(r, _EDGE_JSON) for r in db.execute(
+        f"SELECT * FROM {table('vnexus_graph_edges')} WHERE brand_id = ? ORDER BY created_at, edge_id", (brand_id,)).fetchall()]
+    return nodes, edges
+
+
+def list_graph(brand_id: str) -> tuple[list[dict], list[dict]]:
+    with transaction() as db:
+        return load_graph(db, brand_id)
+
+
+def find_node_by_ref(brand_id: str, kind: str, ref: str) -> Optional[dict]:
+    """The currently valid node of ``kind`` whose attributes.ref equals ``ref`` (used to link records to the graph)."""
+    nodes, _ = list_graph(brand_id)
+    found = [n for n in nodes if n["kind"] == kind and n["valid_to"] is None and (n["attributes"] or {}).get("ref") == ref]
+    return found[-1] if found else None
+
+
+# --------------------------------------------------------------------------- branches
+
+_BRANCH_JSON = (("changes", {}),)
+
+
+def create_branch(*, tenant_id: str, brand_id: str, scope: str, scope_ref: str, project_id: str, base_version_id: str,
+                  parent_branch_id: Optional[str], name: str, hypothesis: str, changes: dict, changes_hash: str, actor: str) -> dict:
+    branch_id = f"br-{uuid4().hex}"
+    stamp = now_iso()
+    with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
+        db.execute(
+            f"""INSERT INTO {table('vnexus_branches')} (branch_id, tenant_id, brand_id, scope, scope_ref, project_id, base_version_id,
+            parent_branch_id, name, hypothesis, changes, changes_hash, state, revision, created_by, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN', 1, ?, ?, ?)""",
+            (branch_id, tenant_id, brand_id, scope, scope_ref, project_id, base_version_id, parent_branch_id, name, hypothesis,
+             json_param(changes), changes_hash, actor, stamp, stamp))
+        append_audit(db, tenant_id=tenant_id, chain_ref=brand_id, subject_type="branch", subject_id=branch_id, action="fork",
+                     actor=actor, to_state="OPEN", detail={"base_version_id": base_version_id, "parent_branch_id": parent_branch_id,
+                                                           "changes_hash": changes_hash})
+    return get_branch(branch_id)
+
+
+def get_branch(branch_id: str) -> Optional[dict]:
+    with transaction() as db:
+        return _rec(db.execute(f"SELECT * FROM {table('vnexus_branches')} WHERE branch_id = ?", (branch_id,)).fetchone(), _BRANCH_JSON)
+
+
+def list_branches(brand_id: str) -> list[dict]:
+    with transaction() as db:
+        return [_rec(r, _BRANCH_JSON) for r in db.execute(
+            f"SELECT * FROM {table('vnexus_branches')} WHERE brand_id = ? ORDER BY created_at, branch_id", (brand_id,)).fetchall()]
+
+
+def update_branch(branch_id: str, *, expected_revision: int, actor: str, action: str, changes: Optional[dict] = None,
+                  changes_hash: Optional[str] = None, base_version_id: Optional[str] = None, state: Optional[str] = None,
+                  from_state: Optional[str] = None, proposal_version_id: Optional[str] = None,
+                  decision_note: Optional[str] = None, detail: Optional[dict] = None) -> dict:
+    """Compare-and-set on revision (and on state when ``from_state`` is given). Only OPEN branches change content."""
+    sets, params = ["revision = revision + 1", "updated_at = ?"], [now_iso()]
+    for column, value in (("changes", json_param(changes) if changes is not None else None), ("changes_hash", changes_hash),
+                          ("base_version_id", base_version_id), ("state", state), ("proposal_version_id", proposal_version_id),
+                          ("decision_note", decision_note)):
+        if value is not None:
+            sets.append(f"{column} = ?")
+            params.append(value)
+    where = "branch_id = ? AND revision = ?"
+    params += [branch_id, expected_revision]
+    if from_state:
+        where += " AND state = ?"
+        params.append(from_state)
+    if changes is not None or base_version_id is not None:
+        where += " AND state = 'OPEN'"
+    with transaction(write=True) as db:
+        row = _rec(db.execute(f"SELECT * FROM {table('vnexus_branches')} WHERE branch_id = ?", (branch_id,)).fetchone(), _BRANCH_JSON)
+        if row is None:
+            raise VnexusNotFound(f"branch {branch_id} not found")
+        cur = db.execute(f"UPDATE {table('vnexus_branches')} SET {', '.join(sets)} WHERE {where}", params)
+        if cur.rowcount != 1:
+            raise VnexusConflict(f"branch {branch_id} changed (state {row['state']}, revision {row['revision']})")
+        append_audit(db, tenant_id=row["tenant_id"], chain_ref=row["brand_id"], subject_type="branch", subject_id=branch_id,
+                     action=action, actor=actor, from_state=row["state"], to_state=state or row["state"],
+                     detail={"changes_hash": changes_hash or row["changes_hash"], **(detail or {})})
+    return get_branch(branch_id)
+
+
+def add_branch_evaluation(*, tenant_id: str, branch_id: str, kind: str, evaluator: str, changes_hash: str, payload: dict,
+                          payload_hash: str) -> dict:
+    evaluation_id = f"ev-{uuid4().hex}"
+    stamp = now_iso()
+    with transaction(write=True) as db:
+        db.execute(
+            f"""INSERT INTO {table('vnexus_branch_evaluations')} (evaluation_id, tenant_id, branch_id, kind, evaluator, changes_hash,
+            payload, payload_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (evaluation_id, tenant_id, branch_id, kind, evaluator, changes_hash, json_param(payload), payload_hash, stamp))
+    return {"evaluation_id": evaluation_id, "branch_id": branch_id, "kind": kind, "evaluator": evaluator, "changes_hash": changes_hash,
+            "payload": payload, "payload_hash": payload_hash, "created_at": stamp}
+
+
+def list_branch_evaluations(branch_id: str) -> list[dict]:
+    with transaction() as db:
+        return [_rec(r, (("payload", {}),)) for r in db.execute(
+            f"SELECT * FROM {table('vnexus_branch_evaluations')} WHERE branch_id = ? ORDER BY created_at, evaluation_id",
+            (branch_id,)).fetchall()]
+
+
 __all__ = [
     "GenomeImmutable", "VnexusConflict", "VnexusNotFound", "append_audit", "approved_version", "create_brand", "create_version",
     "get_brand", "get_version", "list_audit", "list_brands", "list_versions", "now_iso", "transition_version",
-    "update_version_document", "verify_audit_chain",
+    "update_version_document", "verify_audit_chain", "add_branch_evaluation", "close_edge", "close_node",
+    "create_branch", "find_node_by_ref", "get_branch", "get_node", "insert_edge", "insert_node", "list_branch_evaluations",
+    "list_branches", "list_graph", "load_graph", "update_branch",
 ]

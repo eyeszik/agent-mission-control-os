@@ -16,8 +16,10 @@ from typing import Any, Callable, Optional
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from services.langgraph.agency.vnexus import service
+from services.langgraph.agency.vnexus import creative_service, service
 from services.langgraph.agency.vnexus.genome import GenomeDocument, GenomeTransitionError, Scope
+from services.langgraph.agency.vnexus.graph import EdgeKind, GraphError, NodeKind
+from services.langgraph.agency.vnexus.multiverse import BranchTransitionError, ChangeSet
 from services.langgraph.api.routes._project_common import domain_errors
 from services.langgraph.persistence.idempotency import complete_idempotency, fail_idempotency, hash_payload, reserve_idempotency
 from services.langgraph.persistence.vnexus import VnexusConflict, VnexusNotFound
@@ -30,6 +32,8 @@ _VNEXUS_ERRORS: tuple[tuple[type[BaseException], int], ...] = (
     (VnexusConflict, 409),
     (GenomeTransitionError, 409),
     (service.GenomeIntegrityError, 409),
+    (GraphError, 409),
+    (BranchTransitionError, 409),
 )
 
 
@@ -42,6 +46,8 @@ def vnexus_errors(handler: Callable[..., Any]) -> Callable[..., Any]:
             return handler(*args, **kwargs)
         except service.GenomeBlocked as exc:
             raise HTTPException(status_code=409, detail={"message": str(exc), "readiness": exc.report}) from exc
+        except creative_service.MergeConflict as exc:
+            raise HTTPException(status_code=409, detail={"message": str(exc), "report": exc.report}) from exc
         except HTTPException:
             raise
         except Exception as exc:  # noqa: BLE001 - re-raised unless mapped
@@ -208,3 +214,213 @@ def revert(version_id: str, idempotency_key: str = Header(..., alias="Idempotenc
 def compare(from_version: str = Query(..., alias="from"), to_version: str = Query(..., alias="to"),
             principal: Principal = Depends(get_principal)) -> dict:
     return service.compare_versions(principal, from_version, to_version)
+
+
+# --------------------------------------------------------------------------- knowledge graph
+
+
+class NodeCreate(BaseModel):
+    kind: NodeKind
+    label: str = Field(min_length=1, max_length=200)
+    attributes: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = {"extra": "forbid"}
+
+
+class EdgeCreate(BaseModel):
+    kind: EdgeKind
+    src_node_id: str = Field(min_length=1, max_length=80)
+    dst_node_id: str = Field(min_length=1, max_length=80)
+    provenance: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = {"extra": "forbid"}
+
+
+class NodeSupersede(BaseModel):
+    label: str = Field(min_length=1, max_length=200)
+    attributes: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = {"extra": "forbid"}
+
+
+class ImpactRequest(BaseModel):
+    node_ids: list[str] = Field(min_length=1, max_length=50)
+    as_of: Optional[str] = None
+
+    model_config = {"extra": "forbid"}
+
+
+@router.get("/brands/{brand_id}/graph")
+@vnexus_errors
+def graph_view(brand_id: str, as_of: Optional[str] = None, principal: Principal = Depends(get_principal)) -> dict:
+    return creative_service.graph_view(principal, brand_id, as_of=as_of)
+
+
+@router.post("/brands/{brand_id}/graph/nodes", status_code=201)
+@vnexus_errors
+def add_node(brand_id: str, req: NodeCreate, principal: Principal = Depends(get_principal)) -> dict:
+    return {"node": creative_service.add_node(principal, brand_id, kind=req.kind, label=req.label, attributes=req.attributes)}
+
+
+@router.post("/brands/{brand_id}/graph/edges", status_code=201)
+@vnexus_errors
+def add_edge(brand_id: str, req: EdgeCreate, principal: Principal = Depends(get_principal)) -> dict:
+    return {"edge": creative_service.add_edge(principal, brand_id, kind=req.kind, src=req.src_node_id, dst=req.dst_node_id,
+                                              provenance=req.provenance)}
+
+
+@router.delete("/brands/{brand_id}/graph/edges/{edge_id}")
+@vnexus_errors
+def retire_edge(brand_id: str, edge_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    creative_service.retire_edge(principal, brand_id, edge_id)
+    return {"retired": edge_id}
+
+
+@router.post("/graph/nodes/{node_id}/supersede", status_code=201)
+@vnexus_errors
+def supersede_node(node_id: str, req: NodeSupersede, principal: Principal = Depends(get_principal)) -> dict:
+    return {"node": creative_service.supersede_node(principal, node_id, label=req.label, attributes=req.attributes)}
+
+
+@router.get("/graph/nodes/{node_id}/evidence")
+@vnexus_errors
+def node_evidence(node_id: str, as_of: Optional[str] = None, principal: Principal = Depends(get_principal)) -> dict:
+    return creative_service.evidence(principal, node_id, as_of=as_of)
+
+
+@router.post("/brands/{brand_id}/graph/impact")
+@vnexus_errors
+def graph_impact(brand_id: str, req: ImpactRequest, principal: Principal = Depends(get_principal)) -> dict:
+    return creative_service.impact(principal, brand_id, req.node_ids, as_of=req.as_of)
+
+
+@router.get("/brands/{brand_id}/graph/diff")
+@vnexus_errors
+def graph_diff(brand_id: str, from_ts: str = Query(..., alias="from"), to_ts: Optional[str] = Query(None, alias="to"),
+               principal: Principal = Depends(get_principal)) -> dict:
+    return creative_service.snapshot_diff(principal, brand_id, from_ts=from_ts, to_ts=to_ts)
+
+
+# --------------------------------------------------------------------------- creative multiverse
+
+
+class BranchCreate(BaseModel):
+    base_version_id: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=120)
+    hypothesis: str = Field(default="", max_length=1000)
+    changes: ChangeSet
+    parent_branch_id: Optional[str] = None
+
+    model_config = {"extra": "forbid"}
+
+
+class BranchEdit(BaseModel):
+    expected_revision: int = Field(ge=1)
+    changes: ChangeSet
+
+    model_config = {"extra": "forbid"}
+
+
+class BranchFeedback(BaseModel):
+    text: str = Field(min_length=1, max_length=4000)
+    decision: Optional[str] = None
+
+    model_config = {"extra": "forbid"}
+
+
+class BranchMerge(BaseModel):
+    other_branch_id: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=120)
+
+    model_config = {"extra": "forbid"}
+
+
+@router.get("/brands/{brand_id}/branches")
+@vnexus_errors
+def list_branches(brand_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"branches": creative_service.list_branches(principal, brand_id)}
+
+
+@router.post("/brands/{brand_id}/branches", status_code=201)
+@vnexus_errors
+def fork_branch(brand_id: str, req: BranchCreate, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "branch.fork", idempotency_key, payload, lambda: {"branch": creative_service.fork(
+        principal, brand_id, base_version_id=req.base_version_id, name=req.name, hypothesis=req.hypothesis, changes=req.changes,
+        parent_branch_id=req.parent_branch_id)})
+
+
+@router.get("/branches/{branch_id}")
+@vnexus_errors
+def get_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"branch": creative_service.get_branch(principal, branch_id)}
+
+
+@router.put("/branches/{branch_id}")
+@vnexus_errors
+def edit_branch(branch_id: str, req: BranchEdit, principal: Principal = Depends(get_principal)) -> dict:
+    return {"branch": creative_service.edit(principal, branch_id, expected_revision=req.expected_revision, changes=req.changes)}
+
+
+@router.get("/branches/{branch_id}/compare")
+@vnexus_errors
+def compare_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"comparison": creative_service.compare(principal, branch_id)}
+
+
+@router.get("/branches/{branch_id}/compare/{other_id}")
+@vnexus_errors
+def compare_two_branches(branch_id: str, other_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"comparison": creative_service.compare_two(principal, branch_id, other_id)}
+
+
+@router.post("/branches/{branch_id}/evaluations", status_code=201)
+@vnexus_errors
+def evaluate_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"evaluation": creative_service.evaluate(principal, branch_id)}
+
+
+@router.post("/branches/{branch_id}/feedback", status_code=201)
+@vnexus_errors
+def branch_feedback(branch_id: str, req: BranchFeedback, principal: Principal = Depends(get_principal)) -> dict:
+    return {"evaluation": creative_service.record_feedback(principal, branch_id, text=req.text, decision=req.decision)}
+
+
+@router.post("/branches/{branch_id}/merge", status_code=201)
+@vnexus_errors
+def merge_branches(branch_id: str, req: BranchMerge, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                   principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"branch_id": branch_id, **req.model_dump()}
+    return idempotent(principal, "branch.merge", idempotency_key, payload,
+                      lambda: creative_service.merge(principal, branch_id, req.other_branch_id, name=req.name))
+
+
+@router.post("/branches/{branch_id}/rebase")
+@vnexus_errors
+def rebase_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return creative_service.rebase_branch(principal, branch_id)
+
+
+@router.post("/branches/{branch_id}/submit")
+@vnexus_errors
+def submit_branch(branch_id: str, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                  principal: Principal = Depends(get_principal)) -> dict:
+    return idempotent(principal, "branch.submit", idempotency_key, {"branch_id": branch_id},
+                      lambda: _jsonable(creative_service.submit(principal, branch_id)))
+
+
+@router.post("/branches/{branch_id}/settle")
+@vnexus_errors
+def settle_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"branch": creative_service.settle(principal, branch_id)}
+
+
+@router.post("/branches/{branch_id}/archive")
+@vnexus_errors
+def archive_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"branch": creative_service.archive(principal, branch_id)}
+
+
+def _jsonable(result: dict) -> dict:
+    return {"branch": result["branch"], "proposal": _public(result["proposal"])}
