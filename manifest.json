@@ -268,7 +268,7 @@
     },
     {
       "path": "services/langgraph/api/routes/approvals.py",
-      "git_blob_sha": "91322613469c162561d8ff11af2d695d87be0cbf"
+      "git_blob_sha": "17b07c71945fdcc5b1a48dca3da63bec72249f0f"
     },
     {
       "path": "services/langgraph/api/routes/compiled_agency.py",
@@ -308,7 +308,7 @@
     },
     {
       "path": "services/langgraph/app/main.py",
-      "git_blob_sha": "875a6963f504c2d4b359b29d7cdb370f2e1661fc"
+      "git_blob_sha": "888fc2b1358784d9b8f21f57c749efb45b6557eb"
     },
     {
       "path": "services/langgraph/graph/agency/models.py",
@@ -380,7 +380,7 @@
     },
     {
       "path": "services/langgraph/persistence/sqlite_db.py",
-      "git_blob_sha": "8343634629d64cc70e8cc1f07115d5ebbb8682da"
+      "git_blob_sha": "dfa7e2db587f79dda33b8d3616f0407360a1d06b"
     },
     {
       "path": "services/langgraph/persistence/tenancy.py",
@@ -400,7 +400,7 @@
     },
     {
       "path": "services/langgraph/security/approval_authority.py",
-      "git_blob_sha": "4150dcb7c915f9b9aaf339467d83a4c369fe8fde"
+      "git_blob_sha": "3723f812d432a0a09f9b9a0a631f2384603053ec"
     },
     {
       "path": "services/langgraph/security/auth.py",
@@ -685,6 +685,46 @@
     {
       "path": "services/langgraph/agency/vnexus/intelligence_service.py",
       "git_blob_sha": "c8aff3fb449fa58f239d6dbae633ca9cbda38e89"
+    },
+    {
+      "path": "services/langgraph/agency/actions/gateway.py",
+      "git_blob_sha": "bca2a9948d7b69d2f88f79850cffa6d41df67e10"
+    },
+    {
+      "path": "services/langgraph/agency/actions/broker.py",
+      "git_blob_sha": "68ec8749e4cb787c7f536e975328d88a03878e6c"
+    },
+    {
+      "path": "services/langgraph/agency/actions/governance.py",
+      "git_blob_sha": "a0c17efc053a0befca030afd996966a923070a1a"
+    },
+    {
+      "path": "services/langgraph/agency/actions/catalog.py",
+      "git_blob_sha": "f0530ca1cbc88d456b8adfdcd73396ff3210c508"
+    },
+    {
+      "path": "services/langgraph/agency/actions/adapters.py",
+      "git_blob_sha": "d75bffda906eb25d1145fc559cb855db9ed30e78"
+    },
+    {
+      "path": "services/langgraph/agency/actions/safety.py",
+      "git_blob_sha": "2a6e24d1df5307911a2d321db6d89637d9ffd1b6"
+    },
+    {
+      "path": "services/langgraph/agency/actions/risk.py",
+      "git_blob_sha": "2a05551fc71081748cee4884675214a907431a72"
+    },
+    {
+      "path": "services/langgraph/persistence/actions.py",
+      "git_blob_sha": "36645988874ce22816944b4e1ac481fd472c70d6"
+    },
+    {
+      "path": "services/langgraph/api/routes/actions.py",
+      "git_blob_sha": "1d2e3a21dec37f8703a64124cfaae5495d3e6bff"
+    },
+    {
+      "path": "supabase/migrations/20261012_amc_actions_v1.sql",
+      "git_blob_sha": "7bdd18c625f0324c0b665b7bb775d039426bb607"
     }
   ]
 }

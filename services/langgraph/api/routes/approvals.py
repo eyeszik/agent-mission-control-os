@@ -58,7 +58,7 @@ def decide_approval(
     approval_run = get_run_record(approval["run_id"])
     if approval_run is not None:
         # Role and separation-of-duties checks run before any state changes.
-        assert_may_decide_approval(principal, approval_run, body.decision)
+        assert_may_decide_approval(principal, approval_run, body.decision, approval)
 
     scope = _scope(principal, approval_id)
     reservation = reserve_idempotency(

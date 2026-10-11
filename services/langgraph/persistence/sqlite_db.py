@@ -1116,6 +1116,166 @@ _MIGRATIONS = [
         create index if not exists idx_vnexus_media_jobs_project on vnexus_media_jobs(project_id, state);
         create index if not exists idx_vnexus_measurements_campaign on vnexus_measurements(project_id, campaign_ref);
     """),
+    (16, """
+        -- ACE v12 governed action plane and agency clients. Additive only: no existing
+        -- table is altered. Mirrors supabase/migrations/20261012_amc_actions_v1.sql.
+
+        create table if not exists action_requests (
+            action_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            project_id text not null references projects(project_id) on delete cascade,
+            client_id text,
+            capability_id text not null,
+            capability_version text not null,
+            environment text not null check (environment in ('LOCAL','SANDBOX','LIVE')),
+            actor_ref text not null,
+            target_ref text not null,
+            args text not null,
+            args_hash text not null,
+            payload_hash text not null,
+            context_hash text not null,
+            dependency_hashes text not null,
+            policy_version text not null,
+            risk text not null,
+            risk_hash text not null,
+            effective_class text not null check (effective_class in ('R0','R1','R2','R3','R4','R5','R6')),
+            binding text not null,
+            binding_hash text not null,
+            run_id text,
+            approval_id text,
+            financial_approval_id text,
+            budget_reservation_id text,
+            idempotency_key text not null,
+            request_hash text not null,
+            correlation_id text not null,
+            state text not null check (state in ('PROPOSED','VALIDATED','PREPARED','AWAITING_APPROVAL','AUTHORIZED','RESERVED',
+                'DISPATCHING','OBSERVING','VERIFIED','COMPLETED','REJECTED','BLOCKED','EXPIRED','CANCELLED','FAILED','UNKNOWN',
+                'RECONCILING','NEEDS_HUMAN')),
+            version integer not null default 1 check (version >= 1),
+            attempts integer not null default 0 check (attempts >= 0 and attempts <= 3),
+            reconcile_attempts integer not null default 0 check (reconcile_attempts >= 0),
+            lease_owner text,
+            lease_expires_at text,
+            retry_eligible integer not null default 0,
+            reasons text not null,
+            outcome text,
+            injection_flags text not null,
+            created_at text not null,
+            updated_at text not null,
+            expires_at text not null,
+            unique (tenant_id, idempotency_key)
+        );
+
+        create table if not exists action_transitions (
+            entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            action_id text not null references action_requests(action_id) on delete cascade,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            from_state text,
+            to_state text not null,
+            actor text not null,
+            reason text not null,
+            evidence text not null,
+            prev_hash text,
+            entry_hash text not null,
+            created_at text not null
+        );
+
+        create table if not exists action_budget_policies (
+            policy_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            scope_kind text not null check (scope_kind in ('ACTION','PROJECT','CLIENT','TENANT_DAY','TENANT_MONTH')),
+            scope_ref text not null,
+            currency text not null check (length(currency) = 3 and currency = upper(currency)),
+            ceiling_minor bigint not null check (ceiling_minor >= 0),
+            created_by text not null,
+            created_at text not null,
+            unique (tenant_id, scope_kind, scope_ref, currency)
+        );
+
+        create table if not exists action_budget_reservations (
+            reservation_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            project_id text not null references projects(project_id) on delete cascade,
+            client_id text,
+            action_id text not null references action_requests(action_id) on delete cascade,
+            currency text not null check (length(currency) = 3 and currency = upper(currency)),
+            amount_minor bigint not null check (amount_minor >= 0),
+            committed_minor bigint check (committed_minor is null or committed_minor >= 0),
+            status text not null check (status in ('RESERVED','COMMITTED','RELEASED','EXPIRED','REFUNDED')),
+            expires_at text not null,
+            evidence text not null,
+            created_at text not null,
+            updated_at text not null
+        );
+
+        create table if not exists action_freezes (
+            freeze_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            scope_kind text not null check (scope_kind in ('TENANT','PROJECT')),
+            scope_ref text not null,
+            reason text not null,
+            frozen_by text not null,
+            frozen_at text not null,
+            lifted_by text,
+            lifted_at text,
+            lift_reason text
+        );
+
+        create table if not exists action_project_settings (
+            project_id text primary key references projects(project_id) on delete cascade,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            autonomy text not null check (autonomy in ('OBSERVE','DRAFT','PREPARE','REQUEST_APPROVAL')),
+            updated_by text not null,
+            updated_at text not null
+        );
+
+        -- The sandbox fake providers' "remote" state. Only sandbox adapters read or
+        -- write it; nothing here was delivered anywhere.
+        create table if not exists action_sandbox_effects (
+            effect_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            provider text not null,
+            operation text not null,
+            idempotency_key text not null,
+            target_ref text not null,
+            payload_hash text not null,
+            state text not null,
+            cost_minor bigint not null default 0,
+            currency text,
+            body text not null,
+            created_at text not null,
+            updated_at text not null,
+            unique (tenant_id, provider, idempotency_key)
+        );
+
+        create table if not exists agency_clients (
+            client_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            display_name text not null,
+            slug text not null,
+            status text not null check (status in ('ACTIVE','OFFBOARDING','ARCHIVED')),
+            notes text not null default '',
+            created_by text not null,
+            created_at text not null,
+            updated_at text not null,
+            unique (tenant_id, slug)
+        );
+
+        create table if not exists agency_client_projects (
+            project_id text primary key references projects(project_id) on delete cascade,
+            client_id text not null references agency_clients(client_id) on delete cascade,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            linked_by text not null,
+            linked_at text not null
+        );
+
+        create index if not exists idx_action_requests_project on action_requests(project_id, state);
+        create index if not exists idx_action_requests_tenant_state on action_requests(tenant_id, state);
+        create index if not exists idx_action_transitions_action on action_transitions(action_id, entry_id);
+        create index if not exists idx_action_reservations_tenant on action_budget_reservations(tenant_id, currency, status);
+        create index if not exists idx_action_freezes_scope on action_freezes(tenant_id, scope_kind, scope_ref);
+        create index if not exists idx_agency_client_projects_client on agency_client_projects(client_id);
+    """),
 ]
 
 

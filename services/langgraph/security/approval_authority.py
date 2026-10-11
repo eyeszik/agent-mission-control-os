@@ -62,8 +62,21 @@ def assert_may_decide(principal: Principal, initiator: str | None, decision: str
         raise HTTPException(status_code=403, detail=f"The principal who started a {subject} cannot approve it")
 
 
-def assert_may_decide_approval(principal: Principal, run: dict, decision: str) -> None:
+def assert_may_decide_approval(principal: Principal, run: dict, decision: str, approval: dict | None = None) -> None:
     assert_may_decide(principal, run_initiator(run), decision, subject="run")
+    if approval is None:
+        return
+    # A server-written policy on the anchor run may narrow who decides one kind of
+    # approval (financial, governance). It can only narrow: the checks above
+    # still apply. Clients never write run metadata.
+    policy = ((run.get("metadata") or {}).get("approval_policy") or {}).get(approval.get("subject_type") or "")
+    if not policy:
+        return
+    roles = {str(r).strip().lower() for r in policy.get("roles") or ()}
+    if roles and principal.role.strip().lower() not in roles:
+        raise HTTPException(status_code=403, detail=f"Deciding this approval requires one of {sorted(roles)}")
+    if decision == "approve" and policy.get("no_self_approval") and run_initiator(run) == principal.user_id:
+        raise HTTPException(status_code=403, detail="This approval can never be decided by the principal who requested it")
 
 
 __all__ = [
