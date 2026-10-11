@@ -21,6 +21,7 @@ from services.langgraph.api.routes import (
     project_ops,
     projects,
     runtime,
+    vnexus,
 )
 from services.langgraph.app.config import (
     assert_runtime_configuration,
@@ -88,6 +89,7 @@ app.include_router(operations.router, prefix="/operations", tags=["Operations"])
 app.include_router(runtime.router, prefix="/runtime", tags=["Runtime"])
 app.include_router(design.router, prefix="/design", tags=["Design Mode"])
 app.include_router(foundry.router, prefix="/foundry", tags=["Creative Foundry"])
+app.include_router(vnexus.router, prefix="/vnexus", tags=["VNEXUS"])
 app.include_router(compiled_agency.router, prefix="/compiled-agency", tags=["Compiled Agency"])
 app.include_router(projects.router, prefix="/projects", tags=["Projects"])
 app.include_router(project_ops.router, prefix="/projects", tags=["Project Operations"])

@@ -1,0 +1,45 @@
+{
+  "system": "VNEXUS_ACE_v11",
+  "execution_mode": "AUTONOMOUS_VERIFIED",
+  "primary_objective": "Complete VNEXUS ACE repository integration",
+  "repository": "eyeszik/agent-mission-control-os",
+  "active_branch": "claude/ai-agency-pipeline-oae65z",
+  "last_completed_task_id": "TASK-01.0",
+  "execution_status": "RUNNING",
+  "completed_tasks": [
+    "TASK-00.0",
+    "TASK-01.0"
+  ],
+  "pending_tasks": [
+    "TASK-03.0",
+    "TASK-04.0",
+    "TASK-05.0",
+    "TASK-06.0",
+    "TASK-07.0",
+    "TASK-08.0",
+    "TASK-09.0",
+    "TASK-10.0",
+    "TASK-11.0",
+    "TASK-12.0",
+    "TASK-13.0",
+    "TASK-14.0",
+    "TASK-15.0",
+    "TASK-02.0"
+  ],
+  "blocked_tasks": [],
+  "verified_artifacts": [],
+  "test_results": [],
+  "commit_history": [
+    "de0566b5 ci(vnexus): build workspace packages before the web typecheck",
+    "ba247b50 Merge PR #127 (VNEXUS brand genome foundation) into the VNEXUS ACE v11 branch",
+    "4a6de182 ci: use packageManager as single pnpm version source",
+    "e2c4b797 fix: avoid Set iteration unsupported by TypeScript target",
+    "7b09eb07 ci(vnexus): run brand genome tests and web typecheck before merge",
+    "24342be2 feat(vnexus): add brand genome foundation and integration contract",
+    "c11e3a4e feat(vnexus): add brand genome foundation and integration contract",
+    "bf47532c feat(vnexus): add brand genome foundation and integration contract"
+  ],
+  "pull_requests": [],
+  "next_action": "TASK-02.0 persistent brand genome",
+  "pause_reason": null
+}

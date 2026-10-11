@@ -1,0 +1,405 @@
+{
+  "system": "VNEXUS_ACE_v11",
+  "tasks": [
+    {
+      "task_id": "TASK-00.0",
+      "phase": "M0",
+      "objective": "Environment verification and repository audit",
+      "dependencies": [],
+      "preconditions": [],
+      "files_to_modify": [
+        "workspace/repository_audit.json",
+        "workspace/capability_matrix.json"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "git status/log, gh api pulls, tool versions"
+      ],
+      "expected_results": [
+        "audit files written from observed output"
+      ],
+      "actual_results": [
+        "audit written from observed git/gh/tool output"
+      ],
+      "status": "COMPLETE",
+      "retry_count": 0,
+      "evidence_paths": [
+        "workspace/capability_matrix.json",
+        "workspace/repository_audit.json"
+      ]
+    },
+    {
+      "task_id": "TASK-01.0",
+      "phase": "M1",
+      "objective": "PR #127 reconciliation and CI stabilization",
+      "dependencies": [
+        "TASK-00.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        ".github/workflows/vnexus-brand-genome.yml"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pnpm --filter @amc/web typecheck",
+        "pnpm --filter @amc/web exec vitest run tests/brand-genome.test.ts"
+      ],
+      "expected_results": [
+        "typecheck clean after package build; 6 genome tests pass"
+      ],
+      "actual_results": [
+        "genome-validation failed on Web typecheck (packages not built); reproduced 88 TS errors locally; fixed workflow; typecheck clean; 6/6 genome tests pass"
+      ],
+      "status": "COMPLETE",
+      "retry_count": 0,
+      "evidence_paths": [
+        ".github/workflows/vnexus-brand-genome.yml"
+      ]
+    },
+    {
+      "task_id": "TASK-02.0",
+      "phase": "M2",
+      "objective": "Persistent Brand Genome",
+      "dependencies": [
+        "TASK-01.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/agency/vnexus/genome.py",
+        "services/langgraph/persistence/vnexus.py",
+        "services/langgraph/persistence/sqlite_db.py",
+        "supabase/migrations/20261011_amc_vnexus_v1.sql",
+        "services/langgraph/api/routes/vnexus.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest services/langgraph/tests/test_vnexus_genome.py",
+        "pytest (postgres) test_vnexus_genome.py"
+      ],
+      "expected_results": [
+        "immutable approved versions, inheritance, conflicts, approval via existing approvals route, tenant isolation"
+      ],
+      "actual_results": [
+        "genome core+persistence+API+approval: 15/15 SQLite, 15/15 PostgreSQL 16 (all 11 migrations applied); TS parity 10/10; 7 gates pass"
+      ],
+      "status": "IN_PROGRESS",
+      "retry_count": 0,
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_genome.py"
+      ]
+    },
+    {
+      "task_id": "TASK-03.0",
+      "phase": "M3",
+      "objective": "Temporal Brand Knowledge Graph",
+      "dependencies": [
+        "TASK-02.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/agency/vnexus/graph.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest test_vnexus_graph.py"
+      ],
+      "expected_results": [
+        "typed nodes/edges, cycle rejection, impact, snapshot diff, evidence"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-04.0",
+      "phase": "M4",
+      "objective": "Creative Multiverse and branch lifecycle",
+      "dependencies": [
+        "TASK-02.0",
+        "TASK-03.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/agency/vnexus/multiverse.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest test_vnexus_multiverse.py"
+      ],
+      "expected_results": [
+        "fork/compare/review/promote-through-approval/reject/conflict report"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-05.0",
+      "phase": "M5",
+      "objective": "Experience Compiler",
+      "dependencies": [
+        "TASK-02.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/agency/vnexus/experience.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest test_vnexus_production.py"
+      ],
+      "expected_results": [
+        "deterministic compiled experience + Chromium-verified HTML where available"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-06.0",
+      "phase": "M6",
+      "objective": "Autonomous Art Director",
+      "dependencies": [
+        "TASK-02.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/agency/vnexus/art_director.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest"
+      ],
+      "expected_results": [
+        "claim classes + rubric"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-07.0",
+      "phase": "M7",
+      "objective": "Graphic Design and Identity Production",
+      "dependencies": [
+        "TASK-02.0",
+        "TASK-10.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/agency/vnexus/identity.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest"
+      ],
+      "expected_results": [
+        "format probes + deterministic validators on real outputs"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-08.0",
+      "phase": "M8",
+      "objective": "Video and Motion Production",
+      "dependencies": [
+        "TASK-10.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/agency/vnexus/video.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest"
+      ],
+      "expected_results": [
+        "truthful render lifecycle"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-09.0",
+      "phase": "M9",
+      "objective": "Marketing Intelligence",
+      "dependencies": [
+        "TASK-02.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/agency/vnexus/marketing.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest"
+      ],
+      "expected_results": [
+        "no fabricated metrics"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-10.0",
+      "phase": "M10",
+      "objective": "Prompt Genome and provider-neutral media fabric",
+      "dependencies": [
+        "TASK-02.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/agency/vnexus/prompt_genome.py",
+        "services/langgraph/agency/vnexus/media_fabric.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest"
+      ],
+      "expected_results": [
+        "mock/local/disabled adapters; budget; idempotency"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-11.0",
+      "phase": "M11",
+      "objective": "Design Immune System and Creative Digital Twin",
+      "dependencies": [
+        "TASK-02.0",
+        "TASK-03.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/agency/vnexus/immune.py",
+        "services/langgraph/agency/vnexus/twin.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest"
+      ],
+      "expected_results": [
+        "severity findings; simulations labelled"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-12.0",
+      "phase": "M12",
+      "objective": "Creative Foundry UI",
+      "dependencies": [
+        "TASK-02.0",
+        "TASK-03.0",
+        "TASK-04.0",
+        "TASK-05.0",
+        "TASK-09.0",
+        "TASK-10.0",
+        "TASK-11.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "apps/web/components/mission-control/vnexus/*"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pnpm --filter @amc/web typecheck/test/build",
+        "browser drive"
+      ],
+      "expected_results": [
+        "every visible action backed by an API"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-13.0",
+      "phase": "M13",
+      "objective": "Security, authorization, observability, governance",
+      "dependencies": [
+        "TASK-02.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "services/langgraph/tests/test_vnexus_security.py"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "pytest negative tests"
+      ],
+      "expected_results": [
+        "cross-tenant and unauthorized writes denied"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-14.0",
+      "phase": "M14",
+      "objective": "Integration, E2E, regression, performance",
+      "dependencies": [
+        "TASK-12.0",
+        "TASK-13.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [],
+      "implementation_actions": [],
+      "verification_commands": [
+        "full backend suite sqlite+postgres",
+        "web tests",
+        "gates"
+      ],
+      "expected_results": [
+        "no regressions"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    },
+    {
+      "task_id": "TASK-15.0",
+      "phase": "M15",
+      "objective": "Documentation, deployment readiness, delivery",
+      "dependencies": [
+        "TASK-14.0"
+      ],
+      "preconditions": [],
+      "files_to_modify": [
+        "docs/vnexus-ace.md",
+        "workspace/release_readiness.json"
+      ],
+      "implementation_actions": [],
+      "verification_commands": [
+        "7 verifier gates"
+      ],
+      "expected_results": [
+        "draft PR with evidence"
+      ],
+      "actual_results": [],
+      "status": "PENDING",
+      "retry_count": 0,
+      "evidence_paths": []
+    }
+  ]
+}
