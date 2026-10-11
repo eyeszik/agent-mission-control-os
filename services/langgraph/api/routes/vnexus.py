@@ -14,6 +14,7 @@ import inspect
 from typing import Any, Callable, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from services.langgraph.agency.vnexus import (
@@ -59,11 +60,11 @@ def vnexus_errors(handler: Callable[..., Any]) -> Callable[..., Any]:
         try:
             return handler(*args, **kwargs)
         except service.GenomeBlocked as exc:
-            raise HTTPException(status_code=409, detail={"message": str(exc), "readiness": exc.report}) from exc
+            return _blocked("VNEXUS_BLOCKED", str(exc), {"message": str(exc), "readiness": exc.report})
         except fabric_service.RateLimited as exc:
             raise HTTPException(status_code=429, detail=str(exc)) from exc
         except creative_service.MergeConflict as exc:
-            raise HTTPException(status_code=409, detail={"message": str(exc), "report": exc.report}) from exc
+            return _blocked("VNEXUS_MERGE_CONFLICT", str(exc), {"message": str(exc), "report": exc.report})
         except HTTPException:
             raise
         except Exception as exc:  # noqa: BLE001 - re-raised unless mapped
@@ -74,6 +75,12 @@ def vnexus_errors(handler: Callable[..., Any]) -> Callable[..., Any]:
 
     mapped.__signature__ = inspect.signature(handler)  # type: ignore[attr-defined]
     return domain_errors(mapped)
+
+
+def _blocked(code: str, message: str, detail: dict) -> JSONResponse:
+    """409 with the structured report in ``detail`` and the AMC error envelope, so clients get a readable message."""
+    return JSONResponse(status_code=409, content={"detail": detail, "error": {"code": code, "message": message, "status": 409,
+                                                                              "details": detail}})
 
 
 def idempotent(principal: Principal, operation: str, key: str, payload: dict, run: Callable[[], dict]) -> dict:
