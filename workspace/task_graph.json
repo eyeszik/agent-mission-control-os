@@ -271,10 +271,14 @@
       "expected_results": [
         "no fabricated metrics"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "marketing: segments/brief/messaging matrix/channels/UTM/calendar PLANNED+DISABLED/power calcs/measurement contracts; report MEASURED-only; forecast SIMULATED"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_intelligence.py"
+      ]
     },
     {
       "task_id": "TASK-10.0",
@@ -296,11 +300,14 @@
         "mock/local/disabled adapters; budget; idempotency"
       ],
       "actual_results": [
-        "media fabric done (5 local, 3 disabled hosted, mock gated; lifecycle, idempotency, budget, spend approval, retry, integrity, rate limit); prompt genome pending"
+        "media fabric done (5 local, 3 disabled hosted, mock gated; lifecycle, idempotency, budget, spend approval, retry, integrity, rate limit); prompt genome pending",
+        "prompt genome over the unchanged five-pass compiler (PROMPT_PACKAGE_READY), refuses incomplete genome, byte-exact original import with SHA-256, inventory 0/14 SOURCE_REQUIRED, regression + adaptation (no provider call)"
       ],
-      "status": "IN_PROGRESS",
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_intelligence.py"
+      ]
     },
     {
       "task_id": "TASK-11.0",
@@ -322,10 +329,14 @@
       "expected_results": [
         "severity findings; simulations labelled"
       ],
-      "actual_results": [],
-      "status": "PENDING",
+      "actual_results": [
+        "immune scan (genome findings, off-palette, typeface, contrast, dims, provenance, stale source, tamper, schema, a11y) + remediation limited to colour snap revisions and provenance edges; twin snapshot/simulate/outage, nothing written"
+      ],
+      "status": "COMPLETE",
       "retry_count": 0,
-      "evidence_paths": []
+      "evidence_paths": [
+        "services/langgraph/tests/test_vnexus_intelligence.py"
+      ]
     },
     {
       "task_id": "TASK-12.0",

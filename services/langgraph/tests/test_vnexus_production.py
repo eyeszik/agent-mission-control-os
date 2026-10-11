@@ -17,18 +17,11 @@ from services.langgraph.agency.vnexus import media_fabric
 from services.langgraph.agency.vnexus.genome import document_from_flat
 from services.langgraph.agency.visual.browser import probe_browser
 from services.langgraph.tests._project_os_support import as_user, client, headers
-from services.langgraph.tests._vnexus_support import BRAND_DOC, _approve, _c, _draft, make_world
+from services.langgraph.tests._vnexus_support import FULL_DOC, _approve, _c, _draft, make_world
 
 BROWSER = probe_browser().get("available", False)
 needs_browser = pytest.mark.skipif(not BROWSER, reason="NOT_RUN: local Chromium unavailable")
 needs_ffmpeg = pytest.mark.skipif(shutil.which("ffmpeg") is None or not BROWSER, reason="NOT_RUN: ffmpeg or Chromium unavailable")
-
-FULL_DOC = document_from_flat(
-    {**BRAND_DOC.flatten(), "visual.color.accent_2": "#0f766e", "visual.color.muted": "#57534e",
-     "visual.shape_grammar.swiss_editorial": 0.7, "visual.shape_grammar.bauhaus_geometry": 0.3, "visual.logo.mark": "ring_dot",
-     "visual.typography.body": "Inter", "strategy.audience.primary": "people furnishing a first home (fictional persona)",
-     "strategy.positioning.statement": "Small-batch stoneware (fictional brand)"},
-    constraints=list(BRAND_DOC.constraints))
 
 
 @pytest.fixture

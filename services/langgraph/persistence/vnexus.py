@@ -518,11 +518,79 @@ def recent_runs(tenant_id: str, provider_id: str, since: str) -> int:
     return int(normalize_record(row)["n"])
 
 
+
+# --------------------------------------------------------------------------- prompt genomes
+
+_PROMPT_JSON = (("document", {}),)
+
+
+def create_prompt_version(*, tenant_id: str, brand_id: str, prompt_id: str, document: dict, content_hash: str, source_kind: str,
+                          source_hash: Optional[str], actor: str, status: str = "DRAFT") -> dict:
+    stamp = now_iso()
+    with transaction(write=True) as db:
+        row = db.execute(f"SELECT COALESCE(MAX(version), 0) AS v FROM {table('vnexus_prompt_genomes')} WHERE brand_id = ? AND prompt_id = ?",
+                         (brand_id, prompt_id)).fetchone()
+        version = int(normalize_record(row)["v"]) + 1
+        parent = db.execute(f"SELECT prompt_version_id FROM {table('vnexus_prompt_genomes')} WHERE brand_id = ? AND prompt_id = ? "
+                            "AND version = ?", (brand_id, prompt_id, version - 1)).fetchone()
+        pvid = f"pg-{uuid4().hex}"
+        db.execute(
+            f"""INSERT INTO {table('vnexus_prompt_genomes')} (prompt_version_id, tenant_id, brand_id, prompt_id, version, parent_version_id,
+            status, source_kind, source_hash, document, content_hash, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (pvid, tenant_id, brand_id, prompt_id, version, normalize_record(parent)["prompt_version_id"] if parent else None, status,
+             source_kind, source_hash, json_param(document), content_hash, actor, stamp))
+        append_audit(db, tenant_id=tenant_id, chain_ref=brand_id, subject_type="prompt_genome", subject_id=pvid, action="create",
+                     actor=actor, to_state=status, detail={"prompt_id": prompt_id, "version": version, "source_kind": source_kind,
+                                                           "source_hash": source_hash, "content_hash": content_hash})
+    return get_prompt_version(pvid)
+
+
+def get_prompt_version(prompt_version_id: str) -> Optional[dict]:
+    with transaction() as db:
+        return _rec(db.execute(f"SELECT * FROM {table('vnexus_prompt_genomes')} WHERE prompt_version_id = ?",
+                               (prompt_version_id,)).fetchone(), _PROMPT_JSON)
+
+
+def list_prompt_versions(brand_id: str, prompt_id: Optional[str] = None) -> list[dict]:
+    query = f"SELECT * FROM {table('vnexus_prompt_genomes')} WHERE brand_id = ?"
+    params: list[Any] = [brand_id]
+    if prompt_id:
+        query += " AND prompt_id = ?"
+        params.append(prompt_id)
+    with transaction() as db:
+        return [_rec(r, _PROMPT_JSON) for r in db.execute(query + " ORDER BY prompt_id, version", params).fetchall()]
+
+
+# --------------------------------------------------------------------------- measurements
+
+
+def record_measurement(*, tenant_id: str, project_id: str, campaign_ref: str, metric: str, value: float, unit: str, source: str,
+                       source_ref: str, observed_at: str, actor: str) -> dict:
+    mid = f"ms-{uuid4().hex}"
+    stamp = now_iso()
+    with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
+        db.execute(
+            f"""INSERT INTO {table('vnexus_measurements')} (measurement_id, tenant_id, project_id, campaign_ref, metric, value, unit, source,
+            source_ref, observed_at, recorded_by, recorded_at, kind) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'MEASURED')""",
+            (mid, tenant_id, project_id, campaign_ref, metric, value, unit, source, source_ref, observed_at, actor, stamp))
+    return {"measurement_id": mid, "campaign_ref": campaign_ref, "metric": metric, "value": value, "unit": unit, "source": source,
+            "source_ref": source_ref, "observed_at": observed_at, "recorded_by": actor, "recorded_at": stamp, "kind": "MEASURED"}
+
+
+def list_measurements(project_id: str, campaign_ref: str) -> list[dict]:
+    with transaction() as db:
+        return [_rec(r, ()) for r in db.execute(
+            f"SELECT * FROM {table('vnexus_measurements')} WHERE project_id = ? AND campaign_ref = ? ORDER BY observed_at, measurement_id",
+            (project_id, campaign_ref)).fetchall()]
+
+
 __all__ = [
     "GenomeImmutable", "VnexusConflict", "VnexusNotFound", "append_audit", "approved_version", "create_brand", "create_version",
     "get_brand", "get_version", "list_audit", "list_brands", "list_versions", "now_iso", "transition_version",
     "update_version_document", "verify_audit_chain", "add_branch_evaluation", "close_edge", "close_node",
     "create_branch", "find_node_by_ref", "get_branch", "get_node", "insert_edge", "insert_node", "list_branch_evaluations",
     "list_branches", "list_graph", "load_graph", "update_branch", "create_media_job", "get_media_job", "list_media_jobs",
-    "media_job_transitions", "recent_runs", "transition_media_job",
+    "media_job_transitions", "recent_runs", "transition_media_job", "create_prompt_version", "get_prompt_version",
+    "list_measurements", "list_prompt_versions", "record_measurement",
 ]

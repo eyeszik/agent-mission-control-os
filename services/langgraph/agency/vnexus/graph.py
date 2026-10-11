@@ -128,7 +128,10 @@ class Graph:
         self.as_of = as_of
         self.all_nodes = {n.node_id: n for n in nodes}
         self.nodes = {k: n for k, n in self.all_nodes.items() if valid_at(n, as_of)}
-        self.edges = [e for e in edges if valid_at(e, as_of) and e.src_node_id in self.nodes and e.dst_node_id in self.nodes]
+        edges = list(edges)
+        # Edges valid at the instant, including those that point at a node since superseded (lineage to history).
+        self.all_edges = [e for e in edges if valid_at(e, as_of) and e.src_node_id in self.all_nodes and e.dst_node_id in self.all_nodes]
+        self.edges = [e for e in self.all_edges if e.src_node_id in self.nodes and e.dst_node_id in self.nodes]
 
     # ------------------------------------------------------------------ validation
     def check_edge(self, kind: EdgeKind, src: str, dst: str) -> None:

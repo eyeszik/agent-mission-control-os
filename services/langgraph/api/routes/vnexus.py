@@ -16,7 +16,17 @@ from typing import Any, Callable, Optional
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from services.langgraph.agency.vnexus import creative_service, fabric_service, media_fabric, production, service
+from services.langgraph.agency.vnexus import (
+    creative_service,
+    fabric_service,
+    intelligence_service,
+    media_fabric,
+    production,
+    service,
+    twin,
+)
+from services.langgraph.agency.vnexus.marketing import CampaignRequest, forecast
+from services.langgraph.agency.vnexus.prompt_genome import PromptGenomeDocument
 from services.langgraph.agency.vnexus.art_director import ArtDirectionRequest
 from services.langgraph.agency.vnexus.experience import ExperienceRequest
 from services.langgraph.agency.vnexus.video import VideoBrief
@@ -565,3 +575,163 @@ def produce_video(brand_id: str, req: VideoProduction, idempotency_key: str = He
     return idempotent(principal, "production.video", idempotency_key, payload, lambda: production.produce_video(
         principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, brief=req.brief,
         run_key=f"video:{idempotency_key}"))
+
+
+# --------------------------------------------------------------------------- marketing intelligence
+
+
+class CampaignPlan(ProductionTarget):
+    request: CampaignRequest
+
+
+class MeasurementIn(BaseModel):
+    campaign_ref: str = Field(pattern=r"^[a-z0-9][a-z0-9_-]{0,60}$")
+    metric: str = Field(min_length=1, max_length=60)
+    value: float
+    unit: str = Field(min_length=1, max_length=20)
+    source: str = Field(min_length=1, max_length=80)
+    source_ref: str = Field(min_length=1, max_length=300)
+    observed_at: str = Field(min_length=10, max_length=40)
+
+    model_config = {"extra": "forbid"}
+
+
+class ForecastIn(BaseModel):
+    audience_size: int = Field(gt=0, le=10**10)
+    assumed_rate: float = Field(gt=0, lt=1)
+    assumption_source: str = Field(min_length=1, max_length=300)
+
+    model_config = {"extra": "forbid"}
+
+
+@router.post("/brands/{brand_id}/campaigns")
+@vnexus_errors
+def plan_campaign(brand_id: str, req: CampaignPlan, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                  principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "campaign.plan", idempotency_key, payload, lambda: intelligence_service.plan_campaign(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, request=req.request))
+
+
+@router.post("/projects/{project_id}/measurements", status_code=201)
+@vnexus_errors
+def record_measurement(project_id: str, req: MeasurementIn, principal: Principal = Depends(get_principal)) -> dict:
+    return {"measurement": intelligence_service.record_measurement(principal, project_id, **req.model_dump())}
+
+
+@router.get("/projects/{project_id}/campaigns/{campaign_ref}/report")
+@vnexus_errors
+def campaign_report(project_id: str, campaign_ref: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"report": intelligence_service.campaign_report(principal, project_id, campaign_ref)}
+
+
+@router.post("/forecast")
+@vnexus_errors
+def simulate_forecast(req: ForecastIn, principal: Principal = Depends(get_principal)) -> dict:
+    return {"forecast": forecast(**req.model_dump())}
+
+
+# --------------------------------------------------------------------------- prompt genomes
+
+
+class PromptCreate(BaseModel):
+    prompt_id: str = Field(pattern=r"^[a-z0-9][a-z0-9_-]{0,60}$")
+    document: PromptGenomeDocument
+
+    model_config = {"extra": "forbid"}
+
+
+class PromptImport(BaseModel):
+    prompt_id: str = Field(pattern=r"^[a-z0-9][a-z0-9_-]{0,60}$")
+    text: str = Field(min_length=1, max_length=50_000)
+    source_ref: str = Field(min_length=1, max_length=300)
+    family: str = "COPY"
+    asset_type: str = Field(default="source prompt", min_length=1, max_length=120)
+
+    model_config = {"extra": "forbid"}
+
+
+class PromptCompile(BaseModel):
+    scope: Scope
+    scope_ref: str = Field(min_length=1, max_length=300)
+    adapt_to: Optional[str] = Field(default=None, pattern=r"^(generic_text_to_image|generic_text_to_video|structured_json)$")
+
+    model_config = {"extra": "forbid"}
+
+
+@router.get("/brands/{brand_id}/prompts")
+@vnexus_errors
+def list_prompts(brand_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return intelligence_service.list_prompts(principal, brand_id)
+
+
+@router.post("/brands/{brand_id}/prompts", status_code=201)
+@vnexus_errors
+def create_prompt(brand_id: str, req: PromptCreate, principal: Principal = Depends(get_principal)) -> dict:
+    return {"prompt": intelligence_service.create_prompt(principal, brand_id, prompt_id=req.prompt_id, document=req.document)}
+
+
+@router.post("/brands/{brand_id}/prompts/import", status_code=201)
+@vnexus_errors
+def import_prompt(brand_id: str, req: PromptImport, principal: Principal = Depends(get_principal)) -> dict:
+    return {"prompt": intelligence_service.import_original(principal, brand_id, **req.model_dump())}
+
+
+@router.post("/prompts/{prompt_version_id}/compile")
+@vnexus_errors
+def compile_prompt(prompt_version_id: str, req: PromptCompile, principal: Principal = Depends(get_principal)) -> dict:
+    return intelligence_service.compile_prompt(principal, prompt_version_id, scope=req.scope, scope_ref=req.scope_ref, adapt_to=req.adapt_to)
+
+
+@router.post("/brands/{brand_id}/prompts/{prompt_id}/regression")
+@vnexus_errors
+def prompt_regression(brand_id: str, prompt_id: str, req: PromptCompile, principal: Principal = Depends(get_principal)) -> dict:
+    return intelligence_service.regression(principal, brand_id, prompt_id, scope=req.scope, scope_ref=req.scope_ref)
+
+
+# --------------------------------------------------------------------------- design immune system and digital twin
+
+
+class ScopeRef(BaseModel):
+    scope: Scope
+    scope_ref: str = Field(min_length=1, max_length=300)
+
+    model_config = {"extra": "forbid"}
+
+
+class Remediation(ScopeRef):
+    finding_ids: list[str] = Field(min_length=1, max_length=100)
+
+
+class TwinChange(ScopeRef):
+    changes: ChangeSet
+
+
+@router.post("/brands/{brand_id}/immune/scan")
+@vnexus_errors
+def immune_scan(brand_id: str, req: ScopeRef, principal: Principal = Depends(get_principal)) -> dict:
+    return intelligence_service.scan(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref)
+
+
+@router.post("/brands/{brand_id}/immune/remediate")
+@vnexus_errors
+def immune_remediate(brand_id: str, req: Remediation, principal: Principal = Depends(get_principal)) -> dict:
+    return intelligence_service.remediate(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, finding_ids=req.finding_ids)
+
+
+@router.get("/brands/{brand_id}/twin")
+@vnexus_errors
+def twin_snapshot(brand_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return twin.snapshot(principal, brand_id)
+
+
+@router.post("/brands/{brand_id}/twin/simulate")
+@vnexus_errors
+def twin_simulate(brand_id: str, req: TwinChange, principal: Principal = Depends(get_principal)) -> dict:
+    return twin.simulate_change(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, changes=req.changes)
+
+
+@router.get("/projects/{project_id}/twin/provider-outage/{provider_id}")
+@vnexus_errors
+def twin_outage(project_id: str, provider_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return twin.simulate_provider_outage(principal, provider_id, project_id=project_id)

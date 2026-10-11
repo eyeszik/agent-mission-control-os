@@ -656,11 +656,11 @@
     },
     {
       "path": "services/langgraph/persistence/vnexus.py",
-      "git_blob_sha": "6340a2954628a4b73722826e12278824f765bd11"
+      "git_blob_sha": "be4a2a76f0d101291b30e1b9acf8be2b5036e3f1"
     },
     {
       "path": "services/langgraph/api/routes/vnexus.py",
-      "git_blob_sha": "748135da6eceb786fb6e1ad46212b053fc1e44f6"
+      "git_blob_sha": "1c71d18cf353bb279f0d4ae3cb8d6e54cd40fdd7"
     },
     {
       "path": "supabase/migrations/20261011_amc_vnexus_v1.sql",
@@ -681,6 +681,10 @@
     {
       "path": "services/langgraph/agency/vnexus/production.py",
       "git_blob_sha": "ca3afb74b9766c1d40f4543529ae93b2d3a9a7b5"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/intelligence_service.py",
+      "git_blob_sha": "c8aff3fb449fa58f239d6dbae633ca9cbda38e89"
     }
   ]
 }

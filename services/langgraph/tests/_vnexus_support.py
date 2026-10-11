@@ -23,6 +23,19 @@ BRAND_DOC = document_from_flat(
 )
 
 
+# A complete approved genome: every key the bridge, the identity system and the prompt compiler read.
+# FICTIONAL brand; the audience and positioning are invented for tests.
+FULL_DOC = document_from_flat(
+    {**BRAND_DOC.flatten(), "visual.color.accent_2": "#93c5fd", "visual.color.muted": "#4b4540",
+     "visual.shape_grammar.swiss_editorial": 0.7, "visual.shape_grammar.bauhaus_geometry": 0.3, "visual.logo.mark": "ring_dot",
+     "visual.typography.body": "Inter", "strategy.audience.primary": "people furnishing a first home (fictional persona)",
+     "strategy.positioning.statement": "Small-batch stoneware (fictional brand)", "verbal.voice.tone": ["plain", "warm"],
+     "visual.imagery.style": "Natural light on matte surfaces", "visual.motion.pace": "unhurried",
+     "visual.motion.reduced_motion": "static final frame", "visual.motion.emphasis": ["logo reveal"],
+     "visual.logo.min_size": "24px", "visual.logo.clear_space": "a quarter of the mark height"},
+    constraints=list(BRAND_DOC.constraints))
+
+
 def make_world(monkeypatch, tmp_path) -> dict:
     monkeypatch.setenv("AMC_EXPORT_ROOT", str(tmp_path / "exports"))
     monkeypatch.setenv("AMC_OBJECT_STORAGE_BACKEND", "local")
