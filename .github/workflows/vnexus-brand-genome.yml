@@ -20,6 +20,8 @@ jobs:
           node-version: '20'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Build workspace packages (apps/web imports their dist output)
+        run: pnpm --filter "./packages/*" build
       - name: VNEXUS unit tests
         run: pnpm --filter @amc/web exec vitest run tests/brand-genome.test.ts
       - name: Web typecheck
