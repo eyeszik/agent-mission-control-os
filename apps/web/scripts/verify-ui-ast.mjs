@@ -48,7 +48,7 @@ export function scanSource(fileName, text) {
   const problems = [];
   const lines = text.split('\n');
   const allowed = (line) => (lines[line - 1] ?? '').includes('amc-allow-hex');
-  const sourceFile = ts.createSourceFile(fileName, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const sourceFile = ts.createSourceFile(fileName, text, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TSX);
   const report = (node, message) => {
     const line = lineOf(sourceFile, node);
     if (!allowed(line)) problems.push(`${fileName}:${line}: ${message}`);
