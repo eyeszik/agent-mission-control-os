@@ -1,0 +1,1499 @@
+{
+  "action": {
+    "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+    "actor_ref": "alice",
+    "approvals": {
+      "approvals": [
+        {
+          "approval_id": "bba4922d-083e-4d97-9ef7-ad7069cbf0b5",
+          "decided_at": "2026-10-11T23:42:23.467310+00:00",
+          "decision": "approve",
+          "reviewer": "bob",
+          "status": "resolved",
+          "subject": "ACTION_EXECUTION",
+          "subject_hash": "9ebd861795169d22c9b2ff8da7d95ff1c7307882ecd912116afcf56fb12f62d8"
+        }
+      ],
+      "expired": false,
+      "pending": [],
+      "reasons": [],
+      "rejected": false,
+      "satisfied": true,
+      "stale": false
+    },
+    "args": {
+      "body": "Hello (fictional copy).",
+      "path": "/launch/spring",
+      "site": "acme-site",
+      "title": "Spring launch"
+    },
+    "attempts": 1,
+    "binding": {
+      "approval_subjects": [
+        "ACTION_EXECUTION"
+      ],
+      "binding_version": "amc-action-binding/v1",
+      "capability_ref": "sandbox.cms.publish_page@v1",
+      "cost_minor": 0,
+      "currency": null,
+      "dependency_hashes": [],
+      "descriptor_hash": "9bbec9028e7becee16c6a6c608d913dfd39551b3ec819cb0b186778def121283",
+      "effective_class": "R3",
+      "environment": "SANDBOX",
+      "expires_at": "2026-10-12T23:42:23.328371Z",
+      "payload_hash": "7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db",
+      "policy_version": "amc-action-risk/v1",
+      "project_id": "prj-ace-d8a4eccc",
+      "target_ref": "sandbox-cms://acme-site/launch/spring",
+      "tenant_id": "tenant-ace-f6a71aa5"
+    },
+    "binding_diff": [],
+    "binding_hash": "9ebd861795169d22c9b2ff8da7d95ff1c7307882ecd912116afcf56fb12f62d8",
+    "budget_reservation_id": null,
+    "capability_id": "sandbox.cms.publish_page",
+    "capability_version": "v1",
+    "client_id": null,
+    "context_hash": "345fcc3859836a8d8fd495f73704beb87472af63e5bb33e97e09b96b853d2410",
+    "correlation_id": "act-fa978ae80dd2898089445c1bde8448ff",
+    "created_at": "2026-10-11T23:42:23.328371Z",
+    "dependency_hashes": [],
+    "effective_class": "R3",
+    "environment": "SANDBOX",
+    "expires_at": "2026-10-12T23:42:23.328371Z",
+    "idempotency_key": "k-cb8160e967ee4ed09e7ad137cbe1de80",
+    "injection_flags": [],
+    "live_execution": "DISABLED",
+    "outcome": {
+      "budget_committed": false,
+      "currency": null,
+      "delivered_externally": false,
+      "label": "SIMULATED",
+      "observed_cost_minor": 0,
+      "observed_payload_hash": "7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db",
+      "observed_state": "PUBLISHED",
+      "provider_ref": "sbx-a68398e7270e452785ccfd427d37f083",
+      "simulated": true
+    },
+    "payload_hash": "7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db",
+    "policy_version": "amc-action-risk/v1",
+    "project_id": "prj-ace-d8a4eccc",
+    "reasons": [],
+    "retry_eligible": false,
+    "risk": {
+      "autonomy": "REQUEST_APPROVAL",
+      "classes": [
+        "R2",
+        "R3"
+      ],
+      "controls": [
+        "APPROVAL_EXPIRY",
+        "EXACT_APPROVAL",
+        "IDEMPOTENCY",
+        "LIVE_GATE",
+        "READ_BACK",
+        "REVERSIBLE_PLAN",
+        "TENANT_SCOPE",
+        "VERIFIED_TARGET"
+      ],
+      "effective": "R3",
+      "explanations": [
+        {
+          "effect": "class:R2",
+          "reason": "writes to a system outside this one",
+          "rule": "RK03"
+        },
+        {
+          "effect": "class:R3",
+          "reason": "makes something visible to an audience or sends a message",
+          "rule": "RK04"
+        },
+        {
+          "effect": "class:R3",
+          "reason": "reaches a public audience",
+          "rule": "RK04a"
+        }
+      ],
+      "facts": {
+        "audience": "PUBLIC",
+        "blast_radius": 1,
+        "cost_minor": 0,
+        "currency": null,
+        "data_class": "INTERNAL",
+        "dependents": 0,
+        "environment": "SANDBOX",
+        "external": true,
+        "notifies": false,
+        "operation": "PUBLISH",
+        "requested_class": null,
+        "reversibility": "COMPENSATABLE",
+        "scopes": []
+      },
+      "live_gated": false,
+      "policy_version": "amc-action-risk/v1",
+      "requires_approval": true,
+      "requires_financial_approval": false,
+      "requires_privileged_review": false,
+      "requires_step_up": false
+    },
+    "run_id": "action-309b1c8b582ec6df84d4af20",
+    "state": "COMPLETED",
+    "status_label": "Done and checked",
+    "target_ref": "sandbox-cms://acme-site/launch/spring",
+    "tenant_id": "tenant-ace-f6a71aa5",
+    "updated_at": "2026-10-11T23:42:23.518626Z",
+    "version": 9
+  },
+  "action_preview": {
+    "approvals_required": [
+      "ACTION_EXECUTION"
+    ],
+    "autonomy": "REQUEST_APPROVAL",
+    "binding_hash": "98f44d7f5ebc30617b508b1d866e97e3a1c4bcf394905600b5e27019973c4120",
+    "blockers": [],
+    "budget": null,
+    "capability": {
+      "adapter": "SandboxCmsPublish",
+      "dispatch_owner": "actions.gateway",
+      "id": "sandbox.cms.publish_page",
+      "live_status": "LIVE_GATED",
+      "ref": "sandbox.cms.publish_page@v1",
+      "status": "TESTED",
+      "title": "Publish a page publicly (sandbox)"
+    },
+    "compensation": {
+      "operation": "unpublish",
+      "supported": true
+    },
+    "cost": {
+      "amount_minor": 0,
+      "basis": "no cost",
+      "currency": null
+    },
+    "dependencies": [],
+    "effect": "PUBLISH",
+    "environment": "SANDBOX",
+    "expires_at": "2026-10-12T23:42:23.310531Z",
+    "frozen": [],
+    "injection_flags": [],
+    "label": "PREVIEW: nothing was persisted or dispatched",
+    "live": {
+      "reasons": [
+        "no catalogue entry has a reviewed live provider binding",
+        "this deployment contains no code path that dispatches in Environment.LIVE"
+      ],
+      "status": "DISABLED"
+    },
+    "outcome": "WOULD_REQUEST_APPROVAL",
+    "payload_hash": "7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db",
+    "reversibility": "COMPENSATABLE",
+    "risk": {
+      "classes": [
+        "R2",
+        "R3"
+      ],
+      "controls": [
+        "APPROVAL_EXPIRY",
+        "EXACT_APPROVAL",
+        "IDEMPOTENCY",
+        "LIVE_GATE",
+        "READ_BACK",
+        "REVERSIBLE_PLAN",
+        "TENANT_SCOPE",
+        "VERIFIED_TARGET"
+      ],
+      "effective": "R3",
+      "explanations": [
+        {
+          "effect": "class:R2",
+          "reason": "writes to a system outside this one",
+          "rule": "RK03"
+        },
+        {
+          "effect": "class:R3",
+          "reason": "makes something visible to an audience or sends a message",
+          "rule": "RK04"
+        },
+        {
+          "effect": "class:R3",
+          "reason": "reaches a public audience",
+          "rule": "RK04a"
+        }
+      ],
+      "live_gated": false,
+      "policy_version": "amc-action-risk/v1",
+      "requires_approval": true,
+      "requires_financial_approval": false,
+      "requires_privileged_review": false,
+      "requires_step_up": false
+    },
+    "shadow": true,
+    "target_ref": "sandbox-cms://acme-site/launch/spring"
+  },
+  "analytics": {
+    "as_of": "2026-10-11T23:42:25.173254Z",
+    "metrics": [
+      {
+        "definition": "count of actions per state",
+        "metric": "actions_by_state",
+        "source": "action_requests",
+        "value": {
+          "AWAITING_APPROVAL": 1,
+          "COMPLETED": 1,
+          "UNKNOWN": 1
+        }
+      },
+      {
+        "definition": "approvals with status pending",
+        "metric": "approvals_pending",
+        "source": "approvals",
+        "value": 1
+      },
+      {
+        "definition": "actions whose provider state was read back and matched (all SANDBOX here)",
+        "metric": "actions_completed_and_checked",
+        "source": "action_requests",
+        "value": 1
+      },
+      {
+        "definition": "no live distribution exists, so there is nothing to measure",
+        "metric": "audience_reach",
+        "source": null,
+        "status": "NOT_MEASURED",
+        "value": null
+      }
+    ],
+    "note": "Counts of stored records. No figure here is estimated, forecast or simulated.",
+    "scope": "tenant"
+  },
+  "attention_item": {
+    "category": "RECOVERY",
+    "created_at": "2026-10-11T23:42:23.864940Z",
+    "expires_at": null,
+    "kind": "UNKNOWN",
+    "project_id": "prj-ace-d8a4eccc",
+    "ref": "act-5386d3b282cc198af53a3bf63f7e3fe3",
+    "risk": null,
+    "subject_ref": "act-5386d3b282cc198af53a3bf63f7e3fe3",
+    "title": "reconcile by read-back (never re-sent)"
+  },
+  "catalog": {
+    "catalog_hash": "0c2c65719bc0d1fc0a956598b08827a5354c5a169f019f951fe385d34a11f243",
+    "catalog_version": "amc-action-catalog/v1",
+    "entries": [
+      {
+        "approval_policy": "none beyond tenant scope and autonomy (R1)",
+        "budget": "NONE",
+        "candidate_ids": [],
+        "compensation": {
+          "operation": null,
+          "supported": false
+        },
+        "descriptor_hash": "277e69dcd459ff310a94c87fed40e02868f53887870a1f434a2339ace7a3867f",
+        "dispatch_owner": "execution_fabric",
+        "domain": "production",
+        "environments": [
+          "LOCAL"
+        ],
+        "id": "fabric.brand_logo_svg",
+        "idempotency": "fabric execution key (tenant, project, mission, work order, contract, input)",
+        "input_schema": {
+          "owned_by": "execution_fabric work order"
+        },
+        "live_status": "LIVE_GATED",
+        "nominal_risk": {
+          "classes": [
+            "R1"
+          ],
+          "controls": [
+            "OUTPUT_VALIDATION",
+            "TENANT_SCOPE",
+            "WORK_CONTRACT"
+          ],
+          "effective": "R1"
+        },
+        "output_schema": {
+          "owned_by": "Project OS artifact"
+        },
+        "postconditions": [
+          "artifact persisted, read back and validated by svg_safety, palette_delta_e"
+        ],
+        "preconditions": [
+          "N3 role holds capability art_direction",
+          "fabric eligibility checks pass"
+        ],
+        "provider": "local",
+        "ref": "fabric.brand_logo_svg@v1",
+        "retry": {
+          "max_attempts": 3,
+          "retry_class": "RETRY_SAFE"
+        },
+        "risk": {
+          "audience": "NONE",
+          "data_class": "INTERNAL",
+          "external": false,
+          "notifies": false,
+          "operation": "CREATE_LOCAL",
+          "reversibility": "REVERSIBLE",
+          "scopes": []
+        },
+        "scopes": [],
+        "source_ref": "services/langgraph/agency/execution_fabric/skills.py",
+        "status": "IMPLEMENTED",
+        "status_reasons": [],
+        "tests": [
+          "services/langgraph/tests/test_execution_fabric.py"
+        ],
+        "timeout_seconds": 5,
+        "title": "Deterministic SVG mark from the brand capsule (agency.assets.render_logo_svg).",
+        "verification": "storage read-back ObservationReceipt + declared validators",
+        "version": "v1"
+      },
+      {
+        "approval_policy": "exact-binding human approval",
+        "budget": "NONE",
+        "candidate_ids": [],
+        "compensation": {
+          "operation": "unpublish",
+          "supported": true
+        },
+        "descriptor_hash": "9bbec9028e7becee16c6a6c608d913dfd39551b3ec819cb0b186778def121283",
+        "dispatch_owner": "actions.gateway",
+        "domain": "web",
+        "environments": [
+          "SANDBOX"
+        ],
+        "id": "sandbox.cms.publish_page",
+        "idempotency": "effect key = hash(tenant, action, target, payload, Idempotency-Key); the fake dedupes on it",
+        "input_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "body": {
+              "maxLength": 20000,
+              "minLength": 1,
+              "title": "Body",
+              "type": "string"
+            },
+            "path": {
+              "title": "Path",
+              "type": "string"
+            },
+            "site": {
+              "pattern": "^[a-z0-9-]{3,40}$",
+              "title": "Site",
+              "type": "string"
+            },
+            "title": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Title",
+              "type": "string"
+            }
+          },
+          "required": [
+            "site",
+            "path",
+            "title",
+            "body"
+          ],
+          "title": "PublishArgs",
+          "type": "object"
+        },
+        "live_status": "LIVE_GATED",
+        "nominal_risk": {
+          "classes": [
+            "R2",
+            "R3"
+          ],
+          "controls": [
+            "APPROVAL_EXPIRY",
+            "EXACT_APPROVAL",
+            "IDEMPOTENCY",
+            "LIVE_GATE",
+            "READ_BACK",
+            "REVERSIBLE_PLAN",
+            "TENANT_SCOPE",
+            "VERIFIED_TARGET"
+          ],
+          "effective": "R3"
+        },
+        "output_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "cost_minor": {
+              "default": 0,
+              "title": "Cost Minor",
+              "type": "integer"
+            },
+            "currency": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Currency"
+            },
+            "detail": {
+              "additionalProperties": true,
+              "title": "Detail",
+              "type": "object"
+            },
+            "found": {
+              "title": "Found",
+              "type": "boolean"
+            },
+            "method": {
+              "title": "Method",
+              "type": "string"
+            },
+            "payload_hash": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Payload Hash"
+            },
+            "provider_ref": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Provider Ref"
+            },
+            "simulated": {
+              "default": true,
+              "title": "Simulated",
+              "type": "boolean"
+            },
+            "state": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "State"
+            }
+          },
+          "required": [
+            "found",
+            "method"
+          ],
+          "title": "Observation",
+          "type": "object"
+        },
+        "postconditions": [
+          "page PUBLISHED with the approved payload hash"
+        ],
+        "preconditions": [],
+        "provider": "sandbox.cms_publish",
+        "ref": "sandbox.cms.publish_page@v1",
+        "retry": {
+          "max_attempts": 3,
+          "retry_class": "COMPENSATABLE"
+        },
+        "risk": {
+          "audience": "PUBLIC",
+          "data_class": "INTERNAL",
+          "external": true,
+          "notifies": false,
+          "operation": "PUBLISH",
+          "reversibility": "COMPENSATABLE",
+          "scopes": []
+        },
+        "scopes": [],
+        "source_ref": "services/langgraph/agency/actions/adapters.py",
+        "status": "TESTED",
+        "status_reasons": [
+          "sandbox fake: no real provider binding exists; outputs are SIMULATED"
+        ],
+        "tests": [
+          "services/langgraph/tests/test_ace12_actions.py"
+        ],
+        "timeout_seconds": 30,
+        "title": "Publish a page publicly (sandbox)",
+        "verification": "published page read back by effect key",
+        "version": "v1"
+      },
+      {
+        "approval_policy": "exact-binding human approval; separate financial approval",
+        "budget": "provider estimate; spend approval when non-zero",
+        "candidate_ids": [],
+        "compensation": {
+          "operation": null,
+          "supported": false
+        },
+        "descriptor_hash": "bfa3b2e5368007bfcd90d8148c22007676d0cc06d9cf8069deedd0d1dbe96228",
+        "dispatch_owner": "vnexus.media_fabric",
+        "domain": "creative",
+        "environments": [
+          "LOCAL"
+        ],
+        "id": "vnexus.hosted_text_to_image",
+        "idempotency": "tenant + Idempotency-Key per media job",
+        "input_schema": {
+          "owned_by": "vnexus media job MediaRequest"
+        },
+        "live_status": "PROVIDER_GAP",
+        "nominal_risk": {
+          "classes": [
+            "R2",
+            "R4"
+          ],
+          "controls": [
+            "APPROVAL_EXPIRY",
+            "BUDGET_RESERVATION",
+            "EXACT_APPROVAL",
+            "FINANCIAL_APPROVAL",
+            "IDEMPOTENCY",
+            "LIVE_GATE",
+            "READ_BACK",
+            "REVERSIBLE_PLAN",
+            "SPEND_RECONCILIATION",
+            "TENANT_SCOPE",
+            "VERIFIED_TARGET"
+          ],
+          "effective": "R4"
+        },
+        "output_schema": {
+          "owned_by": "vnexus MediaArtifact"
+        },
+        "postconditions": [
+          "bytes re-hashed and quality-checked before QC_PASSED"
+        ],
+        "preconditions": [
+          "approved brand genome",
+          "provider capability discovered"
+        ],
+        "provider": "hosted.text_to_image",
+        "ref": "vnexus.hosted_text_to_image@amc-vnexus-media-fabric/v1",
+        "retry": {
+          "max_attempts": 3,
+          "retry_class": "RETRY_SAFE"
+        },
+        "risk": {
+          "audience": "NONE",
+          "data_class": "INTERNAL",
+          "external": true,
+          "notifies": false,
+          "operation": "SPEND",
+          "reversibility": "REVERSIBLE",
+          "scopes": []
+        },
+        "scopes": [],
+        "source_ref": "services/langgraph/agency/vnexus/media_fabric.py",
+        "status": "PROVIDER_GAP",
+        "status_reasons": [
+          "ADAPTER_NOT_IMPLEMENTED",
+          "NO_CREDENTIALS",
+          "PAID_CALLS_NOT_AUTHORIZED"
+        ],
+        "tests": [
+          "services/langgraph/tests/test_vnexus_production.py"
+        ],
+        "timeout_seconds": 120,
+        "title": "Hosted text-to-image slot (no adapter installed)",
+        "verification": "QC on stored bytes (verify_media / format probes)",
+        "version": "amc-vnexus-media-fabric/v1"
+      }
+    ],
+    "live": {
+      "reasons": [
+        "no catalogue entry has a reviewed live provider binding",
+        "this deployment contains no code path that dispatches in Environment.LIVE"
+      ],
+      "status": "DISABLED"
+    },
+    "reserved_namespaces": [
+      {
+        "namespace": "EXT-001..EXT-090",
+        "reason": "no source definitions in the repository",
+        "status": "VOID_DETECTED"
+      },
+      {
+        "namespace": "ART-001..ART-012",
+        "reason": "no source definitions in the repository",
+        "status": "VOID_DETECTED"
+      }
+    ]
+  },
+  "client": {
+    "client_id": "cli-fcb0fb6888a84ba28901",
+    "created_at": "2026-10-11T23:42:24.000403Z",
+    "created_by": "alice",
+    "display_name": "Contract Client (fictional)",
+    "notes": "",
+    "projects": [
+      {
+        "display_name": "ACE prj-ace-d8a4eccc",
+        "lifecycle_state": "ACTIVE",
+        "project_id": "prj-ace-d8a4eccc"
+      }
+    ],
+    "slug": "contract-client-fictional",
+    "status": "ACTIVE",
+    "tenant_id": "tenant-ace-f6a71aa5",
+    "updated_at": "2026-10-11T23:42:24.000403Z"
+  },
+  "deliverable": {
+    "approvals": [
+      {
+        "approval_id": "e902f1b8-9faa-4092-90af-87950344767d",
+        "decided_at": "2026-10-11T23:42:24.849579+00:00",
+        "decision": "approve",
+        "reviewer": "bob",
+        "status": "resolved",
+        "subject_hash": "a3daa6aa9cb39fd39cb2b2f6921847f8ed5acd09ac3cd4f7756089815d7fc888"
+      }
+    ],
+    "artifact_id": "art-prj-ace-d8a4eccc-mission-9721690719a4074c5b1b-work-media-asset",
+    "artifact_key": "mission-9721690719a4074c5b1b/work:media_asset",
+    "artifact_type": "media_asset",
+    "content_hash": "a3daa6aa9cb39fd39cb2b2f6921847f8ed5acd09ac3cd4f7756089815d7fc888",
+    "mime_type": "image/svg+xml",
+    "preview_uri": null,
+    "provenance_ref": "execution:37ae011414aab6e4b6929691177cea8355fd287c9c33287ff88bed9c2795633e",
+    "release": {
+      "allowed": true,
+      "approval_id": "e902f1b8-9faa-4092-90af-87950344767d",
+      "note": "assumes verification passes; export re-verifies the stored bytes",
+      "reasons": []
+    },
+    "rights": {
+      "rights_ref": null,
+      "status": "NOT_RECORDED"
+    },
+    "source_refs": [
+      "ref:brand_core",
+      "ref:brand_platform",
+      "ref:positioning_statement"
+    ],
+    "status": "draft",
+    "version": 1
+  },
+  "evidence": {
+    "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+    "approvals": [
+      {
+        "approval_id": "bba4922d-083e-4d97-9ef7-ad7069cbf0b5",
+        "decided_at": "2026-10-11T23:42:23.467310+00:00",
+        "decision": "approve",
+        "reviewer": "bob",
+        "stale_reason": null,
+        "status": "resolved",
+        "subject_hash": "9ebd861795169d22c9b2ff8da7d95ff1c7307882ecd912116afcf56fb12f62d8",
+        "subject_type": "ACTION_EXECUTION"
+      }
+    ],
+    "binding_hash": "9ebd861795169d22c9b2ff8da7d95ff1c7307882ecd912116afcf56fb12f62d8",
+    "budget_reservation": null,
+    "chain": {
+      "entries": 9,
+      "head": "2987c65051b6669444c1010f314d1c4410b680e30ba74838008cab624bb57ee8",
+      "intact": true
+    },
+    "claims": [
+      {
+        "claim": "the effect exists at the provider with the bound payload hash",
+        "label": "SIMULATED",
+        "proof": [
+          "observation:act-fa978ae80dd2898089445c1bde8448ff:observe-a1"
+        ]
+      }
+    ],
+    "execution_receipts": [
+      {
+        "actor_role_id": "actions.gateway",
+        "args_hash": "7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db",
+        "attempt": 1,
+        "ended_at": "2026-10-11T23:42:23.576807Z",
+        "idempotency_key": "a54bb9690fa4cd6abdcb5a0f88293412f38d3dc1fd0d337b44d41fbbe82872a2",
+        "operation_id": "act-fa978ae80dd2898089445c1bde8448ff:a1",
+        "payload": "{\"operation_id\": \"act-fa978ae80dd2898089445c1bde8448ff:a1\", \"work_order_id\": \"act-fa978ae80dd2898089445c1bde8448ff\", \"actor_role_id\": \"actions.gateway\", \"tool\": \"sandbox.cms.publish_page\", \"tool_contract_ref\": \"sandbox.cms.publish_page@v1\", \"args_hash\": \"7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db\", \"target\": \"sandbox-cms://acme-site/launch/spring\", \"idempotency_key\": \"a54bb9690fa4cd6abdcb5a0f88293412f38d3dc1fd0d337b44d41fbbe82872a2\", \"attempt\": 1, \"started_at\": \"2026-10-11T23:42:23.571991Z\", \"ended_at\": \"2026-10-11T23:42:23.576807Z\", \"returned_state\": \"PUBLISHED\", \"result_ref\": \"sbx-a68398e7270e452785ccfd427d37f083\"}",
+        "project_id": "prj-ace-d8a4eccc",
+        "result_ref": "sbx-a68398e7270e452785ccfd427d37f083",
+        "returned_state": "PUBLISHED",
+        "run_id": "action-309b1c8b582ec6df84d4af20",
+        "started_at": "2026-10-11T23:42:23.571991Z",
+        "target": "sandbox-cms://acme-site/launch/spring",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "tool": "sandbox.cms.publish_page",
+        "tool_contract_ref": "sandbox.cms.publish_page@v1",
+        "work_order_id": "act-fa978ae80dd2898089445c1bde8448ff"
+      }
+    ],
+    "live_execution": "DISABLED",
+    "observation_receipts": [
+      {
+        "evidence_refs": [
+          "sbx-a68398e7270e452785ccfd427d37f083"
+        ],
+        "expected_postcondition": {
+          "payload_hash": "7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db",
+          "state": "PUBLISHED"
+        },
+        "matches": true,
+        "observation_method": "sandbox read-back by effect key",
+        "observed_at": "2026-10-11T23:42:23.595401Z",
+        "observed_postcondition": {
+          "cost_minor": 0,
+          "found": true,
+          "payload_hash": "7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db",
+          "state": "PUBLISHED"
+        },
+        "operation_id": "act-fa978ae80dd2898089445c1bde8448ff:observe-a1",
+        "payload": "{\"operation_id\": \"act-fa978ae80dd2898089445c1bde8448ff:observe-a1\", \"target\": \"sandbox-cms://acme-site/launch/spring\", \"expected_postcondition\": {\"state\": \"PUBLISHED\", \"payload_hash\": \"7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db\"}, \"observed_postcondition\": {\"found\": true, \"state\": \"PUBLISHED\", \"payload_hash\": \"7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db\", \"cost_minor\": 0}, \"observation_method\": \"sandbox read-back by effect key\", \"evidence_refs\": [\"sbx-a68398e7270e452785ccfd427d37f083\"], \"observed_at\": \"2026-10-11T23:42:23.595401Z\", \"matches\": true}",
+        "project_id": "prj-ace-d8a4eccc",
+        "run_id": "action-309b1c8b582ec6df84d4af20",
+        "target": "sandbox-cms://acme-site/launch/spring",
+        "tenant_id": "tenant-ace-f6a71aa5"
+      }
+    ],
+    "permits": [
+      {
+        "approval_refs": [
+          "bba4922d-083e-4d97-9ef7-ad7069cbf0b5"
+        ],
+        "authority_refs": [
+          "principal:alice"
+        ],
+        "causal_epoch": 1,
+        "dependency_version_refs": [],
+        "eligibility_policy_version": "amc-action-risk/v1",
+        "issued_at": "2026-10-11T23:42:23.518626Z",
+        "payload": "{\"permit_id\": \"permit-act-fa978ae80dd2898089445c1bde8448ff-a1\", \"work_order_id\": \"act-fa978ae80dd2898089445c1bde8448ff\", \"project_snapshot_hash\": \"9ebd861795169d22c9b2ff8da7d95ff1c7307882ecd912116afcf56fb12f62d8\", \"causal_epoch\": 1, \"dependency_version_refs\": [], \"authority_refs\": [\"principal:alice\"], \"approval_refs\": [\"bba4922d-083e-4d97-9ef7-ad7069cbf0b5\"], \"tool_contract_refs\": [\"sandbox.cms.publish_page@v1\"], \"eligibility_policy_version\": \"amc-action-risk/v1\", \"issued_at\": \"2026-10-11T23:42:23.518626Z\"}",
+        "permit_id": "permit-act-fa978ae80dd2898089445c1bde8448ff-a1",
+        "project_id": "prj-ace-d8a4eccc",
+        "project_snapshot_hash": "9ebd861795169d22c9b2ff8da7d95ff1c7307882ecd912116afcf56fb12f62d8",
+        "run_id": "action-309b1c8b582ec6df84d4af20",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "tool_contract_refs": [
+          "sandbox.cms.publish_page@v1"
+        ],
+        "work_order_id": "act-fa978ae80dd2898089445c1bde8448ff"
+      }
+    ],
+    "policy_decisions": [
+      {
+        "action": "action.propose",
+        "decided_at": "2026-10-11T23:42:23.400542Z",
+        "decision_hash": "e2cadfd49f5da4f8d577083df035c61d8e9d47236376021983341ed089c5f2fd",
+        "decision_id": "action-act-fa978ae80dd2898089445c1bde8448ff-propose-v4",
+        "effect": "REQUIRE_APPROVAL",
+        "evidence_refs": [],
+        "input_hash": "0c246326fa850b60061d792f0ce01abd08d9826f70fa5ea91a9531f04cba2d09",
+        "policy_version": "amc-action-risk/v1",
+        "project_id": "prj-ace-d8a4eccc",
+        "required_authority_refs": [
+          "bba4922d-083e-4d97-9ef7-ad7069cbf0b5"
+        ],
+        "subject_ref": "act-fa978ae80dd2898089445c1bde8448ff",
+        "target": "sandbox-cms://acme-site/launch/spring",
+        "tenant_id": "tenant-ace-f6a71aa5"
+      },
+      {
+        "action": "action.dispatch",
+        "decided_at": "2026-10-11T23:42:23.559078Z",
+        "decision_hash": "294caff9947f441aef7ef20408eeaaa9eec18e30fbe045735a74bf57a2dd5d73",
+        "decision_id": "action-act-fa978ae80dd2898089445c1bde8448ff-dispatch-v6",
+        "effect": "ALLOW",
+        "evidence_refs": [
+          "lease:api:alice"
+        ],
+        "input_hash": "0608f5fe360d0b57499afec5b84688c67dca52301fbcd78238df77aa1004732d",
+        "policy_version": "amc-action-risk/v1",
+        "project_id": "prj-ace-d8a4eccc",
+        "required_authority_refs": [],
+        "subject_ref": "act-fa978ae80dd2898089445c1bde8448ff",
+        "target": "sandbox-cms://acme-site/launch/spring",
+        "tenant_id": "tenant-ace-f6a71aa5"
+      }
+    ],
+    "recovery_cases": [],
+    "sandbox_record": {
+      "body": {
+        "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+        "body_sha256": "11191eed73f69bd2b327962b01b15e69976d73ba8210a13ea36a54080130a1f1",
+        "label": "SIMULATED",
+        "title": "Spring launch"
+      },
+      "cost_minor": 0,
+      "created_at": "2026-10-11T23:42:23.572042Z",
+      "currency": null,
+      "effect_id": "sbx-a68398e7270e452785ccfd427d37f083",
+      "idempotency_key": "a54bb9690fa4cd6abdcb5a0f88293412f38d3dc1fd0d337b44d41fbbe82872a2",
+      "operation": "PUBLISH",
+      "payload_hash": "7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db",
+      "provider": "sandbox.cms_publish",
+      "state": "PUBLISHED",
+      "target_ref": "sandbox-cms://acme-site/launch/spring",
+      "tenant_id": "tenant-ace-f6a71aa5",
+      "updated_at": "2026-10-11T23:42:23.572042Z"
+    },
+    "state": "COMPLETED",
+    "status_label": "Done and checked",
+    "transitions": [
+      {
+        "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+        "actor": "alice",
+        "created_at": "2026-10-11T23:42:23.328371Z",
+        "entry_hash": "94b90200ecfe567ddd751d3ad2b2f9c264630973dd397aeb31f074a76bf6ee43",
+        "entry_id": 1,
+        "evidence": {
+          "binding_hash": "9ebd861795169d22c9b2ff8da7d95ff1c7307882ecd912116afcf56fb12f62d8",
+          "risk": "R3"
+        },
+        "from_state": null,
+        "prev_hash": null,
+        "reason": "proposed",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "to_state": "PROPOSED"
+      },
+      {
+        "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+        "actor": "alice",
+        "created_at": "2026-10-11T23:42:23.328371Z",
+        "entry_hash": "261c5ed0f78fd85e67fb84b1efdea68cc8b41325c14beb861a87ca88e67fd274",
+        "entry_id": 2,
+        "evidence": {
+          "dependencies": [],
+          "injection_flags": []
+        },
+        "from_state": "PROPOSED",
+        "prev_hash": "94b90200ecfe567ddd751d3ad2b2f9c264630973dd397aeb31f074a76bf6ee43",
+        "reason": "args, scope, secrets and dependencies validated",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "to_state": "VALIDATED"
+      },
+      {
+        "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+        "actor": "alice",
+        "created_at": "2026-10-11T23:42:23.328371Z",
+        "entry_hash": "01a25bd283f6e85c807a83800950aaa71b15bd00be1cca096ce6383a40551774",
+        "entry_id": 3,
+        "evidence": {
+          "expected": {
+            "payload_hash": "7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db",
+            "state": "PUBLISHED"
+          },
+          "plan": "sandbox.cms.publish_page: PUBLISHED at sandbox-cms://acme-site/launch/spring (SIMULATED)"
+        },
+        "from_state": "VALIDATED",
+        "prev_hash": "261c5ed0f78fd85e67fb84b1efdea68cc8b41325c14beb861a87ca88e67fd274",
+        "reason": "effect plan prepared",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "to_state": "PREPARED"
+      },
+      {
+        "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+        "actor": "alice",
+        "created_at": "2026-10-11T23:42:23.328371Z",
+        "entry_hash": "66e138c26a018874c28241284840da0b82e11da7cfd4e2e1c43012000d2bbe62",
+        "entry_id": 4,
+        "evidence": {
+          "approvals": {
+            "ACTION_EXECUTION": "bba4922d-083e-4d97-9ef7-ad7069cbf0b5"
+          }
+        },
+        "from_state": "PREPARED",
+        "prev_hash": "01a25bd283f6e85c807a83800950aaa71b15bd00be1cca096ce6383a40551774",
+        "reason": "human approval required",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "to_state": "AWAITING_APPROVAL"
+      },
+      {
+        "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+        "actor": "system:gateway",
+        "created_at": "2026-10-11T23:42:23.518626Z",
+        "entry_hash": "a664ff83ae5b8f99afb9a766afd1a5d4ca1334bb78dccddd0256202df30754f4",
+        "entry_id": 5,
+        "evidence": {
+          "approvals": [
+            {
+              "approval_id": "bba4922d-083e-4d97-9ef7-ad7069cbf0b5",
+              "decided_at": "2026-10-11T23:42:23.467310+00:00",
+              "decision": "approve",
+              "reviewer": "bob",
+              "status": "resolved",
+              "subject": "ACTION_EXECUTION",
+              "subject_hash": "9ebd861795169d22c9b2ff8da7d95ff1c7307882ecd912116afcf56fb12f62d8"
+            }
+          ]
+        },
+        "from_state": "AWAITING_APPROVAL",
+        "prev_hash": "66e138c26a018874c28241284840da0b82e11da7cfd4e2e1c43012000d2bbe62",
+        "reason": "every required approval matches the exact binding",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "to_state": "AUTHORIZED"
+      },
+      {
+        "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+        "actor": "alice",
+        "created_at": "2026-10-11T23:42:23.518626Z",
+        "entry_hash": "edfbfe63b2dcbe995cfe85773ee53969b6a565b93bf5a6de244cfdb12f52daf0",
+        "entry_id": 6,
+        "evidence": {
+          "effect_key": "a54bb9690fa4cd6abdcb5a0f88293412f38d3dc1fd0d337b44d41fbbe82872a2",
+          "worker": "api:alice"
+        },
+        "from_state": "AUTHORIZED",
+        "prev_hash": "a664ff83ae5b8f99afb9a766afd1a5d4ca1334bb78dccddd0256202df30754f4",
+        "reason": "lease taken; intent persisted before the effect",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "to_state": "DISPATCHING"
+      },
+      {
+        "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+        "actor": "alice",
+        "created_at": "2026-10-11T23:42:23.518626Z",
+        "entry_hash": "a29a7b51451cbba7839936f1f763bf7d825f5291d5c14cb0befa139373f99945",
+        "entry_id": 7,
+        "evidence": {
+          "receipt": {
+            "at": "2026-10-11T23:42:23.576761+00:00",
+            "deduplicated": false,
+            "provider_ref": "sbx-a68398e7270e452785ccfd427d37f083",
+            "returned_state": "PUBLISHED",
+            "simulated": true
+          }
+        },
+        "from_state": "DISPATCHING",
+        "prev_hash": "edfbfe63b2dcbe995cfe85773ee53969b6a565b93bf5a6de244cfdb12f52daf0",
+        "reason": "receipt persisted; reading back the provider state",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "to_state": "OBSERVING"
+      },
+      {
+        "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+        "actor": "alice",
+        "created_at": "2026-10-11T23:42:23.518626Z",
+        "entry_hash": "d0c32a298b4f3c680e560815a4e0bc049a4db143c4546d5315503bf9b9024cfe",
+        "entry_id": 8,
+        "evidence": {
+          "observation": {
+            "cost_minor": 0,
+            "currency": null,
+            "detail": {
+              "target_ref": "sandbox-cms://acme-site/launch/spring"
+            },
+            "found": true,
+            "method": "sandbox read-back by effect key",
+            "payload_hash": "7d299b0bb8e1a64c8e2ec22102a9d0228d245eb115fd41fb23060540672bf5db",
+            "provider_ref": "sbx-a68398e7270e452785ccfd427d37f083",
+            "simulated": true,
+            "state": "PUBLISHED"
+          }
+        },
+        "from_state": "OBSERVING",
+        "prev_hash": "a29a7b51451cbba7839936f1f763bf7d825f5291d5c14cb0befa139373f99945",
+        "reason": "independent read-back matches the expected effect",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "to_state": "VERIFIED"
+      },
+      {
+        "action_id": "act-fa978ae80dd2898089445c1bde8448ff",
+        "actor": "alice",
+        "created_at": "2026-10-11T23:42:23.518626Z",
+        "entry_hash": "2987c65051b6669444c1010f314d1c4410b680e30ba74838008cab624bb57ee8",
+        "entry_id": 9,
+        "evidence": {},
+        "from_state": "VERIFIED",
+        "prev_hash": "d0c32a298b4f3c680e560815a4e0bc049a4db143c4546d5315503bf9b9024cfe",
+        "reason": "completed and independently checked",
+        "tenant_id": "tenant-ace-f6a71aa5",
+        "to_state": "COMPLETED"
+      }
+    ]
+  },
+  "lifecycle": {
+    "computed_at": "2026-10-11T23:42:25.144292Z",
+    "edges": [
+      {
+        "from": "INTAKE",
+        "to": "DISCOVERY"
+      },
+      {
+        "from": "DISCOVERY",
+        "to": "STRATEGY"
+      },
+      {
+        "from": "STRATEGY",
+        "to": "IDENTITY"
+      },
+      {
+        "from": "IDENTITY",
+        "to": "PRODUCTION"
+      },
+      {
+        "from": "PRODUCTION",
+        "to": "REVIEW"
+      },
+      {
+        "from": "REVIEW",
+        "to": "DELIVERY"
+      },
+      {
+        "from": "DELIVERY",
+        "to": "DISTRIBUTION"
+      },
+      {
+        "from": "DISTRIBUTION",
+        "to": "MEASUREMENT"
+      },
+      {
+        "from": "DELIVERY",
+        "to": "MAINTENANCE"
+      }
+    ],
+    "project_id": "prj-ace-d8a4eccc",
+    "stages": [
+      {
+        "depends_on": [],
+        "evidence": [
+          "client:cli-fcb0fb6888a84ba28901"
+        ],
+        "stage": "INTAKE",
+        "status": "DONE",
+        "unmet": []
+      },
+      {
+        "depends_on": [
+          "INTAKE"
+        ],
+        "evidence": [],
+        "stage": "DISCOVERY",
+        "status": "NOT_STARTED",
+        "unmet": []
+      },
+      {
+        "depends_on": [
+          "DISCOVERY"
+        ],
+        "evidence": [
+          "brand_platform",
+          "positioning_statement"
+        ],
+        "stage": "STRATEGY",
+        "status": "DONE",
+        "unmet": [
+          "DISCOVERY"
+        ]
+      },
+      {
+        "depends_on": [
+          "STRATEGY"
+        ],
+        "evidence": [
+          "brand_core"
+        ],
+        "stage": "IDENTITY",
+        "status": "DONE",
+        "unmet": []
+      },
+      {
+        "depends_on": [
+          "IDENTITY"
+        ],
+        "evidence": [
+          "art-prj-ace-d8a4eccc-mission-9721690719a4074c5b1b-work-media-asset"
+        ],
+        "stage": "PRODUCTION",
+        "status": "DONE",
+        "unmet": []
+      },
+      {
+        "depends_on": [
+          "PRODUCTION"
+        ],
+        "evidence": [
+          "e902f1b8-9faa-4092-90af-87950344767d"
+        ],
+        "stage": "REVIEW",
+        "status": "DONE",
+        "unmet": []
+      },
+      {
+        "depends_on": [
+          "REVIEW"
+        ],
+        "evidence": [
+          "manifest:d94fd9befe2fe744"
+        ],
+        "stage": "DELIVERY",
+        "status": "DONE",
+        "unmet": []
+      },
+      {
+        "depends_on": [
+          "DELIVERY"
+        ],
+        "evidence": [
+          "sandbox:act-fa978ae80dd2898089445c1bde8448ff"
+        ],
+        "stage": "DISTRIBUTION",
+        "status": "LIVE_GATED",
+        "unmet": []
+      },
+      {
+        "depends_on": [
+          "DISTRIBUTION"
+        ],
+        "evidence": [
+          "no measured results are recorded for this project"
+        ],
+        "stage": "MEASUREMENT",
+        "status": "NOT_MEASURED",
+        "unmet": [
+          "DISTRIBUTION"
+        ]
+      },
+      {
+        "depends_on": [
+          "DELIVERY"
+        ],
+        "evidence": [
+          "act-5386d3b282cc198af53a3bf63f7e3fe3"
+        ],
+        "stage": "MAINTENANCE",
+        "status": "ATTENTION",
+        "unmet": []
+      }
+    ],
+    "stale_artifacts": []
+  },
+  "manifest": {
+    "delivered_externally": false,
+    "excluded": [],
+    "exported_at": "2026-10-11T23:42:24.937667+00:00",
+    "items": [
+      {
+        "approval": {
+          "approval_id": "e902f1b8-9faa-4092-90af-87950344767d",
+          "decided_at": "2026-10-11T23:42:24.849579+00:00",
+          "reviewer": "bob"
+        },
+        "artifact_id": "art-prj-ace-d8a4eccc-mission-9721690719a4074c5b1b-work-media-asset",
+        "artifact_type": "media_asset",
+        "sha256": "a3daa6aa9cb39fd39cb2b2f6921847f8ed5acd09ac3cd4f7756089815d7fc888",
+        "verification": {
+          "checks": [
+            {
+              "check": "sha256(read-back) == recorded content_hash",
+              "family": "FILE_INTEGRITY",
+              "passed": true
+            },
+            {
+              "check": "root <svg> with viewBox",
+              "family": "SCHEMA",
+              "passed": true
+            },
+            {
+              "check": "svg_safety",
+              "family": "SECURITY",
+              "passed": true
+            },
+            {
+              "check": "palette_delta_e",
+              "family": "BRAND_CONSISTENCY",
+              "passed": true
+            }
+          ],
+          "status": "PASSED",
+          "verifier": "intake.verify_artifact/v1 (storage read-back)"
+        },
+        "version": 1
+      }
+    ],
+    "manifest_hash": "d94fd9befe2fe74425988114d1a86d66030093417c8d45ba981401fe7c7d6c41",
+    "manifest_version": "amc-delivery-manifest/v1",
+    "project_id": "prj-ace-d8a4eccc",
+    "signature": {
+      "reason": "AMC_DELIVERY_SIGNING_KEY is not configured",
+      "status": "UNSIGNED"
+    },
+    "tenant_id": "tenant-ace-f6a71aa5"
+  },
+  "mission": {
+    "acceptance_criteria": [
+      {
+        "description": "The request is bound to one accessible project.",
+        "evidence": [
+          "resolution:BOUND_BY_ACTIVE_CONTEXT"
+        ],
+        "predicate_id": "P1_PROJECT_BOUND",
+        "reasons": [],
+        "state": "VERIFIED"
+      },
+      {
+        "description": "Brand facts come from approved project memory.",
+        "evidence": [
+          "memory:mem-0ed1cbb6b6d84d03a5538da314ea6fdf"
+        ],
+        "predicate_id": "P2_BRAND_CONTEXT",
+        "reasons": [],
+        "state": "VERIFIED"
+      },
+      {
+        "description": "A real execution produced and persisted the artifact.",
+        "evidence": [
+          "art-prj-ace-d8a4eccc-mission-9721690719a4074c5b1b-work-media-asset:v1",
+          "run:fabric-9774aa6d951d7e60d5219b77"
+        ],
+        "predicate_id": "P3_ARTIFACT_PRODUCED",
+        "reasons": [],
+        "state": "VERIFIED"
+      },
+      {
+        "description": "Independent read-back verification passed.",
+        "evidence": [
+          "sha256:a3daa6aa9cb39fd39cb2b2f6921847f8ed5acd09ac3cd4f7756089815d7fc888"
+        ],
+        "predicate_id": "P4_ARTIFACT_VERIFIED",
+        "reasons": [],
+        "state": "VERIFIED"
+      },
+      {
+        "description": "A human approved this exact artifact version.",
+        "evidence": [
+          "approval:e902f1b8-9faa-4092-90af-87950344767d"
+        ],
+        "predicate_id": "P5_HUMAN_APPROVED",
+        "reasons": [],
+        "state": "NEEDS_HUMAN"
+      }
+    ],
+    "approval": {
+      "approval_id": "e902f1b8-9faa-4092-90af-87950344767d",
+      "status": "pending",
+      "subject_hash": "a3daa6aa9cb39fd39cb2b2f6921847f8ed5acd09ac3cd4f7756089815d7fc888",
+      "subject_ref": "art-prj-ace-d8a4eccc-mission-9721690719a4074c5b1b-work-media-asset"
+    },
+    "contract_hash": "a516d6cc2ba041d4d14ad5e690b29e391c167da94365b98104a4947e06d15715",
+    "deliverable": "VECTOR_MARK",
+    "live_execution": "DISABLED",
+    "mission_id": "msn-7c20a7462a8b384f6dc9205bb7288e4e",
+    "non_actions": [],
+    "reasons": [
+      "WAITING_FOR_HUMAN_APPROVAL"
+    ],
+    "release_eligible": false,
+    "simulation": false,
+    "status": "AWAITING_APPROVAL",
+    "status_label": "Approval required",
+    "verification": {
+      "artifact_id": "art-prj-ace-d8a4eccc-mission-9721690719a4074c5b1b-work-media-asset",
+      "basis": "DETERMINISTIC",
+      "checks": [
+        {
+          "check": "sha256(read-back) == recorded content_hash",
+          "family": "FILE_INTEGRITY",
+          "observed": "a3daa6aa9cb39fd39cb2b2f6921847f8ed5acd09ac3cd4f7756089815d7fc888",
+          "passed": true
+        },
+        {
+          "check": "root <svg> with viewBox",
+          "family": "SCHEMA",
+          "passed": true
+        },
+        {
+          "check": "svg_safety",
+          "detail": "well-formed SVG without active content or external references",
+          "family": "SECURITY",
+          "passed": true
+        },
+        {
+          "check": "palette_delta_e",
+          "detail": "3 colour(s) within dE76<=2.3 of the palette",
+          "family": "BRAND_CONSISTENCY",
+          "passed": true
+        }
+      ],
+      "content_hash": "a3daa6aa9cb39fd39cb2b2f6921847f8ed5acd09ac3cd4f7756089815d7fc888",
+      "findings": [],
+      "status": "PASSED",
+      "verified_at": "2026-10-11T23:42:24.414617+00:00",
+      "verifier": "intake.verify_artifact/v1 (storage read-back)",
+      "version": 1
+    }
+  },
+  "mission_preview": {
+    "acceptance_criteria": [
+      {
+        "description": "The request is bound to one accessible project.",
+        "evidence": [],
+        "predicate_id": "P1_PROJECT_BOUND",
+        "reasons": [],
+        "state": "PENDING"
+      },
+      {
+        "description": "Brand facts come from approved project memory.",
+        "evidence": [],
+        "predicate_id": "P2_BRAND_CONTEXT",
+        "reasons": [],
+        "state": "PENDING"
+      },
+      {
+        "description": "A real execution produced and persisted the artifact.",
+        "evidence": [],
+        "predicate_id": "P3_ARTIFACT_PRODUCED",
+        "reasons": [],
+        "state": "PENDING"
+      },
+      {
+        "description": "Independent read-back verification passed.",
+        "evidence": [],
+        "predicate_id": "P4_ARTIFACT_VERIFIED",
+        "reasons": [],
+        "state": "PENDING"
+      },
+      {
+        "description": "A human approved this exact artifact version.",
+        "evidence": [],
+        "predicate_id": "P5_HUMAN_APPROVED",
+        "reasons": [],
+        "state": "PENDING"
+      }
+    ],
+    "brand_context": {
+      "admissible": true,
+      "capsule_hash": "599199ec2a3fd1198fd58c3bd6200090c0a232a146499046ba40d4f6fcde133d",
+      "status": "RESOLVED"
+    },
+    "cost": {
+      "amount_minor": 0,
+      "basis": "local execution on this host; no provider is called",
+      "currency": null
+    },
+    "deliverable": {
+      "artifact_type": "media_asset",
+      "capability": "fabric.brand_logo_svg",
+      "capability_status": "IMPLEMENTED",
+      "checks": [
+        "sha256 of the stored bytes equals the recorded hash",
+        "root <svg> has a viewBox",
+        "svg_safety: no scripts, external references or event handlers",
+        "every colour is within \u0394E76 of the approved palette"
+      ],
+      "skill": "brand_logo_svg"
+    },
+    "edges": [
+      {
+        "from": "validate:media_asset",
+        "to": "accept:media_asset"
+      },
+      {
+        "from": "accept:media_asset",
+        "to": "deliverable:media_asset"
+      },
+      {
+        "from": "work:media_asset",
+        "to": "validate:media_asset"
+      },
+      {
+        "from": "ref:brand_core",
+        "to": "work:media_asset"
+      },
+      {
+        "from": "ref:brand_platform",
+        "to": "work:media_asset"
+      },
+      {
+        "from": "ref:positioning_statement",
+        "to": "work:media_asset"
+      }
+    ],
+    "external_effects": [],
+    "intent": {
+      "clarifications": [],
+      "deliverable": "VECTOR_MARK",
+      "facts": [
+        {
+          "fact_type": "EXPLICIT",
+          "kind": "deliverable",
+          "note": "matched 'SVG'",
+          "span": [
+            10,
+            13
+          ],
+          "value": "VECTOR_MARK"
+        },
+        {
+          "fact_type": "SAFE_DEFAULT",
+          "kind": "execution_mode",
+          "note": "production missions default to real execution",
+          "span": null,
+          "value": "REAL_EXECUTION"
+        }
+      ],
+      "mode": "REAL_EXECUTION",
+      "request_hash": "abc10e556a77d118dc13b24450a4ec1ebdad9e38d468884b84c59539cf283d1b",
+      "utterance_type": "REQUEST"
+    },
+    "label": "PREVIEW: nothing was executed",
+    "live_execution": "DISABLED",
+    "nodes": [
+      {
+        "artifact_type": "media_asset",
+        "blockers": [],
+        "cell_id": "cell:media_asset",
+        "node_id": "work:media_asset",
+        "objective": "Produce media_asset (Generate campaign concepts and the reproducible prompts that realize them.)",
+        "role": "creative_director",
+        "side_effect_class": "DRAFT",
+        "state": "EXECUTABLE",
+        "status_label": "Executable",
+        "wave": 0
+      }
+    ],
+    "outcome": "READY_TO_LAUNCH",
+    "plan_hash": "9721690719a4074c5b1b18aec79e337850fc48f7936c8060a4a9a561231f2db1",
+    "preview": true,
+    "project": {
+      "project_id": "prj-ace-d8a4eccc",
+      "reasons": [
+        "BOUND_BY_ACTIVE_CONTEXT"
+      ],
+      "status": "BOUND"
+    },
+    "reasons": [],
+    "waves": [
+      {
+        "cells": [
+          "cell:media_asset"
+        ],
+        "index": 0
+      }
+    ]
+  },
+  "recovery_item": {
+    "action_id": "act-5386d3b282cc198af53a3bf63f7e3fe3",
+    "attempts": 1,
+    "capability_id": "sandbox.cms.publish_page",
+    "next_step": "reconcile by read-back (never re-sent)",
+    "project_id": "prj-ace-d8a4eccc",
+    "reasons": [
+      "OUTCOME_UNKNOWN: simulated timeout after the effect was made"
+    ],
+    "reconcile_attempts": 0,
+    "retry_eligible": false,
+    "state": "UNKNOWN",
+    "status_label": "Outcome unknown",
+    "updated_at": "2026-10-11T23:42:23.864940Z"
+  }
+}

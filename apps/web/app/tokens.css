@@ -1,7 +1,7 @@
 /* GENERATED FILE -- do not edit by hand.
  * compiler: amc-dtcg-compiler/v1 (DTCG 2025.10)
  * source: apps/web/tokens/amc.tokens.json
- * source-sha256: 71bf682bfee4b5350d5ee701c5ad588084ba61329c66e62a7fe8aa6020a81d0f
+ * source-sha256: 41453fc888bf984603a9e61a326f51537771e5ba7ee866594cfbeda3453cae87
  */
 :root {
   --amc-component-ai-trust-color-border: var(--amc-semantic-color-border-strong);
@@ -13,11 +13,16 @@
   --amc-component-ai-trust-color-unavailable: var(--amc-semantic-color-status-danger);
   --amc-component-ai-trust-radius-container: var(--amc-semantic-radius-control);
   --amc-primitive-color-amber-400: #fbbf24;
+  --amc-primitive-color-amber-700: #b45309;
   --amc-primitive-color-emerald-400: #34d399;
   --amc-primitive-color-emerald-500: #10b981;
+  --amc-primitive-color-emerald-700: #047857;
   --amc-primitive-color-emerald-900: #064e3b;
   --amc-primitive-color-red-400: #f87171;
+  --amc-primitive-color-red-700: #b91c1c;
   --amc-primitive-color-sky-400: #38bdf8;
+  --amc-primitive-color-sky-700: #0369a1;
+  --amc-primitive-color-white: #ffffff;
   --amc-primitive-color-zinc-100: #f4f4f5;
   --amc-primitive-color-zinc-200: #e4e4e7;
   --amc-primitive-color-zinc-400: #a1a1aa;
@@ -69,4 +74,28 @@
   --amc-semantic-space-inline: var(--amc-primitive-space-2);
   --amc-semantic-space-panel: var(--amc-primitive-space-4);
   --amc-semantic-space-stack: var(--amc-primitive-space-3);
+}
+
+[data-amc-theme="light"] {
+  --amc-component-ai-trust-color-border: var(--amc-semantic-color-border-strong);
+  --amc-component-ai-trust-color-degraded: var(--amc-semantic-color-status-warning);
+  --amc-component-ai-trust-color-detail: var(--amc-semantic-color-foreground);
+  --amc-component-ai-trust-color-label: var(--amc-semantic-color-foreground-strong);
+  --amc-component-ai-trust-color-provider: var(--amc-semantic-color-status-info);
+  --amc-component-ai-trust-color-surface: var(--amc-semantic-color-surface);
+  --amc-component-ai-trust-color-unavailable: var(--amc-semantic-color-status-danger);
+  --amc-semantic-color-accent: var(--amc-primitive-color-emerald-700);
+  --amc-semantic-color-background: var(--amc-primitive-color-zinc-50);
+  --amc-semantic-color-border: var(--amc-primitive-color-zinc-200);
+  --amc-semantic-color-border-strong: var(--amc-primitive-color-zinc-500);
+  --amc-semantic-color-focus-ring: var(--amc-primitive-color-emerald-700);
+  --amc-semantic-color-foreground: var(--amc-primitive-color-zinc-700);
+  --amc-semantic-color-foreground-muted: var(--amc-primitive-color-zinc-600);
+  --amc-semantic-color-foreground-strong: var(--amc-primitive-color-zinc-950);
+  --amc-semantic-color-status-danger: var(--amc-primitive-color-red-700);
+  --amc-semantic-color-status-info: var(--amc-primitive-color-sky-700);
+  --amc-semantic-color-status-success: var(--amc-primitive-color-emerald-700);
+  --amc-semantic-color-status-warning: var(--amc-primitive-color-amber-700);
+  --amc-semantic-color-surface: var(--amc-primitive-color-white);
+  --amc-semantic-color-surface-raised: var(--amc-primitive-color-zinc-100);
 }

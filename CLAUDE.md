@@ -68,7 +68,7 @@ python scripts/verify_guidance_registry.py
 
 ### Critical-file integrity manifest
 
-`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 162 as of the Creative Foundry change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
+`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 182 as of the ACE v12 change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
 
 ```python
 import hashlib, json
@@ -245,6 +245,64 @@ verifies it. A genome revision invalidates dependents through the existing inval
 
 The demo is `scripts/render_foundry_demo.py`, which writes `runtime/foundry/demo/` for a FICTIONAL brand.
 Details: `docs/creative-foundry.md`.
+
+### VNEXUS ACE — persisted brand genome and the layers on it
+
+`services/langgraph/agency/vnexus/` + `persistence/vnexus.py` (migration 15, eleven `amc.vnexus_*` tables) +
+`api/routes/vnexus.py` (`/vnexus`) + `components/mission-control/vnexus/` (VNEXUS Studio mode):
+
+- **Genome.** `genome.py` is pure: chromosomes, scopes brand → project → page → component → asset, typed
+  constraints, `resolve()` (descendants never override IMMUTABLE keys; conflicts are reported, not applied).
+  `service.py` owns the lifecycle. Only DRAFT is editable (CAS on `revision`); APPROVED is immutable and one per
+  scope; revert makes a new draft. Every mutation appends to a per-brand hash-chained audit log.
+- **Approval.** Submit reuses `open_artifact_approval`; `/approvals/{id}/decide` decides. `settle_version` only
+  applies that decision, and only when subject hash/ref match, reviewer ≠ author/submitter and ancestors are
+  unchanged. Don't add another approval path.
+- **Graph and multiverse.** `graph.py`/`multiverse.py` are pure; `creative_service.py` writes inside a locked
+  transaction. Branches fork from APPROVED only and are promoted solely by creating a reviewed version — no
+  autonomous merge.
+- **Production.** `production.approved_projection` refuses without an approved, non-blocking genome. Outputs go
+  through the foundry `studio.store`/`observe` and link `DERIVED_FROM` the GenomeVersion node.
+- **Media fabric.** `media_fabric.py` providers implement identify/capabilities/estimate/validate/submit/status/
+  retrieve. Hosted providers are DISABLED with no network code; `mock.simulated` needs
+  `AMC_VNEXUS_MOCK_PROVIDERS=1` outside production and its output is never claimable as generated
+  (`can_claim_generated`).
+- **Intelligence.** Marketing rates come only from MEASURED rows with a source. Forecasts and the twin are labelled
+  SIMULATION. The prompt genome feeds the unchanged compiler. The 14 original prompts are absent and must not be
+  invented. The immune system auto-fixes only deterministic, reversible issues, as a new revision.
+- **Contracts.** Zod twins live in `packages/shared/src/schemas/vnexus.ts`, checked against the recorded fixture
+  `packages/shared/tests/fixtures/vnexus.json` (regenerate with
+  `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_vnexus_contracts.py`).
+- **Security.** `test_vnexus_security.py` sweeps every `/vnexus` route from the OpenAPI table as another tenant, a
+  viewer and unauthenticated. A new route is covered automatically and must pass.
+
+Details: `docs/vnexus-ace.md`.
+
+### ACE v12 action plane and Agency OS — one gateway, sandbox only
+
+`services/langgraph/agency/actions/` + `persistence/actions.py` (migration 16 / `20261012_amc_actions_v1.sql`) +
+`api/routes/actions.py` (`/actions`); the client app is `agency/agency_os/` + `api/routes/agency_os.py`
+(`/agency-os`) + `apps/web/app/agency` + `components/agency/`:
+
+- **One dispatch owner.** Only `actions.gateway` catalogue entries can be proposed through `/actions`. Fabric and
+  VNEXUS entries are described in `catalog.py` but keep their own dispatch (`NOT_GATEWAY_OWNED`). No LangGraph node
+  may call the gateway, because interrupted nodes replay; a test enforces this.
+- **Approval.** One anchor run per action. Approvals are `approvals` rows with `subject_hash = binding_hash`, decided
+  only via `/approvals/{id}/decide`. Spend and governance roles are server-written `approval_policy` in run
+  metadata, checked by `assert_may_decide_approval`. Don't add another approval store.
+- **State.** `persistence.actions.transition` is the only state writer: CAS on `version`, an allowlisted column
+  set, and a hash-chained `action_transitions` row.
+- **Effects.** Adapters are sandbox fakes writing only `action_sandbox_effects`; completion needs an independent
+  read-back. A timeout becomes `UNKNOWN` and leaves only by reconciliation.
+- **LIVE.** `governance.live_enablement()` always returns `DISABLED`. There is no switch.
+- **Reserved ids.** EXT-001…090 / ART-001…012 have no source definitions: they are `VOID_DETECTED`. Never invent
+  them.
+- **Contracts.** Zod twins live in `packages/shared/src/schemas/agencyOs.ts`, with the fixture
+  `packages/shared/tests/fixtures/ace12.json` (regenerate with
+  `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_ace12_contracts.py`).
+  `test_ace12_traceability.py` requires a test named for every T01–T60 and I01–I20.
+
+Details: `docs/ace-v12/README.md`.
 
 ### Prompt families and v10 prompt OS — decomposed, not injected
 

@@ -178,6 +178,21 @@ def render_svg_frames(frames: list[str], *, width: int, height: int, out_dir: Pa
     return {**run, "status": "PASSED" if not findings else "FAILED", "findings": findings, "files": files}
 
 
+def render_pdf(html: str, *, width_px: int, height_px: int, out_dir: Path, timeout_s: int = 120) -> dict:
+    """A vector PDF printed by local Chromium from self-contained HTML (remote requests are blocked)."""
+    run = _run({"mode": "pdf", "html": html, "width_px": width_px, "height_px": height_px}, out_dir, timeout_s)
+    capture = out_dir / "document.pdf"
+    findings = []
+    if run["exit_code"] != 0:
+        findings.append(f"BROWSER_EXIT:{run['exit_code']}")
+    if run["result"].get("blocked_requests"):
+        findings.append("REMOTE_REQUEST_ATTEMPTED")
+    if not capture.is_file() or not capture.read_bytes().startswith(b"%PDF-"):
+        findings.append("PDF_NOT_WRITTEN")
+    ok = not findings
+    return {**run, "status": "PASSED" if ok else "FAILED", "findings": findings, "capture": str(capture) if ok else None}
+
+
 def run_experience(html: str, scenarios: list[dict], *, out_dir: Path, timeout_s: int = 300) -> dict:
     """Load a generated interface in local Chromium and execute scripted interaction scenarios."""
     run = _run({"mode": "experience", "html": html, "scenarios": scenarios}, out_dir, timeout_s)
@@ -192,5 +207,5 @@ def run_experience(html: str, scenarios: list[dict], *, out_dir: Path, timeout_s
         findings.append("REMOTE_REQUEST_ATTEMPTED")
     return {**run, "status": "PASSED" if not findings else "FAILED", "findings": findings, "scenarios": results}
 
-__all__ = ["capture_svg_sizes", "capture_webgl", "chromium_path", "probe_browser", "rasterize_svg", "render_svg_frames",
+__all__ = ["capture_svg_sizes", "capture_webgl", "chromium_path", "probe_browser", "render_pdf", "rasterize_svg", "render_svg_frames",
            "run_experience", "three_renderer_for"]

@@ -1,0 +1,66 @@
+{
+  "observed_at": "2026-10-11",
+  "repository": "eyeszik/agent-mission-control-os",
+  "base_branch": "master",
+  "base_commit": "7f7db50850c0b4175e6be1c9b894b847a1004d8d",
+  "working_branch": "claude/ai-agency-pipeline-oae65z (restarted from master after PR #124 merged; session-designated branch)",
+  "pull_requests": {
+    "124": {
+      "state": "MERGED",
+      "merge_commit": "ba070ccf6583cb7a502e49b819b85fbc050e5a38",
+      "merged_by": "eyeszik"
+    },
+    "125": {
+      "state": "OPEN",
+      "note": "Jules perf bot PR; not part of this work"
+    },
+    "126": {
+      "state": "MERGED",
+      "merge_commit": "7f7db50850c0b4175e6be1c9b894b847a1004d8d",
+      "content": [
+        "services/langgraph/agency/creative/brand_production.py",
+        "tests/test_brand_production_foundation.py",
+        "docs/brand-production/architecture-audit.md"
+      ],
+      "finding": "tests/test_brand_production_foundation.py sits at repo root; CI runs only services/langgraph/tests, so it never runs in CI",
+      "resolution": "moved to services/langgraph/tests/test_brand_production_foundation.py in the VNEXUS change (6 passed locally); CI's backend jobs now run it"
+    },
+    "127": {
+      "state": "OPEN_DRAFT",
+      "head": "4a6de182fe4df1e66c2baeda0f028176307156fc",
+      "mergeable_state": "unstable",
+      "checks": {
+        "Backend": "success",
+        "Backend on PostgreSQL": "success",
+        "Frontend": "success",
+        "Browser E2E": "success",
+        "Dependency audit": "success",
+        "genome-validation": "failure"
+      },
+      "genome_validation_failure": {
+        "step": "Web typecheck",
+        "cause": "workflow never builds the workspace packages; apps/web imports @amc/shared dist output",
+        "reproduced_locally": "88 TS errors with packages/shared/dist removed; 0 after build",
+        "previous_fixes": {
+          "e2c4b797 TS2802": "resolved (vitest + typecheck pass)",
+          "4a6de182 pnpm version": "resolved (install step passes in CI)"
+        }
+      },
+      "reconciliation": "branch merged into the session branch (ba247b50) and the workflow fixed (de0566b5); PR #127 itself left untouched and unmerged"
+    }
+  },
+  "existing_systems_reused": {
+    "persistence": "services/langgraph/persistence (dual SQLite/Postgres, numbered migrations in sqlite_db.py mirrored in supabase/migrations)",
+    "hashing": "agency/execution/canonical.py canonical_hash (AMC-CANON-1)",
+    "approvals": "persistence/approvals.py + api/routes/approvals.py decide route (approver role + separation of duties)",
+    "project_auth": "api/routes/_project_common.authorize_project_access + security.auth.Principal",
+    "creative_genome_and_renderers": "agency/foundry (CreativeGenome, compose SVG, experience twin, scene, motion, studio.Mission persists Project OS artifacts)",
+    "ui_ux_compiler": "agency/ui_ux.compile_uiux -> UIUXDesignIR",
+    "dtcg": "agency/design_tokens.py (only DTCG compiler)",
+    "prompt_compiler": "agency/prompt_compiler.py (five passes, PROMPT_PACKAGE_READY)",
+    "creative_runtime": "agency/creative (T0-T4, recorder, HITL)",
+    "brand_production_v7_1": "agency/creative/brand_production.py (pure planning)",
+    "web_genome_precheck": "apps/web/lib/design/brand-genome.ts (from PR #127)"
+  },
+  "original_14_prompts": "NOT FOUND in the repository; only references in docs/vnexus-ace-v9-integration.md and docs/brand-production/architecture-audit.md"
+}

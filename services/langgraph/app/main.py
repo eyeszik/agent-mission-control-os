@@ -9,6 +9,8 @@ from fastapi.responses import JSONResponse
 
 from services.langgraph.core.errors import register_error_handlers
 from services.langgraph.api.routes import (
+    actions,
+    agency_os,
     agency,
     analytics,
     approvals,
@@ -21,6 +23,7 @@ from services.langgraph.api.routes import (
     project_ops,
     projects,
     runtime,
+    vnexus,
 )
 from services.langgraph.app.config import (
     assert_runtime_configuration,
@@ -66,7 +69,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=list(_startup_config.cors.allowed_origins),
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    # Every method a route uses must be listed, or browsers fail the preflight
+    # (test_ace12_ui_contract checks this against the route table).
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "Last-Event-ID", "X-AMC-Tenant"],
 )
 
@@ -88,6 +93,9 @@ app.include_router(operations.router, prefix="/operations", tags=["Operations"])
 app.include_router(runtime.router, prefix="/runtime", tags=["Runtime"])
 app.include_router(design.router, prefix="/design", tags=["Design Mode"])
 app.include_router(foundry.router, prefix="/foundry", tags=["Creative Foundry"])
+app.include_router(vnexus.router, prefix="/vnexus", tags=["VNEXUS"])
+app.include_router(actions.router, prefix="/actions", tags=["Governed Actions"])
+app.include_router(agency_os.router, prefix="/agency-os", tags=["Agency OS"])
 app.include_router(compiled_agency.router, prefix="/compiled-agency", tags=["Compiled Agency"])
 app.include_router(projects.router, prefix="/projects", tags=["Projects"])
 app.include_router(project_ops.router, prefix="/projects", tags=["Project Operations"])

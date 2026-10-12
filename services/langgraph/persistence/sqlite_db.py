@@ -913,6 +913,369 @@ _MIGRATIONS = [
         CREATE INDEX IF NOT EXISTS idx_durable_intents_job ON durable_intents(job_id, logical_tick);
         CREATE INDEX IF NOT EXISTS idx_durable_transitions_job ON durable_transitions(job_id, transition_id);
     """),
+    (15, """
+        -- VNEXUS creative intelligence: brand genome versions, creative knowledge graph,
+        -- branches, media jobs, prompt genomes, measurements and a hash-chained audit log.
+        -- Mirrors supabase/migrations/20261011_amc_vnexus_v1.sql.
+        create table if not exists vnexus_brands (
+            brand_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            owner_project_id text not null references projects(project_id) on delete restrict,
+            display_name text not null,
+            created_by text not null,
+            created_at text not null
+        );
+
+        create table if not exists vnexus_genome_versions (
+            version_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            brand_id text not null references vnexus_brands(brand_id) on delete cascade,
+            scope text not null check (scope in ('brand','project','page','component','asset')),
+            scope_ref text not null,
+            project_id text not null references projects(project_id) on delete cascade,
+            version integer not null check (version >= 1),
+            parent_version_id text references vnexus_genome_versions(version_id),
+            status text not null check (status in ('DRAFT','EXPERIMENTAL','IN_REVIEW','APPROVED','REJECTED','SUPERSEDED')),
+            document TEXT not null,
+            content_hash text not null,
+            revision integer not null default 1 check (revision >= 1),
+            origin text not null check (origin in ('AUTHORED','REVERT','BRANCH_PROMOTION','IMPORT')),
+            origin_ref text,
+            created_by text not null,
+            created_at text not null,
+            updated_at text not null,
+            submitted_by text,
+            submitted_at text,
+            approval_id text,
+            decided_by text,
+            decided_at text,
+            unique (brand_id, scope, scope_ref, version)
+        );
+
+        create unique index if not exists uq_vnexus_genome_approved
+            on vnexus_genome_versions(brand_id, scope, scope_ref) where status = 'APPROVED';
+
+        create table if not exists vnexus_audit_log (
+            entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            chain_ref text not null,
+            subject_type text not null,
+            subject_id text not null,
+            action text not null,
+            actor text not null,
+            from_state text,
+            to_state text,
+            detail TEXT not null default '{}',
+            prev_hash text,
+            entry_hash text not null unique,
+            created_at text not null
+        );
+
+        create table if not exists vnexus_graph_nodes (
+            node_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            brand_id text not null references vnexus_brands(brand_id) on delete cascade,
+            kind text not null,
+            label text not null,
+            attributes TEXT not null default '{}',
+            content_hash text not null,
+            valid_from text not null,
+            valid_to text,
+            superseded_by text references vnexus_graph_nodes(node_id),
+            created_by text not null,
+            created_at text not null
+        );
+
+        create table if not exists vnexus_graph_edges (
+            edge_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            brand_id text not null references vnexus_brands(brand_id) on delete cascade,
+            kind text not null,
+            src_node_id text not null references vnexus_graph_nodes(node_id) on delete cascade,
+            dst_node_id text not null references vnexus_graph_nodes(node_id) on delete cascade,
+            provenance TEXT not null default '{}',
+            valid_from text not null,
+            valid_to text,
+            created_by text not null,
+            created_at text not null,
+            check (src_node_id <> dst_node_id)
+        );
+
+        create table if not exists vnexus_branches (
+            branch_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            brand_id text not null references vnexus_brands(brand_id) on delete cascade,
+            scope text not null,
+            scope_ref text not null,
+            project_id text not null references projects(project_id) on delete cascade,
+            base_version_id text not null references vnexus_genome_versions(version_id),
+            parent_branch_id text references vnexus_branches(branch_id),
+            name text not null,
+            hypothesis text not null default '',
+            changes TEXT not null,
+            changes_hash text not null,
+            state text not null check (state in ('OPEN','IN_REVIEW','PROMOTED','REJECTED','ARCHIVED')),
+            revision integer not null default 1 check (revision >= 1),
+            proposal_version_id text references vnexus_genome_versions(version_id),
+            decision_note text,
+            created_by text not null,
+            created_at text not null,
+            updated_at text not null
+        );
+
+        create table if not exists vnexus_branch_evaluations (
+            evaluation_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            branch_id text not null references vnexus_branches(branch_id) on delete cascade,
+            kind text not null check (kind in ('DETERMINISTIC','HUMAN')),
+            evaluator text not null,
+            changes_hash text not null,
+            payload TEXT not null,
+            payload_hash text not null,
+            created_at text not null
+        );
+
+        create table if not exists vnexus_media_jobs (
+            job_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            project_id text not null references projects(project_id) on delete cascade,
+            provider_id text not null,
+            capability text not null,
+            request TEXT not null,
+            request_hash text not null,
+            idempotency_key text not null,
+            state text not null check (state in ('PLANNED','VALIDATED','AUTHORIZED','QUEUED','RUNNING','ARTIFACT_RECEIVED','QC_PASSED','FAILED','CANCELED')),
+            estimate TEXT not null default '{}',
+            budget_ceiling_minor integer not null default 0 check (budget_ceiling_minor >= 0),
+            currency text not null default 'USD',
+            authorized_by text,
+            authorized_at text,
+            attempts integer not null default 0 check (attempts >= 0),
+            max_attempts integer not null default 2 check (max_attempts between 1 and 3),
+            provider_job_ref text,
+            artifact TEXT not null default '{}',
+            qc TEXT not null default '{}',
+            error text,
+            version integer not null default 1 check (version >= 1),
+            created_by text not null,
+            created_at text not null,
+            updated_at text not null,
+            unique (tenant_id, idempotency_key)
+        );
+
+        create table if not exists vnexus_media_job_transitions (
+            transition_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id text not null references vnexus_media_jobs(job_id) on delete cascade,
+            tenant_id text not null,
+            from_state text not null,
+            to_state text not null,
+            reason text not null default '',
+            actor text not null,
+            observed_at text not null
+        );
+
+        create table if not exists vnexus_prompt_genomes (
+            prompt_version_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            brand_id text not null references vnexus_brands(brand_id) on delete cascade,
+            prompt_id text not null,
+            version integer not null check (version >= 1),
+            parent_version_id text references vnexus_prompt_genomes(prompt_version_id),
+            status text not null check (status in ('DRAFT','APPROVED','SUPERSEDED','SOURCE_REQUIRED')),
+            source_kind text not null check (source_kind in ('ORIGINAL_IMPORT','DERIVED','AUTHORED')),
+            source_hash text,
+            document TEXT not null,
+            content_hash text not null,
+            created_by text not null,
+            created_at text not null,
+            unique (brand_id, prompt_id, version)
+        );
+
+        create table if not exists vnexus_measurements (
+            measurement_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            project_id text not null references projects(project_id) on delete cascade,
+            campaign_ref text not null,
+            metric text not null,
+            value REAL not null,
+            unit text not null,
+            source text not null,
+            source_ref text not null,
+            observed_at text not null,
+            recorded_by text not null,
+            recorded_at text not null,
+            kind text not null default 'MEASURED' check (kind = 'MEASURED')
+        );
+
+        create index if not exists idx_vnexus_genome_scope on vnexus_genome_versions(brand_id, scope, scope_ref, status);
+        create index if not exists idx_vnexus_audit_chain on vnexus_audit_log(chain_ref, entry_id);
+        create index if not exists idx_vnexus_nodes_brand on vnexus_graph_nodes(brand_id, kind);
+        create index if not exists idx_vnexus_edges_src on vnexus_graph_edges(src_node_id, kind);
+        create index if not exists idx_vnexus_edges_dst on vnexus_graph_edges(dst_node_id, kind);
+        create index if not exists idx_vnexus_branches_brand on vnexus_branches(brand_id, state);
+        create index if not exists idx_vnexus_media_jobs_project on vnexus_media_jobs(project_id, state);
+        create index if not exists idx_vnexus_measurements_campaign on vnexus_measurements(project_id, campaign_ref);
+    """),
+    (16, """
+        -- ACE v12 governed action plane and agency clients. Additive only: no existing
+        -- table is altered. Mirrors supabase/migrations/20261012_amc_actions_v1.sql.
+
+        create table if not exists action_requests (
+            action_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            project_id text not null references projects(project_id) on delete cascade,
+            client_id text,
+            capability_id text not null,
+            capability_version text not null,
+            environment text not null check (environment in ('LOCAL','SANDBOX','LIVE')),
+            actor_ref text not null,
+            target_ref text not null,
+            args text not null,
+            args_hash text not null,
+            payload_hash text not null,
+            context_hash text not null,
+            dependency_hashes text not null,
+            policy_version text not null,
+            risk text not null,
+            risk_hash text not null,
+            effective_class text not null check (effective_class in ('R0','R1','R2','R3','R4','R5','R6')),
+            binding text not null,
+            binding_hash text not null,
+            run_id text,
+            approval_id text,
+            financial_approval_id text,
+            budget_reservation_id text,
+            idempotency_key text not null,
+            request_hash text not null,
+            correlation_id text not null,
+            state text not null check (state in ('PROPOSED','VALIDATED','PREPARED','AWAITING_APPROVAL','AUTHORIZED','RESERVED',
+                'DISPATCHING','OBSERVING','VERIFIED','COMPLETED','REJECTED','BLOCKED','EXPIRED','CANCELLED','FAILED','UNKNOWN',
+                'RECONCILING','NEEDS_HUMAN')),
+            version integer not null default 1 check (version >= 1),
+            attempts integer not null default 0 check (attempts >= 0 and attempts <= 3),
+            reconcile_attempts integer not null default 0 check (reconcile_attempts >= 0),
+            lease_owner text,
+            lease_expires_at text,
+            retry_eligible integer not null default 0,
+            reasons text not null,
+            outcome text,
+            injection_flags text not null,
+            created_at text not null,
+            updated_at text not null,
+            expires_at text not null,
+            unique (tenant_id, idempotency_key)
+        );
+
+        create table if not exists action_transitions (
+            entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            action_id text not null references action_requests(action_id) on delete cascade,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            from_state text,
+            to_state text not null,
+            actor text not null,
+            reason text not null,
+            evidence text not null,
+            prev_hash text,
+            entry_hash text not null,
+            created_at text not null
+        );
+
+        create table if not exists action_budget_policies (
+            policy_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            scope_kind text not null check (scope_kind in ('ACTION','PROJECT','CLIENT','TENANT_DAY','TENANT_MONTH')),
+            scope_ref text not null,
+            currency text not null check (length(currency) = 3 and currency = upper(currency)),
+            ceiling_minor bigint not null check (ceiling_minor >= 0),
+            created_by text not null,
+            created_at text not null,
+            unique (tenant_id, scope_kind, scope_ref, currency)
+        );
+
+        create table if not exists action_budget_reservations (
+            reservation_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            project_id text not null references projects(project_id) on delete cascade,
+            client_id text,
+            action_id text not null references action_requests(action_id) on delete cascade,
+            currency text not null check (length(currency) = 3 and currency = upper(currency)),
+            amount_minor bigint not null check (amount_minor >= 0),
+            committed_minor bigint check (committed_minor is null or committed_minor >= 0),
+            status text not null check (status in ('RESERVED','COMMITTED','RELEASED','EXPIRED','REFUNDED')),
+            expires_at text not null,
+            evidence text not null,
+            created_at text not null,
+            updated_at text not null
+        );
+
+        create table if not exists action_freezes (
+            freeze_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            scope_kind text not null check (scope_kind in ('TENANT','PROJECT')),
+            scope_ref text not null,
+            reason text not null,
+            frozen_by text not null,
+            frozen_at text not null,
+            lifted_by text,
+            lifted_at text,
+            lift_reason text
+        );
+
+        create table if not exists action_project_settings (
+            project_id text primary key references projects(project_id) on delete cascade,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            autonomy text not null check (autonomy in ('OBSERVE','DRAFT','PREPARE','REQUEST_APPROVAL')),
+            updated_by text not null,
+            updated_at text not null
+        );
+
+        -- The sandbox fake providers' "remote" state. Only sandbox adapters read or
+        -- write it; nothing here was delivered anywhere.
+        create table if not exists action_sandbox_effects (
+            effect_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            provider text not null,
+            operation text not null,
+            idempotency_key text not null,
+            target_ref text not null,
+            payload_hash text not null,
+            state text not null,
+            cost_minor bigint not null default 0,
+            currency text,
+            body text not null,
+            created_at text not null,
+            updated_at text not null,
+            unique (tenant_id, provider, idempotency_key)
+        );
+
+        create table if not exists agency_clients (
+            client_id text primary key,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            display_name text not null,
+            slug text not null,
+            status text not null check (status in ('ACTIVE','OFFBOARDING','ARCHIVED')),
+            notes text not null default '',
+            created_by text not null,
+            created_at text not null,
+            updated_at text not null,
+            unique (tenant_id, slug)
+        );
+
+        create table if not exists agency_client_projects (
+            project_id text primary key references projects(project_id) on delete cascade,
+            client_id text not null references agency_clients(client_id) on delete cascade,
+            tenant_id text not null references tenants(tenant_id) on delete cascade,
+            linked_by text not null,
+            linked_at text not null
+        );
+
+        create index if not exists idx_action_requests_project on action_requests(project_id, state);
+        create index if not exists idx_action_requests_tenant_state on action_requests(tenant_id, state);
+        create index if not exists idx_action_transitions_action on action_transitions(action_id, entry_id);
+        create index if not exists idx_action_reservations_tenant on action_budget_reservations(tenant_id, currency, status);
+        create index if not exists idx_action_freezes_scope on action_freezes(tenant_id, scope_kind, scope_ref);
+        create index if not exists idx_agency_client_projects_client on agency_client_projects(client_id);
+    """),
 ]
 
 

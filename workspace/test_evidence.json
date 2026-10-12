@@ -1,0 +1,74 @@
+{
+  "observed_at": "2026-10-11",
+  "environment": {
+    "host": "claude.ai/code cloud container (linux)",
+    "python": "3.11.15",
+    "node": "v22.22.2",
+    "pnpm": "10.29.3",
+    "postgres": "16.13 local (port 5433, UTF8 database, CI shim + all 11 migrations)",
+    "renderers": "Chromium 1194, Blender 4.2, FFmpeg 6.1.1, Pillow 12.3 with WebP"
+  },
+  "runs": [
+    {
+      "command": "python -m pytest services/langgraph/tests -q (fresh SQLite AMC_DB_PATH)",
+      "result": "1096 passed, 2 skipped",
+      "duration_s": 343.6
+    },
+    {
+      "command": "python -m pytest services/langgraph/tests -q (AMC_DATABASE_BACKEND=postgres)",
+      "result": "1096 passed, 2 skipped",
+      "duration_s": 584.4
+    },
+    {
+      "command": "skips",
+      "result": "both in test_compiled_agency.py: 'source archive not provided' (pre-existing, unrelated to VNEXUS)"
+    },
+    {
+      "command": "python -m pytest services/langgraph/tests/test_vnexus_security.py -q",
+      "result": "6 passed (sweep of every /vnexus route as another tenant, a viewer and unauthenticated)"
+    },
+    {
+      "command": "python -m pytest services/langgraph/tests/test_brand_production_foundation.py -q",
+      "result": "6 passed (moved from repo root so CI runs it; ran separately because it moved after the full runs started)"
+    },
+    {
+      "command": "pnpm --filter @amc/shared test",
+      "result": "135 passed"
+    },
+    {
+      "command": "pnpm --filter @amc/web test",
+      "result": "76 passed"
+    },
+    {
+      "command": "pnpm --filter @amc/web typecheck && pnpm --filter @amc/web verify:ui",
+      "result": "clean"
+    },
+    {
+      "command": "7 verifier gates (make gates)",
+      "result": "7/7 PASS"
+    },
+    {
+      "command": "ruff check (vnexus modules, routes, persistence, tests)",
+      "result": "All checks passed"
+    },
+    {
+      "command": "apps/web/e2e/vnexus-studio.spec.ts + existing e2e (CI-equivalent stack, earlier in session)",
+      "result": "6/6 passed"
+    },
+    {
+      "command": "browser drive of the production build (earlier in session)",
+      "result": "18/18 steps; identity VERIFIED, experience VERIFIED 12/12 scenarios, video MASTER_READY with AI shot BLOCKED, prompt PROMPT_PACKAGE_READY, audit chain intact"
+    },
+    {
+      "command": "GitHub CI on 4b98acb8",
+      "result": "Backend, Frontend, Browser E2E, Dependency audit, genome-validation: success; PostgreSQL job in progress at last check"
+    }
+  ],
+  "not_run": [
+    "load/performance testing",
+    "human usability validation",
+    "any hosted provider (none exists; paid calls not authorized)",
+    "production deployment"
+  ],
+  "note": "Every number above was read from the command's own output on this host; nothing is estimated."
+}

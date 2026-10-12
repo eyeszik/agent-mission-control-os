@@ -30,9 +30,15 @@ DEFAULT_OUTPUT = "apps/web/app/tokens.css"
 CSS_PREFIX = "amc"
 
 
+def themes_of(document: dict) -> dict:
+    """Theme overrides declared in the canonical source ($extensions.amc.themes)."""
+    declared = ((document.get("$extensions") or {}).get("amc") or {}).get("themes") or {}
+    return {name: theme["tokens"] for name, theme in declared.items()}
+
+
 def build(source: Path, *, source_label: str) -> str:
     document = json.loads(source.read_text(encoding="utf-8"))
-    _, css = compile_css(document, prefix=CSS_PREFIX, tiered=True, source_label=source_label)
+    _, css = compile_css(document, prefix=CSS_PREFIX, tiered=True, source_label=source_label, themes=themes_of(document))
     return css
 
 
