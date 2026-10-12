@@ -179,7 +179,7 @@ def recovery_sweep(principal: Principal = Depends(get_principal)) -> dict:
 
     require_role(principal, FREEZE_ROLES, "a recovery sweep")
     reconciled = gateway.recover_stale(principal=principal)
-    expired = gateway.expire_due(principal.tenant_id)
+    expired = gateway.expire_due(principal.tenant_id, principal=principal)
     return {"reconciled": [r["action_id"] for r in reconciled], "expired": expired}
 
 
