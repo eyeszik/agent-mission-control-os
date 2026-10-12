@@ -178,7 +178,7 @@ def recovery_sweep(principal: Principal = Depends(get_principal)) -> dict:
     from services.langgraph.agency.actions.broker import FREEZE_ROLES, require_role
 
     require_role(principal, FREEZE_ROLES, "a recovery sweep")
-    reconciled = [r for r in gateway.recover_stale() if r["tenant_id"] == principal.tenant_id]
+    reconciled = gateway.recover_stale(principal=principal)
     expired = gateway.expire_due(principal.tenant_id)
     return {"reconciled": [r["action_id"] for r in reconciled], "expired": expired}
 
