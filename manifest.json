@@ -28,7 +28,7 @@
     },
     {
       "path": "apps/web/e2e/accessibility-smoke.spec.ts",
-      "git_blob_sha": "6ef3a7f8bf010afe8726c5776e1a671f16594efb"
+      "git_blob_sha": "9a812482ec10f663ae064e61368e09c374fc1aed"
     },
     {
       "path": "apps/web/e2e/agency-smoke.spec.ts",
