@@ -56,7 +56,7 @@
     },
     {
       "path": "apps/web/scripts/verify-ui-ast.mjs",
-      "git_blob_sha": "7114fb0ded4b7b0b57a20709698ee05fb11bd6d0"
+      "git_blob_sha": "3868e93845a8a3734c6f4cddcd86cb152164fc34"
     },
     {
       "path": "apps/web/vercel.json",
