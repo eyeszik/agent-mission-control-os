@@ -227,12 +227,19 @@ def verify_transition_chain(action_id: str) -> dict:
     return {"intact": True, "entries": len(entries), "head": prev}
 
 
-def leased_past(now: datetime, states: Iterable[str]) -> list[dict]:
+def leased_past(now: datetime, states: Iterable[str], *, tenant_id: Optional[str] = None) -> list[dict]:
     states = list(states)
+    if not states:
+        return []
+    query = f"SELECT * FROM {table('action_requests')} WHERE state IN ({', '.join('?' for _ in states)}) "
+    params: list[Any] = [*states]
+    if tenant_id is not None:
+        query += "AND tenant_id = ? "
+        params.append(tenant_id)
+    query += "AND lease_expires_at IS NOT NULL AND lease_expires_at < ? ORDER BY lease_expires_at"
+    params.append(iso(now))
     with transaction() as db:
-        rows = db.execute(
-            f"SELECT * FROM {table('action_requests')} WHERE state IN ({', '.join('?' for _ in states)}) "
-            f"AND lease_expires_at IS NOT NULL AND lease_expires_at < ? ORDER BY lease_expires_at", [*states, iso(now)]).fetchall()
+        rows = db.execute(query, params).fetchall()
     return [_request(r) for r in rows]
 
 
