@@ -431,11 +431,17 @@ def cancel(principal: Principal, action_id: str, *, reason: str, now: Optional[d
     return row
 
 
-def expire_due(tenant_id: str, *, now: Optional[datetime] = None) -> list[str]:
+def expire_due(tenant_id: str, *, principal: Optional[Principal] = None, now: Optional[datetime] = None) -> list[str]:
+    if principal is not None and tenant_id != principal.tenant_id:
+        raise broker.ActionForbidden("tenant scope mismatch")
     moment = _now(now)
     pre = (ActionState.PREPARED.value, ActionState.AWAITING_APPROVAL.value, ActionState.AUTHORIZED.value, ActionState.RESERVED.value)
     out = []
     for row in db.expiring_before(tenant_id, moment, pre):
+        if principal is not None:
+            if not principal.can_access_project(row["project_id"]):
+                continue
+            broker.authorize_scope(principal, row["project_id"], write=True)
         try:
             _release_budget(row, "EXPIRED", "action expired")
             row = _move(row, ActionState.EXPIRED, actor="system:gateway", reason="expired before dispatch", now=moment)
