@@ -525,6 +525,40 @@ def test_t38b_recovery_sweep_cannot_mutate_another_tenants_action(w):
     assert adb.get_request(a["action_id"])["state"] == "FAILED"
 
 
+def test_t38c_recovery_sweep_respects_project_scope_within_same_tenant(w):
+    a = _approved(w, "sandbox.cms.publish_page", CMS, project=w["other"])
+    row = gateway.settle(a["action_id"])
+    past = datetime.now(timezone.utc) - timedelta(minutes=10)
+    adb.transition(
+        row["action_id"],
+        expected_version=row["version"],
+        expected_states=(row["state"],),
+        to_state="DISPATCHING",
+        actor="crashed-worker",
+        reason="cross-project sweep fixture",
+        updates={"lease_owner": "crashed-worker", "lease_expires_at": adb.iso(past), "attempts": 1},
+    )
+    act_as(w, OWNER, projects=w["project"])
+    response = client.post("/actions/recovery/sweep")
+    assert response.status_code == 200
+    assert a["action_id"] not in response.json()["reconciled"]
+    assert adb.get_request(a["action_id"])["state"] == "DISPATCHING"
+    act_as(w, OWNER)
+    assert a["action_id"] in client.post("/actions/recovery/sweep").json()["reconciled"]
+
+
+def test_t38d_expiration_respects_project_scope_within_same_tenant(w):
+    a = propose(w, "sandbox.cms.publish_page", CMS, project=w["other"])["action"]
+    before = adb.get_request(a["action_id"])["state"]
+    actor = P(w, user=OWNER, role="owner", projects=(w["project"],))
+    future = datetime.now(timezone.utc) + timedelta(days=8)
+    expired = gateway.expire_due(w["tenant"], principal=actor, now=future)
+    assert a["action_id"] not in expired
+    assert adb.get_request(a["action_id"])["state"] == before
+    owner = P(w, user=OWNER, role="owner")
+    assert a["action_id"] in gateway.expire_due(w["tenant"], principal=owner, now=future)
+
+
 def test_t39_i15_retries_are_bounded(w):
     a = propose(w, "sandbox.research.fetch_public", {"url": "https://example.com/x", "purpose": "background"})["action"]
     adapters()["sandbox.research.fetch_public"].fault = "transient_before_effect"
