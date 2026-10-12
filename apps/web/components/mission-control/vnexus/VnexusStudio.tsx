@@ -116,7 +116,7 @@ export function VnexusStudio() {
             <button key={a.id} ref={(el) => { tabs.current[i] = el; }} id={`vnx-tab-${a.id}`} type="button" role="tab"
               aria-selected={area === a.id} aria-controls={`vnx-panel-${a.id}`} tabIndex={area === a.id ? 0 : -1}
               onClick={() => setArea(a.id)} onKeyDown={(e) => onKey(e, i)}
-              className={`text-left text-xs px-2.5 py-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 ${area === a.id ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-400 hover:text-zinc-100'}`}>
+              className={`text-left text-xs px-2.5 py-1.5 rounded-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60 ${area === a.id ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-400 hover:text-zinc-100'}`}>
               {a.label}
             </button>
           ))}

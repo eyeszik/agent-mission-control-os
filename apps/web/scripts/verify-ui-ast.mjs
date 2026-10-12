@@ -2,7 +2,8 @@
 // AST gate for frontend token consumption (companion to scripts/verify_design_tokens.py).
 //
 // The Python gate scans lines; this one parses TSX with the TypeScript compiler
-// already in devDependencies (no new packages) and catches what a line regex
+// API pinned under typescript-api (TS 7 no longer exports the legacy API)
+// and catches what a line regex
 // cannot see reliably:
 //   1. visual properties in JSX `style={{...}}` objects (color, background,
 //      border, shadow, fill, stroke, font, ...) -- styling bypasses tokens;
@@ -15,7 +16,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
+import ts from 'typescript-api';
 
 const WEB_ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SCAN_DIRS = ['app', 'components', 'lib'];
@@ -48,7 +49,7 @@ export function scanSource(fileName, text) {
   const problems = [];
   const lines = text.split('\n');
   const allowed = (line) => (lines[line - 1] ?? '').includes('amc-allow-hex');
-  const sourceFile = ts.createSourceFile(fileName, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const sourceFile = ts.createSourceFile(fileName, text, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TSX);
   const report = (node, message) => {
     const line = lineOf(sourceFile, node);
     if (!allowed(line)) problems.push(`${fileName}:${line}: ${message}`);

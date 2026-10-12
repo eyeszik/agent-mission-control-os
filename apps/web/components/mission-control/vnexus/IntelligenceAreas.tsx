@@ -152,7 +152,7 @@ export function PromptsArea() {
           <p><Badge value={result.final_state} /> {result.package_hash ? `package ${short(result.package_hash, 12)}` : ''}</p>
           {result.missing_genome_keys.length > 0 && <p className="text-amber-300">The approved genome lacks: {result.missing_genome_keys.join(', ')}. Nothing was filled in.</p>}
           {result.checks && <p className="text-zinc-400">{Object.entries(result.checks).map(([k, v]) => `${k}: ${v ? 'yes' : 'no'}`).join(' · ')}</p>}
-          {result.adapted && <pre className="whitespace-pre-wrap break-words bg-zinc-950/60 border border-zinc-800 rounded p-2 max-h-48 overflow-auto">{JSON.stringify(result.adapted.body, null, 2)}</pre>}
+          {result.adapted && <pre className="whitespace-pre-wrap break-words bg-zinc-950/60 border border-zinc-800 rounded-sm p-2 max-h-48 overflow-auto">{JSON.stringify(result.adapted.body, null, 2)}</pre>}
         </div>
       )}
     </Panel>

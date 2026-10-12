@@ -51,7 +51,7 @@ export function AITrustEnvelope({
         </p>
         {summary.stages.length > 0 && (
           <details className="text-xs text-ai-trust-detail">
-            <summary className="cursor-pointer rounded-sm text-ai-trust-label focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+            <summary className="cursor-pointer rounded-xs text-ai-trust-label focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus">
               Per-stage provenance ({summary.stages.length})
             </summary>
             <ul className="mt-1 flex flex-col gap-0.5 break-words">

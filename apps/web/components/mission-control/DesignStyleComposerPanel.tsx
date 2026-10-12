@@ -34,8 +34,8 @@ type CatalogState =
   | { status: 'ready'; catalog: StyleCatalogResponse };
 
 const inputClass =
-  'w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60';
-const chipBase = 'text-[10px] font-mono px-1.5 py-0.5 rounded border transition-colors';
+  'w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60';
+const chipBase = 'text-[10px] font-mono px-1.5 py-0.5 rounded-sm border transition-colors';
 
 function Swatches({ colors }: { colors: readonly string[] }) {
   return (
@@ -43,7 +43,7 @@ function Swatches({ colors }: { colors: readonly string[] }) {
       {colors.slice(0, 6).map((color, index) => (
         <span
           key={`${color}-${index}`}
-          className="h-3 w-3 rounded-sm border border-zinc-700/80"
+          className="h-3 w-3 rounded-xs border border-zinc-700/80"
           style={{ backgroundColor: color /* amc-allow-hex: previews catalog palette data, not UI chrome */ }}
         />
       ))}
@@ -90,7 +90,7 @@ function StyleCard({
           disabled={disabled || role === 'primary' || (full && role === null)}
           onClick={() => onAdd(style, 'primary')}
           aria-label={`Set ${style.name} as primary style`}
-          className="text-xs px-2 py-1 rounded border border-emerald-500/30 text-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
+          className="text-xs px-2 py-1 rounded-sm border border-emerald-500/30 text-emerald-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-500/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60"
         >
           {role === 'primary' ? 'Primary' : 'Set primary'}
         </button>
@@ -99,7 +99,7 @@ function StyleCard({
           disabled={disabled || role !== null || full}
           onClick={() => onAdd(style, 'secondary')}
           aria-label={`Add ${style.name} as a secondary layer`}
-          className="text-xs px-2 py-1 rounded border border-zinc-700 text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
+          className="text-xs px-2 py-1 rounded-sm border border-zinc-700 text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-800/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60"
         >
           {role === 'secondary' ? 'Layered' : 'Add layer'}
         </button>
@@ -144,7 +144,7 @@ function LayerRow({
             <button
               type="button"
               onClick={() => onRole(layer.style_id, 'primary')}
-              className="text-[11px] text-zinc-400 hover:text-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded"
+              className="text-[11px] text-zinc-400 hover:text-emerald-300 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded-sm"
             >
               Make primary
             </button>
@@ -154,7 +154,7 @@ function LayerRow({
             aria-pressed={layer.locked}
             aria-label={`${layer.locked ? 'Unlock' : 'Lock'} ${name} dimensions`}
             onClick={() => onLock(layer.style_id)}
-            className={`${chipBase} ${layer.locked ? 'border-amber-500/50 text-amber-300 bg-amber-500/10' : 'border-zinc-700 text-zinc-400'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60`}
+            className={`${chipBase} ${layer.locked ? 'border-amber-500/50 text-amber-300 bg-amber-500/10' : 'border-zinc-700 text-zinc-400'} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60`}
           >
             {layer.locked ? 'Locked' : 'Lock'}
           </button>
@@ -162,7 +162,7 @@ function LayerRow({
             type="button"
             aria-label={`Remove ${name}`}
             onClick={() => onRemove(layer.style_id)}
-            className="text-[11px] text-zinc-500 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded"
+            className="text-[11px] text-zinc-500 hover:text-red-300 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded-sm"
           >
             Remove
           </button>
@@ -202,7 +202,7 @@ function LayerRow({
                   : native
                     ? 'border-zinc-700 text-zinc-400'
                     : 'border-zinc-800 text-zinc-600'
-              } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60`}
+              } focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60`}
             >
               {dimension}
             </button>
@@ -227,11 +227,11 @@ function ComposedResult({ composed, index }: { composed: ComposedStyle; index: S
   return (
     <section aria-label="Composed design direction" className="flex flex-col gap-3">
       {composed.blocking ? (
-        <div role="alert" className="text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">
+        <div role="alert" className="text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded-sm px-3 py-2">
           Blocked — this direction cannot be attached: {composed.conflicts.join(' ')}
         </div>
       ) : (
-        <div className="text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded px-3 py-2">
+        <div className="text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-sm px-3 py-2">
           Composed {composed.composition_id} · catalog {composed.catalog_version}
         </div>
       )}
@@ -262,7 +262,7 @@ function ComposedResult({ composed, index }: { composed: ComposedStyle; index: S
           <button
             type="button"
             onClick={copy}
-            className="text-[11px] text-zinc-400 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded"
+            className="text-[11px] text-zinc-400 hover:text-zinc-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded-sm"
           >
             {copied ? 'Copied' : 'Copy'}
           </button>
@@ -373,13 +373,13 @@ export function DesignStyleComposerPanel() {
 
       {state.status === 'error' && (
         <div className="p-4 flex flex-col gap-2">
-          <div role="alert" className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">
+          <div role="alert" className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-sm px-3 py-2">
             {state.message}
           </div>
           <button
             type="button"
             onClick={() => setReloadToken((token) => token + 1)}
-            className="self-start text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
+            className="self-start text-xs px-3 py-1.5 rounded-sm border border-zinc-700 text-zinc-300 hover:bg-zinc-800/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60"
           >
             Retry
           </button>
@@ -443,7 +443,7 @@ export function DesignStyleComposerPanel() {
                 <button
                   type="button"
                   onClick={() => updateLayers([])}
-                  className="text-[11px] text-zinc-500 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded"
+                  className="text-[11px] text-zinc-500 hover:text-zinc-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded-sm"
                 >
                   Clear
                 </button>
@@ -472,7 +472,7 @@ export function DesignStyleComposerPanel() {
             )}
 
             {checks.conflicts.length > 0 && (
-              <div role="alert" className="text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">
+              <div role="alert" className="text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded-sm px-3 py-2">
                 {checks.conflicts.join(' ')}
               </div>
             )}
@@ -498,7 +498,7 @@ export function DesignStyleComposerPanel() {
             </div>
 
             {composeError && (
-              <div role="alert" className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">
+              <div role="alert" className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-sm px-3 py-2">
                 {composeError}
               </div>
             )}
@@ -508,7 +508,7 @@ export function DesignStyleComposerPanel() {
                 type="button"
                 onClick={handleCompose}
                 disabled={composing || layers.length === 0 || checks.conflicts.length > 0}
-                className="px-4 py-1.5 bg-zinc-100 text-zinc-900 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
+                className="px-4 py-1.5 bg-zinc-100 text-zinc-900 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
               >
                 {composing ? 'Composing…' : 'Validate & compose'}
               </button>
@@ -516,7 +516,7 @@ export function DesignStyleComposerPanel() {
                 type="button"
                 onClick={handleAttach}
                 disabled={!canAttach}
-                className="px-4 py-1.5 border border-emerald-500/40 text-emerald-300 text-sm font-medium rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
+                className="px-4 py-1.5 border border-emerald-500/40 text-emerald-300 text-sm font-medium rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-500/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
               >
                 {composed && attachedId === composed.composition_id && !stale ? 'Attached to next run' : 'Attach to next run'}
               </button>

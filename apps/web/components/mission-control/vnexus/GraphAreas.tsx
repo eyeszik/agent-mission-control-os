@@ -80,7 +80,7 @@ export function GraphArea() {
           {nodes.map((n) => (
             <li key={n.node_id}>
               <button type="button" onClick={() => void inspect(n.node_id)} aria-pressed={selected === n.node_id}
-                className={`w-full text-left px-2 py-1 rounded border ${selected === n.node_id ? 'border-emerald-700/60 bg-zinc-800/60' : 'border-zinc-800 hover:bg-zinc-800/40'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60`}>
+                className={`w-full text-left px-2 py-1 rounded-sm border ${selected === n.node_id ? 'border-emerald-700/60 bg-zinc-800/60' : 'border-zinc-800 hover:bg-zinc-800/40'} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60`}>
                 <span className="text-zinc-500">{n.kind}</span> <span className="text-zinc-200">{n.label}</span>
               </button>
             </li>
@@ -158,7 +158,7 @@ export function MultiverseArea() {
           {branches.map((b) => (
             <li key={b.branch_id} className="flex flex-wrap items-center gap-2">
               <button type="button" aria-pressed={selected === b.branch_id} onClick={() => { setSelected(b.branch_id); setComparison(null); setTwo(null); }}
-                className={`px-2 py-1 rounded border ${selected === b.branch_id ? 'border-emerald-700/60' : 'border-zinc-800'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60`}>{b.name}</button>
+                className={`px-2 py-1 rounded-sm border ${selected === b.branch_id ? 'border-emerald-700/60' : 'border-zinc-800'} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60`}>{b.name}</button>
               <Badge value={b.state} /><span className="text-zinc-500">{Object.keys(b.changes.set).length} set · {b.changes.unset.length} unset</span>
             </li>
           ))}
