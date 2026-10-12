@@ -42,10 +42,20 @@ test.describe('Mission Control accessibility smoke', () => {
     ).toBe(true);
 
     const contrast = await page.getByRole('heading', { name: 'Mission Control' }).evaluate((element) => {
+      // Canvas performs the browser's CSS Color 4 -> sRGB conversion, including
+      // Lab/OKLCH computed values emitted by Tailwind 4. Keep the WCAG formula.
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 1;
+      const context = canvas.getContext('2d', { colorSpace: 'srgb', willReadFrequently: true });
+      if (!context) throw new Error('sRGB canvas unavailable for contrast measurement');
       const parseRgb = (value: string): [number, number, number] => {
-        const match = value.match(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/);
-        if (!match) throw new Error(`Unsupported computed color: ${value}`);
-        return [Number(match[1]), Number(match[2]), Number(match[3])];
+        if (!CSS.supports('color', value)) throw new Error(`Unsupported computed color: ${value}`);
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = value;
+        context.fillRect(0, 0, 1, 1);
+        const [r, g, b, alpha] = context.getImageData(0, 0, 1, 1).data;
+        if (alpha !== 255) throw new Error(`Contrast measurement needs an opaque color: ${value}`);
+        return [r, g, b];
       };
       const luminance = ([r, g, b]: [number, number, number]) => {
         const linear = [r, g, b].map((channel) => {

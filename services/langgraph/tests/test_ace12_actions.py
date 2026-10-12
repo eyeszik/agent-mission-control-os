@@ -847,3 +847,43 @@ def test_policy_simulator_changes_nothing(w):
                                                         "ceiling_minor": 100}).json()
     assert sim["simulation"] is True and {b["action_id"] for b in sim["would_block"]} == {a["action_id"]}
     assert adb.list_budget_policies(w["tenant"]) == before
+
+
+def test_recovery_sweep_cannot_mutate_other_tenants_or_projects(w, monkeypatch, tmp_path):
+    """Filtering the response after recovery is too late: excluded rows must not mutate."""
+    foreign = make_world(monkeypatch, tmp_path / 'foreign')
+    rows = []
+    for world, project in ((w, w['project']), (w, w['other']), (foreign, foreign['project'])):
+        act_as(world, REQUESTER)
+        action = propose(world, 'sandbox.cms.publish_page', CMS, project=project)['action']
+        approve_all(world, action)
+        row = gateway.settle(action['action_id'])
+        past = datetime.now(timezone.utc) - timedelta(minutes=10)
+        row = adb.transition(row['action_id'], expected_version=row['version'], expected_states=(row['state'],),
+                             to_state='DISPATCHING', actor='crashed-worker', reason='test expired lease',
+                             updates={'lease_owner': 'crashed-worker', 'lease_expires_at': adb.iso(past), 'attempts': 1})
+        rows.append(row)
+    act_as(w, OWNER, projects=w['project'])
+    response = client.post('/actions/recovery/sweep')
+    assert response.status_code == 200, response.text
+    assert response.json()['reconciled'] == [rows[0]['action_id']]
+    assert adb.get_request(rows[0]['action_id'])['state'] == 'FAILED'
+    for excluded in rows[1:]:
+        assert adb.get_request(excluded['action_id']) == excluded
+        assert len(adb.list_transitions(excluded['action_id'])) > 0
+
+
+def test_recovery_sweep_expiry_respects_project_scope(w, monkeypatch):
+    actions = []
+    for project in (w['project'], w['other']):
+        act_as(w, REQUESTER)
+        actions.append(propose(w, 'sandbox.cms.publish_page', CMS, project=project, ttl_seconds=60)['action'])
+    excluded = adb.get_request(actions[1]['action_id'])
+    future = datetime.now(timezone.utc) + timedelta(minutes=10)
+    monkeypatch.setattr(gateway, '_now', lambda now: now or future)
+    act_as(w, OWNER, projects=w['project'])
+    response = client.post('/actions/recovery/sweep')
+    assert response.status_code == 200, response.text
+    assert response.json()['expired'] == [actions[0]['action_id']]
+    assert adb.get_request(actions[0]['action_id'])['state'] == 'EXPIRED'
+    assert adb.get_request(actions[1]['action_id']) == excluded

@@ -6,9 +6,9 @@ import { useCallback, useRef, useState, type ReactNode } from 'react';
 // colours from data (palettes) are drawn as SVG fills, never inline styles.
 
 export const inputClass =
-  'w-full bg-zinc-950/50 border border-zinc-800/80 rounded-md p-2 text-sm text-zinc-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60';
+  'w-full bg-zinc-950/50 border border-zinc-800/80 rounded-md p-2 text-sm text-zinc-200 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60';
 export const buttonClass =
-  'text-xs px-3 py-1.5 rounded-md border border-zinc-700 text-zinc-100 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60';
+  'text-xs px-3 py-1.5 rounded-md border border-zinc-700 text-zinc-100 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60';
 export const tone = {
   ok: 'text-emerald-300 border-emerald-700/60',
   warn: 'text-amber-300 border-amber-700/60',
@@ -24,7 +24,7 @@ export function stateTone(state: string): keyof typeof tone {
 }
 
 export function Badge({ value, label }: { value: string; label?: string }) {
-  return <span className={`inline-block text-[11px] px-1.5 py-0.5 rounded border ${tone[stateTone(value)]}`}>{label ?? value}</span>;
+  return <span className={`inline-block text-[11px] px-1.5 py-0.5 rounded-sm border ${tone[stateTone(value)]}`}>{label ?? value}</span>;
 }
 
 export function Panel({ title, description, children, actions }: { title: string; description?: string; children: ReactNode; actions?: ReactNode }) {

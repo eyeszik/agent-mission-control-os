@@ -22,9 +22,9 @@ import {
 import { useProjectStore } from '../../lib/stores/projectStore';
 
 const inputClass =
-  'w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60';
+  'w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-200 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60';
 const buttonClass =
-  'text-xs px-3 py-2 rounded-md border border-zinc-700 text-zinc-100 hover:bg-zinc-800 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60';
+  'text-xs px-3 py-2 rounded-md border border-zinc-700 text-zinc-100 hover:bg-zinc-800 disabled:opacity-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60';
 const toneClass = { ok: 'text-emerald-300 border-emerald-700/60', warn: 'text-amber-300 border-amber-700/60', bad: 'text-red-300 border-red-700/60' } as const;
 const SIZE_CLASS = { s: 'w-36', m: 'w-56', l: 'w-80' } as const;
 
@@ -198,7 +198,7 @@ function Artboard({ artifacts, urls, selectedId, onSelect, size, filter }: {
         onPointerDown={(e) => { drag.current = { x: e.clientX - pan.x, y: e.clientY - pan.y }; }}
         onPointerMove={(e) => { if (drag.current) setPan({ x: e.clientX - drag.current.x, y: e.clientY - drag.current.y }); }}
         onPointerUp={() => { drag.current = null; }} onPointerLeave={() => { drag.current = null; }}
-        className="relative h-[28rem] overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 cursor-grab"
+        className="relative h-[28rem] overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60 cursor-grab"
       >
         <div className="absolute left-4 top-4 flex flex-wrap gap-4 origin-top-left" style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, width: '1600px' }}>
           {/* ⚡ Bolt: Removed .filter() to prevent intermediate array allocation on every render */}
@@ -213,7 +213,7 @@ function Artboard({ artifacts, urls, selectedId, onSelect, size, filter }: {
                     : <img src={urls[a.artifact_id]} alt={`${a.name}, version ${a.version}`} className={`w-full bg-zinc-100 ${filter}`} draggable={false} />)
                   : <span className="text-[11px] text-zinc-500">Preview unavailable</span>}
                 <span className="text-[11px] text-zinc-300 truncate">{a.name}</span>
-                <span className={`text-[10px] font-mono border rounded px-1 w-fit ${toneClass[proofTone(a.proof_state)]}`}>{a.proof_state}</span>
+                <span className={`text-[10px] font-mono border rounded-sm px-1 w-fit ${toneClass[proofTone(a.proof_state)]}`}>{a.proof_state}</span>
               </button>
             ) : null
           ))}
@@ -236,7 +236,7 @@ export function CreativeFoundryPanel() {
   const urls = useObjectUrls(projectId, artifacts);
   const selected = artifacts.find((a) => a.artifact_id === selectedId) ?? null;
   const approval = selected ? approvals[selected.artifact_id] ?? null : null;
-  const filter = { none: '', grayscale: 'grayscale', contrast: 'contrast-150', blur: 'blur-sm' }[a11y];
+  const filter = { none: '', grayscale: 'grayscale', contrast: 'contrast-150', blur: 'blur-xs' }[a11y];
 
   useEffect(() => {
     getFoundryCapabilities().then(setCaps).catch((err) => setStatus({ kind: 'error', message: `Capabilities unavailable: ${err instanceof Error ? err.message : err}` }));
@@ -314,7 +314,7 @@ export function CreativeFoundryPanel() {
             ))}
           </span>
           <label className="flex items-center gap-1">Accessibility preview
-            <select className="bg-zinc-950 border border-zinc-800 rounded p-1 text-zinc-200" value={a11y} onChange={(e) => setA11y(e.target.value as typeof a11y)}>
+            <select className="bg-zinc-950 border border-zinc-800 rounded-sm p-1 text-zinc-200" value={a11y} onChange={(e) => setA11y(e.target.value as typeof a11y)}>
               <option value="none">None</option><option value="grayscale">No colour</option><option value="contrast">High contrast</option><option value="blur">Low vision blur</option>
             </select>
           </label>
@@ -339,7 +339,7 @@ export function CreativeFoundryPanel() {
             <div className="flex flex-col gap-2 min-w-0">
               <h3 className="text-sm text-zinc-200 font-medium">{selected.name}</h3>
               {isPreviewable(selected.mime_type) === 'html' && urls[selected.artifact_id] && (
-                <iframe title={`${selected.name} live preview`} src={urls[selected.artifact_id]} sandbox="allow-scripts allow-forms" className="w-full h-96 rounded border border-zinc-800 bg-zinc-100" />
+                <iframe title={`${selected.name} live preview`} src={urls[selected.artifact_id]} sandbox="allow-scripts allow-forms" className="w-full h-96 rounded-sm border border-zinc-800 bg-zinc-100" />
               )}
               <dl className="text-xs grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-zinc-400">
                 <dt>Proof</dt><dd className={toneClass[proofTone(selected.proof_state)].split(' ')[0]}>{selected.proof_state}{selected.blocked_at ? ` (next: ${selected.blocked_at})` : ''}</dd>

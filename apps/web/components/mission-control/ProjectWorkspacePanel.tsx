@@ -147,7 +147,7 @@ export function ProjectWorkspacePanel() {
           ) : (
             <ul className="flex flex-wrap gap-1.5">
               {folderCounts.map(([folder, count]) => (
-                <li key={folder} className="px-1.5 py-0.5 rounded border border-zinc-800 text-zinc-300 font-mono">{folder} · {count}</li>
+                <li key={folder} className="px-1.5 py-0.5 rounded-sm border border-zinc-800 text-zinc-300 font-mono">{folder} · {count}</li>
               ))}
             </ul>
           )}
@@ -159,7 +159,7 @@ export function ProjectWorkspacePanel() {
             <p className="text-xs text-zinc-500">Assets</p>
             <label className="text-xs text-zinc-500 flex items-center gap-1">
               Media
-              <select value={mediaType} onChange={(event) => setMediaType(event.target.value)} className="bg-zinc-950 border border-zinc-800 rounded px-1 text-zinc-200">
+              <select value={mediaType} onChange={(event) => setMediaType(event.target.value)} className="bg-zinc-950 border border-zinc-800 rounded-sm px-1 text-zinc-200">
                 {MEDIA_FILTERS.map((value) => <option key={value} value={value}>{value || 'all'}</option>)}
               </select>
             </label>

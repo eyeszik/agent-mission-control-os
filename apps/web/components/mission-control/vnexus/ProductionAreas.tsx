@@ -50,9 +50,9 @@ function Preview({ projectId, artifactId, name, kind }: { projectId: string | nu
   const { url, failed } = useArtifactUrl(projectId, artifactId);
   if (failed) return <p className="text-[11px] text-red-300">Preview unavailable for {name}</p>;
   if (!url) return <p className="text-[11px] text-zinc-500">Loading {name}…</p>;
-  if (kind === 'image') return <img src={url} alt={`${name} (synthetic render, not a photograph)`} className="max-h-48 w-auto rounded border border-zinc-800 bg-zinc-100" />;
-  if (kind === 'video') return <video src={url} controls muted playsInline className="max-h-60 rounded border border-zinc-800" aria-label={`${name} (procedural animation)`} />;
-  if (kind === 'html') return <iframe src={url} title={`${name} working page`} sandbox="allow-scripts allow-forms" className="w-full h-96 rounded border border-zinc-800 bg-zinc-50" />;
+  if (kind === 'image') return <img src={url} alt={`${name} (synthetic render, not a photograph)`} className="max-h-48 w-auto rounded-sm border border-zinc-800 bg-zinc-100" />;
+  if (kind === 'video') return <video src={url} controls muted playsInline className="max-h-60 rounded-sm border border-zinc-800" aria-label={`${name} (procedural animation)`} />;
+  if (kind === 'html') return <iframe src={url} title={`${name} working page`} sandbox="allow-scripts allow-forms" className="w-full h-96 rounded-sm border border-zinc-800 bg-zinc-50" />;
   return <a href={url} download={name} className="text-xs text-emerald-300 underline">Download {name}</a>;
 }
 
