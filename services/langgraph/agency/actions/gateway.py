@@ -371,7 +371,20 @@ def _release_budget(row: dict, status: str, reason: str) -> None:
 
 
 def settle(action_id: str, *, actor: str = "system:gateway", now: Optional[datetime] = None) -> dict:
-    """Apply decisions made at /approvals/{id}/decide. Holds no authority itself."""
+    """Apply decisions made at /approvals/{id}/decide. Holds no authority itself.
+
+    Concurrent callers (two dispatches, a dispatch and a view) may both settle the
+    same action; the loser of the compare-and-set reads back what the winner wrote."""
+    try:
+        return _settle(action_id, actor=actor, now=now)
+    except db.ActionConflict:
+        row = db.get_request(action_id)
+        if row is None or row["state"] == ActionState.AWAITING_APPROVAL.value:
+            raise
+        return row
+
+
+def _settle(action_id: str, *, actor: str, now: Optional[datetime]) -> dict:
     moment = _now(now)
     row = db.get_request(action_id)
     if row is None:

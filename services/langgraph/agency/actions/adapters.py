@@ -306,6 +306,7 @@ class SandboxResearchFetch(ActionAdapter):
         text = FIXTURES[self._host(args.url)]
         return {"url": args.url, "purpose": args.purpose, "content": text, "content_sha256": canonical_hash({"text": text}),
                 "provenance": {"claim": "fixture content", "url": args.url, "publisher": "IANA reserved documentation name",
+                               "accessed_at": _now(), "excerpt": text[:200],
                                "confidence": "fixture, not a fetched page"}}
 
 

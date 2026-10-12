@@ -13,4 +13,5 @@ export * from './schemas/styleLibrary';
 export * from './schemas/uiux';
 export * from './schemas/projectOs';
 export * from './schemas/vnexus';
+export * from './schemas/agencyOs';
 export * from './types';

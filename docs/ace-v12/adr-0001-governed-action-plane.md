@@ -48,7 +48,8 @@ onto modules, not services.
 | AuthorizationBroker | `broker.py` | Principal, tenancy registry, approvals table, approval authority |
 | ExecutionGateway | `gateway.py` | Trust-kernel policy decisions, proofs receipts, runs |
 | EvidenceLedger | `evidence.py` + `action_transitions` hash chain | Trust-kernel audit chain, proofs |
-| RecoveryCoordinator | `recovery.py` | Trust-kernel recovery cases |
+| RecoveryCoordinator | `gateway.reconcile` / `recover_stale` / `retry` / `compensate`, `evidence.recovery_workbench` | Trust-kernel recovery cases |
+| Freeze, autonomy dial, LIVE gate | `governance.py` | — |
 | ClientActionConsole | `/agency` UI + `api/routes/actions.py`, `api/routes/agency_os.py` | Existing approval inbox route |
 
 ### Persistence: migration 16

@@ -149,6 +149,17 @@
             ],
             "hex": "#064e3b"
           }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0157,
+              0.4706,
+              0.3412
+            ],
+            "hex": "#047857"
+          }
         }
       },
       "amber": {
@@ -161,6 +172,17 @@
               0.1412
             ],
             "hex": "#fbbf24"
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7059,
+              0.3255,
+              0.0353
+            ],
+            "hex": "#b45309"
           }
         }
       },
@@ -175,6 +197,17 @@
             ],
             "hex": "#f87171"
           }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7255,
+              0.1098,
+              0.1098
+            ],
+            "hex": "#b91c1c"
+          }
         }
       },
       "sky": {
@@ -188,6 +221,28 @@
             ],
             "hex": "#38bdf8"
           }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0118,
+              0.4118,
+              0.6314
+            ],
+            "hex": "#0369a1"
+          }
+        }
+      },
+      "white": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "hex": "#ffffff"
         }
       }
     },
@@ -504,7 +559,136 @@
           "background": "semantic.color.background",
           "wcag": "NON_TEXT"
         }
-      ]
+      ],
+      "themes": {
+        "light": {
+          "$description": "Light theme for surfaces that opt in with data-amc-theme=\"light\". Same semantic roles; every pair below is checked against WCAG 2.2. Component aliases are re-declared so they resolve inside the themed subtree.",
+          "tokens": {
+            "semantic": {
+              "color": {
+                "background": {
+                  "$value": "{primitive.color.zinc.50}"
+                },
+                "surface": {
+                  "$value": "{primitive.color.white}"
+                },
+                "surface-raised": {
+                  "$value": "{primitive.color.zinc.100}"
+                },
+                "border": {
+                  "$value": "{primitive.color.zinc.200}"
+                },
+                "border-strong": {
+                  "$value": "{primitive.color.zinc.500}"
+                },
+                "foreground": {
+                  "$value": "{primitive.color.zinc.700}"
+                },
+                "foreground-strong": {
+                  "$value": "{primitive.color.zinc.950}"
+                },
+                "foreground-muted": {
+                  "$value": "{primitive.color.zinc.600}"
+                },
+                "accent": {
+                  "$value": "{primitive.color.emerald.700}"
+                },
+                "focus-ring": {
+                  "$value": "{primitive.color.emerald.700}"
+                },
+                "status": {
+                  "success": {
+                    "$value": "{primitive.color.emerald.700}"
+                  },
+                  "warning": {
+                    "$value": "{primitive.color.amber.700}"
+                  },
+                  "danger": {
+                    "$value": "{primitive.color.red.700}"
+                  },
+                  "info": {
+                    "$value": "{primitive.color.sky.700}"
+                  }
+                }
+              }
+            },
+            "component": {
+              "ai-trust": {
+                "color": {
+                  "border": {
+                    "$value": "{semantic.color.border-strong}"
+                  },
+                  "surface": {
+                    "$value": "{semantic.color.surface}"
+                  },
+                  "label": {
+                    "$value": "{semantic.color.foreground-strong}"
+                  },
+                  "detail": {
+                    "$value": "{semantic.color.foreground}"
+                  },
+                  "provider": {
+                    "$value": "{semantic.color.status.info}"
+                  },
+                  "degraded": {
+                    "$value": "{semantic.color.status.warning}"
+                  },
+                  "unavailable": {
+                    "$value": "{semantic.color.status.danger}"
+                  }
+                }
+              }
+            }
+          },
+          "contrastPairs": [
+            {
+              "foreground": "semantic.color.foreground",
+              "background": "semantic.color.background",
+              "wcag": "AAA_NORMAL"
+            },
+            {
+              "foreground": "semantic.color.foreground-strong",
+              "background": "semantic.color.surface",
+              "wcag": "AAA_NORMAL"
+            },
+            {
+              "foreground": "semantic.color.foreground-muted",
+              "background": "semantic.color.surface",
+              "wcag": "AA_NORMAL"
+            },
+            {
+              "foreground": "semantic.color.status.success",
+              "background": "semantic.color.surface",
+              "wcag": "AA_NORMAL"
+            },
+            {
+              "foreground": "semantic.color.status.warning",
+              "background": "semantic.color.surface",
+              "wcag": "AA_NORMAL"
+            },
+            {
+              "foreground": "semantic.color.status.danger",
+              "background": "semantic.color.surface",
+              "wcag": "AA_NORMAL"
+            },
+            {
+              "foreground": "semantic.color.status.info",
+              "background": "semantic.color.surface",
+              "wcag": "AA_NORMAL"
+            },
+            {
+              "foreground": "semantic.color.border-strong",
+              "background": "semantic.color.surface",
+              "wcag": "NON_TEXT"
+            },
+            {
+              "foreground": "semantic.color.focus-ring",
+              "background": "semantic.color.background",
+              "wcag": "NON_TEXT"
+            }
+          ]
+        }
+      }
     }
   }
 }

@@ -69,7 +69,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=list(_startup_config.cors.allowed_origins),
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    # Every method a route uses must be listed, or browsers fail the preflight
+    # (test_ace12_ui_contract checks this against the route table).
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "Last-Event-ID", "X-AMC-Tenant"],
 )
 

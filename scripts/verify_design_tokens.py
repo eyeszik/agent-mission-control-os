@@ -140,7 +140,9 @@ def token_pipeline_violations() -> list[str]:
         return [f"{TOKEN_SOURCE}: canonical DTCG token source is missing"]
     try:
         document = json.loads(source.read_text(encoding="utf-8"))
-        _, expected = compile_css(document, prefix="amc", tiered=True, source_label=TOKEN_SOURCE)
+        themes = {name: theme["tokens"] for name, theme in
+                  (((document.get("$extensions") or {}).get("amc") or {}).get("themes") or {}).items()}
+        _, expected = compile_css(document, prefix="amc", tiered=True, source_label=TOKEN_SOURCE, themes=themes)
     except (TokenError, json.JSONDecodeError) as exc:
         return [f"{TOKEN_SOURCE}: does not compile: {exc}"]
 

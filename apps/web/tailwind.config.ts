@@ -14,8 +14,11 @@ const config: Config = {
         // Values come from the generated DTCG tokens (app/tokens.css); the
         // Emerald/Zinc baseline is defined once, in tokens/amc.tokens.json.
         background: "var(--background)",
+        // Theme-aware page background for surfaces that opt into data-amc-theme.
+        canvas: "var(--amc-semantic-color-background)",
         foreground: "var(--foreground)",
         accent: {
+          DEFAULT: "var(--amc-semantic-color-accent)",
           500: "var(--amc-primitive-color-emerald-500)",
           900: "var(--amc-primitive-color-emerald-900)",
         },

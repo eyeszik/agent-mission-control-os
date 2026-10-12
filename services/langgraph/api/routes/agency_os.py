@@ -67,6 +67,12 @@ def _idempotent(principal: Principal, operation: str, key: str, payload: dict, r
     return result
 
 
+@router.get("/me")
+@action_errors
+def me(principal: Principal = Depends(get_principal)) -> dict:
+    return service.authority_twin(principal)
+
+
 # --------------------------------------------------------------------------- clients
 
 

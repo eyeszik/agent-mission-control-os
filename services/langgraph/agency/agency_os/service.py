@@ -271,5 +271,32 @@ def analytics(principal: Principal, *, project_id: Optional[str] = None) -> dict
             "note": "Counts of stored records. No figure here is estimated, forecast or simulated."}
 
 
-__all__ = ["STAGES", "analytics", "archive_client", "attention", "client_projects", "create_client", "get_client",
+def authority_twin(principal: Principal) -> dict:
+    """What this principal may do, from the same role sets the routes enforce.
+    Informational: the server still decides every request."""
+    from services.langgraph.agency.vnexus.service import READ_ONLY_ROLES
+    from services.langgraph.security.approval_authority import approver_roles, self_approval_allowed
+
+    role = broker.role(principal)
+    can = {
+        "read": True,
+        "propose_actions": role not in READ_ONLY_ROLES,
+        "launch_missions": role not in READ_ONLY_ROLES,
+        "decide_approvals": role in approver_roles(),
+        "decide_spend_approvals": role in broker.FINANCE_APPROVER_ROLES,
+        "decide_governance_approvals": role in broker.GOVERNANCE_APPROVER_ROLES,
+        "freeze_dispatch": role in broker.FREEZE_ROLES,
+        "lift_freeze": role in broker.LIFT_ROLES,
+        "raise_autonomy": role in broker.AUTONOMY_RAISE_ROLES,
+        "offboard_clients": role in CLIENT_ADMIN_ROLES,
+        "self_approve": False,
+    }
+    return {"user_id": principal.user_id, "tenant_id": principal.tenant_id, "role": principal.role,
+            "projects": sorted(principal.allowed_project_ids), "can": can,
+            "never": ["dispatch LIVE effects", "approve your own requests" + (
+                " (local-dev override is set, governance and money still excluded)" if self_approval_allowed() else ""),
+                "supply two approvals for one action"]}
+
+
+__all__ = ["STAGES", "authority_twin", "analytics", "archive_client", "attention", "client_projects", "create_client", "get_client",
            "lifecycle", "link_project", "list_clients", "offboarding_report", "start_offboarding"]

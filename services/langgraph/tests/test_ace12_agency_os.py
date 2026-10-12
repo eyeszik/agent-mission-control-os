@@ -178,3 +178,21 @@ def test_clients_and_analytics_are_tenant_scoped_and_evidence_only(journey):
     assert client.get("/agency-os/clients").json()["clients"] == []
     assert client.get(f"/agency-os/clients/{w['client']}").status_code == 404
     assert client.get(f"/agency-os/projects/{w['project']}/lifecycle").status_code == 403
+
+
+def test_i13_export_rereads_stored_bytes_and_excludes_tampered_ones(journey, monkeypatch):
+    # Approved and verified at launch; the bytes at rest change afterwards. Export
+    # re-verifies independently of the earlier verdict and refuses the item.
+    from services.langgraph.api.routes._project_common import storage_adapter
+
+    w = journey
+    m = _launch(w, "Create an SVG logo mark.")
+    artifact_id = m["verification"]["artifact_id"]
+    act_as(w, REVIEWER)
+    client.post(f"/approvals/{m['approval']['approval_id']}/decide", json={"decision": "approve"}, headers=headers())
+    act_as(w, REQUESTER)
+    export = f"/agency-os/projects/{w['project']}/deliverables/export"
+    assert [i["artifact_id"] for i in client.post(export, json={"artifact_ids": [artifact_id]}).json()["manifest"]["items"]] == [artifact_id]
+    monkeypatch.setattr(type(storage_adapter()), "get_bytes", lambda self, location: b"<svg>tampered</svg>")
+    out = client.post(export, json={"artifact_ids": [artifact_id]}).json()["manifest"]
+    assert out["items"] == [] and "CONTENT_HASH_MISMATCH" in out["excluded"][0]["reasons"]

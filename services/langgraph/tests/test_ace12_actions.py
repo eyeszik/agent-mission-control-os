@@ -251,6 +251,14 @@ def test_t19_dispatch_requires_the_approval(w):
     assert _effects(w, "sandbox.cms_publish") == []
 
 
+def test_t19_a_rejection_is_terminal_and_never_dispatches(w):
+    a = propose(w, "sandbox.cms.publish_page", CMS)["action"]
+    assert decide(w, approvals_of(a)["ACTION_EXECUTION"], REVIEWER, "reject") == 200
+    act_as(w, REQUESTER)
+    assert client.get(f"/actions/{a['action_id']}").json()["action"]["state"] == "REJECTED"
+    assert dispatch(a["action_id"]).status_code == 409 and _effects(w, "sandbox.cms_publish") == []
+
+
 def test_t20_i14_requester_cannot_approve_their_own_action(w):
     a = propose(w, "sandbox.cms.publish_page", CMS)["action"]
     as_user(w["mp"], REQUESTER, role="reviewer", tenant=w["tenant"])  # even with an approver role
@@ -440,10 +448,13 @@ def test_t35_e01_concurrent_dispatch_makes_exactly_one_effect(w):
             outcomes.append(gateway.dispatch(principal, a["action_id"])["state"])
         except gateway.NotDispatchable as exc:
             outcomes.append(exc.code)
+        except Exception as exc:  # any other escape (e.g. a lost settle CAS) is a defect
+            outcomes.append(f"UNEXPECTED:{type(exc).__name__}")
 
     threads = [threading.Thread(target=go) for _ in range(4)]
     [t.start() for t in threads]
     [t.join() for t in threads]
+    assert not [o for o in outcomes if o.startswith("UNEXPECTED")], outcomes
     assert outcomes.count("COMPLETED") == 1
     assert len(_effects(w, "sandbox.cms_publish")) == 1
 
@@ -711,6 +722,54 @@ def test_i02_no_graph_node_dispatches_through_the_gateway():
     graph_dir = ROOT / "services" / "langgraph" / "graph"
     offenders = [p for p in graph_dir.rglob("*.py") if "agency.actions" in p.read_text(encoding="utf-8")]
     assert offenders == []
+
+
+def test_i11_no_external_effect_without_authorization(w):
+    # Proposed but unapproved, refused at preview, foreign-owned, or LIVE: none reaches a provider.
+    pending = propose(w, "sandbox.cms.publish_page", CMS)["action"]
+    assert pending["state"] == "AWAITING_APPROVAL"
+    assert dispatch(pending["action_id"]).status_code == 409
+    act_as(w, OWNER)
+    assert client.put(f"/actions/projects/{w['project']}/autonomy", json={"autonomy": "DRAFT"}).status_code == 200
+    act_as(w, REQUESTER)
+    blocked = propose(w, "sandbox.email.send", EMAIL)["action"]
+    assert blocked["state"] == "BLOCKED" and dispatch(blocked["action_id"]).status_code == 409
+    for capability in ("publication.publish", "paid_media.execute_spend"):
+        assert propose(w, capability, {}, env="LOCAL", expect=409)["error"]["code"] == "NOT_GATEWAY_OWNED"
+    assert propose(w, "sandbox.cms.publish_page", CMS, env="LIVE", expect=409)["error"]["code"] == "LIVE_GATED"
+    for provider in ("sandbox.cms_publish", "sandbox.email", "sandbox.ads"):
+        assert _effects(w, provider) == []
+
+
+def test_i13_success_needs_an_independent_read_back(w, monkeypatch):
+    # The adapter's own receipt claims success but nothing was stored: the gateway
+    # believes the read-back, not the claim, and never completes.
+    from services.langgraph.agency.actions.adapters import DispatchReceipt
+
+    a = _approved(w, "sandbox.cms.publish_page", CMS)
+    adapter = adapters()["sandbox.cms.publish_page"]
+    monkeypatch.setattr(adapter, "execute", lambda ctx, args: DispatchReceipt(provider_ref="claimed", returned_state="PUBLISHED",
+                                                                              deduplicated=False, at="2026-01-01T00:00:00+00:00"))
+    out = dispatch(a["action_id"]).json()["action"]
+    assert out["state"] != "COMPLETED" and _effects(w, "sandbox.cms_publish") == []
+    ev = client.get(f"/actions/{a['action_id']}/evidence").json()
+    assert ev["claims"] == [] and not any(o.get("matches") for o in ev["observation_receipts"])
+
+
+def test_i17_provenance_is_complete_and_recomputable(w):
+    from services.langgraph.agency.execution.canonical import canonical_hash
+
+    a = propose(w, "sandbox.research.fetch_public", {"url": "https://example.com/", "purpose": "background"})["action"]
+    done = dispatch(a["action_id"]).json()["action"]
+    assert done["state"] == "COMPLETED"
+    ev = client.get(f"/actions/{a['action_id']}/evidence").json()
+    body = ev["sandbox_record"]["body"]
+    prov = body["provenance"]
+    assert set(prov) >= {"claim", "url", "publisher", "accessed_at", "excerpt", "confidence"}
+    assert prov["url"] == "https://example.com/" and body["content"].startswith(prov["excerpt"])
+    assert body["content_sha256"] == canonical_hash({"text": body["content"]})  # anyone can recompute it
+    assert ev["chain"]["intact"] is True and ev["permits"] and ev["execution_receipts"]
+    assert ev["claims"] and ev["claims"][0]["proof"]  # each claim names the read-back that proves it
 
 
 def test_drift_radar_and_expiry_radar(w):
