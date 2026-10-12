@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
 
 // Small shared primitives for the VNEXUS studio. Tailwind token classes only;
 // colours from data (palettes) are drawn as SVG fills, never inline styles.
@@ -67,17 +67,21 @@ export function Swatch({ color, label }: { color: string; label: string }) {
 
 export type AsyncState = { kind: 'idle' } | { kind: 'busy'; label: string } | { kind: 'error'; message: string } | { kind: 'done'; message: string };
 
-/** One action at a time per area, with an honest status line. */
+/** One action at a time per area, with an honest status line. Only the latest run
+ * reports: a superseded run (e.g. a load an effect re-ran) must not announce "done"
+ * for work whose result was discarded. */
 export function useAction() {
   const [state, setState] = useState<AsyncState>({ kind: 'idle' });
+  const latest = useRef(0);
   const run = useCallback(async <T,>(label: string, fn: () => Promise<T>, done?: (r: T) => string): Promise<T | undefined> => {
+    const seq = ++latest.current;
     setState({ kind: 'busy', label });
     try {
       const result = await fn();
-      setState({ kind: 'done', message: done ? done(result) : `${label}: done` });
+      if (seq === latest.current) setState({ kind: 'done', message: done ? done(result) : `${label}: done` });
       return result;
     } catch (e) {
-      setState({ kind: 'error', message: e instanceof Error ? e.message : String(e) });
+      if (seq === latest.current) setState({ kind: 'error', message: e instanceof Error ? e.message : String(e) });
       return undefined;
     }
   }, []);

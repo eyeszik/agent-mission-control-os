@@ -96,8 +96,11 @@ export function GenomeEditorArea() {
   const { state, run, busy } = useAction();
 
   const scoped = useMemo(() => versions.filter((v) => v.scope === scope && v.scope_ref === scopeRef), [versions, scope, scopeRef]);
-  const refresh = useCallback(async () => {
+  // isCurrent guards against overlapping loads (an effect re-run, or a target change):
+  // a stale load must not overwrite rows the person has started editing.
+  const refresh = useCallback(async (isCurrent: () => boolean = () => true) => {
     const all = await listVersions(brandId);
+    if (!isCurrent()) return;
     setVersions(all);
     const mine = all.filter((v) => v.scope === scope && v.scope_ref === scopeRef);
     const draft = [...mine].reverse().find((v) => v.status === 'DRAFT' || v.status === 'EXPERIMENTAL');
@@ -106,7 +109,11 @@ export function GenomeEditorArea() {
     const rows = base ? rowsFromDocument(base.document) : { values: [], constraints: [] };
     setValues(rows.values); setConstraints(rows.constraints); setReadiness(null); setPreview(null);
   }, [brandId, scope, scopeRef]);
-  useEffect(() => { void run('Loading versions', refresh, () => 'Loaded'); }, [refresh, run]);
+  useEffect(() => {
+    let active = true;
+    void run('Loading versions', () => refresh(() => active), () => 'Loaded');
+    return () => { active = false; };
+  }, [refresh, run]);
 
   const save = async () => {
     const built = documentFromRows(values, constraints);
