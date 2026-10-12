@@ -741,19 +741,31 @@ def reconcile(action_id: str, *, actor: str = "system:recovery", principal: Opti
                  updates={"lease_owner": None, "lease_expires_at": None, "reasons": ["OBSERVATION_MISMATCH"]}, now=moment)
 
 
-def recover_stale(*, now: Optional[datetime] = None) -> list[dict]:
-    """Crash recovery (E08): an expired lease means the worker died mid-flight.
-    The effect may or may not exist, so the action becomes UNKNOWN and is
-    reconciled by read-back, never re-sent."""
+def recover_stale(*, principal: Optional[Principal] = None, now: Optional[datetime] = None) -> list[dict]:
+    """Recover expired leases; interactive sweeps are tenant and project scoped.
+
+    System recovery without a principal retains its existing global behavior.
+    Interactive recovery must authorize each record before any state change.
+    """
     moment = _now(now)
     out = []
-    for row in db.leased_past(moment, (ActionState.DISPATCHING.value, ActionState.OBSERVING.value, ActionState.RECONCILING.value)):
+    candidates = db.leased_past(
+        moment,
+        (ActionState.DISPATCHING.value, ActionState.OBSERVING.value, ActionState.RECONCILING.value),
+        tenant_id=principal.tenant_id if principal is not None else None,
+    )
+    for row in candidates:
+        if principal is not None:
+            if not principal.can_access_project(row["project_id"]):
+                continue
+            broker.authorize_scope(principal, row["project_id"], write=True)
+        actor = principal.user_id if principal is not None else "system:recovery"
         try:
-            row = _move(row, ActionState.UNKNOWN, actor="system:recovery", reason="LEASE_EXPIRED: worker crashed mid-flight",
+            row = _move(row, ActionState.UNKNOWN, actor=actor, reason="LEASE_EXPIRED: worker crashed mid-flight",
                         updates={"lease_owner": None, "lease_expires_at": None}, now=moment)
         except (db.ActionConflict, ValueError):
             continue
-        out.append(reconcile(row["action_id"], now=moment))
+        out.append(reconcile(row["action_id"], principal=principal, now=moment))
     return out
 
 
