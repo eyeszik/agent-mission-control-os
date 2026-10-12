@@ -499,6 +499,32 @@ def test_t38_e08_crash_mid_dispatch_is_recovered_by_read_back(w):
     assert len(_effects(w, "sandbox.cms_publish")) == 1
 
 
+def test_t38b_recovery_sweep_cannot_mutate_another_tenants_action(w):
+    a = _approved(w, "sandbox.cms.publish_page", CMS)
+    row = gateway.settle(a["action_id"])
+    past = datetime.now(timezone.utc) - timedelta(minutes=10)
+    adb.transition(
+        row["action_id"],
+        expected_version=row["version"],
+        expected_states=(row["state"],),
+        to_state="DISPATCHING",
+        actor="crashed-worker",
+        reason="cross-tenant sweep fixture",
+        updates={"lease_owner": "crashed-worker", "lease_expires_at": adb.iso(past), "attempts": 1},
+    )
+    as_user(w["mp"], "external-operator", role="owner", tenant=f"unrelated-{uuid4().hex[:6]}")
+    response = client.post("/actions/recovery/sweep")
+    assert response.status_code == 200
+    assert response.json() == {"reconciled": [], "expired": []}
+    assert adb.get_request(a["action_id"])["state"] == "DISPATCHING"
+
+    act_as(w, OWNER)
+    own_sweep = client.post("/actions/recovery/sweep")
+    assert own_sweep.status_code == 200
+    assert a["action_id"] in own_sweep.json()["reconciled"]
+    assert adb.get_request(a["action_id"])["state"] == "FAILED"
+
+
 def test_t39_i15_retries_are_bounded(w):
     a = propose(w, "sandbox.research.fetch_public", {"url": "https://example.com/x", "purpose": "background"})["action"]
     adapters()["sandbox.research.fetch_public"].fault = "transient_before_effect"
