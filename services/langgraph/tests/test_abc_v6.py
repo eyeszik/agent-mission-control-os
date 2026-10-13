@@ -266,6 +266,25 @@ def test_ace_v100_fenced_lease_heartbeat_and_zombie_rejection(root):
             now=now + timedelta(seconds=201), lease_seconds=30)
 
 
+def test_ace_v100_expired_fence_cannot_reserve_outbox_intent(root):
+    _, _, _, original = _job(root)
+    now = datetime.now(timezone.utc)
+    job, _ = store.claim_due_job(
+        worker_id="reserve-worker-A", now=now, lease_seconds=30,
+        job_id=original["job_id"])
+    assert job is not None
+    args = {
+        "key": f"ace-expired-{uuid4().hex}", "job": job,
+        "logical_tick": int(job["logical_tick"]), "operation": "visual.render",
+        "target": "artifact", "input_hash": "0" * 64,
+        "contract_version": "v1", "retry_class": "RETRY_SAFE",
+        "pre_image": {}, "fencing_token": job["lease_token"],
+    }
+    with pytest.raises(store.StaleFence):
+        store.reserve_intent(**args, now=now + timedelta(seconds=31))
+    assert store.get_intent(args["key"]) is None
+
+
 def test_idempotency_key_is_stable_and_scope_sensitive():
     base = dict(tenant="t", project="p", job="j", logical_tick=1, operation="visual.render", target="a", input_hash="h",
                 contract_version="v1")
