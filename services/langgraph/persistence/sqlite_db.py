@@ -1276,6 +1276,35 @@ _MIGRATIONS = [
         create index if not exists idx_action_freezes_scope on action_freezes(tenant_id, scope_kind, scope_ref);
         create index if not exists idx_agency_client_projects_client on agency_client_projects(client_id);
     """),
+    (17, """
+        -- ACE v100: recover uncertain provider outcomes as durable journal states.
+        -- SQLite cannot change a CHECK in place: rebuild inside a single transaction.
+        BEGIN TRANSACTION;
+        CREATE TABLE durable_intents_new (
+            idempotency_key TEXT PRIMARY KEY,
+            job_id TEXT NOT NULL REFERENCES durable_jobs(job_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            logical_tick INTEGER NOT NULL,
+            operation TEXT NOT NULL,
+            target TEXT NOT NULL,
+            input_hash TEXT NOT NULL,
+            contract_version TEXT NOT NULL,
+            retry_class TEXT NOT NULL CHECK (retry_class IN ('RETRY_SAFE','COMPENSATABLE','NON_RETRYABLE')),
+            pre_image TEXT NOT NULL DEFAULT '{}',
+            status TEXT NOT NULL CHECK (status IN ('INTENT','UNCONFIRMED','COMMITTED','FAILED','ABANDONED')),
+            fencing_token INTEGER NOT NULL,
+            receipt TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            committed_at TEXT
+        );
+        INSERT INTO durable_intents_new SELECT * FROM durable_intents;
+        DROP TABLE durable_intents;
+        ALTER TABLE durable_intents_new RENAME TO durable_intents;
+        CREATE INDEX idx_durable_intents_job ON durable_intents(job_id, logical_tick);
+        COMMIT;
+    """),
+
 ]
 
 
