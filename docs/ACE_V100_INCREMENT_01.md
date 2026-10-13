@@ -35,7 +35,7 @@ shadow = compare_shadow({"count": 1}, {"count": 1})
 
 - Accuracy is UNKNOWN (`null`) until a verified independent oracle is provided; positive accuracy thresholds therefore block. `min_accuracy=0` deliberately disables that dimension for a bounded pilot only.
 - Correctness defaults to checking required fields. Callers needing actual business correctness must provide a domain-specific `valid_row` predicate.
-- Quarantine reports indices and reason codes, not sensitive row values.
+- Quarantine reports indices and reason codes, not sensitive row values. When rows are quarantined but all numeric thresholds pass, the result is QUARANTINE (not ACCEPT); consumers must explicitly decide how to handle such records.
 - Empty datasets, missing timestamps and invalid thresholds fail closed.
 - Shadow comparison does not promote, mutate, or authorize any production effect.
 - All functions are inert until explicitly imported and wired into a caller.
