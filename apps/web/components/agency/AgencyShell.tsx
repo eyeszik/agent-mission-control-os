@@ -183,8 +183,15 @@ export function AgencyShell() {
     return () => window.removeEventListener('keydown', onKey);
   }, [setPaletteOpen]);
 
-  const running = (actions.data ?? []).filter((a) => ['DISPATCHING', 'OBSERVING', 'RECONCILING'].includes(a.state)).length;
-  const unsure = (actions.data ?? []).filter((a) => ['UNKNOWN', 'NEEDS_HUMAN'].includes(a.state)).length;
+  // ⚡ Bolt: Precompute derived metrics in a single pass with zero allocation instead of multiple .filter().length
+  const { running, unsure } = useMemo(() => {
+    let r = 0, u = 0;
+    for (const a of actions.data ?? []) {
+      if (a.state === 'DISPATCHING' || a.state === 'OBSERVING' || a.state === 'RECONCILING') r++;
+      else if (a.state === 'UNKNOWN' || a.state === 'NEEDS_HUMAN') u++;
+    }
+    return { running: r, unsure: u };
+  }, [actions.data]);
   const pending = attention.data?.length ?? 0;
 
   const commands: Command[] = useMemo(() => [
