@@ -227,6 +227,45 @@ def test_t03_concurrent_claim_loses_and_stale_fence_cannot_write(root):
         store.commit_intent(key="nope", receipt={}, fencing_token=a["lease_token"], job_id=job["job_id"], now=later)
 
 
+def test_ace_v100_fenced_lease_heartbeat_and_zombie_rejection(root):
+    _, _, _, original = _job(root)
+    now = datetime.now(timezone.utc)
+    claimed, _ = store.claim_due_job(
+        worker_id="heartbeat-worker-A", now=now, lease_seconds=30, job_id=original["job_id"])
+    assert claimed is not None
+    refreshed = store.renew_lease(
+        job_id=claimed["job_id"], worker_id="heartbeat-worker-A",
+        fencing_token=claimed["lease_token"],
+        now=now + timedelta(seconds=10), lease_seconds=90)
+    assert refreshed["lease_expires_at"] > claimed["lease_expires_at"]
+    assert refreshed["version"] == claimed["version"] + 1
+    with pytest.raises(store.StaleFence):
+        store.renew_lease(
+            job_id=claimed["job_id"], worker_id="heartbeat-worker-B",
+            fencing_token=claimed["lease_token"],
+            now=now + timedelta(seconds=11), lease_seconds=90)
+    with pytest.raises(store.StaleFence):
+        store.renew_lease(
+            job_id=claimed["job_id"], worker_id="heartbeat-worker-A",
+            fencing_token=claimed["lease_token"] + 1,
+            now=now + timedelta(seconds=11), lease_seconds=90)
+    with pytest.raises(store.StaleFence):
+        store.renew_lease(
+            job_id=claimed["job_id"], worker_id="heartbeat-worker-A",
+            fencing_token=claimed["lease_token"],
+            now=now + timedelta(seconds=200), lease_seconds=90)
+    successor, state = store.claim_due_job(
+        worker_id="heartbeat-worker-B", now=now + timedelta(seconds=200),
+        lease_seconds=60, job_id=claimed["job_id"])
+    assert state is RunState.RECONCILING
+    assert successor["lease_token"] > claimed["lease_token"]
+    with pytest.raises(store.StaleFence):
+        store.renew_lease(
+            job_id=claimed["job_id"], worker_id="heartbeat-worker-A",
+            fencing_token=claimed["lease_token"],
+            now=now + timedelta(seconds=201), lease_seconds=30)
+
+
 def test_idempotency_key_is_stable_and_scope_sensitive():
     base = dict(tenant="t", project="p", job="j", logical_tick=1, operation="visual.render", target="a", input_hash="h",
                 contract_version="v1")
