@@ -50,3 +50,13 @@ def test_shadow_is_read_only_and_order_insensitive():
 
 def test_invalid_policy_rejected():
     with pytest.raises(QualityContractError): AccutPolicy(("id",), "id", -1)
+
+def test_lenient_threshold_still_quarantines_problem_rows():
+    permissive = AccutPolicy(("id", "amount"), "id", 60,
+                             min_accuracy=0, min_correctness=0,
+                             min_completeness=0, min_uniqueness=0,
+                             min_timeliness=0)
+    result = validate_accut([row(observed_at="invalid")], permissive, observed_at=NOW)
+    assert result["violations"] == []
+    assert result["decision"] == "QUARANTINE"
+    assert result["quarantine"][0]["reasons"] == ["STALE_OR_INVALID_TIMESTAMP"]
