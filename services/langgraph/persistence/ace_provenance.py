@@ -108,10 +108,11 @@ def verify_project_provenance(
 ) -> bool:
     if not keys:
         return False
+    events = read_project_provenance(tenant_id=tenant_id, project_id=project_id)
+    if not events:
+        return False
     previous = "0" * 64
-    for index, event in enumerate(
-        read_project_provenance(tenant_id=tenant_id, project_id=project_id), start=1
-    ):
+    for index, event in enumerate(events, start=1):
         key = keys.get(event["key_id"])
         if not isinstance(key, bytes) or len(key) < 32 or event["sequence"] != index:
             return False
