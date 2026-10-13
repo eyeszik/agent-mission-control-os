@@ -213,7 +213,18 @@ def operator_move(job_id: str, to: RunState, *, actor: str, reason: str, now: Op
 def reserve_intent(*, key: str, job: dict, logical_tick: int, operation: str, target: str, input_hash: str,
                    contract_version: str, retry_class: str, pre_image: dict, fencing_token: int, now: datetime) -> tuple[dict, bool]:
     """Write-ahead intent. Returns (row, created). An existing key is returned untouched."""
+    stamp = iso(now)
     with transaction(write=True) as db:
+        current = db.execute(
+            f"SELECT * FROM {table('durable_jobs')} WHERE job_id = ? AND tenant_id = ? AND project_id = ?",
+            (job["job_id"], job["tenant_id"], job["project_id"]),
+        ).fetchone()
+        leased = _job(current)
+        if (leased is None or int(leased["lease_token"]) != int(fencing_token)
+                or leased["state"] not in {s.value for s in IN_FLIGHT}
+                or not leased.get("lease_expires_at")
+                or leased["lease_expires_at"] <= stamp):
+            raise StaleFence(f"job {job['job_id']}: cannot reserve intent without live fence")
         row = db.execute(f"SELECT * FROM {table('durable_intents')} WHERE idempotency_key = ?", (key,)).fetchone()
         if row is not None:
             return _intent(row), False
