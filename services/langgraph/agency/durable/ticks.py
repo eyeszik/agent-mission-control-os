@@ -196,18 +196,40 @@ def run_tick(*, worker_id: str, handlers: Mapping[str, JobHandler], now: Optiona
                                              now=datetime.now(timezone.utc))
         elif intent["status"] == "COMMITTED":
             observation = intent["receipt"].get("observation")
+            if observation is None:
+                return release(RunState.DEAD_LETTER, ["COMMITTED_RECEIPT_MISSING_OBSERVATION"])
             report.adopted = True
             move(RunState.OBSERVING, "adopting the committed receipt; nothing re-dispatched")
+        elif intent["status"] in {"FAILED", "ABANDONED"}:
+            return release(RunState.DEAD_LETTER, ["PROVIDER_INTENT_TERMINAL:" + intent["status"]])
         else:
-            decision, adopted = handler.reconcile(job, intent)
-            if decision == "ADOPT":
+            try:
+                decision, adopted = handler.reconcile(job, intent)
+            except Exception as exc:
+                store.mark_intent_unconfirmed(
+                    key=key, job_id=job["job_id"], fencing_token=token,
+                    now=datetime.now(timezone.utc), error_class=type(exc).__name__)
+                report.outcome, report.final_state = "UNCONFIRMED", RunState.RECONCILING.value
+                report.reasons = ["PROVIDER_PROBE_UNAVAILABLE"]
+                return finish()
+            if decision == "ADOPT" and adopted is not None:
                 observation = adopted
                 report.adopted = True
-                move(RunState.OBSERVING, "persisted effect found after the pre-image; adopted, not re-dispatched")
+                move(RunState.OBSERVING, "provider status verified; adopting remote effect")
             elif decision == "REDO" and handler.retry_class == "RETRY_SAFE":
-                move(RunState.READY, "no effect after the pre-image; safe to re-dispatch under the same intent")
+                move(RunState.READY, "provider verified no effect; safe retry under same key")
+            elif decision == "FAILED":
+                store.settle_intent_failed(
+                    key=key, job_id=job["job_id"], fencing_token=token,
+                    now=datetime.now(timezone.utc), provider_receipt={"status": "FAILED", "source": "provider_reconcile"})
+                return release(RunState.DEAD_LETTER, ["PROVIDER_CONFIRMED_FAILURE"])
             else:
-                return release(RunState.DEAD_LETTER, [f"RECONCILE_{decision}: needs human intervention"])
+                store.mark_intent_unconfirmed(
+                    key=key, job_id=job["job_id"], fencing_token=token,
+                    now=datetime.now(timezone.utc), error_class="ProviderStatusUnknown")
+                report.outcome, report.final_state = "UNCONFIRMED", RunState.RECONCILING.value
+                report.reasons = ["PROVIDER_STATUS_UNCONFIRMED"]
+                return finish()
 
     if observation is None:
         move(RunState.RUNNING, "dispatch")
@@ -215,8 +237,14 @@ def run_tick(*, worker_id: str, handlers: Mapping[str, JobHandler], now: Optiona
         try:
             dispatched = handler.dispatch(job)
             report.dispatched = True
-        except Exception as exc:  # noqa: BLE001 - every failure becomes a durable, fingerprinted state
-            return fail(f"DISPATCH_FAILED:{type(exc).__name__}: {str(exc)[:200]}", from_running=True)
+        except Exception as exc:  # An exception may follow remote commit: never assume no effect.
+            store.mark_intent_unconfirmed(
+                key=key, job_id=job["job_id"], fencing_token=token,
+                now=datetime.now(timezone.utc), error_class=type(exc).__name__)
+            move(RunState.RECONCILING, "dispatch outcome unknown; provider probe required")
+            report.outcome, report.final_state = "UNCONFIRMED", RunState.RECONCILING.value
+            report.reasons = ["DISPATCH_OUTCOME_UNKNOWN:" + type(exc).__name__]
+            return finish()
         hook("after_dispatch")
         if dispatched.get("blocked_state"):
             return release(RunState(dispatched["blocked_state"]), list(dispatched.get("reasons") or ["BLOCKED"]))
@@ -245,7 +273,7 @@ def run_tick(*, worker_id: str, handlers: Mapping[str, JobHandler], now: Optiona
     receipt = {"observation": observation, "verification": verification, "trace_id": trace_id, "logical_tick": tick_n,
                "wall_committed_at": store.iso(datetime.now(timezone.utc))}
     current = store.get_intent(key)
-    if current and current["status"] == "INTENT":
+    if current and current["status"] in {"INTENT", "UNCONFIRMED"}:
         store.commit_intent(key=key, receipt=receipt, fencing_token=token, job_id=job["job_id"], now=datetime.now(timezone.utc))
     final_state, extra = handler.on_commit(job, observation, verification)
     due = datetime.now(timezone.utc) + timedelta(seconds=int(job.get("recurrence_seconds") or 0))
