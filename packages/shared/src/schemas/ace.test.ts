@@ -1,4 +1,4 @@
-import fixtures from '../../ace-v100-contract-fixtures.json';
+import fixtures from './ace-fixtures.json';
 import { describe, expect, it } from 'vitest';
 import { AceContractSchemas } from './ace';
 
