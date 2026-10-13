@@ -107,10 +107,6 @@
       "git_blob_sha": "fd81849654714d90b7b10c7afd2521cc5f3b6da7"
     },
     {
-      "path": "packages/shared/src/schemas/ace.test.ts",
-      "git_blob_sha": "deb5ab4c6c0476a7d48382bfad02b8935e3f1424"
-    },
-    {
       "path": "packages/shared/src/schemas/ace.ts",
       "git_blob_sha": "2248d023e44ee6dfb6f1d3700ab1f15ccb003610"
     },
@@ -133,6 +129,10 @@
     {
       "path": "packages/shared/src/schemas/ontology.ts",
       "git_blob_sha": "571815451b168a50e95f0406a1e6af9da2c2a78b"
+    },
+    {
+      "path": "packages/shared/tests/ace.test.ts",
+      "git_blob_sha": "f759b498ff183a3586af2b8656aa1f6b5cf02aab"
     },
     {
       "path": "packages/shared/tsconfig.json",
