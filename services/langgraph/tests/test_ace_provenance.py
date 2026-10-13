@@ -113,3 +113,25 @@ def test_ace_audit_must_have_protected_sufficient_key():
             signing_key=b"unsafe", key_id="test", now=datetime.now(timezone.utc),
         )
     assert read_project_provenance(tenant_id=tenant, project_id=project) == ()
+
+
+def test_ace_confidence_quarantine_is_signed_with_source_attribution():
+    from services.langgraph.agency.ace_controls import EvidenceItem, confidence_gate_and_record
+    tenant, project = _scope()
+    now = datetime.now(timezone.utc)
+    evidence = EvidenceItem(
+        claim_id="required", source_ref="https://example.org/evidence",
+        observed_at=now, status="VOID", metadata_digest="0" * 64,
+    )
+    event = confidence_gate_and_record(
+        evidence=(evidence,), mandatory_claim_ids=frozenset({"required"}),
+        quality=0.91, min_quality=0.85,
+        tenant_id=tenant, project_id=project, actor="system:governance",
+        signing_key=KEY1, key_id="k", observed_at=now,
+    )
+    assert event["decision"] == "QUARANTINE"
+    assert event["source_evidence"][0]["status"] == "VOID"
+    records = read_project_provenance(tenant_id=tenant, project_id=project)
+    assert records[0]["event_type"] == "ACE_CONFIDENCE_DECISION"
+    assert records[0]["payload"]["decision"] == "QUARANTINE"
+    assert verify_project_provenance(tenant_id=tenant, project_id=project, keys={"k": KEY1})
