@@ -1305,6 +1305,27 @@ _MIGRATIONS = [
         COMMIT;
     """),
 
+    (18, """
+        -- ACE v100: append-only, cryptographically authenticated per-project evidence.
+        CREATE TABLE IF NOT EXISTS ace_provenance (
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id),
+            project_id TEXT NOT NULL REFERENCES projects(project_id),
+            sequence INTEGER NOT NULL CHECK (sequence >= 1),
+            key_id TEXT NOT NULL,
+            actor TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            previous_hash TEXT NOT NULL,
+            payload_digest TEXT NOT NULL,
+            record_hash TEXT NOT NULL,
+            signature TEXT NOT NULL,
+            observed_at TEXT NOT NULL,
+            PRIMARY KEY (tenant_id, project_id, sequence)
+        );
+        CREATE INDEX IF NOT EXISTS idx_ace_provenance_project
+            ON ace_provenance(project_id, sequence);
+    """),
+
 ]
 
 
