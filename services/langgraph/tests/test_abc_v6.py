@@ -285,6 +285,94 @@ def test_ace_v100_expired_fence_cannot_reserve_outbox_intent(root):
     assert store.get_intent(args["key"]) is None
 
 
+def test_ace_v100_timeout_after_dispatch_is_reconciled_without_duplicate(root):
+    """A dropped provider acknowledgement must not trigger another dispatch."""
+    _, _, _, job = _job(root)
+    now = datetime.now(timezone.utc)
+    original = HANDLERS["visual_render"]
+    calls = []
+
+    class TimeoutAfterPersist:
+        def __getattr__(self, name):
+            return getattr(original, name)
+
+        def dispatch(self, current):
+            calls.append(current["job_id"])
+            original.dispatch(current)
+            raise TimeoutError("synthetic 504 after remote-side commit")
+
+    first = run_tick(
+        worker_id="w-timeout", handlers={"visual_render": TimeoutAfterPersist()},
+        job_id=job["job_id"], now=now, lease_seconds=60)
+    assert first.outcome == "UNCONFIRMED"
+    assert store.get_intent(first.idempotency_key)["status"] == "UNCONFIRMED"
+    assert store.get_job(job["job_id"])["state"] == "RECONCILING"
+    second = run_tick(
+        worker_id="w-recovery", handlers={"visual_render": original},
+        job_id=job["job_id"], now=now + timedelta(seconds=120), lease_seconds=60)
+    assert second.outcome == "COMMITTED", second.reasons
+    assert second.adopted is True
+    assert second.dispatched is False
+    assert calls == [job["job_id"]]
+    assert store.get_intent(first.idempotency_key)["status"] == "COMMITTED"
+
+
+def test_ace_v100_provider_probe_rejection_and_unknown_state_are_durable(root):
+    _, _, _, job = _job(root)
+    now = datetime.now(timezone.utc)
+    active, _ = store.claim_due_job(
+        worker_id="probe-worker", now=now, lease_seconds=60, job_id=job["job_id"])
+    assert active is not None
+    key = f"probe-{uuid4().hex}"
+    store.reserve_intent(
+        key=key, job=active, logical_tick=1, operation="visual.render",
+        target="artifact", input_hash="0" * 64, contract_version="v1",
+        retry_class="RETRY_SAFE", pre_image={},
+        fencing_token=active["lease_token"], now=now)
+    looked_up = []
+    def uncertain(operation_key):
+        looked_up.append(operation_key)
+        raise TimeoutError("status API unreachable")
+    missing = store.reconcile_provider_intent(
+        key=key, job_id=job["job_id"], fencing_token=active["lease_token"],
+        now=now + timedelta(seconds=1), lookup=uncertain)
+    assert missing["status"] == "UNCONFIRMED"
+    assert looked_up == [key]
+    failed = store.reconcile_provider_intent(
+        key=key, job_id=job["job_id"], fencing_token=active["lease_token"],
+        now=now + timedelta(seconds=2),
+        lookup=lambda operation_key: {"status": "FAILED", "provider_ref": operation_key})
+    assert failed["status"] == "FAILED"
+    assert failed["receipt"]["provider_ref"] == key
+    assert store.reconcile_provider_intent(
+        key=key, job_id=job["job_id"], fencing_token=active["lease_token"],
+        now=now + timedelta(seconds=3),
+        lookup=lambda operation_key: (_ for _ in ()).throw(AssertionError("must not probe")))["status"] == "FAILED"
+
+
+def test_ace_v100_expired_but_unreclaimed_worker_cannot_settle(root):
+    _, _, _, job = _job(root)
+    now = datetime.now(timezone.utc)
+    active, _ = store.claim_due_job(
+        worker_id="late-worker", now=now, lease_seconds=10, job_id=job["job_id"])
+    key = f"late-{uuid4().hex}"
+    store.reserve_intent(
+        key=key, job=active, logical_tick=1, operation="visual.render",
+        target="artifact", input_hash="0" * 64, contract_version="v1",
+        retry_class="RETRY_SAFE", pre_image={},
+        fencing_token=active["lease_token"], now=now)
+    with pytest.raises(store.StaleFence):
+        store.commit_intent(
+            key=key, receipt={"status": "COMMITTED"},
+            job_id=active["job_id"], fencing_token=active["lease_token"],
+            now=now + timedelta(seconds=11))
+    with pytest.raises(store.StaleFence):
+        store.transition(
+            active, RunState.PRECHECK, fencing_token=active["lease_token"],
+            now=now + timedelta(seconds=11))
+    assert store.get_intent(key)["status"] == "INTENT"
+
+
 def test_idempotency_key_is_stable_and_scope_sensitive():
     base = dict(tenant="t", project="p", job="j", logical_tick=1, operation="visual.render", target="a", input_hash="h",
                 contract_version="v1")
