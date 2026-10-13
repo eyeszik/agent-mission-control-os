@@ -33,6 +33,7 @@ from uuid import uuid4
 from services.langgraph.agency.execution.canonical import canonical_hash, canonical_bytes
 
 from .fsm import RunState
+from .observability import traced_boundary
 
 TICK_VERSION = "amc-durable-tick/v1"
 MAX_RETRIES = 3
@@ -95,6 +96,7 @@ def _lag_ms(due_at: Optional[str], started: datetime) -> Optional[int]:
     return max(0, int((started - due).total_seconds() * 1000))
 
 
+@traced_boundary("amc.durable.tick")
 def run_tick(*, worker_id: str, handlers: Mapping[str, JobHandler], now: Optional[datetime] = None,
              lease_seconds: int = 900, job_id: Optional[str] = None, project_id: Optional[str] = None,
              hook: Optional[Hook] = None) -> TickReport:
