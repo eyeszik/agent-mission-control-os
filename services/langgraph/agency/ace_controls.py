@@ -150,7 +150,9 @@ def confidence_gate(*, evidence: tuple[EvidenceItem, ...],
     statuses: dict[str, set[str]] = {}
     for item in evidence:
         statuses.setdefault(item.claim_id, set()).add(item.status)
-    if quality < min_quality or any(statuses.get(cid) != {"VERIFIED"} for cid in mandatory_claim_ids):
+    if not evidence or not mandatory_claim_ids or quality < min_quality or any(
+        statuses.get(cid) != {"VERIFIED"} for cid in mandatory_claim_ids
+    ):
         return "QUARANTINE"
     return "ACCEPT"
 
@@ -180,3 +182,36 @@ def verify_chain(records: tuple[AuditRecord, ...], payloads: tuple[Any, ...], si
             return False
         previous = record.record_hash
     return True
+
+
+def confidence_gate_and_record(
+    *, evidence: tuple[EvidenceItem, ...],
+    mandatory_claim_ids: frozenset[str], quality: float,
+    tenant_id: str, project_id: str, actor: str,
+    signing_key: bytes, key_id: str, observed_at: datetime,
+    min_quality: float = 0.85,
+) -> dict[str, Any]:
+    """Fail-closed decision with durable signed source-level attribution.
+
+    The caller receives no ACCEPT if the audit transaction fails.
+    """
+    from services.langgraph.persistence.ace_provenance import append_provenance
+
+    decision = confidence_gate(
+        evidence=evidence, mandatory_claim_ids=mandatory_claim_ids,
+        quality=quality, min_quality=min_quality,
+    )
+    event = {
+        "schema_version": "ace.confidence.v1",
+        "decision": decision,
+        "quality": quality,
+        "min_quality": min_quality,
+        "mandatory_claim_ids": sorted(mandatory_claim_ids),
+        "source_evidence": [source.model_dump(mode="json") for source in evidence],
+    }
+    receipt = append_provenance(
+        tenant_id=tenant_id, project_id=project_id, actor=actor,
+        event_type="ACE_CONFIDENCE_DECISION", payload=event,
+        signing_key=signing_key, key_id=key_id, now=observed_at,
+    )
+    return {**event, "provenance": receipt}
