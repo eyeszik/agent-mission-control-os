@@ -11,7 +11,7 @@ PII_PATTERNS = {
     "ssn": re.compile(r"\b(?!000|666)[0-8][0-9]{2}-(?!00)[0-9]{2}-(?!0000)[0-9]{4}\b"),
     "credit_card": re.compile(r"\b(?:\d[ -]*?){13,16}\b"),
     "api_key_like": re.compile(r"\b(?:sk|api|key)[-_][A-Za-z0-9_-]{12,}\b", re.IGNORECASE),
-    "bearer": re.compile(r"\\bBearer\\s+[A-Za-z0-9._~+/-]{12,}=*", re.IGNORECASE),
+    "bearer": re.compile(r"\bBearer\s+[A-Za-z0-9._~+/-]{12,}=*", re.IGNORECASE),
 }
 
 
