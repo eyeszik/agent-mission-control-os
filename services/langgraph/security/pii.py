@@ -20,8 +20,8 @@ PII_PATTERNS = {
 
 _BASE64_FRAGMENT = re.compile(r"(?<![A-Za-z0-9+/])(?:[A-Za-z0-9+/]{24,}={0,2})(?![A-Za-z0-9+/=])")
 _EXTRA_SECRET_PATTERNS = (
-    re.compile(r"\\bgh[pousr]_[A-Za-z0-9_]{20,}\\b"),
-    re.compile(r"\\bAKIA[0-9A-Z]{16}\\b"),
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9_]{20,}\\b"),
+    re.compile(r"\bAKIA[0-9A-Z]{16}\\b"),
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
     re.compile(r"(?i)\\bxox[abprs]-[A-Za-z0-9-]{10,}\\b"),
 )
