@@ -116,6 +116,47 @@ def claim_due_job(*, worker_id: str, now: datetime, lease_seconds: int, job_id: 
     return None
 
 
+def renew_lease(*, job_id: str, worker_id: str, fencing_token: int,
+                now: datetime, lease_seconds: int) -> dict:
+    """Extend an unexpired live lease using fenced compare-and-swap.
+
+    An expired lease cannot be resurrected, even before another worker claims it.
+    CAS checks identity, token, state, expiry, and the version observed by this
+    renewal. Durable state changes are committed inside the existing transaction.
+    """
+    if not job_id or not worker_id or fencing_token <= 0 or lease_seconds <= 0:
+        raise ValueError("job_id, worker_id, positive fence and lease_seconds required")
+    if now.tzinfo is None:
+        raise ValueError("now must be timezone-aware")
+    stamp = iso(now)
+    expiry = iso(now + timedelta(seconds=lease_seconds))
+    in_flight = tuple(sorted(state.value for state in IN_FLIGHT))
+    with transaction(write=True) as db:
+        existing = db.execute(
+            f"SELECT * FROM {table('durable_jobs')} WHERE job_id = ?", (job_id,)
+        ).fetchone()
+        job = _job(existing)
+        if (job is None or job["lease_owner"] != worker_id
+                or int(job["lease_token"]) != fencing_token
+                or job["state"] not in in_flight
+                or not job.get("lease_expires_at")
+                or job["lease_expires_at"] <= stamp):
+            raise StaleFence(f"job {job_id}: no active matching lease")
+        cur = db.execute(
+            f"""UPDATE {table('durable_jobs')}
+            SET lease_expires_at = ?, version = version + 1, updated_at = ?
+            WHERE job_id = ? AND lease_owner = ? AND lease_token = ?
+              AND version = ? AND lease_expires_at > ? AND state = ?""",
+            (expiry, stamp, job_id, worker_id, fencing_token,
+             job["version"], stamp, job["state"]),
+        )
+        if cur.rowcount != 1:
+            raise StaleFence(f"job {job_id}: lease was superseded")
+        return _job(db.execute(
+            f"SELECT * FROM {table('durable_jobs')} WHERE job_id = ?", (job_id,)
+        ).fetchone())
+
+
 # Column names are interpolated into SQL, so only these may be set by a transition.
 _MUTABLE_FIELDS = frozenset({"lease_owner", "lease_expires_at", "attempts", "logical_tick", "next_due_at", "last_reasons",
                              "failure_fingerprints", "result"})
