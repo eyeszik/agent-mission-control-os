@@ -27,13 +27,16 @@ def _redact_string(value: str) -> str:
     return scrubbed
 
 
+_SENSITIVE_KEYS = {"authorization", "api_key", "access_token", "refresh_token", "password", "secret", "client_secret", "private_key", "raw_prompt"}
+
+
 def redact_value(value: Any) -> Any:
     """Recursively redact supported sensitive patterns from arbitrary JSON-like values."""
 
     if isinstance(value, str):
         return _redact_string(value)
     if isinstance(value, dict):
-        return {k: redact_value(v) for k, v in value.items()}
+        return {k: ("[REDACTED_SENSITIVE_FIELD]" if isinstance(k, str) and k.lower().replace("-", "_") in _SENSITIVE_KEYS else redact_value(v)) for k, v in value.items()}
     if isinstance(value, list):
         return [redact_value(item) for item in value]
     if isinstance(value, tuple):
