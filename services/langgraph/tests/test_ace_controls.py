@@ -102,7 +102,7 @@ def test_ace_v100_cross_language_contract_fixture_parity():
     from pydantic import ValidationError
     from services.langgraph.agency.ace_controls import AuditRecord, EvidenceItem
     root = Path(__file__).resolve().parents[3]
-    vectors = json.loads((root / "packages/shared/ace-v100-contract-fixtures.json").read_text())
+    vectors = json.loads((root / "packages/shared/src/schemas/ace-fixtures.json").read_text())
     models = {"mission": Mission, "task": Task, "capability": Capability,
               "evidence": EvidenceItem, "audit": AuditRecord}
     for vector in vectors["cases"]:
