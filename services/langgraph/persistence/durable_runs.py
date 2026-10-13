@@ -21,8 +21,21 @@ from services.langgraph.persistence.database import decode_json, json_param, nor
 from services.langgraph.persistence.tenancy import ensure_tenant_project
 
 
+def _record_metric_safely(name: str) -> None:
+    try:
+        from services.langgraph.agency.durable.observability import record_ace_counter
+        record_ace_counter(name)
+    except Exception:
+        # Telemetry failures must never authorize, skip or prevent policy decisions.
+        pass
+
+
 class StaleFence(RuntimeError):
     """The caller's lease was superseded; it must stop without writing."""
+
+    def __init__(self, reason: str) -> None:
+        _record_metric_safely("fence_rejection_total")
+        super().__init__(reason)
 
 
 def iso(moment: datetime) -> str:
@@ -103,6 +116,7 @@ def claim_due_job(*, worker_id: str, now: datetime, lease_seconds: int, job_id: 
                 (entered.value, worker_id, expires, stamp, job["job_id"], job["version"]),
             )
             if cur.rowcount != 1:
+                _record_metric_safely("lease_contention_total")
                 continue  # another worker won the CAS
             claimed = _job(db.execute(f"SELECT * FROM {table('durable_jobs')} WHERE job_id = ?", (job["job_id"],)).fetchone())
             db.execute(
@@ -350,6 +364,7 @@ def reconcile_provider_intent(*, key: str, job_id: str, fencing_token: int,
     intent = _intent(row)
     if intent["status"] in {"COMMITTED", "FAILED", "ABANDONED"}:
         return intent
+    _record_metric_safely("reconciliation_probe_total")
     try:
         observed = lookup(key)
     except Exception as exc:
