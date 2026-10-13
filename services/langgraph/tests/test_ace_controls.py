@@ -93,3 +93,32 @@ def test_authenticated_hash_chain_fails_for_tampering_or_wrong_key():
     assert not verify_chain((first, second), ({"step": 1}, {"step": 3}), key)
     assert not verify_chain((first, second), ({"step": 1}, {"step": 2}), b"wrong")
     assert not verify_chain((second, first), ({"step": 2}, {"step": 1}), key)
+
+
+def test_ace_v100_cross_language_contract_fixture_parity():
+    """The same acceptance/rejection vectors run in TS/Zod (ace.test.ts)."""
+    import json
+    from pathlib import Path
+    from pydantic import ValidationError
+    from services.langgraph.agency.ace_controls import AuditRecord, EvidenceItem
+    root = Path(__file__).resolve().parents[3]
+    vectors = json.loads((root / "packages/shared/ace-v100-contract-fixtures.json").read_text())
+    models = {"mission": Mission, "task": Task, "capability": Capability,
+              "evidence": EvidenceItem, "audit": AuditRecord}
+    for vector in vectors["cases"]:
+        model = models[vector["model"]]
+        try:
+            item = model.model_validate_json(json.dumps(vector["input"]))
+        except ValidationError:
+            assert not vector["accept"], vector
+        else:
+            assert vector["accept"], vector
+            assert model.model_validate_json(item.model_dump_json()) == item
+
+def test_ace_v100_schema_is_draft_2020_12_and_closes_object_properties():
+    from services.langgraph.agency.ace_controls import AuditRecord, EvidenceItem
+    for model in (Mission, Task, Capability, EvidenceItem, AuditRecord):
+        schema = model.model_json_schema(mode="validation")
+        assert schema["additionalProperties"] is False
+        assert schema["type"] == "object"
+        assert schema["properties"]
