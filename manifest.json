@@ -11,6 +11,10 @@
       "git_blob_sha": "0a0ff565fa5a9ed7a882a1c68677116adef07b00"
     },
     {
+      "path": "README.md",
+      "git_blob_sha": "6b051f6c47f2bd2ac4025ca8d00e211bfa5dd9f5"
+    },
+    {
       "path": "apps/web/app/login/page.tsx",
       "git_blob_sha": "c29a2b7339e12edc1e811bc7829e1047e4600eff"
     },
@@ -59,6 +63,14 @@
       "git_blob_sha": "a667db8cdaad0d862c4173ec447d8fbf9f64fcb1"
     },
     {
+      "path": "docs/ACE_V100_INCREMENT_01.md",
+      "git_blob_sha": "c6e87db483a05d56c67ac31e6d5799bacaf54fc9"
+    },
+    {
+      "path": "docs/ACE_V100_MERGE_GATE.md",
+      "git_blob_sha": "7a9407c83b42b0ef2d727b08da6215e52059697f"
+    },
+    {
       "path": "docs/agency-role-contracts.md",
       "git_blob_sha": "eeb0a03f930e5385c927378f8c8868332a0cb7da"
     },
@@ -87,6 +99,22 @@
       "git_blob_sha": "0e4df76542081ddaa126036ec3cb336bdea9e372"
     },
     {
+      "path": "packages/shared/src/index.ts",
+      "git_blob_sha": "3f087d78c67500acd6b65dbf2ea0daa4eb3a50a5"
+    },
+    {
+      "path": "packages/shared/src/schemas/ace-fixtures.json",
+      "git_blob_sha": "fd81849654714d90b7b10c7afd2521cc5f3b6da7"
+    },
+    {
+      "path": "packages/shared/src/schemas/ace.test.ts",
+      "git_blob_sha": "deb5ab4c6c0476a7d48382bfad02b8935e3f1424"
+    },
+    {
+      "path": "packages/shared/src/schemas/ace.ts",
+      "git_blob_sha": "2248d023e44ee6dfb6f1d3700ab1f15ccb003610"
+    },
+    {
       "path": "packages/shared/src/schemas/agency.ts",
       "git_blob_sha": "97804c2d827602e83d3d3f27f6a22239503a7563"
     },
@@ -107,12 +135,16 @@
       "git_blob_sha": "571815451b168a50e95f0406a1e6af9da2c2a78b"
     },
     {
+      "path": "packages/shared/tsconfig.json",
+      "git_blob_sha": "986aacf7bd3dd394ce4fe480ff91b84ebf307d22"
+    },
+    {
       "path": "pnpm-lock.yaml",
       "git_blob_sha": "0651f1d6ee5541e3b550f475e13fd8f0c1ca1f97"
     },
     {
-      "path": "README.md",
-      "git_blob_sha": "6b051f6c47f2bd2ac4025ca8d00e211bfa5dd9f5"
+      "path": "runtime/abc/run-fsm.yaml",
+      "git_blob_sha": "2a5d4d9e25998700c726de6e85d0c18af107bcd4"
     },
     {
       "path": "scripts/compile_abc_manifests.py",
@@ -152,7 +184,7 @@
     },
     {
       "path": "services/langgraph/agency/ace_controls.py",
-      "git_blob_sha": "faf2d066d3281f402952ea6da0efbf5115f04807"
+      "git_blob_sha": "0987413c67c13f714fead112f692d20381a41d1a"
     },
     {
       "path": "services/langgraph/agency/actions/adapters.py",
@@ -244,15 +276,19 @@
     },
     {
       "path": "services/langgraph/agency/durable/fsm.py",
-      "git_blob_sha": "cc26bc1c3f92ef04b56147e66cccc770d7113b15"
+      "git_blob_sha": "c611da1bba3e9819cf023161b76213a22c9f4b13"
     },
     {
       "path": "services/langgraph/agency/durable/governance.py",
       "git_blob_sha": "eff5172d20ba01bc734a746435b899e84d9400bb"
     },
     {
+      "path": "services/langgraph/agency/durable/observability.py",
+      "git_blob_sha": "9f7c75a36cbdd98977453bebf527ecf62c3e1799"
+    },
+    {
       "path": "services/langgraph/agency/durable/ticks.py",
-      "git_blob_sha": "04c727c4bba58c93f487c0f9aa9cf3f85bbe23ae"
+      "git_blob_sha": "6617da2b377076086f892fc655a818174b3e3dea"
     },
     {
       "path": "services/langgraph/agency/durable/visual_job.py",
@@ -383,6 +419,10 @@
       "git_blob_sha": "88d6744e93400a3ea4fa82268d16570defebeb94"
     },
     {
+      "path": "services/langgraph/agency/model_router.py",
+      "git_blob_sha": "c8f71dc76386101e97f544fc0e87393eed164fda"
+    },
+    {
       "path": "services/langgraph/agency/project_os/publishing.py",
       "git_blob_sha": "46016433ce8b4f97d87207c378c23c3adf0f35f8"
     },
@@ -407,12 +447,12 @@
       "git_blob_sha": "f82a7fdadd956ba4cbc3928cde46728cb062eaa5"
     },
     {
-      "path": "services/langgraph/agency/visual/browser_runner.cjs",
-      "git_blob_sha": "034a6d981924fce3b3324abedbdfabd80bd1543a"
-    },
-    {
       "path": "services/langgraph/agency/visual/browser.py",
       "git_blob_sha": "4fc9f3cde4217acd0d89c34aa4ac6facd12bdf8d"
+    },
+    {
+      "path": "services/langgraph/agency/visual/browser_runner.cjs",
+      "git_blob_sha": "034a6d981924fce3b3324abedbdfabd80bd1543a"
     },
     {
       "path": "services/langgraph/agency/visual/capabilities.py",
@@ -463,12 +503,12 @@
       "git_blob_sha": "23bffcebfcf77ef2c18c4d56db119766fdbba101"
     },
     {
-      "path": "services/langgraph/api/routes/agency_os.py",
-      "git_blob_sha": "5697e64579b5f4e54c9a108ffcc20eda943603ab"
-    },
-    {
       "path": "services/langgraph/api/routes/agency.py",
       "git_blob_sha": "c99f61f62d7587816479d7cbd27080f82779adf7"
+    },
+    {
+      "path": "services/langgraph/api/routes/agency_os.py",
+      "git_blob_sha": "5697e64579b5f4e54c9a108ffcc20eda943603ab"
     },
     {
       "path": "services/langgraph/api/routes/analytics.py",
@@ -563,6 +603,10 @@
       "git_blob_sha": "7ed252307021a1cfa8586960d27fb1a7885b4de7"
     },
     {
+      "path": "services/langgraph/persistence/ace_provenance.py",
+      "git_blob_sha": "d683f7ae7b10549901ca4ccba6264ab746089edb"
+    },
+    {
       "path": "services/langgraph/persistence/actions.py",
       "git_blob_sha": "a550ce598da754f5c9f9f471d87930e71eb453a7"
     },
@@ -588,7 +632,7 @@
     },
     {
       "path": "services/langgraph/persistence/durable_runs.py",
-      "git_blob_sha": "0b926edc91053bc349f5fa33adfa92832f97a7fc"
+      "git_blob_sha": "c6f40ca61c6effc88dfb28a1816f1db4d30b9761"
     },
     {
       "path": "services/langgraph/persistence/idempotency.py",
@@ -624,7 +668,7 @@
     },
     {
       "path": "services/langgraph/persistence/sqlite_db.py",
-      "git_blob_sha": "dfa7e2db587f79dda33b8d3616f0407360a1d06b"
+      "git_blob_sha": "a49517f595a18eb0f5c509c828f1ac74c15133be"
     },
     {
       "path": "services/langgraph/persistence/tenancy.py",
@@ -648,7 +692,7 @@
     },
     {
       "path": "services/langgraph/quality/request_accut.py",
-      "git_blob_sha": "ba064f39949cbcd9bb297f5f477321dfe4347fb0"
+      "git_blob_sha": "38d52c7e4c5e9dc3001302a8d66b15ae7bfd0878"
     },
     {
       "path": "services/langgraph/security/approval_authority.py",
@@ -660,19 +704,31 @@
     },
     {
       "path": "services/langgraph/security/pii.py",
-      "git_blob_sha": "f3690eb6b6728a3d3b5f69688035eb2b3e8001b0"
+      "git_blob_sha": "95aef94d1e7fcd669a08948ed91075eb426abc0c"
     },
     {
       "path": "services/langgraph/tests/test_abc_v6.py",
-      "git_blob_sha": "457da6c6b081537ce540f13f7ae4fddc7db8f0aa"
+      "git_blob_sha": "217e1930aacd029852e9ce1ae3625e38b2a3621f"
     },
     {
       "path": "services/langgraph/tests/test_ace_controls.py",
-      "git_blob_sha": "6e69046188a6f64cd37745849936bdcaee61efcd"
+      "git_blob_sha": "bbe5717df2f1a116c7dc405ea171578b65cc165a"
+    },
+    {
+      "path": "services/langgraph/tests/test_ace_model_router.py",
+      "git_blob_sha": "ed305ff3f2654465103ce19ed8fbc9dfc9426d19"
+    },
+    {
+      "path": "services/langgraph/tests/test_ace_observability.py",
+      "git_blob_sha": "06f5970b224af3641d6594a34292845df96bdde8"
     },
     {
       "path": "services/langgraph/tests/test_ace_privacy.py",
-      "git_blob_sha": "3773bd0e182fec45b8fad5ac6cb60742fd78cf89"
+      "git_blob_sha": "92c8899c49148b24d5156dc62f7da7d4e7cecf94"
+    },
+    {
+      "path": "services/langgraph/tests/test_ace_provenance.py",
+      "git_blob_sha": "879d94fa442c845badfddd6044432357458a81ed"
     },
     {
       "path": "services/langgraph/tests/test_agency_kernel.py",
@@ -715,6 +771,10 @@
       "git_blob_sha": "a220e0eab09fdf49b0143e504455bf94d48f1366"
     },
     {
+      "path": "services/langgraph/tests/test_request_accut.py",
+      "git_blob_sha": "e169e233ffecd39fe0f94f6fb34e8196e843ba75"
+    },
+    {
       "path": "services/langgraph/vercel.json",
       "git_blob_sha": "31b6dc202f06d2e9e6b59caeef8db42c33bfc346"
     },
@@ -749,6 +809,14 @@
     {
       "path": "supabase/migrations/20261012_amc_actions_v1.sql",
       "git_blob_sha": "7bdd18c625f0324c0b665b7bb775d039426bb607"
+    },
+    {
+      "path": "supabase/migrations/20261013_amc_ace_provenance_v1.sql",
+      "git_blob_sha": "1219dd1b34fdba79db586370a552a005b72b6629"
+    },
+    {
+      "path": "supabase/migrations/20261013_amc_durable_intent_uncertainty_v2.sql",
+      "git_blob_sha": "a169e33b351c668abbe70dac7ed77f9acfd9c6fb"
     }
   ]
 }
