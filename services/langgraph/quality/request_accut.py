@@ -149,3 +149,45 @@ def compare_shadow(expected: Mapping[str, Any], shadow: Mapping[str, Any]) -> di
     return {"schema_version": "ace.shadow.v1", "matches": before == after,
             "baseline_digest": before, "shadow_digest": after,
             "promotion_authorized": False}
+
+
+def validate_and_record_accut(
+    rows: Sequence[Mapping[str, Any]], policy: AccutPolicy, *,
+    observed_at: datetime, tenant_id: str, project_id: str,
+    actor: str, signing_key: bytes, key_id: str,
+    timestamp_field: str = "observed_at", valid_row=None,
+) -> dict[str, Any]:
+    """Audit every quality decision before it can be returned to a caller.
+
+    This is the release-safe entry point. A persistence or signature failure
+    raises rather than returning an unaudited ACCEPT.
+    """
+    from services.langgraph.persistence.ace_provenance import append_provenance
+
+    result = validate_accut(
+        rows, policy, observed_at=observed_at, timestamp_field=timestamp_field,
+        valid_row=valid_row,
+    )
+    receipt = append_provenance(
+        tenant_id=tenant_id, project_id=project_id, actor=actor,
+        event_type="ACE_ACCUT_DECISION", payload=result,
+        signing_key=signing_key, key_id=key_id, now=observed_at,
+    )
+    return {**result, "provenance": receipt}
+
+
+def compare_shadow_and_record(
+    expected: Mapping[str, Any], shadow: Mapping[str, Any], *,
+    observed_at: datetime, tenant_id: str, project_id: str,
+    actor: str, signing_key: bytes, key_id: str,
+) -> dict[str, Any]:
+    """Record an authenticated shadow comparison; never authorize promotion."""
+    from services.langgraph.persistence.ace_provenance import append_provenance
+
+    result = compare_shadow(expected, shadow)
+    receipt = append_provenance(
+        tenant_id=tenant_id, project_id=project_id, actor=actor,
+        event_type="ACE_SHADOW_COMPARISON", payload=result,
+        signing_key=signing_key, key_id=key_id, now=observed_at,
+    )
+    return {**result, "provenance": receipt}
