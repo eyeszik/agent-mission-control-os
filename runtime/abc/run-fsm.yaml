@@ -147,6 +147,7 @@
       "DEAD_LETTER",
       "OBSERVING",
       "READY",
+      "RECONCILING",
       "WAITING_APPROVAL"
     ],
     "RETRY_PENDING": [
