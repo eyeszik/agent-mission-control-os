@@ -710,23 +710,30 @@ def test_t16_crash_before_any_effect_redoes_under_the_same_intent(root):
     assert len(store.list_intents(job["job_id"])) == 1 and get_artifact(target)["version"] == 1
 
 
-def test_repeated_identical_failure_dead_letters_via_negative_knowledge(root, monkeypatch):
+def test_repeated_dispatch_exception_requires_reconciliation_before_retry(root, monkeypatch):
+    """An exception does not prove that external mutation was not committed."""
     _, _, _, job = _job(root)
     handler = HANDLERS["visual_render"]
-    monkeypatch.setattr(type(handler), "dispatch", lambda self, j: (_ for _ in ()).throw(OSError("disk full")))
+    dispatched = {"count": 0}
+
+    def disconnected(self, current):
+        dispatched["count"] += 1
+        raise OSError("disk full")
+
+    monkeypatch.setattr(type(handler), "dispatch", disconnected)
     first = run_tick(worker_id="w", handlers=HANDLERS, job_id=job["job_id"])
-    assert first.final_state == "RETRY_PENDING"
-    second = run_tick(worker_id="w", handlers=HANDLERS, job_id=job["job_id"],
-                      now=datetime.now(timezone.utc) + timedelta(seconds=60))
-    assert second.final_state == "DEAD_LETTER" and any("NEGATIVE_KNOWLEDGE" in r for r in second.reasons)
-    registry = capability_registry(caps_mod.probe_all(), store.jobs_for_project(job["project_id"]))
-    assert registry["job_kinds"]["visual_render"]["circuit"] == "OPEN"
-    # The operator path back out is explicit and logged; a dead letter cannot jump straight to running.
-    with pytest.raises(IllegalTransition):
-        store.operator_move(job["job_id"], RunState.SCHEDULED, actor="ops", reason="fixed disk")
-    store.operator_move(job["job_id"], RunState.PAUSED, actor="ops", reason="investigating")
-    resumed = store.operator_move(job["job_id"], RunState.SCHEDULED, actor="ops", reason="fixed disk")
-    assert resumed["state"] == "SCHEDULED" and _states(job["job_id"])[-1] == ("PAUSED", "SCHEDULED")
+    assert first.final_state == "RECONCILING"
+    assert store.get_intent(first.idempotency_key)["status"] == "UNCONFIRMED"
+    assert dispatched["count"] == 1
+
+    # A live lease must expire before a different worker can inspect the intent.
+    # The handler's observed pre-image must determine whether a replay is safe.
+    second = run_tick(worker_id="w2", handlers=HANDLERS, job_id=job["job_id"],
+                      now=datetime.now(timezone.utc) + timedelta(seconds=1200))
+    assert second.final_state in {"RECONCILING", "DEAD_LETTER"}
+    assert store.get_intent(first.idempotency_key)["status"] != "COMMITTED"
+    assert dispatched["count"] <= 2
+    assert store.get_job(job["job_id"])["state"] != "RETRY_PENDING"
 
 
 # ------------------------------------------------------------------ T17 rights
