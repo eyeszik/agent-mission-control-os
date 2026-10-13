@@ -79,6 +79,13 @@ def append_provenance(
              json_param(sanitized), record.previous_hash, record.payload_digest,
              record.record_hash, record.signature, stamp),
         )
+    if sanitized.get("decision") == "QUARANTINE":
+        try:
+            from services.langgraph.agency.durable.observability import record_ace_counter
+            record_ace_counter("quarantine_events_total")
+        except Exception:
+            # Recording is already committed. Telemetry failure is non-authoritative.
+            pass
     return {
         "sequence": sequence, "tenant_id": tenant_id, "project_id": project_id,
         "key_id": key_id, "record_hash": record.record_hash,
