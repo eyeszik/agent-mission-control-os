@@ -138,7 +138,7 @@ def validate_accut(rows: Sequence[Mapping[str, Any]], policy: AccutPolicy,
                         if threshold > 0 and (ratios[k] is None or ratios[k] < threshold))
     return {"schema_version": "ace.accut.v1", "row_count": n,
             "metrics": ratios, "violations": violations, "quarantine": problems,
-            "decision": "BLOCK" if violations else "ACCEPT",
+            "decision": "BLOCK" if violations else ("QUARANTINE" if problems else "ACCEPT"),
             "source_digest": canonical_digest(rows)}
 
 def compare_shadow(expected: Mapping[str, Any], shadow: Mapping[str, Any]) -> dict[str, Any]:
