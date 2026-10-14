@@ -13,7 +13,10 @@ const API = process.env.E2E_API_BASE_URL ?? 'http://127.0.0.1:8000';
 const PROJECT = process.env.E2E_PROJECT_ID ?? 'proj_1';
 const SECTIONS = ['Overview', 'Clients', 'Projects', 'Missions', 'Creative Studio', 'Approvals', 'Deliverables', 'Analytics', 'Integrations', 'Settings'];
 
-test.use({ colorScheme: 'dark' });
+// The primary Sections sidebar is lg-only (>=1024px); Playwright's default
+// Desktop Chrome viewport is 1280x720 today, but a stable explicit viewport
+// prevents browser/device preset changes from collapsing the navigation.
+test.use({ colorScheme: 'dark', viewport: { width: 1440, height: 900 } });
 
 test.beforeAll(async ({ request }) => {
   const res = await request.post(`${API}/projects`, {
