@@ -183,8 +183,17 @@ export function AgencyShell() {
     return () => window.removeEventListener('keydown', onKey);
   }, [setPaletteOpen]);
 
-  const running = (actions.data ?? []).filter((a) => ['DISPATCHING', 'OBSERVING', 'RECONCILING'].includes(a.state)).length;
-  const unsure = (actions.data ?? []).filter((a) => ['UNKNOWN', 'NEEDS_HUMAN'].includes(a.state)).length;
+  // ⚡ Bolt: Derived counts precomputed to eliminate intermediate array allocations inside the component render loop.
+  const { running, unsure } = useMemo(() => {
+    let r = 0, u = 0;
+    const runningStates = ['DISPATCHING', 'OBSERVING', 'RECONCILING'];
+    const unsureStates = ['UNKNOWN', 'NEEDS_HUMAN'];
+    for (const a of actions.data ?? []) {
+      if (runningStates.includes(a.state)) r++;
+      else if (unsureStates.includes(a.state)) u++;
+    }
+    return { running: r, unsure: u };
+  }, [actions.data]);
   const pending = attention.data?.length ?? 0;
 
   const commands: Command[] = useMemo(() => [

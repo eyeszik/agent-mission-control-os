@@ -89,7 +89,8 @@ export function ExperienceArea() {
         <div className="flex flex-col gap-2 text-xs">
           <p><Badge value={report.status} /> verification <Badge value={report.verification.status} /> {report.verification.reason ?? ''}</p>
           <ol className="list-decimal pl-5 text-zinc-300">{report.package.stages.map((s) => <li key={s.stage}>{s.stage} <span className="font-mono text-zinc-500">{short(s.stage_hash, 10)}</span></li>)}</ol>
-          {report.verification.scenarios && <p className="text-zinc-400">Scenarios passed {report.verification.scenarios.filter((s) => s.passed).length}/{report.verification.scenarios.length}</p>}
+          {/* ⚡ Bolt: Replaced .filter().length with a zero-allocation .reduce() count to prevent intermediate array allocation on every render */}
+          {report.verification.scenarios && <p className="text-zinc-400">Scenarios passed {report.verification.scenarios.reduce((acc, s) => s.passed ? acc + 1 : acc, 0)}/{report.verification.scenarios.length}</p>}
           {report.package.assumptions.length > 0 && <details><summary className="text-zinc-400 cursor-pointer">Assumptions ({report.package.assumptions.length})</summary><ul className="list-disc pl-5">{report.package.assumptions.map((a) => <li key={a}>{a}</li>)}</ul></details>}
           {report.stored.html && <Preview projectId={projectId} artifactId={report.stored.html} name="experience.html" kind="html" />}
         </div>

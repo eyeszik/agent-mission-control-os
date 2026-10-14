@@ -37,3 +37,6 @@
 ## 2026-10-30 - React Component Inline Filter Map Optimization in Component Render
 **Learning:** Extracting an intermediate filtered array via `artifacts.filter()` inside a functional component's render body, and then mapping over it, forces a new array allocation on every single render cycle. This increases memory pressure and garbage collection overhead unnecessarily.
 **Action:** Replace chains like `.filter(condition).map(render)` with a single `.map(item => condition(item) ? render(item) : null)` inside the render body. React natively ignores `null` nodes without rendering empty DOM wrappers, enabling zero-allocation conditional rendering.
+## 2026-10-31 - React Component Inline Filter Array Allocation Optimization
+**Learning:** Using `.filter(condition).length` directly inside a React component's render body allocates a new intermediate array on every render just to determine its length. This causes unnecessary garbage collection pressure and degrades rendering performance.
+**Action:** Replace `.filter(condition).length` with a zero-allocation `.reduce()` count inline, or use a `useMemo` block with a zero-allocation `for...of` loop when multiple derived counts need to be computed simultaneously.
