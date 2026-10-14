@@ -21,8 +21,21 @@ from services.langgraph.persistence.database import decode_json, json_param, nor
 from services.langgraph.persistence.tenancy import ensure_tenant_project
 
 
+def _record_metric_safely(name: str) -> None:
+    try:
+        from services.langgraph.agency.durable.observability import record_ace_counter
+        record_ace_counter(name)
+    except Exception:
+        # Telemetry failures must never authorize, skip or prevent policy decisions.
+        pass
+
+
 class StaleFence(RuntimeError):
     """The caller's lease was superseded; it must stop without writing."""
+
+    def __init__(self, reason: str) -> None:
+        _record_metric_safely("fence_rejection_total")
+        super().__init__(reason)
 
 
 def iso(moment: datetime) -> str:
@@ -103,6 +116,7 @@ def claim_due_job(*, worker_id: str, now: datetime, lease_seconds: int, job_id: 
                 (entered.value, worker_id, expires, stamp, job["job_id"], job["version"]),
             )
             if cur.rowcount != 1:
+                _record_metric_safely("lease_contention_total")
                 continue  # another worker won the CAS
             claimed = _job(db.execute(f"SELECT * FROM {table('durable_jobs')} WHERE job_id = ?", (job["job_id"],)).fetchone())
             db.execute(
@@ -114,6 +128,47 @@ def claim_due_job(*, worker_id: str, now: datetime, lease_seconds: int, job_id: 
             )
             return claimed, entered
     return None
+
+
+def renew_lease(*, job_id: str, worker_id: str, fencing_token: int,
+                now: datetime, lease_seconds: int) -> dict:
+    """Extend an unexpired live lease using fenced compare-and-swap.
+
+    An expired lease cannot be resurrected, even before another worker claims it.
+    CAS checks identity, token, state, expiry, and the version observed by this
+    renewal. Durable state changes are committed inside the existing transaction.
+    """
+    if not job_id or not worker_id or fencing_token <= 0 or lease_seconds <= 0:
+        raise ValueError("job_id, worker_id, positive fence and lease_seconds required")
+    if now.tzinfo is None:
+        raise ValueError("now must be timezone-aware")
+    stamp = iso(now)
+    expiry = iso(now + timedelta(seconds=lease_seconds))
+    in_flight = tuple(sorted(state.value for state in IN_FLIGHT))
+    with transaction(write=True) as db:
+        existing = db.execute(
+            f"SELECT * FROM {table('durable_jobs')} WHERE job_id = ?", (job_id,)
+        ).fetchone()
+        job = _job(existing)
+        if (job is None or job["lease_owner"] != worker_id
+                or int(job["lease_token"]) != fencing_token
+                or job["state"] not in in_flight
+                or not job.get("lease_expires_at")
+                or job["lease_expires_at"] <= stamp):
+            raise StaleFence(f"job {job_id}: no active matching lease")
+        cur = db.execute(
+            f"""UPDATE {table('durable_jobs')}
+            SET lease_expires_at = ?, version = version + 1, updated_at = ?
+            WHERE job_id = ? AND lease_owner = ? AND lease_token = ?
+              AND version = ? AND lease_expires_at > ? AND state = ?""",
+            (expiry, stamp, job_id, worker_id, fencing_token,
+             job["version"], stamp, job["state"]),
+        )
+        if cur.rowcount != 1:
+            raise StaleFence(f"job {job_id}: lease was superseded")
+        return _job(db.execute(
+            f"SELECT * FROM {table('durable_jobs')} WHERE job_id = ?", (job_id,)
+        ).fetchone())
 
 
 # Column names are interpolated into SQL, so only these may be set by a transition.
@@ -128,6 +183,10 @@ def transition(job: dict, to: RunState, *, fencing_token: int, now: datetime, re
         current = _job(db.execute(f"SELECT * FROM {table('durable_jobs')} WHERE job_id = ?", (job["job_id"],)).fetchone())
     if current is None or int(current["lease_token"]) != int(fencing_token):
         raise StaleFence(f"job {job['job_id']}: fencing token {fencing_token} superseded")
+    if (current["state"] in {state.value for state in IN_FLIGHT}
+            and current.get("lease_owner") is not None
+            and (not current.get("lease_expires_at") or current["lease_expires_at"] <= iso(now))):
+        raise StaleFence(f"job {job['job_id']}: worker lease expired before transition")
     assert_transition(current["state"], to)
     sets = ["state = ?", "version = version + 1", "updated_at = ?"]
     params: list[Any] = [to.value, iso(now)]
@@ -172,7 +231,18 @@ def operator_move(job_id: str, to: RunState, *, actor: str, reason: str, now: Op
 def reserve_intent(*, key: str, job: dict, logical_tick: int, operation: str, target: str, input_hash: str,
                    contract_version: str, retry_class: str, pre_image: dict, fencing_token: int, now: datetime) -> tuple[dict, bool]:
     """Write-ahead intent. Returns (row, created). An existing key is returned untouched."""
+    stamp = iso(now)
     with transaction(write=True) as db:
+        current = db.execute(
+            f"SELECT * FROM {table('durable_jobs')} WHERE job_id = ? AND tenant_id = ? AND project_id = ?",
+            (job["job_id"], job["tenant_id"], job["project_id"]),
+        ).fetchone()
+        leased = _job(current)
+        if (leased is None or int(leased["lease_token"]) != int(fencing_token)
+                or leased["state"] not in {s.value for s in IN_FLIGHT}
+                or not leased.get("lease_expires_at")
+                or leased["lease_expires_at"] <= stamp):
+            raise StaleFence(f"job {job['job_id']}: cannot reserve intent without live fence")
         row = db.execute(f"SELECT * FROM {table('durable_intents')} WHERE idempotency_key = ?", (key,)).fetchone()
         if row is not None:
             return _intent(row), False
@@ -200,19 +270,127 @@ def get_intent(key: str) -> Optional[dict]:
     return _intent(row) if row is not None else None
 
 
-def commit_intent(*, key: str, receipt: dict, fencing_token: int, job_id: str, now: datetime) -> None:
-    """Commit only while still holding the job's fence; never overwrite a committed receipt."""
+def _active_fence(db: Any, *, job_id: str, fencing_token: int, now: datetime) -> dict:
+    """Enforce live storage fence before journal mutations."""
+    job = _job(db.execute(
+        f"SELECT * FROM {table('durable_jobs')} WHERE job_id = ?", (job_id,)
+    ).fetchone())
+    if (job is None or int(job["lease_token"]) != int(fencing_token)
+            or job["state"] not in {state.value for state in IN_FLIGHT}
+            or not job.get("lease_owner") or not job.get("lease_expires_at")
+            or job["lease_expires_at"] <= iso(now)):
+        raise StaleFence(f"job {job_id}: no live fenced lease")
+    return job
+
+
+def mark_intent_unconfirmed(*, key: str, job_id: str, fencing_token: int,
+                            now: datetime, error_class: str = "UNKNOWN") -> dict:
+    """Lost ACK is unknown, not rejected. Do not persist raw exception content."""
+    reason = str(error_class)[:80]
+    if not reason.isidentifier():
+        raise ValueError("error_class must be a sanitized identifier")
     with transaction(write=True) as db:
-        job = db.execute(f"SELECT lease_token FROM {table('durable_jobs')} WHERE job_id = ?", (job_id,)).fetchone()
-        if job is None or int(normalize_record(job)["lease_token"]) != int(fencing_token):
-            raise StaleFence(f"job {job_id}: fence lost before commit")
+        job = _active_fence(db, job_id=job_id, fencing_token=fencing_token, now=now)
         cur = db.execute(
-            f"""UPDATE {table('durable_intents')} SET status = 'COMMITTED', receipt = ?, committed_at = ?
-            WHERE idempotency_key = ? AND status = 'INTENT'""",
-            (json_param(receipt), iso(now), key),
+            f"""UPDATE {table('durable_intents')} SET status = 'UNCONFIRMED', receipt = ?
+            WHERE idempotency_key = ? AND job_id = ? AND tenant_id = ?
+              AND project_id = ? AND status IN ('INTENT','UNCONFIRMED')""",
+            (json_param({"uncertainty": reason, "observed_at": iso(now)}),
+             key, job_id, job["tenant_id"], job["project_id"]),
         )
         if cur.rowcount != 1:
-            raise StaleFence(f"intent {key[:12]} is no longer open")
+            raise StaleFence("intent cannot be marked unconfirmed")
+        return _intent(db.execute(
+            f"SELECT * FROM {table('durable_intents')} WHERE idempotency_key = ?", (key,)
+        ).fetchone())
+
+
+def settle_intent_failed(*, key: str, job_id: str, fencing_token: int,
+                         now: datetime, provider_receipt: dict) -> dict:
+    """Persist an authoritative provider failure, never infer it from timeout."""
+    from services.langgraph.security.pii import redact_value
+    if not isinstance(provider_receipt, dict) or provider_receipt.get("status") != "FAILED":
+        raise ValueError("authoritative FAILED receipt required")
+    with transaction(write=True) as db:
+        job = _active_fence(db, job_id=job_id, fencing_token=fencing_token, now=now)
+        cur = db.execute(
+            f"""UPDATE {table('durable_intents')} SET status = 'FAILED', receipt = ?, committed_at = ?
+            WHERE idempotency_key = ? AND job_id = ? AND tenant_id = ?
+              AND project_id = ? AND status IN ('INTENT','UNCONFIRMED')""",
+            (json_param(redact_value(provider_receipt)), iso(now), key, job_id,
+             job["tenant_id"], job["project_id"]),
+        )
+        if cur.rowcount != 1:
+            raise StaleFence("intent was already settled or out of scope")
+        return _intent(db.execute(
+            f"SELECT * FROM {table('durable_intents')} WHERE idempotency_key = ?", (key,)
+        ).fetchone())
+
+
+def commit_intent(*, key: str, receipt: dict, fencing_token: int, job_id: str, now: datetime) -> None:
+    """Commit provider receipt only under a live matching lease and tenant scope."""
+    from services.langgraph.security.pii import redact_value
+    with transaction(write=True) as db:
+        job = _active_fence(db, job_id=job_id, fencing_token=fencing_token, now=now)
+        cur = db.execute(
+            f"""UPDATE {table('durable_intents')} SET status = 'COMMITTED', receipt = ?, committed_at = ?
+            WHERE idempotency_key = ? AND job_id = ? AND tenant_id = ?
+              AND project_id = ? AND status IN ('INTENT','UNCONFIRMED')""",
+            (json_param(redact_value(receipt)), iso(now), key, job_id,
+             job["tenant_id"], job["project_id"]),
+        )
+        if cur.rowcount != 1:
+            raise StaleFence(f"intent {key[:12]} is already settled, invalid or out of scope")
+
+
+def reconcile_provider_intent(*, key: str, job_id: str, fencing_token: int,
+                              now: datetime, lookup: Any) -> dict:
+    """Query downstream status by original idempotency key; never blindly re-dispatch.
+
+    Probe occurs outside DB transaction; a second live-fence CAS protects the
+    outcome. Compensation is a separate authorized effect, not an assumed rollback.
+    """
+    if not callable(lookup):
+        raise TypeError("provider lookup callback required")
+    with transaction() as db:
+        job = _active_fence(db, job_id=job_id, fencing_token=fencing_token, now=now)
+        row = db.execute(
+            f"""SELECT * FROM {table('durable_intents')} WHERE idempotency_key = ?
+            AND job_id = ? AND tenant_id = ? AND project_id = ?""",
+            (key, job_id, job["tenant_id"], job["project_id"]),
+        ).fetchone()
+    if row is None:
+        raise LookupError("intent missing from scoped journal")
+    intent = _intent(row)
+    if intent["status"] in {"COMMITTED", "FAILED", "ABANDONED"}:
+        return intent
+    _record_metric_safely("reconciliation_probe_total")
+    try:
+        observed = lookup(key)
+    except Exception as exc:
+        return mark_intent_unconfirmed(key=key, job_id=job_id,
+                                       fencing_token=fencing_token, now=now,
+                                       error_class=type(exc).__name__)
+    if not isinstance(observed, dict) or observed.get("status") not in {
+        "COMMITTED", "FAILED", "UNCONFIRMED"
+    }:
+        return mark_intent_unconfirmed(key=key, job_id=job_id,
+                                       fencing_token=fencing_token, now=now,
+                                       error_class="ProviderStatusUnknown")
+    if observed["status"] == "COMMITTED":
+        commit_intent(key=key, receipt=observed, job_id=job_id,
+                      fencing_token=fencing_token, now=now)
+    elif observed["status"] == "FAILED":
+        return settle_intent_failed(key=key, job_id=job_id,
+                                    fencing_token=fencing_token, now=now,
+                                    provider_receipt=observed)
+    else:
+        return mark_intent_unconfirmed(key=key, job_id=job_id,
+                                       fencing_token=fencing_token, now=now,
+                                       error_class="ProviderStatusUnknown")
+    settled = get_intent(key)
+    assert settled is not None
+    return settled
 
 
 def list_intents(job_id: str) -> list[dict]:
@@ -276,4 +454,4 @@ def jobs_for_project(project_id: str, states: Iterable[str] = ()) -> list[dict]:
 
 __all__ = ["StaleFence", "claim_due_job", "commit_intent", "create_job", "get_intent", "get_job", "iso", "jobs_for_project",
            "list_intents", "operator_move", "list_project_ticks", "list_ticks", "list_transitions", "record_tick", "reserve_intent",
-           "transition"]
+           "transition", "mark_intent_unconfirmed", "settle_intent_failed", "reconcile_provider_intent", "renew_lease"]
