@@ -11,6 +11,10 @@
       "git_blob_sha": "388cc533e726f65a53295b0c7ec813d34fe7c180"
     },
     {
+      "path": "apps/web/app/globals.css",
+      "git_blob_sha": "d4ca619094c94ea6da9e9d21c1f8e4b02c01ac9d"
+    },
+    {
       "path": "apps/web/app/login/page.tsx",
       "git_blob_sha": "c29a2b7339e12edc1e811bc7829e1047e4600eff"
     },
