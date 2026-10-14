@@ -28,6 +28,8 @@ _EXTRA_SECRET_PATTERNS = (
 
 
 def _plain_sensitive(text: str) -> bool:
+    # Logs may contain escaped newlines from JSON serialization. Normalize for scanning.
+    text = text.replace("\\n", "\n").replace("\\r", "\r")
     return (any(pattern.search(text) for pattern in PII_PATTERNS.values())
             or any(pattern.search(text) for pattern in _EXTRA_SECRET_PATTERNS))
 
@@ -63,7 +65,7 @@ def detect_pii(text: str) -> bool:
 def _redact_string(value: str) -> str:
     if _encoded_sensitive(value):
         return "[REDACTED_ENCODED_SECRET]"
-    scrubbed = value
+    scrubbed = value.replace("\\n", "\n").replace("\\r", "\r")
     for name, pattern in PII_PATTERNS.items():
         scrubbed = pattern.sub(f"[REDACTED_{name.upper()}]", scrubbed)
     for pattern in _EXTRA_SECRET_PATTERNS:
