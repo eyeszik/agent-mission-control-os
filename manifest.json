@@ -48,11 +48,15 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "ada49a175249e65026bc798cca594823a17ae910"
+      "git_blob_sha": "c643afc6f287e4ff82dde57d852a541981ded77a"
     },
     {
       "path": "apps/web/playwright.config.ts",
       "git_blob_sha": "aa8bdc246f61c95ccfda1dc7e3d810ef657d074a"
+    },
+    {
+      "path": "apps/web/postcss.config.js",
+      "git_blob_sha": "e5640725a9e3294ba06d151e73f408ba97af4a7e"
     },
     {
       "path": "apps/web/scripts/verify-ui-ast.mjs",
@@ -61,6 +65,10 @@
     {
       "path": "apps/web/vercel.json",
       "git_blob_sha": "a667db8cdaad0d862c4173ec447d8fbf9f64fcb1"
+    },
+    {
+      "path": "docs/ACE_V100_FULL_INTEGRATION_RUNBOOK.md",
+      "git_blob_sha": "58e9f9570c566f1df48d94cb219503b9ead63b5a"
     },
     {
       "path": "docs/ACE_V100_INCREMENT_01.md",
@@ -140,7 +148,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "f4a657d6466a36cf3d18030f0db6d32f353960eb"
+      "git_blob_sha": "f890b67383afa1155b2c3493a96c314f98fca8ff"
     },
     {
       "path": "runtime/abc/run-fsm.yaml",
@@ -180,11 +188,15 @@
     },
     {
       "path": "scripts/verify_repository_invariants.py",
-      "git_blob_sha": "86672ee42f5bb7e8b41bfcbe6aa5412833299535"
+      "git_blob_sha": "7cf161fd00a0ca7a8da7af7b44272f1237b0027f"
     },
     {
       "path": "services/langgraph/agency/ace_controls.py",
       "git_blob_sha": "0987413c67c13f714fead112f692d20381a41d1a"
+    },
+    {
+      "path": "services/langgraph/agency/ace_release.py",
+      "git_blob_sha": "a4c3d7c0db6d68d4dcf970654390d5ee55b6672a"
     },
     {
       "path": "services/langgraph/agency/actions/adapters.py",
@@ -704,7 +716,7 @@
     },
     {
       "path": "services/langgraph/security/pii.py",
-      "git_blob_sha": "95aef94d1e7fcd669a08948ed91075eb426abc0c"
+      "git_blob_sha": "7a272a5ccf4e9c7868a586dd3e22999b242833cb"
     },
     {
       "path": "services/langgraph/tests/test_abc_v6.py",
@@ -729,6 +741,10 @@
     {
       "path": "services/langgraph/tests/test_ace_provenance.py",
       "git_blob_sha": "879d94fa442c845badfddd6044432357458a81ed"
+    },
+    {
+      "path": "services/langgraph/tests/test_ace_release.py",
+      "git_blob_sha": "ce23f1d89fc76181b84fbef15fef0cdbf77e45b0"
     },
     {
       "path": "services/langgraph/tests/test_agency_kernel.py",
