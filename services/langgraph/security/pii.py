@@ -57,10 +57,16 @@ def _encoded_sensitive(text: str) -> bool:
 
 
 def detect_pii(text: str) -> bool:
-    return bool(text) and (_plain_sensitive(text) or _encoded_sensitive(text))
+    if not text:
+        return False
+    normalized = text.replace("\\\\n", "\\n").replace("\\\\r", "\\r")
+    return (_plain_sensitive(normalized) or _encoded_sensitive(normalized))
 
 
 def _redact_string(value: str) -> str:
+    normalized = value.replace("\\\\n", "\\n").replace("\\\\r", "\\r")
+    if normalized != value and (_plain_sensitive(normalized) or _encoded_sensitive(normalized)):
+        return "[REDACTED_ESCAPED_SECRET]"
     if _encoded_sensitive(value):
         return "[REDACTED_ENCODED_SECRET]"
     scrubbed = value
