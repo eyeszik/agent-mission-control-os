@@ -72,7 +72,7 @@
     },
     {
       "path": "docs/ACE_V100_FULL_INTEGRATION_RUNBOOK.md",
-      "git_blob_sha": "58e9f9570c566f1df48d94cb219503b9ead63b5a"
+      "git_blob_sha": "de22afc28602bf29697a741bb621327a4e34ae96"
     },
     {
       "path": "docs/ACE_V100_INCREMENT_01.md",
@@ -220,11 +220,11 @@
     },
     {
       "path": "services/langgraph/agency/actions/gateway.py",
-      "git_blob_sha": "2ec11ae1d315c5655a8ef86e26a25c02447b1d8c"
+      "git_blob_sha": "2c42c2b9842af61078a177868ef7131e2fe54cef"
     },
     {
       "path": "services/langgraph/agency/actions/governance.py",
-      "git_blob_sha": "a0c17efc053a0befca030afd996966a923070a1a"
+      "git_blob_sha": "24d73dc5848bf49234df69a2359c5415db3491ef"
     },
     {
       "path": "services/langgraph/agency/actions/risk.py",
@@ -232,7 +232,7 @@
     },
     {
       "path": "services/langgraph/agency/actions/safety.py",
-      "git_blob_sha": "2a6e24d1df5307911a2d321db6d89637d9ffd1b6"
+      "git_blob_sha": "ca287968f152eeffc0b2b045bc53fde0f2062cf7"
     },
     {
       "path": "services/langgraph/agency/compiled/authority.py",
@@ -520,7 +520,7 @@
     },
     {
       "path": "services/langgraph/api/routes/actions.py",
-      "git_blob_sha": "23bffcebfcf77ef2c18c4d56db119766fdbba101"
+      "git_blob_sha": "228187755960e5b46004752e72c96a7b8b0479de"
     },
     {
       "path": "services/langgraph/api/routes/agency_os.py",
@@ -841,6 +841,26 @@
     {
       "path": "supabase/migrations/20261013_amc_durable_intent_uncertainty_v2.sql",
       "git_blob_sha": "a169e33b351c668abbe70dac7ed77f9acfd9c6fb"
+    },
+    {
+      "path": "services/langgraph/agency/ace_evidence.py",
+      "git_blob_sha": "e98e98fe1891a9aefdc527c770dabdd209818a44"
+    },
+    {
+      "path": "scripts/collect_release_evidence.py",
+      "git_blob_sha": "b3a900ef43d95b058738063f6e1bde3a70999dfd"
+    },
+    {
+      "path": "services/langgraph/tests/test_ace100_evidence.py",
+      "git_blob_sha": "ab666ddbfd09860c1557e51643d79ba7a467da91"
+    },
+    {
+      "path": "services/langgraph/tests/test_ace100_uncertainty.py",
+      "git_blob_sha": "e76d044543c0f3e97892a715f26076599685aac3"
+    },
+    {
+      "path": "services/langgraph/tests/test_ace100_edge_cases.py",
+      "git_blob_sha": "d98e182a8525e9b819cd506afd0542dea665d89b"
     }
   ]
 }

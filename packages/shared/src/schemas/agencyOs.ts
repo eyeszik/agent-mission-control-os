@@ -190,6 +190,34 @@ export const EvidenceSchema = z.object({
   live_execution: z.literal('DISABLED'),
 }).strict();
 
+// ACE v100 uncertainty debt: while `assessment.allow_high_risk_dispatch` is false,
+// the gateway holds R3+ dispatch for the whole tenant.
+export const UncertaintyDebtSchema = z.object({
+  applies_to: z.literal('R3+'),
+  policy: z.object({
+    max_unconfirmed_total: z.number().int().nonnegative(),
+    max_unconfirmed_critical: z.number().int().nonnegative(),
+    max_oldest_seconds: z.number().int().nonnegative(),
+    critical_risk: z.array(z.enum(['R3', 'R4', 'R5'])),
+  }).strict(),
+  assessment: z.object({
+    allow_high_risk_dispatch: z.boolean(),
+    unconfirmed_total: z.number().int().nonnegative(),
+    unconfirmed_critical: z.number().int().nonnegative(),
+    oldest_seconds: z.number().int().nonnegative(),
+    blockers: z.array(z.string()),
+  }).strict(),
+  unresolved: z.array(z.object({
+    action_id: z.string(),
+    project_id: z.string(),
+    capability_id: z.string(),
+    state: z.enum(['UNKNOWN', 'RECONCILING', 'NEEDS_HUMAN']),
+    effective_class: RiskClassSchema,
+    updated_at: z.string(),
+  }).strict()),
+}).strict();
+export type UncertaintyDebt = z.infer<typeof UncertaintyDebtSchema>;
+
 export const RecoveryItemSchema = z.object({
   action_id: z.string(),
   project_id: z.string(),

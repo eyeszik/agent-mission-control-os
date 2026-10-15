@@ -577,12 +577,18 @@ def test_t40_mismatch_and_unreadable_providers_escalate_to_a_person(w):
     assert dispatch(a["action_id"]).json()["action"]["state"] == "UNKNOWN"
     assert client.post(f"/actions/{a['action_id']}/reconcile").json()["action"]["state"] == "NEEDS_HUMAN"
     b = _approved(w, "sandbox.cms.publish_page", {**CMS, "path": "/b"})
+    # ACE v100 uncertainty debt: no new R3+ effect starts while a's outcome is unresolved.
+    held = dispatch(b["action_id"])
+    assert held.status_code == 409 and "UNCERTAINTY_DEBT" in str(held.json())
+    assert adb.get_request(b["action_id"])["state"] == "AUTHORIZED"
+    adapters()["sandbox.cms.publish_page"].fault = None  # a person fixes the provider; read-back now matches
+    assert client.post(f"/actions/{a['action_id']}/reconcile").json()["action"]["state"] == "COMPLETED"
     adapters()["sandbox.cms.publish_page"].fault = "observe_unreachable"
     assert dispatch(b["action_id"]).json()["action"]["state"] == "UNKNOWN"
     states = [client.post(f"/actions/{b['action_id']}/reconcile").json()["action"]["state"] for _ in range(3)]
     assert states == ["UNKNOWN", "UNKNOWN", "NEEDS_HUMAN"]
     items = {i["action_id"]: i for i in client.get("/actions/recovery").json()["items"]}
-    assert items[a["action_id"]]["state"] == "NEEDS_HUMAN" and "never re-sent" in items[b["action_id"]]["next_step"]
+    assert a["action_id"] not in items and "never re-sent" in items[b["action_id"]]["next_step"]
 
 
 # --------------------------------------------------------------------------- T41–T46 financial controls

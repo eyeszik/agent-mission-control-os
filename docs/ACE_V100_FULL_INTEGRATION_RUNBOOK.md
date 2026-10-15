@@ -11,14 +11,14 @@ Status: **INCOMPLETE / RELEASE BLOCKED**. Baseline: merged PR #138; final-head r
 ## Priority 0 — Restore a trustworthy mainline
 1. [x] Identify exact CI regression: escaped literal `\\n` between Authorization and Bearer evades `detect_pii`.
 2. [x] Normalize escaped line breaks before sensitive-pattern detection and redaction; preserve nested redaction semantics.
-3. [ ] Run both backend jobs (SQLite and PostgreSQL) on the **new branch head** and demonstrate all tests green; confirm no unrelated regressions.
-4. [ ] Recheck frontend contract, typecheck, Vitest, build, browser HITL smoke, dependency audit, and integrity manifest for the **same SHA**.
-5. [ ] Require branch protection / rulesets to reject failing required checks; verify whether admins can bypass. Any policy change requires authorized repository administrator.
+3. [x] Run both backend jobs (SQLite and PostgreSQL) on the **new branch head** and demonstrate all tests green; confirm no unrelated regressions. *Verified for merged `master` `493877f7`: [`docs/ace-v100/evidence/493877f7…json`](ace-v100/evidence/493877f7763aedd213d3781ff4b615f261af26cf.json).*
+4. [x] Recheck frontend contract, typecheck, Vitest, build, browser HITL smoke, dependency audit, and integrity manifest for the **same SHA**. *Verified for `493877f7` (same evidence file). Collector: `scripts/collect_release_evidence.py`.*
+5. [ ] Require branch protection / rulesets to reject failing required checks; verify whether admins can bypass. Any policy change requires authorized repository administrator. *UNVERIFIED (Increment 02): classic protection not readable by the integration (HTTP 403); no repository rulesets apply to `master`.*
 
 ## Priority 1 — Runtime correctness and external effects
 6. [ ] Inventory **every** external adapter/action and map each to read-only, compensatable, irreversible, or approval-required effects. Record provider-specific idempotency semantics, timeout behavior, retry budget, and reconciliation API. Gate: no unmapped live action.
 7. [ ] Wire stable `tenant/project/action/payload` operation keys through every dispatcher and durable outbox entry; never derive identity from retry attempt. Gate: repeated delivery causes at most one provider effect **where provider supports idempotency**.
-8. [ ] Implement a durable `UNKNOWN_OUTCOME` transition when provider response is lost after mutation; query authoritative provider state before retry. Gate: injected timeout-after-commit never triggers blind duplicate mutation.
+8. [ ] Implement a durable `UNKNOWN_OUTCOME` transition when provider response is lost after mutation; query authoritative provider state before retry. Gate: injected timeout-after-commit never triggers blind duplicate mutation. *Increment 02: holds for the ACE v12 gateway (sandbox adapters), and R3+ dispatch is now held while any outcome is unconfirmed (`test_ace100_edge_cases.py` E01/E04). Open for live adapters, which do not exist.*
 9. [ ] Implement per-provider compensation workflows with explicit eligibility, ownership, human approval and irreversible-failure paths. Gate: compensation fault matrix and receipts for each supported effect type.
 10. [ ] Validate PostgreSQL compare-and-swap fencing, lease renewal, expiry, zombie worker rejection, crash recovery and multi-worker races under skew and partitions. Gate: concurrent integration tests against real PostgreSQL.
 11. [ ] Make outbox publish, effect receipt, audit receipt and checkpoint correlation durable and recoverable; define retention and replay behavior. Gate: kill/restart and duplicate-delivery fault tests.
@@ -39,7 +39,7 @@ Status: **INCOMPLETE / RELEASE BLOCKED**. Baseline: merged PR #138; final-head r
 20. [ ] Wire REQUEST intent and ACCUT checks into actual ingest, transform, publish and quarantine transitions; block promotion on missing accuracy evidence. Gate: shadow comparison plus controlled production-like replay.
 21. [ ] Persist HMAC-chained provenance with key IDs, protected KMS-backed custody, rotation and verification after restart; implement access-controlled append-only storage and tamper alarms. Gate: cross-tenant/tamper/rotation tests.
 22. [ ] Define evidence completeness, source provenance, confidence threshold, freshness and conflict resolution at publication boundary. Gate: unsupported conclusions are quarantined.
-23. [ ] Classify and redact secrets/PII across request/response, structured logs, receipts, traces, exceptions, replay bundles and exports. Gate: seeded secret never reaches any persistent sink.
+23. [ ] Classify and redact secrets/PII across request/response, structured logs, receipts, traces, exceptions, replay bundles and exports. Gate: seeded secret never reaches any persistent sink. *Increment 02: the action boundary now refuses base64/percent-encoded credentials before storage (E08). Other sinks remain to be inventoried.*
 24. [ ] Define encryption, retention, deletion, access controls, data residency and privacy review. Gate: evidence-backed threat-model approval.
 
 ## Priority 5 — Operations, product and release
