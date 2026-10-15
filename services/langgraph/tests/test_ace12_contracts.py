@@ -66,6 +66,7 @@ def capture(monkeypatch, tmp_path) -> dict[str, Any]:
     finally:
         adapters()["sandbox.cms.publish_page"].fault = None
     recovery = client.get("/actions/recovery").json()["items"]
+    uncertainty = client.get("/actions/uncertainty").json()
 
     c = client.post("/agency-os/clients", json={"display_name": "Contract Client (fictional)"}).json()["client"]
     client.post(f"/agency-os/clients/{c['client_id']}/projects", json={"project_id": w["project"]})
@@ -95,7 +96,7 @@ def capture(monkeypatch, tmp_path) -> dict[str, Any]:
         "attention_item": next(i for i in client.get("/agency-os/attention").json()["items"] if i["ref"] or stale),
         "mission_preview": mission_preview, "mission": mission,
         "deliverable": next(d for d in deliverables if d["artifact_id"] == mission["verification"]["artifact_id"]),
-        "manifest": manifest, "analytics": client.get("/agency-os/analytics").json(),
+        "manifest": manifest, "analytics": client.get("/agency-os/analytics").json(), "uncertainty": uncertainty,
     }
 
 

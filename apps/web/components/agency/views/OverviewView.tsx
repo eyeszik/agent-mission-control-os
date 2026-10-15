@@ -1,6 +1,6 @@
 "use client";
 
-import { getAttention, getFreezes, getLifecycle, getLive, listActions } from '../../../lib/api/agencyOs';
+import { getAttention, getFreezes, getLifecycle, getLive, getUncertainty, listActions } from '../../../lib/api/agencyOs';
 import { RISK_LABELS, labelOf, riskTone } from '../../../lib/agency/status';
 import { useAgencyStore } from '../../../lib/stores/agencyStore';
 import { Badge, Button, Card, Empty, ErrorNote, Skeleton, useLoad } from '../ui';
@@ -19,6 +19,7 @@ export function OverviewView() {
   const attention = useLoad(getAttention, []);
   const live = useLoad(getLive, []);
   const freezes = useLoad(getFreezes, []);
+  const debt = useLoad(getUncertainty, []);
   const lifecycle = useLoad(() => (projectId ? getLifecycle(projectId) : Promise.resolve(null)), [projectId]);
   const recent = useLoad(() => listActions(projectId ?? undefined), [projectId]);
 
@@ -64,6 +65,13 @@ export function OverviewView() {
               {freezes.data ? (
                 <Badge status={freezes.data.system_frozen || freezes.data.freezes.length ? 'BLOCKED' : 'READY'}
                   label={freezes.data.system_frozen ? 'System frozen' : freezes.data.freezes.length ? `${freezes.data.freezes.length} active` : 'None'} />
+              ) : <span className="text-fg">…</span>}
+            </li>
+            <li className="flex items-center justify-between gap-2">
+              <span>Unconfirmed effects (risky dispatch held while any exist)</span>
+              {debt.data ? (
+                <Badge status={debt.data.assessment.allow_high_risk_dispatch ? 'READY' : 'ATTENTION'}
+                  label={debt.data.assessment.allow_high_risk_dispatch ? 'None' : `${debt.data.assessment.unconfirmed_total} unconfirmed`} />
               ) : <span className="text-fg">…</span>}
             </li>
           </ul>

@@ -53,7 +53,7 @@ from .adapters import (
 )
 from .catalog import ActionDescriptor, UnknownAction, catalog
 from .fsm import MAX_ATTEMPTS, ActionState
-from .governance import autonomy, freeze_reasons, live_enablement
+from .governance import autonomy, freeze_reasons, live_enablement, uncertainty
 from .models import ApprovalBinding, binding_diff, effect_key
 from .risk import RiskAssessment, RiskFacts, assess
 from .safety import UnsafeInput, assert_no_secrets, injection_flags, redacted
@@ -489,6 +489,10 @@ def preflight(row: dict, *, now: datetime) -> tuple[list[str], list[str]]:
             hold.append(f"AUTONOMY_CEILING_LOWERED: {level.value} now allows up to {level.auto_ceiling.value}")
     if row["risk"].get("requires_step_up"):
         block.append("STEP_UP_UNAVAILABLE")
+    if RiskClass(row["effective_class"]).rank >= RiskClass.R3.rank:
+        debt = uncertainty(row["tenant_id"], now=now)
+        if not debt.allow_high_risk_dispatch:
+            hold += [f"UNCERTAINTY_DEBT:{b}" for b in debt.blockers]
     return hold, block
 
 
@@ -809,13 +813,27 @@ def compensate(principal: Principal, action_id: str, *, reason: str, now: Option
         obs = adapter.compensate(_ctx(row))
     except CompensationUnsupported as exc:
         raise NotDispatchable("COMPENSATION_UNSUPPORTED", exc.detail) from exc
+    except AdapterError as exc:
+        # Partial failure: the provider may already have applied the compensation
+        # (e.g. the refund was made and the read-back was lost). Record that it is
+        # unconfirmed; running it again reads the provider back and never applies
+        # it twice, because adapters compensate by compare-and-set on the observed state.
+        outcome = {**(row.get("outcome") or {}), "compensation": {
+            "status": "UNCONFIRMED", "by": principal.user_id, "reason": reason, "error": type(exc).__name__,
+            "at": db.iso(moment)}}
+        db.annotate(action_id, expected_version=row["version"], actor=principal.user_id,
+                    reason=f"compensation outcome unconfirmed: {type(exc).__name__}", evidence={"error": str(exc)[:500]},
+                    outcome=outcome)
+        raise NotDispatchable("COMPENSATION_UNCONFIRMED",
+                              "the provider may have applied the compensation; run it again to read the provider back",
+                              details={"error": type(exc).__name__}) from exc
     if row.get("budget_reservation_id"):
         res = db.get_reservation(row["budget_reservation_id"])
         if res is not None and res["status"] == "COMMITTED" and obs.state == "REFUNDED":
             db.settle_reservation(res["reservation_id"], status="REFUNDED", expected_status="COMMITTED",
                                   evidence={"refund_observed": obs.model_dump(mode="json")})
-    outcome = {**(row.get("outcome") or {}), "compensation": {"by": principal.user_id, "reason": reason, "observed_state": obs.state,
-                                                              "at": db.iso(moment)}}
+    outcome = {**(row.get("outcome") or {}), "compensation": {"status": "CONFIRMED", "by": principal.user_id, "reason": reason,
+                                                              "observed_state": obs.state, "at": db.iso(moment)}}
     return db.annotate(action_id, expected_version=row["version"], actor=principal.user_id, reason=f"compensated: {reason}",
                        evidence={"observation": obs.model_dump(mode="json")}, outcome=outcome)
 

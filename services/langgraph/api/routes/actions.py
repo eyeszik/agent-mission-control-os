@@ -172,6 +172,28 @@ def recovery(principal: Principal = Depends(get_principal)) -> dict:
     return {"items": views.recovery_workbench(principal)}
 
 
+@router.get("/uncertainty")
+@action_errors
+def uncertainty_debt(principal: Principal = Depends(get_principal)) -> dict:
+    """The tenant's uncertainty debt (ACE v100): while it is exceeded, R3+ dispatch is held.
+
+    Counts cover the whole tenant, because one tenant's unconfirmed effects hold
+    that tenant's risky dispatch. Only actions in projects this caller may access
+    are listed."""
+    from services.langgraph.persistence import actions as adb
+
+    debt = governance.uncertainty(principal.tenant_id)
+    rows = adb.list_requests(principal.tenant_id, states=tuple(governance.UNRESOLVED_STATES),
+                             limit=governance.UNCERTAINTY_SNAPSHOT_LIMIT)
+    visible = [{"action_id": r["action_id"], "project_id": r["project_id"], "capability_id": r["capability_id"],
+                "state": r["state"], "effective_class": r["effective_class"], "updated_at": r["updated_at"]}
+               for r in rows if principal.can_access_project(r["project_id"])]
+    policy = governance.UNCERTAINTY_POLICY.model_dump(mode="json")
+    policy["critical_risk"] = sorted(policy["critical_risk"])
+    return {"applies_to": "R3+", "policy": policy,
+            "assessment": debt.model_dump(mode="json"), "unresolved": visible}
+
+
 @router.post("/recovery/sweep")
 @action_errors
 def recovery_sweep(principal: Principal = Depends(get_principal)) -> dict:

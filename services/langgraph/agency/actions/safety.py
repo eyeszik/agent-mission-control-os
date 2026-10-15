@@ -6,17 +6,21 @@
 * Targets: a sandbox target path is normalised and refused if it climbs out
   (``..``), contains control characters or is absolute in the wrong place.
 * Secrets: a payload that carries a secret-shaped string is refused outright
-  (I16), because storing it would leak it into the evidence trail.
+  (I16), because storing it would leak it into the evidence trail. Percent-encoded
+  and base64-encoded forms are decoded and checked too, so encoding a credential
+  does not smuggle it into storage (ACE v100 edge case 8).
 * Untrusted text: every string is scanned for injection markers. Flags are
   recorded as evidence and never change risk, scope or authority (I18).
 """
 
 from __future__ import annotations
 
+import base64
+import binascii
 import ipaddress
 import re
 from typing import Any, Iterable
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 from services.langgraph.agency.compiled.role_sources import scan_for_injection
 from services.langgraph.security.pii import redact_value
@@ -26,8 +30,10 @@ _BLOCKED_HOST_SUFFIXES = (".local", ".localhost", ".internal", ".intranet", ".la
 _BLOCKED_HOSTS = {"localhost", "metadata.google.internal", "metadata", "instance-data"}
 _SECRET = re.compile(
     r"(?i)(?:\b(?:sk|pk|rk)-[a-z0-9_-]{16,}\b|\bAKIA[0-9A-Z]{16}\b|-----BEGIN [A-Z ]*PRIVATE KEY-----|"
-    r"\bxox[abprs]-[a-z0-9-]{10,}\b|\bghp_[a-z0-9]{30,}\b|\b(?:api|secret|token|password)[_-]?key?\s*[:=]\s*\S{8,})"
+    r"\bxox[abprs]-[a-z0-9-]{10,}\b|\bghp_[a-z0-9]{30,}\b|\b(?:api|secret|token|password)[_-]?key?\s*[:=]\s*\S{8,}|"
+    r"\bbearer\s+[a-z0-9._~+/-]{16,}=*)"
 )
+_BASE64_FRAGMENT = re.compile(r"(?<![A-Za-z0-9+/])[A-Za-z0-9+/]{24,4096}={0,2}(?![A-Za-z0-9+/=])")
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]")
 
 
@@ -94,9 +100,28 @@ def _strings(value: Any) -> Iterable[str]:
             yield from _strings(item)
 
 
+def _decoded(text: str) -> Iterable[str]:
+    """The text, then its percent-decoded forms (two rounds) and decoded base64 fragments."""
+    yield text
+    current = text
+    for _ in range(2):
+        if "%" not in current:
+            break
+        decoded = unquote(current, errors="replace")
+        if decoded == current:
+            break
+        current = decoded
+        yield current
+    for fragment in _BASE64_FRAGMENT.findall(text):
+        try:
+            yield base64.b64decode(fragment, validate=True).decode("utf-8", errors="ignore")
+        except (ValueError, binascii.Error):
+            continue
+
+
 def assert_no_secrets(value: Any) -> None:
     for text in _strings(value):
-        if _SECRET.search(text):
+        if any(_SECRET.search(form) for form in _decoded(text)):
             raise UnsafeInput("SECRET_IN_PAYLOAD", "secrets must be referenced from protected storage, never sent in a payload")
 
 
