@@ -224,6 +224,18 @@ jobs:
           done
           test "$frontend_ready" -eq 1
 
+          # The agency scenario exercises desktop sidebar navigation. Verifying
+          # the route at startup makes deployment-mode failures diagnosable.
+          agency_ready=0
+          for _ in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/agency >/dev/null; then
+              agency_ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$agency_ready" -eq 1
+
       - name: Run browser release smoke
         env:
           CI: "true"

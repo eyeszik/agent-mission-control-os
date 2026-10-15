@@ -42,10 +42,20 @@ test.describe('Mission Control accessibility smoke', () => {
     ).toBe(true);
 
     const contrast = await page.getByRole('heading', { name: 'Mission Control' }).evaluate((element) => {
-      const parseRgb = (value: string): [number, number, number] => {
-        const match = value.match(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/);
-        if (!match) throw new Error(`Unsupported computed color: ${value}`);
-        return [Number(match[1]), Number(match[2]), Number(match[3])];
+      // CSS Color 4 values (lab/oklch) are valid computed colors in Tailwind
+      // v4. Resolve through the browser's actual color pipeline instead of a
+      // regex that only accepts rgb() and silently blocks accessibility CI.
+      const parseRgb = (value: string): [number, number, number, number] => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) throw new Error('Canvas 2D context unavailable for color conversion');
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = value;
+        context.fillRect(0, 0, 1, 1);
+        const channels = context.getImageData(0, 0, 1, 1).data;
+        return [channels[0], channels[1], channels[2], channels[3]];
       };
       const luminance = ([r, g, b]: [number, number, number]) => {
         const linear = [r, g, b].map((channel) => {
@@ -55,15 +65,23 @@ test.describe('Mission Control accessibility smoke', () => {
         return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
       };
 
-      const foreground = parseRgb(getComputedStyle(element).color);
+      const [fr, fg, fb, fa] = parseRgb(getComputedStyle(element).color);
+      if (fa !== 255) throw new Error('Heading color transparency requires explicit compositing');
+      const foreground: [number, number, number] = [fr, fg, fb];
       let current: Element | null = element;
       let background: [number, number, number] | null = null;
       while (current) {
         const computed = getComputedStyle(current);
         const bg = computed.backgroundColor;
         if (bg && bg !== 'transparent' && !bg.endsWith(', 0)')) {
-          background = parseRgb(bg);
-          break;
+          const [r, g, b, alpha] = parseRgb(bg);
+          if (alpha === 255) {
+            background = [r, g, b];
+            break;
+          }
+          // Semi-transparent layers need compositing; do not produce a false
+          // accessibility PASS from an inaccurately assumed background.
+          if (alpha !== 0) throw new Error('Translucent background needs alpha compositing');
         }
         current = current.parentElement;
       }

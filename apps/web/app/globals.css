@@ -1,6 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind CSS v4 loads its layers from a single import. The existing
+ * semantic tokens and theme extensions remain sourced from the reviewed
+ * Tailwind config until their CSS-first migration is separately verified. */
+@import "tailwindcss";
+@config "../tailwind.config.ts";
 
 /* Legacy names kept for existing consumers; values come from the generated
  * DTCG tokens (tokens.css, imported first in layout.tsx). */
