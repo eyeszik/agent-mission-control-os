@@ -4,12 +4,20 @@ No adapter is contacted when this module is imported. Remote calls require an
 operation-specific authorization reference and an allowlisted provider. This
 module does not promise remote effect exactly-once semantics or global quota
 coordination across independent worker processes.
+
+Dialects were checked against the providers' official Python SDKs (google-genai
+2.31.0, openai 3.31.0 and anthropic 1.15.0 from PyPI): request and response
+field names, the Gemini API-key header and model path, and the finish/stop
+reasons. A response cut off at the output cap is ``OUTPUT_TRUNCATED``; a
+refusal or a safety/policy stop is ``OUTPUT_REFUSED``; neither is retried. A
+response without usage reports ``{}``: unknown, never zero.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 import json
 import random
+import re
 import threading
 import time
 from typing import Any, Callable, Mapping, Sequence
@@ -83,30 +91,57 @@ def _tool_message(raw: Any) -> tuple[ToolInvocation, ...]:
     return tuple(calls)
 
 
+# Terminal, non-retryable output outcomes (same prompt and cap would repeat them).
+NON_RETRYABLE_OUTPUT = frozenset({"OUTPUT_TRUNCATED", "OUTPUT_REFUSED"})
+# Gemini model ids become a URL path segment; refuse anything that could change the path.
+_GEMINI_MODEL = re.compile(r"^(?:models/)?[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+_GEMINI_TRUNCATED = frozenset({"MAX_TOKENS"})
+_OPENAI_TRUNCATED = frozenset({"length"})
+_ANTHROPIC_TRUNCATED = frozenset({"max_tokens", "model_context_window_exceeded"})
+
+
+def _counts(**values: Any) -> dict[str, int]:
+    return {k: int(v or 0) for k, v in values.items()}
+
+
 class HttpModelAdapter:
     """Provider dialect and endpoint allowlist; no arbitrary URL invocation."""
 
     ENDPOINTS = {
         "openai": "https://api.openai.com/v1/chat/completions",
         "anthropic": "https://api.anthropic.com/v1/messages",
+        "gemini": "https://generativelanguage.googleapis.com/v1beta/{model}:generateContent",
         "ollama": "http://127.0.0.1:11434/api/chat",
     }
+    CREDENTIALED = frozenset({"openai", "anthropic", "gemini"})
 
     def __init__(self, provider: str, *, credential: str | None,
                  client: httpx.Client | None = None, timeout: float = 45.0) -> None:
         if provider not in self.ENDPOINTS or timeout <= 0:
             raise ValueError("unsupported provider or timeout")
-        if provider in {"openai", "anthropic"} and not credential:
+        if provider in self.CREDENTIALED and not credential:
             raise PermissionError("provider credentials unavailable")
         self.provider = provider
         self.credential = credential
         self.client = client if client is not None else httpx.Client(timeout=timeout)
         self.timeout = timeout
 
+    def _url(self, model: str) -> str:
+        if self.provider != "gemini":
+            return self.ENDPOINTS[self.provider]
+        if not _GEMINI_MODEL.match(model) or ".." in model:
+            raise ValueError("invalid gemini model id")
+        name = model if model.startswith("models/") else f"models/{model}"
+        return self.ENDPOINTS["gemini"].format(model=name)
+
     def invoke(self, *, model: str, prompt: str, tools: Sequence[ToolSpec],
-               max_output_tokens: int, temperature: float = 0) -> tuple[str, tuple[ToolInvocation, ...], dict[str, int]]:
+               max_output_tokens: int, temperature: float = 0,
+               json_output: bool = False) -> tuple[str, tuple[ToolInvocation, ...], dict[str, int]]:
         if not model or not prompt or not 1 <= max_output_tokens <= 8192 or not 0 <= temperature <= 2:
             raise ValueError("invalid model invocation")
+        if self.provider == "gemini" and tools:
+            raise ValueError("tool calls are not implemented for the gemini dialect")
+        url = self._url(model)
         headers = {"content-type": "application/json"}
         # Keep trace context off payloads and logs, and only use the configured
         # global propagator. No credential content is attached to spans.
@@ -140,6 +175,12 @@ class HttpModelAdapter:
                     {"name": t.name, "description": t.description, "input_schema": t.input_schema}
                     for t in tools
                 ]
+        elif self.provider == "gemini":
+            headers["x-goog-api-key"] = str(self.credential)
+            config: dict[str, Any] = {"maxOutputTokens": max_output_tokens, "temperature": temperature}
+            if json_output:
+                config["responseMimeType"] = "application/json"
+            body = {"contents": [{"role": "user", "parts": [{"text": prompt}]}], "generationConfig": config}
         else:
             body = {
                 "model": model, "messages": [{"role": "user", "content": prompt}],
@@ -152,8 +193,7 @@ class HttpModelAdapter:
                     }} for t in tools
                 ]
         try:
-            response = self.client.post(self.ENDPOINTS[self.provider], json=body,
-                                        headers=headers, timeout=self.timeout)
+            response = self.client.post(url, json=body, headers=headers, timeout=self.timeout)
         except httpx.TimeoutException as exc:
             raise ProviderFailure(self.provider, None, "TIMEOUT_UNCONFIRMED") from exc
         except httpx.TransportError as exc:
@@ -164,33 +204,69 @@ class HttpModelAdapter:
             payload = response.json()
             if not isinstance(payload, dict):
                 raise ValueError("response not an object")
+            stop: str | None = None
             if self.provider == "openai":
-                message = payload["choices"][0]["message"]
+                choice = payload["choices"][0]
+                message = choice["message"]
+                if message.get("refusal") or choice.get("finish_reason") == "content_filter":
+                    stop = "OUTPUT_REFUSED"
+                elif choice.get("finish_reason") in _OPENAI_TRUNCATED:
+                    stop = "OUTPUT_TRUNCATED"
                 text = message.get("content") or ""
                 calls = _tool_message(message.get("tool_calls"))
-                usage = payload.get("usage") or {}
-                tokens = {"input_tokens": int(usage.get("prompt_tokens", 0)),
-                          "output_tokens": int(usage.get("completion_tokens", 0))}
+                usage = payload.get("usage")
+                tokens = _counts(input_tokens=usage.get("prompt_tokens"),
+                                 output_tokens=usage.get("completion_tokens")) if usage else {}
             elif self.provider == "anthropic":
+                if payload.get("stop_reason") == "refusal":
+                    stop = "OUTPUT_REFUSED"
+                elif payload.get("stop_reason") in _ANTHROPIC_TRUNCATED:
+                    stop = "OUTPUT_TRUNCATED"
                 blocks = payload["content"]
                 text = "\n".join(x["text"] for x in blocks if x.get("type") == "text")
                 calls = _tool_message([
                     {"name": x["name"], "input": x["input"]}
                     for x in blocks if x.get("type") == "tool_use"
                 ])
-                usage = payload.get("usage") or {}
-                tokens = {"input_tokens": int(usage.get("input_tokens", 0)),
-                          "output_tokens": int(usage.get("output_tokens", 0))}
+                usage = payload.get("usage")
+                tokens = _counts(input_tokens=usage.get("input_tokens"),
+                                 output_tokens=usage.get("output_tokens")) if usage else {}
+            elif self.provider == "gemini":
+                candidates = payload.get("candidates") or []
+                if not candidates:
+                    if (payload.get("promptFeedback") or {}).get("blockReason"):
+                        raise ProviderFailure(self.provider, None, "OUTPUT_REFUSED")
+                    raise ValueError("no candidates")
+                candidate = candidates[0]
+                finish = candidate.get("finishReason")
+                if finish in _GEMINI_TRUNCATED:
+                    stop = "OUTPUT_TRUNCATED"
+                elif finish not in (None, "STOP"):
+                    stop = "OUTPUT_REFUSED"
+                parts = (candidate.get("content") or {}).get("parts") or []
+                # Thought summaries are not the answer.
+                text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
+                calls = ()
+                usage = payload.get("usageMetadata")
+                # Thinking tokens are counted as output so budgets stay conservative.
+                tokens = _counts(
+                    input_tokens=usage.get("promptTokenCount"),
+                    output_tokens=int(usage.get("candidatesTokenCount") or 0)
+                    + int(usage.get("thoughtsTokenCount") or 0),
+                ) if usage else {}
             else:
                 message = payload["message"]
                 text = message.get("content") or ""
                 calls = _tool_message(message.get("tool_calls"))
-                tokens = {"input_tokens": int(payload.get("prompt_eval_count", 0)),
-                          "output_tokens": int(payload.get("eval_count", 0))}
+                reported = "prompt_eval_count" in payload or "eval_count" in payload
+                tokens = _counts(input_tokens=payload.get("prompt_eval_count"),
+                                 output_tokens=payload.get("eval_count")) if reported else {}
             if not isinstance(text, str) or any(v < 0 for v in tokens.values()):
                 raise ValueError("invalid model result")
         except (TypeError, KeyError, IndexError, ValueError, AttributeError) as exc:
             raise ProviderFailure(self.provider, None, "INVALID_PROVIDER_RESPONSE") from exc
+        if stop:
+            raise ProviderFailure(self.provider, response.status_code, stop)
         return text, calls, tokens
 
 
@@ -238,6 +314,7 @@ class ModelRouter:
         self, *, prompt: str, capability: str, complexity: int,
         allowed_providers: frozenset[str], authorization_ref: str,
         tools: Sequence[ToolSpec] = (), max_output_tokens: int = 1024,
+        json_output: bool = False, temperature: float = 0,
     ) -> ModelResult:
         if not authorization_ref.strip():
             raise PermissionError("operation-specific model invocation authorization required")
@@ -255,6 +332,7 @@ class ModelRouter:
             raise NoEligibleProvider("router", None, "NO_ELIGIBLE_CAPABILITY")
         attempts = 0
         route: list[str] = []
+        last_failure: ProviderFailure | None = None
         for candidate in options:
             adapter = self.adapters.get(candidate.provider_id)
             if adapter is None:
@@ -264,9 +342,12 @@ class ModelRouter:
                 try:
                     self._acquire_slot(candidate)
                     attempts += 1
+                    kwargs: dict[str, Any] = {"temperature": temperature}
+                    if json_output:
+                        kwargs["json_output"] = True
                     text, calls, usage = adapter.invoke(
                         model=candidate.model_id, prompt=prompt, tools=tools,
-                        max_output_tokens=max_output_tokens,
+                        max_output_tokens=max_output_tokens, **kwargs,
                     )
                     with self._lock:
                         self._open_until.pop(candidate.provider_id, None)
@@ -276,6 +357,7 @@ class ModelRouter:
                         attempts=attempts, route=tuple(route),
                     )
                 except ProviderFailure as exc:
+                    last_failure = exc
                     temporary = exc.status in {429, 503} or exc.reason in {
                         "TIMEOUT_UNCONFIRMED", "TRANSPORT_UNCONFIRMED"
                     }
@@ -288,4 +370,5 @@ class ModelRouter:
                     with self._lock:
                         self._open_until[candidate.provider_id] = self.clock() + self.cooldown_seconds
                     break
-        raise NoEligibleProvider("router", None, "ALL_AUTHORIZED_ROUTES_UNAVAILABLE")
+        # The last provider failure is chained so callers can see why (e.g. truncation).
+        raise NoEligibleProvider("router", None, "ALL_AUTHORIZED_ROUTES_UNAVAILABLE") from last_failure
