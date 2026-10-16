@@ -66,9 +66,16 @@ export function ExperienceArea() {
   if (!target) return needsProject;
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const content = form.items.split('\n').map((l) => l.trim()).filter(Boolean).slice(0, 12).map((l) => {
-      const [title, ...rest] = l.split(':'); return { title: title.trim().slice(0, 120), body: rest.join(':').trim().slice(0, 400) };
-    });
+    // ⚡ Bolt: Replaced multiple array map/filter/slice passes with a single loop to avoid intermediate array allocations
+    const lines = form.items.split('\n');
+    const content: { title: string; body: string }[] = [];
+    for (let i = 0; i < lines.length && content.length < 12; i++) {
+      const trimmed = lines[i].trim();
+      if (trimmed) {
+        const [title, ...rest] = trimmed.split(':');
+        content.push({ title: title.trim().slice(0, 120), body: rest.join(':').trim().slice(0, 400) });
+      }
+    }
     const r = await run('Compiling experience', () => produceExperience(brandId, target, { target: form.target, objective: form.objective,
       audience: form.audience, primary_action: form.primary_action, content }), (x) => `Experience ${x.status}`);
     if (r) setReport(r);

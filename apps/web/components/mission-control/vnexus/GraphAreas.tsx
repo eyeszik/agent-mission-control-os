@@ -175,7 +175,8 @@ export function MultiverseArea() {
             <button type="button" className={buttonClass} disabled={busy || current.state !== 'OPEN'} onClick={() => void act('Archiving', () => archiveBranch(current.branch_id))}>Archive</button>
           </div>
           <div className="flex flex-wrap items-end gap-2">
-            <Field label="Compare or merge with"><select className={inputClass} value={other} onChange={(e) => setOther(e.target.value)}><option value="">…</option>{branches.filter((b) => b.branch_id !== current.branch_id).map((b) => <option key={b.branch_id} value={b.branch_id}>{b.name}</option>)}</select></Field>
+            {/* ⚡ Bolt: Removed .filter().map() chain to prevent intermediate array allocation on every render */}
+            <Field label="Compare or merge with"><select className={inputClass} value={other} onChange={(e) => setOther(e.target.value)}><option value="">…</option>{branches.map((b) => b.branch_id !== current.branch_id ? <option key={b.branch_id} value={b.branch_id}>{b.name}</option> : null)}</select></Field>
             <button type="button" className={buttonClass} disabled={busy || !other} onClick={() => void run('Comparing branches', async () => setTwo(await compareTwoBranches(current.branch_id, other)))}>Compare</button>
             <button type="button" className={buttonClass} disabled={busy || !other} onClick={() => void act('Merging into a new branch', () => mergeBranches(current.branch_id, other, `${current.name} + merge`))}>Merge into new branch</button>
           </div>
