@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -7,6 +6,7 @@ from fastapi.testclient import TestClient
 from services.langgraph.app.main import app
 from services.langgraph.graph.agency import llm
 from services.langgraph.persistence.runs import RunLimitExceeded, create_run_record, update_run_status
+from services.langgraph.tests.provider_fakes import openai_reply
 
 client = TestClient(app)
 
@@ -14,33 +14,18 @@ client = TestClient(app)
 # --- provider call bounds and token budget ------------------------------------
 
 
-class _FakeChat:
-    calls: list[dict] = []
-    responses: list = []
-
-    def __init__(self, **kwargs):
-        _FakeChat.calls.append(kwargs)
-
-    def invoke(self, _prompt):
-        response = _FakeChat.responses.pop(0)
-        if isinstance(response, Exception):
-            raise response
-        return response
-
-
 @pytest.fixture
-def fake_openai(monkeypatch):
-    import langchain_openai
-
-    _FakeChat.calls = []
-    _FakeChat.responses = []
+def fake_openai(provider_http, monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-real")
-    monkeypatch.setattr(langchain_openai, "ChatOpenAI", _FakeChat)
-    return _FakeChat
+    return provider_http
 
 
-def _ok(total: int = 300) -> SimpleNamespace:
-    return SimpleNamespace(content='{"ok": true}', usage_metadata={"input_tokens": total - 100, "output_tokens": 100, "total_tokens": total})
+def _ok(total: int = 300):
+    return openai_reply('{"ok": true}', prompt_tokens=total - 100, completion_tokens=100)
+
+
+def _not_json(input_tokens: int, output_tokens: int):
+    return openai_reply("not json", prompt_tokens=input_tokens, completion_tokens=output_tokens)
 
 
 def test_every_provider_call_is_bounded(fake_openai, monkeypatch):
@@ -49,17 +34,19 @@ def test_every_provider_call_is_bounded(fake_openai, monkeypatch):
     fake_openai.responses = [_ok()]
     outcome = llm.generate_structured("prompt", {"ok": False})
     assert outcome.mode == "PROVIDER_SUCCESS"
-    call = fake_openai.calls[0]
-    assert call["timeout"] == 12.0
-    assert call["max_tokens"] == 700
-    assert call["max_retries"] == 0
+    assert fake_openai.timeouts == [12.0]
+    assert fake_openai.requests[0].extensions["timeout"]["read"] == 12.0
+    assert fake_openai.bodies()[0]["max_tokens"] == 700
+    # Exactly one HTTP request per attempt: neither router nor adapter retries on its own.
+    assert len(fake_openai.requests) == 1
 
 
 def test_usage_is_recorded_in_provenance_including_failed_attempts(fake_openai):
-    fake_openai.responses = [SimpleNamespace(content="not json", usage_metadata={"input_tokens": 50, "output_tokens": 20, "total_tokens": 70}), _ok(300)]
+    fake_openai.responses = [_not_json(50, 20), _ok(300)]
     outcome = llm.generate_structured("prompt", {"ok": False})
     assert outcome.attempts == 2
     assert outcome.provenance("task")["usage"] == {"input_tokens": 250, "output_tokens": 120, "total_tokens": 370}
+    assert outcome.provenance("task")["usage_reported"] is True
 
 
 def test_exhausted_run_budget_degrades_without_calling_the_provider(fake_openai, monkeypatch):
@@ -69,20 +56,19 @@ def test_exhausted_run_budget_degrades_without_calling_the_provider(fake_openai,
     assert outcome.mode == "FALLBACK_DEGRADED"
     assert outcome.error_class == llm.BUDGET_EXHAUSTED
     assert outcome.attempts == 0
-    assert fake_openai.calls == []
+    assert fake_openai.requests == []
 
 
 def test_retries_debit_the_same_budget(fake_openai, monkeypatch):
     monkeypatch.setenv("AMC_MAX_TOKENS_PER_RUN", "5000")
     monkeypatch.setenv("AMC_LLM_MAX_OUTPUT_TOKENS", "1000")
-    expensive_failure = SimpleNamespace(content="not json", usage_metadata={"input_tokens": 1500, "output_tokens": 1000, "total_tokens": 2500})
-    fake_openai.responses = [expensive_failure, expensive_failure, _ok()]
+    fake_openai.responses = [_not_json(1500, 1000), _not_json(1500, 1000), _ok()]
     outcome = llm.generate_structured("prompt", {"ok": False})
     # Each failed attempt spends 2500 tokens. After two, nothing is left for a
     # third attempt, so retries stop at the ceiling instead of exceeding it.
     assert outcome.mode == "FALLBACK_DEGRADED"
     assert outcome.error_class == llm.BUDGET_EXHAUSTED
-    assert len(fake_openai.calls) == 2
+    assert len(fake_openai.requests) == 2
     assert outcome.provenance("task")["usage"]["total_tokens"] == 5000
 
 

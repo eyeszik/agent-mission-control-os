@@ -51,6 +51,7 @@ from services.langgraph.agency.execution.models import (
     ObservationReceipt,
 )
 from services.langgraph.agency.kernel.lifecycle import TransitionContext, release_guard_failures
+from services.langgraph.agency.model_profiles import pin_metadata as pin_model_profile
 from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffect
 from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
@@ -896,7 +897,9 @@ def create_agency_run(
         request={"project_id": req.project_id, "brief": safe_brief},
     )
     now = datetime.now(timezone.utc)
-    metadata = {"input_data": {"brief": safe_brief}, "initiated_by": principal.user_id, "workflow": pin.as_metadata()}
+    metadata = {"input_data": {"brief": safe_brief}, "initiated_by": principal.user_id, "workflow": pin.as_metadata(),
+                # Pinned for the life of the run; stages and resumes never re-read the environment.
+                "model_profile": pin_model_profile()}
     if contract is not None:
         metadata["delivery_contract"] = contract.model_dump(mode="json")
         metadata["delivery_contract_hash"] = contract_hash(contract)

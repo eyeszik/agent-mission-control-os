@@ -4,7 +4,7 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "b3d677836d9b0bdde81233767a2f31bef77276f2"
+      "git_blob_sha": "dc0501d4dbca3f79f4f6b36e5f75ca6620ac4b35"
     },
     {
       "path": ".github/workflows/ci.yml",
@@ -88,7 +88,7 @@
     },
     {
       "path": "docs/production-activation.md",
-      "git_blob_sha": "d64551a0ee35f32a85c90479392d7f455222d1b6"
+      "git_blob_sha": "57c648010510acb469f70f501ebd5f7134389f92"
     },
     {
       "path": "docs/production-slo-contract.md",
@@ -156,7 +156,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "6b051f6c47f2bd2ac4025ca8d00e211bfa5dd9f5"
+      "git_blob_sha": "dbeac4b2b1120df534498ad87cfffda3215eefa2"
     },
     {
       "path": "runtime/abc/run-fsm.yaml",
@@ -440,7 +440,7 @@
     },
     {
       "path": "services/langgraph/agency/model_router.py",
-      "git_blob_sha": "c8f71dc76386101e97f544fc0e87393eed164fda"
+      "git_blob_sha": "791f8df08d2c9866082bbe951a6a68c347a15eca"
     },
     {
       "path": "services/langgraph/agency/project_os/publishing.py",
@@ -528,7 +528,7 @@
     },
     {
       "path": "services/langgraph/api/routes/agency.py",
-      "git_blob_sha": "c99f61f62d7587816479d7cbd27080f82779adf7"
+      "git_blob_sha": "4811eb00dcadcba531c7557fcf4aba0cb65f6531"
     },
     {
       "path": "services/langgraph/api/routes/analytics.py",
@@ -608,7 +608,7 @@
     },
     {
       "path": "services/langgraph/graph/agency/nodes.py",
-      "git_blob_sha": "d2d4e73809b1ccff4465a5a906b7af67dad6d97e"
+      "git_blob_sha": "a293fc9fa53ec4d1bdfc730a726e1b168eebb51e"
     },
     {
       "path": "services/langgraph/integrations/paid_media.py",
@@ -861,6 +861,14 @@
     {
       "path": "services/langgraph/tests/test_ace100_edge_cases.py",
       "git_blob_sha": "d98e182a8525e9b819cd506afd0542dea665d89b"
+    },
+    {
+      "path": "services/langgraph/agency/model_profiles.py",
+      "git_blob_sha": "19baac3b810642042869980a627b27ccf11fa8ca"
+    },
+    {
+      "path": "services/langgraph/tests/test_amc_i03_model_profiles.py",
+      "git_blob_sha": "3bbf98f589cc6c045a29be2b8857467788aa79e1"
     }
   ]
 }

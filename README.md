@@ -120,7 +120,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 NEXT_PUBLIC_AUTH_MODE=local
 ```
 
-Set `OPENAI_API_KEY` only if real provider generation is desired. Without it, generation is explicitly degraded and delivery remains blocked.
+Set `OPENAI_API_KEY` (or select another provider with `AMC_LLM_PROVIDER`; see `docs/amc-i03-model-profiles.md`) only if real provider generation is desired. Without it, generation is explicitly degraded and delivery remains blocked.
 
 Approvals are role-gated and separated from authorship: only `AMC_APPROVER_ROLES` (default `reviewer,approver,admin,owner`) may decide an approval, and the user who started a run cannot approve it. To approve your own runs in single-user local development, set `AMC_LOCAL_ROLE=admin` and `AMC_ALLOW_SELF_APPROVAL=true`; production configuration rejects the self-approval switch.
 
