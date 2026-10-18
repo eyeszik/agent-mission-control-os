@@ -48,7 +48,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--sha", required=True)
     ap.add_argument("--check-runs", type=Path, help="check-runs JSON; omit to fetch with GITHUB_TOKEN")
-    ap.add_argument("--repo", default=os.environ.get("GITHUB_REPOSITORY", "eyeszik/agent-mission-control-os"))
+    ap.add_argument("--repo", default=os.environ.get("GITHUB_REPOSITORY") or "eyeszik/agent-mission-control-os")
     ap.add_argument("--merged", action="store_true", help="the SHA is reachable from the default branch")
     ap.add_argument("--out", type=Path)
     args = ap.parse_args(argv)

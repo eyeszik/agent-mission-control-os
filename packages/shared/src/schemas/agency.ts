@@ -357,6 +357,18 @@ export const GenerationProvenanceSchema = z.object({
   completed_at: z.string().datetime({ offset: true }),
   fallback_used: z.boolean(),
   error_class: z.string().nullable(),
+  // Provider routes tried in order; more than one means a configured fallback ran.
+  route: z.array(z.string()).default([]),
+  // Pinned model profile hash; null for runs created before profiles were pinned.
+  profile_hash: z.string().nullable().default(null),
+  usage: z.object({
+    input_tokens: z.number().int().nonnegative(),
+    output_tokens: z.number().int().nonnegative(),
+    total_tokens: z.number().int().nonnegative(),
+  }).default({ input_tokens: 0, output_tokens: 0, total_tokens: 0 }),
+  // False when any call's usage was unreported; the unreported estimate then counts toward the run budget.
+  usage_reported: z.boolean().default(true),
+  unreported_token_estimate: z.number().int().nonnegative().default(0),
 });
 
 export const AgencyRunStatusSchema = z.enum([
@@ -445,8 +457,8 @@ export const CompletionEvaluationSchema = z.object({
   terminal_candidate: z.enum(['COMPLETE', 'BLOCKED']),
   criteria: z.array(CompletionCriterionResultSchema),
   proof_coverage: z.number().min(0).max(1),
-  evidence_score: z.number().min(0).max(1),
-  quality_score: z.number().min(0).max(1),
+  evidence_score: z.union([z.number().min(0).max(1), z.literal('NOT_MEASURED')]),
+  quality_score: z.union([z.number().min(0).max(1), z.literal('NOT_MEASURED')]),
   confidence: z.number().min(0).max(1),
 });
 

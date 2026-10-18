@@ -24,7 +24,10 @@
 
 ## P0
 
+> **M0 status (this increment):** G-01 to G-04 are implemented. Residuals are stated under each gap and in `docs/production_completion_plan.md`.
+
 **G-01 · governance/QA · Constant completion scores (F-01)**
+- **Status:** IMPLEMENTED for evidence and quality (`NOT_MEASURED`), and for coverage (computed from the criteria). **Residual:** `confidence` is still caller-supplied, because the column is `NOT NULL` and no calibrated estimator exists. F-13: the criteria passed by the runtime remediation paths are hard-coded `SATISFIED`, so the coverage they record reflects those constants.
 - **Current:** `CompletionEvaluation.evidence_score` and `quality_score` are set to `proof_coverage` literals (0.25, 0.67, 1.0).
 - **Required:** a score is either computed from a named, recorded measurement or reported as `NOT_MEASURED`.
 - **Inputs → outputs:** criteria results → evaluation where every score names its source.
@@ -35,6 +38,7 @@
 - **Complexity / risk:** S / L (contract change behind backward-compatible readers).
 
 **G-02 · contracts · Provenance Zod parity (F-05)**
+- **Status:** IMPLEMENTED. The Zod twin carries `route`, `profile_hash`, `usage`, `usage_reported` and `unreported_token_estimate`, with defaults for older rows. A parity test fails if the backend writes a field the twin lacks.
 - **Current:** Zod `GenerationProvenanceSchema` strips `route`, `profile_hash`, `usage_reported` and `unreported_token_estimate`.
 - **Required:** the twin carries them, and the UI shows unknown usage and fallback routes.
 - **Schema:** Zod only.
@@ -42,16 +46,25 @@
 - **Complexity / risk:** S / L.
 
 **G-03 · deployment · Environment and dependency hygiene (F-06, F-10)**
+- **Status:** IMPLEMENTED for documentation: all 19 variables are in `.env.example`, blank by default, and a test fails on any new undocumented variable. Blank values are now tolerated at the three call sites that would have failed on `int('')`. **Residual:** `opentelemetry` is still not declared as a dependency; the test that needs it still depends on CI's transitive install.
 - **Current:** 19 environment variables are read but undocumented, including secrets and safety switches. `opentelemetry` is undeclared.
 - **Required:** every variable is in `.env.example` with its purpose and secret status, and the inventory's undocumented list is empty or justified. Optional dependencies are declared as extras, and tests skip cleanly when an extra is absent.
 - **Tests:** an inventory check (documented ⊇ read, minus a justified allowlist); a fresh install passes the suite.
 - **Complexity / risk:** S / L.
 
 **G-04 · QA · Non-hermetic test (F-09)**
+- **Status:** IMPLEMENTED. The test uses a unique name per run and passes on a database that already holds the earlier run's rows.
 - **Current:** a fixed display name collides on re-run against the same SQLite file.
 - **Required:** unique names so re-runs pass.
 - **Tests:** run the file twice against one database; both runs pass.
 - **Complexity / risk:** S / L.
+
+**G-45 · governance · Remediation paths record hard-coded criteria (F-13, new in M0)**
+- **Current:** `api/routes/runtime.py` records completion with criteria that are always `SATISFIED`, including when the run did not complete.
+- **Required:** each criterion status is derived from the observed state it names (for example, the remediated run's status, the recovery case's status, the regenerated approval's status). A criterion with no observation is `UNSATISFIED` or `STALE`, never `SATISFIED`.
+- **Schema:** none.
+- **Tests:** a non-completed remediation records a non-`COMPLETE` verdict; criteria match the observed status for each path.
+- **Complexity / risk:** M / M (changes recorded verdicts on remediation paths).
 
 **G-05 · reliability · Async agency runs (F-02)**
 - **Current:** the graph runs inside the HTTP request.
