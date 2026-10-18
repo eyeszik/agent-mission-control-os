@@ -23,7 +23,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.2.0"]
+dev = ["pytest>=8.2.0", "cryptography>=44.0.0"]
+# Google Drive export (integrations/drive_export): RS256 service-account signing and
+# optional AES-GCM encryption of exports. See docs/drive-export.md.
+drive-export = ["cryptography>=44.0.0"]
 # Optional, explicit evaluation path. Production does not import or invoke this extra.
 eval = ["deepeval>=3.0.0"]
 # Local visual engine (docs/local-visual-engine.md). Pillow decodes PNG renders for verification;

@@ -46,3 +46,6 @@ scratch/
 .freevideoforge/
 out/
 .venv-fvf/
+
+# Project export runner output (scripts/export_to_drive.py)
+.amc-export/
