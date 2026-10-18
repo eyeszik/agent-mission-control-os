@@ -91,7 +91,7 @@ See [`docs/production-activation.md`](docs/production-activation.md) for the exa
 - `docs/production-activation.md` — external activation and production smoke-test runbook.
 - `services/langgraph/agency/project_os/` — Project OS contracts and policies (workspace, storage, content, calendar, publishing, memory, knowledge, video bridge, routing, brand drift, workstreams); persistence in `persistence/project*.py` + `persistence/portfolio.py`; routes in `api/routes/{projects,project_ops,portfolio}.py`.
 - `services/freevideoforge/` — local, zero-paid-API video renderer, bridged into projects (not imported) by `agency/project_os/video.py`.
-- `scripts/export_to_drive.py` + `services/langgraph/integrations/drive_export/` — operator export of a project folder to Google Drive (service account, verified read-back) with a Notion record; dry run by default — see `docs/drive-export.md`.
+- `scripts/export_to_drive.py` + `services/langgraph/integrations/drive_export/` — operator export of a project folder to Google Drive (service account or signed-in user, verified read-back) with a Notion record; dry run by default, runnable from `.github/workflows/export-to-drive.yml` — see `docs/drive-export.md`.
 
 ## Local setup
 

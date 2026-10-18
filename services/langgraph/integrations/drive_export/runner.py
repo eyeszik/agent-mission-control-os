@@ -6,8 +6,12 @@
   under the output directory. No credential is read and no network call is
   made. The previous manifest is the one the last dry run wrote locally.
 - ``local`` / ``ci``: also upload to Google Drive and record the export in
-  Notion. Both modes require ``GOOGLE_SA_JSON`` and ``DRIVE_PARENT_FOLDER_ID``;
-  a missing value is a configuration error, never a silent skip.
+  Notion. Both modes need one Drive credential: ``GOOGLE_SA_JSON`` plus
+  ``DRIVE_PARENT_FOLDER_ID`` (a service account, which needs a shared drive),
+  or the three ``GOOGLE_OAUTH_*`` variables (a signed-in user, which is what a
+  personal Google account needs; the folder id is then optional and the runner
+  creates ``AMC exports`` in My Drive). A missing value is a configuration
+  error, never a silent skip.
 
 An upload is identified by its manifest hash, stored in the Drive file's
 ``appProperties``. A rerun for unchanged content finds the existing file and
@@ -28,7 +32,7 @@ from pathlib import Path
 from typing import Mapping
 
 from . import manifest as mf
-from .google_drive import DriveClient, ServiceAccount
+from .google_drive import DriveClient, OAuthUser, ServiceAccount
 from .notion import NotionClient, bookmark_block, database_properties, heading_block, paragraph_blocks, rich_text
 
 VALID_MODES = ("dry_run", "local", "ci")
@@ -36,6 +40,7 @@ UPLOAD_MODES = ("local", "ci")
 ZIP_MIME = "application/zip"
 ENCRYPTED_MIME = "application/octet-stream"
 JSON_MIME = "application/json"
+OAUTH_ROOT_FOLDER = "AMC exports"
 LOCK_STALE_SECONDS = 2 * 60 * 60
 NOTION_PROMPT_SNIPPET_CHARS = 2048
 
@@ -62,6 +67,9 @@ class ExportConfig:
     drive_parent_folder_id: str | None = None
     google_sa_json: str | None = field(default=None, repr=False)
     google_impersonate_subject: str | None = None
+    google_oauth_client_id: str | None = None
+    google_oauth_client_secret: str | None = field(default=None, repr=False)
+    google_oauth_refresh_token: str | None = field(default=None, repr=False)
     notion_token: str | None = field(default=None, repr=False)
     notion_database_id: str | None = None
     notion_parent_page_id: str | None = None
@@ -128,6 +136,9 @@ class ExportConfig:
             drive_parent_folder_id=_env("DRIVE_PARENT_FOLDER_ID") or None,
             google_sa_json=_env("GOOGLE_SA_JSON") or None,
             google_impersonate_subject=_env("GOOGLE_IMPERSONATE_SUBJECT") or None,
+            google_oauth_client_id=_env("GOOGLE_OAUTH_CLIENT_ID") or None,
+            google_oauth_client_secret=_env("GOOGLE_OAUTH_CLIENT_SECRET") or None,
+            google_oauth_refresh_token=_env("GOOGLE_OAUTH_REFRESH_TOKEN") or None,
             notion_token=_env("NOTION_TOKEN") or None,
             notion_database_id=_env("NOTION_DATABASE_ID") or None,
             notion_parent_page_id=_env("NOTION_PARENT_PAGE_ID") or None,
@@ -137,14 +148,35 @@ class ExportConfig:
         config.validate()
         return config
 
+    @property
+    def uses_oauth(self) -> bool:
+        return bool(self.google_oauth_client_id or self.google_oauth_client_secret or self.google_oauth_refresh_token)
+
+    def drive_credential(self) -> ServiceAccount | OAuthUser:
+        if self.uses_oauth:
+            return OAuthUser(self.google_oauth_client_id or "", self.google_oauth_client_secret or "",
+                             self.google_oauth_refresh_token or "")
+        return ServiceAccount.from_value(self.google_sa_json or "", subject=self.google_impersonate_subject)
+
     def validate(self) -> None:
+        if self.uses_oauth and self.google_sa_json:
+            raise ExportConfigError("set either GOOGLE_SA_JSON or the GOOGLE_OAUTH_* variables, not both")
         if self.uploads:
-            if not self.google_sa_json:
-                raise ExportConfigError(f"RUNNER_MODE={self.mode} uploads to Google Drive and needs GOOGLE_SA_JSON")
-            if not self.drive_parent_folder_id:
+            if self.uses_oauth:
+                missing = [name for name, value in (
+                    ("GOOGLE_OAUTH_CLIENT_ID", self.google_oauth_client_id),
+                    ("GOOGLE_OAUTH_CLIENT_SECRET", self.google_oauth_client_secret),
+                    ("GOOGLE_OAUTH_REFRESH_TOKEN", self.google_oauth_refresh_token)) if not value]
+                if missing:
+                    raise ExportConfigError(f"OAuth sign-in is incomplete; also set {', '.join(missing)}")
+            elif not self.google_sa_json:
                 raise ExportConfigError(
-                    f"RUNNER_MODE={self.mode} needs DRIVE_PARENT_FOLDER_ID (a folder in a shared drive "
-                    "that the service account can edit)")
+                    f"RUNNER_MODE={self.mode} uploads to Google Drive and needs GOOGLE_SA_JSON (service account) "
+                    "or the GOOGLE_OAUTH_* variables (signed-in user; see scripts/drive_authorize.py)")
+            elif not self.drive_parent_folder_id:
+                raise ExportConfigError(
+                    f"RUNNER_MODE={self.mode} with a service account needs DRIVE_PARENT_FOLDER_ID (a folder in a "
+                    "shared drive that the service account can edit)")
             if self.notion_enabled and not (self.notion_database_id or self.notion_parent_page_id):
                 raise ExportConfigError("NOTION_TOKEN is set; also set NOTION_DATABASE_ID or NOTION_PARENT_PAGE_ID")
 
@@ -234,12 +266,12 @@ def run_export(
             return _package(config, collected, mhash, previous, result, now, drive=None, folder_id=None)
 
         owns_drive = drive is None
-        drive = drive or DriveClient(ServiceAccount.from_value(config.google_sa_json or "",
-                                                               subject=config.google_impersonate_subject))
+        drive = drive or DriveClient(config.drive_credential())
         owns_notion = notion is None and config.notion_enabled
         notion = notion or (NotionClient(config.notion_token or "") if config.notion_enabled else None)
         try:
-            folder_id = drive.ensure_folder(config.project_id, config.drive_parent_folder_id or "")
+            parent_id = config.drive_parent_folder_id or drive.ensure_folder(OAUTH_ROOT_FOLDER, "root")
+            folder_id = drive.ensure_folder(config.project_id, parent_id)
             existing = drive.find_by_app_properties(
                 {"amc_project_id": config.project_id, "amc_kind": "export", "amc_manifest_hash": mhash},
                 parent_id=folder_id)
@@ -431,9 +463,8 @@ def check_access(config: ExportConfig, *, drive: DriveClient | None = None,
     if not config.uploads:
         raise ExportConfigError("--check needs RUNNER_MODE=local or ci")
     report: dict = {}
-    drive = drive or DriveClient(ServiceAccount.from_value(config.google_sa_json or "",
-                                                           subject=config.google_impersonate_subject))
-    folder = drive.get(config.drive_parent_folder_id or "", fields="id,name,mimeType,driveId,capabilities(canAddChildren)")
+    drive = drive or DriveClient(config.drive_credential())
+    folder = drive.get(config.drive_parent_folder_id or "root", fields="id,name,mimeType,driveId,capabilities(canAddChildren)")
     report["drive_folder"] = {
         "id": folder.get("id"), "name": folder.get("name"),
         "is_folder": folder.get("mimeType") == "application/vnd.google-apps.folder",

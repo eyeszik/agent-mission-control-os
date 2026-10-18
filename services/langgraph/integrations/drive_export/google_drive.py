@@ -1,15 +1,23 @@
-"""Google Drive v3 client authenticated as a service account.
+"""Google Drive v3 client for the export runner.
 
-Implements only what the export runner needs: the OAuth 2.0 JWT-bearer token
-exchange (RS256, signed locally with ``cryptography``), folder lookup and
-creation, file search by ``appProperties``, resumable upload, metadata read
-back, download, link sharing and trashing. Every call sets
-``supportsAllDrives=true``: a service account has no storage quota of its own,
-so the destination folder has to be in a shared drive (or the account has to
-impersonate a Workspace user through domain-wide delegation).
+Two ways to authenticate:
 
-The service-account key is read from ``GOOGLE_SA_JSON`` by the runner, held in
-memory only, never logged and never included in a repr or an error message.
+- ``ServiceAccount``: the OAuth 2.0 JWT-bearer exchange (RS256, signed locally
+  with ``cryptography``). A service account has no storage quota of its own,
+  so the destination folder has to be in a shared drive (Google Workspace), or
+  the account has to impersonate a Workspace user through domain-wide
+  delegation.
+- ``OAuthUser``: a refresh token obtained once with ``scripts/drive_authorize.py``.
+  Files belong to the signed-in user and use their quota, which is what a
+  personal Google account needs. The default scope is ``drive.file``, so the
+  token can only reach files and folders this tool created.
+
+Implements only what the export runner needs: folder lookup and creation, file
+search by ``appProperties``, resumable upload, metadata read back, download,
+link sharing and trashing. Every call sets ``supportsAllDrives=true``.
+
+Credentials are read from the environment by the runner, held in memory only,
+never logged and never included in a repr or an error message.
 """
 
 from __future__ import annotations
@@ -32,6 +40,8 @@ DEFAULT_TOKEN_URI = "https://oauth2.googleapis.com/token"
 # with it, so its effective access is the destination folder. ``drive.file``
 # would hide the shared folder itself from folder lookups.
 DRIVE_SCOPE = "https://www.googleapis.com/auth/drive"
+# Per-file scope for the OAuth user mode: only files this app created.
+DRIVE_FILE_SCOPE = "https://www.googleapis.com/auth/drive.file"
 FOLDER_MIME = "application/vnd.google-apps.folder"
 # Resumable chunks must be a multiple of 256 KiB (except the last one).
 CHUNK_BYTES = 32 * 256 * 1024
@@ -72,6 +82,20 @@ class ServiceAccount:
         return cls(email, key, data.get("token_uri") or DEFAULT_TOKEN_URI, subject or None)
 
 
+@dataclass(frozen=True)
+class OAuthUser:
+    """A signed-in Google user, represented by an OAuth client and its refresh token."""
+
+    client_id: str
+    client_secret: str = field(repr=False)
+    refresh_token: str = field(repr=False)
+    token_uri: str = DEFAULT_TOKEN_URI
+
+    def __post_init__(self) -> None:
+        if not (self.client_id and self.client_secret and self.refresh_token):
+            raise DriveConfigError("OAuth sign-in needs a client id, client secret and refresh token")
+
+
 def _b64url(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
 
@@ -103,7 +127,7 @@ def _quote(value: str) -> str:
 class DriveClient:
     def __init__(
         self,
-        account: ServiceAccount,
+        account: ServiceAccount | OAuthUser,
         *,
         transport: httpx.BaseTransport | None = None,
         sleep: Callable[[float], None] = time.sleep,
@@ -119,7 +143,9 @@ class DriveClient:
         self._token_expiry = 0.0
 
     def __repr__(self) -> str:
-        return f"DriveClient(account={self._account.client_email!r})"
+        if isinstance(self._account, ServiceAccount):
+            return f"DriveClient(service_account={self._account.client_email!r})"
+        return "DriveClient(oauth_user)"
 
     def close(self) -> None:
         self._http.close()
@@ -129,11 +155,21 @@ class DriveClient:
         now = self._clock()
         if self._token and now < self._token_expiry - 60:
             return self._token
-        assertion = signed_assertion(self._account, now=int(now))
-        response = request_with_retry(
-            self._http, "POST", self._account.token_uri, sleep=self._sleep,
-            data={"grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer", "assertion": assertion},
-        )
+        if isinstance(self._account, OAuthUser):
+            form = {"grant_type": "refresh_token", "client_id": self._account.client_id,
+                    "client_secret": self._account.client_secret, "refresh_token": self._account.refresh_token}
+        else:
+            form = {"grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+                    "assertion": signed_assertion(self._account, now=int(now))}
+        try:
+            response = request_with_retry(self._http, "POST", self._account.token_uri, sleep=self._sleep, data=form)
+        except ApiError as exc:
+            if exc.status in (400, 401) and isinstance(self._account, OAuthUser):
+                raise ApiError(
+                    "Google rejected the OAuth refresh token (revoked, expired, or the consent screen is still in "
+                    "Testing, which expires tokens after 7 days); run scripts/drive_authorize.py again",
+                    status=exc.status) from None
+            raise
         payload = response.json()
         token = payload.get("access_token")
         if not token:

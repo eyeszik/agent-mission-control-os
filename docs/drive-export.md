@@ -1,7 +1,9 @@
 # Project export to Google Drive and Notion
 
-`scripts/export_to_drive.py` packages a project's output folder, uploads it to a Google Drive folder and
-records the upload in a Notion database. The code is in `services/langgraph/integrations/drive_export/`.
+`scripts/export_to_drive.py` packages a project's output folder, uploads it to Google Drive and records the
+upload in a Notion database. The code is in `services/langgraph/integrations/drive_export/`. It signs in to
+Google either as a **service account** (Google Workspace shared drive) or as **you** (a personal Google account);
+see "Choose a Google sign-in" below.
 
 It is an operator tool. It is not part of the agency pipeline, it does not publish anything to an audience,
 and it does not touch the AMC approval store. Each Notion record starts with `approvals_state = draft`.
@@ -31,7 +33,7 @@ and it does not touch the AMC approval store. Each Notion record starts with `ap
 | `RUNNER_MODE` | What happens |
 |---|---|
 | `dry_run` (default) | Builds the zip, sidecar and baseline under `--out-dir` (default `./.amc-export`). Reads no credential and makes no network call. |
-| `local`, `ci` | Uploads, verifies and records. Requires `GOOGLE_SA_JSON` and `DRIVE_PARENT_FOLDER_ID`. Requires `NOTION_DATABASE_ID` or `NOTION_PARENT_PAGE_ID` when `NOTION_TOKEN` is set. A missing value is a configuration error (exit 2), never a silent skip. |
+| `local`, `ci` | Uploads, verifies and records. Requires one Google credential: `GOOGLE_SA_JSON` with `DRIVE_PARENT_FOLDER_ID`, or the three `GOOGLE_OAUTH_*` variables. Requires `NOTION_DATABASE_ID` or `NOTION_PARENT_PAGE_ID` when `NOTION_TOKEN` is set. A missing or conflicting value is a configuration error (exit 2), never a silent skip. |
 
 Result statuses:
 
@@ -53,20 +55,54 @@ RUNNER_MODE=local python scripts/export_to_drive.py --project-path ... --brand-i
 Drive folder and the Notion database and reports whether the folder is in a shared drive and accepts children.
 It writes nothing.
 
-## Google Drive setup
+## Choose a Google sign-in
 
-1. In Google Cloud, enable the **Google Drive API** and create a **service account**. Create a JSON key for it.
-2. Service accounts have no Drive storage of their own, so put the destination folder in a **shared drive**.
-   Add the service account's email to that shared drive or folder as **Content manager**. With Google
-   Workspace domain-wide delegation you can instead set `GOOGLE_IMPERSONATE_SUBJECT` to a user, and files are
-   then owned by that user.
+| | Service account | Signed-in user (OAuth) |
+|---|---|---|
+| Best for | Google Workspace, automation without a person | A free personal Google account |
+| Where files go | A folder in a **shared drive** | **My Drive**, folder `AMC exports/<project>/` |
+| Storage used | The shared drive's | Your own |
+| Variables | `GOOGLE_SA_JSON`, `DRIVE_PARENT_FOLDER_ID` | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN` |
+
+Set one set, never both. A service account has no Drive storage of its own and a personal account cannot create
+shared drives, so a personal account must use the signed-in-user option.
+
+### Option A: signed-in user (personal Google account)
+
+1. In console.cloud.google.com, create a project and enable the **Google Drive API** (APIs & Services -> Library).
+2. Open **Google Auth platform** (older consoles: APIs & Services -> OAuth consent screen). Choose **External**,
+   fill in the app name and your email, and add the scope `.../auth/drive.file`.
+3. **Publish the app** (set the publishing status to **In production**). While it is in *Testing*, Google expires
+   refresh tokens after 7 days and the export fails with "run scripts/drive_authorize.py again". The `drive.file`
+   scope is not a sensitive scope, so publishing it for your own use needs no review; Google may still show an
+   "unverified app" page, where you choose Advanced -> continue.
+4. Create **Credentials -> OAuth client ID -> Desktop app**. Copy the client id and client secret.
+5. On your own computer, in a checkout of this repository, run:
+   ```bash
+   python -m pip install httpx
+   GOOGLE_OAUTH_CLIENT_ID=... GOOGLE_OAUTH_CLIENT_SECRET=... python scripts/drive_authorize.py
+   ```
+   A browser opens; sign in and approve. The script prints a **refresh token** once. It is not saved anywhere.
+6. Store the three values as `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` and `GOOGLE_OAUTH_REFRESH_TOKEN`
+   in your secret store (for GitHub Actions, see below). Leave `DRIVE_PARENT_FOLDER_ID` empty.
+
+The token has the `drive.file` scope: it can only see files and folders this tool created, never the rest of your
+Drive. For the same reason it cannot use a folder you made by hand, so leave `DRIVE_PARENT_FOLDER_ID` empty and let
+the runner create `AMC exports`. You may move that folder elsewhere in Drive afterwards. To revoke access, remove
+the app at myaccount.google.com/permissions.
+
+### Option B: service account (Google Workspace)
+
+1. In Google Cloud, enable the **Google Drive API** and create a **service account** with a JSON key.
+2. Put the destination folder in a **shared drive** and add the service account's email as **Content manager**. With
+   domain-wide delegation you can instead set `GOOGLE_IMPERSONATE_SUBJECT` to a user, and files are then owned by
+   that user.
 3. Set `DRIVE_PARENT_FOLDER_ID` to the folder id: the last path segment of the folder's URL.
-4. Set `GOOGLE_SA_JSON` to the key JSON, or to a path to the key file. Keep it in a secret store such as GitHub
-   Actions secrets; never commit it. `*.key`, `.env` and `.env.*` are already git-ignored.
+4. Set `GOOGLE_SA_JSON` to the key JSON, or to a path to the key file. Keep it in a secret store; never commit it.
+   `*.key`, `.env` and `.env.*` are already git-ignored.
 
-The client requests the `drive` scope. A service account reaches only items shared with it, so in practice
-its access is the shared folder. Each call sets `supportsAllDrives=true`. Exports are never shared publicly
-unless `UPLOAD_PUBLIC=true`, which grants "anyone with the link" read access.
+Exports are never shared publicly unless `UPLOAD_PUBLIC=true`, which grants "anyone with the link" read access.
+The GitHub Actions workflow always sets it to `false`.
 
 ## Notion setup
 
@@ -95,6 +131,29 @@ and it cannot detect duplicates. A database is the preferred setup.
 The client uses Notion API version `2022-06-28`. It splits text into runs of at most 2,000 characters and
 sends at most 100 blocks per request, appending the rest.
 
+## GitHub Actions
+
+`.github/workflows/export-to-drive.yml` runs the export from the Actions tab. It has no automatic trigger
+(manual `workflow_dispatch` only), reads the repository with `contents: read`, and pins every action to a commit.
+
+1. **Create the environment.** Settings -> Environments -> New environment, named `drive-export`. Under
+   *Deployment protection rules* add yourself as a **required reviewer**, so every upload waits for your approval.
+2. **Add the secrets** to that environment (Add environment secret). Use one Google set:
+   - Signed-in user: `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`
+   - or service account: `GOOGLE_SA_JSON`, `DRIVE_PARENT_FOLDER_ID`
+   - Notion: `NOTION_TOKEN`, `NOTION_DATABASE_ID`
+   - Optional: `EXPORT_ENCRYPTION_KEY`. Optional variable (not a secret): `EXPORT_RETENTION_FULL_KEEP`.
+3. **Run it.** Actions -> *Export project to Google Drive* -> Run workflow. Inputs: `project_path` (a folder inside the
+   repository, for example `runtime/foundry/demo`), optional `project_id` and `brand_id`, `mode` and `full`.
+4. **Start with `dry_run`.** It runs in a job that has no access to any secret, builds the export, and prints what it
+   would upload (file counts, manifest hash). Then run `ci`: it waits for your approval, checks access read-only,
+   uploads, verifies and records in Notion.
+
+The workflow exports a folder that is committed in the repository. Outputs that exist only on your computer or in a
+cloud session are not on the runner; export those with the script directly. The run log and summary show only the
+status, counts and manifest hash, never Drive links or ids, because they are public in a public repository.
+A dry run's zip is not kept after the job; the run summary is the record.
+
 ## Restore
 
 1. Download the zips for the project, from the newest full export forward. `amc_export_kind` and
@@ -118,7 +177,7 @@ for 30 days, and the runner never deletes permanently. Retention is off when the
   full jitter, capped at 16 s, and honours `Retry-After`. Error messages carry the method, URL path and status
   only.
 - Credentials are read from the environment only, held in memory, excluded from every `repr` and never
-  logged.
+  logged. The OAuth refresh token is printed once by `scripts/drive_authorize.py` and never written to disk.
 - A lock file under `--out-dir/locks/` stops two concurrent exports of the same project. A lock older than
   two hours is treated as stale.
 - `EXPORT_ENCRYPTION_KEY` (base64, 32 bytes) encrypts the zip and the sidecar with AES-256-GCM before upload.
@@ -135,4 +194,4 @@ The original specification included the items below. This runner does not provid
 - A signed audit log. `audit.json` has `"signature": null` because no signing-key custody is configured
   (see G-37 in `docs/capability_gap_register.md`).
 - A JSON-LD provenance graph, semantic (MinHash) deltas, blockchain anchoring and image re-compression.
-- A GitHub Actions workflow and an export button in the web app.
+- An export button in the web app, and keeping a dry run's zip as a workflow artifact.

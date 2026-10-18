@@ -10,14 +10,16 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import importlib.util
 import json
 import re
 import subprocess
 import sys
+import threading
 import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlsplit
 
 import httpx
 import pytest
@@ -29,8 +31,14 @@ from services.langgraph.integrations.drive_export._http import ApiError, request
 from services.langgraph.integrations.drive_export.google_drive import (
     DriveClient,
     DriveConfigError,
+    OAuthUser,
     ServiceAccount,
     signed_assertion,
+)
+from services.langgraph.integrations.drive_export.oauth_setup import (
+    build_authorization_url,
+    exchange_code,
+    new_pkce_pair,
 )
 from services.langgraph.integrations.drive_export.notion import (
     MAX_BLOCKS_PER_REQUEST,
@@ -72,6 +80,8 @@ class DriveEmulator:
         self.permissions: list[tuple[str, dict]] = []
         self.uploads = 0
         self.corrupt_md5 = False
+        self.reject_refresh = False
+        self.refresh_grants = 0
         self.fail_next: list[int] = []
         self._seq = 0
 
@@ -119,6 +129,12 @@ class DriveEmulator:
             return httpx.Response(self.fail_next.pop(0), headers={"Retry-After": "0"})
         if url.host == "oauth2.googleapis.com":
             form = parse_qs(request.content.decode())
+            if form["grant_type"] == ["refresh_token"]:
+                assert form["client_id"] == ["cid"] and form["client_secret"] == ["csecret"]
+                if self.reject_refresh or form["refresh_token"] != ["rtoken"]:
+                    return httpx.Response(400, json={"error": "invalid_grant"})
+                self.refresh_grants += 1
+                return httpx.Response(200, json={"access_token": "tok", "expires_in": 3600})
             assert form["grant_type"] == ["urn:ietf:params:oauth:grant-type:jwt-bearer"]
             claims = _verify_jwt(form["assertion"][0])
             assert claims["scope"] == "https://www.googleapis.com/auth/drive"
@@ -222,8 +238,8 @@ def _config(tmp_path: Path, root: Path, **env) -> ExportConfig:
                                  project_path=str(root), out_dir=str(tmp_path / "out"), brand_id="velune")
 
 
-def _clients(drive_em: DriveEmulator, notion_em: NotionEmulator):
-    drive = DriveClient(ServiceAccount.from_value(SA_JSON), transport=httpx.MockTransport(drive_em),
+def _clients(drive_em: DriveEmulator, notion_em: NotionEmulator, account=None):
+    drive = DriveClient(account or ServiceAccount.from_value(SA_JSON), transport=httpx.MockTransport(drive_em),
                         sleep=lambda s: None, chunk_bytes=1024)
     notion = NotionClient("secret-notion", transport=httpx.MockTransport(notion_em), sleep=lambda s: None)
     return drive, notion
@@ -235,6 +251,9 @@ def emulators():
     drive_em.files["parent"] = {"id": "parent", "name": "AMC exports", "mimeType": "application/vnd.google-apps.folder",
                                 "parents": [], "trashed": False, "appProperties": {}, "createdTime": "2026-01-01T00:00:00.000Z",
                                 "driveId": "sd1", "capabilities": {"canAddChildren": True}}
+    drive_em.files["root"] = {"id": "root", "name": "My Drive", "mimeType": "application/vnd.google-apps.folder",
+                              "parents": [], "trashed": False, "appProperties": {},
+                              "createdTime": "2026-01-01T00:00:00.000Z", "capabilities": {"canAddChildren": True}}
     return drive_em, notion_em
 
 
@@ -533,3 +552,142 @@ def test_cli_dry_run_and_configuration_error_exit_codes(tmp_path):
     assert ok.returncode == 0 and json.loads(ok.stdout)["status"] == "DRY_RUN"
     bad = subprocess.run(script, env={**env, "RUNNER_MODE": "ci"}, capture_output=True, text=True, cwd=ROOT)
     assert bad.returncode == 2 and json.loads(bad.stderr)["status"] == "CONFIG_ERROR"
+
+
+# -- personal Google account: signed-in user instead of a service account ------
+
+OAUTH_ENV = {"GOOGLE_SA_JSON": None, "DRIVE_PARENT_FOLDER_ID": None, "GOOGLE_OAUTH_CLIENT_ID": "cid",
+             "GOOGLE_OAUTH_CLIENT_SECRET": "csecret", "GOOGLE_OAUTH_REFRESH_TOKEN": "rtoken"}
+
+
+def test_signed_in_user_exports_into_an_amc_exports_folder_created_in_my_drive(tmp_path, emulators):
+    drive_em, notion_em = emulators
+    root = _project(tmp_path)
+    config = _config(tmp_path, root, **OAUTH_ENV)
+    assert config.uses_oauth and config.drive_parent_folder_id is None
+    drive, notion = _clients(drive_em, notion_em, account=config.drive_credential())
+    result = run_export(config, drive=drive, notion=notion, now=NOW)
+    assert result.status == "UPLOADED" and drive_em.refresh_grants == 1
+    top = next(f for f in drive_em.files.values() if f["name"] == "AMC exports" and f["parents"] == ["root"])
+    project = next(f for f in drive_em.files.values() if f["name"] == "velune-demo")
+    assert top["parents"] == ["root"] and project["parents"] == [top["id"]]
+    assert drive_em.files[result.drive_file_id]["parents"] == [project["id"]]
+    again = run_export(_config(tmp_path, root, **OAUTH_ENV), drive=_clients(drive_em, notion_em, account=config.drive_credential())[0],
+                       notion=_clients(drive_em, notion_em)[1], now=NOW + timedelta(hours=1))
+    assert again.status == "ALREADY_UPLOADED"
+    assert sum(1 for f in drive_em.files.values() if f["name"] == "AMC exports" and f["parents"] == ["root"]) == 1
+
+
+@pytest.mark.parametrize("env, message", [
+    ({**OAUTH_ENV, "GOOGLE_OAUTH_REFRESH_TOKEN": None}, "also set GOOGLE_OAUTH_REFRESH_TOKEN"),
+    ({**OAUTH_ENV, "GOOGLE_OAUTH_CLIENT_ID": None, "GOOGLE_OAUTH_CLIENT_SECRET": None}, "also set GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET"),
+    ({**OAUTH_ENV, "GOOGLE_SA_JSON": SA_JSON}, "not both"),
+    ({**OAUTH_ENV, "GOOGLE_OAUTH_CLIENT_ID": None, "GOOGLE_OAUTH_CLIENT_SECRET": None,
+      "GOOGLE_OAUTH_REFRESH_TOKEN": None}, "needs GOOGLE_SA_JSON"),
+])
+def test_partial_or_conflicting_google_credentials_fail_closed(tmp_path, env, message):
+    with pytest.raises(ExportConfigError, match=message):
+        _config(tmp_path, _project(tmp_path), **env)
+
+
+def test_a_rejected_refresh_token_tells_the_user_how_to_recover_and_hides_secrets(tmp_path, emulators):
+    drive_em, notion_em = emulators
+    drive_em.reject_refresh = True
+    account = OAuthUser("cid", "csecret", "rtoken")
+    with pytest.raises(ApiError, match="drive_authorize.py") as caught:
+        run_export(_config(tmp_path, _project(tmp_path), **OAUTH_ENV), drive=_clients(drive_em, notion_em, account=account)[0],
+                   notion=_clients(drive_em, notion_em)[1], now=NOW)
+    assert "rtoken" not in str(caught.value) and "csecret" not in str(caught.value)
+    assert "rtoken" not in repr(account) and "csecret" not in repr(account)
+    assert repr(_clients(drive_em, notion_em, account=account)[0]) == "DriveClient(oauth_user)"
+    with pytest.raises(DriveConfigError):
+        OAuthUser("cid", "", "rtoken")
+
+
+def test_check_access_for_a_signed_in_user_reads_my_drive_root(tmp_path, emulators):
+    drive_em, notion_em = emulators
+    config = _config(tmp_path, _project(tmp_path), **OAUTH_ENV)
+    report = check_access(config, drive=_clients(drive_em, notion_em, account=config.drive_credential())[0],
+                          notion=_clients(drive_em, notion_em)[1])
+    assert report["drive_folder"]["id"] == "root" and report["drive_folder"]["can_add_children"]
+
+
+def test_authorization_url_uses_pkce_the_narrow_scope_and_a_loopback_redirect():
+    verifier, challenge = new_pkce_pair()
+    assert challenge == base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
+    assert new_pkce_pair()[0] != verifier
+    url = build_authorization_url("cid", "http://127.0.0.1:5555", "st", challenge)
+    query = {k: v[0] for k, v in parse_qs(urlsplit(url).query).items()}
+    assert query["scope"] == "https://www.googleapis.com/auth/drive.file"
+    assert query["code_challenge"] == challenge and query["code_challenge_method"] == "S256"
+    assert query["access_type"] == "offline" and query["prompt"] == "consent" and query["state"] == "st"
+    assert urlsplit(url).netloc == "accounts.google.com"
+
+
+def test_code_exchange_returns_only_the_refresh_token_and_sends_the_pkce_verifier():
+    seen = {}
+
+    def handler(request):
+        seen.update({k: v[0] for k, v in parse_qs(request.content.decode()).items()})
+        return httpx.Response(200, json={"access_token": "a", "refresh_token": "rt-123", "scope": "x"})
+
+    token = exchange_code("cid", "csecret", "code-1", "http://127.0.0.1:5555", "verifier-1",
+                          transport=httpx.MockTransport(handler))
+    assert token == "rt-123"
+    assert seen["grant_type"] == "authorization_code" and seen["code_verifier"] == "verifier-1"
+    with pytest.raises(ApiError, match="no refresh token"):
+        exchange_code("cid", "csecret", "c", "http://127.0.0.1:5555", "v",
+                      transport=httpx.MockTransport(lambda r: httpx.Response(200, json={"access_token": "a"})))
+
+
+def test_loopback_receiver_ignores_a_wrong_state_and_returns_the_matching_code():
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    spec = importlib.util.spec_from_file_location("drive_authorize", ROOT / "scripts" / "drive_authorize.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    server = HTTPServer(("127.0.0.1", 0), BaseHTTPRequestHandler)
+    base = f"http://127.0.0.1:{server.server_port}"
+    found: dict = {}
+    thread = threading.Thread(target=lambda: found.update(code=module._wait_for_code(server, "good", wait_seconds=20)))
+    thread.start()
+    try:
+        httpx.get(f"{base}/?state=evil&code=stolen", timeout=10)
+        httpx.get(f"{base}/?state=good&code=the-code", timeout=10)
+        thread.join(timeout=20)
+    finally:
+        server.server_close()
+    assert found == {"code": "the-code"}
+
+
+# -- GitHub Actions workflow ---------------------------------------------------
+
+def _workflow() -> dict:
+    import yaml
+
+    return yaml.safe_load((ROOT / ".github" / "workflows" / "export-to-drive.yml").read_text())
+
+
+def test_workflow_is_manual_read_only_and_pins_every_action_by_commit():
+    workflow = _workflow()
+    assert set(workflow[True]) == {"workflow_dispatch"}, "no push, pull_request or schedule trigger"
+    assert workflow["permissions"] == {"contents": "read"}
+    text = (ROOT / ".github" / "workflows" / "export-to-drive.yml").read_text()
+    for line in re.findall(r"uses:\s*(\S+)", text):
+        assert re.fullmatch(r"[\w./-]+@[0-9a-f]{40}", line), f"action not pinned to a commit: {line}"
+
+
+def test_workflow_gives_secrets_only_to_the_environment_gated_upload_job_and_never_inlines_inputs():
+    workflow = _workflow()
+    dry, export = workflow["jobs"]["dry-run"], workflow["jobs"]["export"]
+    assert "environment" not in dry and export["environment"] == "drive-export"
+    assert "secrets." not in json.dumps(dry), "the dry-run job must not see any secret"
+    assert dry["if"] == "${{ inputs.mode == 'dry_run' }}" and export["if"] == "${{ inputs.mode == 'ci' }}"
+    for job in (dry, export):
+        for step in job["steps"]:
+            assert "${{" not in step.get("run", ""), f"expression inlined in a shell script: {step.get('name')}"
+    text = (ROOT / ".github" / "workflows" / "export-to-drive.yml").read_text()
+    for name in ("GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_REFRESH_TOKEN", "GOOGLE_SA_JSON",
+                 "NOTION_TOKEN", "NOTION_DATABASE_ID", "EXPORT_ENCRYPTION_KEY"):
+        assert f"secrets.{name}" in text
+    assert 'UPLOAD_PUBLIC: "false"' in text, "CI exports are never shared by link"
