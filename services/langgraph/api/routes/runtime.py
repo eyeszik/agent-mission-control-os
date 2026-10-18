@@ -596,7 +596,6 @@ def retry_run_from_recovery(
         tenant_id=record["tenant_id"],
         project_id=record["project_id"],
         terminal_candidate=("COMPLETE" if run_response["status"] == "completed" else "BLOCKED"),
-        proof_coverage=(1.0 if run_response["status"] == "completed" else 0.8),
         confidence=0.9,
         criteria=(
             agency_routes.CompletionCriterionResult(
@@ -723,7 +722,6 @@ def compensate_run_recovery(
         tenant_id=record["tenant_id"],
         project_id=record["project_id"],
         terminal_candidate="BLOCKED",
-        proof_coverage=0.85,
         confidence=0.88,
         criteria=(
             agency_routes.CompletionCriterionResult(
@@ -860,7 +858,6 @@ def regenerate_run_approval(
         tenant_id=record["tenant_id"],
         project_id=record["project_id"],
         terminal_candidate="BLOCKED",
-        proof_coverage=0.82,
         confidence=0.9,
         criteria=(
             agency_routes.CompletionCriterionResult(
