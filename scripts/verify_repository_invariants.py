@@ -124,8 +124,8 @@ def main() -> None:
         raise SystemExit("README must document the browser E2E release gate")
 
     root_package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-    if root_package.get("engines", {}).get("node") != ">=20.9.0":
-        raise SystemExit("Root Node.js engine must match the Next.js 16 minimum: >=20.9.0")
+    if root_package.get("engines", {}).get("node") != ">=22.12.0":
+        raise SystemExit("Root Node.js engine must satisfy the Vitest 5 / Vite 8 minimum: >=22.12.0")
     if "lint" in root_package.get("scripts", {}):
         raise SystemExit("Root package still advertises an unimplemented recursive lint command")
 

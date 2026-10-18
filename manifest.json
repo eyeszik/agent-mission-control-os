@@ -8,11 +8,11 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "388cc533e726f65a53295b0c7ec813d34fe7c180"
+      "git_blob_sha": "cc0324c86bc2fb2aa60c9595a39dba1e5869e45c"
     },
     {
       "path": "apps/web/app/globals.css",
-      "git_blob_sha": "d4ca619094c94ea6da9e9d21c1f8e4b02c01ac9d"
+      "git_blob_sha": "67fbd8ec1b442fd068e16bc7e8bfe5d48dc76ece"
     },
     {
       "path": "apps/web/app/login/page.tsx",
@@ -20,11 +20,11 @@
     },
     {
       "path": "apps/web/app/mission-control/page.tsx",
-      "git_blob_sha": "b9b3995718b1cd793554952300af03c73c5ab35c"
+      "git_blob_sha": "8d4caf133ed0fe7b116f17d84f9906557f3fd2ef"
     },
     {
       "path": "apps/web/components/mission-control/CommandInputPanel.tsx",
-      "git_blob_sha": "685d751794f61a2289fbc7a3374fb42eba03f3b6"
+      "git_blob_sha": "4f505d488b48232ebaa0c677125582bd400736aa"
     },
     {
       "path": "apps/web/e2e/accessibility-smoke.spec.ts",
@@ -52,7 +52,7 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "c643afc6f287e4ff82dde57d852a541981ded77a"
+      "git_blob_sha": "ec864a07294a5d9e4b08ba7cca77f8b57d7ff446"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -64,7 +64,7 @@
     },
     {
       "path": "apps/web/scripts/verify-ui-ast.mjs",
-      "git_blob_sha": "7114fb0ded4b7b0b57a20709698ee05fb11bd6d0"
+      "git_blob_sha": "e69a16525386901d4065dac710db3ada264d669b"
     },
     {
       "path": "apps/web/vercel.json",
@@ -104,7 +104,7 @@
     },
     {
       "path": "package.json",
-      "git_blob_sha": "f33738b02229911e6df75e1a398914fa3c92e9d7"
+      "git_blob_sha": "6a246ef352b839bc464b126cf8923eb604fc3db7"
     },
     {
       "path": "packages/shared/openapi/agent-mission-control.openapi.yaml",
@@ -152,11 +152,11 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "f890b67383afa1155b2c3493a96c314f98fca8ff"
+      "git_blob_sha": "bef9bfb454a477498a92d0bf426ba870a186262e"
     },
     {
       "path": "README.md",
-      "git_blob_sha": "dbeac4b2b1120df534498ad87cfffda3215eefa2"
+      "git_blob_sha": "4a76d2d6a6e5c8f1d1b840268b71a121fc8bf23f"
     },
     {
       "path": "runtime/abc/run-fsm.yaml",
@@ -196,7 +196,7 @@
     },
     {
       "path": "scripts/verify_repository_invariants.py",
-      "git_blob_sha": "7cf161fd00a0ca7a8da7af7b44272f1237b0027f"
+      "git_blob_sha": "f7e8cb22f2b7de7eb19d755b99472c04c3ff6054"
     },
     {
       "path": "services/langgraph/agency/ace_controls.py",

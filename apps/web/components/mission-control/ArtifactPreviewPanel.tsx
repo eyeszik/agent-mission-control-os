@@ -136,17 +136,17 @@ export function ArtifactPreviewPanel() {
     <div className="h-full p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between pb-2 border-b border-zinc-800/50">
         <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Inspector</span>
-        {selectedArtifact && <span className="text-xs bg-zinc-800 px-2 py-0.5 rounded text-zinc-400 font-mono">{selectedArtifact.type}</span>}
+        {selectedArtifact && <span className="text-xs bg-zinc-800 px-2 py-0.5 rounded-sm text-zinc-400 font-mono">{selectedArtifact.type}</span>}
       </div>
 
       {error && (
-        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</div>
+        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-sm px-3 py-2">{error}</div>
       )}
 
       {trust?.compile_blocked && (
         <div
           data-testid="mc-compile-blocked-banner"
-          className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2"
+          className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-sm px-3 py-2"
         >
           Compile/release blocked until demanded obligations are discharged.
         </div>
@@ -173,14 +173,14 @@ export function ArtifactPreviewPanel() {
                       onClick={() => handleResolve(approval.approval_id, approval.run_id, 'approve')}
                       disabled={isResolving || Boolean(trust?.compile_blocked)}
                       data-testid="mc-release-btn"
-                      className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 rounded text-xs font-medium transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-sm text-xs font-medium transition-colors disabled:opacity-50"
                     >
                       {isResolving ? 'Working…' : 'Approve'}
                     </button>
                     <button
                       onClick={() => handleResolve(approval.approval_id, approval.run_id, 'reject')}
                       disabled={isResolving}
-                      className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 rounded text-xs font-medium transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 rounded-sm text-xs font-medium transition-colors disabled:opacity-50"
                     >
                       {isResolving ? 'Working…' : 'Reject'}
                     </button>

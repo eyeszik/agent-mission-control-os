@@ -69,7 +69,7 @@ export function WorkflowMapPanel() {
         </svg>
       </div>
       {!activeRunId && (
-        <div className="text-center z-10 bg-zinc-950/80 px-4 py-2 rounded-full backdrop-blur-sm border border-zinc-800">
+        <div className="text-center z-10 bg-zinc-950/80 px-4 py-2 rounded-full backdrop-blur-xs border border-zinc-800">
           <p className="text-sm text-zinc-400 font-mono">Graph Idle</p>
         </div>
       )}
