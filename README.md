@@ -96,7 +96,7 @@ See [`docs/production-activation.md`](docs/production-activation.md) for the exa
 
 ### Prerequisites
 
-- Node.js **20.9+**
+- Node.js **22.12+**
 - pnpm version pinned by the root `packageManager` field
 - Python 3.11 recommended for CI parity
 

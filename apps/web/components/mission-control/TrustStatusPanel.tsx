@@ -72,20 +72,20 @@ export function TrustStatusPanel() {
     <div className="flex items-center gap-4 text-sm">
       <div className="flex items-center gap-1.5">
         <span className="text-zinc-500 text-xs uppercase font-mono">RoleOS</span>
-        <div className="px-2 py-0.5 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded font-mono text-xs">
+        <div className="px-2 py-0.5 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-sm font-mono text-xs">
           {manifest ? `${manifest.role_count} roles` : 'unavailable'}
         </div>
       </div>
       <div className="flex items-center gap-1.5">
         <span className="text-zinc-500 text-xs uppercase font-mono">Trust</span>
-        <div className="px-2 py-0.5 bg-violet-500/10 text-violet-400 border border-violet-500/20 rounded font-mono text-xs">
+        <div className="px-2 py-0.5 bg-violet-500/10 text-violet-400 border border-violet-500/20 rounded-sm font-mono text-xs">
           {trust ? `${trust.policy_decisions}/${trust.open_recovery_cases}/${trust.pending_outbox}` : 'no-project'}
         </div>
       </div>
       <div className="flex items-center gap-1.5">
         <span className="text-zinc-500 text-xs uppercase font-mono">Gate</span>
         <div
-          className={`px-2 py-0.5 border rounded font-mono text-xs ${
+          className={`px-2 py-0.5 border rounded-sm font-mono text-xs ${
             trust?.compile_blocked
               ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
               : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
@@ -96,7 +96,7 @@ export function TrustStatusPanel() {
       </div>
       <div className="flex items-center gap-1.5">
         <span className="text-zinc-500 text-xs uppercase font-mono">Proof</span>
-        <div className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-mono text-xs">
+        <div className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-sm font-mono text-xs">
           {run?.proof ? `${run.proof.summary.execution_count}/${run.proof.summary.observation_count}/${run.proof.summary.failure_count}` : 'no-run'}
         </div>
       </div>
