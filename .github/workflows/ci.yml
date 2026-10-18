@@ -240,25 +240,35 @@ jobs:
         env:
           CI: "true"
           E2E_BASE_URL: http://127.0.0.1:3000
-        run: pnpm --filter @amc/web test:e2e
+        run: |
+          echo "Playwright artifacts: apps/web/playwright-report, apps/web/test-results (PNG, WebM, trace.zip)"
+          ls -ld apps/web/playwright-report apps/web/test-results 2>/dev/null || true
+          pnpm --filter @amc/web test:e2e
 
+      # Capture diagnostics and artifacts before Stop local stack tears down services.
       - name: Print service logs on failure
         if: failure()
-        run: |
-          echo "===== backend ====="
-          cat /tmp/amc-backend.log || true
-          echo "===== frontend ====="
-          cat /tmp/amc-frontend.log || true
+        timeout-minutes: 1
+        run: bash .github/scripts/dump-browser-e2e-logs.sh
 
       - name: Upload Playwright failure artifacts
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        timeout-minutes: 3
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: playwright-failure-${{ github.run_id }}
+          name: playwright-failure-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
+            ci-diagnostics/browser-e2e.log
             apps/web/playwright-report
             apps/web/test-results
-          if-no-files-found: ignore
+            apps/web/traces
+            apps/web/.playwright/artifacts
+            playwright-report
+            test-results
+            traces
+            .playwright/artifacts
+          include-hidden-files: true
+          if-no-files-found: warn
           retention-days: 7
 
       - name: Stop local stack

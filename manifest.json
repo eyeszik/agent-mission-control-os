@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "cc0324c86bc2fb2aa60c9595a39dba1e5869e45c"
+      "git_blob_sha": "f56cfe44fc20c02878dbec2315381385db3b4a08"
     },
     {
       "path": "apps/web/app/globals.css",
