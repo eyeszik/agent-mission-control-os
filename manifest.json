@@ -4,7 +4,7 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "e2869d3e527aa49cd4c06ea6db8ff199774c8173"
+      "git_blob_sha": "a1c21dc2295f2869f530ab096598f870b7d7bf69"
     },
     {
       "path": ".github/workflows/ci.yml",
