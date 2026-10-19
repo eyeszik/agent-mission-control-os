@@ -46,12 +46,16 @@ export function resolveGenome(layers: readonly GenomeLayer[]): GenomeResolution 
       continue;
     }
     appliedScopes.push(layer.scopeId);
-    for (const [key, value] of Object.entries(layer.values)) {
-      if (locked.has(key) && OWN.call(values, key) && values[key] !== value) {
-        conflicts.push({ key, reason: 'IMMUTABLE_OVERRIDE', scopeId: layer.scopeId });
-        continue;
+    // ⚡ Bolt: Use a zero-allocation for...in loop instead of Object.entries()
+    for (const key in layer.values) {
+      if (OWN.call(layer.values, key)) {
+        const value = layer.values[key];
+        if (locked.has(key) && OWN.call(values, key) && values[key] !== value) {
+          conflicts.push({ key, reason: 'IMMUTABLE_OVERRIDE', scopeId: layer.scopeId });
+          continue;
+        }
+        values[key] = value;
       }
-      values[key] = value;
     }
     for (const key of layer.immutableKeys ?? []) locked.add(key);
   }
@@ -97,7 +101,15 @@ export function impactedNodes(nodes: readonly DependencyNode[], changedIds: read
       }
     }
   }
-  return nodes.map((node) => node.id).filter((id) => affected.has(id) && !changedIds.includes(id));
+  // ⚡ Bolt: Replaced .map().filter() with a single-pass loop
+  const result: string[] = [];
+  for (let i = 0; i < nodes.length; i++) {
+    const id = nodes[i].id;
+    if (affected.has(id) && !changedIds.includes(id)) {
+      result.push(id);
+    }
+  }
+  return result;
 }
 export type ProductionEvidence = 'SIMULATED' | 'SUBMITTED' | 'ARTIFACT_RECEIVED' | 'VALIDATED';
 export function canClaimGenerated(evidence: ProductionEvidence, artifactHash?: string): boolean {
