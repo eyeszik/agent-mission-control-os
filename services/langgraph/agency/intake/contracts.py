@@ -196,6 +196,10 @@ class MissionContract(_Strict):
         body = self.model_dump(mode="json")
         body.pop("created_at", None)
         body.pop("acceptance_predicates", None)
+        # The optional snapshot must not change hashes for existing callers.
+        if self.planning_inputs_hash is None and not self.planning_source_refs:
+            body.pop("planning_inputs_hash")
+            body.pop("planning_source_refs")
         return canonical_hash(body)
 
 

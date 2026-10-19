@@ -359,12 +359,18 @@ def test_r_off_palette_svg_fails_brand_consistency(root):
 
 
 def test_replaying_the_same_mission_is_idempotent(root):
+    from services.langgraph.agency.execution.canonical import canonical_hash
+
     tenant = _tenant()
     project = _project(tenant, "Replay House", export_root=root)
     principal = _principal(tenant, project)
     first = _run(principal, f"svg logo for {project}", root)
     second = _run(principal, f"svg logo for {project}", root)
     assert first.mission.mission_id == second.mission.mission_id
+    legacy = first.mission.model_dump(mode="json")
+    for key in ("created_at", "acceptance_predicates", "planning_inputs_hash", "planning_source_refs"):
+        legacy.pop(key)
+    assert first.mission.contract_hash == canonical_hash(legacy)
     assert first.verification.version == second.verification.version == 1
     assert first.approval["approval_id"] == second.approval["approval_id"]
     assert len(get_approvals_for_run(mission_run_id(first.mission.mission_id))) == 1
