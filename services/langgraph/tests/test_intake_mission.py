@@ -567,7 +567,8 @@ def test_ready_design_token_mission_verifies_real_bytes_and_waits_for_approval(r
 
 
 @pytest.mark.parametrize("missing", ("evidence", "decisions", "volatile_constraints", "unverified_evidence",
-                                     "expired_wcag", "unverified_wcag", "proposed_direction"))
+                                     "expired_wcag", "unverified_wcag", "proposed_direction",
+                                     "expired_offset", "malformed_wcag", "future_wcag"))
 def test_planning_inputs_preserve_each_unmet_design_gate(root, missing):
     from services.langgraph.agency.intake.runner import _existing_inputs, _plan
 
@@ -581,6 +582,12 @@ def test_planning_inputs_preserve_each_unmet_design_gate(root, missing):
         body["volatile_constraints"][0]["expires_or_recheck_at"] = "2026-10-08T00:00:00Z"
     elif missing == "unverified_wcag":
         body["volatile_constraints"][0]["verification_status"] = "UNVERIFIED"
+    elif missing == "expired_offset":
+        body["volatile_constraints"][0]["expires_or_recheck_at"] = "2026-10-09T13:00:00+02:00"
+    elif missing == "malformed_wcag":
+        body["volatile_constraints"][0]["expires_or_recheck_at"] = "tomorrow"
+    elif missing == "future_wcag":
+        body["volatile_constraints"][0]["retrieved_at"] = "2026-10-10T00:00:00Z"
     elif missing == "proposed_direction":
         body["decisions"][0]["status"] = "PROPOSED"
         body["decisions"][0]["approved_by"] = None
@@ -649,6 +656,47 @@ def test_planning_input_claims_cannot_forge_accepted_decisions_or_duplicate_evid
     body["evidence"] = [body["evidence"][0], body["evidence"][0]]
     with pytest.raises(ValidationError, match="unique"):
         PlanningInputs.model_validate(body)
+
+
+@pytest.mark.parametrize("status", ("ACCEPTED", "PROPOSED", "REJECTED"))
+@pytest.mark.parametrize("reverse", (False, True))
+def test_planning_inputs_reject_conflicting_live_decisions_without_choosing_by_order(status, reverse):
+    from pydantic import ValidationError
+
+    body = _planning_inputs("tenant", "project").model_dump(mode="json")
+    original = body["decisions"][0]
+    other = {**original, "id": "fixture:conflicting-direction", "selected_option": "direction-b", "status": status}
+    body["decisions"] = [other, original] if reverse else [original, other]
+    with pytest.raises(ValidationError, match="conflicting live planning decisions: creative_direction"):
+        PlanningInputs.model_validate(body)
+
+
+def test_planning_inputs_preserve_explicit_decision_supersession():
+    original = _planning_inputs("tenant", "project")
+    first = original.decisions[0]
+    revised = first.model_copy(update={"version": 2, "selected_option": "direction-b",
+                                       "supersedes": first.decision_hash})
+    body = original.model_dump(mode="json")
+    body["decisions"] = [revised.model_dump(mode="json"), first.model_dump(mode="json")]
+    inputs = PlanningInputs.model_validate(body)
+    from services.langgraph.agency.compiled.decisions import DecisionSpine
+
+    assert DecisionSpine(inputs.decisions).accepted_by_kind() == {"creative_direction": revised.decision_hash}
+
+
+@pytest.mark.parametrize("clock", (NOW, NOW.astimezone(timezone(timedelta(hours=2)))))
+def test_fresh_offset_constraint_unblocks_design_tokens(root, clock):
+    from services.langgraph.agency.intake.runner import _existing_inputs, _plan
+
+    tenant = _tenant()
+    project = _project(tenant, "Offset Freshness Fixture", export_root=root)
+    body = _planning_inputs(tenant, project).model_dump(mode="json")
+    body["volatile_constraints"][0]["expires_or_recheck_at"] = "2026-10-09T11:00:00-02:00"
+    schedule = _plan(project, "design_token_set", "Compile design tokens", clock, _existing_inputs(project),
+                     planning_inputs=PlanningInputs.model_validate(body))
+    cell = schedule.cells["cell:design_token_set"]
+    assert cell.execution_ready and not cell.blockers
+    assert "cell:design_token_set" not in schedule.wave_plan.held
 
 
 def test_ratification_language_in_a_request_does_not_supply_planning_evidence(root):

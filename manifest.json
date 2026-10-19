@@ -408,7 +408,7 @@
     },
     {
       "path": "services/langgraph/agency/intake/planning.py",
-      "git_blob_sha": "82f030a564d698323bb0d4dabb73918814cacb76"
+      "git_blob_sha": "95628db1b71657599921fa7e3b075dccfa08aaa4"
     },
     {
       "path": "services/langgraph/agency/intake/release.py",
@@ -420,7 +420,7 @@
     },
     {
       "path": "services/langgraph/agency/intake/runner.py",
-      "git_blob_sha": "4049351c8e45074d8b6bfa239011dc278543d112"
+      "git_blob_sha": "d7dea8a6eb3eb59b56c828fa88cc346a04ed3d8e"
     },
     {
       "path": "services/langgraph/agency/kernel/__init__.py",
@@ -812,7 +812,7 @@
     },
     {
       "path": "services/langgraph/tests/test_intake_mission.py",
-      "git_blob_sha": "c8a448bc590ad674a40124a89b433f9b38d9974b"
+      "git_blob_sha": "1a398b6ed303ff4f031fe106770408e022e84235"
     },
     {
       "path": "services/langgraph/tests/test_lifecycle_analytics.py",
@@ -897,6 +897,14 @@
     {
       "path": "services/langgraph/tests/test_amc_i03_model_profiles.py",
       "git_blob_sha": "3bbf98f589cc6c045a29be2b8857467788aa79e1"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/evidence.py",
+      "git_blob_sha": "43fcf7592d6560f081530dc21d576c42c72eb9a3"
+    },
+    {
+      "path": "services/langgraph/tests/test_compiled_agency.py",
+      "git_blob_sha": "1743722c1237f5eb81225aecb13d191df26bfc91"
     }
   ]
 }

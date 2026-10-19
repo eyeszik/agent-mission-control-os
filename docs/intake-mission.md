@@ -114,6 +114,21 @@ stop before any mission writes. Duplicate evidence references cannot inflate
 the evidence floor, and structurally invalid accepted decisions are rejected.
 Missing, unverified or expired inputs retain the planner's existing blockers.
 
+Constraint freshness compares parsed ISO timestamps as actual instants. Legacy
+`YYYY-MM-DD` values mean midnight UTC; datetimes require an explicit timezone.
+Malformed dates, future retrieval times, not-yet-effective constraints and blank
+source/value fields remain `UNVERIFIED`. Expiry is exclusive: at or after the
+recheck instant the constraint is `EXPIRED`, including an explicitly expired
+record. The original source strings and hashes are preserved. These temporal
+checks do not authenticate the source or measure accessibility conformance.
+
+A snapshot containing multiple different live decisions of the same kind is
+rejected with `conflicting live planning decisions: <kind>`. Resolve the conflict
+in the authoritative decision records and supply their explicit `supersedes`
+hashes; changing snapshot order cannot select a winner. A valid supersession
+chain is supported regardless of tuple order. This is structural conflict
+detection, not human approval or a source-authentication mechanism.
+
 The snapshot hash and source references are recorded in the mission contract;
 the hash participates in mission identity and the `WORK_STARTED` event. No
 planning facts are extracted as verified facts from “approved”, “ratified” or

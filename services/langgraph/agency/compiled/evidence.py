@@ -14,6 +14,7 @@ tested repository code, never by this ledger alone.
 
 from __future__ import annotations
 
+from datetime import date, datetime, timezone
 from enum import Enum
 from typing import Iterable
 
@@ -423,16 +424,44 @@ class VolatileConstraint(BaseModel):
     expires_or_recheck_at: str | None = None
 
 
+def _constraint_instant(value: str) -> datetime:
+    """Compare ISO instants, retaining legacy date-only values at midnight UTC.
+
+    A datetime without an offset has no reliable comparison instant. Parsing
+    must not rewrite the source record or change its semantic hash.
+    """
+    if len(value) == 10:
+        day = date.fromisoformat(value)
+        return datetime(day.year, day.month, day.day, tzinfo=timezone.utc)
+    moment = datetime.fromisoformat(value[:-1] + "+00:00" if value.endswith("Z") else value)
+    if moment.tzinfo is None:
+        raise ValueError("constraint datetimes require an explicit timezone")
+    return moment.astimezone(timezone.utc)
+
+
 def volatile_status(constraint: VolatileConstraint, as_of: str) -> VolatileVerification:
-    """A value is usable only with a source, a retrieval time and an unexpired recheck."""
+    """Check sourced, current values using instants, never timestamp string order."""
+    if constraint.verification_status is VolatileVerification.EXPIRED:
+        return VolatileVerification.EXPIRED
     if (
         constraint.verification_status is not VolatileVerification.VERIFIED
         or not constraint.source_ref
+        or not constraint.source_ref.strip()
         or not constraint.retrieved_at
         or constraint.value is None
+        or not constraint.value.strip()
     ):
         return VolatileVerification.UNVERIFIED
-    if not constraint.expires_or_recheck_at or constraint.expires_or_recheck_at <= as_of:
+    try:
+        current = _constraint_instant(as_of)
+        retrieved = _constraint_instant(constraint.retrieved_at)
+        effective = _constraint_instant(constraint.effective_date) if constraint.effective_date is not None else None
+        expires = _constraint_instant(constraint.expires_or_recheck_at) if constraint.expires_or_recheck_at else None
+    except (ValueError, OverflowError):
+        return VolatileVerification.UNVERIFIED
+    if retrieved > current or (effective is not None and effective > current):
+        return VolatileVerification.UNVERIFIED
+    if expires is None or expires <= current:
         return VolatileVerification.EXPIRED
     return VolatileVerification.VERIFIED
 

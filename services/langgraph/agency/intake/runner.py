@@ -132,7 +132,7 @@ def _plan(project_id: str, artifact_type: str, objective: str, now: datetime, ex
                            acceptance_criteria=("independent read-back verification passes",), domains=("BRAND",),
                            source_refs=planning_inputs.source_refs if planning_inputs else ())
     existing = {k: v for k, v in existing.items() if k != artifact_type}
-    request = CompiledAgencyRequest(project_id=project_id, as_of=now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+    request = CompiledAgencyRequest(project_id=project_id, as_of=now.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                                     deliverables=(spec,), existing_artifacts=existing,
                                     evidence=planning_inputs.evidence if planning_inputs else (),
                                     decisions=planning_inputs.decisions if planning_inputs else (),
