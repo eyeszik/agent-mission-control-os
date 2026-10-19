@@ -20,6 +20,7 @@ from .contracts import (
     SideEffect,
 )
 from .intent import compile_intent
+from .planning import PlanningInputs
 from .resolver import resolve_project
 from .runner import (
     MissionNotReleasable,
@@ -40,6 +41,7 @@ __all__ = [
     "MissionNotReleasable",
     "MissionOutcome",
     "NonActionReceipt",
+    "PlanningInputs",
     "PredicateState",
     "ProjectResolutionReceipt",
     "ReleaseVerdict",

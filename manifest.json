@@ -56,7 +56,7 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "01445e30b55b809e0a4f62fb73691b26b8ccadaf"
+      "git_blob_sha": "ebdd026c77a69dd2cc014807e7d75d13121e2df2"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -124,11 +124,11 @@
     },
     {
       "path": "packages/shared/src/schemas/ace.ts",
-      "git_blob_sha": "2248d023e44ee6dfb6f1d3700ab1f15ccb003610"
+      "git_blob_sha": "a3719eb43c1ee611018dfa02f305367b06f3d769"
     },
     {
       "path": "packages/shared/src/schemas/agency.ts",
-      "git_blob_sha": "b18e02cefd1df25f75ca5ed1aa1b7d45672b1e0d"
+      "git_blob_sha": "6513c780c9c6377d30d2c24f730316b6e20bc16b"
     },
     {
       "path": "packages/shared/src/schemas/approvals.ts",
@@ -136,7 +136,7 @@
     },
     {
       "path": "packages/shared/src/schemas/events.ts",
-      "git_blob_sha": "2bbf25a3d139f6e3c3000419da9a72f822cb58b4"
+      "git_blob_sha": "b500516ff42b473bbde84ca427318d4b8b09f7d8"
     },
     {
       "path": "packages/shared/src/schemas/lifecycle.ts",
@@ -156,7 +156,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "ce6e8c68b636c842326d1c33b379a8e7a3a5554e"
+      "git_blob_sha": "a8c7ad4585929464fcdfde24379ebd2ebb8344ef"
     },
     {
       "path": "README.md",
@@ -407,6 +407,10 @@
       "git_blob_sha": "305180da4993c199044c566746d756cf4df9cacc"
     },
     {
+      "path": "services/langgraph/agency/intake/planning.py",
+      "git_blob_sha": "82f030a564d698323bb0d4dabb73918814cacb76"
+    },
+    {
       "path": "services/langgraph/agency/intake/release.py",
       "git_blob_sha": "d9645098525969f428b6eca5a209663a0628c497"
     },
@@ -416,7 +420,7 @@
     },
     {
       "path": "services/langgraph/agency/intake/runner.py",
-      "git_blob_sha": "926596252f447af030117cee3295b5740a34f602"
+      "git_blob_sha": "4049351c8e45074d8b6bfa239011dc278543d112"
     },
     {
       "path": "services/langgraph/agency/kernel/__init__.py",
@@ -808,7 +812,7 @@
     },
     {
       "path": "services/langgraph/tests/test_intake_mission.py",
-      "git_blob_sha": "c19389d68cbafd5ffd97e78525051b0f36cee65f"
+      "git_blob_sha": "c8a448bc590ad674a40124a89b433f9b38d9974b"
     },
     {
       "path": "services/langgraph/tests/test_lifecycle_analytics.py",
