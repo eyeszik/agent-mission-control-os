@@ -66,9 +66,13 @@ test('Agency OS: shell, client, plan preview, refused external effect, honest st
 
   // Keyboard: the command palette reaches any section.
   await page.keyboard.press('Control+K');
-  await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeVisible();
-  await page.keyboard.type('analytics');
-  await page.keyboard.press('Enter');
+  const palette = page.getByRole('dialog', { name: 'Command palette' });
+  const search = palette.getByRole('combobox');
+  // Opening the dialog schedules input focus; visibility alone is not readiness.
+  await expect(search).toBeFocused();
+  await search.fill('analytics');
+  await expect(palette.getByRole('option', { name: 'Analytics Section', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await search.press('Enter');
   await expect(page.getByText('Counts of stored records')).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText('Not measured').first()).toBeVisible();
 
