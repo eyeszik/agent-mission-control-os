@@ -77,26 +77,26 @@ export const WorkspaceDocumentSchema = z.object({
   title: z.string(),
   kind: z.string(),
   body: z.string(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const BusinessWorkspaceSchema = z.object({
-  overview: z.record(z.unknown()).default({}),
+  overview: z.record(z.string(), z.unknown()).default({}),
   internal_docs: z.array(WorkspaceDocumentSchema).default([]),
   production_docs: z.array(WorkspaceDocumentSchema).default([]),
   prompt_library: z.array(WorkspaceDocumentSchema).default([]),
 });
 
 export const BrandingWorkspaceSchema = z.object({
-  raw_brand_data: z.record(z.unknown()).default({}),
+  raw_brand_data: z.record(z.string(), z.unknown()).default({}),
   internal_assets: z.array(WorkspaceDocumentSchema).default([]),
   external_assets: z.array(WorkspaceDocumentSchema).default([]),
   visual_asset_prompts: z.array(WorkspaceDocumentSchema).default([]),
 });
 
 export const DesignSystemPackageSchema = z.object({
-  tokens_json: z.record(z.unknown()).default({}),
-  tailwind_config: z.record(z.unknown()).default({}),
+  tokens_json: z.record(z.string(), z.unknown()).default({}),
+  tailwind_config: z.record(z.string(), z.unknown()).default({}),
   global_tokens_css: z.string(),
   component_scaffolds: z.array(WorkspaceDocumentSchema).default([]),
   asset_recipes: z.array(WorkspaceDocumentSchema).default([]),
@@ -235,7 +235,7 @@ export const ResearchCoverageSchema = z.object({
   audience_brief: z.string(),
   interview_guide: z.array(z.string()).default([]),
   competitive_audit: z.array(z.string()).default([]),
-  stakeholder_map: z.array(z.record(z.string())).default([]),
+  stakeholder_map: z.array(z.record(z.string(), z.string())).default([]),
   perception_gaps: z.array(z.string()).default([]),
   category_language: z.array(z.string()).default([]),
   evidence_refs: z.array(z.string()).default([]),
@@ -279,7 +279,7 @@ export const MediaPlanningHandoffSchema = z.object({
   budget: z.string(),
   kpis: z.array(z.string()).default([]),
   creative_specs: z.array(z.string()).default([]),
-  trafficking_sheet: z.array(z.record(z.string())).default([]),
+  trafficking_sheet: z.array(z.record(z.string(), z.string())).default([]),
   execution_mode: z.literal('PLANNING_ONLY'),
 });
 
@@ -421,8 +421,8 @@ export const ObservationReceiptSchema = z.object({
   project_id: z.string(),
   operation_id: z.string(),
   target: z.string(),
-  expected_postcondition: z.record(z.unknown()),
-  observed_postcondition: z.record(z.unknown()),
+  expected_postcondition: z.record(z.string(), z.unknown()),
+  observed_postcondition: z.record(z.string(), z.unknown()),
   observation_method: z.string(),
   evidence_refs: z.array(z.string()).default([]),
   observed_at: z.string().datetime({ offset: true }),

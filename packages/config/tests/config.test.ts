@@ -49,4 +49,21 @@ describe('@amc/config', () => {
     expect(loadConfig(schema, { PORT: '8080', SECRET_TOKEN: 'x' })).toEqual({ PORT: 8080 });
     expect(() => loadConfig(schema, { PORT: '-1' })).toThrow(ValidationError);
   });
+
+  it('describes Zod 4 missing, enum and format issues without disclosing input values', () => {
+    const schema = z.object({ REQUIRED: z.string(), MODE: z.enum(['one', 'two']), ENDPOINT: z.string().url() });
+    let caught: unknown;
+    try {
+      loadConfig(schema, { MODE: 'private-mode-value', ENDPOINT: 'private-invalid-url' });
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(ValidationError);
+    const error = caught as ValidationError;
+    expect(error.message).toContain('REQUIRED is required');
+    expect(error.message).toContain('MODE must be one of one, two');
+    expect(error.message).toContain('ENDPOINT is not a valid url');
+    expect(JSON.stringify(error)).not.toContain('private-mode-value');
+    expect(JSON.stringify(error)).not.toContain('private-invalid-url');
+  });
 });

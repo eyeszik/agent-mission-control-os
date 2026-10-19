@@ -17,7 +17,7 @@ export const AceMissionSchema = z.object({
   tenant_id: nonempty.max(128),
   project_id: nonempty.max(128),
   goal: nonempty.max(10000),
-  constraints: z.record(z.unknown()).default({}),
+  constraints: z.record(z.string(), z.unknown()).default({}),
   policy_version: nonempty,
 }).strict();
 

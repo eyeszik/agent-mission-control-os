@@ -248,7 +248,7 @@ export type MemoryAuthority = z.infer<typeof MemoryAuthoritySchema>;
 const Hash = z.string().regex(/^[a-f0-9]{64}$/);
 const Nullable = <T extends z.ZodTypeAny>(schema: T) => schema.nullable().optional();
 const Strings = z.array(z.string()).default([]);
-const Json = z.record(z.unknown());
+const Json = z.record(z.string(), z.unknown());
 
 export const ProjectWorkspaceV2Schema = z
   .object({
@@ -806,14 +806,14 @@ export const ProjectDetailResponseSchema = z.object({ project: ProjectWorkspaceV
 export const CreatedProjectResponseSchema = z.object({
   project: ProjectWorkspaceV2Schema,
   created: z.boolean(),
-  mirror: z.record(z.unknown()).nullable()
+  mirror: z.record(z.string(), z.unknown()).nullable()
 });
 export const ProjectEventsResponseSchema = z.object({ events: z.array(ProjectEventSchema) });
 export const ProjectArtifactsResponseSchema = z.object({ artifacts: z.array(ArtifactMetadataV2Schema) });
 export const WorkspaceViewSchema = z.object({
   root: z.string(),
   files: z.array(z.object({ folder: z.string(), path: z.string(), bytes: z.number() })),
-  storage: z.record(z.unknown()),
+  storage: z.record(z.string(), z.unknown()),
   objects: z.array(StorageObjectSchema),
   authority: z.string()
 });
@@ -838,7 +838,7 @@ export const PortfolioProjectSchema = z
     production_queue: z.number(),
     approval_queue: z.object({ content_review: z.number(), run_approvals: z.number() }),
     upcoming_calendar_14d: z.number(),
-    publication_queue: z.record(z.number()),
+    publication_queue: z.record(z.string(), z.number()),
     active_campaigns: z.array(z.string()),
     stale_assets: z.number(),
     rights_expiry: z.object({ expired: z.number(), expiring_30d: z.number(), media_without_rights: z.number() }),
@@ -853,7 +853,7 @@ export const PortfolioSchema = z.object({
   tenant_id: z.string(),
   generated_at: z.string(),
   projects: z.array(PortfolioProjectSchema),
-  shared_resources: z.record(z.unknown()),
+  shared_resources: z.record(z.string(), z.unknown()),
   isolation: z.string()
 });
 

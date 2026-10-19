@@ -29,14 +29,14 @@ const baseUrl = z
   });
 
 /** Describe an issue without the received value (zod's own messages can echo it). */
-function describeIssue(issue: z.ZodIssue): string {
+function describeIssue(issue: z.ZodIssue, env: EnvRecord): string {
   switch (issue.code) {
-    case z.ZodIssueCode.invalid_enum_value:
-      return `must be one of ${issue.options.join(', ')}`;
+    case z.ZodIssueCode.invalid_value:
+      return `must be one of ${issue.values.map(String).join(', ')}`;
     case z.ZodIssueCode.invalid_type:
-      return issue.received === 'undefined' ? 'is required' : `must be a ${issue.expected}`;
-    case z.ZodIssueCode.invalid_string:
-      return `is not a valid ${typeof issue.validation === 'string' ? issue.validation : 'string'}`;
+      return issue.path.length === 1 && env[String(issue.path[0])] === undefined ? 'is required' : `must be a ${issue.expected}`;
+    case z.ZodIssueCode.invalid_format:
+      return `is not a valid ${issue.format}`;
     case z.ZodIssueCode.too_small:
     case z.ZodIssueCode.too_big:
     case z.ZodIssueCode.custom:
@@ -53,7 +53,7 @@ function describeIssue(issue: z.ZodIssue): string {
 export function loadConfig<S extends z.ZodTypeAny>(schema: S, env: EnvRecord): z.output<S> {
   const result = schema.safeParse(env);
   if (!result.success) {
-    const issues = result.error.issues.map((issue) => ({ key: issue.path.join('.') || '(root)', message: describeIssue(issue) }));
+    const issues = result.error.issues.map((issue) => ({ key: issue.path.join('.') || '(root)', message: describeIssue(issue, env) }));
     throw new ValidationError(
       `Invalid configuration: ${issues.map((i) => `${i.key} ${i.message}`).join('; ')}`,
       { code: 'CONFIG_INVALID', details: { issues } },
