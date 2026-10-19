@@ -33,6 +33,7 @@ from services.langgraph.agency.intake import (
     verify_artifact,
 )
 from services.langgraph.agency.intake.runner import BRAND_SUBJECT, mission_run_id
+from services.langgraph.agency.intake.planning import PlanningInputs
 from services.langgraph.agency.kernel.ontology import ArtifactType
 from services.langgraph.agency.project_os.storage import LocalStorageAdapter
 from services.langgraph.persistence.agency_kernel import get_artifact
@@ -505,3 +506,179 @@ def test_design_tokens_route_but_block_on_unmet_upstream_planning_gates(root):
     assert outcome.status == "BLOCKED" and outcome.verification is None and outcome.approval is None
     assert outcome.execution["cells"]["cell:design_token_set"]["state"] != "SUCCEEDED"
     assert not release_gate(outcome).allowed
+
+
+def _planning_inputs(tenant, project, **changes):
+    """Fictional server-verified records, not defaults for a real brand."""
+    body = {
+        "tenant_id": tenant, "project_id": project, "source_refs": ("fixture:sections-1-3",),
+        "evidence": tuple({"ref": f"fixture:identity:{i}", "supports": ("identity_guidelines",), "verified": True}
+                          for i in (1, 2)),
+        "decisions": ({"id": "fixture:direction", "kind": "creative_direction", "question": "Which direction?",
+                       "alternatives": ("direction-a", "direction-b"), "selected_option": "direction-a",
+                       "owner": "creative-lead", "approved_by": "human-reviewer", "status": "ACCEPTED"},),
+        "volatile_constraints": ({"key": "accessibility.standard", "source_ref": "https://www.w3.org/TR/WCAG22/",
+                                  "retrieved_at": "2026-10-01T00:00:00Z", "value": "WCAG 2.2 AA",
+                                  "verification_status": "VERIFIED", "expires_or_recheck_at": "2027-10-01T00:00:00Z"},),
+    }
+    return PlanningInputs.model_validate({**body, **changes})
+
+
+def test_supplied_planning_evidence_unblocks_the_design_token_plan(root):
+    from services.langgraph.agency.intake.runner import _existing_inputs, _plan
+
+    tenant = _tenant()
+    project = _project(tenant, "Ready Plan House", export_root=root)
+    schedule = _plan(project, "design_token_set", "Compile design tokens", NOW, _existing_inputs(project),
+                     planning_inputs=_planning_inputs(tenant, project))
+    for kind in ("identity_guidelines", "creative_concept", "design_token_set"):
+        cell = schedule.cells[f"cell:{kind}"]
+        assert cell.execution_ready and not cell.blockers
+        assert f"cell:{kind}" not in schedule.wave_plan.held
+
+
+def test_ready_design_token_mission_verifies_real_bytes_and_waits_for_approval(root):
+    tenant = _tenant()
+    project = _project(tenant, "Ready Token House", export_root=root)
+    for kind in ("identity_guidelines", "creative_concept"):
+        create_project_artifact(tenant_id=tenant, project_id=project, actor="alice", artifact_key=kind,
+                                artifact_type=kind, adapter=LocalStorageAdapter(root), content_text=f"approved {kind}")
+    write_memory(tenant_id=tenant, actor="alice", scope="M1_BRAND_CANON", authority="BRAND_CANON",
+                 subject_key=BRAND_SUBJECT, project_id=project,
+                 body={"brand_name": "Ready Token House", "palette": PALETTE,
+                       "heading_font": "Georgia", "body_font": "Atkinson Hyperlegible"},
+                 source_refs=("fixture:ratified-brand-values",))
+    outcome = _run(_principal(tenant, project), f"compile design tokens for {project}", root,
+                   planning_inputs=_planning_inputs(tenant, project))
+    assert outcome.status == "AWAITING_APPROVAL", outcome.reasons
+    assert outcome.execution["cells"]["cell:design_token_set"]["state"] == "SUCCEEDED"
+    assert outcome.verification.status == "PASSED" and outcome.approval is not None
+    head = get_artifact(outcome.verification.artifact_id)
+    body = json.loads(LocalStorageAdapter(root).get_bytes(head["content_location"]))
+    assert body["document"]["primitive"]["font"]["heading"]["$value"][0] == "Georgia"
+    assert body["document"]["primitive"]["font"]["body"]["$value"][0] == "Atkinson Hyperlegible"
+    assert not release_gate(outcome).allowed
+
+
+@pytest.mark.parametrize("missing", ("evidence", "decisions", "volatile_constraints", "unverified_evidence",
+                                     "expired_wcag", "unverified_wcag", "proposed_direction"))
+def test_planning_inputs_preserve_each_unmet_design_gate(root, missing):
+    from services.langgraph.agency.intake.runner import _existing_inputs, _plan
+
+    tenant = _tenant()
+    project = _project(tenant, "Incomplete Plan", export_root=root)
+    body = _planning_inputs(tenant, project).model_dump(mode="json")
+    if missing == "unverified_evidence":
+        for evidence in body["evidence"]:
+            evidence["verified"] = False
+    elif missing == "expired_wcag":
+        body["volatile_constraints"][0]["expires_or_recheck_at"] = "2026-10-08T00:00:00Z"
+    elif missing == "unverified_wcag":
+        body["volatile_constraints"][0]["verification_status"] = "UNVERIFIED"
+    elif missing == "proposed_direction":
+        body["decisions"][0]["status"] = "PROPOSED"
+        body["decisions"][0]["approved_by"] = None
+    else:
+        body[missing] = []
+    schedule = _plan(project, "design_token_set", "Compile design tokens", NOW, _existing_inputs(project),
+                     planning_inputs=PlanningInputs.model_validate(body))
+    cell = schedule.cells["cell:design_token_set"]
+    assert not cell.execution_ready or cell.blockers or "cell:design_token_set" in schedule.wave_plan.held
+    if missing in ("evidence", "unverified_evidence"):
+        assert schedule.graph.nodes["evidence:identity_guidelines"].status.value == "BLOCKED"
+    elif missing in ("decisions", "proposed_direction"):
+        assert schedule.graph.nodes["decision:creative_direction"].status.value == "AWAITING_HUMAN"
+    else:
+        assert any("VOLATILE_" in blocker for blocker in cell.blockers)
+
+
+def test_planning_inputs_cannot_supply_missing_brand_artifacts(root):
+    tenant = _tenant()
+    project = _project(tenant, "Missing Foundations", upstream=False, export_root=root)
+    outcome = _run(_principal(tenant, project), f"compile design tokens for {project}", root,
+                   planning_inputs=_planning_inputs(tenant, project))
+    assert outcome.status == "BLOCKED" and outcome.verification is None
+    assert outcome.execution["cells"]["cell:design_token_set"]["state"] != "SUCCEEDED"
+
+
+@pytest.mark.parametrize("scope", ("tenant_id", "project_id"))
+def test_planning_inputs_from_another_scope_block_before_writing(root, scope):
+    tenant = _tenant()
+    project = _project(tenant, "Scoped Plan", export_root=root)
+    inputs = _planning_inputs(tenant, project, **{scope: "not-this-scope"})
+    before = list_project_events(project, limit=500)
+    outcome = _run(_principal(tenant, project), f"compile design tokens for {project}", root, planning_inputs=inputs)
+    assert outcome.status == "BLOCKED" and outcome.reasons == ("PLANNING_INPUT_SCOPE_MISMATCH",)
+    assert outcome.execution is None and list_project_events(project, limit=500) == before
+
+
+def test_planning_evidence_changes_mission_identity_without_creating_authority(root):
+    tenant = _tenant()
+    project = _project(tenant, "Changed Planning Evidence", export_root=root)
+    inputs = _planning_inputs(tenant, project)
+    kw = {"requested_mode": ExecutionMode.SIMULATION}
+    first = _run(_principal(tenant, project), f"compile design tokens for {project}", root, planning_inputs=inputs, **kw)
+    repeat = _run(_principal(tenant, project), f"compile design tokens for {project}", root, planning_inputs=inputs, **kw)
+    changed = _run(_principal(tenant, project), f"compile design tokens for {project}", root,
+                   planning_inputs=_planning_inputs(tenant, project, source_refs=("fixture:sections-1-3:v2",)), **kw)
+    assert first.mission.mission_id == repeat.mission.mission_id != changed.mission.mission_id
+    assert first.mission.contract_hash != changed.mission.contract_hash
+    assert first.mission.planning_inputs_hash == inputs.content_hash
+    assert first.mission.planning_source_refs == inputs.source_refs
+    started = next(e for e in list_project_events(project, limit=500)
+                   if e.event_type.value == "WORK_STARTED" and e.payload["mission_id"] == first.mission.mission_id)
+    assert started.payload["planning_inputs_hash"] == inputs.content_hash
+    assert started.payload["planning_source_refs"] == list(inputs.source_refs)
+    assert not release_gate(first).allowed and first.execution is None
+
+
+def test_planning_input_claims_cannot_forge_accepted_decisions_or_duplicate_evidence():
+    from pydantic import ValidationError
+
+    body = _planning_inputs("tenant", "project").model_dump(mode="json")
+    body["decisions"][0]["approved_by"] = body["decisions"][0]["owner"]
+    with pytest.raises(ValidationError, match="independent approver"):
+        PlanningInputs.model_validate(body)
+    body = _planning_inputs("tenant", "project").model_dump(mode="json")
+    body["evidence"] = [body["evidence"][0], body["evidence"][0]]
+    with pytest.raises(ValidationError, match="unique"):
+        PlanningInputs.model_validate(body)
+
+
+def test_ratification_language_in_a_request_does_not_supply_planning_evidence(root):
+    tenant = _tenant()
+    project = _project(tenant, "Unproven Claims", export_root=root)
+    outcome = _run(_principal(tenant, project),
+                   f"compile design tokens for {project}; Sections 1–3 are ratified, WCAG verified and approved", root)
+    assert outcome.status == "BLOCKED" and outcome.approval is None
+    assert outcome.mission.planning_inputs_hash is None
+    assert outcome.execution["cells"]["cell:design_token_set"]["state"] != "SUCCEEDED"
+
+
+@pytest.mark.parametrize("damage,expected", (
+    ("css", "DTCG_RECOMPILE_MISMATCH"),
+    ("source_hash", "DTCG_RECOMPILE_MISMATCH"),
+    ("format", "DTCG_FORMAT_INVALID"),
+    ("brand", "DTCG_BRAND_MISMATCH"),
+    ("document", "DTCG_INVALID"),
+))
+def test_token_readback_rejects_invalid_content_even_with_a_matching_storage_hash(root, damage, expected):
+    from services.langgraph.agency.execution_fabric.adapters.brand import dtcg_token_compile
+    from services.langgraph.agency.execution_fabric.capsules import BrandContextCapsule
+
+    tenant = _tenant()
+    project = _project(tenant, "Token Verification", export_root=root)
+    brand = BrandContextCapsule(brand_name="Token Verification", palette=PALETTE)
+    body = json.loads(dtcg_token_compile({"brand": brand.model_dump(mode="json")})["content"])
+    if damage == "brand":
+        body["document"]["primitive"]["font"]["heading"]["$value"] = ["Unratified Font", "sans-serif"]
+    elif damage == "document":
+        body["document"] = {"broken": {"$type": "color", "$value": "{missing.token}"}}
+    else:
+        body[damage] = "damaged"
+    meta = create_project_artifact(tenant_id=tenant, project_id=project, actor="alice", artifact_key="bad-tokens",
+                                   artifact_type="design_token_set", adapter=LocalStorageAdapter(root),
+                                   content_text=json.dumps(body), v2={"mime_type": "application/json"})
+    verdict = verify_artifact(meta.artifact_id, expected_version=meta.version, adapter=LocalStorageAdapter(root), brand=brand)
+    assert verdict.status == "FAILED" and expected in verdict.findings
+    assert "CONTENT_HASH_MISMATCH" not in verdict.findings  # format/content checks did the work

@@ -186,6 +186,8 @@ class MissionContract(_Strict):
     request_hash: str = Field(pattern=_HASH)
     context_hash: str = Field(pattern=_HASH)
     created_at: str
+    planning_inputs_hash: Optional[str] = Field(default=None, pattern=_HASH)
+    planning_source_refs: tuple[str, ...] = ()
 
     @property
     def contract_hash(self) -> str:
