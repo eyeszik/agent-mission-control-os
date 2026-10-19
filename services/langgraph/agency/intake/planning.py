@@ -43,6 +43,16 @@ class PlanningInputs(BaseModel):
                 or (decision.required_approver and decision.approved_by != decision.required_approver)
             ):
                 raise ValueError("accepted planning decisions need a valid selection and independent approver")
+        # Imported snapshots are not ordered decision-spine operations. Require
+        # explicit supersession rather than letting tuple order pick a winner.
+        superseded = {decision.supersedes for decision in self.decisions if decision.supersedes}
+        live: dict[str, set[str]] = {}
+        for decision in self.decisions:
+            if decision.decision_hash not in superseded:
+                live.setdefault(decision.kind.value, set()).add(decision.decision_hash)
+        conflicts = sorted(kind for kind, hashes in live.items() if len(hashes) > 1)
+        if conflicts:
+            raise ValueError(f"conflicting live planning decisions: {', '.join(conflicts)}; resolve explicit supersession")
         return self
 
     @property
