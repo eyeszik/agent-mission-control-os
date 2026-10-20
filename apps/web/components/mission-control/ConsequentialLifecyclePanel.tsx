@@ -261,27 +261,52 @@ export function ConsequentialLifecyclePanel() {
         value: event.event_type,
       })),
       staleApprovals: (run.approvals ?? []).filter((approval) => approval.status === 'stale'),
-      activeRunLineageRemediations: trust.recent_lineage_remediations.filter((item) => item.run_id === run.run_id),
-      activeRunObligations: trust.recent_invalidation_obligations.filter((item) => item.run_id === run.run_id),
-      // ⚡ Bolt: Derived counts precomputed to eliminate intermediate array allocations inside the component render loop.
-      // Doing this here directly using the full array (or the active slice) instead of `.filter(condition).length` later reduces GC pressure.
-      openLineageRemediationsCount: trust.recent_lineage_remediations.reduce((acc, item) => item.run_id === run.run_id && item.status === 'OPEN' ? acc + 1 : acc, 0),
-      resolvedLineageRemediationsCount: trust.recent_lineage_remediations.reduce((acc, item) => item.run_id === run.run_id && item.status !== 'OPEN' ? acc + 1 : acc, 0),
-      openObligationsCount: trust.recent_invalidation_obligations.reduce((acc, item) => item.run_id === run.run_id && item.state === 'OPEN' ? acc + 1 : acc, 0),
-      hookGapObligationsCount: trust.recent_invalidation_obligations.reduce((acc, item) => item.run_id === run.run_id && item.state === 'HOOK_GAP' ? acc + 1 : acc, 0),
-      retryableRecoveries: trust.recent_recovery_cases.filter(
-        (recovery) =>
-          recovery.status === 'OPEN' &&
-          recovery.reason !== 'AMBIGUOUS_EXTERNAL_RESULT' &&
-          recovery.execution_ref === run.run_id &&
-          run.status === 'failed'
-      ),
-      compensatableRecoveries: trust.recent_recovery_cases.filter(
-        (recovery) =>
-          recovery.status === 'OPEN' &&
-          recovery.reason === 'AMBIGUOUS_EXTERNAL_RESULT' &&
-          recovery.execution_ref === run.run_id
-      ),
+      ...(() => {
+        const activeRunLineageRemediations = [];
+        let openLineageRemediationsCount = 0;
+        let resolvedLineageRemediationsCount = 0;
+        for (const item of trust.recent_lineage_remediations) {
+          if (item.run_id === run.run_id) {
+            activeRunLineageRemediations.push(item);
+            if (item.status === 'OPEN') openLineageRemediationsCount++;
+            else resolvedLineageRemediationsCount++;
+          }
+        }
+
+        const activeRunObligations = [];
+        let openObligationsCount = 0;
+        let hookGapObligationsCount = 0;
+        for (const item of trust.recent_invalidation_obligations) {
+          if (item.run_id === run.run_id) {
+            activeRunObligations.push(item);
+            if (item.state === 'OPEN') openObligationsCount++;
+            else if (item.state === 'HOOK_GAP') hookGapObligationsCount++;
+          }
+        }
+
+        const retryableRecoveries = [];
+        const compensatableRecoveries = [];
+        for (const recovery of trust.recent_recovery_cases) {
+          if (recovery.status === 'OPEN' && recovery.execution_ref === run.run_id) {
+            if (recovery.reason !== 'AMBIGUOUS_EXTERNAL_RESULT' && run.status === 'failed') {
+              retryableRecoveries.push(recovery);
+            } else if (recovery.reason === 'AMBIGUOUS_EXTERNAL_RESULT') {
+              compensatableRecoveries.push(recovery);
+            }
+          }
+        }
+
+        return {
+          activeRunLineageRemediations,
+          openLineageRemediationsCount,
+          resolvedLineageRemediationsCount,
+          activeRunObligations,
+          openObligationsCount,
+          hookGapObligationsCount,
+          retryableRecoveries,
+          compensatableRecoveries,
+        };
+      })(),
     };
   }, [trust, run]);
 

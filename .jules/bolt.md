@@ -46,3 +46,7 @@
 ## 2026-11-02 - Array Iteration Component Parsing Optimization
 **Learning:** Chained array methods like `.split().map().filter().slice().map()` create multiple intermediate arrays during form submit or data parsing. This can cause unnecessary garbage collection overhead.
 **Action:** Replace multiple chained array methods with a single loop (like `for` or `for...of`) that performs the necessary string splits and conditional logic, stopping early when constraints (like max count) are met.
+
+## 2023-10-20 - Consolidating Multiple Array Iterations into Single Passes
+**Learning:** React components containing multiple chained array iterations like `.filter(condition1)` and `.reduce(condition2)` executed separately on the same large array source creates intermediate array allocations and redundant iteration overhead on every recalculation.
+**Action:** Consolidate these operations into a single pass using a manual `for...of` loop enclosed within an IIFE inside the `useMemo` block to derive all required outputs together, avoiding multiple iterations and intermediary object closures.
