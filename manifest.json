@@ -395,6 +395,10 @@
       "git_blob_sha": "2f2a1075334c0b865aff77b17bd76179a111d42d"
     },
     {
+      "path": "services/langgraph/agency/guidance/packs/web_experience.yaml",
+      "git_blob_sha": "a8182358b9291f3edb9942230fccfbc9fd5a24ba"
+    },
+    {
       "path": "services/langgraph/agency/guidance/registry.py",
       "git_blob_sha": "3e4d4ac5124da08cbd56ad55a8f66124fb67fa14"
     },
@@ -808,7 +812,7 @@
     },
     {
       "path": "services/langgraph/tests/test_guidance.py",
-      "git_blob_sha": "861995cc4c5d6523796c45caa8fe81c0d509285b"
+      "git_blob_sha": "213e86b4238f3305288321c3ad2469814247e5d7"
     },
     {
       "path": "services/langgraph/tests/test_intake_mission.py",

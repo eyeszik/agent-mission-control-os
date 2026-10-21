@@ -1,7 +1,7 @@
 /* GENERATED FILE -- do not edit by hand.
  * compiler: amc-dtcg-compiler/v1 (DTCG 2025.10)
  * source: apps/web/tokens/amc.tokens.json
- * source-sha256: 41453fc888bf984603a9e61a326f51537771e5ba7ee866594cfbeda3453cae87
+ * source-sha256: 1f4624bbd7152b41bcc799a444ead01bbaab639a1d2f2d5d05f98a1869f8e26a
  */
 :root {
   --amc-component-ai-trust-color-border: var(--amc-semantic-color-border-strong);
@@ -35,21 +35,43 @@
   --amc-primitive-color-zinc-950: #09090b;
   --amc-primitive-duration-base: 200ms;
   --amc-primitive-duration-fast: 120ms;
+  --amc-primitive-duration-reveal: 480ms;
+  --amc-primitive-duration-slow: 320ms;
+  --amc-primitive-duration-stagger: 60ms;
+  --amc-primitive-easing-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
   --amc-primitive-easing-standard: cubic-bezier(0.2, 0, 0, 1);
   --amc-primitive-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --amc-primitive-font-family-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --amc-primitive-font-line-height-normal: 1.5;
+  --amc-primitive-font-line-height-snug: 1.3;
+  --amc-primitive-font-line-height-tight: 1.1;
+  --amc-primitive-font-size-2xl: 1.953rem;
+  --amc-primitive-font-size-3xl: 2.441rem;
+  --amc-primitive-font-size-4xl: 3.052rem;
+  --amc-primitive-font-size-5xl: 3.815rem;
+  --amc-primitive-font-size-base: 1rem;
+  --amc-primitive-font-size-lg: 1.25rem;
+  --amc-primitive-font-size-sm: 0.875rem;
+  --amc-primitive-font-size-xl: 1.563rem;
+  --amc-primitive-font-size-xs: 0.75rem;
   --amc-primitive-font-weight-medium: 500;
   --amc-primitive-font-weight-regular: 400;
+  --amc-primitive-font-weight-semibold: 600;
   --amc-primitive-radius-lg: 8px;
   --amc-primitive-radius-md: 6px;
   --amc-primitive-radius-sm: 4px;
   --amc-primitive-radius-xl: 12px;
   --amc-primitive-space-0: 0px;
   --amc-primitive-space-1: 4px;
+  --amc-primitive-space-10: 40px;
+  --amc-primitive-space-12: 48px;
+  --amc-primitive-space-16: 64px;
   --amc-primitive-space-2: 8px;
+  --amc-primitive-space-24: 96px;
   --amc-primitive-space-3: 12px;
   --amc-primitive-space-4: 16px;
   --amc-primitive-space-6: 24px;
+  --amc-primitive-space-8: 32px;
   --amc-semantic-color-accent: var(--amc-primitive-color-emerald-500);
   --amc-semantic-color-accent-strong: var(--amc-primitive-color-emerald-900);
   --amc-semantic-color-background: var(--amc-primitive-color-zinc-950);
@@ -67,12 +89,35 @@
   --amc-semantic-color-surface-raised: var(--amc-primitive-color-zinc-800);
   --amc-semantic-font-family-body: var(--amc-primitive-font-family-sans);
   --amc-semantic-font-family-data: var(--amc-primitive-font-family-mono);
+  --amc-semantic-font-line-height-body: var(--amc-primitive-font-line-height-normal);
+  --amc-semantic-font-line-height-heading: var(--amc-primitive-font-line-height-tight);
+  --amc-semantic-font-line-height-title: var(--amc-primitive-font-line-height-snug);
+  --amc-semantic-font-size-body: var(--amc-primitive-font-size-base);
+  --amc-semantic-font-size-caption: var(--amc-primitive-font-size-xs);
+  --amc-semantic-font-size-display: var(--amc-primitive-font-size-4xl);
+  --amc-semantic-font-size-display-lg: var(--amc-primitive-font-size-5xl);
+  --amc-semantic-font-size-h1: var(--amc-primitive-font-size-3xl);
+  --amc-semantic-font-size-h2: var(--amc-primitive-font-size-2xl);
+  --amc-semantic-font-size-h3: var(--amc-primitive-font-size-xl);
+  --amc-semantic-font-size-label: var(--amc-primitive-font-size-sm);
+  --amc-semantic-font-size-lead: var(--amc-primitive-font-size-lg);
+  --amc-semantic-font-weight-body: var(--amc-primitive-font-weight-regular);
+  --amc-semantic-font-weight-heading: var(--amc-primitive-font-weight-semibold);
+  --amc-semantic-font-weight-label: var(--amc-primitive-font-weight-medium);
   --amc-semantic-motion-duration-feedback: var(--amc-primitive-duration-fast);
+  --amc-semantic-motion-duration-hover: var(--amc-primitive-duration-base);
+  --amc-semantic-motion-duration-reveal: var(--amc-primitive-duration-reveal);
+  --amc-semantic-motion-duration-stagger: var(--amc-primitive-duration-stagger);
+  --amc-semantic-motion-easing-emphasized: var(--amc-primitive-easing-emphasized);
   --amc-semantic-motion-easing-standard: var(--amc-primitive-easing-standard);
+  --amc-semantic-motion-offset-reveal: var(--amc-primitive-space-4);
   --amc-semantic-radius-control: var(--amc-primitive-radius-md);
   --amc-semantic-radius-panel: var(--amc-primitive-radius-xl);
+  --amc-semantic-space-block: var(--amc-primitive-space-8);
   --amc-semantic-space-inline: var(--amc-primitive-space-2);
   --amc-semantic-space-panel: var(--amc-primitive-space-4);
+  --amc-semantic-space-section: var(--amc-primitive-space-16);
+  --amc-semantic-space-section-lg: var(--amc-primitive-space-24);
   --amc-semantic-space-stack: var(--amc-primitive-space-3);
 }
 

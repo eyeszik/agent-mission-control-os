@@ -320,6 +320,15 @@ Details: `docs/ace-v12/README.md`.
 
 `services/langgraph/agency/ui_ux/` compiles product/brand/audience state into a strict `UIUXDesignIR` (IA, flows, genome, tiered DTCG tokens, screens, the full 29-state matrix, responsive transforms, WCAG 2.2 requirements, AI-trust rules, implementation map) — pure, deterministic, terminal `UIUX_SPEC_READY`, never generates UI. It runs as a deterministic subprocess of `design_brief` for digital-product briefs (`DesignBrief.ui_ux`; non-UI briefs get `null`) and inside the prompt compiler for `PromptFamily.UI_UX` (`PromptPackage.ui_ux_design`); other families are byte-identical. WCAG 2.2 is normative for every contrast verdict; APCA is advisory only and never merged with it; vendor design systems are reference-only. `agency/design_tokens.py` is the **only** DTCG 2025.10 compiler (frontend `compile_tokens.py`, runtime `_build_design_system`, UI/UX) — don't add a second. Frontend tokens: edit `apps/web/tokens/amc.tokens.json`, run `pnpm tokens:build`; `apps/web/app/tokens.css` is generated and checked for freshness by `verify_design_tokens.py`; `pnpm --filter @amc/web verify:ui` is a TS-AST gate. `UIUXDesignIR` has a strict Zod twin (`packages/shared/src/schemas/uiux.ts`) whose parity is proven by a compiler-generated fixture — if you change the Pydantic models, regenerate `packages/shared/tests/fixtures/uiux-design-ir.json`. Details: `docs/ui-ux-design-compiler.md`.
 
+### Web pages and motion — design skill first
+
+The project skill `.claude/skills/premium-web-design/SKILL.md` is the workflow for building, restyling or animating web pages (landing pages, heroes, navbars, pricing, 21st.dev blocks).
+
+- **Tokens.** The type scale (major third, `text-caption`…`text-display-lg`) and 8px-grid section spacing (`py-block`/`py-section`/`py-section-lg`) are DTCG tokens in `apps/web/tokens/amc.tokens.json`, mapped in `tailwind.config.ts`.
+- **Motion.** Animations use Framer Motion through `apps/web/components/motion/Motion.tsx` (`Reveal`, `Stagger`/`StaggerItem`, `HoverLift`): `LazyMotion` + `domAnimation`, `reducedMotion="user"`, and never on above-the-fold/LCP content. Its numbers mirror the motion tokens in `lib/design/motion.ts`; `tests/motion-tokens.test.ts` fails on drift.
+- **Agency side.** The same methodology is the advisory guidance pack `pg.web_experience.v1`. It routes only for `UI_UX` web requests and is excluded for image/video/print families.
+- **Performance.** A Lighthouse 90+ claim needs a measured mobile run on a production build: `npx -y lighthouse@13.5.0` with `CHROME_PATH` set to the Playwright Chromium.
+
 ### The fail-closed integration pattern
 
 `integrations/publication.py`, `integrations/paid_media.py`, `integrations/zo.py` all follow the same shape: a mode env switch (`AMC_PUBLICATION_MODE`, `AMC_PAID_MEDIA_MODE`, `AMC_ZO_MODE`) defaults to `"disabled"`, and anything beyond `disabled`/`dry_run` for publication or beyond `disabled` for paid-media fails `verify_production_readiness.py`. There is no live executor for either — extending one means installing a real provider adapter deliberately, not flipping the switch.
