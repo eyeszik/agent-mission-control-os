@@ -16,3 +16,4 @@ export * from './schemas/vnexus';
 export * from './schemas/agencyOs';
 export * from './types';
 export * from './schemas/ace';
+export * from './schemas/missionCouncil';
