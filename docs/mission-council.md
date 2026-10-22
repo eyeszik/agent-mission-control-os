@@ -187,6 +187,18 @@ E2E_BASE_URL=http://127.0.0.1:3000 pnpm --filter @amc/web test:e2e -- missions.s
 - **Ported suites.** `test_council_ported_scenarios.py` ports the supplied router, CrewAI and end-to-end suites onto the real API and engines.
 - **Their original form.** The supplied suites tested only their own embedded mocks. Their CrewAI case needed `OPENAI_API_KEY`, because that crew had no LLM configured.
 
+## Dependency advisories
+
+CI's `Dependency audit` job runs `pip-audit` over the `council` extra as well as the base install. CrewAI 1.15.28 is the latest release, and it pins `chromadb~=1.5.9`, `mcp~=1.28.1` and, through `crewai-cli`, `uv~=0.11.6`. While CrewAI is installed, these advisories cannot be upgraded away, so the job ignores exactly these IDs. Any other advisory in the tree fails it.
+
+| Package | Advisory | Affects | Why the council is not exposed |
+| --- | --- | --- | --- |
+| chromadb 1.5.9 | PYSEC-2026-311, -3813, -3814, -3815 (no fix released) | The Chroma **server**: HTTP API code injection, RBAC tenant checks | Chroma is only imported by CrewAI. No Chroma server runs, and the crew sets no memory, knowledge or embedder. |
+| mcp 1.28.1 | CVE-2026-59951 (fixed in 1.30.0) | Streamable HTTP **server** session cleanup | The council uses only the stdio **client**, to operator-allowlisted servers. |
+| uv 0.11.33 | PYSEC-2026-4321 (fixed in 0.13.4) | The `uv` CLI's TLS root bundle | Nothing in the council runs `uv`. It is a `crewai-cli` dependency. |
+
+Remove an ID from the workflow once CrewAI lifts the pin. Without CrewAI, `mcp` resolves to a patched version.
+
 ## Build plan (what is next)
 
 - **Model-backed seats in CI.** Keep the default offline. Add an opt-in job with a provider secret that runs the same suites with `ENABLE_REAL_MODELS=true`.
