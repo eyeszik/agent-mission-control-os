@@ -1,0 +1,271 @@
+{
+  "id": "pg.web_experience.v1",
+  "schema_version": "1.0.0",
+  "pack_version": "1.0.0",
+  "domain": "WEB_DESIGN",
+  "guidance_class": "METHODOLOGY",
+  "authority_class": "ADVISORY",
+  "description": "Advisory methodology for landing pages and marketing sites built as React/Next.js code: design tokens first, purposeful Framer Motion (scroll-triggered fades, staggered reveals, hover transitions), production UI blocks sourced from 21st.dev and adapted to the brand, section-by-section construction and a measured Lighthouse audit. The premise that static pages read as generic is treated as a design hypothesis, not a fact. This pack cannot redefine tokens, WCAG 2.2 conformance, brand state, zero-fabrication rules, permissions or terminal states.",
+  "activation": {
+    "asset_families": [
+      "UI_UX"
+    ],
+    "asset_types": [
+      "landing page",
+      "marketing site",
+      "website",
+      "homepage",
+      "hero section",
+      "web page"
+    ],
+    "channels": [
+      "web"
+    ],
+    "brand_domains": [
+      "visual",
+      "motion"
+    ],
+    "capabilities": [
+      "UI_GENERATION",
+      "CODE_GENERATION"
+    ],
+    "task_tags": [
+      "landing page",
+      "website",
+      "motion",
+      "animation",
+      "framer motion",
+      "scroll reveal",
+      "performance",
+      "lighthouse",
+      "21st.dev",
+      "hero",
+      "navbar",
+      "pricing"
+    ]
+  },
+  "excludes": {
+    "asset_families": [
+      "IMAGE",
+      "VIDEO",
+      "MOTION",
+      "STORYBOARD",
+      "PRINT",
+      "PRESENTATION",
+      "COPY"
+    ],
+    "asset_types": [],
+    "channels": [],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": []
+  },
+  "dependencies": [
+    "pg.branding.core"
+  ],
+  "conflicts_with": [],
+  "context_budget": {
+    "max_sections": 5,
+    "max_chars": 14000
+  },
+  "sections": [
+    {
+      "id": "web.design_system_first",
+      "purpose": "Fix the design system before writing page code so the result is specific to the brand, not a framework default.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Resolve every colour, font size, line height, space and duration to a named design token; no raw hex or arbitrary values in components.",
+        "Use a defined type scale (major third from a 16px base) with named roles: caption, label, body, lead, h3, h2, h1, display.",
+        "Lay out on an 8px base grid; 4px half-steps only inside dense controls.",
+        "Choose one signature device for the brand (a shape, a typographic treatment or a motion behaviour) and repeat it deliberately.",
+        "Write real copy from the brief before styling; layout serves the message, not the reverse."
+      ],
+      "evaluation_criteria": [
+        "Every visual value traces to a token in the DTCG source.",
+        "Swapping only the logo would not make the page plausible for an unrelated brand.",
+        "The type scale is visible as a hierarchy: one display size per viewport, clear steps below it."
+      ],
+      "anti_patterns": [
+        "Default framework look: grey text on white cards, uniform rounded-xl cards, indigo-to-purple gradient hero.",
+        "The stock section recipe (centred hero, three feature cards, logo row, pricing) with no brand-specific thesis.",
+        "Decorative gradient blobs, default glassmorphism or emoji used as icons.",
+        "Raw hex codes or one-off pixel values in component code."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "tokens",
+        "typography",
+        "visual",
+        "composition"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "web.motion",
+      "purpose": "Use Framer Motion to make the page feel responsive and ordered without costing accessibility or performance.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Implement animations with Framer Motion: scroll-triggered fades for sections, staggered reveals for lists and grids, smooth hover and press transitions on interactive surfaces.",
+        "Take durations, easings, stagger interval and reveal offset from the motion tokens.",
+        "Animate opacity and transform only; reveal each element once.",
+        "Honour prefers-reduced-motion: drop transforms and show the final state.",
+        "Keep above-the-fold content and the LCP element visible on first paint; reveal from below the fold only.",
+        "Use motion to show order and hierarchy: what appears first is what matters first."
+      ],
+      "evaluation_criteria": [
+        "With motion removed the page still communicates fully.",
+        "No content is hidden until JavaScript runs above the fold.",
+        "At most one emphasis animation competes for attention per viewport."
+      ],
+      "anti_patterns": [
+        "Fading in the hero headline or hero image from zero opacity.",
+        "Scroll-jacking, parallax by default or looping decorative motion.",
+        "Animating layout properties (width, height, top, left) instead of transform.",
+        "Motion durations hard-coded per component."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "motion",
+        "interaction",
+        "accessibility"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "web.component_sourcing",
+      "purpose": "Start from production-ready UI blocks (for example from 21st.dev) without importing their defaults or their placeholder claims.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Use a sourced block (hero, navbar, pricing) as structure, then map every colour, font and space to the brand tokens.",
+        "Record each block's source URL, author and licence before integrating it.",
+        "Replace all placeholder copy, testimonials, customer logos, ratings and statistics with real, sourced content, or remove them.",
+        "Check the block's dependencies and accessibility (landmarks, labels, focus order, contrast) before adopting it.",
+        "Add motion through the shared motion primitives rather than the block's own animation code."
+      ],
+      "evaluation_criteria": [
+        "No sourced block keeps its original palette or font.",
+        "Every testimonial, logo, rating and number on the page has a real source."
+      ],
+      "anti_patterns": [
+        "Shipping placeholder social proof (sample testimonials, 'Trusted by' logo rows, invented metrics).",
+        "Pasting a block whose licence is unknown.",
+        "Adding a new UI library just to support one pasted block."
+      ],
+      "evidence_requirements": [
+        "Source URL and licence for every third-party block."
+      ],
+      "output_targets": [],
+      "directive_targets": [
+        "engineering",
+        "governance",
+        "visual"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "web.performance",
+      "purpose": "Reach and prove a 90+ Lighthouse score on mobile.",
+      "directive_class": "QUALITY_CRITERION",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Target 90+ in Lighthouse performance, accessibility, best practices and SEO on a production build with mobile emulation.",
+        "Report the measured scores and the run conditions; never state a score that was not measured.",
+        "Serve images through the framework image pipeline with explicit dimensions and modern formats; prioritise only the LCP image.",
+        "Self-host fonts with font-display swap and preload only the fonts above the fold.",
+        "Load Framer Motion lazily (LazyMotion with DOM features) and keep client components to the interactive parts."
+      ],
+      "evaluation_criteria": [
+        "Lighthouse report attached for the final build.",
+        "No layout shift from images, fonts or late-mounting motion wrappers."
+      ],
+      "anti_patterns": [
+        "Claiming a Lighthouse score without a report.",
+        "Unsized images or full-resolution images downscaled in CSS."
+      ],
+      "evidence_requirements": [
+        "Lighthouse report for the production build."
+      ],
+      "output_targets": [],
+      "directive_targets": [
+        "engineering",
+        "quality",
+        "production"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    },
+    {
+      "id": "web.build_process",
+      "purpose": "Replace vague one-shot prompts with a specified, section-by-section build.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Specify the page as named sections, each with its job, its content source and its motion behaviour, before building.",
+        "Build mobile-first, one section at a time, rendering and checking each section before the next.",
+        "Finish with a Lighthouse audit, an accessibility pass and image optimisation."
+      ],
+      "evaluation_criteria": [
+        "Each section states its job, content source and motion.",
+        "The final hand-off includes the audit results."
+      ],
+      "anti_patterns": [
+        "Vague instructions such as 'make it modern' with no named sections or animations.",
+        "Building the whole page in one pass and auditing nothing."
+      ],
+      "evidence_requirements": [],
+      "output_targets": [],
+      "directive_targets": [
+        "quality",
+        "production"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [],
+      "subsections": {}
+    }
+  ],
+  "provenance": {
+    "source": "Premium web workflow supplied by the project owner (Framer Motion, design skill, 21st.dev, Lighthouse), adapted to AMC token and accessibility conventions",
+    "version": "1.0.0",
+    "author": null,
+    "created_at": null,
+    "updated_at": null,
+    "evidence_refs": [
+      ".claude/skills/premium-web-design/SKILL.md"
+    ],
+    "license_or_ip_status": "project_owner_supplied"
+  },
+  "trend": null,
+  "content_hash": ""
+}

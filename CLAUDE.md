@@ -304,6 +304,28 @@ Details: `docs/vnexus-ace.md`.
 
 Details: `docs/ace-v12/README.md`.
 
+### Mission Council — three engines, one gate
+
+`services/langgraph/agency/council/` + `persistence/council.py` (SQLite migration 19 / `20261022_amc_mission_council_v1.sql`) + `api/routes/missions.py` (`/missions`) + `apps/web/components/missions/` (`/missions`, also the Mission Council section of `/agency`):
+
+- **Mission = run.** A mission is a `runs` row (pipeline `mission_council`). Its events are `run_events` (SSE via `/runs/{id}/events`), and its gate is an `approvals` row decided only via `/approvals/{id}/decide`. Don't add another approval or event store.
+- **Engines.** `engines/{langgraph,crewai,autogen}_engine.py` share `engines/base.py` (strategy → audit → gate → prototype).
+  - LangGraph uses the shared checkpointer with `interrupt()` + `Command(resume=)`.
+  - CrewAI and AutoGen are the optional `council` extra; when it is absent they report `NOT_INSTALLED`, never fake it.
+  - AutoGen has no code executor.
+- **Models.** Seats run on the deterministic `MockSeatModel` unless `ENABLE_REAL_MODELS=true`. A failed provider fails the seat; it never falls back to mock output.
+- **Policy and gate.**
+  - `policy.scan` runs first and is deterministic. Model findings only raise risk.
+  - The gate subject hash binds mission, thread, requested actions, strategy/risk hashes and policy version.
+  - Decisions are single-use per action hash.
+- **Tools.** `gateway.invoke` is the only tool path. It is deny-by-default with seat scopes and approval binding for WRITE/EXTERNAL; SHELL is disabled.
+  - Every call is audited and redacted.
+  - MCP servers come only from `AMC_MCP_SERVERS`.
+- **State.** Terminal states never move. `queued → running` happens only under the lease. Checkpoints are hash-chained and verified on read.
+- **Contracts.** Zod twins live in `packages/shared/src/schemas/missionCouncil.ts`, with the fixture `packages/shared/tests/fixtures/mission-council.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_council_contracts.py`).
+
+Details: `docs/mission-council.md`.
+
 ### Prompt families and v10 prompt OS — decomposed, not injected
 
 `agency/prompt_families/` compiles reusable prompt families through the existing prompt compiler. It freezes an `InvariantSet`, varies declared axes, rejects concepts whose SHA-256 signature repeats the `ConceptLedger` (repairing the highest-level axis first, at most 3 passes), and terminates at `PROMPT_PACKAGE_READY`. `AssetRequirement` gained additive `exact_text` (blocking if not preserved verbatim), typed `references` and `series`. `ComputationEvidence` never upgrades a premise to VERIFIED. Methodology lives in the `pg.copy_content.v1`, `pg.attention.hooks.v1` and `pg.visual_prompting.v1` packs. The supplied spec is provenance only (`docs/imported-specs/`). CLI: `prompt-family`. Details: `docs/brand-content-visual-prompt-os.md`.
@@ -319,6 +341,15 @@ Details: `docs/ace-v12/README.md`.
 ### UI/UX design compiler and DTCG tokens
 
 `services/langgraph/agency/ui_ux/` compiles product/brand/audience state into a strict `UIUXDesignIR` (IA, flows, genome, tiered DTCG tokens, screens, the full 29-state matrix, responsive transforms, WCAG 2.2 requirements, AI-trust rules, implementation map) — pure, deterministic, terminal `UIUX_SPEC_READY`, never generates UI. It runs as a deterministic subprocess of `design_brief` for digital-product briefs (`DesignBrief.ui_ux`; non-UI briefs get `null`) and inside the prompt compiler for `PromptFamily.UI_UX` (`PromptPackage.ui_ux_design`); other families are byte-identical. WCAG 2.2 is normative for every contrast verdict; APCA is advisory only and never merged with it; vendor design systems are reference-only. `agency/design_tokens.py` is the **only** DTCG 2025.10 compiler (frontend `compile_tokens.py`, runtime `_build_design_system`, UI/UX) — don't add a second. Frontend tokens: edit `apps/web/tokens/amc.tokens.json`, run `pnpm tokens:build`; `apps/web/app/tokens.css` is generated and checked for freshness by `verify_design_tokens.py`; `pnpm --filter @amc/web verify:ui` is a TS-AST gate. `UIUXDesignIR` has a strict Zod twin (`packages/shared/src/schemas/uiux.ts`) whose parity is proven by a compiler-generated fixture — if you change the Pydantic models, regenerate `packages/shared/tests/fixtures/uiux-design-ir.json`. Details: `docs/ui-ux-design-compiler.md`.
+
+### Web pages and motion — design skill first
+
+The project skill `.claude/skills/premium-web-design/SKILL.md` is the workflow for building, restyling or animating web pages (landing pages, heroes, navbars, pricing, 21st.dev blocks).
+
+- **Tokens.** The type scale (major third, `text-caption`…`text-display-lg`) and 8px-grid section spacing (`py-block`/`py-section`/`py-section-lg`) are DTCG tokens in `apps/web/tokens/amc.tokens.json`, mapped in `tailwind.config.ts`.
+- **Motion.** Animations use Framer Motion through `apps/web/components/motion/Motion.tsx` (`Reveal`, `Stagger`/`StaggerItem`, `HoverLift`): `LazyMotion` + `domAnimation`, `reducedMotion="user"`, and never on above-the-fold/LCP content. Its numbers mirror the motion tokens in `lib/design/motion.ts`; `tests/motion-tokens.test.ts` fails on drift.
+- **Agency side.** The same methodology is the advisory guidance pack `pg.web_experience.v1`. It routes only for `UI_UX` web requests and is excluded for image/video/print families.
+- **Performance.** A Lighthouse 90+ claim needs a measured mobile run on a production build: `npx -y lighthouse@13.5.0` with `CHROME_PATH` set to the Playwright Chromium.
 
 ### The fail-closed integration pattern
 

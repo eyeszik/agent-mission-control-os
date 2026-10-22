@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import {
-  BarChart3, Bell, FolderKanban, LayoutDashboard, Menu, Moon, Package, Palette, Plug, Search, Settings, ShieldCheck, Sun,
+  BarChart3, Bell, Bot, FolderKanban, LayoutDashboard, Menu, Moon, Package, Palette, Plug, Search, Settings, ShieldCheck, Sun,
   Users, Workflow, X,
 } from 'lucide-react';
 import { listProjects } from '../../lib/api/projects';
@@ -14,6 +14,7 @@ import { OverviewView } from './views/OverviewView';
 import { ClientsView } from './views/ClientsView';
 import { ProjectsView } from './views/ProjectsView';
 import { MissionsView } from './views/MissionsView';
+import { MissionDashboard } from '../missions/MissionDashboard';
 import { StudioView } from './views/StudioView';
 import { ApprovalsView } from './views/ApprovalsView';
 import { DeliverablesView } from './views/DeliverablesView';
@@ -26,6 +27,7 @@ const NAV: { id: AgencySection; label: string; Icon: typeof LayoutDashboard }[] 
   { id: 'clients', label: 'Clients', Icon: Users },
   { id: 'projects', label: 'Projects', Icon: FolderKanban },
   { id: 'missions', label: 'Missions', Icon: Workflow },
+  { id: 'council', label: 'Mission Council', Icon: Bot },
   { id: 'studio', label: 'Creative Studio', Icon: Palette },
   { id: 'approvals', label: 'Approvals', Icon: ShieldCheck },
   { id: 'deliverables', label: 'Deliverables', Icon: Package },
@@ -64,6 +66,7 @@ function View({ section }: { section: AgencySection }) {
     case 'clients': return <ClientsView />;
     case 'projects': return <ProjectsView />;
     case 'missions': return <MissionsView />;
+    case 'council': return <MissionDashboard />;
     case 'studio': return <StudioView />;
     case 'approvals': return <ApprovalsView />;
     case 'deliverables': return <DeliverablesView />;
@@ -139,7 +142,7 @@ function CommandPalette({ commands }: { commands: Command[] }) {
   );
 }
 
-export function AgencyShell() {
+export function AgencyShell({ initialSection }: { initialSection?: AgencySection } = {}) {
   const [theme, setTheme] = useState<Theme>('system');
   const [online, setOnline] = useState(true);
   useEffect(() => { setTheme(readTheme()); }, []);
@@ -164,6 +167,7 @@ export function AgencyShell() {
   const setNavOpen = useAgencyStore((s) => s.setNavOpen);
   const setPaletteOpen = useAgencyStore((s) => s.setPaletteOpen);
   const inspected = useAgencyStore((s) => s.inspected);
+  useEffect(() => { if (initialSection) setSection(initialSection); }, [initialSection, setSection]);
 
   const me = useLoad(getMe, []);
   const projects = useLoad(listProjects, []);

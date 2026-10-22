@@ -1326,6 +1326,109 @@ _MIGRATIONS = [
             ON ace_provenance(project_id, sequence);
     """),
 
+    (19, """
+        -- Mission council: ideas, engine state, checkpoints, blueprints, tool audits.
+        -- Additive only. A mission is a runs row (status, approvals and run_events are
+        -- reused). Mirrors supabase/migrations/20261022_amc_mission_council_v1.sql.
+        CREATE TABLE IF NOT EXISTS council_ideas (
+            idea_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('OPEN','PROMOTED')),
+            created_by TEXT NOT NULL,
+            seed_key TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_council_ideas_seed ON council_ideas(tenant_id, seed_key) WHERE seed_key IS NOT NULL;
+        CREATE INDEX IF NOT EXISTS idx_council_ideas_project ON council_ideas(project_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS council_missions (
+            mission_id TEXT PRIMARY KEY REFERENCES runs(run_id) ON DELETE CASCADE,
+            idea_id TEXT NOT NULL REFERENCES council_ideas(idea_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            engine TEXT NOT NULL CHECK (engine IN ('langgraph','crewai','autogen')),
+            model_mode TEXT NOT NULL CHECK (model_mode IN ('MOCK_DETERMINISTIC','PROVIDER')),
+            phase TEXT NOT NULL CHECK (phase IN ('STRATEGY','AUDIT','GATE','PROTOTYPE','DONE')),
+            version INTEGER NOT NULL DEFAULT 0,
+            lease_owner TEXT,
+            lease_expires_at TEXT,
+            approval_id TEXT,
+            approval_subject_hash TEXT,
+            consumed_approval_id TEXT,
+            cancel_requested INTEGER NOT NULL DEFAULT 0,
+            attempts INTEGER NOT NULL DEFAULT 0,
+            last_error TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_council_missions_idea ON council_missions(idea_id, created_at);
+        CREATE INDEX IF NOT EXISTS idx_council_missions_project ON council_missions(project_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS council_checkpoints (
+            checkpoint_id TEXT PRIMARY KEY,
+            mission_id TEXT NOT NULL REFERENCES council_missions(mission_id) ON DELETE CASCADE,
+            seq INTEGER NOT NULL CHECK (seq >= 0),
+            phase TEXT NOT NULL,
+            engine TEXT NOT NULL,
+            state TEXT NOT NULL,
+            state_hash TEXT NOT NULL,
+            prev_hash TEXT NOT NULL,
+            native_checkpoint_id TEXT,
+            created_at TEXT NOT NULL,
+            UNIQUE (mission_id, seq)
+        );
+
+        CREATE TABLE IF NOT EXISTS council_blueprints (
+            blueprint_id TEXT PRIMARY KEY,
+            idea_id TEXT NOT NULL REFERENCES council_ideas(idea_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('DRAFT','PROMOTED')),
+            content TEXT NOT NULL,
+            content_hash TEXT NOT NULL,
+            sources TEXT NOT NULL,
+            verification TEXT,
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            promoted_by TEXT,
+            promoted_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_council_blueprints_idea ON council_blueprints(idea_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS council_tool_audits (
+            audit_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            mission_id TEXT,
+            seat TEXT,
+            tool_id TEXT NOT NULL,
+            sensitivity TEXT NOT NULL,
+            decision TEXT NOT NULL CHECK (decision IN ('ALLOWED','DENIED','FAILED','TIMEOUT')),
+            reason_code TEXT NOT NULL,
+            args_redacted TEXT NOT NULL,
+            args_hash TEXT NOT NULL,
+            result_summary TEXT,
+            approval_id TEXT,
+            action_hash TEXT,
+            duration_ms INTEGER,
+            created_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_council_tool_audits_mission ON council_tool_audits(mission_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS council_approval_consumptions (
+            approval_id TEXT NOT NULL,
+            mission_id TEXT NOT NULL,
+            action_hash TEXT NOT NULL,
+            consumed_by TEXT NOT NULL,
+            consumed_at TEXT NOT NULL,
+            PRIMARY KEY (approval_id, action_hash)
+        );
+    """),
+
 ]
 
 

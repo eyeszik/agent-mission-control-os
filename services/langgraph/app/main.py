@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import os
+import re
 from contextlib import asynccontextmanager
+from uuid import uuid4
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -18,6 +20,7 @@ from services.langgraph.api.routes import (
     design,
     events,
     foundry,
+    missions,
     operations,
     portfolio,
     project_ops,
@@ -44,6 +47,11 @@ API_VERSION = "0.2.0"
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     assert_runtime_configuration()
+    if (os.environ.get("COUNCIL_RECOVER_ON_STARTUP") or "").strip().lower() in {"1", "true", "yes", "on"}:
+        # Resubmit council missions whose worker stopped (expired lease); paused missions need nothing.
+        from services.langgraph.agency.council.service import recover_stale
+
+        recover_stale()
     yield
     close_checkpointer()
 
@@ -55,6 +63,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 register_error_handlers(app)
+
+_REQUEST_ID = re.compile(r"^[A-Za-z0-9._-]{8,128}$")
+
+
+@app.middleware("http")
+async def request_id_middleware(request: Request, call_next):
+    # Echo a well-formed inbound X-Request-ID, otherwise mint one; every response carries it.
+    inbound = request.headers.get("X-Request-ID") or ""
+    request_id = inbound if _REQUEST_ID.match(inbound) else uuid4().hex
+    request.state.request_id = request_id
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    return response
 
 
 
@@ -72,7 +93,8 @@ app.add_middleware(
     # Every method a route uses must be listed, or browsers fail the preflight
     # (test_ace12_ui_contract checks this against the route table).
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "Last-Event-ID", "X-AMC-Tenant"],
+    allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "Last-Event-ID", "X-AMC-Tenant", "X-Request-ID"],
+    expose_headers=["X-Request-ID"],
 )
 
 if hmac_ingress_enabled():
@@ -93,6 +115,7 @@ app.include_router(operations.router, prefix="/operations", tags=["Operations"])
 app.include_router(runtime.router, prefix="/runtime", tags=["Runtime"])
 app.include_router(design.router, prefix="/design", tags=["Design Mode"])
 app.include_router(foundry.router, prefix="/foundry", tags=["Creative Foundry"])
+app.include_router(missions.router, prefix="/missions", tags=["Mission Council"])
 app.include_router(vnexus.router, prefix="/vnexus", tags=["VNEXUS"])
 app.include_router(actions.router, prefix="/actions", tags=["Governed Actions"])
 app.include_router(agency_os.router, prefix="/agency-os", tags=["Agency OS"])

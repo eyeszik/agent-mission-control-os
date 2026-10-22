@@ -106,6 +106,39 @@ jobs:
           AMC_EXPORT_ROOT: /tmp/amc-exports-pg-${{ github.run_id }}
         run: python -m pytest services/langgraph/tests -q
 
+  backend-council:
+    name: Mission Council engines (CrewAI + AutoGen + MCP, offline)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install backend with the council extra
+        run: python -m pip install -e "./services/langgraph[dev,council]"
+
+      - name: Verify installed dependency consistency
+        run: python -m pip check
+
+      # Every engine runs on the deterministic mock model: no key, no network.
+      - name: Run mission council tests on all three engines
+        env:
+          AMC_DATABASE_BACKEND: sqlite
+          AMC_DB_PATH: /tmp/amc_council_${{ github.run_id }}.db
+          AMC_EXPORT_ROOT: /tmp/amc-council-exports-${{ github.run_id }}
+          CREWAI_DISABLE_TELEMETRY: "true"
+          OTEL_SDK_DISABLED: "true"
+        run: >-
+          python -m pytest -q
+          services/langgraph/tests/test_missions_council.py
+          services/langgraph/tests/test_council_engines.py
+          services/langgraph/tests/test_council_gateway.py
+          services/langgraph/tests/test_council_ported_scenarios.py
+          services/langgraph/tests/test_council_contracts.py
+
   frontend:
     name: Frontend (contracts + typecheck + test + build)
     runs-on: ubuntu-latest
@@ -294,6 +327,26 @@ jobs:
           python -m pip install -e "./services/langgraph[dev]" pip-audit
           python -m pip install --upgrade "setuptools>=83.0.0"
           python -m pip_audit
+
+      # The optional council extra (CrewAI, AutoGen, MCP). CrewAI 1.15.28, the latest
+      # release, pins chromadb~=1.5.9, mcp~=1.28.1 and (via crewai-cli) uv~=0.11.6, so
+      # these advisories cannot be upgraded away while CrewAI is installed. None is
+      # reachable from the council (docs/mission-council.md, "Dependency advisories"):
+      #   PYSEC-2026-311/3813/3814/3815  chromadb server API/RBAC; no Chroma server runs
+      #   CVE-2026-59951                 mcp Streamable HTTP server; council uses stdio client
+      #   PYSEC-2026-4321                uv CLI TLS roots; nothing runs uv
+      # Any other advisory in this tree fails the job. Remove an ID once its pin lifts.
+      - name: Audit the optional council extra
+        run: |
+          python -m pip install -e "./services/langgraph[dev,council]"
+          python -m pip install --upgrade "setuptools>=83.0.0"
+          python -m pip_audit \
+            --ignore-vuln PYSEC-2026-311 \
+            --ignore-vuln PYSEC-2026-3813 \
+            --ignore-vuln PYSEC-2026-3814 \
+            --ignore-vuln PYSEC-2026-3815 \
+            --ignore-vuln CVE-2026-59951 \
+            --ignore-vuln PYSEC-2026-4321
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
