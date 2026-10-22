@@ -64,6 +64,7 @@ export default function MissionControlPage() {
           <div className="h-6 w-px bg-zinc-800" />
           <ApprovalInbox />
           <a href="/agency" className="text-xs text-zinc-300 underline-offset-2 hover:text-zinc-100 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60">Agency OS</a>
+          <a href="/missions" className="text-xs text-zinc-300 underline-offset-2 hover:text-zinc-100 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60">Mission Council</a>
           {productionAuth && <button type="button" onClick={() => { signOut(); router.replace('/login'); }} className="text-xs text-zinc-400 hover:text-zinc-100">Sign out</button>}
         </div>
       </header>

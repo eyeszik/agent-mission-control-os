@@ -6,6 +6,17 @@ import { getAppConfig, usesSupabaseAuth } from '../config';
 import { getLogger } from '../logger';
 
 const MAX_RECONNECT_ATTEMPTS = 6;
+
+interface StreamSchema {
+  safeParse(input: unknown): { success: true; data: { sequence: number } } | { success: false; error: { flatten(): unknown } };
+}
+
+export interface SSEClientOptions {
+  /** Validates each payload; defaults to the agency RunEventSchema. */
+  schema?: StreamSchema;
+  /** Bus event each accepted payload is emitted on; defaults to 'run_event_received'. */
+  busEvent?: string;
+}
 const BASE_RECONNECT_MS = 500;
 
 /**
@@ -19,7 +30,12 @@ export class SSEClient {
   private stopped = false;
   private lastSequence = -1;
 
-  constructor(private runId: string, private bus: EventEmitter) {
+  private schema: StreamSchema;
+  private busEvent: string;
+
+  constructor(private runId: string, private bus: EventEmitter, options: SSEClientOptions = {}) {
+    this.schema = options.schema ?? (RunEventSchema as unknown as StreamSchema);
+    this.busEvent = options.busEvent ?? 'run_event_received';
     if (typeof window !== 'undefined') {
       const stored = window.sessionStorage.getItem(this.storageKey());
       if (stored !== null && Number.isInteger(Number(stored))) {
@@ -116,15 +132,15 @@ export class SSEClient {
   private handleMessage(payload: string) {
     try {
       const decoded: unknown = JSON.parse(payload);
-      const parsed = RunEventSchema.safeParse(decoded);
+      const parsed = this.schema.safeParse(decoded);
       if (!parsed.success) {
         getLogger().error('Rejected invalid SSE payload', { run_id: this.runId, issues: parsed.error.flatten() });
         return;
       }
-      const data: RunEvent = parsed.data;
+      const data = parsed.data as RunEvent;
       if (data.sequence <= this.lastSequence) return;
       this.persistSequence(data.sequence);
-      this.bus.emit('run_event_received', data);
+      this.bus.emit(this.busEvent, parsed.data);
     } catch (err) {
       getLogger().error('Failed to parse SSE message', { run_id: this.runId, err });
     }
