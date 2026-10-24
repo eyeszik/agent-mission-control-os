@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from services.langgraph.core.errors import register_error_handlers
 from services.langgraph.api.routes import (
     actions,
+    agency_framework,
     agency_os,
     agency,
     analytics,
@@ -119,6 +120,7 @@ app.include_router(missions.router, prefix="/missions", tags=["Mission Council"]
 app.include_router(vnexus.router, prefix="/vnexus", tags=["VNEXUS"])
 app.include_router(actions.router, prefix="/actions", tags=["Governed Actions"])
 app.include_router(agency_os.router, prefix="/agency-os", tags=["Agency OS"])
+app.include_router(agency_framework.router, prefix="/agency-framework", tags=["Agency Operating Framework"])
 app.include_router(compiled_agency.router, prefix="/compiled-agency", tags=["Compiled Agency"])
 app.include_router(projects.router, prefix="/projects", tags=["Projects"])
 app.include_router(project_ops.router, prefix="/projects", tags=["Project Operations"])

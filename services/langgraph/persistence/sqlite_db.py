@@ -1428,6 +1428,54 @@ _MIGRATIONS = [
             PRIMARY KEY (approval_id, action_hash)
         );
     """),
+    (20, """
+        -- Agency operating framework: per-project plans pinned to the immutable
+        -- 295-task catalog, and one instance row per task. Additive only. Evidence,
+        -- artifacts, decisions, approvals and audit events stay in their existing
+        -- stores and are referenced here, never copied. Mirrors
+        -- supabase/migrations/20261024_amc_agency_framework_v1.sql.
+        CREATE TABLE IF NOT EXISTS agency_framework_plans (
+            plan_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            catalog_id TEXT NOT NULL,
+            catalog_version TEXT NOT NULL,
+            catalog_sha256 TEXT NOT NULL,
+            archetype TEXT NOT NULL,
+            engagement_scope TEXT NOT NULL DEFAULT '',
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE (project_id, catalog_version)
+        );
+
+        CREATE TABLE IF NOT EXISTS agency_task_instances (
+            plan_id TEXT NOT NULL REFERENCES agency_framework_plans(plan_id) ON DELETE CASCADE,
+            task_id TEXT NOT NULL,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            module_id TEXT NOT NULL,
+            stage_gate TEXT NOT NULL,
+            applicability TEXT NOT NULL CHECK (applicability IN ('UNASSESSED','REQUIRED','CONDITIONAL','NOT_APPLICABLE')),
+            applicability_reason TEXT,
+            applicability_by TEXT,
+            state TEXT NOT NULL CHECK (state IN ('BACKLOG','READY','ACTIVE','IN_REVIEW','VERIFIED','APPROVED','BLOCKED','INVALIDATED','NOT_APPLICABLE')),
+            blocked_from TEXT,
+            status_reason TEXT,
+            assignee_role TEXT NOT NULL,
+            evidence_refs TEXT NOT NULL DEFAULT '[]',
+            artifact_refs TEXT NOT NULL DEFAULT '[]',
+            decision_refs TEXT NOT NULL DEFAULT '[]',
+            submitted_by TEXT,
+            verification TEXT,
+            approval_ref TEXT,
+            version INTEGER NOT NULL DEFAULT 0,
+            updated_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (plan_id, task_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_agency_task_instances_project ON agency_task_instances(project_id, module_id);
+    """),
 
 ]
 
