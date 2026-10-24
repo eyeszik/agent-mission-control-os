@@ -53,6 +53,7 @@ from services.langgraph.security.auth import Principal
 
 from .candidates import CANDIDATE_REF
 from .catalog import load_catalog
+from .claims import detect_claims
 from .contracts import (
     PIPELINE,
     POLICY_VERSION,
@@ -98,6 +99,11 @@ class Base(_Strict):
         return v
 
 
+class ClaimEvidence(_Strict):
+    claim: str = Field(min_length=1, max_length=400)
+    evidence_refs: list[str] = Field(min_length=1, max_length=10)
+
+
 class MeaningInput(Base):
     interpreted_obligation: str = Field(min_length=3, max_length=2000)
     requirement_text: str = Field(default="", max_length=4000)
@@ -107,6 +113,7 @@ class MeaningInput(Base):
     output_refs: list[str] = Field(default_factory=list, max_length=20)
     ambiguities: list[str] = Field(default_factory=list, max_length=30)
     advisory_semantic_score: float | None = Field(default=None, ge=0.0, le=1.0)
+    claim_evidence: list[ClaimEvidence] = Field(default_factory=list, max_length=50)
 
     @field_validator("output_refs")
     @classmethod
@@ -296,8 +303,44 @@ def _dependents(edges: list[dict], start: str, budget: int) -> tuple[list[str], 
 # ------------------------------------------------------------------------------ the five builders
 
 
+def _claim_inventory(plan: dict, outputs: list[tuple[str, str]], links: list[ClaimEvidence], adapter: Any) -> dict[str, Any]:
+    """Detection, then substantiation from refs a person linked, then the policy route. No decision."""
+    from .claims import normalize
+
+    items: dict[str, dict[str, Any]] = {}
+    for ref, text in outputs:
+        for claim in detect_claims(text):
+            entry = items.setdefault(claim.normalized, {**claim.as_dict(), "locations": [], "evidence_refs": []})
+            entry["locations"].append(ref)
+    for link in links:
+        key_ = normalize(link.claim)
+        if key_ not in items:
+            raise FrameworkError("UNKNOWN_CLAIM", "Evidence can only be linked to a claim found in the outputs", 422,
+                                 {"claim": link.claim})
+        checks = [resolve_ref(r, tenant_id=plan["tenant_id"], project_id=plan["project_id"], adapter=adapter)
+                  for r in link.evidence_refs]
+        bad = [c for c in checks if not c["ok"]]
+        if bad:
+            raise FrameworkError("REF_REJECTED", "Linked evidence must resolve, reviewed and fresh, in this project", 422,
+                                 {"checks": bad})
+        items[key_]["evidence_refs"].extend(link.evidence_refs)
+    for entry in items.values():
+        if entry["substantiation_need"] == "REVIEW_AS_OPINION":
+            entry["substantiation"] = "REVIEW_AS_OPINION"
+        else:
+            # Linked is not verified: a person still judges whether the evidence supports the claim.
+            entry["substantiation"] = "EVIDENCE_LINKED_UNVERIFIED" if entry["evidence_refs"] else "UNSUBSTANTIATED"
+    unsubstantiated = sum(1 for e in items.values() if e["substantiation"] == "UNSUBSTANTIATED")
+    return {
+        "items": list(items.values()),
+        "unsubstantiated": unsubstantiated,
+        "state": "NO_CLAIMS" if not items else ("UNSUBSTANTIATED_CLAIMS" if unsubstantiated else "EVIDENCE_LINKED"),
+        "decision": "NONE: a person decides at review; nothing is rejected or approved here",
+    }
+
+
 def _meaning(principal: Principal, plan: dict, data: MeaningInput, adapter: Any) -> tuple[dict[str, Any], str, list[str]]:
-    texts, outputs = [], []
+    texts, outputs, raw = [], [], []
     for ref in data.output_refs:
         check, text = _artifact_text(plan, ref, adapter)
         if not check["attachable"]:
@@ -306,6 +349,8 @@ def _meaning(principal: Principal, plan: dict, data: MeaningInput, adapter: Any)
                         "readable": text is not None})
         if text is not None:
             texts.append(text.lower())
+            raw.append((ref, text))
+    claim_inventory = _claim_inventory(plan, raw, data.claim_evidence, adapter)
     corpus = "\n".join(texts)
     qualifiers = [{"qualifier": q, "found": q.lower() in corpus} if texts else {"qualifier": q, "found": None}
                   for q in data.qualifiers]
@@ -330,6 +375,7 @@ def _meaning(principal: Principal, plan: dict, data: MeaningInput, adapter: Any)
         "ambiguities": data.ambiguities,
         "coverage_state": coverage,
         "review_status": "NEEDS_HUMAN" if coverage != "COVERED" else "READY_FOR_REVIEW",
+        "claims": claim_inventory,
         "advisory": {"semantic_score": data.advisory_semantic_score,
                      "note": "advisory only; it never changes coverage_state and never approves a requirement"},
     }, coverage, [o["ref"] for o in outputs]
@@ -343,9 +389,12 @@ def _detect(base: str, variant: str) -> set[str]:
         return re.sub(r"<[^>]+>", " ", markup)
 
     found: set[str] = set()
-    # Known blind spot, reported as a false negative by the fixtures: extract_claims
-    # ignores sentences shorter than six words, so a change inside one is missed.
-    if norm(extract_claims(text_of(base))) != norm(extract_claims(text_of(variant))):
+    # Sentence claims (six words and up) plus every claim-bearing segment, however
+    # short, so a change to "Free" or "Ships in 2 days." is seen.
+    def surface(markup: str) -> tuple[list[str], list[str]]:
+        return norm(extract_claims(text_of(markup))), [c.normalized for c in detect_claims(markup)]
+
+    if surface(base) != surface(variant):
         found.add("CLAIM_CHANGED")
     lang = re.compile(r'\blang\s*=\s*"([^"]*)"', re.IGNORECASE)
     if lang.findall(base) != lang.findall(variant):
