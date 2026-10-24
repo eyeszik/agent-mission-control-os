@@ -336,6 +336,11 @@ Details: `docs/mission-council.md`.
 - **Refs.** `refs.resolve_ref` reads the owning store (knowledge, kernel evidence/decisions, VNEXUS genome, artifact head + byte read-back). Synthetic sources are labelled and never client proof.
 - **Gates.** Evaluated from task state; approval subject `agency-gate:{plan}:{gate}` bound to `evaluation_hash`; strictly in order.
 - **Assurance.** The five records are immutable `qa_report` artifacts (`assurance/<kind>/<id>`), hash-sealed and integrity-checked on read; they never approve, release or mutate the canonical graph.
+- **Release candidates.** A Review may bind delivery's sealed candidate (`release_candidate_ref`). `candidates.inspect` re-checks it read-only:
+  - reviewer: an approver who did not start the run;
+  - artifact hashes are recomputed from the run payload via the binding layer's own `_workspace_artifact_specs` / `_agency_subject_hash`, never a second hash scheme;
+  - the Review never opens a second release decision; the run's approval and delivery stay the authority.
+- **Claims.** `claims.py` detects marketing claims by signal, not length. Detection, substantiation (person-linked refs only, never "verified"), policy (always human review) and decision stay separate. Don't change `project_os.knowledge.extract_claims`; its six-word floor is right for ingestion.
 - **KPIs.** Only from `measurement` evidence and plan events; a zero denominator is `NOT_MEASURED`.
 - **Contracts.** Zod twins in `packages/shared/src/schemas/agencyFramework.ts`, fixture `packages/shared/tests/fixtures/agency-framework.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_agency_framework_contracts.py`).
 
