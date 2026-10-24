@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from enum import Enum
 
-RUN_FSM_VERSION = "amc-run-fsm/v1"
+RUN_FSM_VERSION = "amc-run-fsm/v2"
 
 
 class RunState(str, Enum):
@@ -67,6 +67,12 @@ TRANSITIONS: dict[RunState, frozenset[RunState]] = {
     S.PAUSED: frozenset({S.SCHEDULED, S.STOPPED}),
     S.STOPPED: frozenset(),
 }
+
+
+# An authenticated control-plane stop first revokes the lease/fence. Workers
+# still need transition guards; this adds no worker or requester authority.
+for _stoppable in IN_FLIGHT:
+    TRANSITIONS[_stoppable] = TRANSITIONS[_stoppable] | frozenset({S.STOPPED})
 
 
 class IllegalTransition(ValueError):

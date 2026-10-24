@@ -4,6 +4,7 @@ import json
 import os
 import sqlite3
 from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import datetime
 from typing import Any, Iterator
 from uuid import UUID
@@ -12,6 +13,7 @@ from services.langgraph.core.constants import AMC_DATABASE_BACKENDS, DB_BACKEND_
 from services.langgraph.persistence import sqlite_db
 
 _VALID_BACKENDS = frozenset(AMC_DATABASE_BACKENDS)
+_JOINED_SESSION: ContextVar[Any] = ContextVar("amc_explicit_atomic_session", default=None)
 
 
 def database_backend() -> str:
@@ -83,6 +85,10 @@ class DBSession:
 
 @contextmanager
 def transaction(*, write: bool = False) -> Iterator[DBSession]:
+    joined = _JOINED_SESSION.get()
+    if joined is not None:
+        yield joined
+        return
     postgres = is_postgres()
     if not postgres:
         # Resolve the path at call time so init_db() and this connection always
@@ -129,3 +135,19 @@ def ping_database() -> bool:
     with transaction() as db:
         row = db.execute("SELECT 1 AS ok").fetchone()
         return bool(row and row["ok"] == 1)
+
+
+@contextmanager
+def atomic_transaction() -> Iterator[DBSession]:
+    """Explicitly compose existing persistence APIs into one transaction.
+
+    Ordinary callers keep their previous behavior. Only code inside this
+    scope joins a session; escaping exceptions roll the entire scope back.
+    Never enter this scope across an await or around untrusted worker code.
+    """
+    with transaction(write=True) as db:
+        token = _JOINED_SESSION.set(db)
+        try:
+            yield db
+        finally:
+            _JOINED_SESSION.reset(token)
