@@ -83,8 +83,9 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
 
 export function Skeleton({ lines = 3 }: { lines?: number }) {
   return (
-    <div aria-busy="true" aria-label="Loading" className="flex flex-col gap-2">
-      {Array.from({ length: lines }, (_, i) => <div key={i} className="h-4 animate-pulse rounded-sm bg-surface-raised" />)}
+    <div role="status" aria-busy="true" aria-label="Loading" className="flex flex-col gap-2">
+      {/* The pulse only runs when the viewer has not asked for reduced motion. */}
+      {Array.from({ length: lines }, (_, i) => <div key={i} className="h-4 rounded-sm bg-surface-raised motion-safe:animate-pulse" />)}
     </div>
   );
 }

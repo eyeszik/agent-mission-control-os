@@ -79,6 +79,8 @@ function ModuleNavigator({ view, modules, selected, onSelect }: {
   );
 }
 
+const taskButtonId = (taskId: string) => `afw-task-${taskId}`;
+
 function ModuleTasks({ planId, moduleId, onOpen }: { planId: string; moduleId: string; onOpen: (taskId: string) => void }) {
   const refresh = useAgencyStore((s) => s.refresh);
   const [state, setState] = useState('');
@@ -138,7 +140,7 @@ function ModuleTasks({ planId, moduleId, onOpen }: { planId: string; moduleId: s
         <ul className="flex flex-col gap-1" aria-label={`Tasks in ${moduleId}`}>
           {tasks.data.map((t) => (
             <li key={t.task_id}>
-              <button type="button" onClick={() => onOpen(t.task_id)}
+              <button type="button" id={taskButtonId(t.task_id)} onClick={() => onOpen(t.task_id)}
                 className={`flex w-full flex-col gap-1 rounded-md border border-line px-3 py-2 text-left hover:bg-surface-raised ${focusRing}`}>
                 <span className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm text-fg-strong"><span className="font-mono text-xs text-fg">{t.task_id}</span> {t.title}</span>
@@ -164,6 +166,11 @@ function PlanDashboard({ planId }: { planId: string }) {
   const [moduleId, setModuleId] = useState('AGM-01');
   const [taskId, setTaskId] = useState<string | null>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  // Closing the inspector returns keyboard focus to the task that opened it (WCAG 2.4.3).
+  const closeTask = (closed: string) => {
+    setTaskId(null);
+    requestAnimationFrame(() => document.getElementById(taskButtonId(closed))?.focus());
+  };
   const modules = useMemo(() => catalog.data?.modules ?? [], [catalog.data]);
   const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
@@ -208,7 +215,7 @@ function PlanDashboard({ planId }: { planId: string }) {
               <ModuleTasks planId={planId} moduleId={moduleId} onOpen={setTaskId} />
             </Card>
             <Card title="Task" id="afw-inspector">
-              {taskId ? <TaskInspector key={taskId} planId={planId} taskId={taskId} onClose={() => setTaskId(null)} /> : <Empty title="Select a task">Objective, owner, refs, checks, approvals and history appear here.</Empty>}
+              {taskId ? <TaskInspector key={taskId} planId={planId} taskId={taskId} onClose={() => closeTask(taskId)} /> : <Empty title="Select a task">Objective, owner, refs, checks, approvals and history appear here.</Empty>}
             </Card>
           </div>
         )}
