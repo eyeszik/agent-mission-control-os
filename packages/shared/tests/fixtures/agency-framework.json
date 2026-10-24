@@ -26,14 +26,14 @@
     "items": [
       {
         "author_actor_id": "afw-author",
-        "created_at": "2026-10-24T02:51:26.377320+00:00",
+        "created_at": "2026-10-24T04:46:44.711531+00:00",
         "is_head": true,
         "kind": "meaning",
-        "record_hash": "9b6934cdd5e71dc4db2105347fd690292cc0144e76cfc08f10946163aba3416f",
-        "record_id": "asr-4616aac9a4fb432abe06",
+        "record_hash": "4e46f00e19c730ede3c37b5496aa8f0bccb51de8ce9c48c28b7e363421e2971b",
+        "record_id": "asr-d893f8343f5345a89dad",
         "status": "COVERED",
         "subject_refs": [
-          "artifact:art-proj-afw-633a01997b-pricing-page@v1"
+          "artifact:art-proj-afw-dd6be44ca1-pricing-page@v1"
         ],
         "supersedes_ref": null,
         "task_ids": [
@@ -42,24 +42,48 @@
       },
       {
         "author_actor_id": "afw-author",
-        "created_at": "2026-10-24T02:51:26.527552+00:00",
+        "created_at": "2026-10-24T04:46:45.356665+00:00",
         "is_head": true,
         "kind": "review",
-        "record_hash": "e8e13073478911783e6ee2c000f4bc0a4d9e835afa18f287c11c695a60237d0b",
-        "record_id": "asr-768035444ca0473b8993",
+        "record_hash": "6b0bf6c79b0105579981ec988f6af2788396f571c0c8b4bf3e352c13d26099a1",
+        "record_id": "asr-c3e612491c644a75948a",
         "status": "NEEDS_HUMAN",
         "subject_refs": [
-          "artifact:art-proj-afw-633a01997b-pricing-page@v1"
+          "artifact:art-proj-afw-dd6be44ca1-pricing-page@v1"
         ],
         "supersedes_ref": null,
         "task_ids": []
+      },
+      {
+        "author_actor_id": "afw-inspector",
+        "created_at": "2026-10-24T04:46:59.556892+00:00",
+        "is_head": true,
+        "kind": "review",
+        "record_hash": "89db60e29c15a4affdb2f91a922b96b59d05da0c311b1fd3df06cfdd74c28b80",
+        "record_id": "asr-30cb2c9fcf244c9c8d76",
+        "status": "NEEDS_HUMAN",
+        "subject_refs": [
+          "release-candidate:afa450df-65d4-4613-a5c0-098df7511584",
+          "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set@v1",
+          "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-brand_core@v1",
+          "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec@v1",
+          "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package@v1",
+          "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec@v1",
+          "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set@v1",
+          "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec@v1",
+          "artifact:art-protected-afa450df-65d4-4613-a5c0-098df7511584@v1"
+        ],
+        "supersedes_ref": null,
+        "task_ids": [
+          "AGM-20-001"
+        ]
       }
     ]
   },
   "assurance_record": {
-    "artifact_id": "art-proj-afw-633a01997b-assurance-review-asr-768035444ca0473b8993",
+    "artifact_id": "art-proj-afw-dd6be44ca1-assurance-review-asr-c3e612491c644a75948a",
     "artifact_version": 1,
-    "content_hash": "37c5781ce695c360831ace74b34b6547ff3685216938c8db7449385ea204a343",
+    "content_hash": "19882908669f10302def27449aa67558481c22cd75664ea28bebe3ff13ee2abd",
     "integrity": {
       "problems": [],
       "status": "VERIFIED"
@@ -75,25 +99,29 @@
             {
               "bytes_read": 97,
               "hash_verified": true,
-              "ref": "artifact:art-proj-afw-633a01997b-pricing-page@v1"
+              "ref": "artifact:art-proj-afw-dd6be44ca1-pricing-page@v1",
+              "source": "object storage"
             }
           ]
         },
+        "blocking_findings": [],
         "candidate_manifest_ref": null,
         "candidate_subject_refs": [
           {
-            "artifact_id": "art-proj-afw-633a01997b-pricing-page",
+            "artifact_id": "art-proj-afw-dd6be44ca1-pricing-page",
             "content_hash": "e0f75bc00f323adb89d09d681a3307a0b6eeb9221ad0a1f5a56ffb5b66bad340",
-            "ref": "artifact:art-proj-afw-633a01997b-pricing-page@v1",
+            "ref": "artifact:art-proj-afw-dd6be44ca1-pricing-page@v1",
             "status": "OK",
             "version": 1
           }
         ],
         "decision_ref": null,
-        "decision_subject_hash": "17a70d0b66e22b5c03a35136c101a4382f6f9b13a4ee230530b52d9b9bd48b30",
+        "decision_subject_hash": "6ae74fb0c6f308f0727d6cc32225231c69094b1249c56e21e29470dd341c90c0",
         "dependency_snapshot_hash": "0c74c85746865cfbb1726655ec2a29605342333dcc9ab41b53f4ba73796a0f9b",
-        "dependency_snapshot_ref": "graph-snapshot:86c00169264b96e9",
+        "dependency_snapshot_ref": "graph-snapshot:d252e846b2ee7e65",
         "diff_refs": [],
+        "native_approval_ref": null,
+        "release_candidate": null,
         "reviewer_authority_scope": "decided only at /approvals/{id}/decide (approver role, separation of duties)",
         "status": "NEEDS_HUMAN",
         "summary": "",
@@ -101,26 +129,26 @@
         "unresolved_findings": []
       },
       "catalog_version_ref": "amc-agency-operating-framework/seed-v1@9a2c30e9e65c2a3a",
-      "created_at": "2026-10-24T02:51:26.527552+00:00",
-      "dependency_snapshot_hash": "86c00169264b96e9f0cf547031161da671e72699deaeafde9d882f0ab124ce0d",
+      "created_at": "2026-10-24T04:46:45.356665+00:00",
+      "dependency_snapshot_hash": "d252e846b2ee7e65e2ee29eff95fe346ed621563618d7cb4e6fd5d53670b659a",
       "evidence_refs": [],
       "execution_receipt_ref": null,
       "kind": "review",
-      "mission_id": "afp-230467805a9cb87e72901ed9",
-      "plan_id": "afp-230467805a9cb87e72901ed9",
+      "mission_id": "afp-f81ad2687e6dbe4f1e678e9e",
+      "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
       "privacy_classification": "internal",
-      "project_id": "proj-afw-633a01997b",
-      "record_hash": "e8e13073478911783e6ee2c000f4bc0a4d9e835afa18f287c11c695a60237d0b",
-      "record_id": "asr-768035444ca0473b8993",
+      "project_id": "proj-afw-dd6be44ca1",
+      "record_hash": "6b0bf6c79b0105579981ec988f6af2788396f571c0c8b4bf3e352c13d26099a1",
+      "record_id": "asr-c3e612491c644a75948a",
       "retention_policy_ref": "project-retention-default",
       "schema_version": "amc-assurance/v1",
       "status": "NEEDS_HUMAN",
-      "subject_artifact_id": "art-proj-afw-633a01997b-pricing-page",
+      "subject_artifact_id": "art-proj-afw-dd6be44ca1-pricing-page",
       "subject_content_hash": "e0f75bc00f323adb89d09d681a3307a0b6eeb9221ad0a1f5a56ffb5b66bad340",
       "subject_refs": [
-        "artifact:art-proj-afw-633a01997b-pricing-page@v1"
+        "artifact:art-proj-afw-dd6be44ca1-pricing-page@v1"
       ],
-      "subject_version_ref": "artifact:art-proj-afw-633a01997b-pricing-page@v1",
+      "subject_version_ref": "artifact:art-proj-afw-dd6be44ca1-pricing-page@v1",
       "supersedes_ref": null,
       "task_ids": [],
       "tenant_id": "tenant-events-test"
@@ -129,7 +157,7 @@
       "subject_current": true,
       "subjects": [
         {
-          "ref": "artifact:art-proj-afw-633a01997b-pricing-page@v1",
+          "ref": "artifact:art-proj-afw-dd6be44ca1-pricing-page@v1",
           "status": "OK"
         }
       ]
@@ -140,97 +168,97 @@
     "events": [
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:26.237932+00:00",
-        "event_id": "pev-09006920eac948ad86cd32b8807734f0",
+        "created_at": "2026-10-24T04:46:44.129042+00:00",
+        "event_id": "pev-d0f47d819ddb41cab570660faa997eda",
         "event_type": "APPROVED",
         "payload": {
-          "approval_id": "0efaf1fd-d876-459d-a472-bab6c855ebb1",
+          "approval_id": "9eb763ef-d487-4034-acce-205783ed8129",
           "kind": "agency_framework.approved",
-          "plan_id": "afp-230467805a9cb87e72901ed9",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
           "reviewer": "afw-reviewer",
-          "subject_hash": "931b8d48b76bf82657e10b24aa74a57c08653abb237c9bcff72eeb7a6801e63c",
+          "subject_hash": "98869ae784a6c94bdcb546d7c470854b500383417494b3806142c31beb2d198d",
           "task_id": "AGM-01-001",
           "version": 8
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 14,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v8",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v8",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:26.067984+00:00",
-        "event_id": "pev-3f05df65679f454e8ca80cd7e726fb85",
+        "created_at": "2026-10-24T04:46:43.107374+00:00",
+        "event_id": "pev-aab8484573b44572874eea5a54957152",
         "event_type": "COMMENT",
         "payload": {
-          "approval_id": "0efaf1fd-d876-459d-a472-bab6c855ebb1",
+          "approval_id": "9eb763ef-d487-4034-acce-205783ed8129",
           "kind": "agency_framework.approval_requested",
-          "plan_id": "afp-230467805a9cb87e72901ed9",
-          "subject_hash": "931b8d48b76bf82657e10b24aa74a57c08653abb237c9bcff72eeb7a6801e63c",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
+          "subject_hash": "98869ae784a6c94bdcb546d7c470854b500383417494b3806142c31beb2d198d",
           "task_id": "AGM-01-001",
           "version": 7
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 12,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v7",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v7",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:26.062417+00:00",
-        "event_id": "pev-cf98540e639249638dc73e0ec9e95939",
+        "created_at": "2026-10-24T04:46:43.102107+00:00",
+        "event_id": "pev-3006b9199fe94994861c81e596decdfc",
         "event_type": "APPROVAL_REQUIRED",
         "payload": {
-          "approval_id": "0efaf1fd-d876-459d-a472-bab6c855ebb1",
-          "mission_id": "afp-230467805a9cb87e72901ed9:AGM-01-001:931b8d48b76bf826:6",
-          "subject_hash": "931b8d48b76bf82657e10b24aa74a57c08653abb237c9bcff72eeb7a6801e63c"
+          "approval_id": "9eb763ef-d487-4034-acce-205783ed8129",
+          "mission_id": "afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:98869ae784a6c94b:6",
+          "subject_hash": "98869ae784a6c94bdcb546d7c470854b500383417494b3806142c31beb2d198d"
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 11,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v6",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v6",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-verifier",
-        "created_at": "2026-10-24T02:51:25.974538+00:00",
-        "event_id": "pev-5f22629cbdce4f02b153127e1501aafb",
+        "created_at": "2026-10-24T04:46:43.018699+00:00",
+        "event_id": "pev-74822e01fd724ed3aaf10760de9c21af",
         "event_type": "VERIFIED",
         "payload": {
           "kind": "agency_framework.verified",
           "origins": [
             "SYNTHETIC"
           ],
-          "plan_id": "afp-230467805a9cb87e72901ed9",
-          "proof_hash": "931b8d48b76bf82657e10b24aa74a57c08653abb237c9bcff72eeb7a6801e63c",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
+          "proof_hash": "98869ae784a6c94bdcb546d7c470854b500383417494b3806142c31beb2d198d",
           "task_id": "AGM-01-001",
           "version": 6
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 10,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v6",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v6",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:25.920165+00:00",
-        "event_id": "pev-4c1b31161c8440968c1e490fae00864c",
+        "created_at": "2026-10-24T04:46:42.973081+00:00",
+        "event_id": "pev-cc132e52ec6041568f48174366275e5f",
         "event_type": "COMMENT",
         "payload": {
           "from": "ACTIVE",
           "kind": "agency_framework.transition",
-          "plan_id": "afp-230467805a9cb87e72901ed9",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
           "reason": "",
           "task_id": "AGM-01-001",
           "to": "IN_REVIEW",
           "version": 5
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 9,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v5",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v5",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       }
@@ -890,13 +918,13 @@
       }
     ]
   },
-  "decision_ref": "decision:dec-3483bbddd0f1465fbcc8",
+  "decision_ref": "decision:dec-f1d7182ff84c4fcbaa24",
   "gates": {
     "gates": [
       {
         "approval_id": null,
         "criteria": "Reviewed research supporting segment and opportunity decisions; critical research voids explicitly blocked.",
-        "evaluation_hash": "040677aae8fe94635491a7e5ce451949a2f5445174aee4dd6fd52a4f17cf54ee",
+        "evaluation_hash": "572d190fac81e48b2d5ecfec7e4a3457de56e516e3d35b5912afbf7cc081e71d",
         "evidence_origins": [
           "SYNTHETIC"
         ],
@@ -960,7 +988,7 @@
       {
         "approval_id": null,
         "criteria": "Approved positioning, offer, client scope, VNEXUS governance inputs and journey blueprint.",
-        "evaluation_hash": "d0883280f7419ba38336e0d251c77181d48f9d52eb5725dc4fb770b2adb46466",
+        "evaluation_hash": "59e0db7b15135a9cfc9328f0f1d152efdcbad9f3f093bddc703839ceb4a6de93",
         "evidence_origins": [],
         "no_required_tasks": false,
         "reasons": [],
@@ -1038,7 +1066,7 @@
       {
         "approval_id": null,
         "criteria": "Verified brand, content, website, analytics, CRM dry runs, AI controls, rights and accessibility.",
-        "evaluation_hash": "3fff230455c20e9bda8b26dff785bb5420e82438280931c787e56da7382c6470",
+        "evaluation_hash": "f7941d87b12905d786afc6a9ccc2c6e9b6d99c8bbc13bb6eea3ddfb4e99c35b3",
         "evidence_origins": [],
         "no_required_tasks": false,
         "reasons": [],
@@ -1161,7 +1189,7 @@
       {
         "approval_id": null,
         "criteria": "Channel assets and launch operationally ready; exact action/approval boundaries respected; no implicit external dispatch.",
-        "evaluation_hash": "8bafdf1d6acda17c5c38a450e1115fe70ca38a9c34a68f18d75ef29cbd8e896f",
+        "evaluation_hash": "f12328730e50d1bfbde32c16cfd614c2a2948f555274a2b12620520b7b14dbb1",
         "evidence_origins": [],
         "no_required_tasks": false,
         "reasons": [],
@@ -1234,7 +1262,7 @@
       {
         "approval_id": null,
         "criteria": "Experiment and retention decisions evaluated against real baselines, cohorts, economics and adverse effects.",
-        "evaluation_hash": "42c77f15b57729229dc9957cb0d1eadf9f36cfcb7c6bbdba22db52f42365381b",
+        "evaluation_hash": "e1138fa424e78601511653034979ee2d82ffe826cf20e992196827ad54288598",
         "evidence_origins": [],
         "no_required_tasks": false,
         "reasons": [],
@@ -1508,8 +1536,8 @@
       {
         "category": "acquisition",
         "inputs": [
-          "evidence:msr-4782336f8b3948eebc71",
-          "evidence:msr-585bb9a3498349faa4a3"
+          "evidence:msr-23eadfd5915d497c9811",
+          "evidence:msr-6304274beec943eebd7a"
         ],
         "label": "Conversion rate",
         "metric_id": "acquisition.conversion_rate",
@@ -1615,8 +1643,8 @@
       {
         "category": "delivery",
         "inputs": [
-          "agency-plan:afp-230467805a9cb87e72901ed9:audit",
-          "agency-plan:afp-230467805a9cb87e72901ed9:audit"
+          "agency-plan:afp-f81ad2687e6dbe4f1e678e9e:audit",
+          "agency-plan:afp-f81ad2687e6dbe4f1e678e9e:audit"
         ],
         "label": "Approval rework rate",
         "metric_id": "delivery.approval_rework_rate",
@@ -1631,7 +1659,7 @@
       }
     ],
     "not_measured": 11,
-    "plan_id": "afp-230467805a9cb87e72901ed9"
+    "plan_id": "afp-f81ad2687e6dbe4f1e678e9e"
   },
   "plan_list": {
     "items": [
@@ -1640,11 +1668,11 @@
         "catalog_id": "amc-agency-operating-framework-2026-2027",
         "catalog_sha256": "9a2c30e9e65c2a3a6de70245cc47bbeeea2c695b965c09a143935d8ce3df501a",
         "catalog_version": "amc-agency-operating-framework/seed-v1",
-        "created_at": "2026-10-24T02:51:25.587918+00:00",
+        "created_at": "2026-10-24T04:46:42.599572+00:00",
         "created_by": "afw-author",
         "engagement_scope": "Fictional SaaS onboarding engagement",
-        "plan_id": "afp-230467805a9cb87e72901ed9",
-        "project_id": "proj-afw-633a01997b",
+        "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
+        "project_id": "proj-afw-dd6be44ca1",
         "tenant_id": "tenant-events-test"
       }
     ]
@@ -1660,7 +1688,7 @@
       {
         "approval_id": null,
         "criteria": "Reviewed research supporting segment and opportunity decisions; critical research voids explicitly blocked.",
-        "evaluation_hash": "040677aae8fe94635491a7e5ce451949a2f5445174aee4dd6fd52a4f17cf54ee",
+        "evaluation_hash": "572d190fac81e48b2d5ecfec7e4a3457de56e516e3d35b5912afbf7cc081e71d",
         "evidence_origins": [
           "SYNTHETIC"
         ],
@@ -1724,7 +1752,7 @@
       {
         "approval_id": null,
         "criteria": "Approved positioning, offer, client scope, VNEXUS governance inputs and journey blueprint.",
-        "evaluation_hash": "d0883280f7419ba38336e0d251c77181d48f9d52eb5725dc4fb770b2adb46466",
+        "evaluation_hash": "59e0db7b15135a9cfc9328f0f1d152efdcbad9f3f093bddc703839ceb4a6de93",
         "evidence_origins": [],
         "no_required_tasks": false,
         "reasons": [],
@@ -1802,7 +1830,7 @@
       {
         "approval_id": null,
         "criteria": "Verified brand, content, website, analytics, CRM dry runs, AI controls, rights and accessibility.",
-        "evaluation_hash": "3fff230455c20e9bda8b26dff785bb5420e82438280931c787e56da7382c6470",
+        "evaluation_hash": "f7941d87b12905d786afc6a9ccc2c6e9b6d99c8bbc13bb6eea3ddfb4e99c35b3",
         "evidence_origins": [],
         "no_required_tasks": false,
         "reasons": [],
@@ -1925,7 +1953,7 @@
       {
         "approval_id": null,
         "criteria": "Channel assets and launch operationally ready; exact action/approval boundaries respected; no implicit external dispatch.",
-        "evaluation_hash": "8bafdf1d6acda17c5c38a450e1115fe70ca38a9c34a68f18d75ef29cbd8e896f",
+        "evaluation_hash": "f12328730e50d1bfbde32c16cfd614c2a2948f555274a2b12620520b7b14dbb1",
         "evidence_origins": [],
         "no_required_tasks": false,
         "reasons": [],
@@ -1998,7 +2026,7 @@
       {
         "approval_id": null,
         "criteria": "Experiment and retention decisions evaluated against real baselines, cohorts, economics and adverse effects.",
-        "evaluation_hash": "42c77f15b57729229dc9957cb0d1eadf9f36cfcb7c6bbdba22db52f42365381b",
+        "evaluation_hash": "e1138fa424e78601511653034979ee2d82ffe826cf20e992196827ad54288598",
         "evidence_origins": [],
         "no_required_tasks": false,
         "reasons": [],
@@ -2038,11 +2066,11 @@
       "catalog_id": "amc-agency-operating-framework-2026-2027",
       "catalog_sha256": "9a2c30e9e65c2a3a6de70245cc47bbeeea2c695b965c09a143935d8ce3df501a",
       "catalog_version": "amc-agency-operating-framework/seed-v1",
-      "created_at": "2026-10-24T02:51:25.587918+00:00",
+      "created_at": "2026-10-24T04:46:42.599572+00:00",
       "created_by": "afw-author",
       "engagement_scope": "Fictional SaaS onboarding engagement",
-      "plan_id": "afp-230467805a9cb87e72901ed9",
-      "project_id": "proj-afw-633a01997b",
+      "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
+      "project_id": "proj-afw-dd6be44ca1",
       "tenant_id": "tenant-events-test"
     },
     "progress": {
@@ -2650,14 +2678,430 @@
       "tasks_specified": 295
     }
   },
+  "release_candidate_review": {
+    "artifact_id": "art-proj-afw-dd6be44ca1-assurance-review-asr-30cb2c9fcf244c9c8d76",
+    "artifact_version": 1,
+    "content_hash": "35c202e5853045874d530a16923cb73fbb1d01a864f622c9f1fa53533c7f6355",
+    "integrity": {
+      "problems": [],
+      "status": "VERIFIED"
+    },
+    "record": {
+      "author_actor_id": "afw-inspector",
+      "authority": "NONE: a finding or proposal; grants no approval, release, publication, send or spend",
+      "body": {
+        "access_check_receipt": {
+          "full_candidate_access": true,
+          "principal": "afw-inspector",
+          "subjects": [
+            {
+              "bytes_read": 1065,
+              "hash_verified": true,
+              "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set@v1",
+              "source": "run payload"
+            },
+            {
+              "bytes_read": 2201,
+              "hash_verified": true,
+              "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-brand_core@v1",
+              "source": "run payload"
+            },
+            {
+              "bytes_read": 10923,
+              "hash_verified": true,
+              "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec@v1",
+              "source": "run payload"
+            },
+            {
+              "bytes_read": 13088,
+              "hash_verified": true,
+              "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package@v1",
+              "source": "run payload"
+            },
+            {
+              "bytes_read": 1791,
+              "hash_verified": true,
+              "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec@v1",
+              "source": "run payload"
+            },
+            {
+              "bytes_read": 1393,
+              "hash_verified": true,
+              "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set@v1",
+              "source": "run payload"
+            },
+            {
+              "bytes_read": 2996,
+              "hash_verified": true,
+              "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec@v1",
+              "source": "run payload"
+            },
+            {
+              "bytes_read": 54523,
+              "hash_verified": true,
+              "ref": "artifact:art-protected-afa450df-65d4-4613-a5c0-098df7511584@v1",
+              "source": "run payload"
+            }
+          ]
+        },
+        "blocking_findings": [],
+        "candidate_manifest_ref": "release-candidate:afa450df-65d4-4613-a5c0-098df7511584#d9067b4965c6253f3e4cbc7fdec00d8e819ddbf1b6a1e6db4332a81e9d65ce8e",
+        "candidate_subject_refs": [
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set",
+            "content_hash": "2391a8f33225218e23d687bb50afabaf6a454b5911831a6f0ebff80b4e715d5f",
+            "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set@v1",
+            "status": "OK",
+            "version": 1
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-brand_core",
+            "content_hash": "f4556c6bf0836bb7a054fc71105a633a62346e7ff59582f3e4d93c01f85ab6cd",
+            "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-brand_core@v1",
+            "status": "OK",
+            "version": 1
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec",
+            "content_hash": "b99c8f19e524182f688fe86181f8bdcf7522d459ccc67ca31b75cdcef1ab0da6",
+            "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec@v1",
+            "status": "OK",
+            "version": 1
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package",
+            "content_hash": "933f13ac8d638b225d9faccb34eeca7685fc58c2c526477bedba771cff845f2c",
+            "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package@v1",
+            "status": "OK",
+            "version": 1
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec",
+            "content_hash": "73f0db0740d9e9b5409bd3a442dfb6cdaa593f0524a70a9dd4925d82414edffd",
+            "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec@v1",
+            "status": "OK",
+            "version": 1
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set",
+            "content_hash": "ad24e0a68140c81c786ffb8f5dcf85e6c8c3a30ab7d043894c6219d622b0d664",
+            "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set@v1",
+            "status": "OK",
+            "version": 1
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec",
+            "content_hash": "c9edd1b73601cd436e93a87e7b94a225794827ae2138e36996719e58ecb765a2",
+            "ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec@v1",
+            "status": "OK",
+            "version": 1
+          },
+          {
+            "artifact_id": "art-protected-afa450df-65d4-4613-a5c0-098df7511584",
+            "content_hash": "6ec6e688c4f6786c5d6231d0e36258ee1f7ed20a98b444f3b9a9b6404abcd8aa",
+            "ref": "artifact:art-protected-afa450df-65d4-4613-a5c0-098df7511584@v1",
+            "status": "OK",
+            "version": 1
+          }
+        ],
+        "decision_ref": null,
+        "decision_subject_hash": "1155565e1d7fee6b83ee6d4dc6e6bb54b279728ac375a38f7981e714e34c147f",
+        "dependency_snapshot_hash": "3777c8e63a7ee85c9eb987cf69bcc338c016f5284bf1752f2f5885a44694e6cb",
+        "dependency_snapshot_ref": "graph-snapshot:59fae43094ff0a10",
+        "diff_refs": [],
+        "native_approval_ref": "28f4c83d-b1da-485c-818d-d62c74f78262",
+        "release_candidate": {
+          "approval_subject_hash": "3743af6d67a6ae4aeebbe7459a0976e9145340717fb618bd54512dfcc23ef4c4",
+          "artifact_refs": [
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set",
+              "content_hash": "2391a8f33225218e23d687bb50afabaf6a454b5911831a6f0ebff80b4e715d5f",
+              "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set:v1"
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-brand_core",
+              "content_hash": "f4556c6bf0836bb7a054fc71105a633a62346e7ff59582f3e4d93c01f85ab6cd",
+              "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-brand_core:v1"
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec",
+              "content_hash": "b99c8f19e524182f688fe86181f8bdcf7522d459ccc67ca31b75cdcef1ab0da6",
+              "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec:v1"
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package",
+              "content_hash": "933f13ac8d638b225d9faccb34eeca7685fc58c2c526477bedba771cff845f2c",
+              "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package:v1"
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec",
+              "content_hash": "73f0db0740d9e9b5409bd3a442dfb6cdaa593f0524a70a9dd4925d82414edffd",
+              "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec:v1"
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set",
+              "content_hash": "ad24e0a68140c81c786ffb8f5dcf85e6c8c3a30ab7d043894c6219d622b0d664",
+              "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set:v1"
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec",
+              "content_hash": "c9edd1b73601cd436e93a87e7b94a225794827ae2138e36996719e58ecb765a2",
+              "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec:v1"
+            },
+            {
+              "artifact_id": "art-protected-afa450df-65d4-4613-a5c0-098df7511584",
+              "content_hash": "6ec6e688c4f6786c5d6231d0e36258ee1f7ed20a98b444f3b9a9b6404abcd8aa",
+              "version_ref": "art-protected-afa450df-65d4-4613-a5c0-098df7511584:v1"
+            }
+          ],
+          "blocking": [],
+          "candidate_manifest_hash": "d9067b4965c6253f3e4cbc7fdec00d8e819ddbf1b6a1e6db4332a81e9d65ce8e",
+          "contract_hash": "8cadad042bf58409650972d61ed8b2f51ba8937ac1925b9e709160833b6280ca",
+          "contract_mode": "enforce",
+          "dependency_snapshot_hash": "50c7e6e04ca36dee4a151af6bf0ac46476e41562d5f6353b1f0fcf901ab80026",
+          "freshness": {
+            "approval_subject_verified": true,
+            "artifacts_current": true,
+            "dependencies_current": true,
+            "manifest_hash_verified": true
+          },
+          "native_approval": {
+            "approval_id": "28f4c83d-b1da-485c-818d-d62c74f78262",
+            "decide_route": "/approvals/28f4c83d-b1da-485c-818d-d62c74f78262/decide",
+            "policy_version": "amc-release/v1",
+            "status": "pending",
+            "subject_bound": true
+          },
+          "payload_checks": [
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set",
+              "bytes_read": 1065,
+              "detail": "hash recomputed from the stored payload",
+              "hash_verified": true
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-brand_core",
+              "bytes_read": 2201,
+              "detail": "hash recomputed from the stored payload",
+              "hash_verified": true
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec",
+              "bytes_read": 10923,
+              "detail": "hash recomputed from the stored payload",
+              "hash_verified": true
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package",
+              "bytes_read": 13088,
+              "detail": "hash recomputed from the stored payload",
+              "hash_verified": true
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec",
+              "bytes_read": 1791,
+              "detail": "hash recomputed from the stored payload",
+              "hash_verified": true
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set",
+              "bytes_read": 1393,
+              "detail": "hash recomputed from the stored payload",
+              "hash_verified": true
+            },
+            {
+              "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec",
+              "bytes_read": 2996,
+              "detail": "hash recomputed from the stored payload",
+              "hash_verified": true
+            },
+            {
+              "artifact_id": "art-protected-afa450df-65d4-4613-a5c0-098df7511584",
+              "bytes_read": 54523,
+              "detail": "hash recomputed from the stored payload",
+              "hash_verified": true
+            }
+          ],
+          "policy_version": "amc-release/v1",
+          "recomputed_manifest_hash": "d9067b4965c6253f3e4cbc7fdec00d8e819ddbf1b6a1e6db4332a81e9d65ce8e",
+          "ref": "release-candidate:afa450df-65d4-4613-a5c0-098df7511584",
+          "release_authority": "agency/delivery: evaluate_release_predicate when the run resumes after /approvals/{id}/decide",
+          "run_id": "afa450df-65d4-4613-a5c0-098df7511584",
+          "status": "CURRENT"
+        },
+        "reviewer_authority_scope": "decided only at /approvals/{id}/decide (approver role, separation of duties)",
+        "status": "NEEDS_HUMAN",
+        "summary": "",
+        "summary_note": "navigation aid only; the decision binds the full candidate bytes and dependency snapshot",
+        "unresolved_findings": []
+      },
+      "catalog_version_ref": "amc-agency-operating-framework/seed-v1@9a2c30e9e65c2a3a",
+      "created_at": "2026-10-24T04:46:59.556892+00:00",
+      "dependency_snapshot_hash": "59fae43094ff0a1021c53d9e0dd5949ab0e2735ddfdc62e0f9ba1e5a244fdba2",
+      "evidence_refs": [],
+      "execution_receipt_ref": null,
+      "kind": "review",
+      "mission_id": "afp-f81ad2687e6dbe4f1e678e9e",
+      "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
+      "privacy_classification": "internal",
+      "project_id": "proj-afw-dd6be44ca1",
+      "record_hash": "89db60e29c15a4affdb2f91a922b96b59d05da0c311b1fd3df06cfdd74c28b80",
+      "record_id": "asr-30cb2c9fcf244c9c8d76",
+      "retention_policy_ref": "project-retention-default",
+      "schema_version": "amc-assurance/v1",
+      "status": "NEEDS_HUMAN",
+      "subject_artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set",
+      "subject_content_hash": "2391a8f33225218e23d687bb50afabaf6a454b5911831a6f0ebff80b4e715d5f",
+      "subject_refs": [
+        "release-candidate:afa450df-65d4-4613-a5c0-098df7511584",
+        "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set@v1",
+        "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-brand_core@v1",
+        "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec@v1",
+        "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package@v1",
+        "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec@v1",
+        "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set@v1",
+        "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec@v1",
+        "artifact:art-protected-afa450df-65d4-4613-a5c0-098df7511584@v1"
+      ],
+      "subject_version_ref": "artifact:art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set@v1",
+      "supersedes_ref": null,
+      "task_ids": [
+        "AGM-20-001"
+      ],
+      "tenant_id": "tenant-events-test"
+    },
+    "subject_now": {
+      "release_candidate": {
+        "approval_subject_hash": "3743af6d67a6ae4aeebbe7459a0976e9145340717fb618bd54512dfcc23ef4c4",
+        "artifact_refs": [
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set",
+            "content_hash": "2391a8f33225218e23d687bb50afabaf6a454b5911831a6f0ebff80b4e715d5f",
+            "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set:v1"
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-brand_core",
+            "content_hash": "f4556c6bf0836bb7a054fc71105a633a62346e7ff59582f3e4d93c01f85ab6cd",
+            "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-brand_core:v1"
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec",
+            "content_hash": "b99c8f19e524182f688fe86181f8bdcf7522d459ccc67ca31b75cdcef1ab0da6",
+            "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec:v1"
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package",
+            "content_hash": "933f13ac8d638b225d9faccb34eeca7685fc58c2c526477bedba771cff845f2c",
+            "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package:v1"
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec",
+            "content_hash": "73f0db0740d9e9b5409bd3a442dfb6cdaa593f0524a70a9dd4925d82414edffd",
+            "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec:v1"
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set",
+            "content_hash": "ad24e0a68140c81c786ffb8f5dcf85e6c8c3a30ab7d043894c6219d622b0d664",
+            "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set:v1"
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec",
+            "content_hash": "c9edd1b73601cd436e93a87e7b94a225794827ae2138e36996719e58ecb765a2",
+            "version_ref": "art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec:v1"
+          },
+          {
+            "artifact_id": "art-protected-afa450df-65d4-4613-a5c0-098df7511584",
+            "content_hash": "6ec6e688c4f6786c5d6231d0e36258ee1f7ed20a98b444f3b9a9b6404abcd8aa",
+            "version_ref": "art-protected-afa450df-65d4-4613-a5c0-098df7511584:v1"
+          }
+        ],
+        "blocking": [],
+        "candidate_manifest_hash": "d9067b4965c6253f3e4cbc7fdec00d8e819ddbf1b6a1e6db4332a81e9d65ce8e",
+        "contract_hash": "8cadad042bf58409650972d61ed8b2f51ba8937ac1925b9e709160833b6280ca",
+        "contract_mode": "enforce",
+        "dependency_snapshot_hash": "50c7e6e04ca36dee4a151af6bf0ac46476e41562d5f6353b1f0fcf901ab80026",
+        "freshness": {
+          "approval_subject_verified": true,
+          "artifacts_current": true,
+          "dependencies_current": true,
+          "manifest_hash_verified": true
+        },
+        "native_approval": {
+          "approval_id": "28f4c83d-b1da-485c-818d-d62c74f78262",
+          "decide_route": "/approvals/28f4c83d-b1da-485c-818d-d62c74f78262/decide",
+          "policy_version": "amc-release/v1",
+          "status": "pending",
+          "subject_bound": true
+        },
+        "payload_checks": [
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-asset_prompt_set",
+            "bytes_read": 1065,
+            "detail": "hash recomputed from the stored payload",
+            "hash_verified": true
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-brand_core",
+            "bytes_read": 2201,
+            "detail": "hash recomputed from the stored payload",
+            "hash_verified": true
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-business_model_spec",
+            "bytes_read": 10923,
+            "detail": "hash recomputed from the stored payload",
+            "hash_verified": true
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-campaign_package",
+            "bytes_read": 13088,
+            "detail": "hash recomputed from the stored payload",
+            "hash_verified": true
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-design_system_spec",
+            "bytes_read": 1791,
+            "detail": "hash recomputed from the stored payload",
+            "hash_verified": true
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-design_token_set",
+            "bytes_read": 1393,
+            "detail": "hash recomputed from the stored payload",
+            "hash_verified": true
+          },
+          {
+            "artifact_id": "art-afa450df-65d4-4613-a5c0-098df7511584-website_lockup_spec",
+            "bytes_read": 2996,
+            "detail": "hash recomputed from the stored payload",
+            "hash_verified": true
+          },
+          {
+            "artifact_id": "art-protected-afa450df-65d4-4613-a5c0-098df7511584",
+            "bytes_read": 54523,
+            "detail": "hash recomputed from the stored payload",
+            "hash_verified": true
+          }
+        ],
+        "policy_version": "amc-release/v1",
+        "recomputed_manifest_hash": "d9067b4965c6253f3e4cbc7fdec00d8e819ddbf1b6a1e6db4332a81e9d65ce8e",
+        "ref": "release-candidate:afa450df-65d4-4613-a5c0-098df7511584",
+        "release_authority": "agency/delivery: evaluate_release_predicate when the run resumes after /approvals/{id}/decide",
+        "run_id": "afa450df-65d4-4613-a5c0-098df7511584",
+        "status": "CURRENT"
+      },
+      "subject_current": true
+    },
+    "superseded_by": []
+  },
   "task_detail": {
     "approval": {
-      "approval_id": "0efaf1fd-d876-459d-a472-bab6c855ebb1",
+      "approval_id": "9eb763ef-d487-4034-acce-205783ed8129",
       "decision": "approve",
       "reviewer": "afw-reviewer",
       "stale_reason": null,
       "status": "resolved",
-      "subject_hash": "931b8d48b76bf82657e10b24aa74a57c08653abb237c9bcff72eeb7a6801e63c"
+      "subject_hash": "98869ae784a6c94bdcb546d7c470854b500383417494b3806142c31beb2d198d"
     },
     "binding": {
       "artifact_type": "research_brief",
@@ -2694,162 +3138,162 @@
     "events": [
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:26.237932+00:00",
-        "event_id": "pev-09006920eac948ad86cd32b8807734f0",
+        "created_at": "2026-10-24T04:46:44.129042+00:00",
+        "event_id": "pev-d0f47d819ddb41cab570660faa997eda",
         "event_type": "APPROVED",
         "payload": {
-          "approval_id": "0efaf1fd-d876-459d-a472-bab6c855ebb1",
+          "approval_id": "9eb763ef-d487-4034-acce-205783ed8129",
           "kind": "agency_framework.approved",
-          "plan_id": "afp-230467805a9cb87e72901ed9",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
           "reviewer": "afw-reviewer",
-          "subject_hash": "931b8d48b76bf82657e10b24aa74a57c08653abb237c9bcff72eeb7a6801e63c",
+          "subject_hash": "98869ae784a6c94bdcb546d7c470854b500383417494b3806142c31beb2d198d",
           "task_id": "AGM-01-001",
           "version": 8
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 14,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v8",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v8",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:26.067984+00:00",
-        "event_id": "pev-3f05df65679f454e8ca80cd7e726fb85",
+        "created_at": "2026-10-24T04:46:43.107374+00:00",
+        "event_id": "pev-aab8484573b44572874eea5a54957152",
         "event_type": "COMMENT",
         "payload": {
-          "approval_id": "0efaf1fd-d876-459d-a472-bab6c855ebb1",
+          "approval_id": "9eb763ef-d487-4034-acce-205783ed8129",
           "kind": "agency_framework.approval_requested",
-          "plan_id": "afp-230467805a9cb87e72901ed9",
-          "subject_hash": "931b8d48b76bf82657e10b24aa74a57c08653abb237c9bcff72eeb7a6801e63c",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
+          "subject_hash": "98869ae784a6c94bdcb546d7c470854b500383417494b3806142c31beb2d198d",
           "task_id": "AGM-01-001",
           "version": 7
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 12,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v7",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v7",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-verifier",
-        "created_at": "2026-10-24T02:51:25.974538+00:00",
-        "event_id": "pev-5f22629cbdce4f02b153127e1501aafb",
+        "created_at": "2026-10-24T04:46:43.018699+00:00",
+        "event_id": "pev-74822e01fd724ed3aaf10760de9c21af",
         "event_type": "VERIFIED",
         "payload": {
           "kind": "agency_framework.verified",
           "origins": [
             "SYNTHETIC"
           ],
-          "plan_id": "afp-230467805a9cb87e72901ed9",
-          "proof_hash": "931b8d48b76bf82657e10b24aa74a57c08653abb237c9bcff72eeb7a6801e63c",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
+          "proof_hash": "98869ae784a6c94bdcb546d7c470854b500383417494b3806142c31beb2d198d",
           "task_id": "AGM-01-001",
           "version": 6
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 10,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v6",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v6",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:25.920165+00:00",
-        "event_id": "pev-4c1b31161c8440968c1e490fae00864c",
+        "created_at": "2026-10-24T04:46:42.973081+00:00",
+        "event_id": "pev-cc132e52ec6041568f48174366275e5f",
         "event_type": "COMMENT",
         "payload": {
           "from": "ACTIVE",
           "kind": "agency_framework.transition",
-          "plan_id": "afp-230467805a9cb87e72901ed9",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
           "reason": "",
           "task_id": "AGM-01-001",
           "to": "IN_REVIEW",
           "version": 5
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 9,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v5",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v5",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:25.871255+00:00",
-        "event_id": "pev-e504e37d97594fd393cb76f779d3c598",
+        "created_at": "2026-10-24T04:46:42.927282+00:00",
+        "event_id": "pev-8fa5d478ad37453d890b555a6b88c745",
         "event_type": "COMMENT",
         "payload": {
           "artifact_refs": [],
           "decision_refs": [],
           "evidence_refs": [
-            "knowledge:kn-3d0d231b54a3499b9c01"
+            "knowledge:kn-4b16ba8d675b47e8979b"
           ],
           "kind": "agency_framework.refs",
-          "plan_id": "afp-230467805a9cb87e72901ed9",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
           "task_id": "AGM-01-001",
           "version": 4
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 8,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v4",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v4",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:25.817645+00:00",
-        "event_id": "pev-afacad05011243c6b8e901241b0d69b4",
+        "created_at": "2026-10-24T04:46:42.879628+00:00",
+        "event_id": "pev-a32b42fbeecf40f6a1f70f43303345d3",
         "event_type": "WORK_STARTED",
         "payload": {
           "from": "READY",
           "kind": "agency_framework.transition",
-          "plan_id": "afp-230467805a9cb87e72901ed9",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
           "reason": "",
           "task_id": "AGM-01-001",
           "to": "ACTIVE",
           "version": 3
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 7,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v3",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v3",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:25.771041+00:00",
-        "event_id": "pev-59a0efbaffd742d2b04e8ad4b3d2f1e3",
+        "created_at": "2026-10-24T04:46:42.837230+00:00",
+        "event_id": "pev-55a6b144bbe146fe9bcb09356a5fbde5",
         "event_type": "COMMENT",
         "payload": {
           "from": "BACKLOG",
           "kind": "agency_framework.transition",
-          "plan_id": "afp-230467805a9cb87e72901ed9",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
           "reason": "",
           "task_id": "AGM-01-001",
           "to": "READY",
           "version": 2
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 6,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v2",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v2",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       },
       {
         "actor": "afw-author",
-        "created_at": "2026-10-24T02:51:25.637982+00:00",
-        "event_id": "pev-a7f81330d89a4ba59185328c98c4faf3",
+        "created_at": "2026-10-24T04:46:42.652877+00:00",
+        "event_id": "pev-a76c5812e755439dbcc67d9fbe82d334",
         "event_type": "COMMENT",
         "payload": {
           "applicability": "REQUIRED",
           "kind": "agency_framework.applicability",
-          "plan_id": "afp-230467805a9cb87e72901ed9",
+          "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
           "reason": "core",
           "task_id": "AGM-01-001",
           "version": 1
         },
-        "project_id": "proj-afw-633a01997b",
+        "project_id": "proj-afw-dd6be44ca1",
         "sequence": 3,
-        "subject_ref": "agency-task:afp-230467805a9cb87e72901ed9:AGM-01-001:v1",
+        "subject_ref": "agency-task:afp-f81ad2687e6dbe4f1e678e9e:AGM-01-001:v1",
         "tenant_id": "tenant-events-test",
         "thread_id": null
       }
@@ -2858,45 +3302,45 @@
       "applicability": "REQUIRED",
       "applicability_by": "afw-author",
       "applicability_reason": "core",
-      "approval_ref": "0efaf1fd-d876-459d-a472-bab6c855ebb1",
+      "approval_ref": "9eb763ef-d487-4034-acce-205783ed8129",
       "artifact_refs": [],
       "assignee_role": "market_researcher",
       "blocked_from": null,
-      "created_at": "2026-10-24T02:51:25.587918+00:00",
+      "created_at": "2026-10-24T04:46:42.599572+00:00",
       "decision_refs": [],
       "evidence_refs": [
-        "knowledge:kn-3d0d231b54a3499b9c01"
+        "knowledge:kn-4b16ba8d675b47e8979b"
       ],
       "module_id": "AGM-01",
-      "plan_id": "afp-230467805a9cb87e72901ed9",
-      "project_id": "proj-afw-633a01997b",
+      "plan_id": "afp-f81ad2687e6dbe4f1e678e9e",
+      "project_id": "proj-afw-dd6be44ca1",
       "stage_gate": "01_DISCOVERY",
       "state": "APPROVED",
       "status_reason": null,
       "submitted_by": "afw-author",
       "task_id": "AGM-01-001",
       "tenant_id": "tenant-events-test",
-      "updated_at": "2026-10-24T02:51:26.236774+00:00",
+      "updated_at": "2026-10-24T04:46:44.127989+00:00",
       "updated_by": "afw-author",
       "verification": {
-        "at": "2026-10-24T02:51:25.972332+00:00",
+        "at": "2026-10-24T04:46:43.016374+00:00",
         "checks": [
           {
             "attachable": true,
-            "content_hash": "b069ee57fdfd6009b4b3b1c7bf52c3308bd6cacff8526e5ddd7a37c6b81663f9",
+            "content_hash": "aa0767c9cc549ee8bc2c9a3a6bf144d658baa0c26b566cf77419333234339d77",
             "detail": "1 claim(s), rights OPEN_LICENSE",
             "fresh_until": "2027-10-20T00:00:00+00:00",
             "kind": "knowledge",
             "ok": true,
             "origin": "SYNTHETIC",
-            "ref": "knowledge:kn-3d0d231b54a3499b9c01",
+            "ref": "knowledge:kn-4b16ba8d675b47e8979b",
             "status": "OK"
           }
         ],
         "origins": [
           "SYNTHETIC"
         ],
-        "proof_hash": "931b8d48b76bf82657e10b24aa74a57c08653abb237c9bcff72eeb7a6801e63c",
+        "proof_hash": "98869ae784a6c94bdcb546d7c470854b500383417494b3806142c31beb2d198d",
         "result": "PASSED",
         "verified_by": "afw-verifier"
       },
@@ -2905,13 +3349,13 @@
     "ref_checks": [
       {
         "attachable": true,
-        "content_hash": "b069ee57fdfd6009b4b3b1c7bf52c3308bd6cacff8526e5ddd7a37c6b81663f9",
+        "content_hash": "aa0767c9cc549ee8bc2c9a3a6bf144d658baa0c26b566cf77419333234339d77",
         "detail": "1 claim(s), rights OPEN_LICENSE",
         "fresh_until": "2027-10-20T00:00:00+00:00",
         "kind": "knowledge",
         "ok": true,
         "origin": "SYNTHETIC",
-        "ref": "knowledge:kn-3d0d231b54a3499b9c01",
+        "ref": "knowledge:kn-4b16ba8d675b47e8979b",
         "status": "OK"
       }
     ],
@@ -2924,7 +3368,7 @@
     "items": [
       {
         "applicability": "REQUIRED",
-        "approval_ref": "0efaf1fd-d876-459d-a472-bab6c855ebb1",
+        "approval_ref": "9eb763ef-d487-4034-acce-205783ed8129",
         "assignee_role": "market_researcher",
         "definition_source": "user_supplied",
         "module_id": "AGM-01",
@@ -2937,7 +3381,7 @@
         "status_reason": null,
         "task_id": "AGM-01-001",
         "title": "Conduct stakeholder interviews and establish the business brief",
-        "updated_at": "2026-10-24T02:51:26.236774+00:00",
+        "updated_at": "2026-10-24T04:46:44.127989+00:00",
         "version": 8
       },
       {
@@ -2955,7 +3399,7 @@
         "status_reason": null,
         "task_id": "AGM-01-002",
         "title": "Document mission, vision, values, history and existing brand equity",
-        "updated_at": "2026-10-24T02:51:25.587918+00:00",
+        "updated_at": "2026-10-24T04:46:42.599572+00:00",
         "version": 0
       },
       {
@@ -2973,7 +3417,7 @@
         "status_reason": null,
         "task_id": "AGM-01-003",
         "title": "Inventory products, services, revenue streams and pricing",
-        "updated_at": "2026-10-24T02:51:25.587918+00:00",
+        "updated_at": "2026-10-24T04:46:42.599572+00:00",
         "version": 0
       }
     ]

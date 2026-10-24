@@ -289,6 +289,52 @@ export const AfAssuranceRowSchema = z.object({
 });
 export const AfAssuranceListSchema = z.object({ items: z.array(AfAssuranceRowSchema) });
 
+/** Use-time facts about a sealed delivery release candidate, as a Review binds and re-reads it. */
+export const AfReleaseCandidateInspectionSchema = z
+  .object({
+    ref: z.string().regex(/^release-candidate:/),
+    run_id: z.string(),
+    contract_mode: z.string().nullable(),
+    status: z.enum(['CURRENT', 'BLOCKED', 'NOT_SEALED', 'INVALID']),
+    blocking: z.array(z.string()),
+    release_authority: z.string(),
+    candidate_manifest_hash: z.string().nullable(),
+    approval_subject_hash: z.string().nullable(),
+    artifact_refs: z.array(
+      z.object({ artifact_id: z.string(), version_ref: z.string(), content_hash: z.string().nullable() }).strict(),
+    ),
+    payload_checks: z.array(
+      z
+        .object({
+          artifact_id: z.string(),
+          hash_verified: z.boolean(),
+          bytes_read: z.number().int().nullable(),
+          detail: z.string(),
+        })
+        .strict(),
+    ),
+    freshness: z
+      .object({
+        manifest_hash_verified: z.boolean(),
+        approval_subject_verified: z.boolean(),
+        artifacts_current: z.boolean(),
+        dependencies_current: z.boolean(),
+      })
+      .strict()
+      .nullable(),
+    native_approval: z
+      .object({
+        approval_id: z.string(),
+        status: z.string().nullable(),
+        policy_version: z.string().nullable(),
+        subject_bound: z.boolean(),
+        decide_route: z.string(),
+      })
+      .strict()
+      .nullable(),
+  })
+  .passthrough();
+
 export const AfAssuranceRecordSchema = z.object({
   record: z
     .object({
@@ -309,7 +355,16 @@ export const AfAssuranceRecordSchema = z.object({
     .passthrough(),
   integrity: z.object({ status: z.enum(['VERIFIED', 'INTEGRITY_FAILED']), problems: z.array(z.string()) }),
   subject_now: z
-    .object({ subjects: z.array(z.object({ ref: z.string(), status: z.string() })), subject_current: z.boolean() })
+    .union([
+      z.object({ subjects: z.array(z.object({ ref: z.string(), status: z.string() })), subject_current: z.boolean() }),
+      z.object({
+        release_candidate: z.union([
+          AfReleaseCandidateInspectionSchema,
+          z.object({ status: z.literal('NOT_FOUND'), blocking: z.array(z.string()) }),
+        ]),
+        subject_current: z.boolean(),
+      }),
+    ])
     .nullable(),
   superseded_by: z.array(z.string()),
   artifact_id: z.string(),
@@ -336,4 +391,5 @@ export type AfMetric = z.infer<typeof AfMetricSchema>;
 export type AfMetrics = z.infer<typeof AfMetricsSchema>;
 export type AfAssuranceRow = z.infer<typeof AfAssuranceRowSchema>;
 export type AfAssuranceRecord = z.infer<typeof AfAssuranceRecordSchema>;
+export type AfReleaseCandidateInspection = z.infer<typeof AfReleaseCandidateInspectionSchema>;
 export type AfApplicabilityResult = z.infer<typeof AfApplicabilityResultSchema>;

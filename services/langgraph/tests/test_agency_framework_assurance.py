@@ -32,7 +32,7 @@ from services.langgraph.tests.framework_support import (
 
 ROOT = Path(__file__).resolve().parents[3]
 SITE = ("<html lang=\"en\"><body><h1>Lumen Tea (fictional)</h1><p>Every blend is certified organic and ships "
-        "from our own warehouse in Lyon. Ships in 2 days.</p><img src=\"cup.png\" alt=\"A cup of green tea\"></body></html>")
+        "from our own warehouse in Lyon. Ships in 2 days. Packed by hand.</p><img src=\"cup.png\" alt=\"A cup of green tea\"></body></html>")
 
 
 def record(plan_id: str, kind: str, body: dict, status: int = 201) -> dict:
@@ -88,15 +88,17 @@ def test_mutation_fixtures_report_detections_misses_and_a_confusion_matrix(afw, 
         ("CROSS_TENANT_REF", {"foreign_artifact_id": foreign.removeprefix("artifact:").rsplit("@v", 1)[0]}, ["REF_NOT_FOUND"]),
         ("MISSING_EVIDENCE", {"task_ids": ["AGM-01-001"]}, ["REFS_REQUIRED"]),
         ("ALTERED_APPROVAL_HASH", {"task_ids": ["AGM-01-001"]}, ["APPROVAL_SUBJECT_MISMATCH"]),
-        # Labelled blind spot: "Ships in 2 days." is under six words, so claim extraction never sees it.
+        # Formerly a labelled blind spot (under six words); short claims are now detected by their signals.
         ("CLAIM_CHANGE", {"find": "Ships in 2 days.", "replace": "Ships in 9 days."}, ["CLAIM_CHANGED"]),
+        # Still a miss, measured not hidden: "Packed by hand." is a claim with no word the lexicon knows.
+        ("CLAIM_CHANGE", {"find": "Packed by hand.", "replace": "Packed by machine."}, ["CLAIM_CHANGED"]),
     ]
     states = []
     for cls, extra, expected in fixtures:
         out = record(plan_id, "mutation", {"base_ref": site, "mutation_class": cls, "expected_findings": expected,
                                            "test_fixture_ref": f"fixture:mutation:{cls.lower()}", **extra})
         states.append((cls, out["record"]["status"], out["record"]["body"]["observed_findings"]))
-    assert [s[1] for s in states] == ["DETECTED"] * 8 + ["MISSED"], states
+    assert [s[1] for s in states] == ["DETECTED"] * 9 + ["MISSED"], states
     assert states[1][2] == []  # whitespace-only change: no false positive
     # The canonical page was never touched by any mutation.
     head = ok(client.get(f"/projects/{project_id}/artifacts"))
@@ -104,8 +106,8 @@ def test_mutation_fixtures_report_detections_misses_and_a_confusion_matrix(afw, 
     assert page["version"] == 1
     raw = [r for r in _raw_records(plan_id) if r["kind"] == "mutation"]
     matrix = confusion_matrix(raw)
-    assert matrix["CLAIM_CHANGED"]["TP"] == 1 and matrix["CLAIM_CHANGED"]["FN"] == 1
-    assert matrix["CLAIM_CHANGED"]["recall"] == 0.5 and matrix["CLAIM_CHANGED"]["precision"] == 1.0
+    assert matrix["CLAIM_CHANGED"]["TP"] == 2 and matrix["CLAIM_CHANGED"]["FN"] == 1
+    assert matrix["CLAIM_CHANGED"]["recall"] == round(2 / 3, 4) and matrix["CLAIM_CHANGED"]["precision"] == 1.0
     assert matrix["LOCALE_CHANGED"]["recall"] == 1.0
 
 

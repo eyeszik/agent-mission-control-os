@@ -143,11 +143,61 @@ Each record is sealed with a `record_hash`. Every read re-verifies its integrity
 | Mutation | One perturbation of an in-memory variant. Expected versus observed findings; misses (false negatives) and unexpected findings (false positives) are both reported, with a confusion matrix. | Write the variant |
 | Probe | A dependency change inside a `graph_snapshot` sandbox: declared versus observed effects plus a blast-radius certificate. | Change the canonical graph (`canonical_unchanged` is checked) |
 | Renewal | Trigger evidence, the affected decision and its retained alternatives, with a proposal. | Replace the decision |
-| Review | Exact subject hashes, a dependency snapshot and full-byte access to every candidate. It can open an approval. | Approve. The candidate stays pending until `/approvals/{id}/decide` |
+| Review | Exact subject hashes, a dependency snapshot and full-byte access to every candidate. It can open an approval for plain artifact candidates. Bound to a sealed delivery release candidate, it re-checks the seal and links the run's own approval (below). | Approve or release. A plain candidate stays pending until `/approvals/{id}/decide`; a sealed release candidate is decided only by its run's approval, and released only by delivery |
 
 Mutation detectors: `CLAIM_CHANGED`, `LOCALE_CHANGED`, `A11Y_ALT_MISSING`, `REFS_REQUIRED`, `APPROVAL_SUBJECT_MISMATCH`, `ARTIFACT_STALE` and `REF_NOT_FOUND`.
 
-Known blind spot, measured and not hidden: `CLAIM_CHANGED` uses the Project OS claim extractor, which ignores sentences shorter than six words. A changed claim in such a sentence is a false negative, and the confusion matrix reports it as one. Precision and recall with a zero denominator are `NOT_MEASURED`.
+`CLAIM_CHANGED` compares two claim surfaces of the base and the variant:
+
+- the Project OS sentence extractor (sentences of 6–60 words);
+- the framework's claim detector (`claims.py`).
+
+The detector finds a claim by its *signals*, not its length. It reads every markup segment and sentence, so "Free", "Save 30%" or "Ships in 2 days." on its own is seen. The signals are price, quantity, comparison, absolutes, environmental terms, subjective wording and factual verbs. Comparison is Unicode- and punctuation-normalised (NFKC, trademark marks dropped, curly quotes straightened, trailing `.`/`!` ignored). A `*` or `?` is kept, because it changes the claim. Navigation text such as "Learn more" carries no signal and is not a claim.
+
+Remaining blind spot, measured and not hidden: a claim with no signal word (for example "Packed by hand." → "Packed by machine.") is still missed. The mutation fixtures record it as a false negative in the confusion matrix. Precision and recall with a zero denominator are `NOT_MEASURED`.
+
+### Claims: detection, substantiation, policy, decision
+
+A Meaning record's body carries a `claims` inventory for its outputs. The four stages stay separate:
+
+1. **Detection.** Each claim gets its classes:
+   - substance: `PRICE`, `QUANTIFIED`, `COMPARATIVE`, `ABSOLUTE`, `ENVIRONMENTAL`, `SUBJECTIVE`, `FACTUAL`;
+   - modifiers: `QUALIFIED` with its qualifiers, `THIRD_PARTY_QUOTE`;
+   - an `ambiguous` flag for questions.
+2. **Substantiation need.** Objective classes need evidence; puffery is `REVIEW_AS_OPINION`. A quotation repeats a claim and never substantiates it.
+3. **Substantiation state.** Evidence is linked only by a person, through `claim_evidence: [{claim, evidence_refs}]`:
+   - each ref must resolve reviewed and fresh in this project, or the request is refused with `REF_REJECTED`;
+   - a link to a claim not found in the outputs is refused with `UNKNOWN_CLAIM`;
+   - a linked claim is `EVIDENCE_LINKED_UNVERIFIED`, never "verified", because a person still judges whether the evidence supports it;
+   - an unlinked objective claim is `UNSUBSTANTIATED`.
+4. **Policy and decision.** Every claim is routed to `HUMAN_REVIEW`. Nothing is rejected or approved by the detector, and there is no length-based exemption.
+
+### Review bound to a sealed release candidate
+
+`POST …/assurance/review` with `release_candidate_ref: "release-candidate:<run_id>"` binds the candidate that `agency/delivery` sealed for that run. The read path is `candidates.inspect`; it never writes.
+
+**Who may bind.** The reviewer must hold an approver role (`REVIEWER_ROLE_REQUIRED`). They must not be the run's initiator (`REVIEWER_IS_INITIATOR`).
+
+**Scope.** The run must be in the plan's tenant and project. A run anywhere else is indistinguishable from a missing one (`REF_NOT_FOUND`).
+
+**Subjects.** The subjects are exactly the manifest's artifacts at their sealed versions. Explicit `candidate_refs` must match them (`CANDIDATE_REFS_MISMATCH`).
+
+**Use-time checks**, the same facts the release gate re-checks:
+
+- the manifest recomputes to the sealed `candidate_manifest_hash` and to the sealed approval subject;
+- the artifacts are still the sealed heads;
+- the dependency snapshot is unchanged;
+- every artifact hash recomputes from the stored run payload it was bound over. This is the binding layer's own spec and subject hash, not a second scheme, so this is the full-candidate inspection;
+- in enforce mode, the run's approval is bound to the sealed subject.
+
+**Blocking findings.** Any failure is recorded as a blocking finding and the record is `BLOCKED`:
+`CANDIDATE_NOT_SEALED`, `CANDIDATE_INVALID`, `CANDIDATE_HASH_MISMATCH`, `ARTIFACTS_CHANGED`, `DEPENDENCIES_CHANGED`, `PAYLOAD_UNVERIFIED`, `APPROVAL_SUBJECT_MISMATCH`.
+
+**Decision.** The record links `native_approval_ref`, the run's approval. `request_decision` is refused (`RELEASE_DECISION_OWNED_BY_DELIVERY`), so no second release approval can exist.
+
+**Read-back.** `GET …/assurance/{id}` re-inspects the candidate. `subject_now.subject_current` turns false the moment the candidate drifts.
+
+**Supersession.** A correction's record id is derived from the record it supersedes. Two concurrent corrections of one head therefore collide on the artifact key, and exactly one wins (`STALE_SUPERSEDE`).
 
 ## KPIs
 
@@ -244,14 +294,63 @@ Verified on PostgreSQL 16: apply all migrations (86 `amc` tables), roll back (84
 | `test_agency_framework_archetypes.py` | Fictional B2C goods, B2B services and SaaS engagements end to end, with persistence checked in a fresh process |
 | `test_agency_framework_contracts.py` | Enum parity with Zod, the recorded fixture, `Idempotency-Key` on every write |
 | `packages/shared/tests/agencyFramework.test.ts`, `apps/web/tests/framework-view.test.ts` | Zod fixture parity, transition-table parity with Python, `NOT_MEASURED` display |
-| `apps/web/e2e/framework.spec.ts` | Browser test on the live stack: catalog → modules → applicability → refused review and refs → gates → KPIs → assurance keyboard tabs → audit → reload persistence → phone width |
+| `test_agency_framework_release_candidate.py` | Review ↔ sealed candidate:<br>• valid binding and read-back, then release by the run's own approval;<br>• missing, foreign-project and foreign-tenant runs;<br>• operator and initiator refused;<br>• moved artifacts and a new dependency edge;<br>• a tampered manifest and a forged approval subject;<br>• an unsealed run and an absent approval;<br>• a refused second decision and refused subject changes;<br>• idempotent replay, concurrent supersedes with one winner, an interrupted write |
+| `test_agency_framework_claims.py` | Short-claim detection:<br>• the seven supplied short claims;<br>• long equivalents, qualifiers and disclaimers, quotations;<br>• Unicode and punctuation, questions, navigation text;<br>• markup segments;<br>• mutation detection with no false positives;<br>• Meaning inventory with person-linked evidence, unknown claims and fabricated refs refused |
+| `apps/web/e2e/framework.spec.ts` | Browser test on the live stack: catalog → modules → applicability → refused review and refs → gates → KPIs → assurance keyboard tabs → audit → reload persistence → phone width. It also runs the accessibility checks below |
 
 All data in these tests is fictional and labelled synthetic. No result here is a client result.
+
+## Accessibility
+
+The target is WCAG 2.2 AA. `apps/web/e2e/framework.spec.ts` checks it in two ways.
+
+**axe scans** (`@axe-core/playwright` 4.13.0, tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`; no rule disabled) of every state:
+
+- the instantiation form;
+- the dashboard;
+- the task inspector, with and without an error;
+- the Gates, KPIs and Audit tabs;
+- each assurance kind, empty and with a record;
+- a record's detail view;
+- a refused candidate review;
+- the loading state;
+- the error state;
+- phone width (390 px).
+
+**Checks axe cannot make:**
+
+- keyboard-only task opening;
+- a visible focus indicator;
+- focus returning to the opening task when the inspector closes (2.4.3);
+- errors announced as `role="alert"`;
+- the loading state announced as `role="status"`;
+- no keyframe or movement animation under `prefers-reduced-motion` (2.3.3);
+- retrying from the keyboard after an error;
+- no horizontal overflow at 390 px (1.4.10).
+
+**Defects found and fixed by these tests:**
+
+- focus was lost when the inspector closed;
+- the loading skeleton kept pulsing under reduced motion and had no live role;
+- the shell's Search button had no accessible name at phone width (4.1.2).
+
+**Not tested automatically. These need a person with assistive technology:**
+
+- screen-reader reading order and verbosity (NVDA, VoiceOver);
+- 1.4.4 resize to 200 %;
+- 1.4.12 text spacing;
+- 2.5.8 target size, which axe does not measure fully;
+- 1.4.11 non-text contrast of focus rings in both themes;
+- 3.3 error suggestions for the JSON record editor, which accepts free JSON;
+- cognitive load of the 295-task view.
+
+**Dialog containment is not applicable.** The framework view has no dialogs: the inspector is an in-page panel. Passing these tests does not prove conformance.
 
 ## Known gaps
 
 - Five modules have no N3 role of their own (AGM-11, 16, 17, 22, 23). They bind to the nearest producer, and the gap is shown.
-- The framework does not seal a delivery `ReleaseCandidateManifest`. Its Review record binds candidate hashes, and release eligibility stays with `agency/delivery`.
+- The framework never seals or releases: a Review can bind delivery's sealed candidate (above), and release eligibility stays with `agency/delivery`. The browser suite cannot show a bound candidate, because CI's stack runs without `AMC_CONTRACT_MODE=enforce` and without a model key. That rendering is covered by the backend tests and the Zod fixture instead.
 - No external effect is executed for any module. Modules with publish, spend, send or outreach effects stay planning-only or dry-run, as their existing owners are.
 - Many catalog tasks are `HUMAN_ONLY`: the repository records and verifies the evidence, but a person does the work.
-- `CLAIM_CHANGED` cannot see claims in sentences under six words (see Assurance records).
+- `CLAIM_CHANGED` misses claims that carry no signal word (see Assurance records). The claim lexicon is English-only.
+- Ownership for the five modules without an N3 role is proposed, not activated: see `docs/role-ownership-decisions.md`. Rollout and rollback for the hosting setup are in `docs/agency-framework-rollout.md`.

@@ -24,9 +24,11 @@ from services.langgraph.agency.operating_framework.catalog import (
 )
 from services.langgraph.app.main import app
 from services.langgraph.tests.framework_support import (
+    AUTHOR,
     afw,  # noqa: F401 - fixture
     apply,
     artifact,
+    as_user,
     client,
     complete_task,
     create_project,
@@ -35,6 +37,11 @@ from services.langgraph.tests.framework_support import (
     instantiate,
     key,
     ok,
+)
+from services.langgraph.tests.test_unified_delivery import (  # noqa: F401 - fixture
+    ABSENT_PHRASE,
+    _contract,
+    provider_success,
 )
 from services.langgraph.tests.test_vnexus_contracts import _shape_matches, structure
 
@@ -88,6 +95,15 @@ def capture(monkeypatch) -> dict:
         "metric_input": "eligible_sessions", "value": 400, "unit": "count", "window": "2026-09",
         "source_ref": "synthetic://fixture/analytics"}), 201)
     tasks = ok(client.get(f"/agency-framework/plans/{plan_id}/tasks", params={"module_id": "AGM-01"}))
+    # A review bound to a sealed delivery release candidate (a real enforce-mode run in this project).
+    monkeypatch.setenv("AMC_CONTRACT_MODE", "enforce")
+    run = ok(client.post("/agency/runs", headers=key(), json={
+        "project_id": project_id, "brief": {"brand_name": "Northwind", "target_audience": "Urban professionals"},
+        "delivery_contract": _contract(ABSENT_PHRASE)}), 201)
+    as_user(monkeypatch, "afw-inspector", "reviewer")
+    candidate_review = ok(client.post(f"/agency-framework/plans/{plan_id}/assurance/review", headers=key(), json={
+        "task_ids": ["AGM-20-001"], "release_candidate_ref": f"release-candidate:{run['run_id']}"}), 201)
+    as_user(monkeypatch, AUTHOR)
     return {
         "catalog": ok(client.get("/agency-framework/catalog")),
         "catalog_tasks": {"tasks": ok(client.get("/agency-framework/catalog/tasks"))["tasks"][:3]},
@@ -102,6 +118,8 @@ def capture(monkeypatch) -> dict:
         "metrics": ok(client.get(f"/agency-framework/plans/{plan_id}/metrics")),
         "assurance_list": ok(client.get(f"/agency-framework/plans/{plan_id}/assurance")),
         "assurance_record": ok(client.get(f"/agency-framework/plans/{plan_id}/assurance/{review['record']['record_id']}")),
+        "release_candidate_review": ok(client.get(
+            f"/agency-framework/plans/{plan_id}/assurance/{candidate_review['record']['record_id']}")),
         "decision_ref": choice,
     }
 
@@ -113,7 +131,7 @@ def _scrub(value):
     return value
 
 
-def test_recorded_fixture_matches_live_responses(afw, monkeypatch):
+def test_recorded_fixture_matches_live_responses(afw, monkeypatch, provider_success):
     live = _scrub(capture(monkeypatch))
     if os.environ.get("AMC_REGENERATE_FIXTURES") == "1" or not FIXTURE.exists():
         FIXTURE.write_text(json.dumps(live, indent=2, sort_keys=True) + "\n", encoding="utf-8")

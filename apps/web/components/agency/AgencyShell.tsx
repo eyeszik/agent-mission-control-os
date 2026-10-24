@@ -248,7 +248,7 @@ export function AgencyShell({ initialSection }: { initialSection?: AgencySection
                 {projectList.map((p) => <option key={p.project_id} value={p.project_id}>{p.display_name}</option>)}
               </select>
             </div>
-            <Button variant="secondary" onClick={() => setPaletteOpen(true)} aria-keyshortcuts="Control+K Meta+K" className="ml-auto sm:ml-2">
+            <Button variant="secondary" onClick={() => setPaletteOpen(true)} aria-label="Search" aria-keyshortcuts="Control+K Meta+K" className="ml-auto sm:ml-2">
               <Search aria-hidden="true" size={16} /><span className="hidden sm:inline">Search</span><kbd className="hidden text-xs text-fg sm:inline">⌘K</kbd>
             </Button>
             <div className="flex items-center gap-2 sm:ml-auto">
