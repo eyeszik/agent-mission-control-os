@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type KeyboardEvent } from 'react';
-import type { AfAssuranceKind, AfAssuranceRecord } from '@amc/shared';
+import type { AfAssuranceKind, AfAssuranceRecord, AfReleaseCandidateInspection } from '@amc/shared';
 import { createAssurance, getAssurance, listAssurance } from '../../lib/api/agencyFramework';
 import { shortHash } from '../../lib/framework/view';
 import { useAgencyStore } from '../../lib/stores/agencyStore';
@@ -16,8 +16,8 @@ const KINDS: { kind: AfAssuranceKind; label: string; purpose: string; template: 
     template: { changed_artifact_id: '', change_description: '', declared_effects: [] } },
   { kind: 'renewal', label: 'Renewal', purpose: 'A triggered proposal that retains the decision and its alternatives; never replaces it.',
     template: { trigger_kind: 'NEW_CONTRADICTION', trigger_evidence_refs: [], affected_decision_ref: 'decision:', proposed_alternatives: [], rationale: '' } },
-  { kind: 'review', label: 'Review', purpose: 'Exact candidate hashes, dependency snapshot and full-byte access before any decision.',
-    template: { candidate_refs: [], summary: '', request_decision: false } },
+  { kind: 'review', label: 'Review', purpose: 'Exact candidate hashes, dependency snapshot and full-byte access before any decision. Bind a sealed delivery candidate with release_candidate_ref; its run\'s own approval decides it.',
+    template: { candidate_refs: [], release_candidate_ref: null, summary: '', request_decision: false } },
 ];
 
 const GOOD = new Set(['COVERED', 'DETECTED', 'MATCHED', 'PROPOSED', 'UNDER_REVIEW', 'NEEDS_HUMAN']);
@@ -32,7 +32,20 @@ function Details({ record }: { record: AfAssuranceRecord }) {
       case 'mutation': return [['Class', String(b.mutation_class)], ['Expected', list(b.expected_findings)], ['Observed', list(b.observed_findings)], ['Missed', list(b.false_negative_indicators)], ['Unexpected', list(b.false_positive_indicators)], ['Variant', String(b.variant_storage)]];
       case 'probe': return [['Changed', String(b.changed_dependency_ref)], ['Declared', list(b.declared_effects)], ['Observed', list(b.observed_effects)], ['Undeclared', list(b.unexpected_effects)], ['Canonical unchanged', String((b.isolation as Record<string, unknown> | undefined)?.canonical_unchanged)], ['Writes', list(b.write_set_refs)]];
       case 'renewal': return [['Trigger', String(b.trigger_kind)], ['Decision', String(b.affected_decision_ref)], ['Retained alternatives', list(b.retained_alternatives)], ['Proposed', list(b.proposed_alternatives)], ['Decision unchanged', String(b.decision_unchanged)]];
-      case 'review': return [['Candidates', list((b.candidate_subject_refs as { ref: string }[] | undefined)?.map((s) => s.ref))], ['Full candidate access', String((b.access_check_receipt as Record<string, unknown> | undefined)?.full_candidate_access)], ['Unresolved findings', list(b.unresolved_findings)], ['Decision subject', shortHash(b.decision_subject_hash as string)]];
+      case 'review': {
+        const rc = b.release_candidate as AfReleaseCandidateInspection | null | undefined;
+        const rows: [string, string][] = [['Candidates', list((b.candidate_subject_refs as { ref: string }[] | undefined)?.map((s) => s.ref))], ['Full candidate access', String((b.access_check_receipt as Record<string, unknown> | undefined)?.full_candidate_access)], ['Blocking findings', list(b.blocking_findings)], ['Unresolved findings', list(b.unresolved_findings)], ['Decision subject', shortHash(b.decision_subject_hash as string)]];
+        if (rc) {
+          rows.push(
+            ['Release candidate', `${rc.ref} · ${rc.status}`],
+            ['Sealed manifest', shortHash(rc.candidate_manifest_hash ?? undefined)],
+            ['Freshness when recorded', rc.freshness ? Object.entries(rc.freshness).map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v ? 'yes' : 'no'}`).join(', ') : '—'],
+            ['Release approval', rc.native_approval ? `${rc.native_approval.status ?? 'unknown'} · ${rc.native_approval.subject_bound ? 'bound to the sealed subject' : 'not bound to the sealed subject'} · decide at ${rc.native_approval.decide_route}` : 'not opened for this run'],
+            ['Release authority', rc.release_authority],
+          );
+        }
+        return rows;
+      }
     }
   })();
   return (
