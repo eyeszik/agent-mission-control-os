@@ -187,3 +187,18 @@ def test_reader_cannot_dispatch_or_cancel(scope):
     assert service.inspect(viewer, project, job['job_id'])['job_id'] == job['job_id']
     with pytest.raises(PermissionError):
         service.cancel(viewer, project, job['job_id'])
+
+
+def test_worker_identity_binds_dependency_bytes_and_license(tmp_path, monkeypatch):
+    if not runtime.WORKER.is_file():
+        pytest.skip('NOT_RUN: renderer build required')
+    import shutil
+    for name in ('worker.mjs', 'rough.cjs', 'LICENSE.roughjs'):
+        shutil.copyfile(runtime.WORKER.parent / name, tmp_path / name)
+    monkeypatch.setattr(runtime, 'WORKER', tmp_path / 'worker.mjs')
+    initial = runtime.fingerprint()['worker_source_hash']
+    with (tmp_path / 'rough.cjs').open('a') as file:
+        file.write('\n// fixture dependency byte change\n')
+    assert runtime.fingerprint()['worker_source_hash'] != initial
+    (tmp_path / 'LICENSE.roughjs').unlink()
+    assert runtime.fingerprint()['worker_source_hash'] == '0' * 64

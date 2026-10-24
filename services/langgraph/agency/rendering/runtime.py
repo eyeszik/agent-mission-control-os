@@ -28,7 +28,7 @@ def fingerprint() -> dict:
     node = shutil.which('node')
     version = subprocess.run([node, '--version'], capture_output=True, text=True, timeout=5).stdout.strip() if node else ''
     return {'package_lock_hash': hashlib.sha256((ROOT / 'pnpm-lock.yaml').read_bytes()).hexdigest(),
-            'worker_source_hash': hashlib.sha256(WORKER.read_bytes()).hexdigest() if WORKER.is_file() else '0' * 64,
+            'worker_source_hash': canonical_hash({name: hashlib.sha256((WORKER.parent / name).read_bytes()).hexdigest() for name in ('worker.mjs', 'rough.cjs', 'LICENSE.roughjs')}) if all((WORKER.parent / name).is_file() for name in ('worker.mjs', 'rough.cjs', 'LICENSE.roughjs')) else '0' * 64,
             'runtime_version': version}
 
 
