@@ -14,7 +14,7 @@
     ],
     "max_retries": 3
   },
-  "schema_version": "amc-run-fsm/v1",
+  "schema_version": "amc-run-fsm/v2",
   "sets": {
     "blocked": [
       "BLOCKED_AUTHORITY",
@@ -95,6 +95,7 @@
       "DORMANT",
       "RECONCILING",
       "SCHEDULED",
+      "STOPPED",
       "WAITING_APPROVAL"
     ],
     "DEAD_LETTER": [
@@ -119,11 +120,13 @@
     "LEASED": [
       "PRECHECK",
       "RECONCILING",
-      "SCHEDULED"
+      "SCHEDULED",
+      "STOPPED"
     ],
     "OBSERVING": [
       "INCONCLUSIVE",
       "RECONCILING",
+      "STOPPED",
       "VERIFYING"
     ],
     "PAUSED": [
@@ -137,17 +140,20 @@
       "DORMANT",
       "READY",
       "RECONCILING",
+      "STOPPED",
       "WAITING_APPROVAL"
     ],
     "READY": [
       "RECONCILING",
-      "RUNNING"
+      "RUNNING",
+      "STOPPED"
     ],
     "RECONCILING": [
       "DEAD_LETTER",
       "OBSERVING",
       "READY",
       "RECONCILING",
+      "STOPPED",
       "WAITING_APPROVAL"
     ],
     "RETRY_PENDING": [
@@ -165,7 +171,8 @@
       "INCONCLUSIVE",
       "OBSERVING",
       "RECONCILING",
-      "RETRY_PENDING"
+      "RETRY_PENDING",
+      "STOPPED"
     ],
     "SCHEDULED": [
       "LEASED",
@@ -178,7 +185,8 @@
       "DEAD_LETTER",
       "INCONCLUSIVE",
       "RECONCILING",
-      "RETRY_PENDING"
+      "RETRY_PENDING",
+      "STOPPED"
     ],
     "WAITING_APPROVAL": [
       "DORMANT",

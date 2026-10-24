@@ -116,7 +116,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "git_blob_sha": "67d0b8a71089d96de3ded431fb78ba51720fcc36"
+      "git_blob_sha": "884da5db465d5c20830298ae41371acda3cd6ded"
     },
     {
       "path": "packages/shared/src/schemas/ace-fixtures.json",
@@ -156,7 +156,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "a8c7ad4585929464fcdfde24379ebd2ebb8344ef"
+      "git_blob_sha": "4ba3c50daca9718b77b7d94a96ca1b1f333aeeb7"
     },
     {
       "path": "README.md",
@@ -164,7 +164,7 @@
     },
     {
       "path": "runtime/abc/run-fsm.yaml",
-      "git_blob_sha": "2a5d4d9e25998700c726de6e85d0c18af107bcd4"
+      "git_blob_sha": "ea6112d54cd8cb80c868c87e94516a740fb01d3f"
     },
     {
       "path": "scripts/compile_abc_manifests.py",
@@ -300,7 +300,7 @@
     },
     {
       "path": "services/langgraph/agency/durable/fsm.py",
-      "git_blob_sha": "c611da1bba3e9819cf023161b76213a22c9f4b13"
+      "git_blob_sha": "6d7ec71b8635f849394388e9d33b3079329e7c57"
     },
     {
       "path": "services/langgraph/agency/durable/governance.py",
@@ -596,7 +596,7 @@
     },
     {
       "path": "services/langgraph/app/main.py",
-      "git_blob_sha": "583db01cc9723480b0ed7b88a68e36fcd1f94f07"
+      "git_blob_sha": "84f6c9e9349f31fda0e3756c6dd584d50328a58a"
     },
     {
       "path": "services/langgraph/core/config.py",
@@ -676,7 +676,7 @@
     },
     {
       "path": "services/langgraph/persistence/database.py",
-      "git_blob_sha": "c252e7ecb8fcd87e5e1d335af787a5430729094a"
+      "git_blob_sha": "2b70398082c4a47f79a61fd39079e828c06eebf5"
     },
     {
       "path": "services/langgraph/persistence/delivery.py",
@@ -973,6 +973,74 @@
     {
       "path": "supabase/migrations/20261024_amc_agency_framework_v1.sql",
       "git_blob_sha": "92b0096c5408743ba34f22441bcb6d391ecfc5e0"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/__init__.py",
+      "git_blob_sha": "298bbc03ae9e2e8b615e4ed29f10d3983b03364a"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/contracts.py",
+      "git_blob_sha": "7fd0b69a724d84820b200a702ef010b458929f57"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/runtime.py",
+      "git_blob_sha": "95ea81096744dab1e3fd50da242cb3f3c5ffa06b"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/service.py",
+      "git_blob_sha": "0970eabecec71252d9004051a5263c4692007d66"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/worker.py",
+      "git_blob_sha": "03c91ad968ee05445d221a8a857eecf10f036a20"
+    },
+    {
+      "path": "services/langgraph/api/routes/rendering.py",
+      "git_blob_sha": "8b7ce33276554b07d2b0b25057028b20e485165f"
+    },
+    {
+      "path": "services/langgraph/tests/test_rendering.py",
+      "git_blob_sha": "d4885198cfc8f1068281c6cd4b14f3ad8a19695b"
+    },
+    {
+      "path": "packages/shared/src/schemas/rendering.ts",
+      "git_blob_sha": "2dbb02b4835ccfdab8daf2ca6fc36fa17336a93e"
+    },
+    {
+      "path": "packages/shared/tests/rendering.test.ts",
+      "git_blob_sha": "bbe143fb586100afcd39a5559825ed8e33a9dd47"
+    },
+    {
+      "path": "packages/creative-renderer/package.json",
+      "git_blob_sha": "f2bd13f24f499eb9f9cf0b1cac967a00a1a6f78b"
+    },
+    {
+      "path": "packages/creative-renderer/worker.mjs",
+      "git_blob_sha": "266dc4a23a995908ddbba92da08f458bfe3b4f4b"
+    },
+    {
+      "path": "packages/creative-renderer/build.mjs",
+      "git_blob_sha": "ad71222e8470a929e92adb03077839d3923a7dcf"
+    },
+    {
+      "path": "packages/creative-renderer/worker.test.mjs",
+      "git_blob_sha": "d6a8c30fedc9ea0c472cde12e35be22863bf1e41"
+    },
+    {
+      "path": "apps/web/components/rendering/CreativeRendering.tsx",
+      "git_blob_sha": "abf1bbc8f6ff9c25ffa2cd9049702a5c77288815"
+    },
+    {
+      "path": "apps/web/components/rendering/RenderPreview.tsx",
+      "git_blob_sha": "9ca1ddf593b693120ee8b759a53354710585e679"
+    },
+    {
+      "path": "apps/web/lib/api/rendering.ts",
+      "git_blob_sha": "6d70904fdf48dbec96e3cc44d3c28072324b2f3c"
+    },
+    {
+      "path": "apps/web/app/creative/page.tsx",
+      "git_blob_sha": "d3b9db4f01706d6d8882090235b02f78295d1afb"
     }
   ]
 }
