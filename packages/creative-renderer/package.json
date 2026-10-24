@@ -1,0 +1,14 @@
+{
+  "name": "@amc/creative-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test worker.test.mjs",
+    "typecheck": "node --check worker.mjs"
+  },
+  "dependencies": {
+    "roughjs": "^4.6.6"
+  }
+}
