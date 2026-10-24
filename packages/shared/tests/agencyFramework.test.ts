@@ -11,6 +11,7 @@ import {
   AfMetricsSchema,
   AfPlanListSchema,
   AfPlanViewSchema,
+  AfReleaseCandidateInspectionSchema,
   AfTaskDefinitionSchema,
   AfTaskDetailSchema,
   AfTaskListSchema,
@@ -32,10 +33,23 @@ describe('Agency framework Zod twins parse real backend responses', () => {
     ['metrics', AfMetricsSchema, fixture.metrics],
     ['assurance list', AfAssuranceListSchema, fixture.assurance_list],
     ['assurance record', AfAssuranceRecordSchema, fixture.assurance_record],
+    ['release candidate review', AfAssuranceRecordSchema, fixture.release_candidate_review],
   ];
   for (const [name, schema, value] of cases) {
     it(`parses the ${name}`, () => expect(() => schema.parse(value)).not.toThrow());
   }
+
+  it('binds a review to the exact sealed candidate and re-reads it at use time', () => {
+    const review = AfAssuranceRecordSchema.parse(fixture.release_candidate_review);
+    const bound = AfReleaseCandidateInspectionSchema.parse(review.record.body.release_candidate);
+    expect(bound.status).toBe('CURRENT');
+    expect(bound.blocking).toEqual([]);
+    expect(review.record.body.decision_ref).toBeNull();
+    expect(review.record.body.candidate_manifest_ref).toBe(`${bound.ref}#${bound.candidate_manifest_hash}`);
+    expect(bound.payload_checks.every((c) => c.hash_verified)).toBe(true);
+    expect(bound.native_approval?.subject_bound).toBe(true);
+    expect(review.subject_now && 'release_candidate' in review.subject_now && review.subject_now.subject_current).toBe(true);
+  });
 
   it('parses catalog task definitions', () => {
     for (const t of fixture.catalog_tasks.tasks) expect(() => AfTaskDefinitionSchema.parse(t)).not.toThrow();

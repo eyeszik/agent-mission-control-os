@@ -21,7 +21,10 @@ Boundaries, enforced here and tested:
   record is checked unchanged after. Only native governance can replace it.
 * Review binds the exact subject hashes and dependency snapshot, reads every
   candidate's full bytes, and can only open an approval through the existing
-  route. A summary never stands in for that access.
+  route. A summary never stands in for that access. Bound to a sealed delivery
+  release candidate (``release_candidate_ref``) it re-checks the seal at use
+  time (``candidates.inspect``) and links the run's own approval; it never
+  opens a second release decision, because release is delivery's.
 
 No record publishes, sends, spends, deploys or calls a provider or the network.
 """
@@ -35,13 +38,22 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 from services.langgraph.agency.execution.canonical import canonical_hash
 from services.langgraph.agency.project_os.knowledge import extract_claims
 from services.langgraph.security.auth import Principal
 
+from .candidates import CANDIDATE_REF
 from .catalog import load_catalog
+from .claims import detect_claims
 from .contracts import (
     PIPELINE,
     POLICY_VERSION,
@@ -87,6 +99,11 @@ class Base(_Strict):
         return v
 
 
+class ClaimEvidence(_Strict):
+    claim: str = Field(min_length=1, max_length=400)
+    evidence_refs: list[str] = Field(min_length=1, max_length=10)
+
+
 class MeaningInput(Base):
     interpreted_obligation: str = Field(min_length=3, max_length=2000)
     requirement_text: str = Field(default="", max_length=4000)
@@ -96,6 +113,7 @@ class MeaningInput(Base):
     output_refs: list[str] = Field(default_factory=list, max_length=20)
     ambiguities: list[str] = Field(default_factory=list, max_length=30)
     advisory_semantic_score: float | None = Field(default=None, ge=0.0, le=1.0)
+    claim_evidence: list[ClaimEvidence] = Field(default_factory=list, max_length=50)
 
     @field_validator("output_refs")
     @classmethod
@@ -177,7 +195,8 @@ class RenewalInput(Base):
 
 
 class ReviewInput(Base):
-    candidate_refs: list[str] = Field(min_length=1, max_length=50)
+    candidate_refs: list[str] = Field(default_factory=list, max_length=50)
+    release_candidate_ref: str | None = Field(default=None, max_length=220)
     summary: str = Field(default="", max_length=4000)
     request_decision: bool = False
 
@@ -185,6 +204,19 @@ class ReviewInput(Base):
     @classmethod
     def _cands(cls, v: list[str]) -> list[str]:
         return _artifact_refs(v)
+
+    @field_validator("release_candidate_ref")
+    @classmethod
+    def _candidate(cls, v: str | None) -> str | None:
+        if v is not None and not CANDIDATE_REF.match(v):
+            raise ValueError("a release candidate ref is release-candidate:<run_id>")
+        return v
+
+    @model_validator(mode="after")
+    def _something_to_review(self) -> ReviewInput:
+        if not self.candidate_refs and not self.release_candidate_ref:
+            raise ValueError("a review needs candidate_refs or a release_candidate_ref")
+        return self
 
 
 _INPUTS: dict[str, type[Base]] = {"meaning": MeaningInput, "mutation": MutationInput, "probe": ProbeInput,
@@ -271,8 +303,44 @@ def _dependents(edges: list[dict], start: str, budget: int) -> tuple[list[str], 
 # ------------------------------------------------------------------------------ the five builders
 
 
+def _claim_inventory(plan: dict, outputs: list[tuple[str, str]], links: list[ClaimEvidence], adapter: Any) -> dict[str, Any]:
+    """Detection, then substantiation from refs a person linked, then the policy route. No decision."""
+    from .claims import normalize
+
+    items: dict[str, dict[str, Any]] = {}
+    for ref, text in outputs:
+        for claim in detect_claims(text):
+            entry = items.setdefault(claim.normalized, {**claim.as_dict(), "locations": [], "evidence_refs": []})
+            entry["locations"].append(ref)
+    for link in links:
+        key_ = normalize(link.claim)
+        if key_ not in items:
+            raise FrameworkError("UNKNOWN_CLAIM", "Evidence can only be linked to a claim found in the outputs", 422,
+                                 {"claim": link.claim})
+        checks = [resolve_ref(r, tenant_id=plan["tenant_id"], project_id=plan["project_id"], adapter=adapter)
+                  for r in link.evidence_refs]
+        bad = [c for c in checks if not c["ok"]]
+        if bad:
+            raise FrameworkError("REF_REJECTED", "Linked evidence must resolve, reviewed and fresh, in this project", 422,
+                                 {"checks": bad})
+        items[key_]["evidence_refs"].extend(link.evidence_refs)
+    for entry in items.values():
+        if entry["substantiation_need"] == "REVIEW_AS_OPINION":
+            entry["substantiation"] = "REVIEW_AS_OPINION"
+        else:
+            # Linked is not verified: a person still judges whether the evidence supports the claim.
+            entry["substantiation"] = "EVIDENCE_LINKED_UNVERIFIED" if entry["evidence_refs"] else "UNSUBSTANTIATED"
+    unsubstantiated = sum(1 for e in items.values() if e["substantiation"] == "UNSUBSTANTIATED")
+    return {
+        "items": list(items.values()),
+        "unsubstantiated": unsubstantiated,
+        "state": "NO_CLAIMS" if not items else ("UNSUBSTANTIATED_CLAIMS" if unsubstantiated else "EVIDENCE_LINKED"),
+        "decision": "NONE: a person decides at review; nothing is rejected or approved here",
+    }
+
+
 def _meaning(principal: Principal, plan: dict, data: MeaningInput, adapter: Any) -> tuple[dict[str, Any], str, list[str]]:
-    texts, outputs = [], []
+    texts, outputs, raw = [], [], []
     for ref in data.output_refs:
         check, text = _artifact_text(plan, ref, adapter)
         if not check["attachable"]:
@@ -281,6 +349,8 @@ def _meaning(principal: Principal, plan: dict, data: MeaningInput, adapter: Any)
                         "readable": text is not None})
         if text is not None:
             texts.append(text.lower())
+            raw.append((ref, text))
+    claim_inventory = _claim_inventory(plan, raw, data.claim_evidence, adapter)
     corpus = "\n".join(texts)
     qualifiers = [{"qualifier": q, "found": q.lower() in corpus} if texts else {"qualifier": q, "found": None}
                   for q in data.qualifiers]
@@ -305,6 +375,7 @@ def _meaning(principal: Principal, plan: dict, data: MeaningInput, adapter: Any)
         "ambiguities": data.ambiguities,
         "coverage_state": coverage,
         "review_status": "NEEDS_HUMAN" if coverage != "COVERED" else "READY_FOR_REVIEW",
+        "claims": claim_inventory,
         "advisory": {"semantic_score": data.advisory_semantic_score,
                      "note": "advisory only; it never changes coverage_state and never approves a requirement"},
     }, coverage, [o["ref"] for o in outputs]
@@ -318,9 +389,12 @@ def _detect(base: str, variant: str) -> set[str]:
         return re.sub(r"<[^>]+>", " ", markup)
 
     found: set[str] = set()
-    # Known blind spot, reported as a false negative by the fixtures: extract_claims
-    # ignores sentences shorter than six words, so a change inside one is missed.
-    if norm(extract_claims(text_of(base))) != norm(extract_claims(text_of(variant))):
+    # Sentence claims (six words and up) plus every claim-bearing segment, however
+    # short, so a change to "Free" or "Ships in 2 days." is seen.
+    def surface(markup: str) -> tuple[list[str], list[str]]:
+        return norm(extract_claims(text_of(markup))), [c.normalized for c in detect_claims(markup)]
+
+    if surface(base) != surface(variant):
         found.add("CLAIM_CHANGED")
     lang = re.compile(r'\blang\s*=\s*"([^"]*)"', re.IGNORECASE)
     if lang.findall(base) != lang.findall(variant):
@@ -524,24 +598,68 @@ def _renewal(principal: Principal, plan: dict, data: RenewalInput, adapter: Any)
     }, status, [data.affected_decision_ref, *([data.proposal_ref] if data.proposal_ref else [])]
 
 
+def _authorize_candidate_reviewer(principal: Principal, run: dict) -> None:
+    """Binding a release candidate is an inspection by someone who could decide it, but did not start it."""
+    from services.langgraph.security.approval_authority import (
+        approver_roles,
+        run_initiator,
+        self_approval_allowed,
+    )
+
+    if principal.role.strip().lower() not in approver_roles():
+        raise FrameworkError("REVIEWER_ROLE_REQUIRED", "Reviewing a release candidate requires an approver role", 403)
+    initiator = run_initiator(run)
+    if not self_approval_allowed() and (initiator is None or initiator == principal.user_id):
+        raise FrameworkError("REVIEWER_IS_INITIATOR",
+                             "The person who started the run cannot review its release candidate", 403)
+
+
+def _candidate_subjects(principal: Principal, plan: dict, data: ReviewInput) -> tuple[dict | None, list[str]]:
+    from . import candidates
+
+    if not data.release_candidate_ref:
+        return None, list(data.candidate_refs)
+    if data.request_decision:
+        raise FrameworkError("RELEASE_DECISION_OWNED_BY_DELIVERY",
+                             "A sealed release candidate is decided by its run's approval at /approvals/{id}/decide", 422)
+    _authorize_candidate_reviewer(principal, candidates.load_run(data.release_candidate_ref, plan))
+    candidate = candidates.inspect(data.release_candidate_ref, plan)
+    derived = sorted(candidates.subject_ref(r["version_ref"]) for r in candidate["artifact_refs"])
+    if data.candidate_refs and sorted(data.candidate_refs) != derived:
+        raise FrameworkError("CANDIDATE_REFS_MISMATCH", "Candidate refs must be exactly the sealed candidate's artifacts", 422,
+                             {"sealed": derived})
+    return candidate, derived
+
+
 def _review(principal: Principal, plan: dict, data: ReviewInput, adapter: Any) -> tuple[dict[str, Any], str, list[str]]:
     from services.langgraph.agency.intake.release import open_artifact_approval
     from services.langgraph.persistence import operating_framework as store
     from services.langgraph.persistence.agency_kernel import get_artifact
 
+    candidate, candidate_refs = _candidate_subjects(principal, plan, data)
+    payload_access = {c["artifact_id"]: c for c in (candidate or {}).get("payload_checks", [])}
     subjects, access, blocked = [], [], []
-    for ref in data.candidate_refs:
+    for ref in candidate_refs:
         check = resolve_ref(ref, tenant_id=plan["tenant_id"], project_id=plan["project_id"], adapter=adapter)
         if not check["attachable"]:
             raise FrameworkError("REF_REJECTED", "Review candidates must exist in this project", 422, {"checks": [check]})
         artifact_id, version = parse_artifact_ref(ref)
-        data_bytes = read_artifact_bytes(get_artifact(artifact_id), adapter) if check["status"] == "OK" else None
+        status = check["status"]
+        if artifact_id in payload_access:
+            # Run artifacts are bound over a stored payload, not object storage: the reviewer recomputes that hash.
+            verified = payload_access[artifact_id]
+            access.append({"ref": ref, "bytes_read": verified["bytes_read"], "hash_verified": verified["hash_verified"],
+                           "source": "run payload"})
+            if status == "READBACK_UNAVAILABLE" and verified["hash_verified"]:
+                status = "OK"
+        else:
+            data_bytes = read_artifact_bytes(get_artifact(artifact_id), adapter) if status == "OK" else None
+            access.append({"ref": ref, "bytes_read": len(data_bytes) if data_bytes is not None else None,
+                           "hash_verified": data_bytes is not None, "source": "object storage"})
         subjects.append({"ref": ref, "artifact_id": artifact_id, "version": version, "content_hash": check["content_hash"],
-                         "status": check["status"]})
-        access.append({"ref": ref, "bytes_read": len(data_bytes) if data_bytes is not None else None,
-                       "hash_verified": data_bytes is not None})
-        if check["status"] != "OK":
-            blocked.append({"ref": ref, "status": check["status"]})
+                         "status": status})
+        if status != "OK":
+            blocked.append({"ref": ref, "status": status})
     snap = graph_snapshot(plan["project_id"])
     ids = {s["artifact_id"] for s in subjects}
     edges = [e for e in snap["edges"] if e["artifact_id"] in ids]
@@ -550,27 +668,40 @@ def _review(principal: Principal, plan: dict, data: ReviewInput, adapter: Any) -
     dependency_snapshot = {"edges": edges, "upstream_heads": [
         {"artifact_id": u, "version": heads[u]["version"], "content_hash": heads[u]["content_hash"]} for u in upstream if u in heads]}
     dependency_hash = canonical_hash(dependency_snapshot)
-    subject_hash = canonical_hash({"subjects": [{k: s[k] for k in ("artifact_id", "version", "content_hash")} for s in subjects],
-                                   "dependency_snapshot_hash": dependency_hash})
+    subject_hash = canonical_hash({
+        "subjects": [{k: s[k] for k in ("artifact_id", "version", "content_hash")} for s in subjects],
+        "dependency_snapshot_hash": dependency_hash,
+        **({"candidate_manifest_hash": candidate["candidate_manifest_hash"],
+            "approval_subject_hash": candidate["approval_subject_hash"]} if candidate else {}),
+    })
     diffs = []
     for s in subjects:
         if s["version"] > 1:
             diffs.append({"ref": s["ref"], "compare": f"{s['artifact_id']}@v{s['version'] - 1}..v{s['version']}",
                           "route": f"/projects/{plan['project_id']}/artifacts/{s['artifact_id']}/compare"})
     open_tasks = [t["task_id"] for t in store.list_tasks(plan["plan_id"])
-                  if any(r in data.candidate_refs for r in t["artifact_refs"]) and t["state"] not in ("VERIFIED", "APPROVED")]
+                  if any(r in candidate_refs for r in t["artifact_refs"]) and t["state"] not in ("VERIFIED", "APPROVED")]
     findings = [f"task {t} referencing a candidate is not verified" for t in open_tasks]
     for record in list_records_raw(plan, kinds=("meaning", "mutation", "probe")):
-        if set(record.get("subject_refs", [])) & set(data.candidate_refs) and record["status"] not in (
+        if set(record.get("subject_refs", [])) & set(candidate_refs) and record["status"] not in (
                 "COVERED", "DETECTED", "MATCHED"):
             findings.append(f"{record['kind']} {record['record_id']} is {record['status']}")
-    full_access = all(a["hash_verified"] for a in access)
-    status = "BLOCKED" if blocked or not full_access else "NEEDS_HUMAN"
+    if candidate is not None and candidate.get("native_approval") is None and candidate["status"] != "NOT_SEALED":
+        findings.append("release approval not opened for this run")
+    full_access = bool(access) and all(a["hash_verified"] for a in access)
+    blocking = list((candidate or {}).get("blocking", []))
+    for item in blocked:
+        code = "ARTIFACTS_CHANGED" if item["status"] == "ARTIFACT_STALE" else item["status"]
+        if code not in blocking:
+            blocking.append(code)
+    if candidate_refs and not full_access and "FULL_ACCESS_UNAVAILABLE" not in blocking and not blocked:
+        blocking.append("FULL_ACCESS_UNAVAILABLE")
+    status = "BLOCKED" if blocking else "NEEDS_HUMAN"
     decision_ref = None
     if data.request_decision:
         if status != "NEEDS_HUMAN":
             raise FrameworkError("REVIEW_NOT_READY", "Every candidate must be current and fully readable before a decision", 409,
-                                 {"blocked": blocked})
+                                 {"blocked": blocked, "blocking_findings": blocking})
         approval = open_artifact_approval(
             principal, tenant_id=plan["tenant_id"], project_id=plan["project_id"],
             mission_id=f"{plan['plan_id']}:review:{subject_hash[:16]}", contract_hash=plan["catalog_sha256"],
@@ -578,13 +709,18 @@ def _review(principal: Principal, plan: dict, data: ReviewInput, adapter: Any) -
             run_pipeline=PIPELINE, policy_version=POLICY_VERSION, subject_type="AGENCY_REVIEW_CANDIDATE",
             reason=f"Review of {len(subjects)} candidate artifact(s)", metadata={"plan_id": plan["plan_id"]})
         decision_ref = approval["approval_id"]
+    native = (candidate or {}).get("native_approval")
     return {
         "candidate_subject_refs": subjects,
         "dependency_snapshot_ref": f"graph-snapshot:{snap['hash'][:16]}",
         "dependency_snapshot_hash": dependency_hash,
-        "candidate_manifest_ref": None,
+        "candidate_manifest_ref": (f"{data.release_candidate_ref}#{candidate['candidate_manifest_hash']}"
+                                   if candidate and candidate.get("candidate_manifest_hash") else None),
+        "release_candidate": candidate,
+        "native_approval_ref": native["approval_id"] if native else None,
         "diff_refs": diffs,
         "unresolved_findings": findings,
+        "blocking_findings": blocking,
         "reviewer_authority_scope": "decided only at /approvals/{id}/decide (approver role, separation of duties)",
         "access_check_receipt": {"principal": principal.user_id, "subjects": access, "full_candidate_access": full_access},
         "summary": data.summary,
@@ -592,7 +728,7 @@ def _review(principal: Principal, plan: dict, data: ReviewInput, adapter: Any) -
         "decision_ref": decision_ref,
         "decision_subject_hash": subject_hash,
         "status": status,
-    }, status, data.candidate_refs
+    }, status, [*([data.release_candidate_ref] if data.release_candidate_ref else []), *candidate_refs]
 
 
 _BUILDERS = {"meaning": _meaning, "mutation": _mutation, "probe": _probe, "renewal": _renewal, "review": _review}
@@ -675,7 +811,10 @@ def create_record(principal: Principal, plan_id: str, kind: str, payload: dict[s
     first_subject = next((r for r in subject_refs if r and r.startswith("artifact:")), None)
     subject_check = (resolve_ref(first_subject, tenant_id=plan["tenant_id"], project_id=plan["project_id"], adapter=adapter)
                      if first_subject else None)
-    record_id = f"asr-{uuid4().hex[:20]}"
+    # A correction's id is derived from what it supersedes, so its artifact key is the
+    # compare-and-set: two concurrent corrections of one head cannot both be stored.
+    record_id = (f"asr-{canonical_hash({'kind': kind, 'supersedes': data.supersedes_ref})[:20]}"
+                 if data.supersedes_ref else f"asr-{uuid4().hex[:20]}")
     record = _seal({
         "record_id": record_id,
         "schema_version": SCHEMA_VERSION,
@@ -702,13 +841,26 @@ def create_record(principal: Principal, plan_id: str, kind: str, payload: dict[s
         "authority": "NONE: a finding or proposal; grants no approval, release, publication, send or spend",
         "body": body,
     })
-    meta = create_project_artifact(
-        tenant_id=plan["tenant_id"], project_id=plan["project_id"], actor=principal.user_id,
-        artifact_key=_record_key(kind, record_id), artifact_type=RECORD_ARTIFACT_TYPE, adapter=adapter,
-        content_text=json.dumps(record, sort_keys=True, separators=(",", ":")), subtype=f"assurance.{kind}",
-        v2={"mime_type": "application/json"},
-    )
+    try:
+        meta = create_project_artifact(
+            tenant_id=plan["tenant_id"], project_id=plan["project_id"], actor=principal.user_id,
+            artifact_key=_record_key(kind, record_id), artifact_type=RECORD_ARTIFACT_TYPE, adapter=adapter,
+            content_text=json.dumps(record, sort_keys=True, separators=(",", ":")), subtype=f"assurance.{kind}",
+            v2={"mime_type": "application/json"},
+        )
+    except Exception as exc:
+        if data.supersedes_ref and _record_exists(plan, kind, record_id):
+            raise FrameworkError("STALE_SUPERSEDE", "That record was already superseded; supersede the current head",
+                                 409) from exc
+        raise
     return {**read_record(principal, plan_id, record_id), "artifact_id": meta.artifact_id}
+
+
+def _record_exists(plan: dict, kind: str, record_id: str) -> bool:
+    from services.langgraph.persistence.agency_kernel import get_artifact
+    from services.langgraph.persistence.projects import project_artifact_id
+
+    return get_artifact(project_artifact_id(plan["project_id"], _record_key(kind, record_id))) is not None
 
 
 def read_record(principal: Principal, plan_id: str, record_id: str) -> dict[str, Any]:
@@ -730,7 +882,19 @@ def read_record(principal: Principal, plan_id: str, record_id: str) -> dict[str,
         integrity = _verify(record, artifact, data)
         current = None
         pinned = [r for r in record.get("subject_refs", []) if r.startswith("artifact:")]
-        if pinned:
+        bound = (record.get("body") or {}).get("release_candidate") if kind == "review" else None
+        if bound:
+            from . import candidates
+
+            # Use-time freshness: the seal, the heads, the dependencies and the run's approval are re-read now.
+            try:
+                now = candidates.inspect(bound["ref"], plan)
+            except FrameworkError:
+                now = {"status": "NOT_FOUND", "blocking": ["REF_NOT_FOUND"]}
+            same = now.get("candidate_manifest_hash") == bound.get("candidate_manifest_hash")
+            current = {"release_candidate": now,
+                       "subject_current": same and not now.get("blocking")}
+        elif pinned:
             # Every artifact the record binds must still be the head it pinned.
             checks = [resolve_ref(r, tenant_id=plan["tenant_id"], project_id=plan["project_id"], adapter=adapter) for r in pinned]
             first_ok = checks[0]["content_hash"] == record.get("subject_content_hash")
