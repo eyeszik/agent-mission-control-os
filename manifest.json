@@ -56,7 +56,7 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "ebdd026c77a69dd2cc014807e7d75d13121e2df2"
+      "git_blob_sha": "0444c78b1a309f6debd2880f8b53600f90a0f99a"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -156,7 +156,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "a8c7ad4585929464fcdfde24379ebd2ebb8344ef"
+      "git_blob_sha": "2a77d447f879abe0a8647208263079028ae6a150"
     },
     {
       "path": "README.md",
@@ -956,7 +956,7 @@
     },
     {
       "path": "services/langgraph/agency/operating_framework/assurance.py",
-      "git_blob_sha": "480a854b9d0729dac6e1b76c4ec848b11a53fcf4"
+      "git_blob_sha": "fd58d6620db3de5199f3ca887b720928f40934d3"
     },
     {
       "path": "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json",
@@ -973,6 +973,10 @@
     {
       "path": "supabase/migrations/20261024_amc_agency_framework_v1.sql",
       "git_blob_sha": "92b0096c5408743ba34f22441bcb6d391ecfc5e0"
+    },
+    {
+      "path": "services/langgraph/agency/operating_framework/candidates.py",
+      "git_blob_sha": "c7a28d82099fbab448e0035ad4b32ac95cf06d60"
     }
   ]
 }
