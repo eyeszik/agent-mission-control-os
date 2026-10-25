@@ -39,7 +39,7 @@ council = [
     "crewai>=1.15,<2",
     "autogen-agentchat>=0.7.5,<0.8",
     "autogen-core>=0.7.5,<0.8",
-    "mcp>=1.28,<2",
+    "mcp>=1.28,<3",
     "protobuf>=5.29,<8",
 ]
 
