@@ -28,6 +28,7 @@ from services.langgraph.api.routes import (
     project_ops,
     projects,
     runtime,
+    ucpo,
     vnexus,
 )
 from services.langgraph.app.config import (
@@ -118,6 +119,7 @@ app.include_router(runtime.router, prefix="/runtime", tags=["Runtime"])
 app.include_router(design.router, prefix="/design", tags=["Design Mode"])
 app.include_router(foundry.router, prefix="/foundry", tags=["Creative Foundry"])
 app.include_router(rendering.router, prefix="/foundry", tags=["Governed Rendering"])
+app.include_router(ucpo.router, prefix="/ucpo", tags=["Website Production Line"])
 app.include_router(missions.router, prefix="/missions", tags=["Mission Council"])
 app.include_router(vnexus.router, prefix="/vnexus", tags=["VNEXUS"])
 app.include_router(actions.router, prefix="/actions", tags=["Governed Actions"])
