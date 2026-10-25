@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "000bbee8cc721b390b13b53019f17f5439d8d045"
+      "git_blob_sha": "a26985e4438b2f97cc5ff396c014d55fb686ba53"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -1056,11 +1056,11 @@
     },
     {
       "path": "services/langgraph/agency/ucpo/qa.py",
-      "git_blob_sha": "b22ebf62e7432cffc47f030610a8045e4fe10506"
+      "git_blob_sha": "ed98c8fd9dcd7cd5fbf0640ae857f6cebfb6f718"
     },
     {
       "path": "services/langgraph/agency/ucpo/qa_runner.cjs",
-      "git_blob_sha": "475e280da1e448ef3a185572812d2d2217d1820f"
+      "git_blob_sha": "5456b2465b18d5a1498933a27021e02e1d1dbc79"
     },
     {
       "path": "services/langgraph/agency/ucpo/source.py",
@@ -1084,7 +1084,7 @@
     },
     {
       "path": "services/langgraph/tests/test_ucpo_build.py",
-      "git_blob_sha": "6c10c9df1247840a17da6238d459c86152b421ab"
+      "git_blob_sha": "01325d264960e0dbb395a04612b0bc40bfbd4c07"
     },
     {
       "path": "services/langgraph/tests/test_ucpo_api.py",
