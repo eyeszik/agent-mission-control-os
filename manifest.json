@@ -1056,11 +1056,11 @@
     },
     {
       "path": "services/langgraph/agency/ucpo/qa.py",
-      "git_blob_sha": "b22ebf62e7432cffc47f030610a8045e4fe10506"
+      "git_blob_sha": "36cb5968850d9b03cd4507227c25b2017a3f63c5"
     },
     {
       "path": "services/langgraph/agency/ucpo/qa_runner.cjs",
-      "git_blob_sha": "475e280da1e448ef3a185572812d2d2217d1820f"
+      "git_blob_sha": "f4c61c0352fbbbe84cb30c6de400c1c903cfc83b"
     },
     {
       "path": "services/langgraph/agency/ucpo/source.py",
@@ -1101,6 +1101,10 @@
     {
       "path": "apps/web/lib/api/ucpo.ts",
       "git_blob_sha": "d7491b713a2d374437bf308a40f34e83f982a985"
+    },
+    {
+      "path": "services/langgraph/tests/test_ucpo_qa_discovery.py",
+      "git_blob_sha": "f4bdcca73f54b508ec1fe29575141073bfe65b7d"
     }
   ]
 }
