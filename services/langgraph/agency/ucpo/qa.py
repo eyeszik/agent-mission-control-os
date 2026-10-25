@@ -30,12 +30,15 @@ RUNNER_TIMEOUT_S = 300
 _HEX = {v.lower(): k for k, v in psem.PALETTE.items()}
 
 
-def _playwright_paths() -> tuple[Optional[str], Optional[str]]:
+def _playwright_paths() -> tuple[Optional[str], Optional[str], Optional[str]]:
+    """(NODE_PATH, browsers path, module name). apps/web declares @playwright/test, which pnpm exposes
+    without a top-level ``playwright``; both export the same ``chromium`` launcher."""
+    browsers = os.environ.get("PLAYWRIGHT_BROWSERS_PATH") or ("/opt/pw-browsers" if Path("/opt/pw-browsers").is_dir() else None)
     for candidate in (Path("/opt/node-tools/node_modules"), WEB_NODE_MODULES):
-        if (candidate / "playwright" / "package.json").exists():
-            browsers = os.environ.get("PLAYWRIGHT_BROWSERS_PATH") or ("/opt/pw-browsers" if Path("/opt/pw-browsers").is_dir() else None)
-            return str(candidate), browsers
-    return None, None
+        for module in ("playwright", "@playwright/test"):
+            if (candidate / module / "package.json").exists():
+                return str(candidate), browsers, module
+    return None, None, None
 
 
 def axe_path() -> Optional[Path]:
@@ -142,7 +145,7 @@ def verify_build(out_dir: Path, *, routes: list[str], expected_output_hash: str,
             check="build_identity", result="BLOCKED", detail="export bytes differ from the build being verified"),), dom_evidence={},
             **base)
     iso = isolation or probe_isolation()
-    node_path, browsers = _playwright_paths()
+    node_path, browsers, pw_module = _playwright_paths()
     axe = axe_path()
     missing = [n for n, v in (("isolation", iso.available), ("playwright", node_path), ("axe-core", axe)) if not v]
     if missing:
@@ -154,7 +157,7 @@ def verify_build(out_dir: Path, *, routes: list[str], expected_output_hash: str,
         ev = evidence_dir or (work / "evidence")
         ev.mkdir(parents=True, exist_ok=True)
         cfg = {"out_dir": str(out_dir), "routes": routes, "viewports": list(VIEWPORTS), "axe_path": str(axe),
-               "evidence_dir": str(ev), "result_path": str(work / "result.json")}
+               "evidence_dir": str(ev), "result_path": str(work / "result.json"), "playwright_module": pw_module}
         (work / "config.json").write_text(json.dumps(cfg))
         env = {"NODE_PATH": node_path}
         if browsers:

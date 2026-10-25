@@ -1056,11 +1056,11 @@
     },
     {
       "path": "services/langgraph/agency/ucpo/qa.py",
-      "git_blob_sha": "b22ebf62e7432cffc47f030610a8045e4fe10506"
+      "git_blob_sha": "ed98c8fd9dcd7cd5fbf0640ae857f6cebfb6f718"
     },
     {
       "path": "services/langgraph/agency/ucpo/qa_runner.cjs",
-      "git_blob_sha": "475e280da1e448ef3a185572812d2d2217d1820f"
+      "git_blob_sha": "5456b2465b18d5a1498933a27021e02e1d1dbc79"
     },
     {
       "path": "services/langgraph/agency/ucpo/source.py",
