@@ -189,6 +189,52 @@ jobs:
           NEXT_PUBLIC_AUTH_MODE: local
         run: pnpm --filter @amc/web build
 
+  ucpo-sandbox:
+    name: UCPO sandboxed build + browser QA (must not skip)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22.12.0"
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Install application dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          python -m pip install -e "./services/langgraph[dev]"
+
+      # The sandbox runs Chromium with HOME set to a scratch dir, so browsers live at a fixed path.
+      - name: Install Chromium runtime
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+        run: pnpm --filter @amc/web exec playwright install --with-deps chromium
+
+      # Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor; the UCPO sandbox needs them.
+      - name: Allow unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      # A skip here means the sandbox was unavailable, which would hide regressions, so it fails the job.
+      - name: Run sandboxed build and browser QA tests
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+          AMC_DATABASE_BACKEND: sqlite
+        run: |
+          set -o pipefail  # without it, tee hides a pytest failure
+          python -m pytest services/langgraph/tests/test_ucpo_build.py -q -rs | tee /tmp/ucpo-sandbox.log
+          if grep -q "SKIPPED" /tmp/ucpo-sandbox.log; then
+            echo "::error::UCPO sandbox tests were skipped; the sandbox is not available on this runner"
+            exit 1
+          fi
+
   browser-e2e:
     name: Browser E2E (local degraded HITL)
     runs-on: ubuntu-latest

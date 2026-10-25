@@ -87,7 +87,7 @@ function motion() {
 async function main() {
   const cfg = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
   const root = path.resolve(cfg.out_dir);
-  const { chromium } = require("playwright");
+  const { chromium } = require(cfg.playwright_module || "playwright");
   const browser = await chromium.launch({ args: ["--no-sandbox"] });
   const axe = fs.readFileSync(cfg.axe_path, "utf8");
   const result = { browser: { name: "chromium", version: browser.version() }, routes: {}, aborted: [] };
