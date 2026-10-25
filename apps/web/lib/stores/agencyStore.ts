@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 // Agency OS navigation and selection. Components select single primitives.
 export type AgencySection =
-  | 'overview' | 'clients' | 'projects' | 'missions' | 'council' | 'framework' | 'studio' | 'approvals' | 'deliverables' | 'analytics' | 'integrations' | 'settings';
+  | 'overview' | 'clients' | 'projects' | 'missions' | 'council' | 'framework' | 'websites' | 'studio' | 'approvals' | 'deliverables' | 'analytics' | 'integrations' | 'settings';
 
 export type Inspected = { kind: 'action'; id: string } | { kind: 'approval'; id: string } | null;
 

@@ -740,6 +740,29 @@ def _cmd_source_disposition(args: argparse.Namespace) -> int:
     return disposition_main(["--archive", args.archive] + (["--check"] if args.check else []))
 
 
+def _cmd_website(args: argparse.Namespace) -> int:
+    from services.langgraph.agency.ucpo.contracts import WebsiteBrief
+    from services.langgraph.agency.ucpo.presentation import example_brief
+    from services.langgraph.agency.ucpo.run import run_local
+
+    if bool(args.input) == bool(args.board):
+        raise BriefError("give exactly one of --input or --board")
+    try:
+        brief = example_brief(args.board) if args.board else WebsiteBrief.model_validate_json(Path(args.input).read_text())
+    except (OSError, KeyError, ValidationError, ValueError) as exc:
+        raise BriefError(f"website brief could not be read: {exc}") from exc
+    code, summary = run_local(brief, Path(args.out), preview_seconds=args.preview_seconds)
+    if args.json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+    else:
+        print(f"build: {summary['build']['status']}  browser QA: {(summary['browser_qa'] or {}).get('status', 'NOT_RUN')}  "
+              f"coverage: {summary['coverage']['coverage']}  eligible for approval: {summary['proof']['eligible_for_approval']}")
+        for reason in summary["proof"]["reasons"][:10]:
+            print(f"  blocked: {reason}")
+        print(f"report: {Path(args.out) / 'report.json'}")
+    return code
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agency",
@@ -853,6 +876,18 @@ def build_parser() -> argparse.ArgumentParser:
     source_disposition.add_argument("--archive", required=True, help="Path to agency-role-os-v2 ZIP.")
     source_disposition.add_argument("--check", action="store_true", help="Exit 1 if the committed ledger differs.")
     source_disposition.set_defaults(handler=_cmd_source_disposition)
+
+    website = sub.add_parser(
+        "website",
+        help="Compile a brief into a PSEM site, build and browser-verify it in the sandbox (never deploys).",
+    )
+    website.add_argument("-i", "--input", help="Path to a WebsiteBrief JSON file.")
+    website.add_argument("--board", help="Use a presentation system's example instead of --input.")
+    website.add_argument("-o", "--out", required=True, help="Directory for source, evidence and report.json.")
+    website.add_argument("--preview-seconds", type=float, default=None,
+                         help="Serve the verified build on 127.0.0.1 for this many seconds.")
+    website.add_argument("--json", action="store_true", help="Print the full report as JSON.")
+    website.set_defaults(handler=_cmd_website)
 
     validate = sub.add_parser("validate", help="Run the kernel's structural self-checks.")
     validate.set_defaults(handler=_cmd_validate)
