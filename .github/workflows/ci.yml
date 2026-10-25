@@ -228,6 +228,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
           AMC_DATABASE_BACKEND: sqlite
         run: |
+          set -o pipefail  # without it, tee hides a pytest failure
           python -m pytest services/langgraph/tests/test_ucpo_build.py -q -rs | tee /tmp/ucpo-sandbox.log
           if grep -q "SKIPPED" /tmp/ucpo-sandbox.log; then
             echo "::error::UCPO sandbox tests were skipped; the sandbox is not available on this runner"

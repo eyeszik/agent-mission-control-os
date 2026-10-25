@@ -92,8 +92,9 @@ def test_sandboxed_build_browser_qa_release_and_stale_after_change(root, monkeyp
     assert {s["action"] for s in again["stages"].values()} == {"reused_unchanged"}
 
     report = service.run_build_tick(compiled["job_id"])
-    assert report.final_state == RunState.WAITING_APPROVAL.value, report.reasons
     view = service.inspect_site(alice, project, "halden", adapter=adapter)
+    assert report.final_state == RunState.WAITING_APPROVAL.value, (report.reasons, view["release"]["reasons"], [
+        c for c in (view["browser_qa"] or {}).get("checks", []) if c["result"] != "PASS"][:5])
     assert view["build"]["status"] == "PASSED" and view["browser_qa"]["status"] == "PASSED"
     assert view["browser_qa"]["browser"]["name"] == "chromium" and not view["browser_qa"]["blocked_requests"]
     assert len(view["browser_qa"]["screenshots"]) == 9
@@ -157,7 +158,7 @@ def test_browser_qa_catches_a_defective_generator(tmp_path):
     finally:
         build_mod.cleanup(out.parent.parent)
     failed = {c.check for c in v.checks if c.result == "FAIL"}
-    assert v.status == "FAILED"
+    assert v.status == "FAILED", [c.detail for c in v.checks if c.result == "BLOCKED"]
     assert {"psem_colours", "keyboard_focus", "reflow"} <= failed
     assert any(c.check == "reflow" and c.viewport == "320x900" and c.result == "FAIL" for c in v.checks)
 
