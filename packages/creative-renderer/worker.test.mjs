@@ -15,3 +15,16 @@ test('worker rejects unsupported engines and active input', () => {
   other.request.engine = 'rough_js'; other.request.scene.primitives[0].fill = '\" onload=\"alert(1)';
   assert.throws(() => render(other), /INVALID_COLOR/);
 });
+for (const engine of ['paper_js', 'svg_js']) {
+  for (const kind of ['rectangle', 'ellipse', 'line']) {
+    test(`${engine} renders deterministic ${kind} paths without a browser`, () => {
+      const input = structuredClone(spec);
+      input.request.engine = engine;
+      input.request.scene.primitives[0].kind = kind;
+      const output = render(input);
+      assert.equal(output, render(structuredClone(input)));
+      assert.match(output, /<path d="[Mm]/);
+      assert.doesNotMatch(output, /undefined|NaN|Infinity/);
+    });
+  }
+}
