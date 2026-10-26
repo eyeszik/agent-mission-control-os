@@ -30,14 +30,25 @@ RUNNER_TIMEOUT_S = 300
 _HEX = {v.lower(): k for k, v in psem.PALETTE.items()}
 
 
+def _browser_cache() -> Optional[str]:
+    """Where Playwright's Chromium lives. The sandbox scrubs ``HOME``, so the default per-user cache
+    that ``playwright install`` writes to must be passed explicitly or the runner cannot find it."""
+    configured = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
+    if configured:
+        return configured
+    if Path("/opt/pw-browsers").is_dir():
+        return "/opt/pw-browsers"
+    default = os.path.expanduser("~/.cache/ms-playwright")
+    return default if os.path.isdir(default) else None
+
+
 def _playwright_paths() -> tuple[Optional[str], Optional[str], Optional[str]]:
-    """(NODE_PATH, browsers path, module name). apps/web declares @playwright/test, which pnpm exposes
-    without a top-level ``playwright``; both export the same ``chromium`` launcher."""
-    browsers = os.environ.get("PLAYWRIGHT_BROWSERS_PATH") or ("/opt/pw-browsers" if Path("/opt/pw-browsers").is_dir() else None)
-    for candidate in (Path("/opt/node-tools/node_modules"), WEB_NODE_MODULES):
-        for module in ("playwright", "@playwright/test"):
-            if (candidate / module / "package.json").exists():
-                return str(candidate), browsers, module
+    """Return the module root, browser cache and exact package the runner must load."""
+    for package in ("@playwright/test", "playwright"):
+        for candidate in (Path("/opt/node-tools/node_modules"), WEB_NODE_MODULES):
+            module = candidate / package
+            if (module / "package.json").is_file():
+                return str(candidate), _browser_cache(), str(module)
     return None, None, None
 
 
@@ -145,7 +156,7 @@ def verify_build(out_dir: Path, *, routes: list[str], expected_output_hash: str,
             check="build_identity", result="BLOCKED", detail="export bytes differ from the build being verified"),), dom_evidence={},
             **base)
     iso = isolation or probe_isolation()
-    node_path, browsers, pw_module = _playwright_paths()
+    node_path, browsers, playwright_module = _playwright_paths()
     axe = axe_path()
     missing = [n for n, v in (("isolation", iso.available), ("playwright", node_path), ("axe-core", axe)) if not v]
     if missing:
@@ -157,7 +168,8 @@ def verify_build(out_dir: Path, *, routes: list[str], expected_output_hash: str,
         ev = evidence_dir or (work / "evidence")
         ev.mkdir(parents=True, exist_ok=True)
         cfg = {"out_dir": str(out_dir), "routes": routes, "viewports": list(VIEWPORTS), "axe_path": str(axe),
-               "evidence_dir": str(ev), "result_path": str(work / "result.json"), "playwright_module": pw_module}
+               "playwright_module": playwright_module,
+               "evidence_dir": str(ev), "result_path": str(work / "result.json")}
         (work / "config.json").write_text(json.dumps(cfg))
         env = {"NODE_PATH": node_path}
         if browsers:
