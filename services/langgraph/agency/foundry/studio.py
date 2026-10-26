@@ -41,9 +41,14 @@ def _key(name: str) -> str:
 
 
 def store(principal: Principal, project_id: str, name: str, data: bytes, *, mime: str, artifact_type: str, subtype: str,
-          adapter: StorageAdapter, depends_on: tuple[str, ...] = (), v2: Optional[dict] = None) -> dict:
-    """Create, revise (bytes changed) or reuse (bytes unchanged) a project artifact. Returns its head and what happened."""
-    from services.langgraph.persistence.agency_kernel import get_artifact
+          adapter: StorageAdapter, depends_on: tuple[str, ...] = (), v2: Optional[dict] = None,
+          expect_head_hash: Optional[str] = None) -> dict:
+    """Create, revise (bytes changed) or reuse (bytes unchanged) a project artifact. Returns its head and what happened.
+
+    ``expect_head_hash`` (optional) is the content hash the caller computed its change from. When a head exists and
+    differs, ``StaleArtifactVersionError`` is raised before anything is revised (a lost update is refused, not merged).
+    """
+    from services.langgraph.persistence.agency_kernel import StaleArtifactVersionError, get_artifact
     from services.langgraph.persistence.projects import (
         create_project_artifact,
         project_artifact_id,
@@ -57,6 +62,9 @@ def store(principal: Principal, project_id: str, name: str, data: bytes, *, mime
             **(v2 or {})}
     artifact_id = project_artifact_id(project_id, _key(name))
     head = get_artifact(artifact_id)
+    if head is not None and expect_head_hash is not None and head.get("content_hash") != expect_head_hash \
+            and head.get("content_hash") != stored.content_hash:
+        raise StaleArtifactVersionError(f"{artifact_id}: head changed since it was read")
     if head is None:
         created = create_project_artifact(tenant_id=principal.tenant_id, project_id=project_id, actor=principal.user_id,
                                           artifact_key=_key(name), artifact_type=artifact_type, adapter=adapter,

@@ -22,6 +22,8 @@ from .contracts import BrandIR, Check, EvaluationReport, IntentIR, Result, Scene
 from .scene import GLYPH_ADVANCE_EM
 
 NONBLANK_MIN_COLOURS = 3
+INK_DISTANCE = 150      # Manhattan RGB distance from the ground that counts as content (grain/lighting stay well below)
+MARGIN_MIN_PIXELS = 4   # a single antialiasing speck is not content
 
 
 def _attr_map(svg_text: str) -> dict[str, dict[str, str]]:
@@ -57,6 +59,27 @@ def ink_fraction(r: png.Raster, *, box: tuple[float, float, float, float], ink: 
             if _dist(r.pixel(x, y), target) <= tolerance:
                 hit += 1
     return hit / n if n else 0.0
+
+
+def margin_band_ink(r: png.Raster, *, margin: float, ground: str) -> list[str]:
+    """Edges whose outer half-margin holds content (pixels far from the ground colour): right, bottom, left, top.
+
+    Measured on the rendered pixels, so it sees an overflow the glyph-advance estimate cannot.
+    """
+    half = max(1, int(margin // 2))
+    g = tuple(int(ground[i:i + 2], 16) for i in (1, 3, 5))
+    W, H, buf = r.width, r.height, r.rgba
+
+    def strong(x: int, y: int) -> bool:
+        i = (y * W + x) * 4
+        return abs(buf[i] - g[0]) + abs(buf[i + 1] - g[1]) + abs(buf[i + 2] - g[2]) > INK_DISTANCE
+
+    def count(xs: range, ys: range) -> int:
+        return sum(1 for y in ys for x in xs if strong(x, y))
+
+    bands = {"right": (range(max(0, W - half), W), range(H)), "bottom": (range(W), range(max(0, H - half), H)),
+             "left": (range(min(half, W)), range(H)), "top": (range(W), range(min(half, H)))}
+    return [edge for edge, (xs, ys) in bands.items() if count(xs, ys) >= MARGIN_MIN_PIXELS]
 
 
 def evaluate(scene: SceneIR, svg_text: str, *, intent: IntentIR, brand: BrandIR, png_bytes: Optional[bytes],
@@ -133,6 +156,10 @@ def evaluate(scene: SceneIR, svg_text: str, *, intent: IntentIR, brand: BrandIR,
             stats = pixel_stats(raster)
             add("nonblank", "Q7", ok(stats["distinct_colours_128px"] >= NONBLANK_MIN_COLOURS and stats["luminance_std"] > 2),
                 f"{stats}")
+            if ground and ground.startswith("#") and len(ground) == 7:
+                bleed = margin_band_ink(raster, margin=scene.composition.margin, ground=ground)
+                add("margin_bands", "Q3", ok(not bleed),
+                    f"content in the outer half-margin on: {', '.join(bleed)}" if bleed else "outer half-margin is clear")
             head = attrs.get("headline")
             if head and head.get("fill", "").startswith("#"):
                 fs = float(head.get("font-size", 16))
@@ -146,4 +173,4 @@ def evaluate(scene: SceneIR, svg_text: str, *, intent: IntentIR, brand: BrandIR,
                             renderer_version=renderer_version, checks=tuple(checks), metrics=metrics or {})
 
 
-__all__ = ["evaluate", "ink_fraction", "pixel_stats"]
+__all__ = ["evaluate", "ink_fraction", "margin_band_ink", "pixel_stats"]

@@ -9,6 +9,7 @@ tracing a third-party mark) are UNSUPPORTED, never quietly approximated.
 from __future__ import annotations
 
 import re
+import unicodedata
 from typing import Optional
 
 from services.langgraph.agency.execution.canonical import canonical_hash
@@ -39,7 +40,40 @@ _UNSUPPORTED = (
 )
 
 
+# Letters from other scripts that render like Latin ones. Used only to build the copy the filters scan.
+_CONFUSABLES = str.maketrans({
+    **dict(zip("авекмнорстух", "abekmhopctyx")), **dict(zip("АВЕКМНОРСТХ", "ABEKMHOPCTX")),
+    **dict(zip("іјѕһԁԛ", "ijsh" "dq")), **dict(zip("ΑΒΕΖΗΙΚΜΝΟΡΤΥΧ", "ABEZHIKMNOPTYX")),
+    **dict(zip("αινορτυχ", "aivoptux")),
+})
+
+
+# Glyphs that look like two Latin letters depending on the font: the filters scan the alternate reading as well.
+_ALTERNATE = str.maketrans({"у": "u", "У": "U", "υ": "u", "Υ": "U"})
+
+
+def scan_forms(text: str) -> tuple[str, ...]:
+    primary = scan_form(text)
+    alt = scan_form(text.translate(_ALTERNATE))
+    return (primary,) if alt == primary else (primary, alt)
+
+
+def scan_form(text: str) -> str:
+    """The text as the filters see it: NFKC, invisible/format characters removed, unicode spaces collapsed, common
+    lookalike letters folded to Latin. The stored text is never changed; this is only the copy that is matched."""
+    t = unicodedata.normalize("NFKC", text)
+    t = "".join(ch for ch in t if unicodedata.category(ch) not in {"Cf", "Cc", "Co", "Cn"} or ch in "\n\t")
+    t = t.translate(_CONFUSABLES)
+    return re.sub(r"\s+", " ", t)
+
+
 def _classify(text: str) -> tuple[Classification, str]:
+    forms = scan_forms(text)
+    verdicts = [_classify_form(f) for f in forms]
+    return next((v for v in verdicts if v[0] != Classification.VERIFIED), verdicts[0])
+
+
+def _classify_form(text: str) -> tuple[Classification, str]:
     if _INJECTION.search(text):
         return Classification.PROHIBITED, "instruction-like content is data and cannot change policy"
     if _EFFECTS.search(text):
@@ -83,7 +117,7 @@ def compile_intent(req: AssetRequirement, *, style_profile: str, output_profile:
     for i, text in enumerate(req.exact_text):
         # Exact text is rendered verbatim as escaped SVG text. Injection-like wording stays text, but is flagged.
         cls, why = _classify(text)
-        if cls == Classification.PROHIBITED and _INJECTION.search(text):
+        if cls == Classification.PROHIBITED and any(_INJECTION.search(f) for f in scan_forms(text)):
             items.append(IntentItem(item_id=f"text.{i}", kind="exact_text", text=text[:600], classification=cls,
                                     source=f"exact_text[{i}]", reason=why))
             continue
@@ -109,4 +143,4 @@ def compile_intent(req: AssetRequirement, *, style_profile: str, output_profile:
                     style_profile=style_profile, width=int(w), height=int(h), items=tuple(items), exact_text=tuple(exact))
 
 
-__all__ = ["SUPPORTED_FAMILIES", "compile_intent"]
+__all__ = ["SUPPORTED_FAMILIES", "compile_intent", "scan_form", "scan_forms"]

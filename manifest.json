@@ -352,7 +352,7 @@
     },
     {
       "path": "services/langgraph/agency/foundry/studio.py",
-      "git_blob_sha": "b6302bd7917b497c502aa18bfd25cdbff000918c"
+      "git_blob_sha": "2d48b27e473dc379466ae3d2d0dcafaa82382120"
     },
     {
       "path": "services/langgraph/agency/full_service.py",
@@ -1116,11 +1116,11 @@
     },
     {
       "path": "services/langgraph/agency/avic/service.py",
-      "git_blob_sha": "3ad152b74cbd5f635f732fcb56b56318e25a6cc0"
+      "git_blob_sha": "776815895217940b360fc6e1cb542f30adbb7936"
     },
     {
       "path": "services/langgraph/agency/avic/intent.py",
-      "git_blob_sha": "141786b82c5381896ee38b47fd2847ffead68923"
+      "git_blob_sha": "b4be7b10e621652dc556e0474927b52e430e8e84"
     },
     {
       "path": "services/langgraph/agency/avic/png.py",
@@ -1128,11 +1128,11 @@
     },
     {
       "path": "services/langgraph/agency/avic/evaluate.py",
-      "git_blob_sha": "c19e70cacc99620b0d273b23de7b14e6dc41688f"
+      "git_blob_sha": "4e24e531bd169e48209dcaed41d81326dd6f9258"
     },
     {
       "path": "services/langgraph/tests/test_avic.py",
-      "git_blob_sha": "1d4935200498ce36b7206c546fc8f9b24f98121a"
+      "git_blob_sha": "be79b1238a2988392d125ab9460e225e97dabde5"
     }
   ]
 }
