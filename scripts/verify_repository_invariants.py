@@ -145,7 +145,7 @@ def main() -> None:
     for required in [
         "specifier: 16.4.2",
         "sharp@0.35.5",
-        "postcss@8.5.28",
+        "postcss@8.5.31",
         "'@playwright/test@1.64.1'",
         "playwright-core@1.64.1",
     ]:
