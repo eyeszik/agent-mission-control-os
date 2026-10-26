@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
           cache: "pip"
@@ -81,7 +81,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
           cache: "pip"
@@ -106,17 +106,50 @@ jobs:
           AMC_EXPORT_ROOT: /tmp/amc-exports-pg-${{ github.run_id }}
         run: python -m pytest services/langgraph/tests -q
 
+  backend-council:
+    name: Mission Council engines (CrewAI + AutoGen + MCP, offline)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install backend with the council extra
+        run: python -m pip install -e "./services/langgraph[dev,council]"
+
+      - name: Verify installed dependency consistency
+        run: python -m pip check
+
+      # Every engine runs on the deterministic mock model: no key, no network.
+      - name: Run mission council tests on all three engines
+        env:
+          AMC_DATABASE_BACKEND: sqlite
+          AMC_DB_PATH: /tmp/amc_council_${{ github.run_id }}.db
+          AMC_EXPORT_ROOT: /tmp/amc-council-exports-${{ github.run_id }}
+          CREWAI_DISABLE_TELEMETRY: "true"
+          OTEL_SDK_DISABLED: "true"
+        run: >-
+          python -m pytest -q
+          services/langgraph/tests/test_missions_council.py
+          services/langgraph/tests/test_council_engines.py
+          services/langgraph/tests/test_council_gateway.py
+          services/langgraph/tests/test_council_ported_scenarios.py
+          services/langgraph/tests/test_council_contracts.py
+
   frontend:
     name: Frontend (contracts + typecheck + test + build)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "20.20.2"
+          node-version: "22.12.0"
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -156,10 +189,10 @@ jobs:
           NEXT_PUBLIC_AUTH_MODE: local
         run: pnpm --filter @amc/web build
 
-  browser-e2e:
-    name: Browser E2E (local degraded HITL)
+  ucpo-sandbox:
+    name: UCPO sandboxed build + browser QA (must not skip)
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -168,11 +201,57 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "20.20.2"
+          node-version: "22.12.0"
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Install application dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          python -m pip install -e "./services/langgraph[dev]"
+
+      # The sandbox runs Chromium with HOME set to a scratch dir, so browsers live at a fixed path.
+      - name: Install Chromium runtime
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+        run: pnpm --filter @amc/web exec playwright install --with-deps chromium
+
+      # Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor; the UCPO sandbox needs them.
+      - name: Allow unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      # A skip here means the sandbox was unavailable, which would hide regressions, so it fails the job.
+      - name: Run sandboxed build and browser QA tests
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+          AMC_DATABASE_BACKEND: sqlite
+        run: |
+          set -o pipefail  # without it, tee hides a pytest failure
+          python -m pytest services/langgraph/tests/test_ucpo_build.py -q -rs | tee /tmp/ucpo-sandbox.log
+          if grep -q "SKIPPED" /tmp/ucpo-sandbox.log; then
+            echo "::error::UCPO sandbox tests were skipped; the sandbox is not available on this runner"
+            exit 1
+          fi
+
+  browser-e2e:
+    name: Browser E2E (local degraded HITL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22.12.0"
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Install application dependencies
         run: |
@@ -224,29 +303,51 @@ jobs:
           done
           test "$frontend_ready" -eq 1
 
+          # The agency scenario exercises desktop sidebar navigation. Verifying
+          # the route at startup makes deployment-mode failures diagnosable.
+          agency_ready=0
+          for _ in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/agency >/dev/null; then
+              agency_ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$agency_ready" -eq 1
+
       - name: Run browser release smoke
         env:
           CI: "true"
           E2E_BASE_URL: http://127.0.0.1:3000
-        run: pnpm --filter @amc/web test:e2e
+        run: |
+          echo "Playwright artifacts: apps/web/playwright-report, apps/web/test-results (PNG, WebM, trace.zip)"
+          ls -ld apps/web/playwright-report apps/web/test-results 2>/dev/null || true
+          pnpm --filter @amc/web test:e2e
 
+      # Capture diagnostics and artifacts before Stop local stack tears down services.
       - name: Print service logs on failure
         if: failure()
-        run: |
-          echo "===== backend ====="
-          cat /tmp/amc-backend.log || true
-          echo "===== frontend ====="
-          cat /tmp/amc-frontend.log || true
+        timeout-minutes: 1
+        run: bash .github/scripts/dump-browser-e2e-logs.sh
 
       - name: Upload Playwright failure artifacts
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        timeout-minutes: 3
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: playwright-failure-${{ github.run_id }}
+          name: playwright-failure-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
+            ci-diagnostics/browser-e2e.log
             apps/web/playwright-report
             apps/web/test-results
-          if-no-files-found: ignore
+            apps/web/traces
+            apps/web/.playwright/artifacts
+            playwright-report
+            test-results
+            traces
+            .playwright/artifacts
+          include-hidden-files: true
+          if-no-files-found: warn
           retention-days: 7
 
       - name: Stop local stack
@@ -262,7 +363,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
 
@@ -273,10 +374,30 @@ jobs:
           python -m pip install --upgrade "setuptools>=83.0.0"
           python -m pip_audit
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      # The optional council extra (CrewAI, AutoGen, MCP). CrewAI 1.15.28, the latest
+      # release, pins chromadb~=1.5.9, mcp~=1.28.1 and (via crewai-cli) uv~=0.11.6, so
+      # these advisories cannot be upgraded away while CrewAI is installed. None is
+      # reachable from the council (docs/mission-council.md, "Dependency advisories"):
+      #   PYSEC-2026-311/3813/3814/3815  chromadb server API/RBAC; no Chroma server runs
+      #   CVE-2026-59951                 mcp Streamable HTTP server; council uses stdio client
+      #   PYSEC-2026-4321                uv CLI TLS roots; nothing runs uv
+      # Any other advisory in this tree fails the job. Remove an ID once its pin lifts.
+      - name: Audit the optional council extra
+        run: |
+          python -m pip install -e "./services/langgraph[dev,council]"
+          python -m pip install --upgrade "setuptools>=83.0.0"
+          python -m pip_audit \
+            --ignore-vuln PYSEC-2026-311 \
+            --ignore-vuln PYSEC-2026-3813 \
+            --ignore-vuln PYSEC-2026-3814 \
+            --ignore-vuln PYSEC-2026-3815 \
+            --ignore-vuln CVE-2026-59951 \
+            --ignore-vuln PYSEC-2026-4321
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "20.20.2"
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+          node-version: "22.12.0"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Audit production JavaScript dependencies
         run: |

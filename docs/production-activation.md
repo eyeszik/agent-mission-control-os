@@ -32,6 +32,8 @@ AMC_CORS_ALLOWED_ORIGINS=<exact frontend production origin>
 AMC_PUBLICATION_MODE=disabled
 AMC_PAID_MEDIA_MODE=disabled
 OPENAI_API_KEY=<optional model-provider secret>
+# Or another provider (docs/amc-i03-model-profiles.md), e.g.
+# AMC_LLM_PROVIDER=gemini, GEMINI_API_KEY=<secret>, AMC_GEMINI_MODEL=<model id>
 AMC_OPENAI_MODEL=<reviewed model identifier>
 ```
 

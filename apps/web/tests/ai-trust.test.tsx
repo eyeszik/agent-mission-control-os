@@ -19,6 +19,11 @@ function entry(task: string, mode: string, provider: string | null = null, model
     completed_at: NOW,
     fallback_used: mode !== 'PROVIDER_SUCCESS',
     error_class: null,
+    route: provider ? [provider] : [],
+    profile_hash: null,
+    usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+    usage_reported: true,
+    unreported_token_estimate: 0,
   };
 }
 

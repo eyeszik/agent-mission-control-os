@@ -80,7 +80,7 @@ export function GraphArea() {
           {nodes.map((n) => (
             <li key={n.node_id}>
               <button type="button" onClick={() => void inspect(n.node_id)} aria-pressed={selected === n.node_id}
-                className={`w-full text-left px-2 py-1 rounded border ${selected === n.node_id ? 'border-emerald-700/60 bg-zinc-800/60' : 'border-zinc-800 hover:bg-zinc-800/40'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60`}>
+                className={`w-full text-left px-2 py-1 rounded-sm border ${selected === n.node_id ? 'border-emerald-700/60 bg-zinc-800/60' : 'border-zinc-800 hover:bg-zinc-800/40'} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60`}>
                 <span className="text-zinc-500">{n.kind}</span> <span className="text-zinc-200">{n.label}</span>
               </button>
             </li>
@@ -158,7 +158,7 @@ export function MultiverseArea() {
           {branches.map((b) => (
             <li key={b.branch_id} className="flex flex-wrap items-center gap-2">
               <button type="button" aria-pressed={selected === b.branch_id} onClick={() => { setSelected(b.branch_id); setComparison(null); setTwo(null); }}
-                className={`px-2 py-1 rounded border ${selected === b.branch_id ? 'border-emerald-700/60' : 'border-zinc-800'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60`}>{b.name}</button>
+                className={`px-2 py-1 rounded-sm border ${selected === b.branch_id ? 'border-emerald-700/60' : 'border-zinc-800'} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60`}>{b.name}</button>
               <Badge value={b.state} /><span className="text-zinc-500">{Object.keys(b.changes.set).length} set · {b.changes.unset.length} unset</span>
             </li>
           ))}
@@ -175,7 +175,8 @@ export function MultiverseArea() {
             <button type="button" className={buttonClass} disabled={busy || current.state !== 'OPEN'} onClick={() => void act('Archiving', () => archiveBranch(current.branch_id))}>Archive</button>
           </div>
           <div className="flex flex-wrap items-end gap-2">
-            <Field label="Compare or merge with"><select className={inputClass} value={other} onChange={(e) => setOther(e.target.value)}><option value="">…</option>{branches.filter((b) => b.branch_id !== current.branch_id).map((b) => <option key={b.branch_id} value={b.branch_id}>{b.name}</option>)}</select></Field>
+            {/* ⚡ Bolt: Removed .filter().map() chain to prevent intermediate array allocation on every render */}
+            <Field label="Compare or merge with"><select className={inputClass} value={other} onChange={(e) => setOther(e.target.value)}><option value="">…</option>{branches.map((b) => b.branch_id !== current.branch_id ? <option key={b.branch_id} value={b.branch_id}>{b.name}</option> : null)}</select></Field>
             <button type="button" className={buttonClass} disabled={busy || !other} onClick={() => void run('Comparing branches', async () => setTwo(await compareTwoBranches(current.branch_id, other)))}>Compare</button>
             <button type="button" className={buttonClass} disabled={busy || !other} onClick={() => void act('Merging into a new branch', () => mergeBranches(current.branch_id, other, `${current.name} + merge`))}>Merge into new branch</button>
           </div>

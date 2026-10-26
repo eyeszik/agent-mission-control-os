@@ -26,6 +26,61 @@ SPAN_ATTRIBUTES = ("trace_id", "mission_id", "project_id", "job_id", "node_id", 
                    "failure_fingerprint", "checkpoint_version", "next_due_at", "final_state")
 
 
+ACE_COUNTERS = frozenset({
+    "lease_contention_total", "fence_rejection_total",
+    "quarantine_events_total", "reconciliation_probe_total",
+})
+ACE_HISTOGRAMS = frozenset({"reconciliation_drift_seconds"})
+
+
+def record_ace_counter(name: str, amount: int = 1) -> bool:
+    """Emit an allowlisted OTel counter; false means no exporter is configured."""
+    if name not in ACE_COUNTERS or amount <= 0:
+        raise ValueError("invalid ACE metric")
+    if exporter_status()["opentelemetry"] != "ENABLED":
+        return False
+    from opentelemetry import metrics  # type: ignore[import-not-found]
+
+    meter = metrics.get_meter("amc.ace.v100")
+    meter.create_counter(name).add(amount, {"component": "ace"})
+    return True
+
+
+def record_ace_duration(name: str, seconds: float) -> bool:
+    if name not in ACE_HISTOGRAMS or seconds < 0:
+        raise ValueError("invalid ACE duration")
+    if exporter_status()["opentelemetry"] != "ENABLED":
+        return False
+    from opentelemetry import metrics  # type: ignore[import-not-found]
+
+    metrics.get_meter("amc.ace.v100").create_histogram(name, unit="s").record(
+        seconds, {"component": "ace"}
+    )
+    return True
+
+
+def traced_boundary(span_name: str):
+    """Propagate the OTel context across synchronous and asynchronous calls.
+
+    All attributes are allowlisted by call sites. Disabled telemetry adds no
+    external effect and leaves existing runtime behavior unchanged.
+    """
+    from functools import wraps
+    if not span_name or len(span_name) > 80:
+        raise ValueError("invalid OTel span name")
+
+    def decorate(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            if exporter_status()["opentelemetry"] != "ENABLED":
+                return fn(*args, **kwargs)
+            from opentelemetry import trace
+            with trace.get_tracer("amc.ace.v100").start_as_current_span(span_name):
+                return fn(*args, **kwargs)
+        return wrapper
+    return decorate
+
+
 def _ms_between(a: Optional[str], b: Optional[str]) -> Optional[int]:
     if not a or not b:
         return None
@@ -94,6 +149,19 @@ def metrics(*, ticks: list[dict], transitions: list[dict], intents: list[dict], 
         "intents": {"committed": sum(1 for i in intents if i["status"] == "COMMITTED"),
                     "open": sum(1 for i in intents if i["status"] == "INTENT")},
         "recoveries": len(recoveries),
+        "ace_v100": {
+            "lease_contention_total": sum(1 for t in ticks if t["outcome"] == "LEASE_CONTENTION"),
+            "fence_rejection_total": sum(1 for t in ticks if t["outcome"] == "STALE_FENCE"),
+            "quarantine_events_total": sum(1 for t in ticks if t["outcome"] == "QUARANTINE"),
+            "unconfirmed_intents": sum(1 for i in intents if i["status"] == "UNCONFIRMED"),
+            "reconciliation_drift_seconds": summary([
+                max(0, int(_ms_between(i.get("created_at"), i.get("committed_at")) / 1000))
+                for i in intents
+                if i.get("created_at") and i.get("committed_at")
+                and _ms_between(i.get("created_at"), i.get("committed_at")) is not None
+            ]),
+            "scope": "persisted ticks and intents; runtime OTel counter totals require exporter",
+        },
         "approval_latency_ms": summary([v for v in (_ms_between(a["created_at"], a["decided_at"]) for a in decided)
                                         if v is not None]),
         "gpu_memory": "NOT_MEASURED", "cost_per_verified_artifact": "NOT_MEASURED",
@@ -112,4 +180,4 @@ def project_metrics(project_id: str) -> dict:
     return metrics(ticks=store.list_project_ticks(project_id), transitions=transitions, intents=intents)
 
 
-__all__ = ["SPAN_ATTRIBUTES", "emit_spans", "exporter_status", "metrics", "project_metrics", "spans"]
+__all__ = ["ACE_COUNTERS", "ACE_HISTOGRAMS", "SPAN_ATTRIBUTES", "emit_spans", "exporter_status", "metrics", "project_metrics", "record_ace_counter", "record_ace_duration", "spans", "traced_boundary"]

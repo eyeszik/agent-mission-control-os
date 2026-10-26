@@ -23,7 +23,7 @@ export const RunEventSchema = z.object({
   completed_at: z.string().datetime({ offset: true }).nullable(),
   persisted_at: z.string().datetime({ offset: true }),
   checkpoint_ref: z.string().nullable(),
-  safe_payload: z.record(z.unknown()),
+  safe_payload: z.record(z.string(), z.unknown()),
   redactions_applied: z.array(z.string()),
 });
 

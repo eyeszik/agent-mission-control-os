@@ -42,9 +42,10 @@ BusinessObjective → HumanNeed → ExperienceIntent → BrandStrategy → Creat
 - **`genome.py`.** `compile_genome` is deterministic. Missing optional fields become `Assumption` records. The palette
   is seeded with contrast floors: ink/paper ≥ 7:1 and accents ≥ 3:1. Invariants are the brand name, the mark, a
   locked palette and stated constraints.
-- **`grammars.py`.** Twelve grammars: Swiss editorial, Bauhaus, Constructivist, Art Deco, minimalism, retro
-  computing, tactile paper, dimensional glass, synthetic futurism, cinematic typography, collage and spatial
-  interface. Each has operators, proportions, grid, type, palette and texture logic, primitives, motion, variation
+- **`grammars.py`.** Thirteen grammars: Swiss editorial, Bauhaus, Constructivist, Art Deco, minimalism, retro
+  computing, tactile paper, dimensional glass, synthetic futurism, cinematic typography, collage, PSEM editorial
+  (Post-Surrealist Editorial Modernism, with its locked palette and computed pairing rules in `psem.py`; see
+  `docs/ucpo/README.md`) and spatial interface. Each has operators, proportions, grid, type, palette and texture logic, primitives, motion, variation
   axes and anti-patterns. Lineage is stated as *influence*; copying known artwork or marks is an anti-pattern.
   Blending is weighted and deterministic.
 - **`compose.py`.** CompositionIR (palette *roles*, never literal colours) → SVG. Text stays live `<text>` and is kept

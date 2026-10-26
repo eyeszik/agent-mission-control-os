@@ -24,7 +24,7 @@ function ItemRow({ item, onMove }: { item: ContentItem; onMove: (item: ContentIt
             if (!OPERATOR_TARGETS.includes(target)) return null;
             return (
               <button key={target} type="button" onClick={() => onMove(item, target)}
-                className="px-1.5 py-0.5 rounded border border-zinc-700 text-zinc-300 hover:text-zinc-100">
+                className="px-1.5 py-0.5 rounded-sm border border-zinc-700 text-zinc-300 hover:text-zinc-100">
                 → {target}
               </button>
             );

@@ -399,8 +399,8 @@ class MockProvider(MediaProvider):
         return ProviderCapabilities(provider_id=self.provider_id, capabilities=tuple(Capability),
                                     status=ProviderStatus.AVAILABLE if mock_enabled() else ProviderStatus.DISABLED,
                                     blockers=() if mock_enabled() else ("MOCK_PROVIDERS_DISABLED",),
-                                    cost_per_job_minor=int(os.environ.get("AMC_VNEXUS_MOCK_COST_MINOR", "0")), simulated=True,
-                                    rate_limit_per_minute=int(os.environ.get("AMC_VNEXUS_MOCK_RATE_LIMIT", "30")))
+                                    cost_per_job_minor=int(os.environ.get("AMC_VNEXUS_MOCK_COST_MINOR") or "0"), simulated=True,
+                                    rate_limit_per_minute=int(os.environ.get("AMC_VNEXUS_MOCK_RATE_LIMIT") or "30"))
 
     def _render(self, request: MediaRequest, work_dir: Path) -> Path:
         mode = request.spec.get("mock", "ok")

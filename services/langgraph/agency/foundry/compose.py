@@ -17,7 +17,7 @@ from xml.sax.saxutils import escape
 from .contracts import CompositionIR, CreativeGenome, Primitive, TextBlock
 from .genome import FONT_STACKS
 
-DARK_GROUND = {"retro_computing", "synthetic_futurism", "cinematic_typography"}
+DARK_GROUND = {"retro_computing", "synthetic_futurism", "cinematic_typography", "psem_editorial"}
 
 
 def _rng(genome: CreativeGenome, salt: str, variant_seed: int = 0) -> random.Random:
@@ -103,6 +103,16 @@ def _primitives_for(grammar: str, n: int, rng: random.Random, box: tuple[float, 
             else:
                 P(kind="rect", x=x0 + u * (w - cw), y=y0 + v * (h - ch), w=cw, h=ch, rotation=(u - 0.5) * 30,
                   fill=("accent", "accent_2", "muted")[i % 3])
+        elif grammar == "psem_editorial":
+            # Composed on charcoal (DARK_GROUND): the accent sits on charcoal (5.39:1), hairlines are fog (4.64:1).
+            # Monumental negative space: hairlines and one geometric motif in a single accent; never accent_2 as well.
+            if i == 0:
+                s = min(w, h) * (0.16 + u * 0.08)
+                P(kind="circle", x=x0 + w * (0.62 + u * 0.18), y=y0 + h * (0.08 + v * 0.12), w=s, h=s, r=s / 2, fill="accent")
+            elif i % 2 == 1:
+                P(kind="line", x=x0, y=y0 + h * (0.55 + 0.09 * (i // 2)), w=w, h=0, fill="muted", stroke="muted", stroke_width=1)
+            else:
+                P(kind="bar", x=x0 + rng.randrange(cols) * col, y=y0 + h * (0.6 + u * 0.3), w=col * 0.18, h=h * 0.06, fill="paper")
         elif grammar == "spatial_interface":
             cw, ch = w * (0.45 + u * 0.2), h * (0.22 + v * 0.15)
             x, y = x0 + u * (w - cw), y0 + i * h * 0.18

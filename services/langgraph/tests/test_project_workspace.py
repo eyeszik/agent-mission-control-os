@@ -44,7 +44,10 @@ def test_create_project_initializes_canonical_state_and_mirror(export_root):  # 
 
 def test_same_idempotency_key_never_creates_two_projects():
     key = {"Idempotency-Key": str(uuid4())}
-    body = {"display_name": "Replay Co", "project_id": f"prj-rep-{uuid4().hex[:8]}"}
+    # A unique name: the slug derives from it, and a fixed name collides with the
+    # same project on any re-run against a database that kept the first run's rows.
+    suffix = uuid4().hex[:8]
+    body = {"display_name": f"Replay Co {suffix}", "project_id": f"prj-rep-{suffix}"}
     first = client.post("/projects", json=body, headers=key)
     second = client.post("/projects", json=body, headers=key)
     assert first.status_code == second.status_code == 201

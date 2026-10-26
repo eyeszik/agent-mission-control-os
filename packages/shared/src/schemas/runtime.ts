@@ -85,7 +85,7 @@ export const LineageRemediationSummarySchema = z.object({
   changed_version_ref: z.string(),
   reason: z.string(),
   status: z.enum(['OPEN', 'REGENERATED', 'RETRIED', 'RESOLVED']),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   created_at: z.string().datetime({ offset: true }),
   resolved_at: z.string().datetime({ offset: true }).nullable().optional(),
 });
@@ -110,7 +110,7 @@ export const InvalidationObligationSummarySchema = z.object({
   state: z.enum(['OPEN', 'DISCHARGED_RECOMPUTE', 'DISCHARGED_CUTOFF', 'HOOK_GAP']),
   demanded: z.union([z.boolean(), z.number().int().nonnegative()]).transform((value) => Boolean(value)),
   cause_k: z.string().regex(/^[a-f0-9]{64}$/),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   created_at: z.string().datetime({ offset: true }),
   updated_at: z.string().datetime({ offset: true }),
   discharged_at: z.string().datetime({ offset: true }).nullable().optional(),
@@ -134,7 +134,7 @@ export const RunRemediationResponseSchema = z.object({
   action: RunRemediationActionSchema,
   run: AgencyRunSchema,
   recovery_case: RecoveryCaseSummarySchema.nullable().optional(),
-  pending_approval: z.record(z.unknown()).nullable().optional(),
+  pending_approval: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 
 export const TrustSnapshotSchema = z.object({
@@ -159,7 +159,7 @@ export const TrustSnapshotSchema = z.object({
   recent_recovery_cases: z.array(RecoveryCaseSummarySchema),
   recent_lineage_remediations: z.array(LineageRemediationSummarySchema),
   recent_audit_events: z.array(AuditCheckpointSummarySchema),
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
   database_backend: z.enum(['sqlite', 'postgres']),
   persistence_mode: z.string(),
 });

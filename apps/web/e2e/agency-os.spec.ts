@@ -13,7 +13,10 @@ const API = process.env.E2E_API_BASE_URL ?? 'http://127.0.0.1:8000';
 const PROJECT = process.env.E2E_PROJECT_ID ?? 'proj_1';
 const SECTIONS = ['Overview', 'Clients', 'Projects', 'Missions', 'Creative Studio', 'Approvals', 'Deliverables', 'Analytics', 'Integrations', 'Settings'];
 
-test.use({ colorScheme: 'dark' });
+// The primary Sections sidebar is lg-only (>=1024px); Playwright's default
+// Desktop Chrome viewport is 1280x720 today, but a stable explicit viewport
+// prevents browser/device preset changes from collapsing the navigation.
+test.use({ colorScheme: 'dark', viewport: { width: 1440, height: 900 } });
 
 test.beforeAll(async ({ request }) => {
   const res = await request.post(`${API}/projects`, {
@@ -63,9 +66,13 @@ test('Agency OS: shell, client, plan preview, refused external effect, honest st
 
   // Keyboard: the command palette reaches any section.
   await page.keyboard.press('Control+K');
-  await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeVisible();
-  await page.keyboard.type('analytics');
-  await page.keyboard.press('Enter');
+  const palette = page.getByRole('dialog', { name: 'Command palette' });
+  const search = palette.getByRole('combobox');
+  // Opening the dialog schedules input focus; visibility alone is not readiness.
+  await expect(search).toBeFocused();
+  await search.fill('analytics');
+  await expect(palette.getByRole('option', { name: 'Analytics Section', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await search.press('Enter');
   await expect(page.getByText('Counts of stored records')).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText('Not measured').first()).toBeVisible();
 

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from enum import Enum
 
-RUN_FSM_VERSION = "amc-run-fsm/v1"
+RUN_FSM_VERSION = "amc-run-fsm/v2"
 
 
 class RunState(str, Enum):
@@ -55,7 +55,7 @@ TRANSITIONS: dict[RunState, frozenset[RunState]] = {
     S.OBSERVING: frozenset({S.VERIFYING, S.INCONCLUSIVE, S.RECONCILING}),
     S.VERIFYING: frozenset({S.COMMITTING, S.RETRY_PENDING, S.INCONCLUSIVE, S.DEAD_LETTER, S.RECONCILING}),
     S.COMMITTING: frozenset({S.WAITING_APPROVAL, S.SCHEDULED, S.DORMANT, S.RECONCILING}),
-    S.RECONCILING: frozenset({S.READY, S.OBSERVING, S.DEAD_LETTER, S.WAITING_APPROVAL}),
+    S.RECONCILING: frozenset({S.RECONCILING, S.READY, S.OBSERVING, S.DEAD_LETTER, S.WAITING_APPROVAL}),
     S.WAITING_APPROVAL: frozenset({S.SCHEDULED, S.DORMANT, S.STOPPED}),
     S.RETRY_PENDING: frozenset({S.LEASED, S.DEAD_LETTER, S.PAUSED, S.STOPPED}),
     S.DEGRADED: frozenset({S.SCHEDULED, S.PAUSED, S.STOPPED}),
@@ -67,6 +67,12 @@ TRANSITIONS: dict[RunState, frozenset[RunState]] = {
     S.PAUSED: frozenset({S.SCHEDULED, S.STOPPED}),
     S.STOPPED: frozenset(),
 }
+
+
+# An authenticated control-plane stop first revokes the lease/fence. Workers
+# still need transition guards; this adds no worker or requester authority.
+for _stoppable in IN_FLIGHT:
+    TRANSITIONS[_stoppable] = TRANSITIONS[_stoppable] | frozenset({S.STOPPED})
 
 
 class IllegalTransition(ValueError):

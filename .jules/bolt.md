@@ -37,6 +37,16 @@
 ## 2026-10-30 - React Component Inline Filter Map Optimization in Component Render
 **Learning:** Extracting an intermediate filtered array via `artifacts.filter()` inside a functional component's render body, and then mapping over it, forces a new array allocation on every single render cycle. This increases memory pressure and garbage collection overhead unnecessarily.
 **Action:** Replace chains like `.filter(condition).map(render)` with a single `.map(item => condition(item) ? render(item) : null)` inside the render body. React natively ignores `null` nodes without rendering empty DOM wrappers, enabling zero-allocation conditional rendering.
-## 2026-10-31 - React Component Inline Filter Array Allocation Optimization
-**Learning:** Using `.filter(condition).length` directly inside a React component's render body allocates a new intermediate array on every render just to determine its length. This causes unnecessary garbage collection pressure and degrades rendering performance.
-**Action:** Replace `.filter(condition).length` with a zero-allocation `.reduce()` count inline, or use a `useMemo` block with a zero-allocation `for...of` loop when multiple derived counts need to be computed simultaneously.
+## 2026-10-31 - Component Multiple Array Filter Length Optimization
+**Learning:** Running `.filter(condition).length` checks on arrays during a React render cycle performs redundant iterations and allocates throwaway intermediate arrays, putting pressure on garbage collection.
+**Action:** Replace `.filter().length` passes with a single zero-allocation `for...of` loop or `.reduce()` to compute all counts simultaneously without allocating temporary arrays.
+## 2026-11-01 - React Component Inline Filter Map Optimization in Component Render
+**Learning:** Extracting an intermediate filtered array via `artifacts.filter()` inside a functional component's render body, and then mapping over it, forces a new array allocation on every single render cycle. This increases memory pressure and garbage collection overhead unnecessarily.
+**Action:** Replace chains like `.filter(condition).map(render)` with a single `.map(item => condition(item) ? render(item) : null)` inside the render body. React natively ignores `null` nodes without rendering empty DOM wrappers, enabling zero-allocation conditional rendering.
+## 2026-11-02 - Array Iteration Component Parsing Optimization
+**Learning:** Chained array methods like `.split().map().filter().slice().map()` create multiple intermediate arrays during form submit or data parsing. This can cause unnecessary garbage collection overhead.
+**Action:** Replace multiple chained array methods with a single loop (like `for` or `for...of`) that performs the necessary string splits and conditional logic, stopping early when constraints (like max count) are met.
+
+## 2023-10-20 - Consolidating Multiple Array Iterations into Single Passes
+**Learning:** React components containing multiple chained array iterations like `.filter(condition1)` and `.reduce(condition2)` executed separately on the same large array source creates intermediate array allocations and redundant iteration overhead on every recalculation.
+**Action:** Consolidate these operations into a single pass using a manual `for...of` loop enclosed within an IIFE inside the `useMemo` block to derive all required outputs together, avoiding multiple iterations and intermediary object closures.

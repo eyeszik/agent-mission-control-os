@@ -27,7 +27,7 @@ function MessageCard({ message }: { message: ConversationMessage }) {
       {message.artifact_refs.length > 0 && (
         <ul className="flex flex-wrap gap-1">
           {message.artifact_refs.map((ref) => (
-            <li key={`${ref.version_ref}-${ref.relation}`} className="px-1.5 py-0.5 rounded border border-zinc-700 font-mono text-zinc-300">
+            <li key={`${ref.version_ref}-${ref.relation}`} className="px-1.5 py-0.5 rounded-sm border border-zinc-700 font-mono text-zinc-300">
               {ref.relation}: {ref.version_ref}
             </li>
           ))}
@@ -106,7 +106,7 @@ export function ProjectActivityPanel() {
     <section aria-labelledby="project-activity-heading" className="bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-3 flex flex-col gap-3 min-h-0">
       <div className="flex items-center justify-between">
         <h2 id="project-activity-heading" className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Project Activity</h2>
-        <button type="button" onClick={onNewThread} className="text-xs px-2 py-0.5 rounded border border-zinc-700 text-zinc-300 hover:text-zinc-100">New thread</button>
+        <button type="button" onClick={onNewThread} className="text-xs px-2 py-0.5 rounded-sm border border-zinc-700 text-zinc-300 hover:text-zinc-100">New thread</button>
       </div>
       {error && <p role="alert" className="text-xs text-rose-300">{error}</p>}
       <div role="tablist" aria-label="Conversation threads" className="flex flex-wrap gap-1">
@@ -117,7 +117,7 @@ export function ProjectActivityPanel() {
             type="button"
             aria-selected={thread.thread_id === threadId}
             onClick={() => setThread(thread.thread_id)}
-            className={`text-xs px-2 py-0.5 rounded ${thread.thread_id === threadId ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-400 border border-zinc-800'}`}
+            className={`text-xs px-2 py-0.5 rounded-sm ${thread.thread_id === threadId ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-400 border border-zinc-800'}`}
           >
             {thread.title}
           </button>

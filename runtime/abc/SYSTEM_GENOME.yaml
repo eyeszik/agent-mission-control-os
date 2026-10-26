@@ -171,7 +171,7 @@
     "build_dag": "amc-build-dag/v1",
     "governance": "amc-governance/v1",
     "mission_genome": "amc-mission-genome/v1",
-    "run_fsm": "amc-run-fsm/v1",
+    "run_fsm": "amc-run-fsm/v2",
     "visual_engine": "amc-visual-engine/v1"
   },
   "verifier_registry": {

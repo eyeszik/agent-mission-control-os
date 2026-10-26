@@ -1,5 +1,3 @@
-import sys
-from types import SimpleNamespace
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
@@ -7,6 +5,7 @@ from fastapi.testclient import TestClient
 from services.langgraph.app.main import app
 from services.langgraph.graph.agency.llm import generate_structured
 from services.langgraph.quality.evaluator import evaluate_quality
+from services.langgraph.tests.provider_fakes import openai_reply
 
 client = TestClient(app)
 
@@ -20,21 +19,11 @@ def test_provider_absence_is_explicitly_degraded(monkeypatch):
     assert outcome.data == {"value": "fallback"}
 
 
-def test_malformed_provider_output_retries_three_times_then_degrades(monkeypatch):
-    calls = {"count": 0}
-
-    class FakeChatOpenAI:
-        def __init__(self, **kwargs):
-            self.kwargs = kwargs
-
-        def invoke(self, prompt):
-            calls["count"] += 1
-            return SimpleNamespace(content="not-json")
-
+def test_malformed_provider_output_retries_three_times_then_degrades(provider_http, monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "synthetic-test-key")
-    monkeypatch.setitem(sys.modules, "langchain_openai", SimpleNamespace(ChatOpenAI=FakeChatOpenAI))
+    provider_http.responses = [openai_reply("not-json") for _ in range(3)]
     outcome = generate_structured("return data", {"value": "fallback"})
-    assert calls["count"] == 3
+    assert len(provider_http.requests) == 3
     assert outcome.mode == "FALLBACK_DEGRADED"
     assert outcome.attempts == 3
     assert outcome.error_class in {"JSONDecodeError", "ValueError"}

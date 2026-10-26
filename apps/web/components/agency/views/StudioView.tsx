@@ -20,6 +20,7 @@ export function StudioView() {
         ))}
       </ul>
       <a href="/mission-control" className="text-sm font-medium text-accent underline underline-offset-2">Open Mission Control</a>
+      <a href="/creative" className="text-sm font-medium text-accent underline underline-offset-2">Open governed rendering</a>
       <p className="text-xs text-fg">Image and video generation from hosted models is not connected; those requests report “Tool not connected”.</p>
     </Card>
   );

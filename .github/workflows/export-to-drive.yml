@@ -1,0 +1,175 @@
+name: Export project to Google Drive
+
+# Manual only. A dry run builds the export and reports what it would upload, with no
+# credential. A CI run uploads to Google Drive and records the export in Notion; it runs
+# in the "drive-export" environment, so required reviewers (Settings -> Environments)
+# can gate it and its secrets are not visible to any other job. See docs/drive-export.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_path:
+        description: Folder inside this repository to export, for example runtime/foundry/demo
+        required: true
+        type: string
+      project_id:
+        description: Drive subfolder and record id (defaults to the folder name)
+        required: false
+        type: string
+      brand_id:
+        description: Brand id recorded in Notion
+        required: false
+        type: string
+      mode:
+        description: dry_run builds locally and uploads nothing; ci uploads to Drive and Notion
+        required: true
+        type: choice
+        options: [dry_run, ci]
+        default: dry_run
+      full:
+        description: Include every file, not only the ones that changed
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: export-to-drive
+  cancel-in-progress: false
+
+jobs:
+  dry-run:
+    name: Dry run (no credentials)
+    if: ${{ inputs.mode == 'dry_run' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+
+      - name: Install export dependencies
+        run: python -m pip install httpx "cryptography>=44"
+
+      - name: Resolve the project path
+        id: path
+        shell: bash
+        env:
+          PROJECT_PATH: ${{ inputs.project_path }}
+        run: |
+          resolved="$(realpath -e -- "$PROJECT_PATH")" || { echo "::error::project_path does not exist"; exit 1; }
+          case "$resolved" in
+            "$GITHUB_WORKSPACE"/*) ;;
+            *) echo "::error::project_path must be inside the repository"; exit 1 ;;
+          esac
+          [[ "$resolved" != *$'\n'* ]] || { echo "::error::invalid project_path"; exit 1; }
+          echo "resolved=$resolved" >> "$GITHUB_OUTPUT"
+
+      - name: Dry run
+        shell: bash
+        env:
+          RUNNER_MODE: dry_run
+          AMC_PROJECT_PATH: ${{ steps.path.outputs.resolved }}
+          REPO_COMMIT_SHA: ${{ github.sha }}
+          PROJECT_ID: ${{ inputs.project_id }}
+          BRAND_ID: ${{ inputs.brand_id }}
+          FULL: ${{ inputs.full }}
+        run: |
+          args=()
+          [ -z "$PROJECT_ID" ] || args+=(--project-id "$PROJECT_ID")
+          [ -z "$BRAND_ID" ] || args+=(--brand-id "$BRAND_ID")
+          [ "$FULL" != "true" ] || args+=(--full)
+          python scripts/export_to_drive.py "${args[@]}" --out-dir "$RUNNER_TEMP/amc-export" > "$RUNNER_TEMP/result.json"
+          jq '{status, mode, export_kind, artifacts_count, files_in_zip, removed, manifest_hash}' "$RUNNER_TEMP/result.json"
+          {
+            echo "### Export dry run"
+            echo '```json'
+            jq '{status, mode, export_kind, artifacts_count, files_in_zip, removed, manifest_hash}' "$RUNNER_TEMP/result.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  export:
+    name: Export to Google Drive and Notion
+    if: ${{ inputs.mode == 'ci' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: drive-export
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+
+      - name: Install export dependencies
+        run: python -m pip install httpx "cryptography>=44"
+
+      - name: Resolve the project path
+        id: path
+        shell: bash
+        env:
+          PROJECT_PATH: ${{ inputs.project_path }}
+        run: |
+          resolved="$(realpath -e -- "$PROJECT_PATH")" || { echo "::error::project_path does not exist"; exit 1; }
+          case "$resolved" in
+            "$GITHUB_WORKSPACE"/*) ;;
+            *) echo "::error::project_path must be inside the repository"; exit 1 ;;
+          esac
+          [[ "$resolved" != *$'\n'* ]] || { echo "::error::invalid project_path"; exit 1; }
+          echo "resolved=$resolved" >> "$GITHUB_OUTPUT"
+
+      - name: Check Drive and Notion access (read-only)
+        shell: bash
+        env:
+          RUNNER_MODE: ci
+          AMC_PROJECT_PATH: ${{ steps.path.outputs.resolved }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+          GOOGLE_SA_JSON: ${{ secrets.GOOGLE_SA_JSON }}
+          DRIVE_PARENT_FOLDER_ID: ${{ secrets.DRIVE_PARENT_FOLDER_ID }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        run: python scripts/export_to_drive.py --check --out-dir "$RUNNER_TEMP/amc-export" > /dev/null
+
+      - name: Export
+        shell: bash
+        env:
+          RUNNER_MODE: ci
+          AMC_PROJECT_PATH: ${{ steps.path.outputs.resolved }}
+          REPO_COMMIT_SHA: ${{ github.sha }}
+          PROJECT_ID: ${{ inputs.project_id }}
+          BRAND_ID: ${{ inputs.brand_id }}
+          FULL: ${{ inputs.full }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+          GOOGLE_SA_JSON: ${{ secrets.GOOGLE_SA_JSON }}
+          DRIVE_PARENT_FOLDER_ID: ${{ secrets.DRIVE_PARENT_FOLDER_ID }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          EXPORT_ENCRYPTION_KEY: ${{ secrets.EXPORT_ENCRYPTION_KEY }}
+          EXPORT_RETENTION_FULL_KEEP: ${{ vars.EXPORT_RETENTION_FULL_KEEP }}
+          UPLOAD_PUBLIC: "false"
+        run: |
+          args=()
+          [ -z "$PROJECT_ID" ] || args+=(--project-id "$PROJECT_ID")
+          [ -z "$BRAND_ID" ] || args+=(--brand-id "$BRAND_ID")
+          [ "$FULL" != "true" ] || args+=(--full)
+          python scripts/export_to_drive.py "${args[@]}" --out-dir "$RUNNER_TEMP/amc-export" > "$RUNNER_TEMP/result.json"
+          # The full result holds Drive and Notion identifiers; this log and summary are public in a public repo.
+          jq '{status, export_kind, artifacts_count, files_in_zip, removed, manifest_hash}' "$RUNNER_TEMP/result.json"
+          {
+            echo "### Export"
+            echo '```json'
+            jq '{status, export_kind, artifacts_count, files_in_zip, removed, manifest_hash}' "$RUNNER_TEMP/result.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

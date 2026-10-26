@@ -48,6 +48,7 @@ from .contracts import (
     SideEffect,
 )
 from .intent import compile_intent
+from .planning import PlanningInputs
 from .release import approval_run_id, artifact_release_verdict, open_artifact_approval
 from .resolver import resolve_project
 
@@ -119,7 +120,8 @@ def _existing_inputs(project_id: str) -> dict[str, str]:
     return heads
 
 
-def _plan(project_id: str, artifact_type: str, objective: str, now: datetime, existing: dict[str, str]):
+def _plan(project_id: str, artifact_type: str, objective: str, now: datetime, existing: dict[str, str],
+          *, planning_inputs: Optional[PlanningInputs] = None):
     from services.langgraph.agency.compiled.backchain import DeliverableSpec
     from services.langgraph.agency.compiled.planner import CompiledAgencyRequest, compile_agency_plan
     from services.langgraph.agency.execution_fabric.schedule import from_compiled_agency_plan
@@ -127,10 +129,14 @@ def _plan(project_id: str, artifact_type: str, objective: str, now: datetime, ex
 
     root = Path(__file__).resolve().parents[4]
     spec = DeliverableSpec(id=artifact_type, requested_outcome=objective[:200], output_contract=artifact_type,
-                           acceptance_criteria=("independent read-back verification passes",), domains=("BRAND",))
+                           acceptance_criteria=("independent read-back verification passes",), domains=("BRAND",),
+                           source_refs=planning_inputs.source_refs if planning_inputs else ())
     existing = {k: v for k, v in existing.items() if k != artifact_type}
-    request = CompiledAgencyRequest(project_id=project_id, as_of=now.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                    deliverables=(spec,), existing_artifacts=existing)
+    request = CompiledAgencyRequest(project_id=project_id, as_of=now.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                    deliverables=(spec,), existing_artifacts=existing,
+                                    evidence=planning_inputs.evidence if planning_inputs else (),
+                                    decisions=planning_inputs.decisions if planning_inputs else (),
+                                    volatile_constraints=planning_inputs.volatile_constraints if planning_inputs else ())
     return from_compiled_agency_plan(compile_agency_plan(request, registry=RoleOSRegistry(root / "runtime" / "role_os")))
 
 
@@ -138,7 +144,8 @@ def _plan(project_id: str, artifact_type: str, objective: str, now: datetime, ex
 
 
 def verify_artifact(artifact_id: str, *, expected_version: int, adapter: StorageAdapter,
-                    palette: Optional[dict[str, str]] = None, now: Optional[datetime] = None) -> ArtifactVerification:
+                    palette: Optional[dict[str, str]] = None, brand: Optional[BrandContextCapsule] = None,
+                    now: Optional[datetime] = None) -> ArtifactVerification:
     """Re-read the persisted artifact and check it independently of the producer."""
     import hashlib
 
@@ -197,6 +204,37 @@ def verify_artifact(artifact_id: str, *, expected_version: int, adapter: Storage
                 findings.append("OFF_PALETTE")
         else:
             findings.append("NO_PALETTE_TO_CHECK")
+    elif mime == "application/json" and head.get("artifact_type") == "design_token_set":
+        # Recompile persisted bytes, independently of the fabric's producer verdict.
+        import json
+
+        from services.langgraph.agency.design_tokens import compile_css
+        from services.langgraph.agency.execution_fabric.adapters.brand import token_document
+
+        if brand is None:
+            findings.append("NO_BRAND_CAPSULE_TO_CHECK")
+            return done("INCONCLUSIVE", version, recorded_hash)
+        try:
+            body = json.loads(data)
+            graph, css = compile_css(body["document"], prefix="brand", tiered=True,
+                                     source_label=f"brand-capsule:{brand.capsule_hash[:16]}")
+            schema_ok = body.get("format") == "DTCG 2025.10"
+            matches = body["document"] == token_document(brand)
+            recompiled = css == body.get("css") and graph.source_hash == body.get("source_hash")
+            checks.extend((
+                {"family": "SCHEMA", "check": "DTCG 2025.10 document compiles", "passed": schema_ok},
+                {"family": "BRAND_CONSISTENCY", "check": "tokens match approved brand capsule", "passed": matches},
+                {"family": "FILE_INTEGRITY", "check": "CSS and source hash reproduce from read-back", "passed": recompiled},
+            ))
+            if not schema_ok:
+                findings.append("DTCG_FORMAT_INVALID")
+            if not matches:
+                findings.append("DTCG_BRAND_MISMATCH")
+            if not recompiled:
+                findings.append("DTCG_RECOMPILE_MISMATCH")
+        except (ValueError, KeyError, TypeError):
+            checks.append({"family": "SCHEMA", "check": "DTCG document compiles", "passed": False})
+            findings.append("DTCG_INVALID")
     else:
         # No independent verifier for this media type yet: say so, never pass by default.
         findings.append(f"NO_INDEPENDENT_VERIFIER_FOR:{mime or 'unknown'}")
@@ -218,6 +256,7 @@ def run_mission(
     now: Optional[datetime] = None,
     adapter: Optional[StorageAdapter] = None,
     byte_budget: int = DEFAULT_BYTE_BUDGET,
+    planning_inputs: Optional[PlanningInputs] = None,
 ) -> MissionOutcome:
     moment = _now(now)
     intent = compile_intent(raw_request, requested_mode=requested_mode)
@@ -229,6 +268,11 @@ def run_mission(
         return MissionOutcome(status="NEEDS_CLARIFICATION", reasons=("DELIVERABLE_UNKNOWN", *intent.clarifications), **base)
 
     project_id = resolution.project_id
+    if planning_inputs is not None and (
+        planning_inputs.tenant_id != principal.tenant_id or planning_inputs.project_id != project_id
+    ):
+        return MissionOutcome(status="BLOCKED", reasons=("PLANNING_INPUT_SCOPE_MISMATCH",), **base)
+    planning_hash = planning_inputs.content_hash if planning_inputs else None
     store = adapter or LocalStorageAdapter(export_root)
     counts_before = _observed_counts(project_id)
     artifact_type, skill_id = ROUTES[intent.deliverable]
@@ -236,9 +280,11 @@ def run_mission(
                                               subjects={BRAND_SUBJECT: BRAND_AUTHORITY_FLOOR}, thread_id=thread_id,
                                               now=moment, byte_budget=byte_budget,
                                               fingerprint=project_fingerprint(project_id, exclude_types=(artifact_type,)))
-    mission_id = "msn-" + canonical_hash({"tenant": principal.tenant_id, "project": project_id, "request": intent.request_hash,
-                                          "context": capsule.capsule_hash, "deliverable": intent.deliverable.value,
-                                          "mode": intent.mode.value})[:32]
+    identity = {"tenant": principal.tenant_id, "project": project_id, "request": intent.request_hash,
+                "context": capsule.capsule_hash, "deliverable": intent.deliverable.value, "mode": intent.mode.value}
+    if planning_hash is not None:
+        identity["planning_inputs_hash"] = planning_hash
+    mission_id = "msn-" + canonical_hash(identity)[:32]
     preds = _predicates(intent.side_effects)
     _set(preds, "P1_PROJECT_BOUND", PredicateState.VERIFIED, evidence=(f"resolution:{resolution.reasons[-1]}",))
 
@@ -250,7 +296,8 @@ def run_mission(
     else:
         try:
             body = brand_entry["body"]
-            brand = BrandContextCapsule(brand_name=body["brand_name"], palette=body["palette"])
+            brand = BrandContextCapsule(brand_name=body["brand_name"], palette=body["palette"],
+                                        **{key: body[key] for key in ("heading_font", "body_font", "voice", "locale") if key in body})
             _set(preds, "P2_BRAND_CONTEXT", PredicateState.VERIFIED, evidence=(f"memory:{brand_entry['memory_id']}",))
         except (KeyError, TypeError, ValidationError) as exc:
             _set(preds, "P2_BRAND_CONTEXT", PredicateState.FAILED, reasons=(f"BRAND_CONTEXT_INVALID:{type(exc).__name__}",))
@@ -262,11 +309,15 @@ def run_mission(
         assumptions=tuple(f for f in intent.facts if f.fact_type.value in {"SAFE_DEFAULT", "AMBIGUOUS_NONCRITICAL"}),
         unknowns=capsule.unknowns, execution_mode=intent.mode, request_hash=intent.request_hash,
         context_hash=capsule.capsule_hash, created_at=moment.isoformat(),
+        planning_inputs_hash=planning_hash,
+        planning_source_refs=planning_inputs.source_refs if planning_inputs else (),
     )
     _event(principal, project_id, ActivityType.WORK_STARTED, mission_id, {
         "intake_version": mission.intake_version, "mission_id": mission_id, "contract_hash": mission.contract_hash,
         "deliverable": intent.deliverable.value, "mode": intent.mode.value, "simulation": intent.mode is ExecutionMode.SIMULATION,
         "context_hash": capsule.capsule_hash,
+        "planning_inputs_hash": planning_hash,
+        "planning_source_refs": list(planning_inputs.source_refs) if planning_inputs else [],
     })
 
     def non_actions() -> tuple[NonActionReceipt, ...]:
@@ -308,7 +359,8 @@ def run_mission(
     from services.langgraph.agency.execution_fabric.consumer import execute_mission
     from services.langgraph.agency.execution_fabric.contracts import ExecutionContext, ExecutionState
 
-    schedule = _plan(project_id, artifact_type, intent.raw_request, moment, _existing_inputs(project_id))
+    schedule = _plan(project_id, artifact_type, intent.raw_request, moment, _existing_inputs(project_id),
+                     planning_inputs=planning_inputs)
     ctx = ExecutionContext.from_server(tenant_id=principal.tenant_id, project_id=project_id, actor=principal.user_id,
                                        mode="LOCAL", export_root=Path(export_root))
     report = execute_mission(schedule, ctx, brand=brand, skill_overrides={f"work:{artifact_type}": skill_id}, adapter=store)
@@ -324,7 +376,8 @@ def run_mission(
 
     artifact_id, version = cell.artifact_ref.rsplit(":v", 1)
     _set(preds, "P3_ARTIFACT_PRODUCED", PredicateState.VERIFIED, evidence=(cell.artifact_ref, f"run:{report.run_id}"))
-    verification = verify_artifact(artifact_id, expected_version=int(version), adapter=store, palette=brand.palette, now=moment)
+    verification = verify_artifact(artifact_id, expected_version=int(version), adapter=store, palette=brand.palette,
+                                   brand=brand, now=moment)
     _event(principal, project_id, ActivityType.VERIFIED if verification.status == "PASSED" else ActivityType.FAILED,
            f"{artifact_id}:v{version}", {"mission_id": mission_id, "verification": verification.model_dump(mode="json")})
     if verification.status != "PASSED":

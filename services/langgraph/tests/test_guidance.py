@@ -86,6 +86,7 @@ def test_default_registry_loads_branding_pack_and_has_stable_hash():
         "pg.studio_identity.v4",
         "pg.ui_ux.core",
         "pg.visual_prompting.v1",
+        "pg.web_experience.v1",
     ]
     assert first.registry_hash == second.registry_hash
     assert first.get("pg.branding.core").content_hash
@@ -424,6 +425,28 @@ def test_packaging_task_routes_production_design_system():
 def test_one_off_image_does_not_over_trigger_production_design_system_pack():
     selection = route_guidance(_requirement(), default_registry())
     assert "pg.production_design_system.v1" not in selection.selected_pack_ids
+
+
+def test_landing_page_build_routes_web_experience_pack():
+    requirement = _requirement(
+        family=PromptFamily.ui_ux,
+        asset_type="landing page",
+        objective="Build a landing page with scroll-triggered fades, staggered reveals and hover transitions.",
+        channel="web",
+        destination="/",
+    )
+    selection = route_guidance(requirement, default_registry())
+
+    assert "pg.web_experience.v1" in selection.selected_pack_ids
+    assert "pg.branding.core" in selection.selected_pack_ids
+    assert any("web.motion" in item for item in selection.selected_section_ids)
+    assert any("web.performance" in item for item in selection.selected_section_ids)
+
+
+def test_web_image_asset_does_not_trigger_web_experience_pack():
+    selection = route_guidance(_requirement(), default_registry())
+    assert "pg.web_experience.v1" not in selection.selected_pack_ids
+    assert "pg.web_experience.v1" in selection.rejected_pack_ids
 
 
 def test_excluding_production_design_system_removes_it_without_breaking_compilation():

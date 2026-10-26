@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Literal
+from typing import Annotated, Any, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -211,10 +211,29 @@ class CompletionCriterionResult(StrictModel):
     stale_refs: tuple[str, ...] = ()
 
 
+NOT_MEASURED = "NOT_MEASURED"
+
+
 class CompletionEvaluation(StrictModel):
+    """Completion verdict for a run.
+
+    ``proof_coverage`` is derived from the criteria (satisfied / total). The
+    evidence and quality scores have no measuring component yet, so they stay
+    ``NOT_MEASURED`` unless a real measurement supplies a number. ``confidence``
+    is still supplied by the caller (no calibrated estimator exists; see G-01).
+    """
+
     terminal_candidate: Literal["COMPLETE", "BLOCKED"]
     criteria: tuple[CompletionCriterionResult, ...]
     proof_coverage: float = Field(ge=0.0, le=1.0)
-    evidence_score: float = Field(ge=0.0, le=1.0)
-    quality_score: float = Field(ge=0.0, le=1.0)
+    evidence_score: Union[Annotated[float, Field(ge=0.0, le=1.0)], Literal["NOT_MEASURED"]] = NOT_MEASURED
+    quality_score: Union[Annotated[float, Field(ge=0.0, le=1.0)], Literal["NOT_MEASURED"]] = NOT_MEASURED
     confidence: float = Field(ge=0.0, le=1.0)
+
+
+def proof_coverage_from(criteria: tuple[CompletionCriterionResult, ...]) -> float:
+    """Share of criteria satisfied. An empty or fully blocked set is 0.0, never a guess."""
+    if not criteria:
+        return 0.0
+    satisfied = sum(1 for item in criteria if item.status is CriterionStatus.SATISFIED)
+    return satisfied / len(criteria)

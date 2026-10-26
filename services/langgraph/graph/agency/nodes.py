@@ -676,6 +676,13 @@ def _log_node(state: GraphState, node_id: str) -> None:
     )
 
 
+def _generation_binding(state: GraphState) -> dict:
+    """The run's pinned model profile and an operation-specific call reference."""
+    run = state.get("run")
+    return {"run_metadata": getattr(run, "metadata", None) or {},
+            "authorization_ref": f"agency-run:{getattr(run, 'id', 'unbound')}"}
+
+
 def brief_intake_node(state: GraphState) -> dict:
     _log_node(state, "brief_intake")
     _assert_live_stage_contract("brief_intake")
@@ -733,7 +740,7 @@ def brand_strategy_node(state: GraphState) -> dict:
         "tone_of_voice": brief.get("tone") or "confident and approachable",
         "target_audience_summary": brief.get("target_audience", "General audience"),
     }
-    outcome = generate_structured(prompt, fallback, schema_version="brand-strategy-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")))
+    outcome = generate_structured(prompt, fallback, schema_version="brand-strategy-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")), **_generation_binding(state))
     result = _record_generation(agency, "brand_strategy", outcome)
     strategy = BrandStrategy(**{**fallback, **{k: v for k, v in result.items() if k in fallback}})
     agency["brand_strategy"] = strategy.model_dump()
@@ -789,7 +796,7 @@ def creative_concepting_node(state: GraphState) -> dict:
             {"id": "concept-3", "name": "Proof Over Promises", "tagline": "Results you can see.", "rationale": "Counters category skepticism with evidence-led messaging."},
         ]
     }
-    outcome = generate_structured(prompt, fallback, schema_version="creative-concepts-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")))
+    outcome = generate_structured(prompt, fallback, schema_version="creative-concepts-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")), **_generation_binding(state))
     result = _record_generation(agency, "creative_concepting", outcome)
     concepts = [CreativeConcept(**item) for item in (result.get("concepts") or fallback["concepts"])]
     agency["creative_concepts"] = [item.model_dump() for item in concepts]
@@ -818,7 +825,7 @@ def copywriting_node(state: GraphState) -> dict:
         for item in concepts
     ]
     fallback = {"copy": fallback_variants}
-    outcome = generate_structured(prompt, fallback, schema_version="campaign-copy-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")))
+    outcome = generate_structured(prompt, fallback, schema_version="campaign-copy-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")), **_generation_binding(state))
     result = _record_generation(agency, "copywriting", outcome)
     variants = [CopyVariant(**item) for item in (result.get("copy") or fallback_variants)]
     agency["copy_variants"] = [item.model_dump() for item in variants]
@@ -934,7 +941,7 @@ def design_brief_node(state: GraphState) -> dict:
         "imagery_style": "Authentic, lightly art-directed photography over stock imagery.",
         "layout_notes": "Generous whitespace, a single dominant focal image per placement, consistent grid across channels.",
     }
-    outcome = generate_structured(prompt, fallback, schema_version="design-brief-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")))
+    outcome = generate_structured(prompt, fallback, schema_version="design-brief-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")), **_generation_binding(state))
     result = _record_generation(agency, "design_brief", outcome)
     design_brief = DesignBrief(
         **{**fallback, **{k: v for k, v in result.items() if k in fallback}},

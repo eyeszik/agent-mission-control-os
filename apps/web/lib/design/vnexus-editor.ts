@@ -29,7 +29,16 @@ export function rawOf(value: GenomeValue): string {
 
 export function parseValue(kind: ValueKind, raw: string): { ok: true; value: GenomeValue } | { ok: false; error: string } {
   if (kind === 'text') return { ok: true, value: raw };
-  if (kind === 'list') return { ok: true, value: raw.split('\n').map((s) => s.trim()).filter(Boolean) };
+  if (kind === 'list') {
+    // ⚡ Bolt: Replaced .map().filter() with a single-pass loop
+    const parts = raw.split('\n');
+    const res: string[] = [];
+    for (let i = 0; i < parts.length; i++) {
+      const t = parts[i].trim();
+      if (t) res.push(t);
+    }
+    return { ok: true, value: res };
+  }
   if (kind === 'boolean') {
     if (raw === 'true' || raw === 'false') return { ok: true, value: raw === 'true' };
     return { ok: false, error: 'enter true or false' };
