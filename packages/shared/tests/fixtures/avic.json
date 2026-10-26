@@ -1,0 +1,1595 @@
+{
+  "approval_response": {
+    "approval_id": "9cad1b08-6bcc-4767-9755-6cdabb281527",
+    "approval_status": "pending",
+    "authority_ref": "human-review",
+    "confidence": null,
+    "created_at": "2026-10-26T18:14:50.677623+00:00",
+    "decided_at": null,
+    "decision": null,
+    "policy_version": "amc-avic-approval/v1",
+    "project_id": "prj-test-d6382e5e2802",
+    "reason": "Compiled SVG requires human visual, brand and accessibility review before local release",
+    "reviewer": null,
+    "run_id": "mission-c0eba5fb89f3924dd48a58d4",
+    "stale_reason": null,
+    "staled_at": null,
+    "status": "PENDING",
+    "subject_hash": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
+    "subject_ref": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+    "subject_type": "CREATIVE_ARTIFACT",
+    "subject_version_ref": "2",
+    "tenant_id": "tenant-events-test"
+  },
+  "asset_list": {
+    "assets": [
+      {
+        "asset_id": "halden-kiln-poster",
+        "scene_artifact": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "version": 2
+      }
+    ]
+  },
+  "asset_view": {
+    "approvals": [],
+    "asset_id": "halden-kiln-poster",
+    "brand_approved": false,
+    "brand_source": "foundry.psem.PALETTE",
+    "consistency": {
+      "consistent": true,
+      "stale": []
+    },
+    "evaluation": {
+      "checks": [
+        {
+          "check": "svg_safety",
+          "detail": "well-formed SVG without active content or external references",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "allowlist_elements",
+          "detail": "all elements allowlisted",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "allowlist_attributes",
+          "detail": "all attributes allowlisted",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "text_placement",
+          "detail": "ok",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "unique_ids",
+          "detail": "16 unique ids",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "reference_integrity",
+          "detail": "all references local and resolved",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "finite_coordinates",
+          "detail": "all coordinates finite and bounded",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "resource_ceiling",
+          "detail": "26 elements, 4 path commands, depth<=24: True",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "profile_integrity",
+          "detail": "NATIVE_EDITABLE_VECTOR: 0 embedded raster element(s)",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "dimensions",
+          "detail": "declared 1200x1500, expected 1200x1500",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "exact_text.headline",
+          "detail": "expected 'MADE SLOWLY', SVG has 'MADE SLOWLY'",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "exact_text.annotation",
+          "detail": "expected 'FIG. 07 / KILN OPENING 2027', SVG has 'FIG. 07 / KILN OPENING 2027'",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "palette",
+          "detail": "5 colour(s) within dE76<=2.3 of the palette",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "accent_budget",
+          "detail": "1 accent colour(s) used: ['#ff4c2f']",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "contrast.headline",
+          "detail": "#f0eee9 on #171719 = 15.44:1 (floor 4.5)",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "contrast.annotation",
+          "detail": "#838185 on #171719 = 4.64:1 (floor 4.5)",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "contrast.motif",
+          "detail": "#ff4c2f on #171719 = 5.39:1 (floor 3.0)",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "text_fit.headline",
+          "detail": "estimated right edge 821px of 1200px (glyph-advance estimate)",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "text_fit.annotation",
+          "detail": "estimated right edge 365px of 1200px (glyph-advance estimate)",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "render_dimensions",
+          "detail": "1200x1500",
+          "level": "Q7",
+          "result": "PASS"
+        },
+        {
+          "check": "nonblank",
+          "detail": "{'distinct_colours_128px': 526, 'luminance_mean': 35.13, 'luminance_std': 25.24}",
+          "level": "Q7",
+          "result": "PASS"
+        },
+        {
+          "check": "margin_bands",
+          "detail": "outer half-margin is clear",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "headline_rendered",
+          "detail": "41.1% of the headline box is headline ink",
+          "level": "Q7",
+          "result": "PASS"
+        }
+      ],
+      "passed": true,
+      "png_sha256": "21cc9345efeb1ea48cdd4a6616a6d75f761930547261062faa7f5114f827b020",
+      "renderer": "raster.chromium",
+      "renderer_version": "141.0.7390.37",
+      "svg_sha256": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3"
+    },
+    "exact_text": [
+      "MADE SLOWLY",
+      "FIG. 07 / KILN OPENING 2027"
+    ],
+    "height": 1500,
+    "objects": [
+      {
+        "fill": "#171719",
+        "object_id": "background",
+        "operations": [],
+        "protected": false,
+        "semantic_role": "background",
+        "stroke": null,
+        "text": null
+      },
+      {
+        "fill": "#f0eee9",
+        "object_id": "grain",
+        "operations": [],
+        "protected": false,
+        "semantic_role": "texture",
+        "stroke": null,
+        "text": null
+      },
+      {
+        "fill": "none",
+        "object_id": "motif-ring-outer",
+        "operations": [
+          "recolor"
+        ],
+        "protected": true,
+        "semantic_role": "motif",
+        "stroke": "#ff4c2f",
+        "text": null
+      },
+      {
+        "fill": "none",
+        "object_id": "motif-ring-inner",
+        "operations": [
+          "recolor"
+        ],
+        "protected": true,
+        "semantic_role": "motif",
+        "stroke": "#f0eee9",
+        "text": null
+      },
+      {
+        "fill": "none",
+        "object_id": "motif-axis",
+        "operations": [
+          "recolor"
+        ],
+        "protected": true,
+        "semantic_role": "motif",
+        "stroke": "#f0eee9",
+        "text": null
+      },
+      {
+        "fill": "url(#material-object-body)",
+        "object_id": "material-object",
+        "operations": [
+          "recolor",
+          "set_geometry"
+        ],
+        "protected": false,
+        "semantic_role": "material_object",
+        "stroke": null,
+        "text": null
+      },
+      {
+        "fill": "#f0eee9",
+        "object_id": "material-object-highlight",
+        "operations": [
+          "recolor",
+          "set_geometry"
+        ],
+        "protected": false,
+        "semantic_role": "highlight",
+        "stroke": null,
+        "text": null
+      },
+      {
+        "fill": "#f0eee9",
+        "object_id": "lighting-key",
+        "operations": [],
+        "protected": false,
+        "semantic_role": "lighting",
+        "stroke": null,
+        "text": null
+      },
+      {
+        "fill": "#f0eee9",
+        "object_id": "headline",
+        "operations": [
+          "recolor",
+          "change_text"
+        ],
+        "protected": true,
+        "semantic_role": "headline",
+        "stroke": null,
+        "text": "MADE SLOWLY"
+      },
+      {
+        "fill": "none",
+        "object_id": "annotation-rule",
+        "operations": [
+          "recolor",
+          "set_geometry"
+        ],
+        "protected": false,
+        "semantic_role": "rule",
+        "stroke": "#838185",
+        "text": null
+      },
+      {
+        "fill": "#838185",
+        "object_id": "annotation",
+        "operations": [
+          "recolor",
+          "change_text"
+        ],
+        "protected": true,
+        "semantic_role": "annotation",
+        "stroke": null,
+        "text": "FIG. 07 / KILN OPENING 2027"
+      }
+    ],
+    "output_profile": "NATIVE_EDITABLE_VECTOR",
+    "palette": {
+      "amber": "#ffaa3d",
+      "charcoal": "#171719",
+      "fog": "#838185",
+      "graphite": "#323234",
+      "paper": "#f0eee9",
+      "signal_red": "#ff4c2f"
+    },
+    "project_id": "prj-test-d6382e5e2802",
+    "release": null,
+    "scene_hash": "a9cf15b0861c4c96294569675a73c4a4c6105ef4844d356876fb5ef307906333",
+    "stages": {
+      "brand": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-brand",
+        "content_hash": "a2fc78b11122f6fa6e5898bb5465e3309380c47b94f7396444cf379799feb1e2",
+        "version": 1
+      },
+      "evaluation": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
+        "content_hash": "0d29beecc696b10ee870de83c84d9307eca0ceb6a692e085c58a78e1e66c8464",
+        "version": 1
+      },
+      "intent": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-intent",
+        "content_hash": "2a58c59c0d9e30622bf6e19437c837f3baf3f5c31d7c6909df0897560d3636b2",
+        "version": 1
+      },
+      "preview": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
+        "content_hash": "21cc9345efeb1ea48cdd4a6616a6d75f761930547261062faa7f5114f827b020",
+        "version": 1
+      },
+      "provenance": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-provenance",
+        "content_hash": "810cfd5a421cc4aa614b5b846b292ef73ea2a49d7262e059478ab43cb211362f",
+        "version": 1
+      },
+      "references": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-references",
+        "content_hash": "4e2dbd3f43caafca0d1cebda43e3acaa12a1920e02440918aab44964d90eda94",
+        "version": 1
+      },
+      "scene": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "content_hash": "f7a6a775ddca2d492c7b889e0e0207fec2eb31244d7f7ac45258dd41876d6536",
+        "version": 1
+      },
+      "svg": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+        "content_hash": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3",
+        "version": 1
+      }
+    },
+    "style_profile": "post-surrealist-editorial",
+    "svg_sha256": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3",
+    "width": 1200
+  },
+  "asset_view_after": {
+    "approvals": [
+      {
+        "approval_id": "9cad1b08-6bcc-4767-9755-6cdabb281527",
+        "created_at": "2026-10-26T18:14:50.677623+00:00",
+        "current": true,
+        "decision": null,
+        "reviewer": null,
+        "status": "pending",
+        "subject_hash": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530"
+      }
+    ],
+    "asset_id": "halden-kiln-poster",
+    "brand_approved": false,
+    "brand_source": "foundry.psem.PALETTE",
+    "consistency": {
+      "consistent": true,
+      "stale": []
+    },
+    "evaluation": {
+      "checks": [
+        {
+          "check": "svg_safety",
+          "detail": "well-formed SVG without active content or external references",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "allowlist_elements",
+          "detail": "all elements allowlisted",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "allowlist_attributes",
+          "detail": "all attributes allowlisted",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "text_placement",
+          "detail": "ok",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "unique_ids",
+          "detail": "16 unique ids",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "reference_integrity",
+          "detail": "all references local and resolved",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "finite_coordinates",
+          "detail": "all coordinates finite and bounded",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "resource_ceiling",
+          "detail": "26 elements, 4 path commands, depth<=24: True",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "profile_integrity",
+          "detail": "NATIVE_EDITABLE_VECTOR: 0 embedded raster element(s)",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "dimensions",
+          "detail": "declared 1200x1500, expected 1200x1500",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "exact_text.headline",
+          "detail": "expected 'MADE SLOWLY', SVG has 'MADE SLOWLY'",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "exact_text.annotation",
+          "detail": "expected 'FIG. 07 / KILN OPENING 2027', SVG has 'FIG. 07 / KILN OPENING 2027'",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "palette",
+          "detail": "5 colour(s) within dE76<=2.3 of the palette",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "accent_budget",
+          "detail": "1 accent colour(s) used: ['#ff4c2f']",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "contrast.headline",
+          "detail": "#f0eee9 on #171719 = 15.44:1 (floor 4.5)",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "contrast.annotation",
+          "detail": "#838185 on #171719 = 4.64:1 (floor 4.5)",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "contrast.motif",
+          "detail": "#ff4c2f on #171719 = 5.39:1 (floor 3.0)",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "text_fit.headline",
+          "detail": "estimated right edge 821px of 1200px (glyph-advance estimate)",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "text_fit.annotation",
+          "detail": "estimated right edge 365px of 1200px (glyph-advance estimate)",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "protected_geometry",
+          "detail": "3 protected unchanged",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "render_dimensions",
+          "detail": "1200x1500",
+          "level": "Q7",
+          "result": "PASS"
+        },
+        {
+          "check": "nonblank",
+          "detail": "{'distinct_colours_128px': 521, 'luminance_mean': 34.89, 'luminance_std': 24.9}",
+          "level": "Q7",
+          "result": "PASS"
+        },
+        {
+          "check": "margin_bands",
+          "detail": "outer half-margin is clear",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "headline_rendered",
+          "detail": "41.1% of the headline box is headline ink",
+          "level": "Q7",
+          "result": "PASS"
+        }
+      ],
+      "passed": true,
+      "png_sha256": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+      "renderer": "raster.chromium",
+      "renderer_version": "141.0.7390.37",
+      "svg_sha256": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530"
+    },
+    "exact_text": [
+      "MADE SLOWLY",
+      "FIG. 07 / KILN OPENING 2027"
+    ],
+    "height": 1500,
+    "objects": [
+      {
+        "fill": "#171719",
+        "object_id": "background",
+        "operations": [],
+        "protected": false,
+        "semantic_role": "background",
+        "stroke": null,
+        "text": null
+      },
+      {
+        "fill": "#f0eee9",
+        "object_id": "grain",
+        "operations": [],
+        "protected": false,
+        "semantic_role": "texture",
+        "stroke": null,
+        "text": null
+      },
+      {
+        "fill": "none",
+        "object_id": "motif-ring-outer",
+        "operations": [
+          "recolor"
+        ],
+        "protected": true,
+        "semantic_role": "motif",
+        "stroke": "#ff4c2f",
+        "text": null
+      },
+      {
+        "fill": "none",
+        "object_id": "motif-ring-inner",
+        "operations": [
+          "recolor"
+        ],
+        "protected": true,
+        "semantic_role": "motif",
+        "stroke": "#838185",
+        "text": null
+      },
+      {
+        "fill": "none",
+        "object_id": "motif-axis",
+        "operations": [
+          "recolor"
+        ],
+        "protected": true,
+        "semantic_role": "motif",
+        "stroke": "#f0eee9",
+        "text": null
+      },
+      {
+        "fill": "url(#material-object-body)",
+        "object_id": "material-object",
+        "operations": [
+          "recolor",
+          "set_geometry"
+        ],
+        "protected": false,
+        "semantic_role": "material_object",
+        "stroke": null,
+        "text": null
+      },
+      {
+        "fill": "#f0eee9",
+        "object_id": "material-object-highlight",
+        "operations": [
+          "recolor",
+          "set_geometry"
+        ],
+        "protected": false,
+        "semantic_role": "highlight",
+        "stroke": null,
+        "text": null
+      },
+      {
+        "fill": "#f0eee9",
+        "object_id": "lighting-key",
+        "operations": [],
+        "protected": false,
+        "semantic_role": "lighting",
+        "stroke": null,
+        "text": null
+      },
+      {
+        "fill": "#f0eee9",
+        "object_id": "headline",
+        "operations": [
+          "recolor",
+          "change_text"
+        ],
+        "protected": true,
+        "semantic_role": "headline",
+        "stroke": null,
+        "text": "MADE SLOWLY"
+      },
+      {
+        "fill": "none",
+        "object_id": "annotation-rule",
+        "operations": [
+          "recolor",
+          "set_geometry"
+        ],
+        "protected": false,
+        "semantic_role": "rule",
+        "stroke": "#838185",
+        "text": null
+      },
+      {
+        "fill": "#838185",
+        "object_id": "annotation",
+        "operations": [
+          "recolor",
+          "change_text"
+        ],
+        "protected": true,
+        "semantic_role": "annotation",
+        "stroke": null,
+        "text": "FIG. 07 / KILN OPENING 2027"
+      }
+    ],
+    "output_profile": "NATIVE_EDITABLE_VECTOR",
+    "palette": {
+      "amber": "#ffaa3d",
+      "charcoal": "#171719",
+      "fog": "#838185",
+      "graphite": "#323234",
+      "paper": "#f0eee9",
+      "signal_red": "#ff4c2f"
+    },
+    "project_id": "prj-test-d6382e5e2802",
+    "release": {
+      "approval_id": "9cad1b08-6bcc-4767-9755-6cdabb281527",
+      "external_effects": "none",
+      "reasons": [
+        "APPROVAL_PENDING"
+      ],
+      "release_allowed": false,
+      "svg_sha256": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530"
+    },
+    "scene_hash": "63a2862ba0e7e82c4bf775439d20c5b090f8c0b6b021a3ee8339fe6cbb1748d2",
+    "stages": {
+      "brand": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-brand",
+        "content_hash": "a2fc78b11122f6fa6e5898bb5465e3309380c47b94f7396444cf379799feb1e2",
+        "version": 1
+      },
+      "evaluation": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
+        "content_hash": "b1a3c61c117221d4b70e69ff38a4d9d2ba37d98434baf8f10f149e37667ed3f0",
+        "version": 2
+      },
+      "intent": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-intent",
+        "content_hash": "2a58c59c0d9e30622bf6e19437c837f3baf3f5c31d7c6909df0897560d3636b2",
+        "version": 1
+      },
+      "preview": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
+        "content_hash": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+        "version": 2
+      },
+      "provenance": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-provenance",
+        "content_hash": "986bf9b21d78ac08d0699eb1ed542ea1ca37f9c64a455307dc32c73bff022db8",
+        "version": 2
+      },
+      "references": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-references",
+        "content_hash": "4e2dbd3f43caafca0d1cebda43e3acaa12a1920e02440918aab44964d90eda94",
+        "version": 1
+      },
+      "release": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-release",
+        "content_hash": "1fc0055b4a3039ab04a300ca1ba1a70b20d8272a12ef06f2e33b6b9ca8b63c6d",
+        "version": 1
+      },
+      "scene": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "content_hash": "02984ee4217f3a0734446a1bb3579f11a82f1b4b43c4312a2433704d8713cc4c",
+        "version": 2
+      },
+      "svg": {
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+        "content_hash": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
+        "version": 2
+      }
+    },
+    "style_profile": "post-surrealist-editorial",
+    "svg_sha256": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
+    "width": 1200
+  },
+  "capabilities": {
+    "brand": {
+      "palette": {
+        "amber": "#ffaa3d",
+        "charcoal": "#171719",
+        "fog": "#838185",
+        "graphite": "#323234",
+        "paper": "#f0eee9",
+        "signal_red": "#ff4c2f"
+      },
+      "source": "foundry.psem.PALETTE"
+    },
+    "capabilities": [
+      {
+        "limit": "Unicode-normalised scan copy (NFKC, invisible characters, lookalike letters); stored text untouched",
+        "name": "ACE intent: classification, injection containment, effects never inferred",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_intent_reuses_promptir_and_classifies_every_item",
+          "test_prompt_injection_and_effects_are_data_not_policy",
+          "test_intent_filter_survives_unicode_evasions",
+          "test_intent_normalization_does_not_mangle_or_over_block_benign_text"
+        ]
+      },
+      {
+        "limit": "raster refused in native profiles",
+        "name": "Output profiles: native editable / fidelity / illustrative",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_scene_ir_rejects_raster_in_native_profile_and_dangling_references"
+        ]
+      },
+      {
+        "limit": "no raster generation provider; refused, never substituted",
+        "name": "HYBRID_SVG, RASTER_FINAL",
+        "state": "BLOCKED",
+        "tests": [
+          "test_raster_and_hybrid_profiles_are_never_silently_substituted"
+        ]
+      },
+      {
+        "limit": "same inputs give the same bytes",
+        "name": "SceneIR + deterministic SVG emitter",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_scene_is_deterministic_and_covers_every_requirement"
+        ]
+      },
+      {
+        "limit": "malicious and invalid documents rejected",
+        "name": "Allowlist SVG validator (elements, attributes, local refs, ids, finite coords, ceilings)",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_malicious_or_invalid_svg_is_rejected",
+          "test_resource_ceilings_reject_oversized_and_deep_documents"
+        ]
+      },
+      {
+        "limit": "`runtime/avic/demo/`",
+        "name": "Editorial vertical slice (background, headline, motif, material object, lighting, annotation)",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_slice_renders_and_passes_independent_evaluation"
+        ]
+      },
+      {
+        "limit": "exact text, protected geometry and off-palette edits refused",
+        "name": "Edits: inspect, recolor, change_text, set_geometry, validate",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_edits_are_bounded_by_brief_brand_and_protection"
+        ]
+      },
+      {
+        "limit": "compare-and-set on the head hash read; the scene is the commit record",
+        "name": "Edit concurrency: stale base and racing writers conflict instead of overwriting",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_store_checks_the_head_it_was_computed_from",
+          "test_an_edit_against_a_stale_base_conflicts_and_stores_nothing",
+          "test_a_writer_that_slips_in_between_read_and_write_is_detected"
+        ]
+      },
+      {
+        "limit": "no transaction across stages; `consistency` + `recompile_asset`",
+        "name": "Crash recovery: stale derived stages detected, blocked from release, re-derived from the scene",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_a_crash_between_stage_writes_fails_closed_and_recompile_recovers"
+        ]
+      },
+      {
+        "limit": "reads SVG/PNG bytes, not the compiler objects",
+        "name": "Independent evaluation (exact text, palette, accent budget, WCAG contrast, text fit estimate, nonblank, headline ink)",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_evaluator_reads_the_bytes_not_the_scene"
+        ]
+      },
+      {
+        "limit": "reported as a defect with no automatic repair",
+        "name": "Margin bands: content in the outer half-margin measured on rendered pixels",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_margin_bands_see_ink_where_nothing_may_be",
+          "test_pixels_catch_an_overflow_that_the_glyph_estimate_misses",
+          "test_a_normal_slice_has_clean_margins"
+        ]
+      },
+      {
+        "limit": "service tests drive the real `/approvals/{id}/decide` route",
+        "name": "Project OS persistence, lineage, approval, local release, approval non-inheritance, tamper detection, cache divergence",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_project_os_lineage_approval_release_and_no_approval_inheritance",
+          "test_tampered_stored_bytes_block_approval_and_release",
+          "test_cache_divergence_is_rejected",
+          "test_cross_tenant_and_out_of_scope_principals_are_denied"
+        ]
+      },
+      {
+        "limit": "isolated re-render + independent re-evaluation, rollback, at most 3 attempts",
+        "name": "H3 causal repair (contrast, palette, accent budget, text overflow, exact text)",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_h3_repairs_a_contrast_defect_with_an_isolated_render_and_independent_evaluation",
+          "test_failed_repair_rolls_back_and_keeps_the_parent"
+        ]
+      },
+      {
+        "limit": "reported as a defect with hypotheses; human review",
+        "name": "H3 automatic repair of blank renders and margin overflow",
+        "state": "PROPOSED",
+        "tests": [
+          "test_detect_only_turns_failures_into_defects_and_reports_missing_evidence"
+        ]
+      },
+      {
+        "limit": "measured fidelity vs Chromium render; stdlib CPU baseline",
+        "name": "H1 coarse-to-fine region reconstruction + linear-gradient fitting + Pareto",
+        "state": "PARTIAL",
+        "tests": [
+          "test_reconstruction_is_deterministic_native_and_improves_with_budget",
+          "test_h1_measured_fidelity_with_real_render"
+        ]
+      },
+      {
+        "limit": "optional research dependencies not installed or licence-reviewed",
+        "name": "H1 DiffVG / LIVE / Bezier contour fitting / Jacobian constraint projection",
+        "state": "PROPOSED",
+        "tests": []
+      },
+      {
+        "limit": "`mutate_brand`",
+        "name": "H2 governed brand mutation (approval required, protected invariants, rollback ref)",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_brand_mutations_need_approval_and_never_touch_protected_invariants"
+        ]
+      },
+      {
+        "limit": "Chromium test + demo `variants.json`",
+        "name": "H4 reproducible variant branches, Pareto selection, no approval inheritance",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_h4_branches_keep_immutable_constraints_and_never_carry_approval"
+        ]
+      },
+      {
+        "limit": "the other 12 listed profiles are PROPOSED and refused",
+        "name": "Style profiles: Post-Surrealist Editorial, Swiss Editorial Modernism, Technical Minimalism, Geometric Infographics",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_proposed_style_profiles_are_refused_not_approximated",
+          "test_psem_profile_uses_the_one_psem_palette"
+        ]
+      },
+      {
+        "limit": "palette-only shading; `physical_claim = NONE`",
+        "name": "H5 material parameters with provenance; vector shading for 10 families; bounded vector texture",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_material_parameters_carry_provenance_and_make_no_physical_claim"
+        ]
+      },
+      {
+        "limit": "no physics backend",
+        "name": "Physically based material rendering / inverse rendering",
+        "state": "BLOCKED",
+        "tests": []
+      },
+      {
+        "limit": "references contribute measured palettes only",
+        "name": "Semantic reference analysis (subjects, styles)",
+        "state": "PROPOSED",
+        "tests": [
+          "test_references_are_hashed_measured_and_rights_gated"
+        ]
+      },
+      {
+        "limit": "belongs to cinematic/motion capabilities, not AVIC",
+        "name": "Video / motion",
+        "state": "PROVIDER_GAP",
+        "tests": []
+      },
+      {
+        "limit": "Python and CLI only until the `/avic` route lands",
+        "name": "API route / web UI",
+        "state": "NOT_ADDED",
+        "tests": []
+      }
+    ],
+    "renderer": {
+      "blockers": [],
+      "concurrency": 2,
+      "name": "raster.chromium",
+      "state": "IMPLEMENTED_VERIFIED"
+    },
+    "style_profiles": [
+      {
+        "name": "Post-Surrealist Editorial",
+        "notes": [
+          "one signal accent",
+          "monumental negative space",
+          "optical asymmetry",
+          "matte, fine grain",
+          "technical annotation",
+          "neo-grotesk type"
+        ],
+        "profile_id": "post-surrealist-editorial",
+        "state": "IMPLEMENTED_VERIFIED"
+      },
+      {
+        "name": "Swiss Editorial Modernism",
+        "notes": [
+          "modular grid",
+          "flush-left type",
+          "single accent"
+        ],
+        "profile_id": "swiss-editorial-modernism",
+        "state": "IMPLEMENTED_VERIFIED"
+      },
+      {
+        "name": "Technical Minimalism",
+        "notes": [
+          "hairline rules",
+          "dense annotation",
+          "restrained palette"
+        ],
+        "profile_id": "technical-minimalism",
+        "state": "IMPLEMENTED_VERIFIED"
+      },
+      {
+        "name": "Geometric Infographics",
+        "notes": [
+          "modular blocks",
+          "legible hierarchy"
+        ],
+        "profile_id": "geometric-infographics",
+        "state": "IMPLEMENTED_VERIFIED"
+      },
+      {
+        "name": "Experimental Brand Geometry",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "experimental-brand-geometry",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Premium Product Vector",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "premium-product-vector",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Atmospheric Monochrome",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "atmospheric-monochrome",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Material-Rich Abstraction",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "material-rich-abstraction",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Modular Identity Systems",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "modular-identity-systems",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Contemporary Typographic Poster",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "contemporary-typographic-poster",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Analog Conceptual Photography",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "analog-conceptual-photography",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Digital Collage",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "digital-collage",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Cinematic Composition",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "cinematic-composition",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Optical Surrealism",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "optical-surrealism",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Retro Digital Broadcast",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "retro-digital-broadcast",
+        "state": "PROPOSED"
+      },
+      {
+        "name": "Photographic Vector Realism",
+        "notes": [
+          "listed; no compiler path yet"
+        ],
+        "profile_id": "photographic-vector-realism",
+        "state": "PROPOSED"
+      }
+    ]
+  },
+  "compile_response": {
+    "artifacts": {
+      "brand": {
+        "action": "created",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-brand",
+        "file": "brand.json",
+        "role": "design_lead",
+        "sha256": "a2fc78b11122f6fa6e5898bb5465e3309380c47b94f7396444cf379799feb1e2",
+        "version": 1
+      },
+      "evaluation": {
+        "action": "created",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
+        "file": "evaluation.json",
+        "role": "brand_safety_reviewer",
+        "sha256": "0d29beecc696b10ee870de83c84d9307eca0ceb6a692e085c58a78e1e66c8464",
+        "version": 1
+      },
+      "intent": {
+        "action": "created",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-intent",
+        "file": "requirements.json",
+        "role": "creative_director",
+        "sha256": "2a58c59c0d9e30622bf6e19437c837f3baf3f5c31d7c6909df0897560d3636b2",
+        "version": 1
+      },
+      "preview": {
+        "action": "created",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
+        "file": "preview.png",
+        "role": "creative_director",
+        "sha256": "21cc9345efeb1ea48cdd4a6616a6d75f761930547261062faa7f5114f827b020",
+        "version": 1
+      },
+      "provenance": {
+        "action": "created",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-provenance",
+        "file": "provenance.json",
+        "role": "brand_safety_reviewer",
+        "sha256": "810cfd5a421cc4aa614b5b846b292ef73ea2a49d7262e059478ab43cb211362f",
+        "version": 1
+      },
+      "references": {
+        "action": "created",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-references",
+        "file": "reference.json",
+        "role": "creative_director",
+        "sha256": "4e2dbd3f43caafca0d1cebda43e3acaa12a1920e02440918aab44964d90eda94",
+        "version": 1
+      },
+      "scene": {
+        "action": "created",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "file": "scene.json",
+        "role": "creative_director",
+        "sha256": "f7a6a775ddca2d492c7b889e0e0207fec2eb31244d7f7ac45258dd41876d6536",
+        "version": 1
+      },
+      "svg": {
+        "action": "created",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+        "file": "master.svg",
+        "role": "creative_director",
+        "sha256": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3",
+        "version": 1
+      }
+    },
+    "asset_id": "halden-kiln-poster",
+    "candidate": {
+      "candidate_id": "cand-a9cf15b0861c4c96",
+      "evaluation_hash": "e8d94f7a906b50820df5edfa2ca9e5fccf80e3b25852e893315bfdea2f940fc4",
+      "metrics": {
+        "repair_attempts": 0,
+        "repair_success_rate": null,
+        "svg_bytes": 3097,
+        "svg_elements": 25
+      },
+      "output_profile": "NATIVE_EDITABLE_VECTOR",
+      "parent_candidate": null,
+      "scene_hash": "a9cf15b0861c4c96294569675a73c4a4c6105ef4844d356876fb5ef307906333",
+      "status": "EVALUATED",
+      "svg_sha256": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3"
+    },
+    "coverage": {
+      "coverage": 1.0,
+      "rows": [
+        {
+          "objects": [
+            "motif-ring-outer",
+            "motif-ring-inner",
+            "motif-axis"
+          ],
+          "requirement": "req.content.0",
+          "status": "MAPPED",
+          "text": "A geometric identity motif"
+        },
+        {
+          "objects": [
+            "material-object"
+          ],
+          "requirement": "req.content.1",
+          "status": "MAPPED",
+          "text": "A ceramic material object with soft lighting"
+        },
+        {
+          "objects": [
+            "annotation-rule",
+            "annotation"
+          ],
+          "requirement": "req.content.2",
+          "status": "MAPPED",
+          "text": "A technical annotation"
+        },
+        {
+          "objects": [
+            "headline"
+          ],
+          "requirement": "text.0",
+          "status": "MAPPED",
+          "text": "MADE SLOWLY"
+        },
+        {
+          "objects": [
+            "annotation-rule",
+            "annotation"
+          ],
+          "requirement": "text.1",
+          "status": "MAPPED",
+          "text": "FIG. 07 / KILN OPENING 2027"
+        }
+      ],
+      "unmapped": []
+    },
+    "evaluation": {
+      "checks": [
+        {
+          "check": "svg_safety",
+          "detail": "well-formed SVG without active content or external references",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "allowlist_elements",
+          "detail": "all elements allowlisted",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "allowlist_attributes",
+          "detail": "all attributes allowlisted",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "text_placement",
+          "detail": "ok",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "unique_ids",
+          "detail": "16 unique ids",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "reference_integrity",
+          "detail": "all references local and resolved",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "finite_coordinates",
+          "detail": "all coordinates finite and bounded",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "resource_ceiling",
+          "detail": "26 elements, 4 path commands, depth<=24: True",
+          "level": "Q4",
+          "result": "PASS"
+        },
+        {
+          "check": "profile_integrity",
+          "detail": "NATIVE_EDITABLE_VECTOR: 0 embedded raster element(s)",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "dimensions",
+          "detail": "declared 1200x1500, expected 1200x1500",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "exact_text.headline",
+          "detail": "expected 'MADE SLOWLY', SVG has 'MADE SLOWLY'",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "exact_text.annotation",
+          "detail": "expected 'FIG. 07 / KILN OPENING 2027', SVG has 'FIG. 07 / KILN OPENING 2027'",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "palette",
+          "detail": "5 colour(s) within dE76<=2.3 of the palette",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "accent_budget",
+          "detail": "1 accent colour(s) used: ['#ff4c2f']",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "contrast.headline",
+          "detail": "#f0eee9 on #171719 = 15.44:1 (floor 4.5)",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "contrast.annotation",
+          "detail": "#838185 on #171719 = 4.64:1 (floor 4.5)",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "contrast.motif",
+          "detail": "#ff4c2f on #171719 = 5.39:1 (floor 3.0)",
+          "level": "Q5",
+          "result": "PASS"
+        },
+        {
+          "check": "text_fit.headline",
+          "detail": "estimated right edge 821px of 1200px (glyph-advance estimate)",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "text_fit.annotation",
+          "detail": "estimated right edge 365px of 1200px (glyph-advance estimate)",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "render_dimensions",
+          "detail": "1200x1500",
+          "level": "Q7",
+          "result": "PASS"
+        },
+        {
+          "check": "nonblank",
+          "detail": "{'distinct_colours_128px': 526, 'luminance_mean': 35.13, 'luminance_std': 25.24}",
+          "level": "Q7",
+          "result": "PASS"
+        },
+        {
+          "check": "margin_bands",
+          "detail": "outer half-margin is clear",
+          "level": "Q3",
+          "result": "PASS"
+        },
+        {
+          "check": "headline_rendered",
+          "detail": "41.1% of the headline box is headline ink",
+          "level": "Q7",
+          "result": "PASS"
+        }
+      ],
+      "metrics": {
+        "distinct_colours_128px": 526,
+        "luminance_mean": 35.13,
+        "luminance_std": 25.24
+      },
+      "png_sha256": "21cc9345efeb1ea48cdd4a6616a6d75f761930547261062faa7f5114f827b020",
+      "renderer": "raster.chromium",
+      "renderer_version": "141.0.7390.37",
+      "scene_hash": "a9cf15b0861c4c96294569675a73c4a4c6105ef4844d356876fb5ef307906333",
+      "schema_version": "amc-avic/1",
+      "svg_sha256": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3"
+    },
+    "metrics": {
+      "compile_latency_ms": 0.4,
+      "render_latency_ms": 1865.2,
+      "render_variance_vs_stored": null,
+      "renderer_status": "PASSED",
+      "repair_attempts": 0,
+      "repair_success_rate": null,
+      "svg_bytes": 3097,
+      "svg_elements": 25,
+      "verify_latency_ms": 1600.2
+    },
+    "repairs": [],
+    "status": "EVALUATED"
+  },
+  "conflict": {
+    "detail": {
+      "reasons": [
+        "STALE_BASE: the SVG changed after it was opened; reload and re-apply"
+      ],
+      "status": "CONFLICT"
+    }
+  },
+  "edit_response": {
+    "artifacts": {
+      "evaluation": {
+        "action": "revised",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
+        "sha256": "b1a3c61c117221d4b70e69ff38a4d9d2ba37d98434baf8f10f149e37667ed3f0",
+        "version": 2
+      },
+      "preview": {
+        "action": "revised",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
+        "sha256": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+        "version": 2
+      },
+      "scene": {
+        "action": "revised",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "sha256": "02984ee4217f3a0734446a1bb3579f11a82f1b4b43c4312a2433704d8713cc4c",
+        "version": 2
+      },
+      "svg": {
+        "action": "revised",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+        "sha256": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
+        "version": 2
+      }
+    },
+    "metrics": {
+      "compile_latency_ms": 0.3,
+      "render_latency_ms": 1835.8,
+      "render_variance_vs_stored": null,
+      "renderer_status": "PASSED",
+      "repair_attempts": 0,
+      "repair_success_rate": null,
+      "svg_bytes": 3097,
+      "svg_elements": 25,
+      "verify_latency_ms": 1532.6
+    },
+    "status": "EVALUATED",
+    "transformations": [
+      {
+        "after": "#838185",
+        "before": "#f0eee9",
+        "field": "stroke",
+        "object_id": "motif-ring-inner"
+      }
+    ]
+  },
+  "recompile_response": {
+    "already_consistent": true,
+    "artifacts": {
+      "evaluation": {
+        "action": "reused_unchanged",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
+        "sha256": "b1a3c61c117221d4b70e69ff38a4d9d2ba37d98434baf8f10f149e37667ed3f0",
+        "version": 2
+      },
+      "preview": {
+        "action": "reused_unchanged",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
+        "sha256": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+        "version": 2
+      },
+      "provenance": {
+        "action": "reused_unchanged",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-provenance",
+        "sha256": "986bf9b21d78ac08d0699eb1ed542ea1ca37f9c64a455307dc32c73bff022db8",
+        "version": 2
+      },
+      "scene": {
+        "action": "reused_unchanged",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "sha256": "02984ee4217f3a0734446a1bb3579f11a82f1b4b43c4312a2433704d8713cc4c",
+        "version": 2
+      },
+      "svg": {
+        "action": "reused_unchanged",
+        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+        "sha256": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
+        "version": 2
+      }
+    },
+    "metrics": {},
+    "status": "EVALUATED"
+  },
+  "release_response": {
+    "artifact": {
+      "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-release",
+      "sha256": "1fc0055b4a3039ab04a300ca1ba1a70b20d8272a12ef06f2e33b6b9ca8b63c6d",
+      "version": 1
+    },
+    "manifest": {
+      "approval_id": "9cad1b08-6bcc-4767-9755-6cdabb281527",
+      "compiler_version": "amc-avic-compiler/0.1.0",
+      "external_effects": "none",
+      "files": {
+        "brand.json": {
+          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-brand",
+          "sha256": "a2fc78b11122f6fa6e5898bb5465e3309380c47b94f7396444cf379799feb1e2",
+          "version": 1
+        },
+        "evaluation.json": {
+          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
+          "sha256": "b1a3c61c117221d4b70e69ff38a4d9d2ba37d98434baf8f10f149e37667ed3f0",
+          "version": 2
+        },
+        "master.svg": {
+          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+          "sha256": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
+          "version": 2
+        },
+        "preview.png": {
+          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
+          "sha256": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+          "version": 2
+        },
+        "provenance.json": {
+          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-provenance",
+          "sha256": "986bf9b21d78ac08d0699eb1ed542ea1ca37f9c64a455307dc32c73bff022db8",
+          "version": 2
+        },
+        "reference.json": {
+          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-references",
+          "sha256": "4e2dbd3f43caafca0d1cebda43e3acaa12a1920e02440918aab44964d90eda94",
+          "version": 1
+        },
+        "requirements.json": {
+          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-intent",
+          "sha256": "2a58c59c0d9e30622bf6e19437c837f3baf3f5c31d7c6909df0897560d3636b2",
+          "version": 1
+        },
+        "scene.json": {
+          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+          "sha256": "02984ee4217f3a0734446a1bb3579f11a82f1b4b43c4312a2433704d8713cc4c",
+          "version": 2
+        }
+      },
+      "output_profile": "NATIVE_EDITABLE_VECTOR",
+      "policy_version": "amc-avic-policy/1",
+      "project_id": "prj-test-d6382e5e2802",
+      "quality": {
+        "accent_budget": "PASS",
+        "allowlist_attributes": "PASS",
+        "allowlist_elements": "PASS",
+        "contrast.annotation": "PASS",
+        "contrast.headline": "PASS",
+        "contrast.motif": "PASS",
+        "dimensions": "PASS",
+        "exact_text.annotation": "PASS",
+        "exact_text.headline": "PASS",
+        "finite_coordinates": "PASS",
+        "headline_rendered": "PASS",
+        "margin_bands": "PASS",
+        "nonblank": "PASS",
+        "palette": "PASS",
+        "profile_integrity": "PASS",
+        "protected_geometry": "PASS",
+        "reference_integrity": "PASS",
+        "render_dimensions": "PASS",
+        "resource_ceiling": "PASS",
+        "svg_safety": "PASS",
+        "text_fit.annotation": "PASS",
+        "text_fit.headline": "PASS",
+        "text_placement": "PASS",
+        "unique_ids": "PASS"
+      },
+      "release_allowed": false,
+      "release_reasons": [
+        "APPROVAL_PENDING"
+      ],
+      "renderer": "raster.chromium",
+      "renderer_version": "141.0.7390.37",
+      "schema_version": "amc-avic/1",
+      "source_hashes": {
+        "png": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+        "scene": "63a2862ba0e7e82c4bf775439d20c5b090f8c0b6b021a3ee8339fe6cbb1748d2",
+        "svg": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530"
+      }
+    },
+    "reasons": [
+      "APPROVAL_PENDING"
+    ],
+    "status": "BLOCKED"
+  }
+}

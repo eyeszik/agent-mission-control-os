@@ -808,7 +808,9 @@ def test_capability_registry_names_real_tests_and_matches_the_docs():
 
     from services.langgraph.agency.avic import capabilities as caps
 
-    tests = {n.name for n in ast.walk(ast.parse(Path(__file__).read_text())) if isinstance(n, ast.FunctionDef)}
+    here = Path(__file__).parent
+    tests = {n.name for f in ("test_avic.py", "test_avic_api.py", "test_avic_contracts.py")
+             for n in ast.walk(ast.parse((here / f).read_text())) if isinstance(n, ast.FunctionDef)}
     for c in caps.CAPABILITIES:
         assert c.state in caps.STATES, c.name
         if c.state in {"IMPLEMENTED_VERIFIED", "PARTIAL"}:
@@ -817,3 +819,20 @@ def test_capability_registry_names_real_tests_and_matches_the_docs():
     docs = (Path(__file__).resolve().parents[3] / "docs" / "avic.md").read_text()
     block = docs.split(caps.MARK_BEGIN)[1].split(caps.MARK_END)[0].strip()
     assert block == caps.docs_table(), "docs/avic.md is stale: regenerate the capability table from avic/capabilities.py"
+
+
+def test_render_capacity_is_bounded_and_reported(monkeypatch, tmp_path):
+    import threading
+
+    from services.langgraph.agency.avic.contracts import CapabilityState
+
+    monkeypatch.setattr(render, "renderer_state", lambda: (CapabilityState.IMPLEMENTED_VERIFIED, [], "chromium"))
+    slots = threading.BoundedSemaphore(1)
+    monkeypatch.setattr(render, "_slots", slots)
+    monkeypatch.setattr(render, "SLOT_WAIT_S", 0.05)
+    assert slots.acquire()  # another render holds the only slot
+    try:
+        out = render.render("<svg/>", width=4, height=4, work_dir=tmp_path)
+    finally:
+        slots.release()
+    assert out["status"] == "BLOCKED" and out["png"] is None and out["findings"][0].startswith("RENDER_CAPACITY")

@@ -1,6 +1,6 @@
 # ACE × AVIC — governed visual compilation to native SVG
 
-`services/langgraph/agency/avic/` turns an authorized brief into a verified, approval-gated **native SVG** and a separate PNG preview. It is built from existing owners and adds no table, migration, approval store, scheduler or route. The capability matrix below is generated from `avic/capabilities.py` and checked against the test suite.
+`services/langgraph/agency/avic/` turns an authorized brief into a verified, approval-gated **native SVG** and a separate PNG preview. It is built from existing owners and adds no table, migration, approval store or scheduler; its one route is `/avic`, used by the Visual Compiler section of `/agency`. The capability matrix below is generated from `avic/capabilities.py` and checked against the test suite.
 
 ```
 INGEST -> HASH_INTENT -> FILTER -> REFERENCE_ANALYSIS -> BRAND_VALIDATION -> IMAGE_INTENT -> SCENE_COMPILATION
@@ -52,7 +52,9 @@ Stage → N3 role → N1 type: `intent` creative_director/asset_prompt_set · `r
 | Physically based material rendering / inverse rendering | BLOCKED | no physics backend |
 | Semantic reference analysis (subjects, styles) | PROPOSED | references contribute measured palettes only (tests: `test_references_are_hashed_measured_and_rights_gated`) |
 | Video / motion | PROVIDER_GAP | belongs to cinematic/motion capabilities, not AVIC |
-| API route / web UI | NOT_ADDED | Python and CLI only until the `/avic` route lands |
+| `/avic` API: tenant-scoped, operator-gated writes, idempotent, stale edits are 409, inert SVG serving | IMPLEMENTED_VERIFIED | brand is the server projection; client authority fields are rejected; route sweep covers every path (tests: `test_another_tenant_learns_nothing`, `test_read_only_role_reads_but_cannot_write`, `test_every_route_requires_authentication`, `test_client_supplied_authority_is_rejected`, `test_stored_svg_is_served_inert`, `test_operator_path_edit_conflict_recovery_approval_release`, `test_recorded_fixture_matches_live_responses`) |
+| Visual Compiler section in `/agency` (compile, inspect, edit, recover, request approval, release) | IMPLEMENTED_VERIFIED | browser test `apps/web/e2e/visuals.spec.ts` (axe WCAG 2.2 AA, stale-edit conflict, phone width); approval is decided in the queue (tests: `test_operator_path_edit_conflict_recovery_approval_release`) |
+| Bounded render concurrency | IMPLEMENTED_VERIFIED | `AMC_AVIC_RENDER_CONCURRENCY` (default 2); no slot in time is BLOCKED (tests: `test_render_capacity_is_bounded_and_reported`) |
 <!-- avic-capabilities:end -->
 
 ## Rules the code enforces
@@ -80,6 +82,23 @@ Stage → N3 role → N1 type: `intent` creative_director/asset_prompt_set · `r
 
 `optimize.candidates(png)` splits the working grid where Lab error is largest, fits flat colour and least-squares linear gradients per region, and emits rect + `linearGradient` SVG at several budgets. `optimize.compare` measures the Chromium render against the reference (MSE, PSNR, mean ΔE76). Demo results, synthetic 320×240 reference, measured at full resolution (`runtime/avic/demo/benchmark_results.json`): budget 16 → mean ΔE76 7.20, 64 → 3.86, 256 → 1.61. Region count is not evidence of fidelity; only the measured numbers are.
 
+## API and operator UI
+
+`/avic` (`api/routes/avic.py`), all routes authenticated and resolved against the project's recorded tenant:
+
+| Route | Who | What |
+|---|---|---|
+| `GET /avic/capabilities` | any principal | registry rows with their tests, style profiles, renderer state and concurrency, the brand projection |
+| `GET /avic/projects/{p}/assets`, `GET …/{asset}` | project reader | asset list; view with stage heads, evaluation, consistency, editable objects, approvals, last release |
+| `GET …/{asset}/master.svg`, `…/preview.png` | project reader | stored bytes; SVG with `Content-Security-Policy: default-src 'none'; sandbox` and `nosniff` |
+| `POST …/assets` | operator + `Idempotency-Key` | compile; the brand is the server's projection, never the request's |
+| `POST …/{asset}/edits` | operator + `Idempotency-Key` | one edit; `base_svg_sha256` is required and a stale base is `409 CONFLICT` |
+| `POST …/{asset}/recompile` | operator + `Idempotency-Key` | re-derive stale stages from the scene; a no-op when consistent |
+| `POST …/{asset}/approval` | operator | open or reuse the approval bound to the current SVG hash |
+| `POST …/{asset}/release` | operator | local release record; blocked unless verified, current and approved by someone else |
+
+Requests reject unknown fields, so a client cannot send a brand, tenant, approver or `force`. The UI (`components/avic/VisualCompilerView.tsx`) shows the preview through `<img>` from the PNG (the SVG source is never injected into the page), lists every check, disables each control with its reason, reloads on a 409 and keeps Apply off until the newer version has loaded. `apps/web/e2e/visuals.spec.ts` drives it against the real stack (axe WCAG 2.2 AA, stale-edit conflict, phone width).
+
 ## Run it
 
 ```bash
@@ -94,4 +113,4 @@ The CLI exit code is 0 when evaluation passed, 1 when it failed or policy blocke
 
 ## Not done
 
-Hosted or local image/video generation, HYBRID/RASTER_FINAL output, semantic reference understanding, Bézier/differentiable vectorization, physically based materials, cross-editor (Inkscape/Illustrator) round-trip tests, a `/avic` API route and a web UI, Cloudflare deployment of the archived Realism Engine worker. The archived Realism Engine sources were inspected as data; none of their code is imported (see `docs/engineering/avic-m0-report.md`).
+Hosted or local image/video generation, HYBRID/RASTER_FINAL output, semantic reference understanding, Bézier/differentiable vectorization, physically based materials, cross-editor (Inkscape/Illustrator) round-trip tests, reference uploads through the API, Cloudflare deployment of the archived Realism Engine worker. The archived Realism Engine sources were inspected as data; none of their code is imported (see `docs/engineering/avic-m0-report.md`).

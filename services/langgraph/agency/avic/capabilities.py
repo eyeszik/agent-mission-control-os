@@ -81,7 +81,17 @@ CAPABILITIES: tuple[Capability, ...] = (
     Capability("Semantic reference analysis (subjects, styles)", "PROPOSED",
                "references contribute measured palettes only", ("test_references_are_hashed_measured_and_rights_gated",)),
     Capability("Video / motion", "PROVIDER_GAP", "belongs to cinematic/motion capabilities, not AVIC"),
-    Capability("API route / web UI", "NOT_ADDED", "Python and CLI only until the `/avic` route lands"),
+    Capability("`/avic` API: tenant-scoped, operator-gated writes, idempotent, stale edits are 409, inert SVG serving",
+               "IMPLEMENTED_VERIFIED", "brand is the server projection; client authority fields are rejected; route sweep covers every path",
+               ("test_another_tenant_learns_nothing", "test_read_only_role_reads_but_cannot_write",
+                "test_every_route_requires_authentication", "test_client_supplied_authority_is_rejected",
+                "test_stored_svg_is_served_inert", "test_operator_path_edit_conflict_recovery_approval_release",
+                "test_recorded_fixture_matches_live_responses")),
+    Capability("Visual Compiler section in `/agency` (compile, inspect, edit, recover, request approval, release)", "IMPLEMENTED_VERIFIED",
+               "browser test `apps/web/e2e/visuals.spec.ts` (axe WCAG 2.2 AA, stale-edit conflict, phone width); approval is decided in the queue",
+               ("test_operator_path_edit_conflict_recovery_approval_release",)),
+    Capability("Bounded render concurrency", "IMPLEMENTED_VERIFIED", "`AMC_AVIC_RENDER_CONCURRENCY` (default 2); no slot in time is BLOCKED",
+               ("test_render_capacity_is_bounded_and_reported",)),
 )
 
 STATES = {"IMPLEMENTED_VERIFIED", "PARTIAL", "PROPOSED", "BLOCKED", "PROVIDER_GAP", "NOT_ADDED"}

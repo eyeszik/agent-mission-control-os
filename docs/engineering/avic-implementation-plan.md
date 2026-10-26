@@ -23,7 +23,7 @@ measurement; anything without an implementation is named PROPOSED/BLOCKED rather
 
 ## Next actions (not done, in priority order)
 
-1. `/avic` API route over `service` (tenant-scoped, auth-required) and a Mission Control panel, once an operator needs it.
+1. ~~`/avic` API route and operator UI~~ done (phase 1): `/avic`, Zod twin + recorded fixture, route sweep, Visual Compiler section, browser test. Reference uploads through the API are next.
 2. Bézier contour fitting for H1 (stdlib marching squares + least-squares cubic fit), measured against the region baseline.
 3. Licence-reviewed optional DiffVG/LIVE adapter behind a capability probe, CPU baseline kept.
 4. Cross-editor round-trip tests (Inkscape CLI where installed) for NATIVE_EDITABLE_VECTOR.

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import time
 from pathlib import Path
 from typing import Any, Optional
@@ -159,8 +160,6 @@ def compile_asset(principal: Principal, project_id: str, req: AssetRequirement, 
                   material: Optional[MaterialSpec] = None) -> dict:
     """INGEST .. EVALUATE (+ bounded repair) .. persist. Returns stage entries, evaluation and candidate."""
     _authorize(principal, project_id)
-    import re
-
     if not re.fullmatch(ASSET_ID, req.asset_id):
         raise ValueError(f"asset_id must match {ASSET_ID}")
     intent = compile_intent(req, style_profile=style_profile)
@@ -371,7 +370,15 @@ def recompile_asset(principal: Principal, project_id: str, asset_id: str, *, ada
     conflict that left stages behind; idempotent when nothing is stale."""
     from services.langgraph.persistence.agency_kernel import StaleArtifactVersionError
 
+    from services.langgraph.persistence.agency_kernel import get_artifact
+
     _authorize(principal, project_id)
+    if consistency(project_id, asset_id, adapter=adapter)["consistent"]:  # nothing to recover: touch nothing
+        heads_now = {k: get_artifact(_artifact_id(project_id, asset_id, k)) for k in ("scene", "svg", "preview", "evaluation",
+                                                                                     "provenance")}
+        return {"status": "EVALUATED", "already_consistent": True, "metrics": {},
+                "artifacts": {k: {"artifact_id": h["artifact_id"], "version": int(h["version"]), "action": "reused_unchanged",
+                                  "sha256": h.get("content_hash")} for k, h in heads_now.items() if h is not None}}
     intent, brand, scene, _svg_text, heads = _load(project_id, asset_id, adapter)
     stored = None
     try:  # a stored preview is only a valid reuse candidate if the evaluation ties it to the stored SVG
@@ -473,6 +480,79 @@ def release_local(principal: Principal, project_id: str, asset_id: str, *, appro
             "manifest": manifest.model_dump(mode="json"), "artifact": {k: entry[k] for k in ("artifact_id", "version", "sha256")}}
 
 
+def list_assets(project_id: str) -> list[dict]:
+    """Assets compiled in a project (one per ``foundry-avic-<asset>-scene`` artifact)."""
+    from services.langgraph.persistence.projects import list_project_artifacts
+
+    out = []
+    for a in list_project_artifacts(project_id):
+        key = a.artifact_key
+        if key.startswith("foundry-avic-") and key.endswith("-scene"):
+            out.append({"asset_id": key[len("foundry-avic-"):-len("-scene")], "scene_artifact": a.artifact_id,
+                        "version": int(a.version)})
+    return sorted(out, key=lambda x: x["asset_id"])
+
+
+EDITABLE_ROLES = {"motif", "annotation", "headline", "material_object", "rule", "region", "highlight", "shadow"}
+
+
+def inspect_asset(principal: Principal, project_id: str, asset_id: str, *, adapter: StorageAdapter) -> dict:
+    """Operator read model: stage heads, evaluation, consistency, editable objects, approvals, last release.
+
+    Read-only. ``svg_sha256`` is the base an edit must name (``base_svg_sha256``) so concurrent edits conflict.
+    """
+    from services.langgraph.persistence.agency_kernel import get_artifact
+    from services.langgraph.persistence.approvals import list_approvals_for_subject_refs
+
+    _authorize(principal, project_id)
+    if not re.fullmatch(ASSET_ID, asset_id):
+        raise LookupError(asset_id)
+    stages: dict[str, dict] = {}
+    for stage in STAGES:
+        head = get_artifact(_artifact_id(project_id, asset_id, stage))
+        if head is not None:
+            stages[stage] = {"artifact_id": head["artifact_id"], "version": int(head["version"]),
+                             "content_hash": head.get("content_hash")}
+    if "scene" not in stages:
+        raise LookupError(asset_id)
+    intent, brand, scene, svg_text, heads = _load(project_id, asset_id, adapter)
+    evaluation = json.loads(observe(_artifact_id(project_id, asset_id, "evaluation"), adapter)[0])
+    report = evaluation.get("report", {})
+    release = None
+    if "release" in stages:
+        rel = json.loads(observe(_artifact_id(project_id, asset_id, "release"), adapter)[0])
+        release = {"release_allowed": bool(rel.get("release_allowed")), "reasons": list(rel.get("release_reasons", [])),
+                   "approval_id": rel.get("approval_id"), "svg_sha256": rel.get("source_hashes", {}).get("svg"),
+                   "external_effects": rel.get("external_effects", "none")}
+    approvals = [{"approval_id": a["approval_id"], "status": str(a.get("status")), "decision": a.get("decision"),
+                  "reviewer": a.get("reviewer"), "subject_hash": a.get("subject_hash"),
+                  "current": a.get("subject_hash") == heads["svg"], "created_at": str(a.get("created_at") or "")}
+                 for a in list_approvals_for_subject_refs(project_id, [stages["svg"]["artifact_id"]])] if "svg" in stages else []
+    objects = [{"object_id": o.object_id, "semantic_role": o.semantic_role, "protected": o.protected, "text": o.text,
+                "fill": o.appearance.fill, "stroke": o.appearance.stroke,
+                "operations": [] if o.semantic_role not in EDITABLE_ROLES else
+                ["recolor"] + (["change_text"] if o.text is not None else []) + ([] if o.protected else ["set_geometry"])}
+               for o in scene.objects]
+    return {"project_id": project_id, "asset_id": asset_id, "svg_sha256": heads["svg"], "scene_hash": scene.scene_hash,
+            "style_profile": intent.style_profile, "output_profile": scene.document.output_profile.value,
+            "width": scene.document.width, "height": scene.document.height, "exact_text": list(intent.exact_text),
+            "stages": stages, "consistency": consistency(project_id, asset_id, adapter=adapter),
+            "evaluation": {"passed": bool(evaluation.get("passed")), "renderer": report.get("renderer"),
+                           "renderer_version": report.get("renderer_version"), "svg_sha256": report.get("svg_sha256"),
+                           "png_sha256": report.get("png_sha256"),
+                           "checks": [{k: c.get(k) for k in ("check", "level", "result", "detail")} for c in report.get("checks", [])]},
+            "objects": objects, "palette": dict(brand.palette), "brand_source": brand.source, "brand_approved": brand.approved,
+            "approvals": approvals, "release": release}
+
+
+def read_stage_bytes(principal: Principal, project_id: str, asset_id: str, stage: str, *, adapter: StorageAdapter) -> bytes:
+    """Stored bytes of one stage after authorization (independent read through Project OS)."""
+    _authorize(principal, project_id)
+    if stage not in STAGES or not re.fullmatch(ASSET_ID, asset_id):
+        raise LookupError(stage)
+    return observe(_artifact_id(project_id, asset_id, stage), adapter)[0]
+
+
 def export_package(project_id: str, asset_id: str, *, adapter: StorageAdapter, out_dir: Path) -> dict[str, str]:
     """Write the stored release package files to ``out_dir`` (read-back of stored bytes, for local inspection)."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -488,4 +568,4 @@ def export_package(project_id: str, asset_id: str, *, adapter: StorageAdapter, o
 
 
 __all__ = ["APPROVAL_POLICY", "AvicAccessDenied", "RUN_PIPELINE", "STAGES", "cache_identity", "compile_asset", "consistency",
-           "edit_asset", "export_package", "recompile_asset", "release_local", "request_approval"]
+           "edit_asset", "export_package", "inspect_asset", "list_assets", "read_stage_bytes", "recompile_asset", "release_local", "request_approval"]
