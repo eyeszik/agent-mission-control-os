@@ -192,7 +192,7 @@ jobs:
   ucpo-sandbox:
     name: UCPO sandboxed build + browser QA (must not skip)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 40  # the Chromium install step alone may take up to 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -257,7 +257,7 @@ jobs:
   browser-e2e:
     name: Browser E2E (local degraded HITL)
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 40  # the Chromium install step alone may take up to 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 

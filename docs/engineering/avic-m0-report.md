@@ -26,8 +26,10 @@
 - Seven verifier gates: all pass (`make gates` equivalents run one by one); `manifest.json` pins 283 files (6 AVIC
   boundary files added: `avic/svg.py`, `service.py`, `intent.py`, `png.py`, `evaluate.py`, `tests/test_avic.py`).
 - `ruff check --select E9,F` on the new code: clean. `compileall`: clean.
-- Full backend suite after the change (same environment fixes as above): see the pull request description; it was
-  still running when this file was committed and its result is reported there rather than guessed here.
+- Full backend suite after the change, with the renderer package built and the empty provider variables unset:
+  **1696 passed, 2 failed, 14 skipped** in 3939 s. The 2 failures are the `test_ucpo_build.py` sandbox tests that need
+  Chromium 1248 (host limit above). The skips are optional extras not installed here (jsonschema, crewai/autogen, mcp)
+  and archive-gated tests. Versus the baseline: +68 passes (49 AVIC tests, 19 environment-fixed), no new failures.
 - Frontend: no file under `apps/web` or `packages/` was changed, so web typecheck/tests/build were not re-run.
 
 ## Measurements (actual, this host)
