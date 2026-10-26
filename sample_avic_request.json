@@ -1,0 +1,22 @@
+{
+  "requirement": {
+    "asset_id": "halden-kiln-poster",
+    "family": "IMAGE",
+    "asset_type": "editorial_poster",
+    "objective": "Announce the spring kiln opening of a small fictional ceramics studio",
+    "audience": "ceramics collectors and studio-list subscribers",
+    "channel": "print",
+    "destination": "studio wall poster",
+    "content_requirements": [
+      "A geometric identity motif",
+      "A ceramic material object with soft lighting",
+      "A technical annotation"
+    ],
+    "negative_constraints": ["no photographs", "no third-party marks"],
+    "quality_constraints": ["headline legible at a distance"],
+    "exact_text": ["MADE SLOWLY", "FIG. 07 / KILN OPENING 2027"],
+    "production": {"width": 1200, "height": 1500, "format": "svg"}
+  },
+  "style_profile": "post-surrealist-editorial",
+  "seed": 7
+}

@@ -1,0 +1,98 @@
+[
+  {
+    "branch_id": "br-7297b8de58d4",
+    "evaluation_refs": [
+      "332c8444ce8da9ccec5aff6d4224f348f258bb96443607266caca3806da4151e"
+    ],
+    "immutable_constraints": [
+      "exact.headline",
+      "exact.annotation",
+      "protected.motif",
+      "palette",
+      "contrast.headline",
+      "contrast.annotation",
+      "contrast.motif",
+      "accent.single",
+      "profile"
+    ],
+    "input_hash": "0d71b2df9b8b6f8085d1594bdff0acb6518235fa1dedab891c11ff11ed0f5a74",
+    "metrics": {
+      "failures": 0,
+      "luminance_std": 38.01,
+      "svg_bytes": 3182
+    },
+    "mutation_axes": {
+      "material": "metallic",
+      "motif": "bars"
+    },
+    "parent_version": "5d0a549043a985499530daeb34a00f7cbf8bb61ef6c0d611ec256107bf16a01b",
+    "renderer_version": "141.0.7390.37",
+    "scene_hash": "c0d4a576c822dafc821e2f578421b84e362b8d5a6fff0dead4fa8cfe62491f86",
+    "status": "SELECTED",
+    "svg_sha256": "b3889e99c56ecbd23c577e0b799b662b831a57938d6143084ee3b9893047d047"
+  },
+  {
+    "branch_id": "br-581c7d8265c5",
+    "evaluation_refs": [
+      "8b7048b6c1af5878f033da563661a092f5b05f8c7719d7290dcc6520763163f7"
+    ],
+    "immutable_constraints": [
+      "exact.headline",
+      "exact.annotation",
+      "protected.motif",
+      "palette",
+      "contrast.headline",
+      "contrast.annotation",
+      "contrast.motif",
+      "accent.single",
+      "profile"
+    ],
+    "input_hash": "036325f834aaf3433cfab6be8b159874af592bd100f2ddf090c74e1d09053483",
+    "metrics": {
+      "failures": 0,
+      "luminance_std": 24.81,
+      "svg_bytes": 3139
+    },
+    "mutation_axes": {
+      "material": "glossy",
+      "motif": "modules"
+    },
+    "parent_version": "5d0a549043a985499530daeb34a00f7cbf8bb61ef6c0d611ec256107bf16a01b",
+    "renderer_version": "141.0.7390.37",
+    "scene_hash": "674f23666f710775efa1e9cfe944b6bcc4ce330223205974923fe8ca6cee665a",
+    "status": "SELECTED",
+    "svg_sha256": "b60cf8ae58d3d1664516b7064274dedc3a9c952d5e3c3ab7087b6c1442f407e1"
+  },
+  {
+    "branch_id": "br-d1ced6871de5",
+    "evaluation_refs": [
+      "82b39a32e51282e52ef8bb71bda2c43873004fe780e025e18418a715192fd3f3"
+    ],
+    "immutable_constraints": [
+      "exact.headline",
+      "exact.annotation",
+      "protected.motif",
+      "palette",
+      "contrast.headline",
+      "contrast.annotation",
+      "contrast.motif",
+      "accent.single",
+      "profile"
+    ],
+    "input_hash": "27a03724d6db0dfb667f6333be83bd41352eec346a82162c6981cbec6d5aa4a6",
+    "metrics": {
+      "failures": 0,
+      "luminance_std": 24.23,
+      "svg_bytes": 3874
+    },
+    "mutation_axes": {
+      "material": "matte",
+      "motif": "axis"
+    },
+    "parent_version": "5d0a549043a985499530daeb34a00f7cbf8bb61ef6c0d611ec256107bf16a01b",
+    "renderer_version": "141.0.7390.37",
+    "scene_hash": "58976e73c439d5ade2195f16cc7ec2e937dcdfcb149b1d1a312e9daebf170251",
+    "status": "EVALUATED",
+    "svg_sha256": "4b40ae524e789f3c3d30af0731ef8880d6aed2483fedc722f9207b3db4fde1ef"
+  }
+]

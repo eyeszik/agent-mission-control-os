@@ -275,6 +275,17 @@ Details: `docs/creative-foundry.md`.
 
 Details: `docs/ucpo/README.md`.
 
+### ACE × AVIC — brief to verified native SVG
+
+`services/langgraph/agency/avic/` + CLI `avic` (`docs/avic.md`):
+
+- **Inputs are reused, not re-owned.** The brief is a PromptIR `AssetRequirement`; the palette is a read-only `BrandIR` projection (PSEM comes from `foundry.psem.PALETTE`); hashing is AMC-CANON-1. `intent.compile_intent` classifies every item VERIFIED/INFERRED/PROPOSED/UNSUPPORTED/PROHIBITED; instruction-like text, publish/send/spend and third-party marks are PROHIBITED and block the compile.
+- **SVG.** `scene.compile_scene` -> `SceneIR`; `svg.emit` is deterministic; `svg.validate` is an allowlist on top of `execution_fabric.verifiers.svg_safety` (elements, attributes, local `url(#id)` only, unique ids, finite coords, ceilings, no raster in native profiles). HYBRID_SVG and RASTER_FINAL are refused, never substituted.
+- **Render and verify.** Rendering is only `visual.browser.rasterize_svg`. `evaluate.evaluate` reads the SVG/PNG bytes (exact text, palette dE, accent budget, WCAG contrast, text-fit estimate, nonblank, headline ink); `avic/png.py` is a stdlib PNG codec so this works without Pillow/NumPy (not declared deps).
+- **Persistence and approval.** `service` stores each stage via `foundry.studio.store` after `assert_role_may_produce` (`STAGES`); approval is `open_artifact_approval` on the SVG content hash, decided via `/approvals/{id}/decide`; `release_local` re-reads and re-validates bytes and uses `artifact_release_verdict` (no external effect). Failing edits/recompiles return REJECTED and keep the head. Project OS keeps only its own v2 metadata keys, so lineage/cache identity live in `provenance.json`. Don't add a store, table or approval path.
+- **H3/H1/H2/H4/H5.** `repair` (defects only from failed checks, dependency-closure proposals, divergence check, isolated re-render, no-regression acceptance, <=3 attempts); `optimize` (stdlib region split + linear gradients, measured vs Chromium; DiffVG/LIVE/Bezier/Jacobian projection are PROPOSED); `brand` (`mutate_brand` needs an approval ref and never touches protected invariants; `explore` branches carry no approval); `materials` (palette-only shading, `physical_claim="NONE"`, physics backend BLOCKED).
+- **Demo.** `python scripts/render_avic_demo.py` regenerates `runtime/avic/demo/` (fictional brand, synthetic reference).
+
 ### VNEXUS ACE — persisted brand genome and the layers on it
 
 `services/langgraph/agency/vnexus/` + `persistence/vnexus.py` (migration 15, eleven `amc.vnexus_*` tables) +

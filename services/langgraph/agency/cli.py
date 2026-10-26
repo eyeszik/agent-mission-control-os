@@ -763,6 +763,29 @@ def _cmd_website(args: argparse.Namespace) -> int:
     return code
 
 
+def _cmd_avic(args: argparse.Namespace) -> int:
+    from services.langgraph.agency.avic.run import run_local
+
+    try:
+        request = json.loads(Path(args.input).read_text())
+    except (OSError, ValueError) as exc:
+        raise BriefError(f"AVIC request could not be read: {exc}") from exc
+    try:
+        code, summary = run_local(request, Path(args.out), reference=Path(args.reference) if args.reference else None,
+                                  variants=args.variants)
+    except ValidationError as exc:
+        raise BriefError(f"AVIC request is invalid: {exc}") from exc
+    if args.json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+    else:
+        failed = [k for k, v in summary.get("checks", {}).items() if v != "PASS"]
+        print(f"status: {summary['status']}  failed checks: {failed or 'none'}  repairs: {summary.get('repairs', 0)}")
+        for reason in summary.get("reasons", [])[:10]:
+            print(f"  blocked: {reason}")
+        print(f"package: {Path(args.out)}")
+    return code
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agency",
@@ -888,6 +911,17 @@ def build_parser() -> argparse.ArgumentParser:
                          help="Serve the verified build on 127.0.0.1 for this many seconds.")
     website.add_argument("--json", action="store_true", help="Print the full report as JSON.")
     website.set_defaults(handler=_cmd_website)
+
+    avic = sub.add_parser(
+        "avic",
+        help="Compile a visual brief into native SVG, render it locally and verify it (never releases or publishes).",
+    )
+    avic.add_argument("-i", "--input", required=True, help="Path to an AVIC request JSON (see sample_avic_request.json).")
+    avic.add_argument("-o", "--out", required=True, help="Directory for the release package.")
+    avic.add_argument("--reference", help="Optional PNG reference: colour hint and H1 fidelity benchmark.")
+    avic.add_argument("--variants", type=int, default=0, help="Explore up to 4 H4 variants (motif, material).")
+    avic.add_argument("--json", action="store_true", help="Print the summary as JSON.")
+    avic.set_defaults(handler=_cmd_avic)
 
     validate = sub.add_parser("validate", help="Run the kernel's structural self-checks.")
     validate.set_defaults(handler=_cmd_validate)
