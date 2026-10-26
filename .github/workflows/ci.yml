@@ -216,7 +216,14 @@ jobs:
       - name: Install Chromium runtime
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
-        run: pnpm --filter @amc/web exec playwright install --with-deps chromium
+        timeout-minutes: 15
+        run: |
+          # Runner mirrors are occasionally very slow; bound each attempt and retry a fixed number of times.
+          for attempt in 1 2 3; do
+            timeout 240 pnpm --filter @amc/web exec playwright install --with-deps chromium && exit 0
+            echo "Chromium install attempt $attempt failed or timed out" >&2
+          done
+          exit 1
 
       # Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor; the UCPO sandbox needs them.
       - name: Allow unprivileged user namespaces
@@ -261,7 +268,14 @@ jobs:
           python -m pip install -e "./services/langgraph[dev]"
 
       - name: Install Chromium runtime
-        run: pnpm --filter @amc/web exec playwright install --with-deps chromium
+        timeout-minutes: 15
+        run: |
+          # Runner mirrors are occasionally very slow; bound each attempt and retry a fixed number of times.
+          for attempt in 1 2 3; do
+            timeout 240 pnpm --filter @amc/web exec playwright install --with-deps chromium && exit 0
+            echo "Chromium install attempt $attempt failed or timed out" >&2
+          done
+          exit 1
 
       - name: Start local stack
         env:
