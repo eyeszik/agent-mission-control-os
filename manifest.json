@@ -4,7 +4,7 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "c04df0444b3c06410641dfbacdef0f61380a48bb"
+      "git_blob_sha": "58c98d761a725e896e476ace5127a4fd9dcda836"
     },
     {
       "path": ".github/workflows/ci.yml",
@@ -1056,11 +1056,11 @@
     },
     {
       "path": "services/langgraph/agency/ucpo/qa.py",
-      "git_blob_sha": "ed98c8fd9dcd7cd5fbf0640ae857f6cebfb6f718"
+      "git_blob_sha": "b56d8b8a8670849b7b4e7e8a0bdf067de1db5ec6"
     },
     {
       "path": "services/langgraph/agency/ucpo/qa_runner.cjs",
-      "git_blob_sha": "5456b2465b18d5a1498933a27021e02e1d1dbc79"
+      "git_blob_sha": "f4c61c0352fbbbe84cb30c6de400c1c903cfc83b"
     },
     {
       "path": "services/langgraph/agency/ucpo/source.py",
@@ -1101,6 +1101,10 @@
     {
       "path": "apps/web/lib/api/ucpo.ts",
       "git_blob_sha": "d7491b713a2d374437bf308a40f34e83f982a985"
+    },
+    {
+      "path": "services/langgraph/tests/test_ucpo_qa_discovery.py",
+      "git_blob_sha": "6664475d36c35b33b4405057dc7c09304d8986d5"
     }
   ]
 }
