@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
+import subprocess
 
 from services.langgraph.agency.durable.fsm import RunState
 from services.langgraph.agency.execution.canonical import canonical_hash
@@ -45,6 +46,19 @@ def _event(job, kind, payload=None):
     record_event(job['job_id'], job['tenant_id'], job['project_id'], 'rendering', kind, payload or {})
 
 
+def _candidate(job, **changes):
+    """Persist observations under the current fence, independently of acceptance."""
+    with atomic_transaction() as db:
+        _locked(db, job['job_id'])
+        store._active_fence(db, job_id=job['job_id'], fencing_token=job['lease_token'], now=_now())
+        # Read through the public decoder: SQLite JSON and PostgreSQL JSONB differ.
+        result = dict(store.get_job(job['job_id']).get('result') or {})
+        result.update(changes)
+        db.execute(f"UPDATE {table('durable_jobs')} SET result = ? WHERE job_id = ? AND lease_token = ?",
+                   (json_param(result), job['job_id'], job['lease_token']))
+        return result
+
+
 def submit(principal: Principal, project: str, request: RenderRequest, export_root: Path) -> dict:
     _scope(principal, project)
     _command_authority(principal)
@@ -80,6 +94,25 @@ def inspect(principal, project, job_id):
     approval_state = {'approve': 'approved', 'reject': 'rejected'}.get(approval_state, approval_state)
     if current_approval and current_approval.get('subject_version_ref') != str(result.get('version')):
         release = release.model_copy(update={'allowed': False, 'reasons': (*release.reasons, 'APPROVAL_VERSION_MISMATCH')})
+    if current_approval and (current_approval.get('subject_type') != 'RENDER_ARTIFACT'
+            or current_approval.get('subject_ref') != result.get('artifact_id')
+            or current_approval.get('policy_version') != 'amc-render-release/v1'):
+        release = release.model_copy(update={'allowed': False, 'reasons': (*release.reasons, 'APPROVAL_PURPOSE_MISMATCH')})
+    # Historical verification is not proof that persisted bytes remain readable.
+    # This GET observes bytes and authority; it never dispatches or writes state.
+    if result.get('artifact_id') and verification and verification['status'] == 'PASSED':
+        try:
+            candidate = result.get('candidate')
+            if not candidate:  # Compatibility with jobs persisted before candidate receipts.
+                from services.langgraph.persistence.agency_kernel import get_artifact
+                head = get_artifact(result['artifact_id'])
+                candidate = {'storage_uri': head['content_location']}
+            data = LocalStorageAdapter(Path(job['spec']['export_root'])).get_bytes(candidate['storage_uri'])
+            measured = verify(data, _spec(job))
+            if measured.status != 'PASSED' or measured.content_hash != result['content_hash']:
+                raise ValueError('PERSISTED_OUTPUT_CHANGED')
+        except (OSError, ValueError, RuntimeError, KeyError, TypeError):
+            release = release.model_copy(update={'allowed': False, 'reasons': (*release.reasons, 'VERIFICATION_STALE: persisted output unavailable or changed')})
     if quarantined(job):
         release = release.model_copy(update={'allowed': False, 'reasons': (*release.reasons, 'ENGINE_QUARANTINED')})
     state = job['state']
@@ -89,9 +122,19 @@ def inspect(principal, project, job_id):
         workflow = 'completed'
     elif approval_state == 'rejected':
         workflow = 'blocked'
+    compute = result.get('compute_status')
+    if compute is None:  # Preserve existing persisted jobs without inventing observations.
+        compute = 'succeeded' if result.get('artifact_id') else ('cancelled' if state == 'STOPPED' else 'running' if job.get('lease_owner') else 'queued')
+    if state == RunState.STOPPED.value and compute == 'running':
+        compute = 'cancel_requested'  # Revoking acceptance does not prove process termination.
+    artifact_state = 'pending_verification'
+    if verification:
+        artifact_state = {'PASSED': 'verified', 'FAILED': 'rejected', 'INCONCLUSIVE': 'pending_verification'}[verification['status']]
+        if any(r.startswith('VERIFICATION_STALE') for r in release.reasons):
+            artifact_state = 'stale'
     return {'job_id': job_id, 'run_id': (approval or {}).get('run_id') or job_id, 'spec_hash': job['spec_hash'], 'engine': job['spec']['render']['request']['engine'],
-            'workflow_status': workflow, 'job_status': 'succeeded' if result.get('artifact_id') else state.lower(),
-            'artifact_status': ('stale' if any(r.startswith('VERIFICATION_STALE') for r in release.reasons) else 'verified') if verification and verification['status'] == 'PASSED' else 'pending_verification',
+            'workflow_status': workflow, 'job_status': compute,
+            'artifact_status': artifact_state,
             'approval_status': approval_state,
             'blockers': job.get('last_reasons') or [], 'artifact_id': result.get('artifact_id'), 'artifact_version': result.get('version'),
             'content_hash': result.get('content_hash'), 'approval_id': (approval or {}).get('approval_id'),
@@ -108,6 +151,7 @@ def cancel(principal, project, job_id):
     _command_authority(principal)
     inspect(principal, project, job_id)
     with atomic_transaction() as db:
+        _policy_lock(db, store.get_job(job_id))
         _locked(db, job_id)
         job = store.get_job(job_id)
         if job['state'] == RunState.STOPPED.value:
@@ -160,10 +204,20 @@ class RenderHandler:
 
     def dispatch(self, job):
         spec = _spec(job)
-        data = render(spec)
+        _candidate(job, compute_status='running', verification=None)
+        try:
+            data = render(spec)
+        except (OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as exc:
+            _candidate(job, compute_status='failed', failure_code=type(exc).__name__)
+            # The local renderer has no external effects; this is a known failure,
+            # unlike an unknown remote dispatch outcome.
+            return {'failed': True, 'reasons': ['LOCAL_RENDER_FAILED:' + type(exc).__name__]}
+        _candidate(job, compute_status='succeeded')
         adapter = LocalStorageAdapter(Path(job['spec']['export_root']))
         obj = adapter.put_bytes(tenant_id=job['tenant_id'], project_id=job['project_id'], data=data)
-        return {'storage_uri': obj.storage_uri, 'content_hash': obj.content_hash, 'route': spec.request.engine.value}
+        receipt = {'storage_uri': obj.storage_uri, 'content_hash': obj.content_hash, 'route': spec.request.engine.value}
+        _candidate(job, candidate=receipt)
+        return receipt
 
     def observe(self, job, dispatched):
         adapter = LocalStorageAdapter(Path(job['spec']['export_root']))
@@ -171,14 +225,17 @@ class RenderHandler:
         report = verify(data, _spec(job))
         if report.content_hash != dispatched['content_hash']:
             raise ValueError('READBACK_HASH_MISMATCH')
+        _candidate(job, verification=report.model_dump(mode='json'))
         return {**dispatched, 'verification': report.model_dump(mode='json')}
 
     def verify(self, job, observation):
         return observation['verification']
 
     def reconcile(self, job, intent):
-        # Only an immutable receipt can establish an output. The durable tick
-        # adopts COMMITTED receipts itself; incomplete pure renders are retry-safe.
+        # An interrupted local render can be adopted only from persisted bytes.
+        candidate = (job.get('result') or {}).get('candidate')
+        if candidate:
+            return 'ADOPT', self.observe(job, candidate)
         return 'REDO', None
 
     def on_commit(self, job, observation, verification):
@@ -211,7 +268,8 @@ class RenderHandler:
                 mission_id=job['job_id'], contract_hash=job['spec_hash'], artifact_id=aid, version=version,
                 content_hash=readback.content_hash, run_pipeline=KIND, policy_version='amc-render-release/v1',
                 subject_type='RENDER_ARTIFACT', reason='Rendered output requires independent human review before release')
-            result = {'artifact_id': aid, 'version': version, 'content_hash': readback.content_hash,
+            result = {'compute_status': 'succeeded', 'candidate': {k: observation[k] for k in ('storage_uri', 'content_hash', 'route')},
+                      'artifact_id': aid, 'version': version, 'content_hash': readback.content_hash,
                       'verification': readback.model_dump(mode='json'), 'approval': approval}
             db.execute(f"UPDATE {table('durable_jobs')} SET result = ? WHERE job_id = ? AND lease_token = ?", (json_param(result), job['job_id'], job['lease_token']))
             update_run_status(job['job_id'], 'needs_approval')
@@ -260,6 +318,7 @@ def resume(principal, project, job_id):
     _command_authority(principal)
     current = inspect(principal, project, job_id)
     with atomic_transaction() as db:
+        _policy_lock(db, store.get_job(job_id))
         _locked(db, job_id)
         job = store.get_job(job_id)
         current = inspect(principal, project, job_id)

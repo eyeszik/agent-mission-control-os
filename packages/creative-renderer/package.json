@@ -9,6 +9,8 @@
     "typecheck": "node --check worker.mjs"
   },
   "dependencies": {
+    "@svgdotjs/svg.js": "3.2.4",
+    "paper": "0.12.18",
     "roughjs": "^4.6.6"
   }
 }

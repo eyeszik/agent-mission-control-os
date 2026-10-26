@@ -29,6 +29,8 @@ export function CreativeRendering() {
   const [events, setEvents] = useState<string[]>([]);
   const key = useRef<string | null>(null);
   const generation = useRef(0);
+  const requestSequence = useRef(0);
+  const actionPending = useRef(false);
   const actionController = useRef<AbortController | null>(null);
   useEffect(() => {
     if (usesSupabaseAuth() && !readSession()) { router.replace('/login'); return; }
@@ -39,7 +41,7 @@ export function CreativeRendering() {
     }).catch(() => { if (active) setError('Unable to load authorized projects or render capabilities.'); });
     return () => { active = false; controller.abort(); actionController.current?.abort(); };
   }, [router]);
-  useEffect(() => { generation.current++; actionController.current?.abort(); key.current = null; setJob(null); setEvents([]); setBusy(false); }, [project]);
+  useEffect(() => { generation.current++; actionController.current?.abort(); key.current = null; setJob(null); setEvents([]); actionPending.current = false; setBusy(false); }, [project]);
   useEffect(() => {
     if (!job || !project || job.workflow_status === 'completed' || job.workflow_status === 'cancelled') return;
     const expected = generation.current; const controller = new AbortController();
@@ -48,8 +50,10 @@ export function CreativeRendering() {
       const parsed = RunEventSchema.safeParse(raw);
       if (!parsed.success || expected !== generation.current) return;
       setEvents(old => [...old, parsed.data.event_type].slice(-50));
+      if (actionPending.current) return;
+      const sequence = ++requestSequence.current;
       void getRenderJob(project, job.job_id, controller.signal).then(next => {
-        if (expected === generation.current) setJob(next);
+        if (expected === generation.current && sequence === requestSequence.current) setJob(next);
       }).catch(() => { if (!controller.signal.aborted) setError('Progress disconnected; use Refresh to read the current job.'); });
     };
     bus.on('run_event_received', onEvent);
@@ -59,13 +63,28 @@ export function CreativeRendering() {
   const selected = capabilities.find(c => c.engine === engine);
   async function run() {
     if (!project || busy) return;
-    const expected = generation.current; const controller = new AbortController(); actionController.current = controller;
+    const expected = ++generation.current; const controller = new AbortController(); actionController.current?.abort(); actionController.current = controller;
+    requestSequence.current++; setJob(null); setEvents([]);
+    actionPending.current = true;
     key.current ??= crypto.randomUUID(); setBusy(true); setError('');
     try {
       const next = await submitRender(project, brief, engine, key.current, controller.signal);
       if (expected === generation.current) setJob(next);
     } catch { if (!controller.signal.aborted) setError('Dispatch failed. Retry preserves the same request key.'); }
-    finally { if (expected === generation.current) setBusy(false); }
+    finally { if (expected === generation.current) { actionPending.current = false; setBusy(false); } }
+  }
+  async function act(operation: typeof getRenderJob) {
+    if (!project || !job || busy) return;
+    const expected = generation.current;
+    const sequence = ++requestSequence.current;
+    const controller = new AbortController();
+    actionController.current?.abort(); actionController.current = controller;
+    actionPending.current = true; setBusy(true); setError('');
+    try {
+      const next = await operation(project, job.job_id, controller.signal);
+      if (expected === generation.current && sequence === requestSequence.current) setJob(next);
+    } catch { if (!controller.signal.aborted) setError('Unable to update this job. Refresh to read its current state.'); }
+    finally { if (expected === generation.current) { actionPending.current = false; setBusy(false); } }
   }
   return <main className="mx-auto grid max-w-6xl gap-6 p-6 text-fg">
     <a href="/agency" className="text-accent underline">Back to Agency OS</a>
@@ -85,11 +104,11 @@ export function CreativeRendering() {
       <dl className="grid grid-cols-2 gap-2"><dt>Workflow</dt><dd>{job.workflow_status}</dd><dt>Compute</dt><dd>{job.job_status}</dd><dt>Artifact</dt><dd>{job.artifact_status}</dd><dt>Approval</dt><dd>{job.approval_status}</dd></dl>
       <p className="break-all text-xs">Specification: {job.spec_hash}</p>
       {job.blockers.length > 0 && <p role="status">{job.blockers.join(', ')}</p>}
-      <button type="button" className="text-accent underline" onClick={() => { if (project) void getRenderJob(project, job.job_id).then(setJob).catch(() => setError('Refresh failed.')); }}>Refresh job</button>
-      {!job.artifact_id && job.workflow_status !== 'cancelled' && <button type="button" className="text-accent underline" onClick={() => { if (project) void cancelRenderJob(project, job.job_id).then(setJob).catch(() => setError('Cancellation failed.')); }}>Cancel queued or active render</button>}
+      <button type="button" className="text-accent underline" disabled={busy} onClick={() => void act(getRenderJob)}>Refresh job</button>
+      {!job.artifact_id && job.workflow_status !== 'cancelled' && <button type="button" className="text-accent underline" disabled={busy} onClick={() => void act(cancelRenderJob)}>Cancel queued or active render</button>}
       {job.artifact_id && project && <RenderPreview project={project} artifact={job.artifact_id} />}
       {job.approval_id && <a href="/agency" className="text-accent underline" onClick={() => useAgencyStore.getState().setSection('approvals')}>Review in Approval inbox</a>}
-      {(job.approval_status === 'approved' || job.approval_status === 'rejected') && job.workflow_status === 'awaiting_approval' && <button type="button" className="text-accent underline" onClick={() => { if (project) void resumeRenderJob(project, job.job_id).then(setJob).catch(() => setError('Review could not be applied; refresh the current evidence.')); }}>Apply authoritative review decision</button>}
+      {(job.approval_status === 'approved' || job.approval_status === 'rejected') && job.workflow_status === 'awaiting_approval' && <button type="button" className="text-accent underline" disabled={busy} onClick={() => void act(resumeRenderJob)}>Apply authoritative review decision</button>}
       <p>{job.release.allowed ? 'Release eligibility confirmed by the server. No publication was performed.' : 'Release is not authorized.'}</p>
       <ol aria-label="Observed progress events" className="max-h-48 overflow-auto text-xs">{events.map((event, index) => <li key={index}>{event}</li>)}</ol>
     </section>}

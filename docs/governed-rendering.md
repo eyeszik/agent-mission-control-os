@@ -1,6 +1,6 @@
 # Governed rendering
 
-The corrected architecture is implemented as a local typed-primitives vertical slice. This is **not the complete eight-engine platform**. Rough.js SVG is the only implemented profile; seven engine IDs report ADAPTER_NOT_IMPLEMENTED. PNG/video, arbitrary source execution, GPU workers, remote presigned storage and execution-spend approvals are not implemented and cannot be enabled by request wording. No production project foundations or human approvals are synthesized.
+The corrected architecture is implemented as a local typed-primitives vertical slice. This is **not the complete eight-engine platform**. Three data-only SVG profiles are implemented: Rough.js seeded paths, Paper.js headless paths, and SVG.js PathArray geometry. Five engine IDs report ADAPTER_NOT_IMPLEMENTED. Paper.js does not run PaperScript, import SVG, use Canvas or render text; SVG.js does not provide a browser DOM/export adapter. PNG/video, arbitrary source execution, GPU workers, remote presigned storage and execution-spend approvals are not implemented and cannot be enabled by request wording. No production project foundations or human approvals are synthesized.
 
 ## Run
 
@@ -48,3 +48,41 @@ python scripts/verify_manifest.py
 Real worker tests skip explicitly when the worker has not been built. A skip is not proof of runtime readiness. Hosted backend jobs do not currently build Node workers; frontend CI builds/tests the real Rough.js worker.
 
 Revert the implementation commit to remove the feature. No database migration is required. Retain already stored artifacts and historical approval/audit records. Manifest regeneration must use scripts.verify_manifest.git_blob_sha on listed file bytes; do not replace Git blob hashes with raw SHA-256.
+
+
+## Completion pass and remaining specification work
+
+The completion pass adds independently observed compute outcomes, fenced durable candidate
+receipts, and recovery by read-back instead of unconditional re-rendering. Rejected output
+can correctly have compute `succeeded` and artifact `rejected`. Candidate writes after
+cancellation or lease takeover are refused. Corrupt or missing persisted output invalidates
+release eligibility on subsequent reads. The exact release subject, purpose, policy and
+version remain separate from compute state. SVG verification rejects unreviewed attributes
+and missing paths; it is not a visual-equivalence or accessibility audit.
+
+The creative browser smoke test uses a clearly fictional local project. It exercises actual
+capabilities, unavailable-engine refusal, scoped queueing and cancellation through the real
+UI/API. Rendering and human review are tested separately in the database-backed cohort;
+the browser test does not claim to approve or render a production brand.
+
+The complete corrected design is still **PENDING_IMPLEMENTATION** beyond these profiles:
+
+| Requirement | Current implementation / smallest remaining action |
+| --- | --- |
+| p5, Pixi, R3F, Remotion, Motion Canvas | No adapters; implement and validate each runtime/profile individually. Do not enable from package declarations. |
+| Raster/video and codecs | No renderer/encoder/verifier; select exact output profile and validate decoded persisted bytes. |
+| Executable scene source and GPU | Not supported by typed-primitives isolation; select and validate an OS/worker isolation substrate before admitting code. |
+| Execution budget approvals | No spend is dispatched here. Add purpose-bound execution grants before introducing paid/high-resource dispatch. |
+| Remote worker transport/presigned storage | Local trusted driver only. A reviewed staging/promotion adapter and worker authentication are still required. |
+| Real brand foundations | No scoped source artifacts or approval records were supplied. Use the existing intake/planning evidence gates; generic geometric fixtures establish no brand readiness. |
+| Brand/accessibility verification | No production claim. Bind actual approved token/artifact versions and execute the required rendered checks for the selected profile. |
+
+Missing live project evidence must be reported as: “Live evidence was unavailable. This
+claim remains unverified.” Human creative-direction acceptance and artifact release are
+separate approvals. None of the tests or generic geometry requests supplies either.
+
+Regenerate manifest hashes after reviewing changed tracked files with
+`scripts.verify_manifest.git_blob_sha`; preserve every existing entry. Run
+`python scripts/verify_manifest.py` afterward. Dependency bumps on master had left five
+entries stale; this pass refreshes those alongside its own files and updates the explicit
+PostCSS lockfile invariant from 8.5.28 to the installed 8.5.31.

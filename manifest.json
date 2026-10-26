@@ -156,7 +156,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "7e91cb5a7d71f403239173a7855dcc5dd455ec54"
+      "git_blob_sha": "d69674590c0adcbac73aef54340f945f51c482d5"
     },
     {
       "path": "README.md",
@@ -988,11 +988,11 @@
     },
     {
       "path": "services/langgraph/agency/rendering/runtime.py",
-      "git_blob_sha": "16651c9eae9cec5e384cc85fad22a4b6c82ce82b"
+      "git_blob_sha": "a3841388d52c57f3930879e2c67485acaf7a55cf"
     },
     {
       "path": "services/langgraph/agency/rendering/service.py",
-      "git_blob_sha": "0970eabecec71252d9004051a5263c4692007d66"
+      "git_blob_sha": "0e0f628b6ce4e543ffe999793fb94b1060b5b79e"
     },
     {
       "path": "services/langgraph/agency/rendering/worker.py",
@@ -1004,7 +1004,7 @@
     },
     {
       "path": "services/langgraph/tests/test_rendering.py",
-      "git_blob_sha": "4924ed4558d3f57364450794313d9c7f1fdf838e"
+      "git_blob_sha": "cc1e9fa41a2bd913590a3c3a0dfc25018408305d"
     },
     {
       "path": "packages/shared/src/schemas/rendering.ts",
@@ -1016,23 +1016,23 @@
     },
     {
       "path": "packages/creative-renderer/package.json",
-      "git_blob_sha": "f2bd13f24f499eb9f9cf0b1cac967a00a1a6f78b"
+      "git_blob_sha": "397cac9e5b968146e45f0d5e308f61506c825b7d"
     },
     {
       "path": "packages/creative-renderer/worker.mjs",
-      "git_blob_sha": "266dc4a23a995908ddbba92da08f458bfe3b4f4b"
+      "git_blob_sha": "182c75ddca799719188371698c81b640f5e69fd1"
     },
     {
       "path": "packages/creative-renderer/build.mjs",
-      "git_blob_sha": "9d1cf8627043f9f58b4b5a2b44517c174ef5f9a9"
+      "git_blob_sha": "08133572b39e492ec2ef5da70ce4c64a81f52f05"
     },
     {
       "path": "packages/creative-renderer/worker.test.mjs",
-      "git_blob_sha": "d6a8c30fedc9ea0c472cde12e35be22863bf1e41"
+      "git_blob_sha": "b4900c73fbe6e3f64e632ce8cc750e605eb05a24"
     },
     {
       "path": "apps/web/components/rendering/CreativeRendering.tsx",
-      "git_blob_sha": "abf1bbc8f6ff9c25ffa2cd9049702a5c77288815"
+      "git_blob_sha": "df34a058a136ef7d9ae284e4b2301b2bb6342a52"
     },
     {
       "path": "apps/web/components/rendering/RenderPreview.tsx",
@@ -1040,7 +1040,7 @@
     },
     {
       "path": "apps/web/lib/api/rendering.ts",
-      "git_blob_sha": "6d70904fdf48dbec96e3cc44d3c28072324b2f3c"
+      "git_blob_sha": "96b0201fb16bc3665ddec7a276a40c1fde4e3bef"
     },
     {
       "path": "apps/web/app/creative/page.tsx",
@@ -1101,6 +1101,10 @@
     {
       "path": "apps/web/lib/api/ucpo.ts",
       "git_blob_sha": "d7491b713a2d374437bf308a40f34e83f982a985"
+    },
+    {
+      "path": "apps/web/e2e/creative-rendering.spec.ts",
+      "git_blob_sha": "ef3792a25c13f3e145eba8f2e14b5963239d35ee"
     },
     {
       "path": "services/langgraph/tests/test_ucpo_qa_discovery.py",

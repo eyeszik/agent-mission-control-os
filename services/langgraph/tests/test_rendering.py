@@ -193,7 +193,8 @@ def test_worker_identity_binds_dependency_bytes_and_license(tmp_path, monkeypatc
     if not runtime.WORKER.is_file():
         pytest.skip('NOT_RUN: renderer build required')
     import shutil
-    for name in ('worker.mjs', 'rough.cjs', 'LICENSE.roughjs'):
+    for name in runtime.BUNDLE_FILES:
+        (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(runtime.WORKER.parent / name, tmp_path / name)
     monkeypatch.setattr(runtime, 'WORKER', tmp_path / 'worker.mjs')
     initial = runtime.fingerprint()['worker_source_hash']
@@ -202,3 +203,118 @@ def test_worker_identity_binds_dependency_bytes_and_license(tmp_path, monkeypatc
     assert runtime.fingerprint()['worker_source_hash'] != initial
     (tmp_path / 'LICENSE.roughjs').unlink()
     assert runtime.fingerprint()['worker_source_hash'] == '0' * 64
+
+
+@pytest.mark.parametrize('engine', ['paper_js', 'svg_js', 'rough_js'])
+@pytest.mark.parametrize('kind', ['rectangle', 'ellipse', 'line'])
+def test_real_still_profiles_reach_verified_output(scope, engine, kind):
+    if not runtime.WORKER.is_file():
+        pytest.skip('NOT_RUN: renderer build required')
+    principal, project, root = scope
+    scene = {'primitives': [{'kind': kind, 'x': 20, 'y': 20, 'width': 100, 'height': 80}]}
+    job = service.submit(principal, project, request(engine=engine, scene=scene), root)
+    tick = run_tick(worker_id='fixture-controller', handlers={service.KIND: service.RenderHandler()}, job_id=job['job_id'])
+    assert tick.final_state == 'WAITING_APPROVAL', tick.reasons
+    observed = service.inspect(principal, project, job['job_id'])
+    assert observed['job_status'] == 'succeeded'
+    assert observed['artifact_status'] == 'verified'
+    assert observed['approval_status'] == 'pending'
+    assert not observed['release']['allowed']
+
+
+def test_rejected_output_preserves_real_compute_success(scope, monkeypatch):
+    principal, project, root = scope
+    # Fictional defective renderer exercises real storage and independent verification.
+    monkeypatch.setattr(service, 'blockers', lambda spec: [])
+    monkeypatch.setattr(service, 'render', lambda spec: b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"/>')
+    job = service.submit(principal, project, request(), root)
+    run_tick(worker_id='fixture-controller', handlers={service.KIND: service.RenderHandler()}, job_id=job['job_id'])
+    observed = service.inspect(principal, project, job['job_id'])
+    assert observed['job_status'] == 'succeeded'
+    assert observed['artifact_status'] == 'rejected'
+    assert observed['verification']['status'] == 'FAILED'
+    assert not observed['release']['allowed']
+    assert not list_project_artifacts(project)
+
+
+def test_known_local_compute_failure_is_not_unknown_remote_success(scope, monkeypatch):
+    principal, project, root = scope
+    monkeypatch.setattr(service, 'blockers', lambda spec: [])
+    def fail(spec):
+        raise RuntimeError('fictional worker failure')
+    monkeypatch.setattr(service, 'render', fail)
+    job = service.submit(principal, project, request(), root)
+    tick = run_tick(worker_id='fixture-controller', handlers={service.KIND: service.RenderHandler()}, job_id=job['job_id'])
+    assert tick.final_state == 'RETRY_PENDING'
+    observed = service.inspect(principal, project, job['job_id'])
+    assert observed['job_status'] == 'failed'
+    assert observed['verification'] is None
+    assert not observed['release']['allowed']
+
+
+def test_persisted_candidate_is_recovered_without_repeating_compute(scope, monkeypatch):
+    if not runtime.WORKER.is_file():
+        pytest.skip('NOT_RUN: renderer build required')
+    principal, project, root = scope
+    job = service.submit(principal, project, request(), root)
+    def interrupted(point):
+        if point == 'after_dispatch':
+            raise RuntimeError('fictional lost driver after durable candidate receipt')
+    with pytest.raises(RuntimeError):
+        run_tick(worker_id='fixture-first', handlers={service.KIND: service.RenderHandler()}, job_id=job['job_id'], hook=interrupted)
+    def must_not_render(spec):
+        raise AssertionError('recovery must independently read persisted output')
+    monkeypatch.setattr(service, 'render', must_not_render)
+    recovered = run_tick(worker_id='fixture-takeover', now=datetime.now(timezone.utc) + timedelta(seconds=901),
+                         handlers={service.KIND: service.RenderHandler()}, job_id=job['job_id'])
+    assert recovered.adopted and not recovered.dispatched
+    assert recovered.final_state == 'WAITING_APPROVAL'
+    assert len(list_project_artifacts(project)) == 1
+
+
+@pytest.mark.parametrize('attribute', ['style="fill:red"', 'transform="scale(0)"', 'opacity="0"', 'onload="alert(1)"'])
+def test_svg_profile_refuses_unreviewed_rendering_attributes(scope, attribute):
+    principal, project, _ = scope
+    spec = runtime.compile_spec(principal.tenant_id, project, request())
+    data = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540"><path d="M0 0L1 1" {attribute}/></svg>'.encode()
+    assert 'UNEXPECTED_SVG_ATTRIBUTE' in runtime.verify(data, spec).findings
+
+
+def test_persisted_byte_corruption_invalidates_release_readiness(scope):
+    if not runtime.WORKER.is_file():
+        pytest.skip('NOT_RUN: renderer build required')
+    from services.langgraph.agency.project_os.storage import LocalStorageAdapter
+    principal, project, root = scope
+    job = service.submit(principal, project, request(), root)
+    run_tick(worker_id='fixture-controller', handlers={service.KIND: service.RenderHandler()}, job_id=job['job_id'])
+    stored = store.get_job(job['job_id'])
+    content_hash = stored['result']['content_hash']
+    LocalStorageAdapter(root)._path(principal.tenant_id, project, content_hash).write_bytes(b'fictional corruption')
+    observed = service.inspect(principal, project, job['job_id'])
+    assert observed['job_status'] == 'succeeded'
+    assert observed['artifact_status'] == 'stale'
+    assert not observed['release']['allowed']
+
+
+@pytest.mark.parametrize('field,value', [('subject_type', 'EXECUTION_PERMISSION'), ('subject_ref', 'fixture-other-artifact'), ('policy_version', 'render.execute/v1')])
+def test_execution_or_other_subject_approval_cannot_authorize_artifact_release(scope, monkeypatch, field, value):
+    if not runtime.WORKER.is_file():
+        pytest.skip('NOT_RUN: renderer build required')
+    from services.langgraph.persistence.database import table
+    principal, project, root = scope
+    job = service.submit(principal, project, request(), root)
+    run_tick(worker_id='fixture-controller', handlers={service.KIND: service.RenderHandler()}, job_id=job['job_id'])
+    result = service.inspect(principal, project, job['job_id'])
+    as_user(monkeypatch, 'fixture-independent-reviewer', tenant=principal.tenant_id, projects=project)
+    response = client.post(f"/approvals/{result['approval_id']}/decide", json={'decision': 'approve'}, headers=headers())
+    assert response.status_code == 200, response.text
+    assert service.inspect(principal, project, job['job_id'])['release']['allowed']
+    # Explicit test-only alteration represents a decision for a different purpose/subject.
+    assert field in {'subject_type', 'subject_ref', 'policy_version'}
+    with atomic_transaction() as db:
+        db.execute(f"UPDATE {table('approvals')} SET {field} = ? WHERE approval_id = ?", (value, result['approval_id']))
+    observed = service.inspect(principal, project, job['job_id'])
+    assert not observed['release']['allowed']
+    assert 'APPROVAL_PURPOSE_MISMATCH' in observed['release']['reasons']
+    with pytest.raises(ValueError):
+        service.resume(principal, project, job['job_id'])
