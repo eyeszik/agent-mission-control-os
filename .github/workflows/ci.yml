@@ -216,14 +216,13 @@ jobs:
       - name: Install Chromium runtime
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
-        timeout-minutes: 15
+        timeout-minutes: 25
         run: |
-          # Runner mirrors are occasionally very slow; bound each attempt and retry a fixed number of times.
-          for attempt in 1 2 3; do
-            timeout 240 pnpm --filter @amc/web exec playwright install --with-deps chromium && exit 0
-            echo "Chromium install attempt $attempt failed or timed out" >&2
-          done
-          exit 1
+          # The runner's apt mirror is occasionally very slow. Let apt retry stalled downloads itself and
+          # cap the whole step. Never kill and re-run the installer: an interrupted apt-get keeps the dpkg
+          # lock, so every retry would fail immediately.
+          printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-network >/dev/null
+          pnpm --filter @amc/web exec playwright install --with-deps chromium
 
       # Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor; the UCPO sandbox needs them.
       - name: Allow unprivileged user namespaces
@@ -268,14 +267,13 @@ jobs:
           python -m pip install -e "./services/langgraph[dev]"
 
       - name: Install Chromium runtime
-        timeout-minutes: 15
+        timeout-minutes: 25
         run: |
-          # Runner mirrors are occasionally very slow; bound each attempt and retry a fixed number of times.
-          for attempt in 1 2 3; do
-            timeout 240 pnpm --filter @amc/web exec playwright install --with-deps chromium && exit 0
-            echo "Chromium install attempt $attempt failed or timed out" >&2
-          done
-          exit 1
+          # The runner's apt mirror is occasionally very slow. Let apt retry stalled downloads itself and
+          # cap the whole step. Never kill and re-run the installer: an interrupted apt-get keeps the dpkg
+          # lock, so every retry would fail immediately.
+          printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-network >/dev/null
+          pnpm --filter @amc/web exec playwright install --with-deps chromium
 
       - name: Start local stack
         env:
