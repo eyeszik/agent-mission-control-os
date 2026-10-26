@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import time
 from pathlib import Path
 from typing import Any, Optional
@@ -76,13 +77,13 @@ def _json(obj: Any) -> bytes:
 
 
 def _put(principal: Principal, project_id: str, asset_id: str, stage: str, data: bytes, *, adapter: StorageAdapter,
-         depends_on: tuple[str, ...] = ()) -> dict:
+         depends_on: tuple[str, ...] = (), expect_head_hash: Optional[str] = None) -> dict:
     """Store one stage after the N3 role check. Lineage and versions live in the records themselves (Project OS
-    keeps only its own v2 metadata keys)."""
+    keeps only its own v2 metadata keys). ``expect_head_hash`` refuses a write over a head the caller never saw."""
     role, artifact_type, mime, filename = STAGES[stage]
     assert_role_may_produce(role, artifact_type)
     entry = store(principal, project_id, f"avic-{asset_id}-{stage}", data, mime=mime, artifact_type=artifact_type,
-                  subtype=f"avic_{stage}", adapter=adapter, depends_on=depends_on)
+                  subtype=f"avic_{stage}", adapter=adapter, depends_on=depends_on, expect_head_hash=expect_head_hash)
     return {**entry, "stage": stage, "role": role, "file": filename, "sha256": hashlib.sha256(data).hexdigest()}
 
 
@@ -159,8 +160,6 @@ def compile_asset(principal: Principal, project_id: str, req: AssetRequirement, 
                   material: Optional[MaterialSpec] = None) -> dict:
     """INGEST .. EVALUATE (+ bounded repair) .. persist. Returns stage entries, evaluation and candidate."""
     _authorize(principal, project_id)
-    import re
-
     if not re.fullmatch(ASSET_ID, req.asset_id):
         raise ValueError(f"asset_id must match {ASSET_ID}")
     intent = compile_intent(req, style_profile=style_profile)
@@ -251,7 +250,8 @@ def compile_asset(principal: Principal, project_id: str, req: AssetRequirement, 
                           for k, v in entries.items()}}
 
 
-def _load(project_id: str, asset_id: str, adapter: StorageAdapter) -> tuple[IntentIR, BrandIR, SceneIR, str]:
+def _load(project_id: str, asset_id: str, adapter: StorageAdapter) -> tuple[IntentIR, BrandIR, SceneIR, str, dict[str, str]]:
+    """Read the inputs of a change. The last value is the content hash of each head read (the CAS base for writes)."""
     intent_doc, _ = observe(_artifact_id(project_id, asset_id, "intent"), adapter)
     brand_doc, _ = observe(_artifact_id(project_id, asset_id, "brand"), adapter)
     scene_doc, _ = observe(_artifact_id(project_id, asset_id, "scene"), adapter)
@@ -259,15 +259,55 @@ def _load(project_id: str, asset_id: str, adapter: StorageAdapter) -> tuple[Inte
     b = json.loads(brand_doc)
     b.pop("authority", None)
     b.pop("note", None)
+    heads = {"scene": hashlib.sha256(scene_doc).hexdigest(), "svg": hashlib.sha256(svg_bytes).hexdigest()}
     return (IntentIR.model_validate(json.loads(intent_doc)["intent"]), BrandIR.model_validate(b),
-            SceneIR.model_validate(json.loads(scene_doc)), svg_bytes.decode())
+            SceneIR.model_validate(json.loads(scene_doc)), svg_bytes.decode(), heads)
+
+
+def _commit(principal: Principal, project_id: str, asset_id: str, *, intent: IntentIR, scene: SceneIR, text: str,
+            png_bytes: bytes, report: EvaluationReport, repairs: list[dict], adapter: StorageAdapter, tag: dict,
+            expect: Optional[dict[str, str]], prov_edit: Optional[dict] = None) -> dict[str, dict]:
+    """Write the derived stages in dependency order. The scene is the commit record: every later stage is a pure
+    function of it, so a crash part-way leaves stages that ``consistency`` detects and ``recompile_asset`` re-derives.
+    ``expect`` holds the head hashes the change was computed from; a mismatch raises ``StaleArtifactVersionError``."""
+    expect = expect or {}
+    e: dict[str, dict] = {}
+    e["scene"] = _put(principal, project_id, asset_id, "scene", _json(scene.model_dump(mode="json")), adapter=adapter,
+                      expect_head_hash=expect.get("scene"))
+    e["svg"] = _put(principal, project_id, asset_id, "svg", text.encode(), adapter=adapter, expect_head_hash=expect.get("svg"))
+    e["preview"] = _put(principal, project_id, asset_id, "preview", png_bytes, adapter=adapter)
+    e["evaluation"] = _put(principal, project_id, asset_id, "evaluation", _json({
+        "report": report.model_dump(mode="json"), "coverage": requirement_coverage(intent, scene), "repairs": repairs,
+        **tag, "passed": True}), adapter=adapter)
+    prov = json.loads(observe(_artifact_id(project_id, asset_id, "provenance"), adapter)[0])
+    identity = prov.get("cache_identity") if prov.get("scene_hash") == scene.scene_hash else None
+    e["provenance"] = _put(principal, project_id, asset_id, "provenance", _json({
+        **prov, **({"edits": [*prov.get("edits", []), prov_edit]} if prov_edit else {}), "cache_identity": identity, "scene_hash": scene.scene_hash,
+        "renderer_version": report.renderer_version,
+        "files": {**prov.get("files", {}), **{k: {"artifact_id": v["artifact_id"], "version": v["version"], "sha256": v["sha256"]}
+                                              for k, v in e.items() if k != "provenance"}}}), adapter=adapter)
+    return e
+
+
+def _artifacts_view(entries: dict[str, dict]) -> dict:
+    return {k: {f: v[f] for f in ("artifact_id", "version", "action", "sha256")} for k, v in entries.items()}
 
 
 def edit_asset(principal: Principal, project_id: str, asset_id: str, *, op: str, args: dict, adapter: StorageAdapter,
-               work_dir: Path) -> dict:
-    """Apply one edit; store it only when the independent evaluation passes. Otherwise keep the parent head."""
+               work_dir: Path, base_svg_sha256: Optional[str] = None) -> dict:
+    """Apply one edit; store it only when the independent evaluation passes. Otherwise keep the parent head.
+
+    ``base_svg_sha256`` is the SVG the operator was looking at. If the head has moved on, nothing is stored and the
+    result is ``CONFLICT``. Writes also carry the head hashes read here, so a writer that slips in between the read
+    and the write is detected too (never silently overwritten).
+    """
+    from services.langgraph.persistence.agency_kernel import StaleArtifactVersionError
+
     _authorize(principal, project_id)
-    intent, brand, scene, parent_svg = _load(project_id, asset_id, adapter)
+    intent, brand, scene, parent_svg, heads = _load(project_id, asset_id, adapter)
+    if base_svg_sha256 is not None and base_svg_sha256 != heads["svg"]:
+        return {"status": "CONFLICT", "reasons": ["STALE_BASE: the SVG changed after it was opened; reload and re-apply"],
+                "head_svg_sha256": heads["svg"]}
     try:
         if op == "recolor":
             child, records = edit_ops.recolor(scene, brand, args["object_id"], args["palette_key"], field=args.get("field", "fill"))
@@ -284,24 +324,81 @@ def edit_asset(principal: Principal, project_id: str, asset_id: str, *, op: str,
     if not report.passed or png_bytes is None:
         return {"status": "REJECTED", "reasons": [f"{c.check}:{c.result.value}" for c in report.failures()] or ["NOT_RENDERED"],
                 "evaluation": report.model_dump(mode="json"), "repairs": repairs, "parent_kept": True}
-    scene_e = _put(principal, project_id, asset_id, "scene", _json(child.model_dump(mode="json")), adapter=adapter)
-    svg_e = _put(principal, project_id, asset_id, "svg", text.encode(), adapter=adapter)
-    prev_e = _put(principal, project_id, asset_id, "preview", png_bytes, adapter=adapter)
-    eval_e = _put(principal, project_id, asset_id, "evaluation", _json({"report": report.model_dump(mode="json"),
-                  "coverage": requirement_coverage(intent, child), "repairs": repairs, "edit": op,
-                  "passed": True}), adapter=adapter)
-    prov = json.loads(observe(_artifact_id(project_id, asset_id, "provenance"), adapter)[0])
-    _put(principal, project_id, asset_id, "provenance", _json({
-        **prov, "cache_identity": None, "scene_hash": child.scene_hash, "renderer_version": report.renderer_version,
-        "edits": [*prov.get("edits", []), {"op": op, "parent_svg_sha256": hashlib.sha256(parent_svg.encode()).hexdigest(),
-                                            "transformations": [r.model_dump(mode="json") for r in records]}],
-        "files": {**prov.get("files", {}), **{k: {"artifact_id": e["artifact_id"], "version": e["version"], "sha256": e["sha256"]}
-                                              for k, e in {"scene": scene_e, "svg": svg_e, "preview": prev_e,
-                                                           "evaluation": eval_e}.items()}},
-    }), adapter=adapter)
+    edit_record = {"op": op, "parent_svg_sha256": heads["svg"], "transformations": [r.model_dump(mode="json") for r in records]}
+    try:
+        e = _commit(principal, project_id, asset_id, intent=intent, scene=child, text=text, png_bytes=png_bytes, report=report,
+                    repairs=repairs, adapter=adapter, tag={"edit": op}, expect=heads, prov_edit=edit_record)
+    except StaleArtifactVersionError as exc:
+        return {"status": "CONFLICT", "reasons": [f"STALE_BASE: {exc}"]}
     return {"status": "EVALUATED", "transformations": [r.model_dump(mode="json") for r in records], "metrics": metrics,
-            "artifacts": {k: {f: e[f] for f in ("artifact_id", "version", "action", "sha256")} for k, e in
-                          {"scene": scene_e, "svg": svg_e, "preview": prev_e, "evaluation": eval_e}.items()}}
+            "artifacts": _artifacts_view({k: v for k, v in e.items() if k != "provenance"})}
+
+
+def consistency(project_id: str, asset_id: str, *, adapter: StorageAdapter) -> dict:
+    """Is every derived stage still a function of the scene (the commit record)? ``stale`` names the ones that are not."""
+    scene_bytes, _ = observe(_artifact_id(project_id, asset_id, "scene"), adapter)
+    scene = SceneIR.model_validate(json.loads(scene_bytes))
+    stale: list[str] = []
+    svg_bytes, _ = observe(_artifact_id(project_id, asset_id, "svg"), adapter)
+    try:
+        svg_ok = svg.emit(scene).encode() == svg_bytes
+    except Exception:  # an unemittable scene cannot match any stored SVG
+        svg_ok = False
+    sha = hashlib.sha256(svg_bytes).hexdigest()
+    if not svg_ok:
+        stale.append("svg")
+    evaluation = json.loads(observe(_artifact_id(project_id, asset_id, "evaluation"), adapter)[0])
+    rep = evaluation.get("report", {})
+    eval_ok = svg_ok and rep.get("scene_hash") == scene.scene_hash and rep.get("svg_sha256") == sha
+    if not eval_ok:
+        stale.append("evaluation")
+    try:
+        preview_bytes, _ = observe(_artifact_id(project_id, asset_id, "preview"), adapter)
+        preview_ok = eval_ok and rep.get("png_sha256") == hashlib.sha256(preview_bytes).hexdigest()
+    except LookupError:
+        preview_ok = False
+    if not preview_ok:
+        stale.append("preview")
+    prov = json.loads(observe(_artifact_id(project_id, asset_id, "provenance"), adapter)[0])
+    if prov.get("scene_hash") != scene.scene_hash:
+        stale.append("provenance")
+    return {"consistent": not stale, "stale": stale}
+
+
+def recompile_asset(principal: Principal, project_id: str, asset_id: str, *, adapter: StorageAdapter, work_dir: Path) -> dict:
+    """Re-derive svg, preview, evaluation and provenance from the stored scene. The recovery path after a crash or a
+    conflict that left stages behind; idempotent when nothing is stale."""
+    from services.langgraph.persistence.agency_kernel import StaleArtifactVersionError
+
+    from services.langgraph.persistence.agency_kernel import get_artifact
+
+    _authorize(principal, project_id)
+    if consistency(project_id, asset_id, adapter=adapter)["consistent"]:  # nothing to recover: touch nothing
+        heads_now = {k: get_artifact(_artifact_id(project_id, asset_id, k)) for k in ("scene", "svg", "preview", "evaluation",
+                                                                                     "provenance")}
+        return {"status": "EVALUATED", "already_consistent": True, "metrics": {},
+                "artifacts": {k: {"artifact_id": h["artifact_id"], "version": int(h["version"]), "action": "reused_unchanged",
+                                  "sha256": h.get("content_hash")} for k, h in heads_now.items() if h is not None}}
+    intent, brand, scene, _svg_text, heads = _load(project_id, asset_id, adapter)
+    stored = None
+    try:  # a stored preview is only a valid reuse candidate if the evaluation ties it to the stored SVG
+        ev = json.loads(observe(_artifact_id(project_id, asset_id, "evaluation"), adapter)[0])["report"]
+        old_png, _ = observe(_artifact_id(project_id, asset_id, "preview"), adapter)
+        if ev.get("svg_sha256") == heads["svg"] and ev.get("png_sha256") == hashlib.sha256(old_png).hexdigest():
+            stored = (heads["svg"], old_png)
+    except (LookupError, KeyError, ValueError):
+        pass
+    scene2, text, png_bytes, report, repairs, metrics = _produce(scene, intent, brand, work_dir / f"recompile-{scene.scene_hash[:12]}",
+                                                                 stored=stored)
+    if not report.passed or png_bytes is None:
+        return {"status": "REJECTED", "reasons": [f"{c.check}:{c.result.value}" for c in report.failures()] or ["NOT_RENDERED"],
+                "evaluation": report.model_dump(mode="json"), "repairs": repairs}
+    try:
+        e = _commit(principal, project_id, asset_id, intent=intent, scene=scene2, text=text, png_bytes=png_bytes, report=report,
+                    repairs=repairs, adapter=adapter, tag={"recompiled_from_scene": True}, expect=heads)
+    except StaleArtifactVersionError as exc:
+        return {"status": "CONFLICT", "reasons": [f"STALE_BASE: {exc}"]}
+    return {"status": "EVALUATED", "metrics": metrics, "artifacts": _artifacts_view(e)}
 
 
 def _verified(project_id: str, asset_id: str, adapter: StorageAdapter) -> tuple[dict, dict, str]:
@@ -325,6 +422,8 @@ def _verified(project_id: str, asset_id: str, adapter: StorageAdapter) -> tuple[
     if not evaluation.get("passed"):
         problems.append("EVALUATION_NOT_PASSED")
     scene = SceneIR.model_validate(json.loads(observe(_artifact_id(project_id, asset_id, "scene"), adapter)[0]))
+    if evaluation["report"].get("scene_hash") != scene.scene_hash:
+        problems.append("EVALUATION_SCENE_MISMATCH: the scene changed after it was evaluated")
     recheck = svg.validate(svg_bytes.decode(), profile=scene.document.output_profile, max_bytes=scene.compilation.max_svg_bytes)
     problems += [f"REVALIDATION:{c.check}" for c in recheck if c.result != Result.PASS]
     return svg_head, evaluation, ";".join(problems)
@@ -381,6 +480,79 @@ def release_local(principal: Principal, project_id: str, asset_id: str, *, appro
             "manifest": manifest.model_dump(mode="json"), "artifact": {k: entry[k] for k in ("artifact_id", "version", "sha256")}}
 
 
+def list_assets(project_id: str) -> list[dict]:
+    """Assets compiled in a project (one per ``foundry-avic-<asset>-scene`` artifact)."""
+    from services.langgraph.persistence.projects import list_project_artifacts
+
+    out = []
+    for a in list_project_artifacts(project_id):
+        key = a.artifact_key
+        if key.startswith("foundry-avic-") and key.endswith("-scene"):
+            out.append({"asset_id": key[len("foundry-avic-"):-len("-scene")], "scene_artifact": a.artifact_id,
+                        "version": int(a.version)})
+    return sorted(out, key=lambda x: x["asset_id"])
+
+
+EDITABLE_ROLES = {"motif", "annotation", "headline", "material_object", "rule", "region", "highlight", "shadow"}
+
+
+def inspect_asset(principal: Principal, project_id: str, asset_id: str, *, adapter: StorageAdapter) -> dict:
+    """Operator read model: stage heads, evaluation, consistency, editable objects, approvals, last release.
+
+    Read-only. ``svg_sha256`` is the base an edit must name (``base_svg_sha256``) so concurrent edits conflict.
+    """
+    from services.langgraph.persistence.agency_kernel import get_artifact
+    from services.langgraph.persistence.approvals import list_approvals_for_subject_refs
+
+    _authorize(principal, project_id)
+    if not re.fullmatch(ASSET_ID, asset_id):
+        raise LookupError(asset_id)
+    stages: dict[str, dict] = {}
+    for stage in STAGES:
+        head = get_artifact(_artifact_id(project_id, asset_id, stage))
+        if head is not None:
+            stages[stage] = {"artifact_id": head["artifact_id"], "version": int(head["version"]),
+                             "content_hash": head.get("content_hash")}
+    if "scene" not in stages:
+        raise LookupError(asset_id)
+    intent, brand, scene, svg_text, heads = _load(project_id, asset_id, adapter)
+    evaluation = json.loads(observe(_artifact_id(project_id, asset_id, "evaluation"), adapter)[0])
+    report = evaluation.get("report", {})
+    release = None
+    if "release" in stages:
+        rel = json.loads(observe(_artifact_id(project_id, asset_id, "release"), adapter)[0])
+        release = {"release_allowed": bool(rel.get("release_allowed")), "reasons": list(rel.get("release_reasons", [])),
+                   "approval_id": rel.get("approval_id"), "svg_sha256": rel.get("source_hashes", {}).get("svg"),
+                   "external_effects": rel.get("external_effects", "none")}
+    approvals = [{"approval_id": a["approval_id"], "status": str(a.get("status")), "decision": a.get("decision"),
+                  "reviewer": a.get("reviewer"), "subject_hash": a.get("subject_hash"),
+                  "current": a.get("subject_hash") == heads["svg"], "created_at": str(a.get("created_at") or "")}
+                 for a in list_approvals_for_subject_refs(project_id, [stages["svg"]["artifact_id"]])] if "svg" in stages else []
+    objects = [{"object_id": o.object_id, "semantic_role": o.semantic_role, "protected": o.protected, "text": o.text,
+                "fill": o.appearance.fill, "stroke": o.appearance.stroke,
+                "operations": [] if o.semantic_role not in EDITABLE_ROLES else
+                ["recolor"] + (["change_text"] if o.text is not None else []) + ([] if o.protected else ["set_geometry"])}
+               for o in scene.objects]
+    return {"project_id": project_id, "asset_id": asset_id, "svg_sha256": heads["svg"], "scene_hash": scene.scene_hash,
+            "style_profile": intent.style_profile, "output_profile": scene.document.output_profile.value,
+            "width": scene.document.width, "height": scene.document.height, "exact_text": list(intent.exact_text),
+            "stages": stages, "consistency": consistency(project_id, asset_id, adapter=adapter),
+            "evaluation": {"passed": bool(evaluation.get("passed")), "renderer": report.get("renderer"),
+                           "renderer_version": report.get("renderer_version"), "svg_sha256": report.get("svg_sha256"),
+                           "png_sha256": report.get("png_sha256"),
+                           "checks": [{k: c.get(k) for k in ("check", "level", "result", "detail")} for c in report.get("checks", [])]},
+            "objects": objects, "palette": dict(brand.palette), "brand_source": brand.source, "brand_approved": brand.approved,
+            "approvals": approvals, "release": release}
+
+
+def read_stage_bytes(principal: Principal, project_id: str, asset_id: str, stage: str, *, adapter: StorageAdapter) -> bytes:
+    """Stored bytes of one stage after authorization (independent read through Project OS)."""
+    _authorize(principal, project_id)
+    if stage not in STAGES or not re.fullmatch(ASSET_ID, asset_id):
+        raise LookupError(stage)
+    return observe(_artifact_id(project_id, asset_id, stage), adapter)[0]
+
+
 def export_package(project_id: str, asset_id: str, *, adapter: StorageAdapter, out_dir: Path) -> dict[str, str]:
     """Write the stored release package files to ``out_dir`` (read-back of stored bytes, for local inspection)."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -395,5 +567,5 @@ def export_package(project_id: str, asset_id: str, *, adapter: StorageAdapter, o
     return written
 
 
-__all__ = ["APPROVAL_POLICY", "AvicAccessDenied", "RUN_PIPELINE", "STAGES", "cache_identity", "compile_asset", "edit_asset",
-           "export_package", "release_local", "request_approval"]
+__all__ = ["APPROVAL_POLICY", "AvicAccessDenied", "RUN_PIPELINE", "STAGES", "cache_identity", "compile_asset", "consistency",
+           "edit_asset", "export_package", "inspect_asset", "list_assets", "read_stage_bytes", "recompile_asset", "release_local", "request_approval"]

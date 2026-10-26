@@ -59,3 +59,15 @@
 
 Cross-editor round trips, physically based materials, semantic reference understanding, DiffVG/LIVE-class
 vectorization, HYBRID/RASTER output, any deployment or provider integration, and the archived Cloudflare worker.
+
+## Phase 0 follow-up (defects found in review of the shipped code)
+
+| Defect | Fix | Test |
+|---|---|---|
+| Lost update: an edit was not checked against the version it was computed from | `store(expect_head_hash=)`, `edit_asset(base_svg_sha256=)`, `CONFLICT` | `test_store_checks_the_head_it_was_computed_from`, `test_an_edit_against_a_stale_base_...`, `test_a_writer_that_slips_in_...` |
+| Multi-stage write not recoverable | scene is the commit record; `consistency`, `recompile_asset`, evaluation-vs-scene check | `test_a_crash_between_stage_writes_...` |
+| Overflow only estimated from glyph advances | `margin_bands` on rendered pixels, `out_of_canvas` defect | `test_pixels_catch_an_overflow_...`, `test_a_normal_slice_has_clean_margins` |
+| Intent regex filter bypassable with Unicode | normalised scan copy (`intent.scan_form`) | `test_intent_filter_survives_unicode_evasions` (7 cases) |
+| Claims could drift from tests | `avic/capabilities.py` registry, docs table generated, test ties rows to tests | `test_capability_registry_names_real_tests_and_matches_the_docs` |
+
+`test_avic.py`: 65 tests, 0 skipped.

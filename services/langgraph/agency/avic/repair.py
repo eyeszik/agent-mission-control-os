@@ -111,6 +111,13 @@ def detect(scene: SceneIR, report: EvaluationReport, brand: BrandIR) -> tuple[tu
                                     confidence=1.0, severity="CRITICAL",
                                     repair_options=("restore the exact text from the brief",),
                                     verification_plan=f"re-run {c.check}"))
+        elif c.check == "margin_bands":
+            defects.append(DefectIR(defect_id=_defect_id(scene.scene_hash, c.check), artifact_version=scene.scene_hash,
+                                    kind="out_of_canvas", region_refs=("document",), symptoms=c.detail, evidence_refs=refs,
+                                    candidate_causes=("text or a motif runs past the margin (the glyph estimate was too small)",
+                                                      "geometry was moved toward the edge"),
+                                    confidence=0.6, severity="MAJOR", repair_options=(),
+                                    verification_plan="human review of the preview; no automatic repair"))
         elif c.check in {"nonblank", "headline_rendered"}:
             defects.append(DefectIR(defect_id=_defect_id(scene.scene_hash, c.check), artifact_version=scene.scene_hash,
                                     kind="blank_render", region_refs=("document",), symptoms=c.detail, evidence_refs=refs,

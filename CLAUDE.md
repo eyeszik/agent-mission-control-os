@@ -68,7 +68,7 @@ python scripts/verify_guidance_registry.py
 
 ### Critical-file integrity manifest
 
-`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 182 as of the ACE v12 change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
+`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 284 as of the AVIC API change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
 
 ```python
 import hashlib, json
@@ -277,13 +277,16 @@ Details: `docs/ucpo/README.md`.
 
 ### ACE × AVIC — brief to verified native SVG
 
-`services/langgraph/agency/avic/` + CLI `avic` (`docs/avic.md`):
+`services/langgraph/agency/avic/` + `api/routes/avic.py` (`/avic`) + `components/avic/` (the Visual Compiler section of `/agency`) + CLI `avic` (`docs/avic.md`):
 
 - **Inputs are reused, not re-owned.** The brief is a PromptIR `AssetRequirement`; the palette is a read-only `BrandIR` projection (PSEM comes from `foundry.psem.PALETTE`); hashing is AMC-CANON-1. `intent.compile_intent` classifies every item VERIFIED/INFERRED/PROPOSED/UNSUPPORTED/PROHIBITED; instruction-like text, publish/send/spend and third-party marks are PROHIBITED and block the compile.
 - **SVG.** `scene.compile_scene` -> `SceneIR`; `svg.emit` is deterministic; `svg.validate` is an allowlist on top of `execution_fabric.verifiers.svg_safety` (elements, attributes, local `url(#id)` only, unique ids, finite coords, ceilings, no raster in native profiles). HYBRID_SVG and RASTER_FINAL are refused, never substituted.
 - **Render and verify.** Rendering is only `visual.browser.rasterize_svg`. `evaluate.evaluate` reads the SVG/PNG bytes (exact text, palette dE, accent budget, WCAG contrast, text-fit estimate, nonblank, headline ink); `avic/png.py` is a stdlib PNG codec so this works without Pillow/NumPy (not declared deps).
 - **Persistence and approval.** `service` stores each stage via `foundry.studio.store` after `assert_role_may_produce` (`STAGES`); approval is `open_artifact_approval` on the SVG content hash, decided via `/approvals/{id}/decide`; `release_local` re-reads and re-validates bytes and uses `artifact_release_verdict` (no external effect). Failing edits/recompiles return REJECTED and keep the head. Project OS keeps only its own v2 metadata keys, so lineage/cache identity live in `provenance.json`. Don't add a store, table or approval path.
 - **H3/H1/H2/H4/H5.** `repair` (defects only from failed checks, dependency-closure proposals, divergence check, isolated re-render, no-regression acceptance, <=3 attempts); `optimize` (stdlib region split + linear gradients, measured vs Chromium; DiffVG/LIVE/Bezier/Jacobian projection are PROPOSED); `brand` (`mutate_brand` needs an approval ref and never touches protected invariants; `explore` branches carry no approval); `materials` (palette-only shading, `physical_claim="NONE"`, physics backend BLOCKED).
+- **Concurrency and recovery.** The scene is the commit record; stage writes carry the head hash they were computed from (`studio.store(expect_head_hash=)`), so a stale edit is `CONFLICT` (HTTP 409), never an overwrite. `consistency` names stale derived stages; `recompile_asset` re-derives them. Renders are bounded by `AMC_AVIC_RENDER_CONCURRENCY`.
+- **API.** Every write needs an operator role and an `Idempotency-Key`; an edit must send `base_svg_sha256`. The brand is the server projection; client authority fields are 422. Stored SVG is served with `default-src 'none'` CSP. `test_avic_api.py` sweeps every `/avic` route from the OpenAPI table (other tenant, viewer, unauthenticated); a new route is covered automatically. Zod twins: `packages/shared/src/schemas/avic.ts`, fixture `packages/shared/tests/fixtures/avic.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_avic_contracts.py`; needs Chromium).
+- **Claims.** `capabilities.py` is the capability registry; the matrix in `docs/avic.md` is generated from it and a test requires every verified row to name existing tests.
 - **Demo.** `python scripts/render_avic_demo.py` regenerates `runtime/avic/demo/` (fictional brand, synthetic reference).
 
 ### VNEXUS ACE — persisted brand genome and the layers on it

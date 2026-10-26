@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import {
-  BarChart3, Bell, Bot, Globe, ListChecks, FolderKanban, LayoutDashboard, Menu, Moon, Package, Palette, Plug, Search, Settings, ShieldCheck, Sun,
+  BarChart3, Bell, Bot, Globe, ListChecks, FolderKanban, LayoutDashboard, Menu, Moon, Package, Palette, PenTool, Plug, Search, Settings, ShieldCheck, Sun,
   Users, Workflow, X,
 } from 'lucide-react';
 import { listProjects } from '../../lib/api/projects';
@@ -17,6 +17,7 @@ import { MissionsView } from './views/MissionsView';
 import { MissionDashboard } from '../missions/MissionDashboard';
 import { FrameworkView } from '../framework/FrameworkView';
 import { WebsiteProductionView } from '../ucpo/WebsiteProductionView';
+import { VisualCompilerView } from '../avic/VisualCompilerView';
 import { StudioView } from './views/StudioView';
 import { ApprovalsView } from './views/ApprovalsView';
 import { DeliverablesView } from './views/DeliverablesView';
@@ -32,6 +33,7 @@ const NAV: { id: AgencySection; label: string; Icon: typeof LayoutDashboard }[] 
   { id: 'council', label: 'Mission Council', Icon: Bot },
   { id: 'framework', label: 'Operating Framework', Icon: ListChecks },
   { id: 'websites', label: 'Website Production', Icon: Globe },
+  { id: 'visuals', label: 'Visual Compiler', Icon: PenTool },
   { id: 'studio', label: 'Creative Studio', Icon: Palette },
   { id: 'approvals', label: 'Approvals', Icon: ShieldCheck },
   { id: 'deliverables', label: 'Deliverables', Icon: Package },
@@ -73,6 +75,7 @@ function View({ section }: { section: AgencySection }) {
     case 'council': return <MissionDashboard />;
     case 'framework': return <FrameworkView />;
     case 'websites': return <WebsiteProductionView />;
+    case 'visuals': return <VisualCompilerView />;
     case 'studio': return <StudioView />;
     case 'approvals': return <ApprovalsView />;
     case 'deliverables': return <DeliverablesView />;

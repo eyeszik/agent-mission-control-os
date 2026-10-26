@@ -7,6 +7,8 @@ SVG source; it is never fed back into the SVG.
 
 from __future__ import annotations
 
+import os
+import threading
 import time
 from pathlib import Path
 from typing import Optional
@@ -16,6 +18,11 @@ from services.langgraph.agency.visual.browser import probe_browser, rasterize_sv
 from .contracts import CapabilityState
 
 RENDERER = "raster.chromium"
+# Each render starts a Chromium process. Bound how many run at once on this host (API threads, CLI, tests share it);
+# a caller that cannot get a slot in time is told so (BLOCKED, RENDER_CAPACITY) rather than queued without limit.
+RENDER_SLOTS = max(1, int(os.environ.get("AMC_AVIC_RENDER_CONCURRENCY", "2") or 2))
+SLOT_WAIT_S = 90
+_slots = threading.BoundedSemaphore(RENDER_SLOTS)
 
 
 def renderer_state() -> tuple[CapabilityState, list[str], Optional[str]]:
@@ -30,9 +37,15 @@ def render(svg_text: str, *, width: int, height: int, work_dir: Path, timeout_s:
     state, blockers, _ = renderer_state()
     if state != CapabilityState.IMPLEMENTED_VERIFIED:
         return {"status": "BLOCKED", "png": None, "renderer_version": None, "render_ms": None, "findings": blockers}
-    t = time.perf_counter()
-    r = rasterize_svg(svg_text, width=width, height=height, out_dir=work_dir, timeout_s=timeout_s)
-    ms = round((time.perf_counter() - t) * 1000, 1)
+    if not _slots.acquire(timeout=SLOT_WAIT_S):
+        return {"status": "BLOCKED", "png": None, "renderer_version": None, "render_ms": None,
+                "findings": [f"RENDER_CAPACITY: {RENDER_SLOTS} render(s) already running"]}
+    try:
+        t = time.perf_counter()
+        r = rasterize_svg(svg_text, width=width, height=height, out_dir=work_dir, timeout_s=timeout_s)
+        ms = round((time.perf_counter() - t) * 1000, 1)
+    finally:
+        _slots.release()
     version = (r.get("result") or {}).get("browser_version")
     if r["status"] != "PASSED":
         return {"status": "FAILED", "png": None, "renderer_version": version, "render_ms": ms,
