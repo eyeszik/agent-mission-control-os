@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import {
-  BarChart3, Bell, FolderKanban, LayoutDashboard, Menu, Moon, Package, Palette, Plug, Search, Settings, ShieldCheck, Sun,
+  BarChart3, Bell, Bot, Globe, ListChecks, FolderKanban, LayoutDashboard, Menu, Moon, Package, Palette, Plug, Search, Settings, ShieldCheck, Sun,
   Users, Workflow, X,
 } from 'lucide-react';
 import { listProjects } from '../../lib/api/projects';
@@ -14,6 +14,9 @@ import { OverviewView } from './views/OverviewView';
 import { ClientsView } from './views/ClientsView';
 import { ProjectsView } from './views/ProjectsView';
 import { MissionsView } from './views/MissionsView';
+import { MissionDashboard } from '../missions/MissionDashboard';
+import { FrameworkView } from '../framework/FrameworkView';
+import { WebsiteProductionView } from '../ucpo/WebsiteProductionView';
 import { StudioView } from './views/StudioView';
 import { ApprovalsView } from './views/ApprovalsView';
 import { DeliverablesView } from './views/DeliverablesView';
@@ -26,6 +29,9 @@ const NAV: { id: AgencySection; label: string; Icon: typeof LayoutDashboard }[] 
   { id: 'clients', label: 'Clients', Icon: Users },
   { id: 'projects', label: 'Projects', Icon: FolderKanban },
   { id: 'missions', label: 'Missions', Icon: Workflow },
+  { id: 'council', label: 'Mission Council', Icon: Bot },
+  { id: 'framework', label: 'Operating Framework', Icon: ListChecks },
+  { id: 'websites', label: 'Website Production', Icon: Globe },
   { id: 'studio', label: 'Creative Studio', Icon: Palette },
   { id: 'approvals', label: 'Approvals', Icon: ShieldCheck },
   { id: 'deliverables', label: 'Deliverables', Icon: Package },
@@ -64,6 +70,9 @@ function View({ section }: { section: AgencySection }) {
     case 'clients': return <ClientsView />;
     case 'projects': return <ProjectsView />;
     case 'missions': return <MissionsView />;
+    case 'council': return <MissionDashboard />;
+    case 'framework': return <FrameworkView />;
+    case 'websites': return <WebsiteProductionView />;
     case 'studio': return <StudioView />;
     case 'approvals': return <ApprovalsView />;
     case 'deliverables': return <DeliverablesView />;
@@ -139,7 +148,7 @@ function CommandPalette({ commands }: { commands: Command[] }) {
   );
 }
 
-export function AgencyShell() {
+export function AgencyShell({ initialSection }: { initialSection?: AgencySection } = {}) {
   const [theme, setTheme] = useState<Theme>('system');
   const [online, setOnline] = useState(true);
   useEffect(() => { setTheme(readTheme()); }, []);
@@ -164,6 +173,7 @@ export function AgencyShell() {
   const setNavOpen = useAgencyStore((s) => s.setNavOpen);
   const setPaletteOpen = useAgencyStore((s) => s.setPaletteOpen);
   const inspected = useAgencyStore((s) => s.inspected);
+  useEffect(() => { if (initialSection) setSection(initialSection); }, [initialSection, setSection]);
 
   const me = useLoad(getMe, []);
   const projects = useLoad(listProjects, []);
@@ -240,7 +250,7 @@ export function AgencyShell() {
                 {projectList.map((p) => <option key={p.project_id} value={p.project_id}>{p.display_name}</option>)}
               </select>
             </div>
-            <Button variant="secondary" onClick={() => setPaletteOpen(true)} aria-keyshortcuts="Control+K Meta+K" className="ml-auto sm:ml-2">
+            <Button variant="secondary" onClick={() => setPaletteOpen(true)} aria-label="Search" aria-keyshortcuts="Control+K Meta+K" className="ml-auto sm:ml-2">
               <Search aria-hidden="true" size={16} /><span className="hidden sm:inline">Search</span><kbd className="hidden text-xs text-fg sm:inline">⌘K</kbd>
             </Button>
             <div className="flex items-center gap-2 sm:ml-auto">

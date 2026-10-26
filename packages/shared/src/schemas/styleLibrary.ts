@@ -181,7 +181,7 @@ export const ComposedStyleSchema = z.object({
   catalog_version: z.string().min(1),
   selections: z.array(StyleSelectionSchema).min(1),
   // dimension -> style id that owns it after resolution
-  resolved_dimensions: z.record(StyleDimensionSchema, StyleIdSchema).default({}),
+  resolved_dimensions: z.partialRecord(StyleDimensionSchema, StyleIdSchema).default({}),
   resolved_tokens: z.array(ResolvedStyleTokenSchema).default([]),
   conflicts: z.array(z.string()).default([]),
   warnings: z.array(z.string()).default([]),
@@ -204,7 +204,7 @@ export const DesignStyleDirectionSchema = z.object({
   composition_id: z.string().min(1),
   catalog_version: z.string().min(1),
   selections: z.array(StyleSelectionSchema).min(1),
-  resolved_dimensions: z.record(StyleDimensionSchema, StyleIdSchema).default({}),
+  resolved_dimensions: z.partialRecord(StyleDimensionSchema, StyleIdSchema).default({}),
   prompt: z.string(),
   negative_prompt: z.string().default(''),
   conflicts: z.array(z.string()).default([]),

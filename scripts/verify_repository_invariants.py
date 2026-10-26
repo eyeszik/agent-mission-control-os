@@ -124,16 +124,16 @@ def main() -> None:
         raise SystemExit("README must document the browser E2E release gate")
 
     root_package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-    if root_package.get("engines", {}).get("node") != ">=20.9.0":
-        raise SystemExit("Root Node.js engine must match the Next.js 16 minimum: >=20.9.0")
+    if root_package.get("engines", {}).get("node") != ">=22.12.0":
+        raise SystemExit("Root Node.js engine must satisfy the Vitest 5 / Vite 8 minimum: >=22.12.0")
     if "lint" in root_package.get("scripts", {}):
         raise SystemExit("Root package still advertises an unimplemented recursive lint command")
 
     web_package = json.loads((ROOT / "apps/web/package.json").read_text(encoding="utf-8"))
-    if web_package.get("dependencies", {}).get("next") != "16.3.8":
-        raise SystemExit("Web package must remain pinned to audited Next.js 16.3.8")
-    if web_package.get("devDependencies", {}).get("@playwright/test") != "1.63.0":
-        raise SystemExit("Browser gate must pin @playwright/test to 1.63.0")
+    if web_package.get("dependencies", {}).get("next") != "16.4.2":
+        raise SystemExit("Web package must remain pinned to audited Next.js 16.4.2")
+    if web_package.get("devDependencies", {}).get("@playwright/test") != "1.64.1":
+        raise SystemExit("Browser gate must pin @playwright/test to 1.64.1")
     if web_package.get("scripts", {}).get("test") != "vitest run tests":
         raise SystemExit("Web unit tests must be scoped to tests/ so Vitest cannot execute Playwright specs")
     if web_package.get("scripts", {}).get("test:e2e") != "playwright test":
@@ -143,11 +143,11 @@ def main() -> None:
 
     lockfile = (ROOT / "pnpm-lock.yaml").read_text(encoding="utf-8")
     for required in [
-        "specifier: 16.3.8",
+        "specifier: 16.4.2",
         "sharp@0.35.5",
         "postcss@8.5.28",
-        "'@playwright/test@1.63.0'",
-        "playwright-core@1.63.0",
+        "'@playwright/test@1.64.1'",
+        "playwright-core@1.64.1",
     ]:
         if required not in lockfile:
             raise SystemExit(f"Audited frontend lockfile token missing: {required}")

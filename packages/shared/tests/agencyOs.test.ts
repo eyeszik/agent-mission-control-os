@@ -16,6 +16,7 @@ import {
   MissionPreviewSchema,
   MissionSummarySchema,
   RecoveryItemSchema,
+  UncertaintyDebtSchema,
 } from '../src/schemas/agencyOs';
 
 // Recorded from the real API by services/langgraph/tests/test_ace12_contracts.py.
@@ -36,6 +37,7 @@ describe('ACE v12 Zod twins parse real backend responses', () => {
     ['deliverable', DeliverableSchema, fixture.deliverable],
     ['manifest', DeliveryManifestSchema, fixture.manifest],
     ['analytics', AnalyticsSchema, fixture.analytics],
+    ['uncertainty debt', UncertaintyDebtSchema, fixture.uncertainty],
   ];
   it.each(cases)('%s', (_name, schema, value) => {
     expect(() => schema.parse(value)).not.toThrow();

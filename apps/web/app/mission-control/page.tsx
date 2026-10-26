@@ -51,7 +51,7 @@ export default function MissionControlPage() {
                 type="button"
                 aria-pressed={mode === value}
                 onClick={() => setMode(value)}
-                className={`text-xs px-2.5 py-1 rounded whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 ${mode === value ? "bg-zinc-100 text-zinc-900" : "text-zinc-400 hover:text-zinc-100"}`}
+                className={`text-xs px-2.5 py-1 rounded-sm whitespace-nowrap focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60 ${mode === value ? "bg-zinc-100 text-zinc-900" : "text-zinc-400 hover:text-zinc-100"}`}
               >
                 {label}
               </button>
@@ -63,7 +63,8 @@ export default function MissionControlPage() {
           <TrustStatusPanel />
           <div className="h-6 w-px bg-zinc-800" />
           <ApprovalInbox />
-          <a href="/agency" className="text-xs text-zinc-300 underline-offset-2 hover:text-zinc-100 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60">Agency OS</a>
+          <a href="/agency" className="text-xs text-zinc-300 underline-offset-2 hover:text-zinc-100 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60">Agency OS</a>
+          <a href="/missions" className="text-xs text-zinc-300 underline-offset-2 hover:text-zinc-100 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60">Mission Council</a>
           {productionAuth && <button type="button" onClick={() => { signOut(); router.replace('/login'); }} className="text-xs text-zinc-400 hover:text-zinc-100">Sign out</button>}
         </div>
       </header>
@@ -84,7 +85,7 @@ export default function MissionControlPage() {
           <>
         <div className="lg:col-span-5 flex flex-col gap-4">
           <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl overflow-hidden relative flex flex-col">
-            <div className="p-3 border-b border-zinc-800/60 bg-zinc-900/80 backdrop-blur-sm z-10 flex justify-between items-center"><span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Topology Map</span></div>
+            <div className="p-3 border-b border-zinc-800/60 bg-zinc-900/80 backdrop-blur-xs z-10 flex justify-between items-center"><span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Topology Map</span></div>
             <WorkflowMapPanel />
           </div>
           <div className="h-48 shrink-0"><LiveStepProgressPanel /></div>

@@ -98,5 +98,8 @@ describe('style selections', () => {
       applied: true,
     };
     expect(DesignStyleDirectionSchema.safeParse(direction).success).toBe(true);
+    // Zod 4 enum-keyed record() requires every key; these maps are deliberately sparse.
+    expect(DesignStyleDirectionSchema.safeParse({ ...direction, resolved_dimensions: {} }).success).toBe(true);
+    expect(DesignStyleDirectionSchema.safeParse({ ...direction, resolved_dimensions: { vibes: 'CLS-01' } }).success).toBe(false);
   });
 });

@@ -1276,6 +1276,207 @@ _MIGRATIONS = [
         create index if not exists idx_action_freezes_scope on action_freezes(tenant_id, scope_kind, scope_ref);
         create index if not exists idx_agency_client_projects_client on agency_client_projects(client_id);
     """),
+    (17, """
+        -- ACE v100: recover uncertain provider outcomes as durable journal states.
+        -- SQLite cannot change a CHECK in place: rebuild inside a single transaction.
+        BEGIN TRANSACTION;
+        CREATE TABLE durable_intents_new (
+            idempotency_key TEXT PRIMARY KEY,
+            job_id TEXT NOT NULL REFERENCES durable_jobs(job_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            logical_tick INTEGER NOT NULL,
+            operation TEXT NOT NULL,
+            target TEXT NOT NULL,
+            input_hash TEXT NOT NULL,
+            contract_version TEXT NOT NULL,
+            retry_class TEXT NOT NULL CHECK (retry_class IN ('RETRY_SAFE','COMPENSATABLE','NON_RETRYABLE')),
+            pre_image TEXT NOT NULL DEFAULT '{}',
+            status TEXT NOT NULL CHECK (status IN ('INTENT','UNCONFIRMED','COMMITTED','FAILED','ABANDONED')),
+            fencing_token INTEGER NOT NULL,
+            receipt TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            committed_at TEXT
+        );
+        INSERT INTO durable_intents_new SELECT * FROM durable_intents;
+        DROP TABLE durable_intents;
+        ALTER TABLE durable_intents_new RENAME TO durable_intents;
+        CREATE INDEX idx_durable_intents_job ON durable_intents(job_id, logical_tick);
+        COMMIT;
+    """),
+
+    (18, """
+        -- ACE v100: append-only, cryptographically authenticated per-project evidence.
+        CREATE TABLE IF NOT EXISTS ace_provenance (
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id),
+            project_id TEXT NOT NULL REFERENCES projects(project_id),
+            sequence INTEGER NOT NULL CHECK (sequence >= 1),
+            key_id TEXT NOT NULL,
+            actor TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            previous_hash TEXT NOT NULL,
+            payload_digest TEXT NOT NULL,
+            record_hash TEXT NOT NULL,
+            signature TEXT NOT NULL,
+            observed_at TEXT NOT NULL,
+            PRIMARY KEY (tenant_id, project_id, sequence)
+        );
+        CREATE INDEX IF NOT EXISTS idx_ace_provenance_project
+            ON ace_provenance(project_id, sequence);
+    """),
+
+    (19, """
+        -- Mission council: ideas, engine state, checkpoints, blueprints, tool audits.
+        -- Additive only. A mission is a runs row (status, approvals and run_events are
+        -- reused). Mirrors supabase/migrations/20261022_amc_mission_council_v1.sql.
+        CREATE TABLE IF NOT EXISTS council_ideas (
+            idea_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('OPEN','PROMOTED')),
+            created_by TEXT NOT NULL,
+            seed_key TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_council_ideas_seed ON council_ideas(tenant_id, seed_key) WHERE seed_key IS NOT NULL;
+        CREATE INDEX IF NOT EXISTS idx_council_ideas_project ON council_ideas(project_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS council_missions (
+            mission_id TEXT PRIMARY KEY REFERENCES runs(run_id) ON DELETE CASCADE,
+            idea_id TEXT NOT NULL REFERENCES council_ideas(idea_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            engine TEXT NOT NULL CHECK (engine IN ('langgraph','crewai','autogen')),
+            model_mode TEXT NOT NULL CHECK (model_mode IN ('MOCK_DETERMINISTIC','PROVIDER')),
+            phase TEXT NOT NULL CHECK (phase IN ('STRATEGY','AUDIT','GATE','PROTOTYPE','DONE')),
+            version INTEGER NOT NULL DEFAULT 0,
+            lease_owner TEXT,
+            lease_expires_at TEXT,
+            approval_id TEXT,
+            approval_subject_hash TEXT,
+            consumed_approval_id TEXT,
+            cancel_requested INTEGER NOT NULL DEFAULT 0,
+            attempts INTEGER NOT NULL DEFAULT 0,
+            last_error TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_council_missions_idea ON council_missions(idea_id, created_at);
+        CREATE INDEX IF NOT EXISTS idx_council_missions_project ON council_missions(project_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS council_checkpoints (
+            checkpoint_id TEXT PRIMARY KEY,
+            mission_id TEXT NOT NULL REFERENCES council_missions(mission_id) ON DELETE CASCADE,
+            seq INTEGER NOT NULL CHECK (seq >= 0),
+            phase TEXT NOT NULL,
+            engine TEXT NOT NULL,
+            state TEXT NOT NULL,
+            state_hash TEXT NOT NULL,
+            prev_hash TEXT NOT NULL,
+            native_checkpoint_id TEXT,
+            created_at TEXT NOT NULL,
+            UNIQUE (mission_id, seq)
+        );
+
+        CREATE TABLE IF NOT EXISTS council_blueprints (
+            blueprint_id TEXT PRIMARY KEY,
+            idea_id TEXT NOT NULL REFERENCES council_ideas(idea_id) ON DELETE CASCADE,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('DRAFT','PROMOTED')),
+            content TEXT NOT NULL,
+            content_hash TEXT NOT NULL,
+            sources TEXT NOT NULL,
+            verification TEXT,
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            promoted_by TEXT,
+            promoted_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_council_blueprints_idea ON council_blueprints(idea_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS council_tool_audits (
+            audit_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            mission_id TEXT,
+            seat TEXT,
+            tool_id TEXT NOT NULL,
+            sensitivity TEXT NOT NULL,
+            decision TEXT NOT NULL CHECK (decision IN ('ALLOWED','DENIED','FAILED','TIMEOUT')),
+            reason_code TEXT NOT NULL,
+            args_redacted TEXT NOT NULL,
+            args_hash TEXT NOT NULL,
+            result_summary TEXT,
+            approval_id TEXT,
+            action_hash TEXT,
+            duration_ms INTEGER,
+            created_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_council_tool_audits_mission ON council_tool_audits(mission_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS council_approval_consumptions (
+            approval_id TEXT NOT NULL,
+            mission_id TEXT NOT NULL,
+            action_hash TEXT NOT NULL,
+            consumed_by TEXT NOT NULL,
+            consumed_at TEXT NOT NULL,
+            PRIMARY KEY (approval_id, action_hash)
+        );
+    """),
+    (20, """
+        -- Agency operating framework: per-project plans pinned to the immutable
+        -- 295-task catalog, and one instance row per task. Additive only. Evidence,
+        -- artifacts, decisions, approvals and audit events stay in their existing
+        -- stores and are referenced here, never copied. Mirrors
+        -- supabase/migrations/20261024_amc_agency_framework_v1.sql.
+        CREATE TABLE IF NOT EXISTS agency_framework_plans (
+            plan_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+            project_id TEXT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+            catalog_id TEXT NOT NULL,
+            catalog_version TEXT NOT NULL,
+            catalog_sha256 TEXT NOT NULL,
+            archetype TEXT NOT NULL,
+            engagement_scope TEXT NOT NULL DEFAULT '',
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE (project_id, catalog_version)
+        );
+
+        CREATE TABLE IF NOT EXISTS agency_task_instances (
+            plan_id TEXT NOT NULL REFERENCES agency_framework_plans(plan_id) ON DELETE CASCADE,
+            task_id TEXT NOT NULL,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            module_id TEXT NOT NULL,
+            stage_gate TEXT NOT NULL,
+            applicability TEXT NOT NULL CHECK (applicability IN ('UNASSESSED','REQUIRED','CONDITIONAL','NOT_APPLICABLE')),
+            applicability_reason TEXT,
+            applicability_by TEXT,
+            state TEXT NOT NULL CHECK (state IN ('BACKLOG','READY','ACTIVE','IN_REVIEW','VERIFIED','APPROVED','BLOCKED','INVALIDATED','NOT_APPLICABLE')),
+            blocked_from TEXT,
+            status_reason TEXT,
+            assignee_role TEXT NOT NULL,
+            evidence_refs TEXT NOT NULL DEFAULT '[]',
+            artifact_refs TEXT NOT NULL DEFAULT '[]',
+            decision_refs TEXT NOT NULL DEFAULT '[]',
+            submitted_by TEXT,
+            verification TEXT,
+            approval_ref TEXT,
+            version INTEGER NOT NULL DEFAULT 0,
+            updated_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (plan_id, task_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_agency_task_instances_project ON agency_task_instances(project_id, module_id);
+    """),
+
 ]
 
 

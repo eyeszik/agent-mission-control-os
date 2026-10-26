@@ -19,6 +19,7 @@ import {
   MissionPreviewSchema,
   MissionSummarySchema,
   RecoveryItemSchema,
+  UncertaintyDebtSchema,
   type ActionEvidence,
   type ActionPreview,
   type ActionView,
@@ -66,6 +67,7 @@ export const getBudget = () => apiFetch('/actions/budget', { method: 'GET' }, Bu
 export const simulateBudget = (body: { scope_kind: string; scope_ref: string; currency: string; ceiling_minor: number }) =>
   apiFetch('/actions/budget/simulate', post(body), R);
 export const getFreezes = () => apiFetch('/actions/freezes', { method: 'GET' }, FreezeListSchema);
+export const getUncertainty = () => apiFetch('/actions/uncertainty', { method: 'GET' }, UncertaintyDebtSchema);
 export const createFreeze = (body: { scope_kind: 'TENANT' | 'PROJECT'; scope_ref?: string; reason: string }) =>
   apiFetch('/actions/freezes', post(body), wrap('freeze', R));
 export const liftFreeze = (freezeId: string, reason: string) =>

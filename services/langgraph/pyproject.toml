@@ -23,15 +23,28 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.2.0"]
+dev = ["pytest>=8.2.0", "cryptography>=44.0.0"]
+# Google Drive export (integrations/drive_export): RS256 service-account signing and
+# optional AES-GCM encryption of exports. See docs/drive-export.md.
+drive-export = ["cryptography>=44.0.0"]
 # Optional, explicit evaluation path. Production does not import or invoke this extra.
 eval = ["deepeval>=3.0.0"]
 # Local visual engine (docs/local-visual-engine.md). Pillow decodes PNG renders for verification;
 # bpy is Blender as a Python module (wheels exist for CPython 3.11 only). FFmpeg is a system package.
 visual = ["Pillow>=10.0", "bpy==4.2.0; python_version == '3.11'"]
+# Mission council engines and the MCP client (docs/mission-council.md). LangGraph is a
+# base dependency; without this extra the CrewAI/AutoGen engines report NOT_INSTALLED and
+# MCP tools are absent. Resolving crewai and autogen together needs protobuf 5.29.x.
+council = [
+    "crewai>=1.15,<2",
+    "autogen-agentchat>=0.7.5,<0.8",
+    "autogen-core>=0.7.5,<0.8",
+    "mcp>=1.28,<3",
+    "protobuf>=5.29,<8",
+]
 
 [tool.hatch.build]
-include = ["agency/guidance/packs/*.yaml", "agency/compiled/data/*.json"]
+include = ["agency/guidance/packs/*.yaml", "agency/compiled/data/*.json", "agency/operating_framework/data/*.json"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["app", "api", "agency", "core", "graph", "persistence", "quality", "security", "integrations"]

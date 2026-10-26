@@ -227,6 +227,152 @@ def test_t03_concurrent_claim_loses_and_stale_fence_cannot_write(root):
         store.commit_intent(key="nope", receipt={}, fencing_token=a["lease_token"], job_id=job["job_id"], now=later)
 
 
+def test_ace_v100_fenced_lease_heartbeat_and_zombie_rejection(root):
+    _, _, _, original = _job(root)
+    now = datetime.now(timezone.utc)
+    claimed, _ = store.claim_due_job(
+        worker_id="heartbeat-worker-A", now=now, lease_seconds=30, job_id=original["job_id"])
+    assert claimed is not None
+    refreshed = store.renew_lease(
+        job_id=claimed["job_id"], worker_id="heartbeat-worker-A",
+        fencing_token=claimed["lease_token"],
+        now=now + timedelta(seconds=10), lease_seconds=90)
+    assert refreshed["lease_expires_at"] > claimed["lease_expires_at"]
+    assert refreshed["version"] == claimed["version"] + 1
+    with pytest.raises(store.StaleFence):
+        store.renew_lease(
+            job_id=claimed["job_id"], worker_id="heartbeat-worker-B",
+            fencing_token=claimed["lease_token"],
+            now=now + timedelta(seconds=11), lease_seconds=90)
+    with pytest.raises(store.StaleFence):
+        store.renew_lease(
+            job_id=claimed["job_id"], worker_id="heartbeat-worker-A",
+            fencing_token=claimed["lease_token"] + 1,
+            now=now + timedelta(seconds=11), lease_seconds=90)
+    with pytest.raises(store.StaleFence):
+        store.renew_lease(
+            job_id=claimed["job_id"], worker_id="heartbeat-worker-A",
+            fencing_token=claimed["lease_token"],
+            now=now + timedelta(seconds=200), lease_seconds=90)
+    successor, state = store.claim_due_job(
+        worker_id="heartbeat-worker-B", now=now + timedelta(seconds=200),
+        lease_seconds=60, job_id=claimed["job_id"])
+    assert state is RunState.RECONCILING
+    assert successor["lease_token"] > claimed["lease_token"]
+    with pytest.raises(store.StaleFence):
+        store.renew_lease(
+            job_id=claimed["job_id"], worker_id="heartbeat-worker-A",
+            fencing_token=claimed["lease_token"],
+            now=now + timedelta(seconds=201), lease_seconds=30)
+
+
+def test_ace_v100_expired_fence_cannot_reserve_outbox_intent(root):
+    _, _, _, original = _job(root)
+    now = datetime.now(timezone.utc)
+    job, _ = store.claim_due_job(
+        worker_id="reserve-worker-A", now=now, lease_seconds=30,
+        job_id=original["job_id"])
+    assert job is not None
+    args = {
+        "key": f"ace-expired-{uuid4().hex}", "job": job,
+        "logical_tick": int(job["logical_tick"]), "operation": "visual.render",
+        "target": "artifact", "input_hash": "0" * 64,
+        "contract_version": "v1", "retry_class": "RETRY_SAFE",
+        "pre_image": {}, "fencing_token": job["lease_token"],
+    }
+    with pytest.raises(store.StaleFence):
+        store.reserve_intent(**args, now=now + timedelta(seconds=31))
+    assert store.get_intent(args["key"]) is None
+
+
+def test_ace_v100_timeout_after_dispatch_is_reconciled_without_duplicate(root):
+    """A dropped provider acknowledgement must not trigger another dispatch."""
+    _, _, _, job = _job(root)
+    now = datetime.now(timezone.utc)
+    original = HANDLERS["visual_render"]
+    calls = []
+
+    class TimeoutAfterPersist:
+        def __getattr__(self, name):
+            return getattr(original, name)
+
+        def dispatch(self, current):
+            calls.append(current["job_id"])
+            original.dispatch(current)
+            raise TimeoutError("synthetic 504 after remote-side commit")
+
+    first = run_tick(
+        worker_id="w-timeout", handlers={"visual_render": TimeoutAfterPersist()},
+        job_id=job["job_id"], now=now, lease_seconds=60)
+    assert first.outcome == "UNCONFIRMED"
+    assert store.get_intent(first.idempotency_key)["status"] == "UNCONFIRMED"
+    assert store.get_job(job["job_id"])["state"] == "RECONCILING"
+    second = run_tick(
+        worker_id="w-recovery", handlers={"visual_render": original},
+        job_id=job["job_id"], now=now + timedelta(seconds=120), lease_seconds=60)
+    assert second.outcome == "COMMITTED", second.reasons
+    assert second.adopted is True
+    assert second.dispatched is False
+    assert calls == [job["job_id"]]
+    assert store.get_intent(first.idempotency_key)["status"] == "COMMITTED"
+
+
+def test_ace_v100_provider_probe_rejection_and_unknown_state_are_durable(root):
+    _, _, _, job = _job(root)
+    now = datetime.now(timezone.utc)
+    active, _ = store.claim_due_job(
+        worker_id="probe-worker", now=now, lease_seconds=60, job_id=job["job_id"])
+    assert active is not None
+    key = f"probe-{uuid4().hex}"
+    store.reserve_intent(
+        key=key, job=active, logical_tick=1, operation="visual.render",
+        target="artifact", input_hash="0" * 64, contract_version="v1",
+        retry_class="RETRY_SAFE", pre_image={},
+        fencing_token=active["lease_token"], now=now)
+    looked_up = []
+    def uncertain(operation_key):
+        looked_up.append(operation_key)
+        raise TimeoutError("status API unreachable")
+    missing = store.reconcile_provider_intent(
+        key=key, job_id=job["job_id"], fencing_token=active["lease_token"],
+        now=now + timedelta(seconds=1), lookup=uncertain)
+    assert missing["status"] == "UNCONFIRMED"
+    assert looked_up == [key]
+    failed = store.reconcile_provider_intent(
+        key=key, job_id=job["job_id"], fencing_token=active["lease_token"],
+        now=now + timedelta(seconds=2),
+        lookup=lambda operation_key: {"status": "FAILED", "provider_ref": operation_key})
+    assert failed["status"] == "FAILED"
+    assert failed["receipt"]["provider_ref"] == key
+    assert store.reconcile_provider_intent(
+        key=key, job_id=job["job_id"], fencing_token=active["lease_token"],
+        now=now + timedelta(seconds=3),
+        lookup=lambda operation_key: (_ for _ in ()).throw(AssertionError("must not probe")))["status"] == "FAILED"
+
+
+def test_ace_v100_expired_but_unreclaimed_worker_cannot_settle(root):
+    _, _, _, job = _job(root)
+    now = datetime.now(timezone.utc)
+    active, _ = store.claim_due_job(
+        worker_id="late-worker", now=now, lease_seconds=10, job_id=job["job_id"])
+    key = f"late-{uuid4().hex}"
+    store.reserve_intent(
+        key=key, job=active, logical_tick=1, operation="visual.render",
+        target="artifact", input_hash="0" * 64, contract_version="v1",
+        retry_class="RETRY_SAFE", pre_image={},
+        fencing_token=active["lease_token"], now=now)
+    with pytest.raises(store.StaleFence):
+        store.commit_intent(
+            key=key, receipt={"status": "COMMITTED"},
+            job_id=active["job_id"], fencing_token=active["lease_token"],
+            now=now + timedelta(seconds=11))
+    with pytest.raises(store.StaleFence):
+        store.transition(
+            active, RunState.PRECHECK, fencing_token=active["lease_token"],
+            now=now + timedelta(seconds=11))
+    assert store.get_intent(key)["status"] == "INTENT"
+
+
 def test_idempotency_key_is_stable_and_scope_sensitive():
     base = dict(tenant="t", project="p", job="j", logical_tick=1, operation="visual.render", target="a", input_hash="h",
                 contract_version="v1")
@@ -564,23 +710,30 @@ def test_t16_crash_before_any_effect_redoes_under_the_same_intent(root):
     assert len(store.list_intents(job["job_id"])) == 1 and get_artifact(target)["version"] == 1
 
 
-def test_repeated_identical_failure_dead_letters_via_negative_knowledge(root, monkeypatch):
+def test_repeated_dispatch_exception_requires_reconciliation_before_retry(root, monkeypatch):
+    """An exception does not prove that external mutation was not committed."""
     _, _, _, job = _job(root)
     handler = HANDLERS["visual_render"]
-    monkeypatch.setattr(type(handler), "dispatch", lambda self, j: (_ for _ in ()).throw(OSError("disk full")))
+    dispatched = {"count": 0}
+
+    def disconnected(self, current):
+        dispatched["count"] += 1
+        raise OSError("disk full")
+
+    monkeypatch.setattr(type(handler), "dispatch", disconnected)
     first = run_tick(worker_id="w", handlers=HANDLERS, job_id=job["job_id"])
-    assert first.final_state == "RETRY_PENDING"
-    second = run_tick(worker_id="w", handlers=HANDLERS, job_id=job["job_id"],
-                      now=datetime.now(timezone.utc) + timedelta(seconds=60))
-    assert second.final_state == "DEAD_LETTER" and any("NEGATIVE_KNOWLEDGE" in r for r in second.reasons)
-    registry = capability_registry(caps_mod.probe_all(), store.jobs_for_project(job["project_id"]))
-    assert registry["job_kinds"]["visual_render"]["circuit"] == "OPEN"
-    # The operator path back out is explicit and logged; a dead letter cannot jump straight to running.
-    with pytest.raises(IllegalTransition):
-        store.operator_move(job["job_id"], RunState.SCHEDULED, actor="ops", reason="fixed disk")
-    store.operator_move(job["job_id"], RunState.PAUSED, actor="ops", reason="investigating")
-    resumed = store.operator_move(job["job_id"], RunState.SCHEDULED, actor="ops", reason="fixed disk")
-    assert resumed["state"] == "SCHEDULED" and _states(job["job_id"])[-1] == ("PAUSED", "SCHEDULED")
+    assert first.final_state == "RECONCILING"
+    assert store.get_intent(first.idempotency_key)["status"] == "UNCONFIRMED"
+    assert dispatched["count"] == 1
+
+    # A live lease must expire before a different worker can inspect the intent.
+    # The handler's observed pre-image must determine whether a replay is safe.
+    second = run_tick(worker_id="w2", handlers=HANDLERS, job_id=job["job_id"],
+                      now=datetime.now(timezone.utc) + timedelta(seconds=1200))
+    assert second.final_state in {"RECONCILING", "DEAD_LETTER"}
+    assert store.get_intent(first.idempotency_key)["status"] != "COMMITTED"
+    assert dispatched["count"] <= 2
+    assert store.get_job(job["job_id"])["state"] != "RETRY_PENDING"
 
 
 # ------------------------------------------------------------------ T17 rights

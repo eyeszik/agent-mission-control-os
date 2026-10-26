@@ -50,9 +50,9 @@ function Preview({ projectId, artifactId, name, kind }: { projectId: string | nu
   const { url, failed } = useArtifactUrl(projectId, artifactId);
   if (failed) return <p className="text-[11px] text-red-300">Preview unavailable for {name}</p>;
   if (!url) return <p className="text-[11px] text-zinc-500">Loading {name}…</p>;
-  if (kind === 'image') return <img src={url} alt={`${name} (synthetic render, not a photograph)`} className="max-h-48 w-auto rounded border border-zinc-800 bg-zinc-100" />;
-  if (kind === 'video') return <video src={url} controls muted playsInline className="max-h-60 rounded border border-zinc-800" aria-label={`${name} (procedural animation)`} />;
-  if (kind === 'html') return <iframe src={url} title={`${name} working page`} sandbox="allow-scripts allow-forms" className="w-full h-96 rounded border border-zinc-800 bg-zinc-50" />;
+  if (kind === 'image') return <img src={url} alt={`${name} (synthetic render, not a photograph)`} className="max-h-48 w-auto rounded-sm border border-zinc-800 bg-zinc-100" />;
+  if (kind === 'video') return <video src={url} controls muted playsInline className="max-h-60 rounded-sm border border-zinc-800" aria-label={`${name} (procedural animation)`} />;
+  if (kind === 'html') return <iframe src={url} title={`${name} working page`} sandbox="allow-scripts allow-forms" className="w-full h-96 rounded-sm border border-zinc-800 bg-zinc-50" />;
   return <a href={url} download={name} className="text-xs text-emerald-300 underline">Download {name}</a>;
 }
 
@@ -66,9 +66,16 @@ export function ExperienceArea() {
   if (!target) return needsProject;
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const content = form.items.split('\n').map((l) => l.trim()).filter(Boolean).slice(0, 12).map((l) => {
-      const [title, ...rest] = l.split(':'); return { title: title.trim().slice(0, 120), body: rest.join(':').trim().slice(0, 400) };
-    });
+    // ⚡ Bolt: Replaced multiple array map/filter/slice passes with a single loop to avoid intermediate array allocations
+    const lines = form.items.split('\n');
+    const content: { title: string; body: string }[] = [];
+    for (let i = 0; i < lines.length && content.length < 12; i++) {
+      const trimmed = lines[i].trim();
+      if (trimmed) {
+        const [title, ...rest] = trimmed.split(':');
+        content.push({ title: title.trim().slice(0, 120), body: rest.join(':').trim().slice(0, 400) });
+      }
+    }
     const r = await run('Compiling experience', () => produceExperience(brandId, target, { target: form.target, objective: form.objective,
       audience: form.audience, primary_action: form.primary_action, content }), (x) => `Experience ${x.status}`);
     if (r) setReport(r);
@@ -89,7 +96,8 @@ export function ExperienceArea() {
         <div className="flex flex-col gap-2 text-xs">
           <p><Badge value={report.status} /> verification <Badge value={report.verification.status} /> {report.verification.reason ?? ''}</p>
           <ol className="list-decimal pl-5 text-zinc-300">{report.package.stages.map((s) => <li key={s.stage}>{s.stage} <span className="font-mono text-zinc-500">{short(s.stage_hash, 10)}</span></li>)}</ol>
-          {report.verification.scenarios && <p className="text-zinc-400">Scenarios passed {report.verification.scenarios.filter((s) => s.passed).length}/{report.verification.scenarios.length}</p>}
+          {/* ⚡ Bolt: Use a zero-allocation reduce instead of .filter().length to prevent intermediate array allocation */}
+          {report.verification.scenarios && <p className="text-zinc-400">Scenarios passed {report.verification.scenarios.reduce((acc, s) => s.passed ? acc + 1 : acc, 0)}/{report.verification.scenarios.length}</p>}
           {report.package.assumptions.length > 0 && <details><summary className="text-zinc-400 cursor-pointer">Assumptions ({report.package.assumptions.length})</summary><ul className="list-disc pl-5">{report.package.assumptions.map((a) => <li key={a}>{a}</li>)}</ul></details>}
           {report.stored.html && <Preview projectId={projectId} artifactId={report.stored.html} name="experience.html" kind="html" />}
         </div>

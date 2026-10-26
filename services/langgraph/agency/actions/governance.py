@@ -12,6 +12,12 @@
 * LIVE (I20): ``live_enablement()`` is the single gate. This change contains no
   code path that returns ENABLED.
 * Policy simulator: read-only impact of a proposed budget ceiling.
+* Uncertainty debt (ACE v100): ``uncertainty()`` feeds the tenant's unresolved
+  effects (UNKNOWN, RECONCILING, NEEDS_HUMAN) into the pure
+  ``ace_release.assess_uncertainty`` budget. The gateway holds R3+ dispatch while
+  the budget is exceeded, so no new risky effect starts while an earlier one is
+  unconfirmed. The default policy tolerates none. A snapshot that may be
+  truncated counts as incomplete and therefore blocks.
 """
 
 from __future__ import annotations
@@ -20,6 +26,14 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Optional
 
+import hashlib
+
+from services.langgraph.agency.ace_release import (
+    EffectObservation,
+    UncertaintyAssessment,
+    UncertaintyPolicy,
+    assess_uncertainty,
+)
 from services.langgraph.persistence import actions as db
 from services.langgraph.security.auth import Principal
 
@@ -136,3 +150,30 @@ def simulate_budget_policy(principal: Principal, *, scope_kind: str, scope_ref: 
 
 __all__ = ["autonomy", "freeze", "freeze_reasons", "lift", "live_enablement", "set_autonomy", "simulate_budget_policy",
            "system_frozen"]
+
+
+# ACE v12 states whose provider outcome is not yet known. ``NEEDS_HUMAN`` stays in
+# the set: a mismatched or unreadable read-back is unresolved until a person and
+# a reconciliation settle it.
+UNRESOLVED_STATES = {"UNKNOWN": "UNCONFIRMED", "RECONCILING": "RECONCILING", "NEEDS_HUMAN": "RECONCILING"}
+UNCERTAINTY_SNAPSHOT_LIMIT = 1000
+UNCERTAINTY_POLICY = UncertaintyPolicy()  # zero tolerance: any unresolved effect holds R3+ dispatch
+
+
+def _observation(row: dict) -> EffectObservation:
+    # EffectObservation's risk scale ends at R5; R6 (governance) is at least as critical.
+    risk = "R5" if row["effective_class"] == "R6" else row["effective_class"]
+    updated = datetime.strptime(row["updated_at"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+    return EffectObservation(operation_key_digest=hashlib.sha256(row["action_id"].encode()).hexdigest(), risk=risk,
+                             status=UNRESOLVED_STATES[row["state"]], updated_at=updated)
+
+
+def uncertainty(tenant_id: str, *, now: Optional[datetime] = None,
+                policy: UncertaintyPolicy = UNCERTAINTY_POLICY) -> UncertaintyAssessment:
+    """One tenant's uncertainty debt, from a single authoritative query.
+
+    Other tenants' unresolved effects never count here (tenant isolation)."""
+    rows = db.list_requests(tenant_id, states=tuple(UNRESOLVED_STATES), limit=UNCERTAINTY_SNAPSHOT_LIMIT + 1)
+    complete = len(rows) <= UNCERTAINTY_SNAPSHOT_LIMIT
+    return assess_uncertainty(observations=tuple(_observation(r) for r in rows[:UNCERTAINTY_SNAPSHOT_LIMIT]),
+                              now=now or datetime.now(timezone.utc), policy=policy, snapshot_complete=complete)

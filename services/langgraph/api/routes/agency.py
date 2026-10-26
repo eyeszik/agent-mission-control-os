@@ -49,8 +49,10 @@ from services.langgraph.agency.execution.models import (
     ExecutionReceipt,
     FailureFingerprint,
     ObservationReceipt,
+    proof_coverage_from,
 )
 from services.langgraph.agency.kernel.lifecycle import TransitionContext, release_guard_failures
+from services.langgraph.agency.model_profiles import pin_metadata as pin_model_profile
 from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffect
 from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
@@ -604,16 +606,14 @@ def _record_completion(
     tenant_id: str,
     project_id: str,
     terminal_candidate: str,
-    proof_coverage: float,
     confidence: float,
     criteria: list[CompletionCriterionResult],
 ) -> dict:
+    criteria_tuple = tuple(criteria)
     evaluation = CompletionEvaluation(
         terminal_candidate=terminal_candidate,  # type: ignore[arg-type]
-        criteria=tuple(criteria),
-        proof_coverage=proof_coverage,
-        evidence_score=proof_coverage,
-        quality_score=proof_coverage,
+        criteria=criteria_tuple,
+        proof_coverage=proof_coverage_from(criteria_tuple),
         confidence=confidence,
     )
     return put_completion_evaluation(run_id, tenant_id, project_id, evaluation)
@@ -896,7 +896,9 @@ def create_agency_run(
         request={"project_id": req.project_id, "brief": safe_brief},
     )
     now = datetime.now(timezone.utc)
-    metadata = {"input_data": {"brief": safe_brief}, "initiated_by": principal.user_id, "workflow": pin.as_metadata()}
+    metadata = {"input_data": {"brief": safe_brief}, "initiated_by": principal.user_id, "workflow": pin.as_metadata(),
+                # Pinned for the life of the run; stages and resumes never re-read the environment.
+                "model_profile": pin_model_profile()}
     if contract is not None:
         metadata["delivery_contract"] = contract.model_dump(mode="json")
         metadata["delivery_contract_hash"] = contract_hash(contract)
@@ -984,7 +986,6 @@ def create_agency_run(
             tenant_id=run.tenant_id,
             project_id=run.project_id,
             terminal_candidate="BLOCKED",
-            proof_coverage=0.25,
             confidence=0.25,
             criteria=[CompletionCriterionResult(criterion_ref="execution", status=CriterionStatus.BLOCKED)],
         )
@@ -1145,7 +1146,6 @@ def create_agency_run(
         tenant_id=run.tenant_id,
         project_id=run.project_id,
         terminal_candidate="BLOCKED",
-        proof_coverage=0.67,
         confidence=0.72,
         criteria=[
             CompletionCriterionResult(criterion_ref="execution", status=CriterionStatus.SATISFIED),
@@ -1801,7 +1801,6 @@ def resume_agency_run(
         tenant_id=record["tenant_id"],
         project_id=record["project_id"],
         terminal_candidate="COMPLETE",
-        proof_coverage=1.0,
         confidence=0.96,
         criteria=[
             CompletionCriterionResult(criterion_ref="execution", status=CriterionStatus.SATISFIED),

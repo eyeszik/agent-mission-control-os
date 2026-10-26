@@ -92,6 +92,17 @@ GRAMMARS: dict[str, VisualGrammar] = {g.grammar_id: g for g in (
        {"display_weight": 600, "case": "sentence", "tracking": -0.01, "family": "text"},
        "paper panels, accent focus", "soft_shadow", ("card", "circle", "line"), {"easing": "spring", "energy": 0.45},
        ("material", "lighting", "spacing"), ("panels obscuring controls", "motion without reduced-motion path")),
+    _g("psem_editorial", "Post-Surrealist Editorial Modernism",
+       ("monumental_negative_space", "full_bleed_alternation", "editorial_spread", "hairline_division",
+        "micro_label", "serial_numbering", "geometric_motif", "optical_asymmetry"),
+       {"margin": 0.1, "gutter": 0.02, "headline_scale": 0.17, "density": 0.18}, {"columns": 12, "baseline": 8},
+       {"display_weight": 800, "case": "sentence", "tracking": -0.04, "family": "display"},
+       "charcoal and paper; one accent per composition (signal red or amber), on charcoal or behind charcoal type",
+       "fine analog grain, matte print", ("line", "rect", "circle", "bar"), {"easing": "ease_out", "energy": 0.2},
+       ("composition", "spacing", "typography", "visual_metaphor"),
+       ("more than one accent in a composition", "accent text on paper (below 3:1)", "glossy or glassy surfaces",
+        "identifiable people or faces", "stock-photo clichés", "symmetric centered layouts"),
+       "Influenced by surrealist conceptual photography and Swiss editorial modernism; reproduces no specific work."),
 )}
 
 DEFAULT_WEIGHTS = {"swiss_editorial": 1.0}

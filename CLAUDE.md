@@ -26,7 +26,7 @@ python -m uvicorn services.langgraph.app.main:app --host 127.0.0.1 --port 8000 -
 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000 pnpm --filter @amc/web dev --hostname 127.0.0.1 --port 3000
 ```
 
-Copy `.env.example`; minimum local config uses `AMC_ENV=local`, `AMC_AUTH_MODE=local`, `AMC_DATABASE_BACKEND=sqlite`. Without `OPENAI_API_KEY`, agency generation is explicitly `FALLBACK_DEGRADED` and delivery is blocked — that's intended behavior, not a bug, when testing without a key.
+Copy `.env.example`; minimum local config uses `AMC_ENV=local`, `AMC_AUTH_MODE=local`, `AMC_DATABASE_BACKEND=sqlite`. Without a usable credential for the selected provider (`OPENAI_API_KEY` by default), agency generation is explicitly `FALLBACK_DEGRADED` and delivery is blocked — that's intended behavior, not a bug, when testing without a key.
 
 ### Test
 
@@ -100,7 +100,7 @@ python3 orchestrate_brand_pipeline.py creative-run --input sample_creative_missi
 
 This is the one thing that isn't obvious from browsing individual files, and it matters for almost any nontrivial change here.
 
-**Layer 1 — the real, running execution pipeline** (`services/langgraph/graph/agency/`). `build.py` compiles a LangGraph `StateGraph`: `brief_intake → brand_strategy → creative_concepting → copywriting → design_brief → campaign_assembly → brand_safety_qa → hitl_gate → delivery`, compiled with `interrupt_before=["delivery"]` so every run pauses for human approval. Each node calls `llm.py`'s `generate_structured()`, which hits `OPENAI_API_KEY` (`gpt-4o-mini` by default) and returns a `GenerationOutcome` carrying `mode`; no key means `mode="FALLBACK_DEGRADED"`, and degraded output is not an error to catch downstream — it's a durable fact the lifecycle guards check before allowing release. This is what `api/routes/agency.py` actually invokes for a real run, checkpointed via `persistence/checkpoints.py` (SQLite locally, Postgres in production).
+**Layer 1 — the real, running execution pipeline** (`services/langgraph/graph/agency/`). `build.py` compiles a LangGraph `StateGraph`: `brief_intake → brand_strategy → creative_concepting → copywriting → design_brief → campaign_assembly → brand_safety_qa → hitl_gate → delivery`, compiled with `interrupt_before=["delivery"]` so every run pauses for human approval. Each node calls `llm.py`'s `generate_structured()`, which goes through the canonical `agency/model_router.py` using the run's pinned model profile (`agency/model_profiles.py`, `metadata.model_profile`; OpenAI `gpt-4o-mini` by default, or Anthropic, Gemini or Ollama via `AMC_LLM_PROVIDER`; see `docs/amc-i03-model-profiles.md`) and returns a `GenerationOutcome` carrying `mode`; no usable credential or an invalid selection means `mode="FALLBACK_DEGRADED"`, and degraded output is not an error to catch downstream — it's a durable fact the lifecycle guards check before allowing release. This is what `api/routes/agency.py` actually invokes for a real run, checkpointed via `persistence/checkpoints.py` (SQLite locally, Postgres in production).
 
 **Layer 2 — the governance kernel** (`services/langgraph/agency/kernel/`: `ontology.py` N1, `lifecycle.py` N2, `roles.py` N3, `registry.py` N4). A closed, typed vocabulary: 28 `ArtifactType`s owned by `Department`s (N1; `media_asset` was added for rendered/uploaded media); a transition matrix per entity (`engagement`/`workstream`/`artifact`) with guarded, fail-closed release states (N2); 13 `RoleContract`s declaring `produces`/`consumes`/`min_evidence`/`requires_human_approval`/`external_side_effect` per role (N3); an artifact registry with branch/merge semantics (N4). Every Pydantic model here has a Zod twin in `packages/shared/src/schemas/` and `verify_ontology_parity.py` enforces they agree.
 
@@ -227,7 +227,7 @@ Details: `docs/local-visual-engine.md`, `docs/durable-runtime.md`, `docs/abc-v6-
 
 - **Genome.** `compile_genome(UserBrief)` is deterministic, records assumptions and enforces palette contrast floors.
   The brief never carries authority.
-- **Grammars.** Twelve `VisualGrammar`s, blended by weight.
+- **Grammars.** Thirteen `VisualGrammar`s, blended by weight (the thirteenth, `psem_editorial`, is PSEM; `psem.py` holds its locked palette and computed pairing rules).
 - **Composition.** `compose.py` emits CompositionIR (palette roles) and then SVG.
 - **Variants.** `variants.py` mutates, crossbreeds and forks within `creative.ir.ResourceBudget` caps.
 - **Experience twin.** `experience.py` builds working HTML evaluated by real Chromium scenarios and counterfactual
@@ -245,6 +245,35 @@ verifies it. A genome revision invalidates dependents through the existing inval
 
 The demo is `scripts/render_foundry_demo.py`, which writes `runtime/foundry/demo/` for a FICTIONAL brand.
 Details: `docs/creative-foundry.md`.
+
+### Website production line (UCPO) — brief to verified site, never deployed
+
+`services/langgraph/agency/ucpo/` + `api/routes/ucpo.py` (`/ucpo`) + `components/ucpo/` (the Website Production section of `/agency`) + CLI `website`:
+
+- **Stages are Project OS artifacts.**
+  - Brief → requirements → PSEM genome → tokens → plates → site IR → source.
+  - Each is stored through `foundry.studio.store` (key `foundry-ucpo-<site>-<stage>`) with `depends_on`, after `assert_role_may_produce`.
+  - No table, migration or approval store is added. Don't add one.
+- **Copy and requirements.**
+  - Copy comes only from the brief.
+  - Requirement ids are structural.
+  - Every element in the generated source carries `data-req`.
+- **Generated source is untrusted.**
+  - `sandbox.probe_isolation` must *demonstrate* the sandbox: `unshare -rmn`, a read-only repo, `env -i`, `prlimit` and `timeout`. Otherwise return `BLOCKED_ISOLATION` and run nothing.
+  - Build: `tsc` + `next build --webpack` inside the sandbox.
+  - QA: `qa_runner.cjs` in the sandbox, with Chromium route-fulfilled from the export.
+  - NOT_RUN or BLOCKED never counts as PASS.
+- **Durable job.** Build + QA is the durable job `ucpo_site_build` (`SiteBuildHandler`), driven by an explicit `run_tick`.
+- **Release.**
+  - `release.seal_proof` binds every revision.
+  - Approval opens only for an eligible proof and is decided via `/approvals/{id}/decide`.
+  - `deployment` is always `NOT_AUTHORIZED`.
+- **Registries.**
+  - Disciplines, presentation systems, prompt modules and multimodal specs are registries.
+  - Generation providers are `CAPABILITY_GAP`; never fake them.
+- **Contracts.** Zod twins are in `packages/shared/src/schemas/ucpo.ts`; the fixture is `packages/shared/tests/fixtures/ucpo.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_ucpo_contracts.py`).
+
+Details: `docs/ucpo/README.md`.
 
 ### VNEXUS ACE — persisted brand genome and the layers on it
 
@@ -304,6 +333,48 @@ Details: `docs/vnexus-ace.md`.
 
 Details: `docs/ace-v12/README.md`.
 
+### Mission Council — three engines, one gate
+
+`services/langgraph/agency/council/` + `persistence/council.py` (SQLite migration 19 / `20261022_amc_mission_council_v1.sql`) + `api/routes/missions.py` (`/missions`) + `apps/web/components/missions/` (`/missions`, also the Mission Council section of `/agency`):
+
+- **Mission = run.** A mission is a `runs` row (pipeline `mission_council`). Its events are `run_events` (SSE via `/runs/{id}/events`), and its gate is an `approvals` row decided only via `/approvals/{id}/decide`. Don't add another approval or event store.
+- **Engines.** `engines/{langgraph,crewai,autogen}_engine.py` share `engines/base.py` (strategy → audit → gate → prototype).
+  - LangGraph uses the shared checkpointer with `interrupt()` + `Command(resume=)`.
+  - CrewAI and AutoGen are the optional `council` extra; when it is absent they report `NOT_INSTALLED`, never fake it.
+  - AutoGen has no code executor.
+- **Models.** Seats run on the deterministic `MockSeatModel` unless `ENABLE_REAL_MODELS=true`. A failed provider fails the seat; it never falls back to mock output.
+- **Policy and gate.**
+  - `policy.scan` runs first and is deterministic. Model findings only raise risk.
+  - The gate subject hash binds mission, thread, requested actions, strategy/risk hashes and policy version.
+  - Decisions are single-use per action hash.
+- **Tools.** `gateway.invoke` is the only tool path. It is deny-by-default with seat scopes and approval binding for WRITE/EXTERNAL; SHELL is disabled.
+  - Every call is audited and redacted.
+  - MCP servers come only from `AMC_MCP_SERVERS`.
+- **State.** Terminal states never move. `queued → running` happens only under the lease. Checkpoints are hash-chained and verified on read.
+- **Contracts.** Zod twins live in `packages/shared/src/schemas/missionCouncil.ts`, with the fixture `packages/shared/tests/fixtures/mission-council.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_council_contracts.py`).
+
+Details: `docs/mission-council.md`.
+
+### Agency Operating Framework — a ledger over existing owners
+
+`services/langgraph/agency/operating_framework/` + `persistence/operating_framework.py` (SQLite migration 20 / `20261024_amc_agency_framework_v1.sql`) + `api/routes/agency_framework.py` (`/agency-framework`) + `apps/web/components/framework/` (`/framework`, also the Operating Framework section of `/agency`):
+
+- **Catalog.** `data/catalog.seed-v1.json` is vendored byte-for-byte and SHA-256 pinned; `load_catalog` refuses it unless schema and semantic checks pass (24 modules, 295 unique tasks, per-module counts, no cycles). A changed catalog is a new version and pin, never an in-place edit.
+- **Bindings.** `bindings.py` maps each module to an N3 role that may produce its N1 artifact type (`verify_bindings` checks the live kernel). Coverage is EXACT / NEAREST / NO_N3_ROLE; keep the gaps visible, don't invent roles.
+- **Tasks.** Instances are CAS on `version`; every write appends one `project_events` row in the same transaction. VERIFIED only via `/verify` (server re-check, approver role, not the submitter); APPROVED only via `/settle` after `/approvals/{id}/decide` on an approval bound to `task_proof_hash`. `MANUAL_TRANSITIONS` is mirrored in `apps/web/lib/framework/view.ts` (parity-tested).
+- **Refs.** `refs.resolve_ref` reads the owning store (knowledge, kernel evidence/decisions, VNEXUS genome, artifact head + byte read-back). Synthetic sources are labelled and never client proof.
+- **Gates.** Evaluated from task state; approval subject `agency-gate:{plan}:{gate}` bound to `evaluation_hash`; strictly in order.
+- **Assurance.** The five records are immutable `qa_report` artifacts (`assurance/<kind>/<id>`), hash-sealed and integrity-checked on read; they never approve, release or mutate the canonical graph.
+- **Release candidates.** A Review may bind delivery's sealed candidate (`release_candidate_ref`). `candidates.inspect` re-checks it read-only:
+  - reviewer: an approver who did not start the run;
+  - artifact hashes are recomputed from the run payload via the binding layer's own `_workspace_artifact_specs` / `_agency_subject_hash`, never a second hash scheme;
+  - the Review never opens a second release decision; the run's approval and delivery stay the authority.
+- **Claims.** `claims.py` detects marketing claims by signal, not length. Detection, substantiation (person-linked refs only, never "verified"), policy (always human review) and decision stay separate. Don't change `project_os.knowledge.extract_claims`; its six-word floor is right for ingestion.
+- **KPIs.** Only from `measurement` evidence and plan events; a zero denominator is `NOT_MEASURED`.
+- **Contracts.** Zod twins in `packages/shared/src/schemas/agencyFramework.ts`, fixture `packages/shared/tests/fixtures/agency-framework.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_agency_framework_contracts.py`).
+
+Release eligibility stays with `agency/delivery`; nothing here dispatches an external effect. Details: `docs/agency-operating-framework.md`.
+
 ### Prompt families and v10 prompt OS — decomposed, not injected
 
 `agency/prompt_families/` compiles reusable prompt families through the existing prompt compiler. It freezes an `InvariantSet`, varies declared axes, rejects concepts whose SHA-256 signature repeats the `ConceptLedger` (repairing the highest-level axis first, at most 3 passes), and terminates at `PROMPT_PACKAGE_READY`. `AssetRequirement` gained additive `exact_text` (blocking if not preserved verbatim), typed `references` and `series`. `ComputationEvidence` never upgrades a premise to VERIFIED. Methodology lives in the `pg.copy_content.v1`, `pg.attention.hooks.v1` and `pg.visual_prompting.v1` packs. The supplied spec is provenance only (`docs/imported-specs/`). CLI: `prompt-family`. Details: `docs/brand-content-visual-prompt-os.md`.
@@ -319,6 +390,15 @@ Details: `docs/ace-v12/README.md`.
 ### UI/UX design compiler and DTCG tokens
 
 `services/langgraph/agency/ui_ux/` compiles product/brand/audience state into a strict `UIUXDesignIR` (IA, flows, genome, tiered DTCG tokens, screens, the full 29-state matrix, responsive transforms, WCAG 2.2 requirements, AI-trust rules, implementation map) — pure, deterministic, terminal `UIUX_SPEC_READY`, never generates UI. It runs as a deterministic subprocess of `design_brief` for digital-product briefs (`DesignBrief.ui_ux`; non-UI briefs get `null`) and inside the prompt compiler for `PromptFamily.UI_UX` (`PromptPackage.ui_ux_design`); other families are byte-identical. WCAG 2.2 is normative for every contrast verdict; APCA is advisory only and never merged with it; vendor design systems are reference-only. `agency/design_tokens.py` is the **only** DTCG 2025.10 compiler (frontend `compile_tokens.py`, runtime `_build_design_system`, UI/UX) — don't add a second. Frontend tokens: edit `apps/web/tokens/amc.tokens.json`, run `pnpm tokens:build`; `apps/web/app/tokens.css` is generated and checked for freshness by `verify_design_tokens.py`; `pnpm --filter @amc/web verify:ui` is a TS-AST gate. `UIUXDesignIR` has a strict Zod twin (`packages/shared/src/schemas/uiux.ts`) whose parity is proven by a compiler-generated fixture — if you change the Pydantic models, regenerate `packages/shared/tests/fixtures/uiux-design-ir.json`. Details: `docs/ui-ux-design-compiler.md`.
+
+### Web pages and motion — design skill first
+
+The project skill `.claude/skills/premium-web-design/SKILL.md` is the workflow for building, restyling or animating web pages (landing pages, heroes, navbars, pricing, 21st.dev blocks).
+
+- **Tokens.** The type scale (major third, `text-caption`…`text-display-lg`) and 8px-grid section spacing (`py-block`/`py-section`/`py-section-lg`) are DTCG tokens in `apps/web/tokens/amc.tokens.json`, mapped in `tailwind.config.ts`.
+- **Motion.** Animations use Framer Motion through `apps/web/components/motion/Motion.tsx` (`Reveal`, `Stagger`/`StaggerItem`, `HoverLift`): `LazyMotion` + `domAnimation`, `reducedMotion="user"`, and never on above-the-fold/LCP content. Its numbers mirror the motion tokens in `lib/design/motion.ts`; `tests/motion-tokens.test.ts` fails on drift.
+- **Agency side.** The same methodology is the advisory guidance pack `pg.web_experience.v1`. It routes only for `UI_UX` web requests and is excluded for image/video/print families.
+- **Performance.** A Lighthouse 90+ claim needs a measured mobile run on a production build: `npx -y lighthouse@13.5.0` with `CHROME_PATH` set to the Playwright Chromium.
 
 ### The fail-closed integration pattern
 

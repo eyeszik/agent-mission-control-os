@@ -140,7 +140,7 @@ export const TokenSystemSpecSchema = z.object({
   format: z.literal('DTCG 2025.10'),
   tiers: z.array(z.string()),
   css_prefix: z.string(),
-  document: z.record(z.unknown()),
+  document: z.record(z.string(), z.unknown()),
   source_hash: z.string(),
   token_count: z.number().int().min(1),
   css: z.string(),

@@ -579,6 +579,35 @@ def test_stale_volatile_requirement_cannot_silently_release():
     assert volatile_release_blockers([VolatileConstraint(key="k")], "2026-09-27") == ["VOLATILE_UNVERIFIED:k"]
 
 
+@pytest.mark.parametrize("changes,as_of,expected", (
+    ({"expires_or_recheck_at": "2026-10-09T13:00:00+02:00"}, "2026-10-09T12:00:00Z", "EXPIRED"),
+    ({"expires_or_recheck_at": "2026-10-09T11:00:00-02:00"}, "2026-10-09T12:00:00Z", "VERIFIED"),
+    ({"expires_or_recheck_at": "2026-10-09T14:00:00+02:00"}, "2026-10-09T12:00:00Z", "EXPIRED"),
+    ({"expires_or_recheck_at": "tomorrow"}, "2026-10-09T12:00:00Z", "UNVERIFIED"),
+    ({"retrieved_at": "not-a-date"}, "2026-10-09T12:00:00Z", "UNVERIFIED"),
+    ({"retrieved_at": "2026-10-10T00:00:00Z"}, "2026-10-09T12:00:00Z", "UNVERIFIED"),
+    ({"effective_date": "2026-10-10"}, "2026-10-09T12:00:00Z", "UNVERIFIED"),
+    ({"effective_date": "not-a-date"}, "2026-10-09T12:00:00Z", "UNVERIFIED"),
+    ({"effective_date": ""}, "2026-10-09T12:00:00Z", "UNVERIFIED"),
+    ({"retrieved_at": "2026-10-01T00:00:00"}, "2026-10-09T12:00:00Z", "UNVERIFIED"),
+    ({}, "not-a-date", "UNVERIFIED"),
+    ({}, "2026-10-09T12:00:00", "UNVERIFIED"),
+    ({"source_ref": "   "}, "2026-10-09T12:00:00Z", "UNVERIFIED"),
+    ({"value": "   "}, "2026-10-09T12:00:00Z", "UNVERIFIED"),
+    ({"verification_status": "EXPIRED"}, "2026-10-09T12:00:00Z", "EXPIRED"),
+    ({}, "2026-10-09T14:00:00+02:00", "VERIFIED"),
+))
+def test_volatile_freshness_uses_actual_instants_and_rejects_unverifiable_dates(changes, as_of, expected):
+    """Fictional constraint records exercise admission, not WCAG conformance."""
+    body = {"key": "accessibility.standard", "source_ref": "fixture:standard:v1",
+            "retrieved_at": "2026-10-01T00:00:00Z", "value": "fixture:accessibility-target",
+            "verification_status": "VERIFIED", "expires_or_recheck_at": "2026-11-01T00:00:00Z"}
+    constraint = VolatileConstraint.model_validate({**body, **changes})
+    assert volatile_status(constraint, as_of).value == expected
+    blockers = volatile_release_blockers([constraint], as_of)
+    assert blockers == ([] if expected == "VERIFIED" else [f"VOLATILE_{expected}:accessibility.standard"])
+
+
 # --------------------------------------------------------------------------- LEARNING / MEASUREMENT
 
 def test_learning_is_append_only_tenant_scoped_and_cannot_mutate_authority():

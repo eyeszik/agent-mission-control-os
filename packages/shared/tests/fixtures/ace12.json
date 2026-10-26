@@ -1495,5 +1495,38 @@
     "state": "UNKNOWN",
     "status_label": "Outcome unknown",
     "updated_at": "2026-10-11T23:42:23.864940Z"
+  },
+  "uncertainty": {
+    "applies_to": "R3+",
+    "assessment": {
+      "allow_high_risk_dispatch": false,
+      "blockers": [
+        "UNCERTAINTY_COUNT_EXCEEDED",
+        "CRITICAL_UNCERTAINTY_EXCEEDED"
+      ],
+      "oldest_seconds": 0,
+      "unconfirmed_critical": 1,
+      "unconfirmed_total": 1
+    },
+    "policy": {
+      "critical_risk": [
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "max_oldest_seconds": 0,
+      "max_unconfirmed_critical": 0,
+      "max_unconfirmed_total": 0
+    },
+    "unresolved": [
+      {
+        "action_id": "act-2aa9ce57cfce66673a8903d6564563ab",
+        "capability_id": "sandbox.cms.publish_page",
+        "effective_class": "R3",
+        "project_id": "prj-ace-5fd9ed44",
+        "state": "UNKNOWN",
+        "updated_at": "2026-10-15T08:15:04.077139Z"
+      }
+    ]
   }
 }

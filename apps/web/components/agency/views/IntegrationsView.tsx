@@ -65,7 +65,8 @@ export function IntegrationsView() {
             <>
               <p className="text-sm">{drift.data.drifted === 0 ? 'No drift detected.' : `${drift.data.drifted} capability(ies) differ from their declaration.`}</p>
               <ul className="flex flex-col gap-1 text-sm">
-                {drift.data.entries.filter((e) => e.drift).map((e) => <li key={e.id}><Badge status="ATTENTION" label="Drift" /> {e.id}: declared {e.declared.toLowerCase()}, observed {e.observed.toLowerCase()}</li>)}
+                {/* ⚡ Bolt: Removed .filter().map() chain to prevent intermediate array allocation on every render */}
+                {drift.data.entries.map((e) => e.drift ? <li key={e.id}><Badge status="ATTENTION" label="Drift" /> {e.id}: declared {e.declared.toLowerCase()}, observed {e.observed.toLowerCase()}</li> : null)}
               </ul>
               <p className="text-xs text-fg">Checked {new Date(drift.data.checked_at).toLocaleString()}</p>
             </>

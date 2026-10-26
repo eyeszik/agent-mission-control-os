@@ -52,6 +52,24 @@ const config: Config = {
           unavailable: "var(--amc-component-ai-trust-color-unavailable)",
         },
       },
+      // Type scale (major third, 16px base) from semantic.font.size / line-height.
+      fontSize: {
+        caption: ["var(--amc-semantic-font-size-caption)", { lineHeight: "var(--amc-semantic-font-line-height-body)" }],
+        label: ["var(--amc-semantic-font-size-label)", { lineHeight: "var(--amc-semantic-font-line-height-body)" }],
+        body: ["var(--amc-semantic-font-size-body)", { lineHeight: "var(--amc-semantic-font-line-height-body)" }],
+        lead: ["var(--amc-semantic-font-size-lead)", { lineHeight: "var(--amc-semantic-font-line-height-body)" }],
+        h3: ["var(--amc-semantic-font-size-h3)", { lineHeight: "var(--amc-semantic-font-line-height-title)" }],
+        h2: ["var(--amc-semantic-font-size-h2)", { lineHeight: "var(--amc-semantic-font-line-height-title)" }],
+        h1: ["var(--amc-semantic-font-size-h1)", { lineHeight: "var(--amc-semantic-font-line-height-heading)" }],
+        display: ["var(--amc-semantic-font-size-display)", { lineHeight: "var(--amc-semantic-font-line-height-heading)" }],
+        "display-lg": ["var(--amc-semantic-font-size-display-lg)", { lineHeight: "var(--amc-semantic-font-line-height-heading)" }],
+      },
+      // Layout rhythm on the 8px grid; Tailwind's default numeric spacing is already 4px-based.
+      spacing: {
+        block: "var(--amc-semantic-space-block)",
+        section: "var(--amc-semantic-space-section)",
+        "section-lg": "var(--amc-semantic-space-section-lg)",
+      },
       borderRadius: {
         "ai-trust": "var(--amc-component-ai-trust-radius-container)",
       },

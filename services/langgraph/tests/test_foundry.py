@@ -119,7 +119,7 @@ def test_genome_records_assumptions_and_refuses_foreign_project_hint():
 
 
 def test_grammars_blend_deterministically_and_reject_unknowns():
-    assert len(GRAMMARS) == 12 and all(g.anti_patterns and g.lineage_note for g in GRAMMARS.values())
+    assert len(GRAMMARS) == 13 and all(g.anti_patterns and g.lineage_note for g in GRAMMARS.values())
     w = normalise({"art_deco": 2, "swiss_editorial": 2})
     assert w == {"art_deco": 0.5, "swiss_editorial": 0.5}
     assert blend(w) == blend(dict(reversed(list(w.items()))))
@@ -436,7 +436,7 @@ def test_api_capabilities_and_mission_route(root, monkeypatch):
     tenant, pid, _ = _project(root)
     as_user(monkeypatch, "alice", tenant=tenant, projects=pid)
     caps = client.get("/foundry/capabilities").json()
-    assert caps["hosted_generation"] == "NONE" and len(caps["grammars"]) == 12
+    assert caps["hosted_generation"] == "NONE" and len(caps["grammars"]) == 13
     body = {"brief": {"organization": "Halden & Fen", "deliverable_types": ["genome", "design_tokens"], "seed": 11}}
     assert client.post(f"/foundry/projects/{pid}/missions", json=body).status_code == 422  # Idempotency-Key required
     key = headers()
