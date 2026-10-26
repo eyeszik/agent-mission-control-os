@@ -1,0 +1,41 @@
+{
+  "allowed_variations": [
+    "composition",
+    "motif",
+    "headline_scale",
+    "annotation"
+  ],
+  "approved": false,
+  "authority": "PROJECTION",
+  "max_signal_accents": 1,
+  "palette": {
+    "amber": "#ffaa3d",
+    "charcoal": "#171719",
+    "fog": "#838185",
+    "graphite": "#323234",
+    "paper": "#f0eee9",
+    "signal_red": "#ff4c2f"
+  },
+  "protected_invariants": [
+    "palette",
+    "single_signal_accent",
+    "accent_never_on_paper"
+  ],
+  "roles": {
+    "accent": "signal_red",
+    "accent_2": "amber",
+    "ground": "paper",
+    "ink": "charcoal",
+    "muted": "fog",
+    "night": "charcoal",
+    "secondary": "graphite"
+  },
+  "schema_version": "amc-avic/1",
+  "source": "foundry.psem.PALETTE",
+  "source_hash": "596adb4c2f313e8b8c07b36b7c949d0e668e62ac624ba5b9835336ffa4e71618",
+  "typography": [
+    "Helvetica Neue",
+    "Arial",
+    "sans-serif"
+  ]
+}

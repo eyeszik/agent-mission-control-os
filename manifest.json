@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "b739b282265a148625dbe642302b857048d6a6cf"
+      "git_blob_sha": "e9672be205bc51585ead96cfbfadccd15d5640dd"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -160,7 +160,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "e33872de9944cf3af22a1ac40e5b5c926dadcba9"
+      "git_blob_sha": "ecc9b4cb5deb0f3d78e9ccaa927b046a439eaa55"
     },
     {
       "path": "runtime/abc/run-fsm.yaml",
@@ -1109,6 +1109,30 @@
     {
       "path": "services/langgraph/tests/test_ucpo_qa_discovery.py",
       "git_blob_sha": "6664475d36c35b33b4405057dc7c09304d8986d5"
+    },
+    {
+      "path": "services/langgraph/agency/avic/svg.py",
+      "git_blob_sha": "ac1ef252312a2d047f4adb707f0ded798b5a992e"
+    },
+    {
+      "path": "services/langgraph/agency/avic/service.py",
+      "git_blob_sha": "3ad152b74cbd5f635f732fcb56b56318e25a6cc0"
+    },
+    {
+      "path": "services/langgraph/agency/avic/intent.py",
+      "git_blob_sha": "141786b82c5381896ee38b47fd2847ffead68923"
+    },
+    {
+      "path": "services/langgraph/agency/avic/png.py",
+      "git_blob_sha": "ae0b01c462397a19fd044c49fcb78e88c3a4e73a"
+    },
+    {
+      "path": "services/langgraph/agency/avic/evaluate.py",
+      "git_blob_sha": "c19e70cacc99620b0d273b23de7b14e6dc41688f"
+    },
+    {
+      "path": "services/langgraph/tests/test_avic.py",
+      "git_blob_sha": "1d4935200498ce36b7206c546fc8f9b24f98121a"
     }
   ]
 }

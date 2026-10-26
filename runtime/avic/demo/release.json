@@ -1,0 +1,20 @@
+{
+  "external_effects": "none",
+  "files": {
+    "benchmark_results.json": "1c654a873b1781c694aeeb28f5d3aef88342b3a72416269bbb4b46be73d38eee",
+    "brand.json": "287497b22b3bbd88473f861537385d01d1164276be1b0aa6f717314b53b66d1e",
+    "complexity_report.json": "3b19d7704a2b09afb935396ab9f92ae2dab5f5d4ecc3e83811c825d82ea184af",
+    "constraints.json": "e3093f881c9f27feaa27836f7b4873e2a23786707a8cd26cfd95dcb72ef424cc",
+    "evaluation.json": "d3eb5191d5e559eafe12c1a8a9d7750586544b91d0b5e98c3b3f6963a7c9a9f2",
+    "master.svg": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3",
+    "preview.png": "cf6929a64c6f31b423b17cf74358f2a25e94775d521832b29c0fcbb8095e3f3f",
+    "provenance.json": "1995f302770ab6c06d4bed1fca3e687ec03f22726ded72bcf3afe085d79f9889",
+    "requirements.json": "2a58c59c0d9e30622bf6e19437c837f3baf3f5c31d7c6909df0897560d3636b2",
+    "scene.json": "c571459516287c26b4af80a7b813ddd2820c24068b09e1ae19c7803a3bcee171",
+    "variants.json": "b4095c9c3bea4b4b6c3bc429a58d820d063c26ebaf16061ec12ee47be8336e9d"
+  },
+  "reasons": [
+    "LOCAL_RUN: approval and release need a project and a second person (service.request_approval + /approvals/{id}/decide)"
+  ],
+  "release_allowed": false
+}
