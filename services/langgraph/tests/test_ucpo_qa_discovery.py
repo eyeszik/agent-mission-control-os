@@ -22,6 +22,7 @@ def modules(tmp_path, monkeypatch):
         return {"/opt/node-tools/node_modules": tools, "/opt/pw-browsers": cache}.get(str(value), Path(value))
     monkeypatch.setattr(qa, "Path", fixture_path)
     monkeypatch.delenv("PLAYWRIGHT_BROWSERS_PATH", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
     return web, tools, cache
 
 
@@ -54,6 +55,14 @@ def test_scoped_package_symlink_and_default_browser_cache(modules, tmp_path):
     (web / "@playwright" / "test").symlink_to(actual, target_is_directory=True)
     cache.mkdir()
     assert qa._playwright_paths() == (str(web), "/opt/pw-browsers", str(web / "@playwright/test"))
+
+
+def test_user_default_browser_cache_is_passed_into_the_scrubbed_sandbox(modules, tmp_path):
+    web, _, _ = modules
+    selected = package(web, "@playwright/test")
+    default = tmp_path / "home" / ".cache" / "ms-playwright"
+    default.mkdir(parents=True)
+    assert qa._playwright_paths() == (str(web), str(default), str(selected))
 
 
 def test_missing_dependency_remains_unavailable(modules):

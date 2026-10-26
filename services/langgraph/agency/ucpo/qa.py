@@ -30,14 +30,25 @@ RUNNER_TIMEOUT_S = 300
 _HEX = {v.lower(): k for k, v in psem.PALETTE.items()}
 
 
+def _browser_cache() -> Optional[str]:
+    """Where Playwright's Chromium lives. The sandbox scrubs ``HOME``, so the default per-user cache
+    that ``playwright install`` writes to must be passed explicitly or the runner cannot find it."""
+    configured = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
+    if configured:
+        return configured
+    if Path("/opt/pw-browsers").is_dir():
+        return "/opt/pw-browsers"
+    default = os.path.expanduser("~/.cache/ms-playwright")
+    return default if os.path.isdir(default) else None
+
+
 def _playwright_paths() -> tuple[Optional[str], Optional[str], Optional[str]]:
     """Return the module root, browser cache and exact package the runner must load."""
     for package in ("@playwright/test", "playwright"):
         for candidate in (Path("/opt/node-tools/node_modules"), WEB_NODE_MODULES):
             module = candidate / package
             if (module / "package.json").is_file():
-                browsers = os.environ.get("PLAYWRIGHT_BROWSERS_PATH") or ("/opt/pw-browsers" if Path("/opt/pw-browsers").is_dir() else None)
-                return str(candidate), browsers, str(module)
+                return str(candidate), _browser_cache(), str(module)
     return None, None, None
 
 
