@@ -32,7 +32,7 @@
     "@types/node": "^20.0.0",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "postcss": "^8.5.23",
+    "postcss": "^8.5.31",
     "tailwindcss": "^4.3.3",
     "typescript": "7.0.2",
     "typescript-api": "npm:typescript@5.9.3",
