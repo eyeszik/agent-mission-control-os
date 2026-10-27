@@ -88,6 +88,26 @@ faked. Installing `@playwright/test` + Chromium would unblock raster and web
 verification; FFmpeg would unblock motion; Blender would unblock the scene. None
 of those installs has been authorised.
 
+## Workflow smoke test (2026-10-27)
+
+The supported path was executed against the repository's **fictional** demo
+brand, not UNSPLIT, to prove what the host can do before asking for a direction:
+
+```
+python3 scripts/render_foundry_demo.py --out /tmp/foundry-demo-smoke --quality draft
+```
+
+Result: genome, tokens (JSON + CSS), mark, lockup, dark lockup, icon family and
+poster SVG were persisted to Project OS, read back, re-hashed and reported
+`VERIFIED`. The capability gaps matched the table above exactly: app icon PNG,
+poster PNG, variant PNGs, browser-verified website section, Blender scene and
+MP4 motion were `MISSING` for the stated blockers. Nothing was published and no
+approval was decided.
+
+Dependencies installed locally to reach that point: `pydantic 2.14.1`,
+`pillow 13.0.0`, `httpx 0.28.1`, `fastapi`. They are environment state, not a
+repository change; no requirements file pins them.
+
 ## Open prerequisites before Gate 2
 
 - Trademark/domain/company-name clearance for **UNSPLIT**.
