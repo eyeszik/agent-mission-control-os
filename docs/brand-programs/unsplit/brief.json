@@ -1,0 +1,26 @@
+{
+  "project_name": "UNSPLIT — running year, one line",
+  "target_artifacts": [
+    "positioning_statement",
+    "brand_platform",
+    "identity_guidelines",
+    "design_token_set",
+    "campaign_package",
+    "automation_spec"
+  ],
+  "available_inputs": [
+    "research_brief",
+    "market_analysis",
+    "design_brief"
+  ],
+  "target_phase": "strategy",
+  "evidence_count": 8,
+  "facts": {
+    "generation_mode": "PRIMARY",
+    "approval_exists": false,
+    "approval_resolved": false,
+    "approval_decision": null,
+    "brand_safety_passed": null,
+    "spend_authorized": false
+  }
+}
