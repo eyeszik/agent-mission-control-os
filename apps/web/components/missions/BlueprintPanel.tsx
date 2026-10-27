@@ -56,7 +56,8 @@ function BlueprintCard({ blueprint, onChanged }: { blueprint: Blueprint; onChang
 /** Extract the best parts of the idea's completed missions into a blueprint, then promote it after timeline verification. */
 export function BlueprintPanel({ idea, onChanged }: { idea: IdeaDetail; onChanged: () => void }) {
   const runner = useRunner();
-  const completed = idea.missions.filter((m) => m.status === 'completed').length;
+  // ⚡ Bolt: Replace .filter().length with a zero-allocation .reduce() count
+  const completed = idea.missions.reduce((acc, m) => m.status === 'completed' ? acc + 1 : acc, 0);
   return (
     <div className="flex min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -65,7 +66,8 @@ export function BlueprintPanel({ idea, onChanged }: { idea: IdeaDetail; onChange
           onClick={() => runner.run('Extract blueprint', async () => {
             const bp = await extractBlueprint(idea.idea_id);
             onChanged();
-            return `Blueprint ${bp.blueprint_id} extracted from ${bp.sources.filter((s) => s.used_for.length).length} mission(s)`;
+            // ⚡ Bolt: Replace .filter().length with a zero-allocation .reduce() count
+            return `Blueprint ${bp.blueprint_id} extracted from ${bp.sources.reduce((acc, s) => s.used_for.length ? acc + 1 : acc, 0)} mission(s)`;
           })}>
           Extract blueprint
         </Button>

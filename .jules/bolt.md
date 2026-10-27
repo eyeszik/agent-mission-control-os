@@ -50,3 +50,7 @@
 ## 2023-10-20 - Consolidating Multiple Array Iterations into Single Passes
 **Learning:** React components containing multiple chained array iterations like `.filter(condition1)` and `.reduce(condition2)` executed separately on the same large array source creates intermediate array allocations and redundant iteration overhead on every recalculation.
 **Action:** Consolidate these operations into a single pass using a manual `for...of` loop enclosed within an IIFE inside the `useMemo` block to derive all required outputs together, avoiding multiple iterations and intermediary object closures.
+
+## 2026-11-15 - Array Method Filter Length Optimization
+**Learning:** Using `.filter(condition).length` to count matching elements in an array creates an intermediate array that is immediately discarded, causing unnecessary garbage collection overhead and slower execution, especially on larger arrays.
+**Action:** Replace `.filter(condition).length` with a zero-allocation `.reduce((acc, item) => condition ? acc + 1 : acc, 0)`.
