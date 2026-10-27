@@ -79,7 +79,8 @@ function Overview({ view, onChanged }: { view: AvicAssetView; onChanged: () => v
 
 function Evaluation({ view }: { view: AvicAssetView }) {
   const checks = [...view.evaluation.checks].sort((a, b) => Number(a.result === 'PASS') - Number(b.result === 'PASS'));
-  const failing = checks.filter((c) => c.result !== 'PASS').length;
+  // ⚡ Bolt: Use zero-allocation reduce instead of .filter().length
+  const failing = checks.reduce((acc, c) => acc + (c.result !== 'PASS' ? 1 : 0), 0);
   return (
     <Card title="Independent evaluation" id="avic-evaluation"
       description={`${checks.length} checks read from the stored SVG and PNG bytes · ${failing} not passing · renderer ${view.evaluation.renderer ?? 'none'} ${view.evaluation.renderer_version ?? ''}`}>

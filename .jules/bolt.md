@@ -50,3 +50,6 @@
 ## 2023-10-20 - Consolidating Multiple Array Iterations into Single Passes
 **Learning:** React components containing multiple chained array iterations like `.filter(condition1)` and `.reduce(condition2)` executed separately on the same large array source creates intermediate array allocations and redundant iteration overhead on every recalculation.
 **Action:** Consolidate these operations into a single pass using a manual `for...of` loop enclosed within an IIFE inside the `useMemo` block to derive all required outputs together, avoiding multiple iterations and intermediary object closures.
+## 2023-11-04 - Zero-Allocation Derived State Counting
+**Learning:** Running `.filter(condition).length` inside a React component's render body, or within callback functions that get recreated/executed frequently, allocates temporary arrays simply to determine a count. This causes needless garbage collection overhead, particularly if the arrays are non-trivial in size or processed frequently.
+**Action:** Replace `.filter(condition).length` with zero-allocation alternatives such as `.reduce((acc, item) => acc + (condition ? 1 : 0), 0)`.
