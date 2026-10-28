@@ -153,8 +153,8 @@ def _counts(w):
     from services.langgraph.persistence.database import transaction, table
 
     with transaction() as conn:
-        approvals = conn.execute(f"SELECT COUNT(*) FROM {table('approvals')} WHERE project_id = ?", (w["owner"],)).fetchone()[0]
-        jobs = conn.execute(f"SELECT COUNT(*) FROM {table('vnexus_media_jobs')} WHERE project_id = ?", (w["owner"],)).fetchone()[0]
+        approvals = conn.execute(f"SELECT COUNT(*) AS n FROM {table('approvals')} WHERE project_id = ?", (w["owner"],)).fetchone()["n"]
+        jobs = conn.execute(f"SELECT COUNT(*) AS n FROM {table('vnexus_media_jobs')} WHERE project_id = ?", (w["owner"],)).fetchone()["n"]
     versions = len(db.list_versions(w["brand"]))
     return approvals, jobs, versions
 
