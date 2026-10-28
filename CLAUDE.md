@@ -84,14 +84,7 @@ Then re-run `verify_manifest.py`. New security-boundary files should generally b
 
 ### Agency CLI
 
-```bash
-python3 orchestrate_brand_pipeline.py plan --input sample_brief.json                            # or: make brand-plan
-python3 orchestrate_brand_pipeline.py roles --department brand                                  # or: make brand-roles DEPT=brand
-python3 orchestrate_brand_pipeline.py validate                                                  # or: make brand-validate
-python3 orchestrate_brand_pipeline.py compile-prompts --input sample_prompt_request.json --json  # or: make prompt-compile
-python3 orchestrate_brand_pipeline.py ui-ux --input sample_ui_ux_request.json                     # or: make ui-ux-compile
-python3 orchestrate_brand_pipeline.py creative-run --input sample_creative_mission.json --compare  # or: make creative-run
-```
+Subcommands (`plan`, `roles`, `validate`, `compile-prompts`, `ui-ux`, `creative-run`, and the per-subsystem ones in `docs/agency-cli.md`) are listed by `python3 orchestrate_brand_pipeline.py --help`; the Makefile wraps them (`make brand-plan`, `make prompt-compile`, …).
 `plan` **plans against the governance kernel only** — it resolves artifacts to roles, checks evidence floors, and walks the lifecycle guards. `compile-prompts` runs the claims-audit prompt compiler (see Architecture). Neither calls an LLM, and neither touches the real execution pipeline. `plan` exits 0 = clear, 1 = blocked (kernel guard failed), 2 = brief couldn't be interpreted; `compile-prompts` exits 0 only when `final_state == PROMPT_PACKAGE_READY`.
 
 ## Architecture
@@ -110,327 +103,6 @@ This is the one thing that isn't obvious from browsing individual files, and it 
 
 `packages/{errors,config,logger,constants,db,testing}` (TypeScript, built from root `tsconfig.base.json`, Node16 resolution, CommonJS output except the ESM-only test helper `@amc/testing`) and `services/langgraph/core/{constants,errors,config}.py` are sibling implementations of the same vocabularies, error envelope (`{detail, error: {code, message, status, details?}}`) and config/logging conventions; `tests/test_core.py` reads `packages/constants/src/index.ts` to keep the vocabularies in step. `apps/web/lib/config.ts` must keep reading each `NEXT_PUBLIC_*` variable as a literal `process.env` expression (Next.js only inlines literal references into browser bundles); `@amc/config` loaders take that explicit record and never read `process.env` themselves. `app/config.py` is still the single owner of runtime configuration and the production gates — `core.config` is a typed view that imports it lazily (it imports `core.constants`, so an eager import would cycle). `@amc/db` is a driver-agnostic contract only; the web app has no database access. Details: `docs/workspace-packages.md`.
 
-### Skill dispatcher — capability gating, not a plugin system yet
-
-`agency/skills/dispatcher.py`: a `Skill` is registered once with the N3 `Capability` it requires; `dispatch_skill(role_id, skill_id, payload)` raises before the handler ever runs if the role's contract doesn't hold that capability. Authorization failures raise (`RoleContractError`/`SkillDispatchError`); handler-execution failures come back as a `SkillOutcome(status="FAILED")` rather than propagating, mirroring `GenerationOutcome`'s degraded-mode convention. Currently exactly one skill is registered (`zo_ask`, read-only, via `integrations/zo.py`). There is no AI image/audio *generation* in this codebase — `agency/assets.py`'s `render_logo_svg`/`render_background_pattern_svg`/`render_hero_svg` are fixed, deterministic SVG templates parameterized by brand color tokens. The one renderer is `services/freevideoforge/` (local, zero paid API, needs Pillow + FFmpeg), which the Project OS bridges by file contract rather than import (see below).
-
-### Guidance registry + prompt compiler — stops deliberately short of generation
-
-`agency/guidance/` (models/registry/router) and `agency/prompt_compiler.py` are a second, newer subsystem alongside the kernel, reachable via `orchestrate_brand_pipeline.py compile-prompts`. Two parts:
-
-- **Guidance registry** (`agency/guidance/packs/*.yaml`, e.g. `pg.branding.core`, `pg.studio_identity.v4`): hash-verified (`content_hash` per pack, `registry_hash` over all packs), YAML-as-JSON-1.2 (rejects duplicate keys, no custom tags/aliases — deterministic stdlib parsing). Every pack is `authority_class: ADVISORY` or `EVIDENCE_BOUND_ADVISORY` — guidance can shape how a prompt is compiled, it can never redefine runtime policy, permissions, or canonical `BrandCore` state (`guidance/models.py`'s module docstring is explicit about this). `router.py`'s `route_guidance()` selects packs/sections by a deterministic weighted-overlap score against the request (asset family/type, channel, brand domains, capabilities, task tags) — **no LLM call in routing**, so identical inputs always select identically.
-- **Prompt compiler** (`prompt_compiler.py`, ~1300 lines): five explicit audit passes — `intake_claims → hunt_gaps → build_research_backfill → validate_claims → synthesize_report` — before it will compile a prompt package, so retrieval can't silently rewrite source material and every unresolved premise stays visible. Its own module docstring states the boundary plainly: *"intentionally stops at validated prompt packages. It never invokes a media provider, writes a generated asset, publishes content, or performs any other external creative side effect."* `CompilerState`'s terminal success value is `PROMPT_PACKAGE_READY` (`GENERATION_FIREWALL` in the module) — there is deliberately no `ASSETS_GENERATED` state in this enum.
-
-Read together: this is the validated, evidence-grounded input a real image/video generation skill would consume — it is not that skill. Wiring an actual provider behind `PROMPT_PACKAGE_READY` output is still open work, same as the rest of the kernel-to-Layer-1 integration gap above.
-
-### Project OS — PROJECT is the durable unit
-
-`services/langgraph/agency/project_os/` (pure contracts/policies) + `persistence/{projects,project_ops,project_knowledge,project_media,portfolio}.py` + `api/routes/{projects,project_ops,portfolio}.py`. Runs execute inside projects (a run appends `WORK_STARTED`/`APPROVAL_REQUIRED` to `project_events` and is dual-materialized into `<export>/projects/<tenant>/<project>/`); chats are project activity; the filesystem mirror is never authority. It **extends** existing primitives instead of adding parallel ones: artifacts are N4 `agency_artifacts` rows (v2 metadata in `metadata.v2`, history in `artifact_versions`, compare-and-set via `record_artifact_revision(expected_version=)`); content approval reuses `approval_authority.assert_may_decide`; the single scheduler (`scheduled_jobs` + `run_scheduler_tick`) delivers through the trust-kernel outbox and `OutboxDispatcher`; receipts reuse `DispatchPermit`/`ExecutionReceipt`/`ObservationReceipt`; learning reuses `LearningLedger`, persisted per tenant. Vocabulary parity with `packages/shared/src/schemas/projectOs.ts` is part of `verify_ontology_parity.py`; object parity is the generated fixture `packages/shared/tests/fixtures/project-os.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_project_os_contracts.py`). Publication is dry-run only (live registry ships empty), paid media is planning-only, R2 fails closed. Details: `docs/project-os.md` and its companions.
-
-### Delivery contracts and the release handshake — proof, not authority
-
-`services/langgraph/agency/delivery/` adds what "done" means for a run without adding an authority. `AMC_CONTRACT_MODE` (`off` default / `shadow` / `enforce`) picks the topology a *new* run is pinned to (`metadata.workflow`: `workflow_version`, `contract_mode`, `graph_fingerprint`); GET/resume/contract-view rebuild from that pin, never from the env, and a fingerprint mismatch refuses to resume. `agency/v2-contract` inserts `contract_check` (deterministic `critic.py`, no model) between `brand_safety_qa` and `hitl_gate`; the static `interrupt_before=["delivery"]` is unchanged and both topologies are defined once in `workflow.py`. In shadow/enforce the API seals a `ReleaseCandidateManifest` (exact artifact versions incl. the protected run artifact, contract + re-evaluated result hash, dependency snapshot, `amc-release/v1`) *before* the approval can be decided; enforce binds the approval's `subject_hash` to `canonical_hash({candidate_manifest_hash, contract_hash, policy_version})` and resume runs `evaluate_release_predicate` (N2 ∧ contract dod ∧ approved non-stale ∧ subject match ∧ artifacts match ∧ dependencies match ∧ compile gate), then seals a `ReleaseReceipt` from the final payload before completing. Shadow keeps the legacy approval subject and only records a `release_gate` verdict event. The CRG (`crg.py`) and `BlastRadiusCertificate` (`blast_radius.py`, returned by `record_artifact_revision`) are derived projections with no persistence imports (tested). PATTERN requirements are rejected until a linear-time regex engine is pinned. The v4 MethodRouter/ProblemSignature/MethodPlan layer was never provided and is not implemented. Details: `docs/unified-delivery.md`.
-
-### Method routing and delegation — a compiler, not an orchestrator
-
-`agency/compiled/method_{models,catalog,router,mission}.py` + `data/method_catalog.v1.json` (18 families, 128 methods, provenance `DESCRIPTION_UNVERIFIED`). `compile_method_plan(ObjectiveRequest)` normalizes the request, selects problem families **only from structural facts** (keywords are corroboration and yield ≤3 clarification gates), derives slot-tagged needs (MACRO/DIAGNOSE/DECIDE/EXECUTE/CONTROL/LEARN), picks methods by greedy set cover, prunes counterfactually (every survivor has a `MinimalityCertificate`), runs a ≤2-stack planning-only shadow duel on exact ties, and emits a hash-chained `DelegationEnvelope` DAG (empty authority/approval refs; context hashes chain, so `verify_context_chain`/`causal_closure` invalidate exactly the stale closure). `compile_method_mission` projects it to the canonical mission payload with an explicit `phase_map`, runs the **existing** `MissionWorkOrderAdapter`/`WorkOrderCompiler`/`RoleResolver`, checks hard eligibility gates and a `ProofOfNonAuthority` (delta must be 0), and schedules with the existing `CausalWorkGraph`/`build_cell`/`schedule_waves`. `compile_method_mission` itself still reports `EXECUTOR_GAP` (it is plan-only); the execution fabric below consumes its waves and reports method cells truthfully (they hold no N3 contract and need a drafting provider, so they stay blocked). CLI: `orchestrate_brand_pipeline.py method-plan --input sample_method_request.json`. Details: `docs/method-routing-delegation.md`.
-
-### Execution fabric — the governed execution plane
-
-`services/langgraph/agency/execution_fabric/` consumes the waves both compiled planners emit (`schedule.from_compiled_agency_plan` / `from_method_mission`; the planners are unchanged) and replaces blanket `EXECUTOR_GAP` with truthful per-cell `ExecutionState`s (SUCCEEDED, FAILED, BLOCKED_{AUTHORITY,TOOL,PROVIDER,DEPENDENCY,CONTRACT,POLICY}, NEEDS_HUMAN, PROVIDER_GAP). `consumer.execute_mission` recomputes the wave plan to prove freshness, checks eligibility (server-issued authority only — `ExecutionContext.from_server` rejects client-injected authority and any mode but LOCAL/SANDBOX; N3 role + skill capability; provider/sandbox availability; injection scan of every payload string), splits colliding cells into sub-waves, and runs a two-phase write-ahead per cell: idempotency reservation keyed `hash(tenant, project, mission, work_order, contract_hash, input_hash)` in a tenant scope + a `DispatchPermit` recording the target's pre-image version, then `dispatch_skill` → validators → ProjectOS `create/revise_project_artifact` (OCC, `provenance_ref=execution:<key>`) → `ExecutionReceipt` → storage read-back `ObservationReceipt` → complete. A stale uncommitted reservation is reconciled against the permit pre-image (retry / adopt / halt `RECONCILE_DIVERGENT`). Consequential side effects are never dispatched (NEEDS_HUMAN without approval, `LIVE_GATED` with one), and deliverables stop at the N2 release boundary as NEEDS_HUMAN. Skills are registered in the canonical dispatcher (`Skill` gained `side_effect_class`/`sandbox_requirement`/`provider_requirement`/`validator_ids`/`timeout_class`; `register_skill` refuses redefinition); domain adapters cover deterministic SVG + DTCG, a stdlib-DOM WCAG 2.2 audit, a Python-only code sandbox (temp copy, segment-checked paths, AST diff, `py_compile` allowlist, scrubbed env, rlimits, `unshare -rn`), FreeVideoForge ingest + `ffprobe` verification, and local SEO checks. Text/T2I/AI-video/search-demand have no provider adapter and are `PROVIDER_GAP` — never simulated. Read models in `coverage.py` (coverage graph, autonomy envelopes ≤ canonical, cross-modal ΔE witness). CLI: `orchestrate_brand_pipeline.py fabric-run --input sample_fabric_mission.json` (writes to the configured DB). Details: `docs/execution-fabric.md`.
-
-### Cinematic capability — routed, not global
-
-`services/langgraph/agency/cinematic/` is a lazily-loaded domain capability that compiles ideas/scripts/storyboards/images into T2I/T2V/I2V/storyboard/brand-motion prompts, with canonical `ProjectIR`/`ShotIR`, source-authority resolution, continuity handshakes, camera/lighting/physics reasoning, an evaluator, and a bounded repair loop. It routes via its own deterministic trigger metadata (`cinematic.route_request`) and honours the same firewall — it terminates at prompts and never invokes a media provider. It is a native module (real schemas/compilers/evaluator, not advisory prose) and its full specification is deliberately kept out of this file; see `docs/cinematic-capability.md` and invoke via `orchestrate_brand_pipeline.py cinematic`.
-
-### Creative search runtime — bounded search, human-gated
-
-`services/langgraph/agency/creative/` runs a brief through `MissionIR → ExecutionPlan → context portfolio → candidates → hard gate → blind critics → Pareto front → HUMAN → ≤1 correction + TriDiff → approval → delivery gate`. It is deterministic: there are no model calls, and model-backed types (image, video, social, brand identity) plan `BLOCKED` as `provider_gap`.
-
-- **Capability registry.** `knowledge/creative-capabilities/registry.json` (hash-pinned guides, dispositions) is loaded by `capabilities.py`.
-- **Topology.** `organization.py` picks the smallest topology (T0–T4). T4 search runs only when the brief asks for exploration and `max_candidates > 1`. The caps are schema-enforced: population ≤ 4, generations ≤ 2, corrections ≤ 1.
-- **Context.** `context.py` reads the design corpus only through `load_validated_corpus`. References contribute abstract principles only; unknown rights are excluded. `derive_requirements` maps the owned accessibility contract into renderer requirements.
-- **Critics.** They see a lineage-free `BlindView`. `ConstraintValidator` is non-compensable.
-- **HITL.** It reuses `create_approval_request(subject_hash=<ArtifactIR hash>)`: no graph change, no migration. `delivery_gate` fails closed on pending, rejected, stale or hash-mismatched approvals and never performs delivery.
-- **Recorder.** `recorder.py` refuses free text and secrets.
-
-CLI: `creative-run`. Details: `docs/creative-runtime.md`.
-
-### Governed intake mission — words to a release decision
-
-`services/langgraph/agency/intake/` connects a raw request to a release verdict through existing primitives only:
-
-- **Intent.** A deterministic `compile_intent`, with no model call. Facts keep source spans. Publish, spend and send are `FORBIDDEN_TO_INFER`. Approval wording is only an `APPROVAL_CANDIDATE`. `SIMULATION` is a server argument, never inferred from text.
-- **Project.** `resolve_project` filters on tenant, then `Principal` access, then archived state, before matching. Filtered projects are counted, never named. The order is explicit id, then name/slug/brand, then the active project. Ties, or a named project that differs from the active one, are `AMBIGUOUS`.
-- **Context.** `compile_context` wraps the unchanged `project_os.memory.resolve`. On top of it, it:
-  - takes conversation memory (M3) only from this thread;
-  - drops learning memory (M6);
-  - applies an authority floor;
-  - withholds same-authority conflicts;
-  - reports all-stale subjects as `UNRESOLVED_STALE`;
-  - enforces a byte budget.
-
-  The capsule hash covers the selected memory and the mission's input artifact heads. The mission's own output type is excluded, so replays keep their identity.
-- **Execution.** It runs through the existing compiled planner and `execute_mission` in LOCAL mode.
-- **Verification.** `verify_artifact` re-reads the stored bytes and checks the SHA-256 against the recorded hash, the version binding, SVG structure, `svg_safety` and palette conformance. A type with no verifier is `INCONCLUSIVE`, never `PASSED`.
-- **Approval.** It uses the existing `approvals` table and a run with `needs_approval` and `initiated_by`, so `/approvals/{id}/decide` enforces the approver role and separation of duties. The subject hash is the verified content hash.
-- **Release.** `release_gate` fails closed on simulation, a stale verification, or an approval that is missing, pending, rejected, stale, mismatched or self-approved. It never performs an effect.
-- **External effects.** Publish, spend and send are never dispatched. Each gets a `NonActionReceipt` that states its own limits.
-
-The slice adds no route, UI, table, event type or migration. It is Python-only; the tests drive the real approval route. Details: `docs/intake-mission.md`.
-
-### Local visual engine and durable runtime — real local renders, bounded ticks
-
-`services/langgraph/agency/visual/` renders on the host only (no hosted image/video API):
-
-- **R1 Blender Cycles.** `blender_runner.py`, run under `python -I` and, where possible, `unshare -rn`.
-- **R5 FFmpeg turntables.** Encoded only from frames that R1 rendered.
-- **R4 vector mark.** The unchanged `agency.assets` SVG.
-- **R2 offline diffusion.** Needs local weights plus an `amc-model.json` licence record.
-- **R3 Three.js.** `three_renderer_for` picks WebGPU vs WebGL by shader architecture.
-
-R2 and R3 are probed and **blocked** when absent; never substitute another route. Outputs become `media_asset`
-artifacts. `verify.verify_media` reopens the stored bytes for Q0–Q4. Q5–Q7 are always `human_required`, and a
-check that could not run is `INCONCLUSIVE`, never `PASSED`. `browser.py`/`browser_runner.cjs` drive local Chromium
-for WebGL/SVG evidence.
-
-`agency/intake/release.py` is the shared approval binding + release verdict, used by intake, visual and durable jobs.
-
-`services/langgraph/agency/durable/` + `persistence/durable_runs.py` (migration 14 / `20261009_amc_durable_runtime_v1.sql`):
-
-- **FSM.** A 20-state run FSM (`fsm.py`, pure). `transition()` is the only writer. It is fenced on `lease_token`
-  and allowlists the columns it may set.
-- **Ticks.** `ticks.run_tick` does: lease → precheck → write-ahead intent with pre-image → dispatch → readback →
-  verify → fenced commit → telemetry.
-- **Recovery.** Crash recovery adopts or redoes from the pre-image.
-- **Guarantee.** At-least-once, **not** exactly-once.
-- **Not always on.** No worker is deployed; `RuntimeActive` stays false.
-
-Also in that package:
-
-- **Genome and DAG.** `genome.py` (MissionGenome admission, contradiction engine, proof debt) and `build_dag.py`
-  (A00–A11, three separate predicates).
-- **Governance.** `governance.py` holds G0–G4; G3/G4 are never allowed.
-- **Proofs and observability.** `proofs.py` and `observability.py` (computed only from rows; `NOT_MEASURED` /
-  `BASELINE_UNKNOWN` instead of invented numbers).
-
-`runtime/abc/*.yaml` are generated: edit code, then run `python scripts/compile_abc_manifests.py --write`.
-`test_t19_abc_manifests_match_code` checks them. `scripts/seal_abc_build.py` writes the unsigned verification
-seal from real command results.
-
-Details: `docs/local-visual-engine.md`, `docs/durable-runtime.md`, `docs/abc-v6-traceability.md`,
-`docs/abc-v6-runbook.md`.
-
-### Generative Creative Foundry — brief to verified brand family, locally
-
-`services/langgraph/agency/foundry/` + `api/routes/foundry.py` + `CreativeFoundryPanel.tsx` (Mission Control mode):
-
-- **Genome.** `compile_genome(UserBrief)` is deterministic, records assumptions and enforces palette contrast floors.
-  The brief never carries authority.
-- **Grammars.** Thirteen `VisualGrammar`s, blended by weight (the thirteenth, `psem_editorial`, is PSEM; `psem.py` holds its locked palette and computed pairing rules).
-- **Composition.** `compose.py` emits CompositionIR (palette roles) and then SVG.
-- **Variants.** `variants.py` mutates, crossbreeds and forks within `creative.ir.ResourceBudget` caps.
-- **Experience twin.** `experience.py` builds working HTML evaluated by real Chromium scenarios and counterfactual
-  skins.
-- **Scene and motion.** `scene.py` renders a Blender package scene; `motion.py` turns keyframes into SVG frames,
-  then Chromium, then FFmpeg.
-- **Proofs.** `proof.py` computes the proof state machine from evidence.
-- **Routing.** Local-first; a hosted model is a forbidden route.
-- **Capabilities and discovery.** Capabilities are discovered, never installed. The discovery adapters are declared
-  and DISABLED.
-
-`studio.Mission` persists every deliverable as a Project OS artifact with `depends_on=genome`, reads it back and
-verifies it. A genome revision invalidates dependents through the existing invalidation. Approval goes through
-`open_artifact_approval` with the mission id scoped to the project. Don't add a second store or token compiler here.
-
-The demo is `scripts/render_foundry_demo.py`, which writes `runtime/foundry/demo/` for a FICTIONAL brand.
-Details: `docs/creative-foundry.md`.
-
-### Website production line (UCPO) — brief to verified site, never deployed
-
-`services/langgraph/agency/ucpo/` + `api/routes/ucpo.py` (`/ucpo`) + `components/ucpo/` (the Website Production section of `/agency`) + CLI `website`:
-
-- **Stages are Project OS artifacts.**
-  - Brief → requirements → PSEM genome → tokens → plates → site IR → source.
-  - Each is stored through `foundry.studio.store` (key `foundry-ucpo-<site>-<stage>`) with `depends_on`, after `assert_role_may_produce`.
-  - No table, migration or approval store is added. Don't add one.
-- **Copy and requirements.**
-  - Copy comes only from the brief.
-  - Requirement ids are structural.
-  - Every element in the generated source carries `data-req`.
-- **Generated source is untrusted.**
-  - `sandbox.probe_isolation` must *demonstrate* the sandbox: `unshare -rmn`, a read-only repo, `env -i`, `prlimit` and `timeout`. Otherwise return `BLOCKED_ISOLATION` and run nothing.
-  - Build: `tsc` + `next build --webpack` inside the sandbox.
-  - QA: `qa_runner.cjs` in the sandbox, with Chromium route-fulfilled from the export.
-  - NOT_RUN or BLOCKED never counts as PASS.
-- **Durable job.** Build + QA is the durable job `ucpo_site_build` (`SiteBuildHandler`), driven by an explicit `run_tick`.
-- **Release.**
-  - `release.seal_proof` binds every revision.
-  - Approval opens only for an eligible proof and is decided via `/approvals/{id}/decide`.
-  - `deployment` is always `NOT_AUTHORIZED`.
-- **Registries.**
-  - Disciplines, presentation systems, prompt modules and multimodal specs are registries.
-  - Generation providers are `CAPABILITY_GAP`; never fake them.
-- **Contracts.** Zod twins are in `packages/shared/src/schemas/ucpo.ts`; the fixture is `packages/shared/tests/fixtures/ucpo.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_ucpo_contracts.py`).
-
-Details: `docs/ucpo/README.md`.
-
-### ACE × AVIC — brief to verified native SVG
-
-`services/langgraph/agency/avic/` + `api/routes/avic.py` (`/avic`) + `components/avic/` (the Visual Compiler section of `/agency`) + CLI `avic` (`docs/avic.md`):
-
-- **Inputs are reused, not re-owned.** The brief is a PromptIR `AssetRequirement`; the palette is a read-only `BrandIR` projection (PSEM comes from `foundry.psem.PALETTE`); hashing is AMC-CANON-1. `intent.compile_intent` classifies every item VERIFIED/INFERRED/PROPOSED/UNSUPPORTED/PROHIBITED; instruction-like text, publish/send/spend and third-party marks are PROHIBITED and block the compile.
-- **SVG.** `scene.compile_scene` -> `SceneIR`; `svg.emit` is deterministic; `svg.validate` is an allowlist on top of `execution_fabric.verifiers.svg_safety` (elements, attributes, local `url(#id)` only, unique ids, finite coords, ceilings, no raster in native profiles). HYBRID_SVG and RASTER_FINAL are refused, never substituted.
-- **Render and verify.** Rendering is only `visual.browser.rasterize_svg`. `evaluate.evaluate` reads the SVG/PNG bytes (exact text, palette dE, accent budget, WCAG contrast, text-fit estimate, nonblank, headline ink); `avic/png.py` is a stdlib PNG codec so this works without Pillow/NumPy (not declared deps).
-- **Persistence and approval.** `service` stores each stage via `foundry.studio.store` after `assert_role_may_produce` (`STAGES`); approval is `open_artifact_approval` on the SVG content hash, decided via `/approvals/{id}/decide`; `release_local` re-reads and re-validates bytes and uses `artifact_release_verdict` (no external effect). Failing edits/recompiles return REJECTED and keep the head. Project OS keeps only its own v2 metadata keys, so lineage/cache identity live in `provenance.json`. Don't add a store, table or approval path.
-- **H3/H1/H2/H4/H5.** `repair` (defects only from failed checks, dependency-closure proposals, divergence check, isolated re-render, no-regression acceptance, <=3 attempts); `optimize` (stdlib region split + linear gradients, measured vs Chromium; DiffVG/LIVE/Bezier/Jacobian projection are PROPOSED); `brand` (`mutate_brand` needs an approval ref and never touches protected invariants; `explore` branches carry no approval); `materials` (palette-only shading, `physical_claim="NONE"`, physics backend BLOCKED).
-- **Concurrency and recovery.** The scene is the commit record; stage writes carry the head hash they were computed from (`studio.store(expect_head_hash=)`), so a stale edit is `CONFLICT` (HTTP 409), never an overwrite. `consistency` names stale derived stages; `recompile_asset` re-derives them. Renders are bounded by `AMC_AVIC_RENDER_CONCURRENCY`.
-- **API.** Every write needs an operator role and an `Idempotency-Key`; an edit must send `base_svg_sha256`. The brand is the server projection; client authority fields are 422. Stored SVG is served with `default-src 'none'` CSP. `test_avic_api.py` sweeps every `/avic` route from the OpenAPI table (other tenant, viewer, unauthenticated); a new route is covered automatically. Zod twins: `packages/shared/src/schemas/avic.ts`, fixture `packages/shared/tests/fixtures/avic.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_avic_contracts.py`; needs Chromium).
-- **Claims.** `capabilities.py` is the capability registry; the matrix in `docs/avic.md` is generated from it and a test requires every verified row to name existing tests.
-- **Demo.** `python scripts/render_avic_demo.py` regenerates `runtime/avic/demo/` (fictional brand, synthetic reference).
-
-### VNEXUS ACE — persisted brand genome and the layers on it
-
-`services/langgraph/agency/vnexus/` + `persistence/vnexus.py` (migration 15, eleven `amc.vnexus_*` tables) +
-`api/routes/vnexus.py` (`/vnexus`) + `components/mission-control/vnexus/` (VNEXUS Studio mode):
-
-- **Genome.** `genome.py` is pure: chromosomes, scopes brand → project → page → component → asset, typed
-  constraints, `resolve()` (descendants never override IMMUTABLE keys; conflicts are reported, not applied).
-  `service.py` owns the lifecycle. Only DRAFT is editable (CAS on `revision`); APPROVED is immutable and one per
-  scope; revert makes a new draft. Every mutation appends to a per-brand hash-chained audit log.
-- **Approval.** Submit reuses `open_artifact_approval`; `/approvals/{id}/decide` decides. `settle_version` only
-  applies that decision, and only when subject hash/ref match, reviewer ≠ author/submitter and ancestors are
-  unchanged. Don't add another approval path.
-- **Graph and multiverse.** `graph.py`/`multiverse.py` are pure; `creative_service.py` writes inside a locked
-  transaction. Branches fork from APPROVED only and are promoted solely by creating a reviewed version — no
-  autonomous merge.
-- **Production.** `production.approved_projection` refuses without an approved, non-blocking genome. Outputs go
-  through the foundry `studio.store`/`observe` and link `DERIVED_FROM` the GenomeVersion node.
-- **Media fabric.** `media_fabric.py` providers implement identify/capabilities/estimate/validate/submit/status/
-  retrieve. Hosted providers are DISABLED with no network code; `mock.simulated` needs
-  `AMC_VNEXUS_MOCK_PROVIDERS=1` outside production and its output is never claimable as generated
-  (`can_claim_generated`).
-- **Intelligence.** Marketing rates come only from MEASURED rows with a source. Forecasts and the twin are labelled
-  SIMULATION. The prompt genome feeds the unchanged compiler. The 14 original prompts are absent and must not be
-  invented. The immune system auto-fixes only deterministic, reversible issues, as a new revision.
-- **Contracts.** Zod twins live in `packages/shared/src/schemas/vnexus.ts`, checked against the recorded fixture
-  `packages/shared/tests/fixtures/vnexus.json` (regenerate with
-  `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_vnexus_contracts.py`).
-- **Security.** `test_vnexus_security.py` sweeps every `/vnexus` route from the OpenAPI table as another tenant, a
-  viewer and unauthenticated. A new route is covered automatically and must pass.
-
-Details: `docs/vnexus-ace.md`.
-
-### VNEXUS brand book — a projection of the approved genome, built incrementally
-
-`services/langgraph/agency/vnexus/brandbook/` + the brand book routes in `api/routes/vnexus.py` + `components/mission-control/vnexus/BrandBookArea.tsx` (`docs/vnexus-brandbook.md`):
-
-- **One authority.** The approved genome (plus explicitly referenced approved assets) is authority; the book is a projection; pages, prompts and previews are derived. Intake proposals become a genome DRAFT through `propose_draft`, then the existing review. Don't add an editable style guide.
-- **Template.** `manifest.py` is a versioned, brandless 24-page template. A page's `required_paths`/`optional_paths` are its dependency set, so a page that reads a key must declare it. Conditional sections need an applicability decision (`production.brandbook.applicability.<page>`), never invented content.
-- **States.** `FieldState` (VALUE/NONE/NOT_APPLICABLE/PROPOSED/UNKNOWN) is separate from `approved` and from `EvidenceClass`. `"@none"` and `"@not_applicable: reason"` are explicit genome decisions; NONE is never printed as copy. Production refuses unresolved keys, proposals and template tokens.
-- **Assets.** One canonical master per build, placed by hash on every page. A master that is missing, unreadable or unsafe is reported and never substituted. Raster-in-SVG is never vector. Misuse specimens are labelled views, never masters.
-- **Rendering.** Deterministic HTML, page format from the genome, no `overflow:hidden`. It is measured in Chromium through the `layout` mode of `visual/browser_runner.cjs`; a check that could not run is NOT_RUN. `identity.specs` renders `brand_guidelines` from this compiler (no hardcoded clear space or minimum size).
-- **Incremental.** One Project OS record per page (sections + checks) keyed by dependency hash. Unchanged pages are reused, interrupted builds resume, and the build record always rebinds to the current genome. Project OS slugs artifact keys to 64 characters, so keys are short digests and `_put` refuses longer ones. The process cache holds pure compiler output keyed by tenant/project after authorization, never approvals.
-- **Release.** Approval is bound to the production book bytes via `open_artifact_approval`; release is `artifact_release_verdict` plus a genome freshness check. No external effect.
-- **Contracts.** Zod twins in `packages/shared/src/schemas/vnexusBrandbook.ts`, fixture `packages/shared/tests/fixtures/vnexus-brandbook.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_vnexus_brandbook_contracts.py`; needs Chromium). Benchmark: `python scripts/bench_brandbook.py`.
-
-### VNEXUS creative directions — recommend, select by approval, rebuild only when needed
-
-`services/langgraph/agency/vnexus/directions/` + the creative directions routes in `api/routes/vnexus.py` + `components/mission-control/vnexus/DirectionsArea.tsx` (`docs/vnexus-directions.md`):
-
-- **Stages.** Intake → shared `CreativeIntent` (through the existing prompt compiler; exact identity text is kept out of raster prompts) → generate/import → record → review → human selection → conditional vector reconstruction → freeze. The 14 seats, six modes and eight stages are PROPOSED definitions; don't claim they reproduce an original spec.
-- **Routes.** `providers.py` is the route registry. Cloudflare, Gemini critique, Exa/Tavily and Groq are declared with `adapter_implemented=False` and stay DISABLED. `AMC_VNEXUS_SPEND_MODE=zero` refuses unknown or non-zero prices and offers `manual.handoff`; a refused route never falls through to another model. Credentials are env var names, checked for presence only. `local.foundry_compose` is the only real generator (deterministic marks/icons).
-- **Provenance.** Imports are `USER_REPORTED`; `observed` (server facts) and `reported` (importer statements) are separate fields; SIMULATED is never selectable or a master.
-- **Review.** It only computes a stored session: `effects` are fixed false. Local measurements produce findings and gate evidence, never scores; scores come only from named human reviewers. No vision route exists, so perceptual lenses without human input are NOT_REVIEWED (null scores) and required ones block readiness. Gates are non-compensatory. `measured_recall` is always `HUMAN_RECALL_NOT_TESTED`. Work orders are `PROPOSAL_ONLY`.
-- **Selection and freeze.** Selection is `open_artifact_approval` on the candidate bytes. Freeze needs that approval, a PASSED reconstruction when the role needs vectors, and a RELEASE review `READY_FOR_APPROVAL`; it submits a genome draft pinning `visual.logo.master_artifact` + `visual.logo.master_sha256`. The brand book and `produce_identity` read the master only through the approved genome and refuse bytes that don't match the pin. Don't add another approval path.
-- **Reconstruction.** Only for roles that need editable paths. `controlled_trace` is the AVIC region split snapped to the palette (PARTIAL: rectangle regions, stair-stepped curves); identity text is never traced. Fidelity is claimed only from a measured Chromium comparison; without Chromium it is NOT_VERIFIED.
-- **Storage.** Project OS artifacts only (no table or migration); the per-intent ledger is compare-and-set.
-- **Contracts.** Zod twins in `packages/shared/src/schemas/vnexusDirections.ts`, fixture `packages/shared/tests/fixtures/vnexus-directions.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_vnexus_directions_contracts.py`; needs Chromium). Demo: `python scripts/render_directions_demo.py`.
-
-### ACE v12 action plane and Agency OS — one gateway, sandbox only
-
-`services/langgraph/agency/actions/` + `persistence/actions.py` (migration 16 / `20261012_amc_actions_v1.sql`) +
-`api/routes/actions.py` (`/actions`); the client app is `agency/agency_os/` + `api/routes/agency_os.py`
-(`/agency-os`) + `apps/web/app/agency` + `components/agency/`:
-
-- **One dispatch owner.** Only `actions.gateway` catalogue entries can be proposed through `/actions`. Fabric and
-  VNEXUS entries are described in `catalog.py` but keep their own dispatch (`NOT_GATEWAY_OWNED`). No LangGraph node
-  may call the gateway, because interrupted nodes replay; a test enforces this.
-- **Approval.** One anchor run per action. Approvals are `approvals` rows with `subject_hash = binding_hash`, decided
-  only via `/approvals/{id}/decide`. Spend and governance roles are server-written `approval_policy` in run
-  metadata, checked by `assert_may_decide_approval`. Don't add another approval store.
-- **State.** `persistence.actions.transition` is the only state writer: CAS on `version`, an allowlisted column
-  set, and a hash-chained `action_transitions` row.
-- **Effects.** Adapters are sandbox fakes writing only `action_sandbox_effects`; completion needs an independent
-  read-back. A timeout becomes `UNKNOWN` and leaves only by reconciliation.
-- **LIVE.** `governance.live_enablement()` always returns `DISABLED`. There is no switch.
-- **Reserved ids.** EXT-001…090 / ART-001…012 have no source definitions: they are `VOID_DETECTED`. Never invent
-  them.
-- **Contracts.** Zod twins live in `packages/shared/src/schemas/agencyOs.ts`, with the fixture
-  `packages/shared/tests/fixtures/ace12.json` (regenerate with
-  `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_ace12_contracts.py`).
-  `test_ace12_traceability.py` requires a test named for every T01–T60 and I01–I20.
-
-Details: `docs/ace-v12/README.md`.
-
-### Mission Council — three engines, one gate
-
-`services/langgraph/agency/council/` + `persistence/council.py` (SQLite migration 19 / `20261022_amc_mission_council_v1.sql`) + `api/routes/missions.py` (`/missions`) + `apps/web/components/missions/` (`/missions`, also the Mission Council section of `/agency`):
-
-- **Mission = run.** A mission is a `runs` row (pipeline `mission_council`). Its events are `run_events` (SSE via `/runs/{id}/events`), and its gate is an `approvals` row decided only via `/approvals/{id}/decide`. Don't add another approval or event store.
-- **Engines.** `engines/{langgraph,crewai,autogen}_engine.py` share `engines/base.py` (strategy → audit → gate → prototype).
-  - LangGraph uses the shared checkpointer with `interrupt()` + `Command(resume=)`.
-  - CrewAI and AutoGen are the optional `council` extra; when it is absent they report `NOT_INSTALLED`, never fake it.
-  - AutoGen has no code executor.
-- **Models.** Seats run on the deterministic `MockSeatModel` unless `ENABLE_REAL_MODELS=true`. A failed provider fails the seat; it never falls back to mock output.
-- **Policy and gate.**
-  - `policy.scan` runs first and is deterministic. Model findings only raise risk.
-  - The gate subject hash binds mission, thread, requested actions, strategy/risk hashes and policy version.
-  - Decisions are single-use per action hash.
-- **Tools.** `gateway.invoke` is the only tool path. It is deny-by-default with seat scopes and approval binding for WRITE/EXTERNAL; SHELL is disabled.
-  - Every call is audited and redacted.
-  - MCP servers come only from `AMC_MCP_SERVERS`.
-- **State.** Terminal states never move. `queued → running` happens only under the lease. Checkpoints are hash-chained and verified on read.
-- **Contracts.** Zod twins live in `packages/shared/src/schemas/missionCouncil.ts`, with the fixture `packages/shared/tests/fixtures/mission-council.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_council_contracts.py`).
-
-Details: `docs/mission-council.md`.
-
-### Agency Operating Framework — a ledger over existing owners
-
-`services/langgraph/agency/operating_framework/` + `persistence/operating_framework.py` (SQLite migration 20 / `20261024_amc_agency_framework_v1.sql`) + `api/routes/agency_framework.py` (`/agency-framework`) + `apps/web/components/framework/` (`/framework`, also the Operating Framework section of `/agency`):
-
-- **Catalog.** `data/catalog.seed-v1.json` is vendored byte-for-byte and SHA-256 pinned; `load_catalog` refuses it unless schema and semantic checks pass (24 modules, 295 unique tasks, per-module counts, no cycles). A changed catalog is a new version and pin, never an in-place edit.
-- **Bindings.** `bindings.py` maps each module to an N3 role that may produce its N1 artifact type (`verify_bindings` checks the live kernel). Coverage is EXACT / NEAREST / NO_N3_ROLE; keep the gaps visible, don't invent roles.
-- **Tasks.** Instances are CAS on `version`; every write appends one `project_events` row in the same transaction. VERIFIED only via `/verify` (server re-check, approver role, not the submitter); APPROVED only via `/settle` after `/approvals/{id}/decide` on an approval bound to `task_proof_hash`. `MANUAL_TRANSITIONS` is mirrored in `apps/web/lib/framework/view.ts` (parity-tested).
-- **Refs.** `refs.resolve_ref` reads the owning store (knowledge, kernel evidence/decisions, VNEXUS genome, artifact head + byte read-back). Synthetic sources are labelled and never client proof.
-- **Gates.** Evaluated from task state; approval subject `agency-gate:{plan}:{gate}` bound to `evaluation_hash`; strictly in order.
-- **Assurance.** The five records are immutable `qa_report` artifacts (`assurance/<kind>/<id>`), hash-sealed and integrity-checked on read; they never approve, release or mutate the canonical graph.
-- **Release candidates.** A Review may bind delivery's sealed candidate (`release_candidate_ref`). `candidates.inspect` re-checks it read-only:
-  - reviewer: an approver who did not start the run;
-  - artifact hashes are recomputed from the run payload via the binding layer's own `_workspace_artifact_specs` / `_agency_subject_hash`, never a second hash scheme;
-  - the Review never opens a second release decision; the run's approval and delivery stay the authority.
-- **Claims.** `claims.py` detects marketing claims by signal, not length. Detection, substantiation (person-linked refs only, never "verified"), policy (always human review) and decision stay separate. Don't change `project_os.knowledge.extract_claims`; its six-word floor is right for ingestion.
-- **KPIs.** Only from `measurement` evidence and plan events; a zero denominator is `NOT_MEASURED`.
-- **Contracts.** Zod twins in `packages/shared/src/schemas/agencyFramework.ts`, fixture `packages/shared/tests/fixtures/agency-framework.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_agency_framework_contracts.py`).
-
-Release eligibility stays with `agency/delivery`; nothing here dispatches an external effect. Details: `docs/agency-operating-framework.md`.
-
-### Prompt families and v10 prompt OS — decomposed, not injected
-
-`agency/prompt_families/` compiles reusable prompt families through the existing prompt compiler. It freezes an `InvariantSet`, varies declared axes, rejects concepts whose SHA-256 signature repeats the `ConceptLedger` (repairing the highest-level axis first, at most 3 passes), and terminates at `PROMPT_PACKAGE_READY`. `AssetRequirement` gained additive `exact_text` (blocking if not preserved verbatim), typed `references` and `series`. `ComputationEvidence` never upgrades a premise to VERIFIED. Methodology lives in the `pg.copy_content.v1`, `pg.attention.hooks.v1` and `pg.visual_prompting.v1` packs. The supplied spec is provenance only (`docs/imported-specs/`). CLI: `prompt-family`. Details: `docs/brand-content-visual-prompt-os.md`.
-
-### Compiled Agency planner — plans over the kernel, never executes
-
-`services/langgraph/agency/compiled/` compiles `DeliverableSpec`s into a Causal Work Graph (expanded from N3 `produces`/`consumes`), binds each work node to a sealed RoleOS specialist *and* an N3 contract (ceiling = intersection; RoleOS is DENY_CONSEQUENTIAL_BY_DEFAULT), wraps `WorkOrderCompiler` output as proof-carrying work orders, and schedules mission cells into waves; release readiness delegates to N2 `release_guard_failures`. Pure and deterministic (`as_of` is an input). The RoleOS source archive is dispositioned in `agency/compiled/data/source_disposition.json` (1,177 records, hash-sealed); SKILL bodies are not vendored and load JIT only from a verified archive. `/compiled-agency/v1/plan` discards client-supplied approvals/grants/provider status, so external actions always plan blocked. Layer 1 enforces N2/N3 seams directly but does not consume compiled plans; that wiring is open integration work. Details: `docs/compiled-agency.md`.
-
-### Design Mode — style catalog composed by dimension
-
-`packages/shared/style-library/design-styles.json` is the canonical style catalog (contract: `packages/shared/src/schemas/styleLibrary.ts`, mirrored by `services/langgraph/agency/design/style_registry.py`). Styles are composed **by dimension**, never by concatenating prompts: each selection layer claims dimensions (default: the style's own `design_dimensions`), and each dimension resolves to one style — a locked layer wins, then strength, then the primary (`style_composer.py`); `prompt_compiler.py` emits one prompt line per resolved dimension. Declared incompatibility, a disabled style, or two locks on one dimension are *blocking*. Catalog references to styles not yet migrated (`pending_references`) are allowed but must be well-formed ids — never invent those styles. The UI (`DesignStyleComposerPanel`, behind Mission Control's Design Mode toggle) attaches a selection via `lib/stores/designStore.ts`; the Campaign Terminal sends it as `CampaignBrief.style_selection`; `brief_intake` carries it and `design_brief` **recomposes it server-side** into `DesignBrief.style_direction` (applied to generation only when non-blocking), exported as `branding/raw/style-direction.md` and surfaced to the reviewer as a QA advisory. API: `GET /design/styles`, `POST /design/styles/compose` (`api/routes/design.py`, auth-required).
-
-### UI/UX design compiler and DTCG tokens
-
-`services/langgraph/agency/ui_ux/` compiles product/brand/audience state into a strict `UIUXDesignIR` (IA, flows, genome, tiered DTCG tokens, screens, the full 29-state matrix, responsive transforms, WCAG 2.2 requirements, AI-trust rules, implementation map) — pure, deterministic, terminal `UIUX_SPEC_READY`, never generates UI. It runs as a deterministic subprocess of `design_brief` for digital-product briefs (`DesignBrief.ui_ux`; non-UI briefs get `null`) and inside the prompt compiler for `PromptFamily.UI_UX` (`PromptPackage.ui_ux_design`); other families are byte-identical. WCAG 2.2 is normative for every contrast verdict; APCA is advisory only and never merged with it; vendor design systems are reference-only. `agency/design_tokens.py` is the **only** DTCG 2025.10 compiler (frontend `compile_tokens.py`, runtime `_build_design_system`, UI/UX) — don't add a second. Frontend tokens: edit `apps/web/tokens/amc.tokens.json`, run `pnpm tokens:build`; `apps/web/app/tokens.css` is generated and checked for freshness by `verify_design_tokens.py`; `pnpm --filter @amc/web verify:ui` is a TS-AST gate. `UIUXDesignIR` has a strict Zod twin (`packages/shared/src/schemas/uiux.ts`) whose parity is proven by a compiler-generated fixture — if you change the Pydantic models, regenerate `packages/shared/tests/fixtures/uiux-design-ir.json`. Details: `docs/ui-ux-design-compiler.md`.
-
 ### Web pages and motion — design skill first
 
 The project skill `.claude/skills/premium-web-design/SKILL.md` is the workflow for building, restyling or animating web pages (landing pages, heroes, navbars, pricing, 21st.dev blocks).
@@ -439,6 +111,46 @@ The project skill `.claude/skills/premium-web-design/SKILL.md` is the workflow f
 - **Motion.** Animations use Framer Motion through `apps/web/components/motion/Motion.tsx` (`Reveal`, `Stagger`/`StaggerItem`, `HoverLift`): `LazyMotion` + `domAnimation`, `reducedMotion="user"`, and never on above-the-fold/LCP content. Its numbers mirror the motion tokens in `lib/design/motion.ts`; `tests/motion-tokens.test.ts` fails on drift.
 - **Agency side.** The same methodology is the advisory guidance pack `pg.web_experience.v1`. It routes only for `UI_UX` web requests and is excluded for image/video/print families.
 - **Performance.** A Lighthouse 90+ claim needs a measured mobile run on a production build: `npx -y lighthouse@13.5.0` with `CHROME_PATH` set to the Playwright Chromium.
+
+### Subsystem guidance (loads on demand)
+
+Per-subsystem rules live in a `CLAUDE.md` inside each directory and load only when a session works under it. Read the nested file before changing that subsystem; the `docs/` pages have the long form.
+
+- `services/langgraph/agency/skills/` — Skill dispatcher — capability gating, not a plugin system yet
+- `services/langgraph/agency/guidance/` — Guidance registry + prompt compiler — stops deliberately short of generation
+- `services/langgraph/agency/project_os/` — Project OS — PROJECT is the durable unit
+- `services/langgraph/agency/delivery/` — Delivery contracts and the release handshake — proof, not authority
+- `services/langgraph/agency/compiled/` — Method routing and delegation — a compiler, not an orchestrator
+- `services/langgraph/agency/execution_fabric/` — Execution fabric — the governed execution plane
+- `services/langgraph/agency/cinematic/` — Cinematic capability — routed, not global
+- `services/langgraph/agency/creative/` — Creative search runtime — bounded search, human-gated
+- `services/langgraph/agency/intake/` — Governed intake mission — words to a release decision
+- `services/langgraph/agency/visual/` — Local visual engine (R1–R5 renderers, verification)
+- `services/langgraph/agency/durable/` — Durable runtime (run FSM, ticks, ABC manifests)
+- `services/langgraph/agency/foundry/` — Generative Creative Foundry — brief to verified brand family, locally
+- `services/langgraph/agency/ucpo/` — Website production line (UCPO) — brief to verified site, never deployed
+- `services/langgraph/agency/avic/` — ACE × AVIC — brief to verified native SVG
+- `services/langgraph/agency/vnexus/` — VNEXUS ACE — persisted brand genome and the layers on it
+- `services/langgraph/agency/vnexus/brandbook/` — VNEXUS brand book — a projection of the approved genome, built incrementally
+- `services/langgraph/agency/vnexus/directions/` — VNEXUS creative directions — recommend, select by approval, rebuild only when needed
+- `services/langgraph/agency/actions/` — ACE v12 action plane and Agency OS — one gateway, sandbox only
+- `services/langgraph/agency/council/` — Mission Council — three engines, one gate
+- `services/langgraph/agency/operating_framework/` — Agency Operating Framework — a ledger over existing owners
+- `services/langgraph/agency/prompt_families/` — Prompt families and v10 prompt OS — decomposed, not injected
+- `services/langgraph/agency/compiled/` — Compiled Agency planner — plans over the kernel, never executes
+- `services/langgraph/agency/design/` — Design Mode — style catalog composed by dimension
+- `services/langgraph/agency/ui_ux/` — UI/UX design compiler and DTCG tokens
+
+### Cross-cutting rules (always apply)
+
+These hold across every subsystem; the nested files add detail but never relax them.
+
+- **One approval path.** Release and content approvals are `open_artifact_approval` (or the existing `approvals` rows) decided only on `/approvals/{id}/decide`. Don't add another approval store or decision route.
+- **One artifact store.** Derived artifacts are Project OS artifacts written through `foundry.studio.store` (N4 `agency_artifacts`) with `depends_on`. Don't add a parallel store, table or migration for them.
+- **Fail closed on external effects.** Publish, spend and send are never dispatched; LIVE enablement stays disabled. Hosted generation, critique and research providers are declared DISABLED until a verified adapter, credentials and an entitlement/pricing/terms recheck exist. Never simulate provider output; `NOT_RUN`, `NOT_VERIFIED`, `BLOCKED` and `PROVIDER_GAP` are never a pass.
+- **Don't invent missing sources.** Reserved ids (EXT-001…090 / ART-001…012) are `VOID_DETECTED`; the 14 original VNEXUS prompts and any unsupplied board/spec definitions are absent; unmigrated style references stay pending.
+- **Contracts and sweeps.** An API-visible Pydantic model needs a Zod twin and a recorded fixture (regenerate with `AMC_REGENERATE_FIXTURES=1` and the matching `pytest` file named in the subsystem's nested guidance). New `/vnexus` and `/avic` routes are covered by their route-security sweeps automatically and must pass.
+- **Proof, not authority.** Hashes, verifier gates and read-backs prove identity and integrity; they never grant approval or release.
 
 ### The fail-closed integration pattern
 

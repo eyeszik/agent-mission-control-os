@@ -1,0 +1,7 @@
+# agency/design
+
+_Guidance for this directory, moved verbatim from the root `CLAUDE.md` so it loads only when working here. Cross-cutting rules stay in the root file._
+
+## Design Mode — style catalog composed by dimension
+
+`packages/shared/style-library/design-styles.json` is the canonical style catalog (contract: `packages/shared/src/schemas/styleLibrary.ts`, mirrored by `services/langgraph/agency/design/style_registry.py`). Styles are composed **by dimension**, never by concatenating prompts: each selection layer claims dimensions (default: the style's own `design_dimensions`), and each dimension resolves to one style — a locked layer wins, then strength, then the primary (`style_composer.py`); `prompt_compiler.py` emits one prompt line per resolved dimension. Declared incompatibility, a disabled style, or two locks on one dimension are *blocking*. Catalog references to styles not yet migrated (`pending_references`) are allowed but must be well-formed ids — never invent those styles. The UI (`DesignStyleComposerPanel`, behind Mission Control's Design Mode toggle) attaches a selection via `lib/stores/designStore.ts`; the Campaign Terminal sends it as `CampaignBrief.style_selection`; `brief_intake` carries it and `design_brief` **recomposes it server-side** into `DesignBrief.style_direction` (applied to generation only when non-blocking), exported as `branding/raw/style-direction.md` and surfaced to the reviewer as a QA advisory. API: `GET /design/styles`, `POST /design/styles/compose` (`api/routes/design.py`, auth-required).
