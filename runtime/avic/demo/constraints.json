@@ -1,0 +1,104 @@
+[
+  {
+    "constraint_id": "exact.headline",
+    "kind": "exact_text",
+    "requirement_refs": [
+      "text.0"
+    ],
+    "severity": "CRITICAL",
+    "target": [
+      "headline"
+    ],
+    "tolerance": null,
+    "verification": "SVG text == brief"
+  },
+  {
+    "constraint_id": "exact.annotation",
+    "kind": "exact_text",
+    "requirement_refs": [
+      "text.1"
+    ],
+    "severity": "CRITICAL",
+    "target": [
+      "annotation"
+    ],
+    "tolerance": null,
+    "verification": "SVG text == brief"
+  },
+  {
+    "constraint_id": "protected.motif",
+    "kind": "protected_geometry",
+    "requirement_refs": [],
+    "severity": "CRITICAL",
+    "target": [
+      "motif-ring-outer",
+      "motif-ring-inner",
+      "motif-axis"
+    ],
+    "tolerance": null,
+    "verification": "geometry attributes unchanged by any edit or repair"
+  },
+  {
+    "constraint_id": "palette",
+    "kind": "palette",
+    "requirement_refs": [],
+    "severity": "CRITICAL",
+    "target": [],
+    "tolerance": 2.3,
+    "verification": "every literal colour within dE76 2.3 of the brand palette"
+  },
+  {
+    "constraint_id": "contrast.headline",
+    "kind": "contrast",
+    "requirement_refs": [],
+    "severity": "CRITICAL",
+    "target": [
+      "headline",
+      "background"
+    ],
+    "tolerance": 4.5,
+    "verification": "WCAG 2.2 ratio of headline fill on ground"
+  },
+  {
+    "constraint_id": "contrast.annotation",
+    "kind": "contrast",
+    "requirement_refs": [],
+    "severity": "CRITICAL",
+    "target": [
+      "annotation",
+      "background"
+    ],
+    "tolerance": 4.5,
+    "verification": "WCAG 2.2 ratio of annotation fill on ground"
+  },
+  {
+    "constraint_id": "contrast.motif",
+    "kind": "contrast",
+    "requirement_refs": [],
+    "severity": "CRITICAL",
+    "target": [
+      "motif-ring-outer",
+      "background"
+    ],
+    "tolerance": 3.0,
+    "verification": "WCAG 2.2 graphic contrast of the accent motif on ground"
+  },
+  {
+    "constraint_id": "accent.single",
+    "kind": "single_accent",
+    "requirement_refs": [],
+    "severity": "CRITICAL",
+    "target": [],
+    "tolerance": 1.0,
+    "verification": "at most N accent colours used"
+  },
+  {
+    "constraint_id": "profile",
+    "kind": "profile",
+    "requirement_refs": [],
+    "severity": "CRITICAL",
+    "target": [],
+    "tolerance": null,
+    "verification": "no raster in a native profile"
+  }
+]

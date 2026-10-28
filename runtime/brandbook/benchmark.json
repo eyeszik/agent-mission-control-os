@@ -1,0 +1,442 @@
+{
+  "after_merge_page_records": {
+    "concurrent_isolation": {
+      "other_name_absent": true,
+      "own_name_present": true,
+      "wall_ms": [
+        20580.5,
+        20844.3
+      ]
+    },
+    "environment": {
+      "chromium": true,
+      "cpu_count": 4,
+      "platform": "Linux-6.18.44-fc-v180-x86_64-with-glibc2.39",
+      "python": "3.11.17",
+      "storage": "local filesystem + SQLite"
+    },
+    "fixture": "FULL_DOC + DECIDED (fictional), PREVIEW mode, 24 pages",
+    "label": "after_merge_page_records",
+    "samples": 3,
+    "scenarios": {
+      "cold": {
+        "browser_runs": [
+          2,
+          2,
+          2
+        ],
+        "cache_hits": [
+          0,
+          0,
+          0
+        ],
+        "model_calls": 0,
+        "pages_rendered": [
+          24,
+          24,
+          24
+        ],
+        "pages_reused": [
+          0,
+          0,
+          0
+        ],
+        "peak_rss_kb": 163684,
+        "stage_ms_median": {
+          "assemble": 182.4,
+          "compile": 12.4,
+          "context": 19.8,
+          "measure": 3869.4,
+          "record": 125.8,
+          "render": 0.8,
+          "reuse_lookup": 56.3,
+          "store": 4126.2
+        },
+        "total_ms": {
+          "max": 8918.2,
+          "median": 8680.4,
+          "min": 7576.4,
+          "n": 3
+        }
+      },
+      "copy_edit": {
+        "browser_runs": [
+          2,
+          2,
+          2
+        ],
+        "cache_hits": [
+          20,
+          20,
+          20
+        ],
+        "model_calls": 0,
+        "pages_rendered": [
+          4,
+          4,
+          4
+        ],
+        "pages_reused": [
+          20,
+          20,
+          20
+        ],
+        "peak_rss_kb": 164516,
+        "stage_ms_median": {
+          "assemble": 201.3,
+          "compile": 7.5,
+          "context": 19.2,
+          "measure": 1946.4,
+          "record": 85.9,
+          "render": 0.3,
+          "reuse_lookup": 60.5,
+          "store": 740.5
+        },
+        "total_ms": {
+          "max": 3155.0,
+          "median": 3061.7,
+          "min": 2777.9,
+          "n": 3
+        }
+      },
+      "palette_edit": {
+        "browser_runs": [
+          2,
+          2,
+          2
+        ],
+        "cache_hits": [
+          0,
+          0,
+          0
+        ],
+        "model_calls": 0,
+        "pages_rendered": [
+          24,
+          24,
+          24
+        ],
+        "pages_reused": [
+          0,
+          0,
+          0
+        ],
+        "peak_rss_kb": 164516,
+        "stage_ms_median": {
+          "assemble": 213.1,
+          "compile": 12.0,
+          "context": 19.3,
+          "measure": 3935.1,
+          "record": 86.9,
+          "render": 0.7,
+          "reuse_lookup": 61.2,
+          "store": 4021.5
+        },
+        "total_ms": {
+          "max": 9105.3,
+          "median": 8290.4,
+          "min": 7880.8,
+          "n": 3
+        }
+      },
+      "resume_after_interrupt": {
+        "browser_runs": [
+          2,
+          2,
+          2
+        ],
+        "cache_hits": [
+          0,
+          0,
+          0
+        ],
+        "model_calls": 0,
+        "pages_rendered": [
+          15,
+          15,
+          15
+        ],
+        "pages_reused": [
+          9,
+          9,
+          9
+        ],
+        "peak_rss_kb": 164516,
+        "stage_ms_median": {
+          "assemble": 224.9,
+          "compile": 14.4,
+          "context": 17.3,
+          "measure": 3053.7,
+          "record": 83.2,
+          "render": 0.5,
+          "reuse_lookup": 61.0,
+          "store": 2513.5
+        },
+        "total_ms": {
+          "max": 6363.5,
+          "median": 6142.7,
+          "min": 5804.5,
+          "n": 3
+        }
+      },
+      "warm": {
+        "browser_runs": [
+          0,
+          0,
+          0
+        ],
+        "cache_hits": [
+          23,
+          23,
+          23
+        ],
+        "model_calls": 0,
+        "pages_rendered": [
+          0,
+          0,
+          0
+        ],
+        "pages_reused": [
+          24,
+          24,
+          24
+        ],
+        "peak_rss_kb": 163684,
+        "stage_ms_median": {
+          "assemble": 18.2,
+          "compile": 6.9,
+          "context": 20.1,
+          "record": 11.4,
+          "reuse_lookup": 64.5,
+          "store": 0.0
+        },
+        "total_ms": {
+          "max": 123.4,
+          "median": 121.5,
+          "min": 121.2,
+          "n": 3
+        }
+      }
+    }
+  },
+  "before_merge_page_records": {
+    "concurrent_isolation": {
+      "other_name_absent": true,
+      "own_name_present": true,
+      "wall_ms": [
+        34459.5,
+        33595.8
+      ]
+    },
+    "environment": {
+      "chromium": true,
+      "cpu_count": 4,
+      "platform": "Linux-6.18.44-fc-v180-x86_64-with-glibc2.39",
+      "python": "3.11.17",
+      "storage": "local filesystem + SQLite"
+    },
+    "fixture": "FULL_DOC + DECIDED (fictional), PREVIEW mode, 24 pages",
+    "label": "before_merge_page_records",
+    "samples": 3,
+    "scenarios": {
+      "cold": {
+        "browser_runs": [
+          2,
+          2,
+          2
+        ],
+        "cache_hits": [
+          0,
+          0,
+          0
+        ],
+        "model_calls": 0,
+        "pages_rendered": [
+          24,
+          24,
+          24
+        ],
+        "pages_reused": [
+          0,
+          0,
+          0
+        ],
+        "peak_rss_kb": 171436,
+        "stage_ms_median": {
+          "assemble": 176.0,
+          "compile": 12.7,
+          "context": 23.8,
+          "measure": 3911.8,
+          "record": 113.4,
+          "render": 1.0,
+          "reuse_lookup": 78.1,
+          "store": 7130.4
+        },
+        "total_ms": {
+          "max": 13125.4,
+          "median": 11448.2,
+          "min": 9673.2,
+          "n": 3
+        }
+      },
+      "copy_edit": {
+        "browser_runs": [
+          2,
+          2,
+          2
+        ],
+        "cache_hits": [
+          20,
+          20,
+          20
+        ],
+        "model_calls": 0,
+        "pages_rendered": [
+          4,
+          4,
+          4
+        ],
+        "pages_reused": [
+          20,
+          20,
+          20
+        ],
+        "peak_rss_kb": 173096,
+        "stage_ms_median": {
+          "assemble": 217.3,
+          "compile": 7.4,
+          "context": 18.8,
+          "measure": 1863.2,
+          "record": 89.5,
+          "render": 0.3,
+          "reuse_lookup": 109.3,
+          "store": 1157.1
+        },
+        "total_ms": {
+          "max": 3795.4,
+          "median": 3452.9,
+          "min": 3240.7,
+          "n": 3
+        }
+      },
+      "palette_edit": {
+        "browser_runs": [
+          2,
+          2,
+          2
+        ],
+        "cache_hits": [
+          0,
+          0,
+          0
+        ],
+        "model_calls": 0,
+        "pages_rendered": [
+          24,
+          24,
+          24
+        ],
+        "pages_reused": [
+          0,
+          0,
+          0
+        ],
+        "peak_rss_kb": 173096,
+        "stage_ms_median": {
+          "assemble": 209.7,
+          "compile": 12.4,
+          "context": 18.9,
+          "measure": 3908.3,
+          "record": 87.2,
+          "render": 0.6,
+          "reuse_lookup": 58.9,
+          "store": 6459.2
+        },
+        "total_ms": {
+          "max": 12127.0,
+          "median": 10754.8,
+          "min": 9968.2,
+          "n": 3
+        }
+      },
+      "resume_after_interrupt": {
+        "browser_runs": [
+          2,
+          2,
+          2
+        ],
+        "cache_hits": [
+          0,
+          0,
+          0
+        ],
+        "model_calls": 0,
+        "pages_rendered": [
+          16,
+          16,
+          16
+        ],
+        "pages_reused": [
+          8,
+          8,
+          8
+        ],
+        "peak_rss_kb": 173864,
+        "stage_ms_median": {
+          "assemble": 216.8,
+          "compile": 15.2,
+          "context": 16.9,
+          "measure": 3084.9,
+          "record": 86.5,
+          "render": 0.6,
+          "reuse_lookup": 83.2,
+          "store": 4102.9
+        },
+        "total_ms": {
+          "max": 8927.9,
+          "median": 7547.4,
+          "min": 7300.9,
+          "n": 3
+        }
+      },
+      "warm": {
+        "browser_runs": [
+          0,
+          0,
+          0
+        ],
+        "cache_hits": [
+          23,
+          23,
+          23
+        ],
+        "model_calls": 0,
+        "pages_rendered": [
+          0,
+          0,
+          0
+        ],
+        "pages_reused": [
+          24,
+          24,
+          24
+        ],
+        "peak_rss_kb": 171564,
+        "stage_ms_median": {
+          "assemble": 19.6,
+          "compile": 6.9,
+          "context": 19.0,
+          "record": 11.0,
+          "reuse_lookup": 120.9,
+          "store": 0.0
+        },
+        "total_ms": {
+          "max": 187.5,
+          "median": 178.0,
+          "min": 174.9,
+          "n": 3
+        }
+      }
+    }
+  }
+}

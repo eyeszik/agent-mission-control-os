@@ -1,0 +1,38 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "vdc-a9e1f3845056a35f",
+      "job_id": "mjob-6a0cad67d9a04455b066f9c81e7218b9",
+      "provenance": "RECORDED",
+      "slot": 1,
+      "status": "COMPLETE"
+    },
+    {
+      "candidate_id": "vdc-1447ce411e0421be",
+      "job_id": "mjob-ab13631d7c2f41d592eed61e70b71614",
+      "provenance": "RECORDED",
+      "slot": 2,
+      "status": "COMPLETE"
+    },
+    {
+      "candidate_id": "vdc-5cad7ef211bd1ce7",
+      "job_id": "mjob-384baf5dc38349e38094358d1825c431",
+      "provenance": "RECORDED",
+      "slot": 3,
+      "status": "COMPLETE"
+    }
+  ],
+  "decision": {
+    "allowed": true,
+    "blockers": [],
+    "estimate_minor": 0,
+    "health": "AVAILABLE",
+    "note": "",
+    "offer": null,
+    "route_id": "local.foundry_compose",
+    "spend_mode": "zero"
+  },
+  "handoff": null,
+  "note": "",
+  "status": "COMPLETE"
+}

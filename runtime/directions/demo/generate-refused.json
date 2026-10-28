@@ -1,0 +1,124 @@
+{
+  "candidates": [],
+  "decision": {
+    "allowed": false,
+    "blockers": [
+      "ADAPTER_NOT_IMPLEMENTED",
+      "ENTITLEMENT_UNVERIFIED: capabilities, quota, price, terms and data handling not rechecked against official sources for this account",
+      "CREDENTIAL_NOT_CONFIGURED: CLOUDFLARE_API_TOKEN",
+      "PRICE_UNKNOWN: a route without a verified price is never run in zero-spend mode"
+    ],
+    "estimate_minor": null,
+    "health": "DISABLED",
+    "note": "nothing was called; no other model was substituted",
+    "offer": "manual.handoff",
+    "route_id": "cloudflare.workers_ai.text_to_image",
+    "spend_mode": "zero"
+  },
+  "handoff": {
+    "asset_role": "LOGO_MARK",
+    "blockers": [],
+    "genome_ref": "gv-229463a9817b43b6adadc1182b8b0eab",
+    "intent_id": "vdi-a8201b1dd60f9ccb",
+    "return": {
+      "formats": [
+        "image/png",
+        "image/svg+xml"
+      ],
+      "max_bytes": 12000000,
+      "provenance": "USER_REPORTED: the importer's statement; this server verifies only the bytes it stores",
+      "record": [
+        "provider",
+        "model",
+        "model_version",
+        "seed",
+        "parameters",
+        "generated_at",
+        "job_ref",
+        "receipt_ref",
+        "cost_minor",
+        "currency",
+        "rights_basis",
+        "reference_ids"
+      ]
+    },
+    "rules": [
+      "use only an account and terms you are authorized to use; this package grants no entitlement",
+      "do not include identity text in generated images",
+      "do not upload private or [PII] material to a provider"
+    ],
+    "slots": [
+      {
+        "direction": "led by the approved swiss editorial grammar",
+        "negative_prompt": "no lettering, letters, words or numerals in the image: identity text is set later from the approved type; no third-party logos, trademarks or recognisable real people; no photographs of identifiable individuals; no embedded signatures or watermarks; flat shapes only: no gradients, textures or photographic detail",
+        "parameters": {
+          "count": 1,
+          "height": 1024,
+          "seed": null,
+          "width": 1024
+        },
+        "prompt": "# logo_mark — production prompt\n\n## Objective\nA mark for a small stoneware studio (fictional)\n\n## Audience\npeople furnishing a first home (fictional persona)\n\n## Channel / destination\nweb / unspecified\n\n## Canonical brand directives\n- Canonical brand context (strategy): {\"brand_name\":\"Halden & Fen (fictional)\",\"positioning_essence\":\"Small-batch stoneware (fictional brand)\"}\n- Canonical brand context (visual): {\"color_story\":[{\"description\":\"ink colour from the approved brand genome\",\"reference_hex\":\"#14161a\",\"role\":\"ink\"},{\"description\":\"paper colour from the approved brand genome\",\"reference_hex\":\"#f7f4ee\",\"role\":\"paper\"},{\"description\":\"accent colour from the approved brand genome\",\"reference_hex\":\"#c2410c\",\"role\":\"accent\"},{\"description\":\"accent_2 colour from the approved brand genome\",\"reference_hex\":\"#93c5fd\",\"role\":\"accent_2\"},{\"description\":\"muted colour from the approved brand genome\",\"reference_hex\":\"#4b4540\",\"role\":\"muted\"}],\"imagery_style\":\"Natural light on matte surfaces\",\"logo_lockups\":[{\"clear_space_rule\":\"a quarter of the mark height\",\"generation_reference\":\"Approved mark 'ring_dot' rendered from vector; never regenerated\",\"lockup_id\":\"primary\",\"lockup_type\":\"primary\",\"minimum_size\":\"24px\",\"placement_notes\":\"No placement notes in the approved genome.\",\"usage_context\":\"Default digital and print mark.\"}],\"typography_direction\":\"Display Schibsted Grotesk; body Inter\"}\n\n## Selected advisory strategy guidance\n- Structure positioning around audience, context, category or frame, distinctive value, and supporting proof.\n- Distinguish category parity from genuine whitespace.\n- Ensure positioning can inform copy, design, product, and campaign decisions.\n- Establish purpose as the organization's reason for existence beyond an individual transaction.\n- Express vision as the future state the organization seeks to help create.\n- Express values as behavioral decision principles rather than decorative adjectives.\n- Model audience through jobs, goals, pains, barriers, triggers, alternatives, language, and context.\n- Evaluate market through direct competitors, indirect competitors, substitutes, category codes, parity, whitespace, and risk.\n- Distinguish desired recognition, comprehension, memory, emotional association, and perception shift.\n\n## Selected advisory verbal guidance\n- Define durable voice separately from context-dependent tone.\n- Prefer concrete active verbs and consistent terminology.\n- Write from the intended audience's perspective.\n- Avoid unsupported guarantees and superlatives.\n\n## Selected advisory visual guidance\n- Map audience expectations and competitor or category visual codes.\n- Translate personality into form and verbal rhythm into visual rhythm.\n- Develop distinct creative territories before selecting a governing concept.\n- Use typography as a personality-bearing system.\n- Encode content meaning in structure and hierarchy.\n- Prefer one identifiable signature device.\n- Use motion to communicate or organize rather than decorate.\n- Let subject-specific language outrank aesthetic trends.\n- test one-color, inverse, small-size, silhouette, print, responsive lockup, busy-background, and favicon behavior\n- separate primitive, semantic, and component roles\n- treat color meaning as contextual\n- preserve non-color cues for essential information\n- define subject, framing, composition, lighting, color behavior, texture, camera behavior, realism, human representation, illustration geometry, and exclusions\n- define grid, stroke, fill, optical weight, corners, metaphor rules, and sizes\n- define grid, spacing, radius, border, shadow, elevation, and density\n\n## Selected advisory composition guidance\n- Map audience expectations and competitor or category visual codes.\n- Translate personality into form and verbal rhythm into visual rhythm.\n- Develop distinct creative territories before selecting a governing concept.\n- Use typography as a personality-bearing system.\n- Encode content meaning in structure and hierarchy.\n- Prefer one identifiable signature device.\n- Use motion to communicate or organize rather than decorate.\n- Let subject-specific language outrank aesthetic trends.\n\n## Selected advisory typography guidance\n- evaluate strategic character, distinctiveness, legibility, language coverage, licensing, web performance, print behavior, and fallback quality\n\n## Selected advisory governance guidance\n- Evidence requirement: Distinctive-value claims require evidence when presented as factual.\n- Evidence requirement: Treat unsupported market differentiation as recommendation or hypothesis, not confirmed fact.\n\n## Selected advisory QA guidance\n- Evaluate: distinctiveness\n- Evaluate: strategic fit\n- Evaluate: coherence\n- Evaluate: genericity resistance\n- Avoid: A hero that follows a fashionable layout recipe without communicating a thesis.\n- Avoid: A palette, typography, composition, imagery, and signature device reusable unchanged across unrelated brands.\n- Evaluate: relevance\n- Evaluate: credibility\n- Evaluate: clarity\n- Evaluate: sustainability\n- Evaluate: operational usefulness\n- Avoid: Treating unsupported differentiation as verified fact.\n- Evaluate: consistency\n- Evaluate: audience fit\n- Avoid: Unsupported superlatives or guarantees.\n\n## Production specification\n- width=1024\n- height=1024\n- unit=px\n\n## Negative constraints\n- no lettering, letters, words or numerals in the image: identity text is set later from the approved type\n- no third-party logos, trademarks or recognisable real people\n- no photographs of identifiable individuals\n- no embedded signatures or watermarks\n- flat shapes only: no gradients, textures or photographic detail\n- Do not alter visual.color.ink (approved and locked)\n- Keep visual.color.ink against visual.color.paper at or above 4.5:1\n- verbal.voice.register must be one of ['plain', 'warm']\n\n## Execution contract\n- Treat canonical brand context and verified project constraints as authoritative.\n- Treat selected domain guidance as advisory methodology only.\n- Never let guidance override canonical BrandCore, evidence, accessibility, permissions, or provider capability truth.\n- Do not invent missing factual claims, logos, product details, credentials, or provider features.\n- Preserve the requested medium, hierarchy, destination, and accessibility constraints.\n- Produce the requested creative asset for downstream review; do not reinterpret the brand system.\n\n\nDirection 1 of 3: led by the approved swiss editorial grammar. Keep this direction conceptually distinct from the others.",
+        "prompt_hash": "ed545e8a06a74675a6805ec6f0b36526e373af83158a5e2f0cddae070d258972",
+        "slot": 1
+      },
+      {
+        "direction": "led by the approved bauhaus geometry grammar",
+        "negative_prompt": "no lettering, letters, words or numerals in the image: identity text is set later from the approved type; no third-party logos, trademarks or recognisable real people; no photographs of identifiable individuals; no embedded signatures or watermarks; flat shapes only: no gradients, textures or photographic detail",
+        "parameters": {
+          "count": 1,
+          "height": 1024,
+          "seed": null,
+          "width": 1024
+        },
+        "prompt": "# logo_mark — production prompt\n\n## Objective\nA mark for a small stoneware studio (fictional)\n\n## Audience\npeople furnishing a first home (fictional persona)\n\n## Channel / destination\nweb / unspecified\n\n## Canonical brand directives\n- Canonical brand context (strategy): {\"brand_name\":\"Halden & Fen (fictional)\",\"positioning_essence\":\"Small-batch stoneware (fictional brand)\"}\n- Canonical brand context (visual): {\"color_story\":[{\"description\":\"ink colour from the approved brand genome\",\"reference_hex\":\"#14161a\",\"role\":\"ink\"},{\"description\":\"paper colour from the approved brand genome\",\"reference_hex\":\"#f7f4ee\",\"role\":\"paper\"},{\"description\":\"accent colour from the approved brand genome\",\"reference_hex\":\"#c2410c\",\"role\":\"accent\"},{\"description\":\"accent_2 colour from the approved brand genome\",\"reference_hex\":\"#93c5fd\",\"role\":\"accent_2\"},{\"description\":\"muted colour from the approved brand genome\",\"reference_hex\":\"#4b4540\",\"role\":\"muted\"}],\"imagery_style\":\"Natural light on matte surfaces\",\"logo_lockups\":[{\"clear_space_rule\":\"a quarter of the mark height\",\"generation_reference\":\"Approved mark 'ring_dot' rendered from vector; never regenerated\",\"lockup_id\":\"primary\",\"lockup_type\":\"primary\",\"minimum_size\":\"24px\",\"placement_notes\":\"No placement notes in the approved genome.\",\"usage_context\":\"Default digital and print mark.\"}],\"typography_direction\":\"Display Schibsted Grotesk; body Inter\"}\n\n## Selected advisory strategy guidance\n- Structure positioning around audience, context, category or frame, distinctive value, and supporting proof.\n- Distinguish category parity from genuine whitespace.\n- Ensure positioning can inform copy, design, product, and campaign decisions.\n- Establish purpose as the organization's reason for existence beyond an individual transaction.\n- Express vision as the future state the organization seeks to help create.\n- Express values as behavioral decision principles rather than decorative adjectives.\n- Model audience through jobs, goals, pains, barriers, triggers, alternatives, language, and context.\n- Evaluate market through direct competitors, indirect competitors, substitutes, category codes, parity, whitespace, and risk.\n- Distinguish desired recognition, comprehension, memory, emotional association, and perception shift.\n\n## Selected advisory verbal guidance\n- Define durable voice separately from context-dependent tone.\n- Prefer concrete active verbs and consistent terminology.\n- Write from the intended audience's perspective.\n- Avoid unsupported guarantees and superlatives.\n\n## Selected advisory visual guidance\n- Map audience expectations and competitor or category visual codes.\n- Translate personality into form and verbal rhythm into visual rhythm.\n- Develop distinct creative territories before selecting a governing concept.\n- Use typography as a personality-bearing system.\n- Encode content meaning in structure and hierarchy.\n- Prefer one identifiable signature device.\n- Use motion to communicate or organize rather than decorate.\n- Let subject-specific language outrank aesthetic trends.\n- test one-color, inverse, small-size, silhouette, print, responsive lockup, busy-background, and favicon behavior\n- separate primitive, semantic, and component roles\n- treat color meaning as contextual\n- preserve non-color cues for essential information\n- define subject, framing, composition, lighting, color behavior, texture, camera behavior, realism, human representation, illustration geometry, and exclusions\n- define grid, stroke, fill, optical weight, corners, metaphor rules, and sizes\n- define grid, spacing, radius, border, shadow, elevation, and density\n\n## Selected advisory composition guidance\n- Map audience expectations and competitor or category visual codes.\n- Translate personality into form and verbal rhythm into visual rhythm.\n- Develop distinct creative territories before selecting a governing concept.\n- Use typography as a personality-bearing system.\n- Encode content meaning in structure and hierarchy.\n- Prefer one identifiable signature device.\n- Use motion to communicate or organize rather than decorate.\n- Let subject-specific language outrank aesthetic trends.\n\n## Selected advisory typography guidance\n- evaluate strategic character, distinctiveness, legibility, language coverage, licensing, web performance, print behavior, and fallback quality\n\n## Selected advisory governance guidance\n- Evidence requirement: Distinctive-value claims require evidence when presented as factual.\n- Evidence requirement: Treat unsupported market differentiation as recommendation or hypothesis, not confirmed fact.\n\n## Selected advisory QA guidance\n- Evaluate: distinctiveness\n- Evaluate: strategic fit\n- Evaluate: coherence\n- Evaluate: genericity resistance\n- Avoid: A hero that follows a fashionable layout recipe without communicating a thesis.\n- Avoid: A palette, typography, composition, imagery, and signature device reusable unchanged across unrelated brands.\n- Evaluate: relevance\n- Evaluate: credibility\n- Evaluate: clarity\n- Evaluate: sustainability\n- Evaluate: operational usefulness\n- Avoid: Treating unsupported differentiation as verified fact.\n- Evaluate: consistency\n- Evaluate: audience fit\n- Avoid: Unsupported superlatives or guarantees.\n\n## Production specification\n- width=1024\n- height=1024\n- unit=px\n\n## Negative constraints\n- no lettering, letters, words or numerals in the image: identity text is set later from the approved type\n- no third-party logos, trademarks or recognisable real people\n- no photographs of identifiable individuals\n- no embedded signatures or watermarks\n- flat shapes only: no gradients, textures or photographic detail\n- Do not alter visual.color.ink (approved and locked)\n- Keep visual.color.ink against visual.color.paper at or above 4.5:1\n- verbal.voice.register must be one of ['plain', 'warm']\n\n## Execution contract\n- Treat canonical brand context and verified project constraints as authoritative.\n- Treat selected domain guidance as advisory methodology only.\n- Never let guidance override canonical BrandCore, evidence, accessibility, permissions, or provider capability truth.\n- Do not invent missing factual claims, logos, product details, credentials, or provider features.\n- Preserve the requested medium, hierarchy, destination, and accessibility constraints.\n- Produce the requested creative asset for downstream review; do not reinterpret the brand system.\n\n\nDirection 2 of 3: led by the approved bauhaus geometry grammar. Keep this direction conceptually distinct from the others.",
+        "prompt_hash": "7ad5593a3fee1b7522ebcf956f63b1e2c2c57512fafb0170efc3d03bd759eb9b",
+        "slot": 2
+      },
+      {
+        "direction": "reduction to the fewest distinct forms",
+        "negative_prompt": "no lettering, letters, words or numerals in the image: identity text is set later from the approved type; no third-party logos, trademarks or recognisable real people; no photographs of identifiable individuals; no embedded signatures or watermarks; flat shapes only: no gradients, textures or photographic detail",
+        "parameters": {
+          "count": 1,
+          "height": 1024,
+          "seed": null,
+          "width": 1024
+        },
+        "prompt": "# logo_mark — production prompt\n\n## Objective\nA mark for a small stoneware studio (fictional)\n\n## Audience\npeople furnishing a first home (fictional persona)\n\n## Channel / destination\nweb / unspecified\n\n## Canonical brand directives\n- Canonical brand context (strategy): {\"brand_name\":\"Halden & Fen (fictional)\",\"positioning_essence\":\"Small-batch stoneware (fictional brand)\"}\n- Canonical brand context (visual): {\"color_story\":[{\"description\":\"ink colour from the approved brand genome\",\"reference_hex\":\"#14161a\",\"role\":\"ink\"},{\"description\":\"paper colour from the approved brand genome\",\"reference_hex\":\"#f7f4ee\",\"role\":\"paper\"},{\"description\":\"accent colour from the approved brand genome\",\"reference_hex\":\"#c2410c\",\"role\":\"accent\"},{\"description\":\"accent_2 colour from the approved brand genome\",\"reference_hex\":\"#93c5fd\",\"role\":\"accent_2\"},{\"description\":\"muted colour from the approved brand genome\",\"reference_hex\":\"#4b4540\",\"role\":\"muted\"}],\"imagery_style\":\"Natural light on matte surfaces\",\"logo_lockups\":[{\"clear_space_rule\":\"a quarter of the mark height\",\"generation_reference\":\"Approved mark 'ring_dot' rendered from vector; never regenerated\",\"lockup_id\":\"primary\",\"lockup_type\":\"primary\",\"minimum_size\":\"24px\",\"placement_notes\":\"No placement notes in the approved genome.\",\"usage_context\":\"Default digital and print mark.\"}],\"typography_direction\":\"Display Schibsted Grotesk; body Inter\"}\n\n## Selected advisory strategy guidance\n- Structure positioning around audience, context, category or frame, distinctive value, and supporting proof.\n- Distinguish category parity from genuine whitespace.\n- Ensure positioning can inform copy, design, product, and campaign decisions.\n- Establish purpose as the organization's reason for existence beyond an individual transaction.\n- Express vision as the future state the organization seeks to help create.\n- Express values as behavioral decision principles rather than decorative adjectives.\n- Model audience through jobs, goals, pains, barriers, triggers, alternatives, language, and context.\n- Evaluate market through direct competitors, indirect competitors, substitutes, category codes, parity, whitespace, and risk.\n- Distinguish desired recognition, comprehension, memory, emotional association, and perception shift.\n\n## Selected advisory verbal guidance\n- Define durable voice separately from context-dependent tone.\n- Prefer concrete active verbs and consistent terminology.\n- Write from the intended audience's perspective.\n- Avoid unsupported guarantees and superlatives.\n\n## Selected advisory visual guidance\n- Map audience expectations and competitor or category visual codes.\n- Translate personality into form and verbal rhythm into visual rhythm.\n- Develop distinct creative territories before selecting a governing concept.\n- Use typography as a personality-bearing system.\n- Encode content meaning in structure and hierarchy.\n- Prefer one identifiable signature device.\n- Use motion to communicate or organize rather than decorate.\n- Let subject-specific language outrank aesthetic trends.\n- test one-color, inverse, small-size, silhouette, print, responsive lockup, busy-background, and favicon behavior\n- separate primitive, semantic, and component roles\n- treat color meaning as contextual\n- preserve non-color cues for essential information\n- define subject, framing, composition, lighting, color behavior, texture, camera behavior, realism, human representation, illustration geometry, and exclusions\n- define grid, stroke, fill, optical weight, corners, metaphor rules, and sizes\n- define grid, spacing, radius, border, shadow, elevation, and density\n\n## Selected advisory composition guidance\n- Map audience expectations and competitor or category visual codes.\n- Translate personality into form and verbal rhythm into visual rhythm.\n- Develop distinct creative territories before selecting a governing concept.\n- Use typography as a personality-bearing system.\n- Encode content meaning in structure and hierarchy.\n- Prefer one identifiable signature device.\n- Use motion to communicate or organize rather than decorate.\n- Let subject-specific language outrank aesthetic trends.\n\n## Selected advisory typography guidance\n- evaluate strategic character, distinctiveness, legibility, language coverage, licensing, web performance, print behavior, and fallback quality\n\n## Selected advisory governance guidance\n- Evidence requirement: Distinctive-value claims require evidence when presented as factual.\n- Evidence requirement: Treat unsupported market differentiation as recommendation or hypothesis, not confirmed fact.\n\n## Selected advisory QA guidance\n- Evaluate: distinctiveness\n- Evaluate: strategic fit\n- Evaluate: coherence\n- Evaluate: genericity resistance\n- Avoid: A hero that follows a fashionable layout recipe without communicating a thesis.\n- Avoid: A palette, typography, composition, imagery, and signature device reusable unchanged across unrelated brands.\n- Evaluate: relevance\n- Evaluate: credibility\n- Evaluate: clarity\n- Evaluate: sustainability\n- Evaluate: operational usefulness\n- Avoid: Treating unsupported differentiation as verified fact.\n- Evaluate: consistency\n- Evaluate: audience fit\n- Avoid: Unsupported superlatives or guarantees.\n\n## Production specification\n- width=1024\n- height=1024\n- unit=px\n\n## Negative constraints\n- no lettering, letters, words or numerals in the image: identity text is set later from the approved type\n- no third-party logos, trademarks or recognisable real people\n- no photographs of identifiable individuals\n- no embedded signatures or watermarks\n- flat shapes only: no gradients, textures or photographic detail\n- Do not alter visual.color.ink (approved and locked)\n- Keep visual.color.ink against visual.color.paper at or above 4.5:1\n- verbal.voice.register must be one of ['plain', 'warm']\n\n## Execution contract\n- Treat canonical brand context and verified project constraints as authoritative.\n- Treat selected domain guidance as advisory methodology only.\n- Never let guidance override canonical BrandCore, evidence, accessibility, permissions, or provider capability truth.\n- Do not invent missing factual claims, logos, product details, credentials, or provider features.\n- Preserve the requested medium, hierarchy, destination, and accessibility constraints.\n- Produce the requested creative asset for downstream review; do not reinterpret the brand system.\n\n\nDirection 3 of 3: reduction to the fewest distinct forms. Keep this direction conceptually distinct from the others.",
+        "prompt_hash": "e73c5e5570ae5eff8271e5b01969966ed1fb07be4ae9ec25196436e90c1610b7",
+        "slot": 3
+      }
+    ],
+    "status": "READY",
+    "vector_instructions": {
+      "approved_faces": {
+        "body": "Inter",
+        "display": "Schibsted Grotesk"
+      },
+      "exact_text": [],
+      "exact_text_rule": "text decided NONE",
+      "fills": "approved palette role colours only; no gradients unless the genome approves them",
+      "geometry": [
+        "native shapes or paths only; an embedded raster is never vector",
+        "explicit viewBox; no clipping of the mark",
+        "closed counters stay open at the smallest application size",
+        "no scripts, external references or foreignObject"
+      ],
+      "minimum_sizes": [
+        "favicon 32px",
+        "A4 letterhead"
+      ],
+      "need": "REQUIRED",
+      "palette_roles": {
+        "accent": "#c2410c",
+        "accent_2": "#93c5fd",
+        "ink": "#14161a",
+        "muted": "#4b4540",
+        "paper": "#f7f4ee"
+      },
+      "protected": [
+        "visual.color.ink"
+      ]
+    }
+  },
+  "status": "BLOCKED"
+}

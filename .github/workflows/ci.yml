@@ -192,7 +192,7 @@ jobs:
   ucpo-sandbox:
     name: UCPO sandboxed build + browser QA (must not skip)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 40  # the Chromium install step alone may take up to 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -216,7 +216,13 @@ jobs:
       - name: Install Chromium runtime
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
-        run: pnpm --filter @amc/web exec playwright install --with-deps chromium
+        timeout-minutes: 25
+        run: |
+          # The runner's apt mirror is occasionally very slow. Let apt retry stalled downloads itself and
+          # cap the whole step. Never kill and re-run the installer: an interrupted apt-get keeps the dpkg
+          # lock, so every retry would fail immediately.
+          printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-network >/dev/null
+          pnpm --filter @amc/web exec playwright install --with-deps chromium
 
       # Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor; the UCPO sandbox needs them.
       - name: Allow unprivileged user namespaces
@@ -235,10 +241,23 @@ jobs:
             exit 1
           fi
 
+      # AVIC renders through the same local Chromium; its browser tests must run here, not skip.
+      - name: Run AVIC, brand book and creative-direction render, release and API tests
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+          AMC_DATABASE_BACKEND: sqlite
+        run: |
+          set -o pipefail
+          python -m pytest services/langgraph/tests/test_avic.py services/langgraph/tests/test_avic_api.py services/langgraph/tests/test_avic_contracts.py services/langgraph/tests/test_vnexus_brandbook.py services/langgraph/tests/test_vnexus_brandbook_contracts.py services/langgraph/tests/test_vnexus_directions.py services/langgraph/tests/test_vnexus_directions_contracts.py -q -rs | tee /tmp/avic.log
+          if grep -q "SKIPPED" /tmp/avic.log; then
+            echo "::error::AVIC, brand book or creative-direction browser tests were skipped; Chromium is not available to the renderer on this runner"
+            exit 1
+          fi
+
   browser-e2e:
     name: Browser E2E (local degraded HITL)
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 40  # the Chromium install step alone may take up to 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -261,7 +280,13 @@ jobs:
           python -m pip install -e "./services/langgraph[dev]"
 
       - name: Install Chromium runtime
-        run: pnpm --filter @amc/web exec playwright install --with-deps chromium
+        timeout-minutes: 25
+        run: |
+          # The runner's apt mirror is occasionally very slow. Let apt retry stalled downloads itself and
+          # cap the whole step. Never kill and re-run the installer: an interrupted apt-get keeps the dpkg
+          # lock, so every retry would fail immediately.
+          printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-network >/dev/null
+          pnpm --filter @amc/web exec playwright install --with-deps chromium
 
       - name: Start local stack
         env:

@@ -3,7 +3,7 @@ import { apiFetch } from './client';
 const base = (project: string) => `/foundry/projects/${encodeURIComponent(project)}/renders`;
 export const renderCapabilities = (signal?: AbortSignal) => apiFetch('/foundry/render-capabilities', { signal }, RenderCapabilitiesSchema);
 export const getRenderJob = (project: string, job: string, signal?: AbortSignal) => apiFetch(`${base(project)}/${encodeURIComponent(job)}`, { signal }, RenderJobSchema);
-export const cancelRenderJob = (project: string, job: string) => apiFetch(`${base(project)}/${encodeURIComponent(job)}/cancel`, { method: 'POST' }, RenderJobSchema);
+export const cancelRenderJob = (project: string, job: string, signal?: AbortSignal) => apiFetch(`${base(project)}/${encodeURIComponent(job)}/cancel`, { method: 'POST', signal }, RenderJobSchema);
 export function submitRender(project: string, brief: string, engine: RenderEngineId, key: string, signal?: AbortSignal) {
   return apiFetch(base(project), { method: 'POST', idempotencyKey: key, signal, body: JSON.stringify({
     workflow_id: `creative-${key}`, task_id: 'geometric-study', brief, engine,
@@ -11,4 +11,4 @@ export function submitRender(project: string, brief: string, engine: RenderEngin
   }) }, RenderJobSchema);
 }
 
-export const resumeRenderJob = (project: string, job: string) => apiFetch(`${base(project)}/${encodeURIComponent(job)}/resume`, { method: 'POST' }, RenderJobSchema);
+export const resumeRenderJob = (project: string, job: string, signal?: AbortSignal) => apiFetch(`${base(project)}/${encodeURIComponent(job)}/resume`, { method: 'POST', signal }, RenderJobSchema);

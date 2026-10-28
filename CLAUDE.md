@@ -68,7 +68,7 @@ python scripts/verify_guidance_registry.py
 
 ### Critical-file integrity manifest
 
-`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 182 as of the ACE v12 change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
+`manifest.json` (schema `amc-integrity/v2`) pins git-blob SHAs for the security/authorization-boundary files (count them in `manifest.json`; 288 as of the VNEXUS creative-directions change) (auth, config, persistence, the N1–N4 kernel modules, CI workflow, verifier scripts themselves, etc.). Editing any tracked file drifts its hash and fails `verify_manifest.py`. Regenerate deliberately, never by copying a printed hash by hand:
 
 ```python
 import hashlib, json
@@ -275,6 +275,20 @@ Details: `docs/creative-foundry.md`.
 
 Details: `docs/ucpo/README.md`.
 
+### ACE × AVIC — brief to verified native SVG
+
+`services/langgraph/agency/avic/` + `api/routes/avic.py` (`/avic`) + `components/avic/` (the Visual Compiler section of `/agency`) + CLI `avic` (`docs/avic.md`):
+
+- **Inputs are reused, not re-owned.** The brief is a PromptIR `AssetRequirement`; the palette is a read-only `BrandIR` projection (PSEM comes from `foundry.psem.PALETTE`); hashing is AMC-CANON-1. `intent.compile_intent` classifies every item VERIFIED/INFERRED/PROPOSED/UNSUPPORTED/PROHIBITED; instruction-like text, publish/send/spend and third-party marks are PROHIBITED and block the compile.
+- **SVG.** `scene.compile_scene` -> `SceneIR`; `svg.emit` is deterministic; `svg.validate` is an allowlist on top of `execution_fabric.verifiers.svg_safety` (elements, attributes, local `url(#id)` only, unique ids, finite coords, ceilings, no raster in native profiles). HYBRID_SVG and RASTER_FINAL are refused, never substituted.
+- **Render and verify.** Rendering is only `visual.browser.rasterize_svg`. `evaluate.evaluate` reads the SVG/PNG bytes (exact text, palette dE, accent budget, WCAG contrast, text-fit estimate, nonblank, headline ink); `avic/png.py` is a stdlib PNG codec so this works without Pillow/NumPy (not declared deps).
+- **Persistence and approval.** `service` stores each stage via `foundry.studio.store` after `assert_role_may_produce` (`STAGES`); approval is `open_artifact_approval` on the SVG content hash, decided via `/approvals/{id}/decide`; `release_local` re-reads and re-validates bytes and uses `artifact_release_verdict` (no external effect). Failing edits/recompiles return REJECTED and keep the head. Project OS keeps only its own v2 metadata keys, so lineage/cache identity live in `provenance.json`. Don't add a store, table or approval path.
+- **H3/H1/H2/H4/H5.** `repair` (defects only from failed checks, dependency-closure proposals, divergence check, isolated re-render, no-regression acceptance, <=3 attempts); `optimize` (stdlib region split + linear gradients, measured vs Chromium; DiffVG/LIVE/Bezier/Jacobian projection are PROPOSED); `brand` (`mutate_brand` needs an approval ref and never touches protected invariants; `explore` branches carry no approval); `materials` (palette-only shading, `physical_claim="NONE"`, physics backend BLOCKED).
+- **Concurrency and recovery.** The scene is the commit record; stage writes carry the head hash they were computed from (`studio.store(expect_head_hash=)`), so a stale edit is `CONFLICT` (HTTP 409), never an overwrite. `consistency` names stale derived stages; `recompile_asset` re-derives them. Renders are bounded by `AMC_AVIC_RENDER_CONCURRENCY`.
+- **API.** Every write needs an operator role and an `Idempotency-Key`; an edit must send `base_svg_sha256`. The brand is the server projection; client authority fields are 422. Stored SVG is served with `default-src 'none'` CSP. `test_avic_api.py` sweeps every `/avic` route from the OpenAPI table (other tenant, viewer, unauthenticated); a new route is covered automatically. Zod twins: `packages/shared/src/schemas/avic.ts`, fixture `packages/shared/tests/fixtures/avic.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_avic_contracts.py`; needs Chromium).
+- **Claims.** `capabilities.py` is the capability registry; the matrix in `docs/avic.md` is generated from it and a test requires every verified row to name existing tests.
+- **Demo.** `python scripts/render_avic_demo.py` regenerates `runtime/avic/demo/` (fictional brand, synthetic reference).
+
 ### VNEXUS ACE — persisted brand genome and the layers on it
 
 `services/langgraph/agency/vnexus/` + `persistence/vnexus.py` (migration 15, eleven `amc.vnexus_*` tables) +
@@ -306,6 +320,32 @@ Details: `docs/ucpo/README.md`.
   viewer and unauthenticated. A new route is covered automatically and must pass.
 
 Details: `docs/vnexus-ace.md`.
+
+### VNEXUS brand book — a projection of the approved genome, built incrementally
+
+`services/langgraph/agency/vnexus/brandbook/` + the brand book routes in `api/routes/vnexus.py` + `components/mission-control/vnexus/BrandBookArea.tsx` (`docs/vnexus-brandbook.md`):
+
+- **One authority.** The approved genome (plus explicitly referenced approved assets) is authority; the book is a projection; pages, prompts and previews are derived. Intake proposals become a genome DRAFT through `propose_draft`, then the existing review. Don't add an editable style guide.
+- **Template.** `manifest.py` is a versioned, brandless 24-page template. A page's `required_paths`/`optional_paths` are its dependency set, so a page that reads a key must declare it. Conditional sections need an applicability decision (`production.brandbook.applicability.<page>`), never invented content.
+- **States.** `FieldState` (VALUE/NONE/NOT_APPLICABLE/PROPOSED/UNKNOWN) is separate from `approved` and from `EvidenceClass`. `"@none"` and `"@not_applicable: reason"` are explicit genome decisions; NONE is never printed as copy. Production refuses unresolved keys, proposals and template tokens.
+- **Assets.** One canonical master per build, placed by hash on every page. A master that is missing, unreadable or unsafe is reported and never substituted. Raster-in-SVG is never vector. Misuse specimens are labelled views, never masters.
+- **Rendering.** Deterministic HTML, page format from the genome, no `overflow:hidden`. It is measured in Chromium through the `layout` mode of `visual/browser_runner.cjs`; a check that could not run is NOT_RUN. `identity.specs` renders `brand_guidelines` from this compiler (no hardcoded clear space or minimum size).
+- **Incremental.** One Project OS record per page (sections + checks) keyed by dependency hash. Unchanged pages are reused, interrupted builds resume, and the build record always rebinds to the current genome. Project OS slugs artifact keys to 64 characters, so keys are short digests and `_put` refuses longer ones. The process cache holds pure compiler output keyed by tenant/project after authorization, never approvals.
+- **Release.** Approval is bound to the production book bytes via `open_artifact_approval`; release is `artifact_release_verdict` plus a genome freshness check. No external effect.
+- **Contracts.** Zod twins in `packages/shared/src/schemas/vnexusBrandbook.ts`, fixture `packages/shared/tests/fixtures/vnexus-brandbook.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_vnexus_brandbook_contracts.py`; needs Chromium). Benchmark: `python scripts/bench_brandbook.py`.
+
+### VNEXUS creative directions — recommend, select by approval, rebuild only when needed
+
+`services/langgraph/agency/vnexus/directions/` + the creative directions routes in `api/routes/vnexus.py` + `components/mission-control/vnexus/DirectionsArea.tsx` (`docs/vnexus-directions.md`):
+
+- **Stages.** Intake → shared `CreativeIntent` (through the existing prompt compiler; exact identity text is kept out of raster prompts) → generate/import → record → review → human selection → conditional vector reconstruction → freeze. The 14 seats, six modes and eight stages are PROPOSED definitions; don't claim they reproduce an original spec.
+- **Routes.** `providers.py` is the route registry. Cloudflare, Gemini critique, Exa/Tavily and Groq are declared with `adapter_implemented=False` and stay DISABLED. `AMC_VNEXUS_SPEND_MODE=zero` refuses unknown or non-zero prices and offers `manual.handoff`; a refused route never falls through to another model. Credentials are env var names, checked for presence only. `local.foundry_compose` is the only real generator (deterministic marks/icons).
+- **Provenance.** Imports are `USER_REPORTED`; `observed` (server facts) and `reported` (importer statements) are separate fields; SIMULATED is never selectable or a master.
+- **Review.** It only computes a stored session: `effects` are fixed false. Local measurements produce findings and gate evidence, never scores; scores come only from named human reviewers. No vision route exists, so perceptual lenses without human input are NOT_REVIEWED (null scores) and required ones block readiness. Gates are non-compensatory. `measured_recall` is always `HUMAN_RECALL_NOT_TESTED`. Work orders are `PROPOSAL_ONLY`.
+- **Selection and freeze.** Selection is `open_artifact_approval` on the candidate bytes. Freeze needs that approval, a PASSED reconstruction when the role needs vectors, and a RELEASE review `READY_FOR_APPROVAL`; it submits a genome draft pinning `visual.logo.master_artifact` + `visual.logo.master_sha256`. The brand book and `produce_identity` read the master only through the approved genome and refuse bytes that don't match the pin. Don't add another approval path.
+- **Reconstruction.** Only for roles that need editable paths. `controlled_trace` is the AVIC region split snapped to the palette (PARTIAL: rectangle regions, stair-stepped curves); identity text is never traced. Fidelity is claimed only from a measured Chromium comparison; without Chromium it is NOT_VERIFIED.
+- **Storage.** Project OS artifacts only (no table or migration); the per-intent ledger is compare-and-set.
+- **Contracts.** Zod twins in `packages/shared/src/schemas/vnexusDirections.ts`, fixture `packages/shared/tests/fixtures/vnexus-directions.json` (regenerate with `AMC_REGENERATE_FIXTURES=1 pytest services/langgraph/tests/test_vnexus_directions_contracts.py`; needs Chromium). Demo: `python scripts/render_directions_demo.py`.
 
 ### ACE v12 action plane and Agency OS — one gateway, sandbox only
 

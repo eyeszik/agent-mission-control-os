@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import {
-  BarChart3, Bell, Bot, Globe, ListChecks, FolderKanban, LayoutDashboard, Menu, Moon, Package, Palette, Plug, Search, Settings, ShieldCheck, Sun,
+  BarChart3, Bell, Bot, Globe, ListChecks, FolderKanban, LayoutDashboard, Menu, Moon, Package, Palette, PenTool, Plug, Search, Settings, ShieldCheck, Sun,
   Users, Workflow, X,
 } from 'lucide-react';
 import { listProjects } from '../../lib/api/projects';
@@ -17,6 +17,7 @@ import { MissionsView } from './views/MissionsView';
 import { MissionDashboard } from '../missions/MissionDashboard';
 import { FrameworkView } from '../framework/FrameworkView';
 import { WebsiteProductionView } from '../ucpo/WebsiteProductionView';
+import { VisualCompilerView } from '../avic/VisualCompilerView';
 import { StudioView } from './views/StudioView';
 import { ApprovalsView } from './views/ApprovalsView';
 import { DeliverablesView } from './views/DeliverablesView';
@@ -32,6 +33,7 @@ const NAV: { id: AgencySection; label: string; Icon: typeof LayoutDashboard }[] 
   { id: 'council', label: 'Mission Council', Icon: Bot },
   { id: 'framework', label: 'Operating Framework', Icon: ListChecks },
   { id: 'websites', label: 'Website Production', Icon: Globe },
+  { id: 'visuals', label: 'Visual Compiler', Icon: PenTool },
   { id: 'studio', label: 'Creative Studio', Icon: Palette },
   { id: 'approvals', label: 'Approvals', Icon: ShieldCheck },
   { id: 'deliverables', label: 'Deliverables', Icon: Package },
@@ -73,6 +75,7 @@ function View({ section }: { section: AgencySection }) {
     case 'council': return <MissionDashboard />;
     case 'framework': return <FrameworkView />;
     case 'websites': return <WebsiteProductionView />;
+    case 'visuals': return <VisualCompilerView />;
     case 'studio': return <StudioView />;
     case 'approvals': return <ApprovalsView />;
     case 'deliverables': return <DeliverablesView />;
@@ -193,16 +196,15 @@ export function AgencyShell({ initialSection }: { initialSection?: AgencySection
     return () => window.removeEventListener('keydown', onKey);
   }, [setPaletteOpen]);
 
-  // ⚡ Bolt: Derived counts precomputed using a single pass for...of loop to eliminate multiple intermediate array allocations inside the render loop.
-  let running = 0;
-  let unsure = 0;
-  for (const a of (actions.data ?? [])) {
-    if (a.state === 'DISPATCHING' || a.state === 'OBSERVING' || a.state === 'RECONCILING') {
-      running++;
-    } else if (a.state === 'UNKNOWN' || a.state === 'NEEDS_HUMAN') {
-      unsure++;
+  // ⚡ Bolt: Precompute derived metrics in a single pass with zero allocation instead of multiple .filter().length
+  const { running, unsure } = useMemo(() => {
+    let r = 0, u = 0;
+    for (const a of actions.data ?? []) {
+      if (a.state === 'DISPATCHING' || a.state === 'OBSERVING' || a.state === 'RECONCILING') r++;
+      else if (a.state === 'UNKNOWN' || a.state === 'NEEDS_HUMAN') u++;
     }
-  }
+    return { running: r, unsure: u };
+  }, [actions.data]);
   const pending = attention.data?.length ?? 0;
 
   const commands: Command[] = useMemo(() => [
@@ -251,8 +253,8 @@ export function AgencyShell({ initialSection }: { initialSection?: AgencySection
                 {projectList.map((p) => <option key={p.project_id} value={p.project_id}>{p.display_name}</option>)}
               </select>
             </div>
-            <Button variant="secondary" onClick={() => setPaletteOpen(true)} aria-label="Search" aria-keyshortcuts="Control+K Meta+K" className="ml-auto sm:ml-2">
-              <Search aria-hidden="true" size={16} /><span className="hidden sm:inline">Search</span><kbd className="hidden text-xs text-fg sm:inline">⌘K</kbd>
+            <Button variant="secondary" onClick={() => setPaletteOpen(true)} aria-keyshortcuts="Control+K Meta+K" className="ml-auto sm:ml-2">
+              <Search aria-hidden="true" size={16} /><span className="sr-only sm:not-sr-only">Search</span><kbd className="hidden text-xs text-fg sm:inline">⌘K</kbd>
             </Button>
             <div className="flex items-center gap-2 sm:ml-auto">
               <span role="status" aria-live="polite" className="hidden text-xs text-fg md:inline">

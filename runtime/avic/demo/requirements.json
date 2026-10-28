@@ -1,0 +1,221 @@
+{
+  "coverage": {
+    "coverage": 1.0,
+    "rows": [
+      {
+        "objects": [
+          "motif-ring-outer",
+          "motif-ring-inner",
+          "motif-axis"
+        ],
+        "requirement": "req.content.0",
+        "status": "MAPPED",
+        "text": "A geometric identity motif"
+      },
+      {
+        "objects": [
+          "material-object"
+        ],
+        "requirement": "req.content.1",
+        "status": "MAPPED",
+        "text": "A ceramic material object with soft lighting"
+      },
+      {
+        "objects": [
+          "annotation-rule",
+          "annotation"
+        ],
+        "requirement": "req.content.2",
+        "status": "MAPPED",
+        "text": "A technical annotation"
+      },
+      {
+        "objects": [
+          "headline"
+        ],
+        "requirement": "text.0",
+        "status": "MAPPED",
+        "text": "MADE SLOWLY"
+      },
+      {
+        "objects": [
+          "annotation-rule",
+          "annotation"
+        ],
+        "requirement": "text.1",
+        "status": "MAPPED",
+        "text": "FIG. 07 / KILN OPENING 2027"
+      }
+    ],
+    "unmapped": []
+  },
+  "intent": {
+    "asset_id": "halden-kiln-poster",
+    "exact_text": [
+      "MADE SLOWLY",
+      "FIG. 07 / KILN OPENING 2027"
+    ],
+    "height": 1500,
+    "items": [
+      {
+        "classification": "VERIFIED",
+        "item_id": "goal.objective",
+        "kind": "goal",
+        "reason": "",
+        "source": "objective",
+        "text": "Announce the spring kiln opening of a small fictional ceramics studio"
+      },
+      {
+        "classification": "VERIFIED",
+        "item_id": "goal.audience",
+        "kind": "goal",
+        "reason": "",
+        "source": "audience",
+        "text": "ceramics collectors and studio-list subscribers"
+      },
+      {
+        "classification": "VERIFIED",
+        "item_id": "req.content.0",
+        "kind": "hard_requirement",
+        "reason": "",
+        "source": "content_requirements[0]",
+        "text": "A geometric identity motif"
+      },
+      {
+        "classification": "VERIFIED",
+        "item_id": "req.content.1",
+        "kind": "hard_requirement",
+        "reason": "",
+        "source": "content_requirements[1]",
+        "text": "A ceramic material object with soft lighting"
+      },
+      {
+        "classification": "VERIFIED",
+        "item_id": "req.content.2",
+        "kind": "hard_requirement",
+        "reason": "",
+        "source": "content_requirements[2]",
+        "text": "A technical annotation"
+      },
+      {
+        "classification": "VERIFIED",
+        "item_id": "acc.quality.0",
+        "kind": "acceptance",
+        "reason": "",
+        "source": "quality_constraints[0]",
+        "text": "headline legible at a distance"
+      },
+      {
+        "classification": "VERIFIED",
+        "item_id": "neg.0",
+        "kind": "negative",
+        "reason": "",
+        "source": "negative_constraints[0]",
+        "text": "no photographs"
+      },
+      {
+        "classification": "VERIFIED",
+        "item_id": "neg.1",
+        "kind": "negative",
+        "reason": "",
+        "source": "negative_constraints[1]",
+        "text": "no third-party marks"
+      },
+      {
+        "classification": "VERIFIED",
+        "item_id": "text.0",
+        "kind": "exact_text",
+        "reason": "must survive character-for-character",
+        "source": "exact_text[0]",
+        "text": "MADE SLOWLY"
+      },
+      {
+        "classification": "VERIFIED",
+        "item_id": "text.1",
+        "kind": "exact_text",
+        "reason": "must survive character-for-character",
+        "source": "exact_text[1]",
+        "text": "FIG. 07 / KILN OPENING 2027"
+      },
+      {
+        "classification": "PROPOSED",
+        "item_id": "profile.output",
+        "kind": "output_profile",
+        "reason": "default for editorial vector work",
+        "source": "production.format",
+        "text": "NATIVE_EDITABLE_VECTOR"
+      },
+      {
+        "classification": "PROPOSED",
+        "item_id": "mutable.palette",
+        "kind": "mutable",
+        "reason": "brand-governed default",
+        "source": "compiler",
+        "text": "palette roles from the brand projection"
+      },
+      {
+        "classification": "PROPOSED",
+        "item_id": "mutable.layout",
+        "kind": "mutable",
+        "reason": "style-profile default",
+        "source": "compiler",
+        "text": "grid layout from the style profile"
+      }
+    ],
+    "output_profile": "NATIVE_EDITABLE_VECTOR",
+    "requirement_hash": "76aedfb935ed9a5fd502485e71d6b2f67b9660d8e9f658ee2b51d47046b93d18",
+    "schema_version": "amc-avic/1",
+    "style_profile": "post-surrealist-editorial",
+    "width": 1200
+  },
+  "requirement": {
+    "asset_id": "halden-kiln-poster",
+    "asset_type": "editorial_poster",
+    "audience": "ceramics collectors and studio-list subscribers",
+    "business_reason": null,
+    "channel": "print",
+    "content_requirements": [
+      "A geometric identity motif",
+      "A ceramic material object with soft lighting",
+      "A technical annotation"
+    ],
+    "destination": "studio wall poster",
+    "exact_text": [
+      "MADE SLOWLY",
+      "FIG. 07 / KILN OPENING 2027"
+    ],
+    "family": "IMAGE",
+    "guidance_overrides": {
+      "exclude": [],
+      "include": []
+    },
+    "negative_constraints": [
+      "no photographs",
+      "no third-party marks"
+    ],
+    "objective": "Announce the spring kiln opening of a small fictional ceramics studio",
+    "production": {
+      "aspect_ratio": null,
+      "bleed": null,
+      "codec": null,
+      "color_space": null,
+      "container": null,
+      "duration_seconds": null,
+      "format": "svg",
+      "fps": null,
+      "height": 1500,
+      "orientation": null,
+      "resolution": null,
+      "safe_area": null,
+      "unit": "px",
+      "width": 1200
+    },
+    "quality_constraints": [
+      "headline legible at a distance"
+    ],
+    "references": [],
+    "required_brand_domains": [],
+    "required_capabilities": [],
+    "series": null
+  }
+}

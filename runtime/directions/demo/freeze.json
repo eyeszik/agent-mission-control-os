@@ -1,0 +1,23 @@
+{
+  "approval_id": "b4b6e1c8-73be-43e2-99a8-acb9cd322a64",
+  "binding": {
+    "approval_id": "b4b6e1c8-73be-43e2-99a8-acb9cd322a64",
+    "binding_id": "vdb-baeb1f3d15d0e21e",
+    "created_at": "2026-10-28T18:50:01.811153Z",
+    "created_by": "alice",
+    "genome_keys": {
+      "visual.logo.master_artifact": "art-prj-vnx-5f094d97-foundry-vdx-a8201b1dd60f9ccb-v551e7a24dc1b-svg",
+      "visual.logo.master_sha256": "df72d8e71cb78b2be7d14a29737d8348b5fd78a32e1cf377e5c11a6c919380f6"
+    },
+    "genome_version_id": "gv-450977ee3ea848debad879a314271f3e",
+    "intent_id": "vdi-a8201b1dd60f9ccb",
+    "kind": "MASTER",
+    "status": "PENDING_GENOME_REVIEW",
+    "subject_artifact_id": "art-prj-vnx-5f094d97-foundry-vdx-a8201b1dd60f9ccb-v551e7a24dc1b-svg",
+    "subject_sha256": "df72d8e71cb78b2be7d14a29737d8348b5fd78a32e1cf377e5c11a6c919380f6",
+    "subject_version": 1
+  },
+  "genome_version_id": "gv-450977ee3ea848debad879a314271f3e",
+  "note": "decide on /approvals/{id}/decide; the brand book and identity production read the master only after approval",
+  "status": "PENDING_GENOME_REVIEW"
+}

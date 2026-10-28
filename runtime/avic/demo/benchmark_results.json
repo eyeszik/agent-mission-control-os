@@ -1,0 +1,76 @@
+{
+  "candidates": [
+    {
+      "budget": 16,
+      "estimated_rms_lab": 9.442,
+      "gradients": 15,
+      "measured_full_resolution": {
+        "comparable": true,
+        "compare_size": [
+          320,
+          240
+        ],
+        "mean_delta_e76": 7.2,
+        "mse": 276.463,
+        "psnr_db": 23.71
+      },
+      "profile": "NATIVE_FIDELITY_VECTOR",
+      "regions": 16,
+      "svg_bytes": 3874,
+      "svg_sha256": "1eaadc226f1991b0fd12e5995957dc3c57032b5d3df7690a99553246b7679114"
+    },
+    {
+      "budget": 64,
+      "estimated_rms_lab": 4.976,
+      "gradients": 60,
+      "measured_full_resolution": {
+        "comparable": true,
+        "compare_size": [
+          320,
+          240
+        ],
+        "mean_delta_e76": 3.859,
+        "mse": 86.251,
+        "psnr_db": 28.77
+      },
+      "profile": "NATIVE_FIDELITY_VECTOR",
+      "regions": 64,
+      "svg_bytes": 14787,
+      "svg_sha256": "1f23d799923d83af8efa61928b588eb9332340c307c97b230cd1a27b4c2a5a7d"
+    },
+    {
+      "budget": 256,
+      "estimated_rms_lab": 1.755,
+      "gradients": 249,
+      "measured_full_resolution": {
+        "comparable": true,
+        "compare_size": [
+          320,
+          240
+        ],
+        "mean_delta_e76": 1.609,
+        "mse": 19.234,
+        "psnr_db": 35.29
+      },
+      "profile": "NATIVE_FIDELITY_VECTOR",
+      "regions": 256,
+      "svg_bytes": 60577,
+      "svg_sha256": "040a216477b5f01f0845edec802be6ee7dcb79d4ba46f3c0b74d06c7e8795b78"
+    }
+  ],
+  "method": "error-driven region split + least-squares linear gradients (CPU, stdlib)",
+  "not_implemented": [
+    "diffvg_differentiable_rendering",
+    "live_layerwise_paths",
+    "bezier_contour_fitting",
+    "nonlinear_constraint_projection"
+  ],
+  "pareto_front": [
+    16,
+    64,
+    256
+  ],
+  "reference_sha256": "5ee4eb27b1cc0b744845fac81b17efdd14aacaeb4233c505ac14dd0c4bef5218",
+  "renderer": "raster.chromium",
+  "renderer_version": "141.0.7390.37"
+}

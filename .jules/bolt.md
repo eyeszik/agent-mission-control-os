@@ -54,3 +54,7 @@
 ## 2026-11-15 - Array Method Filter Length Optimization
 **Learning:** Using `.filter(condition).length` to count matching elements in an array creates an intermediate array that is immediately discarded, causing unnecessary garbage collection overhead and slower execution, especially on larger arrays.
 **Action:** Replace `.filter(condition).length` with a zero-allocation `.reduce((acc, item) => condition ? acc + 1 : acc, 0)`.
+
+## 2023-11-04 - Zero-Allocation Derived State Counting
+**Learning:** Running `.filter(condition).length` inside a React component's render body, or within callback functions that get recreated/executed frequently, allocates temporary arrays simply to determine a count. This causes needless garbage collection overhead, particularly if the arrays are non-trivial in size or processed frequently.
+**Action:** Replace `.filter(condition).length` with zero-allocation alternatives such as `.reduce((acc, item) => acc + (condition ? 1 : 0), 0)`.
