@@ -193,6 +193,25 @@ def render_pdf(html: str, *, width_px: int, height_px: int, out_dir: Path, timeo
     return {**run, "status": "PASSED" if ok else "FAILED", "findings": findings, "capture": str(capture) if ok else None}
 
 
+def measure_layout(html: str, *, width: int, height: int, out_dir: Path, capture: bool = False, min_font_px: int = 10,
+                   timeout_s: int = 180) -> dict:
+    """Measure every ``[data-page]`` section of self-contained HTML in local Chromium (remote requests are blocked):
+    overflow beyond the page body, clipped and too-small text, overlapping blocks, rendered copy and placed marks.
+    With ``capture`` each section is also screenshotted (a raster preview, never the editable source)."""
+    run = _run({"mode": "layout", "html": html, "width": width, "height": height, "capture": capture, "min_font_px": min_font_px},
+               out_dir, timeout_s)
+    findings = []
+    if run["exit_code"] != 0:
+        findings.append(f"BROWSER_EXIT:{run['exit_code']}")
+    if run["result"].get("blocked_requests"):
+        findings.append("REMOTE_REQUEST_ATTEMPTED")
+    pages = run["result"].get("layout")
+    if pages is None:
+        findings.append("LAYOUT_NOT_MEASURED")
+    return {**run, "status": "PASSED" if not findings else "FAILED", "findings": findings, "pages": pages or [],
+            "captures": run["result"].get("captures") or {}}
+
+
 def run_experience(html: str, scenarios: list[dict], *, out_dir: Path, timeout_s: int = 300) -> dict:
     """Load a generated interface in local Chromium and execute scripted interaction scenarios."""
     run = _run({"mode": "experience", "html": html, "scenarios": scenarios}, out_dir, timeout_s)
@@ -207,5 +226,5 @@ def run_experience(html: str, scenarios: list[dict], *, out_dir: Path, timeout_s
         findings.append("REMOTE_REQUEST_ATTEMPTED")
     return {**run, "status": "PASSED" if not findings else "FAILED", "findings": findings, "scenarios": results}
 
-__all__ = ["capture_svg_sizes", "capture_webgl", "chromium_path", "probe_browser", "render_pdf", "rasterize_svg", "render_svg_frames",
+__all__ = ["capture_svg_sizes", "capture_webgl", "chromium_path", "measure_layout", "probe_browser", "render_pdf", "rasterize_svg", "render_svg_frames",
            "run_experience", "three_renderer_for"]

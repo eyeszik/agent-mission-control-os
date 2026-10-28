@@ -108,34 +108,10 @@ def typography_specimen_svg(genome: CreativeGenome, *, width: int = 1200, height
             f'<rect width="{width}" height="{height}" fill="{pal["paper"]}"/>{"".join(rows)}</svg>\n')
 
 
-def guidelines_html(genome: CreativeGenome, *, constraints: list[dict[str, Any]], genome_ref: str) -> str:
-    pal = genome.palette.roles()
-    mark_svg = compose.to_svg(compose.mark(genome, size=320), genome)
-    lockup_svg = compose.to_svg(compose.lockup(genome, width=900, height=270), genome)
-    swatches = "".join(f'<div class="sw"><div style="background:{v};height:96px;border:1px solid {pal["ink"]}"></div>'
-                       f'<p><b>{escape(k)}</b> {v}<br>on paper {wcag_contrast_ratio(v, pal["paper"])}:1</p></div>' for k, v in pal.items())
-    rules = "".join(f"<li><code>{escape(c['key'])}</code> {escape(c['kind'])}{(' ' + escape(str(c.get('params')))) if c.get('params') else ''}</li>"
-                    for c in constraints) or "<li>No constraints recorded in the approved genome.</li>"
-    page = ("<section data-page><h1>{t}</h1>{b}</section>")
-    pages = [
-        page.format(t=f"{escape(genome.brand_name)} brand guidelines", b=f"<p>Compiled from approved genome {escape(genome_ref)}. "
-                    "Generated locally; every value below comes from the approved genome or is marked as a default.</p>"),
-        page.format(t="Logo", b=f"<div class='art'>{mark_svg}</div><div class='art'>{lockup_svg}</div>"
-                    "<p>Clear space: one quarter of the mark's height on every side. Minimum size: 24px on screen.</p>"),
-        page.format(t="Colour", b=f"<div class='grid'>{swatches}</div>"),
-        page.format(t="Typography", b=f"<p>Display: {escape(', '.join(genome.typography_rules['stacks']['display']))}</p>"
-                    f"<p>Text: {escape(', '.join(genome.typography_rules['stacks']['text']))}</p>"),
-        page.format(t="Rules", b=f"<ul>{rules}</ul>"),
-    ]
-    return (f"<!doctype html><html lang='en'><head><meta charset='utf-8'><title>{escape(genome.brand_name)} guidelines</title><style>"
-            f"@page{{size:794px 1123px;margin:0}}html,body{{margin:0;background:{pal['paper']};color:{pal['ink']};"
-            "font-family:sans-serif}section{box-sizing:border-box;width:794px;height:1123px;padding:64px;page-break-after:always;"
-            "overflow:hidden}h1{font-size:40px}.art svg{max-width:100%;height:auto}.grid{display:grid;grid-template-columns:repeat(3,1fr);"
-            f"gap:16px}}code{{font-size:13px}}</style></head><body>{''.join(pages)}</body></html>")
-
-
 def specs(genome: CreativeGenome, deliverables: tuple[str, ...], *, copy: dict[str, str], constraints: list[dict[str, Any]],
-          genome_ref: str) -> tuple[list[OutputSpec], dict[str, CompositionIR]]:
+          genome_ref: str, guidelines: Optional[tuple[str, int, int]] = None) -> tuple[list[OutputSpec], dict[str, CompositionIR]]:
+    """Output specifications. ``guidelines`` is the brand book HTML and page size rendered from the approved
+    projection by ``vnexus.brandbook`` (the guidelines are never a fixed template with invented rules)."""
     unknown = sorted(set(deliverables) - set(IDENTITY_DELIVERABLES))
     if unknown:
         raise ValueError(f"unknown identity deliverables: {unknown}")
@@ -203,8 +179,11 @@ def specs(genome: CreativeGenome, deliverables: tuple[str, ...], *, copy: dict[s
         out.append(S(deliverable="editorial_layout", name="editorial-a4.pdf", capability=Capability.DOCUMENT_PDF, width=794, height=1123,
                      source={"svg": compose.to_svg(ir, genome)}))
     if "brand_guidelines" in want:
-        out.append(S(deliverable="brand_guidelines", name="brand-guidelines.pdf", capability=Capability.DOCUMENT_PDF, width=794,
-                     height=1123, source={"html": guidelines_html(genome, constraints=constraints, genome_ref=genome_ref)}))
+        if guidelines is None:
+            raise ValueError("brand_guidelines is rendered from the approved projection; pass the brand book HTML")
+        html, width, height = guidelines
+        out.append(S(deliverable="brand_guidelines", name="brand-guidelines.pdf", capability=Capability.DOCUMENT_PDF, width=width,
+                     height=height, source={"html": html}))
     return out, irs
 
 
@@ -327,6 +306,6 @@ def min_reproduction(svg: str, *, sizes: tuple[int, ...] = (16, 24, 32), work: A
     return _check("min_reproduction", ok, "foreground coverage by size: " + ", ".join(f"{s}px {f:.0%}" for s, f in results))
 
 
-__all__ = ["IDENTITY_DELIVERABLES", "OutputSpec", "PROVIDER_FOR", "color_system_svg", "crop_behavior", "guidelines_html",
+__all__ = ["IDENTITY_DELIVERABLES", "OutputSpec", "PROVIDER_FOR", "color_system_svg", "crop_behavior",
            "min_reproduction", "monogram_svg", "optical_centre", "palette_check", "raster_metrics", "safe_area", "specs",
            "stroke_consistency", "text_contrast", "transparency", "transparent_svg", "typography_specimen_svg"]
