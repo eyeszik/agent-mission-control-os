@@ -20,7 +20,7 @@ from services.langgraph.tests._project_os_support import as_user, client, header
 from services.langgraph.tests._vnexus_support import FULL_DOC, _approve, _draft, make_world
 
 # Routes that hold no tenant data: capability discovery and a pure, labelled simulation.
-TENANT_FREE = {("GET", "/vnexus/fabric/providers"), ("POST", "/vnexus/forecast")}
+TENANT_FREE = {("GET", "/vnexus/fabric/providers"), ("POST", "/vnexus/forecast"), ("GET", "/vnexus/brandbook/template")}
 # Tenant-scoped listings: another tenant gets 200 with *its own* (empty) list, checked below.
 SCOPED_LISTINGS = {("GET", "/vnexus/brands")}
 # Settlement applies a decision already made through /approvals/{id}/decide (approver role and
@@ -48,7 +48,7 @@ def owned(monkeypatch, tmp_path):
     ids = {"brand_id": w["brand"], "project_id": w["owner"], "version_id": v["version_id"], "branch_id": br["branch_id"],
            "other_id": br["branch_id"], "job_id": job["job_id"], "prompt_version_id": prompt["prompt_version_id"], "prompt_id": "p",
            "node_id": graph["nodes"][0]["node_id"], "edge_id": graph["edges"][0]["edge_id"], "campaign_ref": "c",
-           "provider_id": "local.svg"}
+           "provider_id": "local.svg", "page_id": "p01"}
     return w, ids
 
 
@@ -62,6 +62,8 @@ def _url(path: str, ids: dict) -> str:
         url += f"?scope=brand&scope_ref={ids['brand_id']}"
     if path.endswith("/graph/diff"):
         url += "?from=2000-01-01"
+    if "/brandbook/" in path and not path.endswith("/template") and "/intake" not in path:
+        url += f"?scope=brand&scope_ref={ids['brand_id']}&project_id={ids['project_id']}&mode=PREVIEW"
     return url
 
 
@@ -82,6 +84,10 @@ def _body(path: str, ids: dict) -> dict:
         return {"text": "x"}
     if path.endswith("/measurements"):
         return {"campaign_ref": "c", "metric": "m", "value": 1, "unit": "u", "source": "s", "source_ref": "r", "observed_at": "2026-01-01"}
+    if "/brandbook/" in path and path.endswith(("/compile", "/builds", "/approval", "/release")):
+        return {**target, "project_id": ids["project_id"], **({"mode": "PREVIEW"} if path.endswith(("/compile", "/builds")) else {})}
+    if path.endswith("/brandbook/intake/propose"):
+        return target
     if path == "/vnexus/brands":
         return {"brand_id": f"x-{uuid4().hex[:6]}", "display_name": "x", "owner_project_id": ids["project_id"]}
     return {}

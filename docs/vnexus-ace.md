@@ -194,3 +194,7 @@ Chromium, Pillow and FFmpeg tests are skipped, and verification reports `NOT_RUN
 - Graph read access is governed by the brand's owner project.
 - Art-direction and immune checks are deterministic heuristics. They do not replace human creative review;
   approvals stay human.
+
+## Brand book
+
+The 24-page brand book, its incremental build and its approval flow are documented in [`vnexus-brandbook.md`](vnexus-brandbook.md).

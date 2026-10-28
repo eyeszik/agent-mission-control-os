@@ -242,15 +242,15 @@ jobs:
           fi
 
       # AVIC renders through the same local Chromium; its browser tests must run here, not skip.
-      - name: Run AVIC render, repair, release and API tests
+      - name: Run AVIC and brand book render, release and API tests
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
           AMC_DATABASE_BACKEND: sqlite
         run: |
           set -o pipefail
-          python -m pytest services/langgraph/tests/test_avic.py services/langgraph/tests/test_avic_api.py services/langgraph/tests/test_avic_contracts.py -q -rs | tee /tmp/avic.log
+          python -m pytest services/langgraph/tests/test_avic.py services/langgraph/tests/test_avic_api.py services/langgraph/tests/test_avic_contracts.py services/langgraph/tests/test_vnexus_brandbook.py services/langgraph/tests/test_vnexus_brandbook_contracts.py -q -rs | tee /tmp/avic.log
           if grep -q "SKIPPED" /tmp/avic.log; then
-            echo "::error::AVIC browser tests were skipped; Chromium is not available to the renderer on this runner"
+            echo "::error::AVIC or brand book browser tests were skipped; Chromium is not available to the renderer on this runner"
             exit 1
           fi
 

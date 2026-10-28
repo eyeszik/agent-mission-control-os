@@ -4,7 +4,7 @@ import type { VnexusScope } from '@amc/shared';
 // Which brand and scope the VNEXUS studio is working on, and which area is
 // open. Components select single primitives from this store.
 export type VnexusArea =
-  | 'overview' | 'genome' | 'history' | 'graph' | 'multiverse' | 'experience' | 'art' | 'graphic' | 'video'
+  | 'overview' | 'genome' | 'history' | 'graph' | 'multiverse' | 'experience' | 'art' | 'graphic' | 'brandbook' | 'video'
   | 'marketing' | 'prompts' | 'jobs' | 'immune' | 'governance';
 
 interface VnexusState {

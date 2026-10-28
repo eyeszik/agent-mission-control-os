@@ -13,7 +13,7 @@ import functools
 import inspect
 from typing import Any, Callable, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -26,6 +26,9 @@ from services.langgraph.agency.vnexus import (
     service,
     twin,
 )
+from services.langgraph.agency.vnexus.brandbook import service as brandbook
+from services.langgraph.agency.vnexus.brandbook.fields import IntakeRecord
+from services.langgraph.agency.vnexus.brandbook.manifest import DEFAULT_MANIFEST, Mode as BookMode
 from services.langgraph.agency.vnexus.marketing import CampaignRequest, forecast
 from services.langgraph.agency.vnexus.prompt_genome import PromptGenomeDocument
 from services.langgraph.agency.vnexus.art_director import ArtDirectionRequest
@@ -61,6 +64,8 @@ def vnexus_errors(handler: Callable[..., Any]) -> Callable[..., Any]:
             return handler(*args, **kwargs)
         except service.GenomeBlocked as exc:
             return _blocked("VNEXUS_BLOCKED", str(exc), {"message": str(exc), "readiness": exc.report})
+        except brandbook.BrandBookBlocked as exc:
+            return _blocked("VNEXUS_BRANDBOOK_BLOCKED", str(exc), {"message": str(exc), "report": exc.report})
         except fabric_service.RateLimited as exc:
             raise HTTPException(status_code=429, detail=str(exc)) from exc
         except creative_service.MergeConflict as exc:
@@ -742,3 +747,131 @@ def twin_simulate(brand_id: str, req: TwinChange, principal: Principal = Depends
 @vnexus_errors
 def twin_outage(project_id: str, provider_id: str, principal: Principal = Depends(get_principal)) -> dict:
     return twin.simulate_provider_outage(principal, provider_id, project_id=project_id)
+
+
+# --------------------------------------------------------------------------- brand book (projection of the approved genome)
+
+BOOK_HEADERS = {"Content-Security-Policy": "default-src 'none'; img-src data:; style-src 'unsafe-inline'; sandbox",
+                "X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store"}
+
+
+class BookTarget(ProductionTarget):
+    mode: BookMode
+    preview_version_id: Optional[str] = Field(default=None, max_length=120)
+
+
+class BookRelease(ProductionTarget):
+    approval_id: Optional[str] = Field(default=None, max_length=200)
+
+
+class IntakeIn(BaseModel):
+    intake: IntakeRecord
+    expected_sha256: Optional[str] = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+
+    model_config = {"extra": "forbid"}
+
+
+class ScopeOnly(BaseModel):
+    scope: Scope
+    scope_ref: str = Field(min_length=1, max_length=300)
+
+    model_config = {"extra": "forbid"}
+
+
+@router.get("/brandbook/template")
+def brandbook_template(principal: Principal = Depends(get_principal)) -> dict:
+    return {"manifest": DEFAULT_MANIFEST.model_dump(mode="json"), "manifest_hash": DEFAULT_MANIFEST.manifest_hash,
+            "modes": [m.value for m in BookMode]}
+
+
+@router.get("/brands/{brand_id}/brandbook/intake")
+@vnexus_errors
+def brandbook_intake(brand_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    intake, sha = brandbook.load_intake(principal, brand_id)
+    return {"intake": intake.model_dump(mode="json"), "sha256": sha}
+
+
+@router.put("/brands/{brand_id}/brandbook/intake")
+@vnexus_errors
+def brandbook_save_intake(brand_id: str, req: IntakeIn, principal: Principal = Depends(get_principal)) -> dict:
+    return brandbook.save_intake(principal, brand_id, req.intake, expected_sha256=req.expected_sha256)
+
+
+@router.post("/brands/{brand_id}/brandbook/intake/propose", status_code=201)
+@vnexus_errors
+def brandbook_propose(brand_id: str, req: ScopeOnly, principal: Principal = Depends(get_principal)) -> dict:
+    """Intake proposals become a genome DRAFT; the existing submit/approve flow decides them."""
+    return {"version": _public(brandbook.propose_draft(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref))}
+
+
+@router.get("/brands/{brand_id}/brandbook/gaps")
+@vnexus_errors
+def brandbook_gaps(brand_id: str, scope: Scope, scope_ref: str, project_id: str, mode: BookMode = BookMode.PRODUCTION,
+                   principal: Principal = Depends(get_principal)) -> dict:
+    return brandbook.gaps_report(principal, brand_id, scope=scope, scope_ref=scope_ref, project_id=project_id, mode=mode)
+
+
+@router.post("/brands/{brand_id}/brandbook/compile")
+@vnexus_errors
+def brandbook_compile(brand_id: str, req: BookTarget, principal: Principal = Depends(get_principal)) -> dict:
+    """Page packages and readable prompts. Nothing is rendered, stored, generated or sent."""
+    return brandbook.compile_package(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id,
+                                     mode=req.mode, preview_version_id=req.preview_version_id)
+
+
+@router.post("/brands/{brand_id}/brandbook/builds", status_code=201)
+@vnexus_errors
+def brandbook_build(brand_id: str, req: BookTarget, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                    principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "brandbook.build", idempotency_key, payload, lambda: brandbook.build(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, mode=req.mode,
+        preview_version_id=req.preview_version_id))
+
+
+@router.get("/brands/{brand_id}/brandbook/builds/current")
+@vnexus_errors
+def brandbook_current(brand_id: str, scope: Scope, scope_ref: str, project_id: str, mode: BookMode,
+                      principal: Principal = Depends(get_principal)) -> dict:
+    return brandbook.get_build(principal, brand_id, scope=scope, scope_ref=scope_ref, project_id=project_id, mode=mode)
+
+
+@router.get("/brands/{brand_id}/brandbook/book.html")
+@vnexus_errors
+def brandbook_book(brand_id: str, scope: Scope, scope_ref: str, project_id: str, mode: BookMode,
+                   principal: Principal = Depends(get_principal)) -> Response:
+    data, mime = brandbook.read_output(principal, brand_id, scope=scope, scope_ref=scope_ref, project_id=project_id, mode=mode, kind="book")
+    return Response(data, media_type=mime, headers=BOOK_HEADERS)
+
+
+@router.get("/brands/{brand_id}/brandbook/book.pdf")
+@vnexus_errors
+def brandbook_pdf(brand_id: str, scope: Scope, scope_ref: str, project_id: str, principal: Principal = Depends(get_principal)) -> Response:
+    data, mime = brandbook.read_output(principal, brand_id, scope=scope, scope_ref=scope_ref, project_id=project_id,
+                                       mode=BookMode.PRODUCTION, kind="pdf")
+    return Response(data, media_type=mime, headers={"X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store"})
+
+
+@router.get("/brands/{brand_id}/brandbook/pages/{page_id}/preview.png")
+@vnexus_errors
+def brandbook_preview(brand_id: str, page_id: str, scope: Scope, scope_ref: str, project_id: str, mode: BookMode,
+                      principal: Principal = Depends(get_principal)) -> Response:
+    if page_id not in {p.id for p in DEFAULT_MANIFEST.pages}:
+        raise HTTPException(status_code=404, detail="Unknown page")
+    data, mime = brandbook.read_output(principal, brand_id, scope=scope, scope_ref=scope_ref, project_id=project_id, mode=mode,
+                                       kind="preview", page_id=page_id)
+    return Response(data, media_type=mime, headers={"X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store"})
+
+
+@router.post("/brands/{brand_id}/brandbook/approval")
+@vnexus_errors
+def brandbook_approval(brand_id: str, req: ProductionTarget, principal: Principal = Depends(get_principal)) -> dict:
+    """Opens the approval bound to the production book's bytes; decided only on /approvals/{id}/decide."""
+    return brandbook.request_approval(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id)
+
+
+@router.post("/brands/{brand_id}/brandbook/release")
+@vnexus_errors
+def brandbook_release(brand_id: str, req: BookRelease, principal: Principal = Depends(get_principal)) -> dict:
+    return brandbook.release(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id,
+                             approval_id=req.approval_id)

@@ -81,8 +81,25 @@ def produce_identity(principal: Principal, brand_id: str, *, scope: Scope, scope
     service.authorize(principal, project_id, write=True)
     p, meta = approved_projection(principal, brand_id, scope=scope, scope_ref=scope_ref)
     genome = creative_genome(p, project_id=project_id)
-    outputs, irs = identity.specs(genome, deliverables, copy=copy, constraints=meta["constraints"], genome_ref=p.genome_ref)
+    guidelines, guidelines_status = None, None
+    if "brand_guidelines" in deliverables:
+        from services.langgraph.agency.foundry import compose
+
+        from .brandbook.service import guidelines_for_identity
+
+        ir = compose.mark(genome, size=512)
+        html, width, height, guidelines_status = guidelines_for_identity(
+            p.values, brand_name=p.brand_name, brand_id=brand_id, genome_ref=p.genome_ref, resolution_hash=p.resolution_hash,
+            mark_svg=identity.transparent_svg(compose.to_svg(ir, genome), ir, genome))
+        guidelines = (html, width, height)
+    outputs, irs = identity.specs(genome, deliverables, copy=copy, constraints=meta["constraints"], genome_ref=p.genome_ref,
+                                  guidelines=guidelines)
     results, validations = [], []
+    if guidelines_status is not None:
+        validations.append({"output": "brand-guidelines.pdf", "check": "guidelines_completeness",
+                            "passed": guidelines_status == "READY", "status": "PASSED" if guidelines_status == "READY" else "FAILED",
+                            "severity": "WARNING", "detail": f"brand book status {guidelines_status}: gaps are labelled in the "
+                                                             "document; build it in /vnexus brand book for the full gap report"})
     for spec in outputs:
         job = _run_spec(principal, project_id, spec, run_key=run_key)
         art = job.get("artifact") or {}

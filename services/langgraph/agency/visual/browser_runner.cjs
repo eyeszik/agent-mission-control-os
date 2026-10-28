@@ -268,6 +268,55 @@ async function main() {
       await page.pdf({ path: path.join(outDir, "document.pdf"), width: `${spec.width_px}px`, height: `${spec.height_px}px`,
                        printBackground: true, margin: { top: "0", right: "0", bottom: "0", left: "0" } });
       result.pdf = { capture: "document.pdf", pages: await page.evaluate(() => document.querySelectorAll("[data-page]").length || 1) };
+    } else if (spec.mode === "layout") {
+      // Measure each [data-page] section: content outside its body box, clipped or too-small text, overlapping
+      // blocks, rendered copy text and placed marks. Nothing here decides pass/fail; the caller does.
+      await page.setViewportSize({ width: spec.width + 48, height: spec.height });
+      await page.setContent(spec.html, { waitUntil: "load" });
+      await page.evaluate(() => (document.fonts ? document.fonts.ready : null));
+      result.layout = await page.evaluate((minFont) => {
+        const visible = (el) => { const cs = getComputedStyle(el); return cs.display !== "none" && cs.visibility !== "hidden" && el.getClientRects().length > 0; };
+        const describe = (el) => (el.tagName.toLowerCase() + (el.dataset.copy ? `[data-copy=${el.dataset.copy}]` : "") + (el.className && typeof el.className === "string" ? "." + el.className.split(" ")[0] : "")).slice(0, 80);
+        const pages = [];
+        for (const sec of document.querySelectorAll("section[data-page]")) {
+          const body = sec.querySelector(".body");
+          const br = body.getBoundingClientRect();
+          const overflow = [], clipped = [], small = [], overlaps = [];
+          for (const el of body.querySelectorAll("*")) {
+            if (!visible(el)) continue;
+            const r = el.getBoundingClientRect();
+            if (r.width === 0 && r.height === 0) continue;
+            if (r.bottom > br.bottom + 1 || r.right > br.right + 1 || r.left < br.left - 1 || r.top < br.top - 1) overflow.push(describe(el));
+            const cs = getComputedStyle(el);
+            if (["P", "H1", "TD", "TH", "SPAN", "FIGCAPTION", "DT", "DD", "B"].includes(el.tagName) && el.scrollWidth > el.clientWidth + 1 && cs.overflowX !== "visible") clipped.push(describe(el));
+            const hasText = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+            if (hasText && parseFloat(cs.fontSize) < minFont) small.push(describe(el));
+          }
+          const kids = [...body.children].filter(visible).map((el) => [el, el.getBoundingClientRect()]);
+          for (let i = 0; i < kids.length; i++) for (let j = i + 1; j < kids.length; j++) {
+            const a = kids[i][1], b = kids[j][1];
+            const w = Math.min(a.right, b.right) - Math.max(a.left, b.left), h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+            if (w > 2 && h > 2) overlaps.push(describe(kids[i][0]) + " / " + describe(kids[j][0]));
+          }
+          const copies = {};
+          for (const el of sec.querySelectorAll("[data-copy]")) copies[el.dataset.copy] = el.textContent;
+          const marks = [...sec.querySelectorAll("img.mark")].map((i) => ({ sha: i.dataset.sha || null, misuse: i.dataset.misuse === "true", loaded: i.complete && i.naturalWidth > 0 }));
+          const labelled = [...sec.querySelectorAll(".status,.gap")].every((e) => e.textContent.trim().length > 0);
+          const footer = (sec.querySelector(".pf") || { textContent: "" }).textContent;
+          pages.push({ id: sec.dataset.page, overflow_count: overflow.length, overflow: overflow.slice(0, 8), clipped: clipped.slice(0, 8),
+                       small: small.slice(0, 8), overlaps: overlaps.slice(0, 8), copies, marks, status_labelled: labelled, footer,
+                       box: [Math.round(sec.getBoundingClientRect().width), Math.round(sec.getBoundingClientRect().height)] });
+        }
+        return pages;
+      }, spec.min_font_px || 10);
+      if (spec.capture) {
+        result.captures = {};
+        for (const p of result.layout) {
+          const file = `page-${p.id}.png`;
+          await page.locator(`section[data-page="${p.id}"]`).screenshot({ path: path.join(outDir, file) });
+          result.captures[p.id] = file;
+        }
+      }
     } else if (spec.mode === "experience") {
       result.scenarios = [];
       for (const scenario of spec.scenarios) {

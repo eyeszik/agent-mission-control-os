@@ -19,6 +19,7 @@ test.beforeAll(async ({ request }) => {
 });
 
 test('VNEXUS studio: draft to review, honest refusals, keyboard navigation', async ({ page }) => {
+  test.setTimeout(240_000);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   const status = (text: string | RegExp) => page.getByRole('status').filter({ hasText: text }).first();
@@ -62,6 +63,20 @@ test('VNEXUS studio: draft to review, honest refusals, keyboard navigation', asy
   await page.getByRole('tab', { name: 'Graphic Design', exact: true }).click();
   await page.getByRole('button', { name: 'Render' }).click();
   await expect(page.getByRole('alert').filter({ hasText: /no approved genome/i })).toBeVisible({ timeout: 15_000 });
+
+  // Brand book: decisions are listed; production refuses without an approved genome; a preview renders all 24
+  // pages with every gap labelled (no approved genome yet, so nothing is READY).
+  await page.getByRole('tab', { name: 'Brand Book', exact: true }).click();
+  await page.getByRole('button', { name: 'Open decisions' }).click();
+  await expect(status(/open decision\(s\)/)).toBeVisible({ timeout: 15_000 });
+  await page.getByLabel('Brand book mode').selectOption('PRODUCTION');
+  await page.getByRole('button', { name: 'Build', exact: true }).click();
+  await expect(page.getByRole('alert').filter({ hasText: /no approved genome/i })).toBeVisible({ timeout: 15_000 });
+  await page.getByLabel('Brand book mode').selectOption('PREVIEW');
+  await page.getByRole('button', { name: 'Build', exact: true }).click();
+  await expect(status(/Built: 24 rendered/)).toBeVisible({ timeout: 120_000 });
+  await expect(page.getByRole('button', { name: /^24 Release/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Request approval' })).toBeDisabled();
 
   // Hosted generation is visibly disabled.
   await page.getByRole('tab', { name: 'Provider Jobs', exact: true }).click();
