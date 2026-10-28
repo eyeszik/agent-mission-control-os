@@ -24,7 +24,7 @@ export function stateTone(state: string): keyof typeof tone {
 }
 
 export function Badge({ value, label }: { value: string; label?: string }) {
-  return <span className={`inline-block text-[11px] px-1.5 py-0.5 rounded-sm border ${tone[stateTone(value)]}`}>{label ?? value}</span>;
+  return <span className={`inline-flex items-center shrink-0 whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-sm border ${tone[stateTone(value)]}`}>{label ?? value}</span>;
 }
 
 export function Panel({ title, description, children, actions }: { title: string; description?: string; children: ReactNode; actions?: ReactNode }) {

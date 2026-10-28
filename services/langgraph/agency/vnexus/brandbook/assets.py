@@ -1,6 +1,7 @@
 """Canonical identity assets for one build: resolved once, reused on every page, never regenerated per page.
 
-Preference: an approved vector master artifact (``visual.logo.master_artifact``),
+Preference: an approved vector master artifact (``visual.logo.master_artifact``, pinned by
+``visual.logo.master_sha256`` when the genome records it),
 then a deterministic vector composed from the approved mark key
 (``visual.logo.mark``), then a proposed concept (draft only, labelled). With none
 of them the master is ``MISSING`` and the page routes to identity review; nothing
@@ -71,9 +72,16 @@ def resolve_mark(states: dict[str, FieldState], *, compose_mark: Callable[[str],
         safe = verdict.passed or (kind is AssetKind.RASTER_IN_SVG and not _ACTIVE.search(text))
         if not safe:
             return MarkAsset(kind=AssetKind.MISSING, source=f"master artifact {master.value} failed svg safety: {verdict.detail}")
+        digest = hashlib.sha256(data).hexdigest()
+        pinned = states.get("visual.logo.master_sha256")
+        if pinned is not None and pinned.status in (FieldStatus.VALUE, FieldStatus.PROPOSED) and isinstance(pinned.value, str) \
+                and pinned.value.lower() != digest:
+            # The genome pins the master's exact bytes; a changed artifact head is never used under an old approval.
+            return MarkAsset(kind=AssetKind.MISSING, source=f"master artifact {master.value} no longer matches the pinned sha256 "
+                                                            f"{pinned.value[:16]}: identity review")
         if master.status is FieldStatus.PROPOSED:
             kind = AssetKind.PROPOSED_CONCEPT
-        return MarkAsset(kind=kind, sha256=hashlib.sha256(data).hexdigest(), svg=text, approved=master.approved,
+        return MarkAsset(kind=kind, sha256=digest, svg=text, approved=master.approved,
                          source=f"master artifact {master.value}")
     mark = states.get("visual.logo.mark")
     if mark is not None and mark.status in (FieldStatus.VALUE, FieldStatus.PROPOSED) and isinstance(mark.value, str):

@@ -235,7 +235,7 @@ def context(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str
     genome_ref = layers[-1].version_id if layers else "no-approved-genome"
     resolution_hash = resolution.resolution_hash
     merged = {**approved, **proposed}
-    states = {k: field_state(k, approved, proposed) for k in ("visual.logo.mark", "visual.logo.master_artifact")}
+    states = {k: field_state(k, approved, proposed) for k in ("visual.logo.mark", "visual.logo.master_artifact", "visual.logo.master_sha256")}
     mark = resolve_mark(states, compose_mark=_composer(merged, brand["display_name"], genome_ref, resolution_hash, project_id),
                         load_master=_authorized_master_loader(principal, {project_id, brand["owner_project_id"]}))
     return compiler.BookContext(brand_id=brand_id, brand_name=brand["display_name"], genome_ref=genome_ref,

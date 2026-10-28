@@ -78,6 +78,12 @@ test('VNEXUS studio: draft to review, honest refusals, keyboard navigation', asy
   await expect(page.getByRole('button', { name: /^24 Release/ })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Request approval' })).toBeDisabled();
 
+  // Creative directions compile only from an approved genome: refused here, honestly.
+  await page.getByRole('tab', { name: 'Creative Directions', exact: true }).click();
+  await page.getByLabel('Objective').fill('A mark for a fictional studio');
+  await page.getByRole('button', { name: 'Compile intent' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: /no approved genome/i })).toBeVisible({ timeout: 15_000 });
+
   // Hosted generation is visibly disabled.
   await page.getByRole('tab', { name: 'Provider Jobs', exact: true }).click();
   await expect(status('Jobs loaded')).toBeVisible({ timeout: 15_000 });

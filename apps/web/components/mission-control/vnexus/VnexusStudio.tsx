@@ -10,6 +10,7 @@ import { GenomeEditorArea, HistoryArea, OverviewArea } from './GenomeAreas';
 import { GraphArea, MultiverseArea } from './GraphAreas';
 import { ArtDirectionArea, ExperienceArea, GraphicArea, JobsArea, VideoArea } from './ProductionAreas';
 import { BrandBookArea } from './BrandBookArea';
+import { DirectionsArea } from './DirectionsArea';
 import { GovernanceArea, ImmuneArea, MarketingArea, PromptsArea } from './IntelligenceAreas';
 import { Empty, Field, StatusLine, buttonClass, inputClass, useAction } from './ui';
 
@@ -22,6 +23,7 @@ const AREAS: { id: VnexusArea; label: string }[] = [
   { id: 'experience', label: 'Experience' },
   { id: 'art', label: 'Art Direction' },
   { id: 'graphic', label: 'Graphic Design' },
+  { id: 'directions', label: 'Creative Directions' },
   { id: 'brandbook', label: 'Brand Book' },
   { id: 'video', label: 'Video & Motion' },
   { id: 'marketing', label: 'Marketing' },
@@ -134,6 +136,7 @@ export function VnexusStudio() {
               {area === 'experience' && <ExperienceArea />}
               {area === 'art' && <ArtDirectionArea />}
               {area === 'graphic' && <GraphicArea />}
+              {area === 'directions' && <DirectionsArea />}
               {area === 'brandbook' && <BrandBookArea />}
               {area === 'video' && <VideoArea />}
               {area === 'marketing' && <MarketingArea />}

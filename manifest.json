@@ -4,11 +4,11 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "702430ddfbdafee553e542e4d748f3b495fcd95e"
+      "git_blob_sha": "ca7ef9c11099d53c793d6781c68b02ba5a5f40c9"
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "cb9120d143022f57c0be569f481de303960232e7"
+      "git_blob_sha": "33c22b01874f021102b9205d2fbd7b48a2dc86ea"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -116,7 +116,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "git_blob_sha": "330746455c7354b2be5b56d0282c4b486af16ff2"
+      "git_blob_sha": "c1d169d54cd2ce1c26e6d87b02c24db1a966810f"
     },
     {
       "path": "packages/shared/src/schemas/ace-fixtures.json",
@@ -160,7 +160,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "a6d958703e334087bc293d087e7a5a65183b99f9"
+      "git_blob_sha": "19a4e230c3ad532c05494ce5b493dcb5aa3d45dd"
     },
     {
       "path": "runtime/abc/run-fsm.yaml",
@@ -520,7 +520,7 @@
     },
     {
       "path": "services/langgraph/agency/vnexus/production.py",
-      "git_blob_sha": "d1cc20728c6b2b3b329544f0ddbcdd8b9904e31f"
+      "git_blob_sha": "f8eecad6e9067267996877b533209d407215828a"
     },
     {
       "path": "services/langgraph/agency/vnexus/service.py",
@@ -588,7 +588,7 @@
     },
     {
       "path": "services/langgraph/api/routes/vnexus.py",
-      "git_blob_sha": "94f558ec2ce6353384cc953fefd1063a6fcd3af3"
+      "git_blob_sha": "533ed3f3177f3aa1786e34bcbaa839d9f71d18a5"
     },
     {
       "path": "services/langgraph/app/config.py",
@@ -1140,11 +1140,19 @@
     },
     {
       "path": "services/langgraph/agency/vnexus/brandbook/service.py",
-      "git_blob_sha": "278e77ca1d7bb7443287f1acb358c8c1e1e9343b"
+      "git_blob_sha": "84a4536c306ab86ef827179981d27a8451650327"
     },
     {
       "path": "services/langgraph/agency/vnexus/brandbook/fields.py",
       "git_blob_sha": "9eef00923a5a25927dabfd3eb6a63edb722d5182"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/directions/service.py",
+      "git_blob_sha": "b169a3fbdcd196932c8c9c2cc2015ebc2158f1f4"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/directions/providers.py",
+      "git_blob_sha": "85ab2178176a91f5358f2d86850e06005cd5455c"
     }
   ]
 }

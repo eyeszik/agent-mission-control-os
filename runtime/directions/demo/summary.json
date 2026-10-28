@@ -1,0 +1,30 @@
+{
+  "brand": "Halden & Fen (fictional)",
+  "brand_book_mark": {
+    "kind": "VECTOR",
+    "sha256_matches_master": true
+  },
+  "compare_means": {
+    "A": 6.0,
+    "B": 8.0
+  },
+  "compare_verdict": "RECOMMENDED_DIRECTION",
+  "fidelity": {
+    "comparable": true,
+    "compare_size": [
+      96,
+      96
+    ],
+    "mean_delta_e76": 1.531,
+    "mse": 400.369,
+    "psnr_db": 22.11
+  },
+  "freeze": "PENDING_GENOME_REVIEW",
+  "hosted_offer": "manual.handoff",
+  "hosted_route": "BLOCKED",
+  "local_compositions": 3,
+  "measured_recall": "HUMAN_RECALL_NOT_TESTED",
+  "provider_calls": 0,
+  "reconstruction_status": "PASSED",
+  "release_verdict": "READY_FOR_APPROVAL"
+}
