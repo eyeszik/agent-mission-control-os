@@ -1,0 +1,472 @@
+{
+  "assessments": [
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "palette_roles",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "06",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "reproduction",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "06",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "applicable_contrast",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "06",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "readability",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "07",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "contrast",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "07",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "non_color_cues",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "07",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "paths_topology",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "11",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "small_size",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "11",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "exports",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "11",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "channel_fit",
+      "finding_ids": [
+        "vdf-d3491636ae2e1b02"
+      ],
+      "reason": "",
+      "score": 7,
+      "seat": "12",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "crop",
+      "finding_ids": [],
+      "reason": "VISION_CRITIQUE_ROUTE_DISABLED: gemini.image_critique has no adapter; no human assessment was supplied",
+      "score": null,
+      "seat": "12",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "layout_fit",
+      "finding_ids": [],
+      "reason": "VISION_CRITIQUE_ROUTE_DISABLED: gemini.image_critique has no adapter; no human assessment was supplied",
+      "score": null,
+      "seat": "12",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "prohibited_content",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "13",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "privacy",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "13",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "provenance",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "13",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "substantiation",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "14",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "uncertainty",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "14",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "coverage",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "14",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "spelling",
+      "finding_ids": [],
+      "reason": "no identity text in this brief",
+      "score": null,
+      "seat": "04",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "hierarchy",
+      "finding_ids": [],
+      "reason": "no identity text in this brief",
+      "score": null,
+      "seat": "04",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "spacing_lettering",
+      "finding_ids": [],
+      "reason": "no identity text in this brief",
+      "score": null,
+      "seat": "04",
+      "status": "NOT_APPLICABLE"
+    }
+  ],
+  "base_session_id": null,
+  "blinded": false,
+  "brand_id": "brand-1ff3001f",
+  "brand_memory": {
+    "entries": [
+      {
+        "candidate": "A",
+        "category_overlap": "UNKNOWN: no reviewer assessed category overlap",
+        "observed_cues": {
+          "aspect": 1.0,
+          "dominant_colours": [
+            "#f7f4ee",
+            "#14161a",
+            "#4b4540"
+          ],
+          "figure_share": 0.2576
+        },
+        "predicted_label": "PREDICTION by a reviewer, not measured recall",
+        "predicted_memorability": "NOT_ASSESSED"
+      }
+    ],
+    "measured_recall": "HUMAN_RECALL_NOT_TESTED",
+    "recall_protocol": "a recall test needs participants, an exposure/delay protocol and recorded results; none exist",
+    "trademark_clearance": "NOT_ASSESSED: no clearance search was performed and none is claimed"
+  },
+  "candidates": {
+    "vdc-53fff1b746f5b8cd": "df72d8e71cb78b2be7d14a29737d8348b5fd78a32e1cf377e5c11a6c919380f6"
+  },
+  "correlation_note": "seats sharing one assessor are correlated perspectives, not independent corroboration; local measurements are not creative judgments",
+  "created_at": "2026-10-28T18:50:00.612720Z",
+  "created_by": "alice",
+  "effects": {
+    "approved": false,
+    "mutated_master": false,
+    "published": false,
+    "regenerated": false,
+    "spent": false
+  },
+  "emotional_map": {
+    "entries": [],
+    "note": "reviewer interpretation of visible cues; not a measurement of audience emotion",
+    "status": "NOT_ASSESSED",
+    "targets": [
+      "plain",
+      "warm"
+    ],
+    "targets_source": "genome verbal.voice.tone"
+  },
+  "findings": [
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "df72d8e71cb78b2be7d14a29737d8348b5fd78a32e1cf377e5c11a6c919380f6",
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "safety_privacy_rights",
+      "evidence_class": "OBSERVED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-d90dbed8882a27fd",
+      "measurement": null,
+      "observation": "traced locally from the approved selection",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "13",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "df72d8e71cb78b2be7d14a29737d8348b5fd78a32e1cf377e5c11a6c919380f6",
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "criterion": "channel_fit",
+      "evidence_class": "OBSERVED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-d3491636ae2e1b02",
+      "measurement": null,
+      "observation": "reads at favicon size in a browser tab (fictional check)",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "12",
+      "severity": "NOTE",
+      "uncertainty": ""
+    }
+  ],
+  "gates": [
+    {
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "evidence": "stored bytes re-hash to df72d8e71cb78b2b; recorded adapter output",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [],
+      "gate": "OUTPUT_PROVENANCE",
+      "status": "PASS"
+    },
+    {
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "evidence": "identity text decided NONE",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [],
+      "gate": "EXACT_IDENTITY_TEXT",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "evidence": "logotypes are exempt from WCAG 1.4.3 and this role carries no required information-bearing graphics",
+      "evidence_class": "INFERRED",
+      "finding_ids": [],
+      "gate": "ACCESSIBILITY",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "evidence": "human inspection (vdf-d90dbed8882a27fd); was UNKNOWN: rights basis is the importer's statement; third-party marks and likeness need a human inspection (seat 13)",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [
+        "vdf-d90dbed8882a27fd"
+      ],
+      "gate": "SAFETY_PRIVACY_RIGHTS",
+      "status": "PASS"
+    },
+    {
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "evidence": "bound to the current approved genome and palette",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [],
+      "gate": "CANONICAL_INTEGRITY",
+      "status": "PASS"
+    }
+  ],
+  "genome_ref": "gv-229463a9817b43b6adadc1182b8b0eab",
+  "intent_id": "vdi-a8201b1dd60f9ccb",
+  "labels": {
+    "A": "vdc-53fff1b746f5b8cd"
+  },
+  "lenses_active": [
+    "06",
+    "07",
+    "11",
+    "12",
+    "13",
+    "14"
+  ],
+  "lenses_required_missing": [],
+  "measurements": {
+    "vdc-53fff1b746f5b8cd": {
+      "geometry": {
+        "classification": "VECTOR",
+        "clip_paths": 0,
+        "elements": 776,
+        "external_refs": [],
+        "fills": [
+          "#14161a",
+          "#4b4540",
+          "#f7f4ee"
+        ],
+        "gradients": 0,
+        "parseable": true,
+        "path_nodes": 0,
+        "pii_like_text": [],
+        "safe": true,
+        "safety_detail": "well-formed SVG without active content or external references",
+        "shapes": 773,
+        "text_elements": [],
+        "vector": true,
+        "view_box": "0 0 192 192"
+      },
+      "mime": "image/svg+xml",
+      "pixel_source": "rendered stored SVG bytes in local Chromium",
+      "pixels": {
+        "aspect": 1.0,
+        "dhash": "003068f0e0f06870",
+        "dominant": [
+          {
+            "delta_e76": 0.0,
+            "hex": "#f7f4ee",
+            "nearest_role": "paper",
+            "share": 0.7424
+          },
+          {
+            "delta_e76": 0.0,
+            "hex": "#14161a",
+            "nearest_role": "ink",
+            "share": 0.203
+          },
+          {
+            "delta_e76": 0.0,
+            "hex": "#4b4540",
+            "nearest_role": "muted",
+            "share": 0.0213
+          }
+        ],
+        "dominant_coverage": 0.9667,
+        "dominant_pair_contrast": 16.5,
+        "figure_share": 0.2576,
+        "height": 192,
+        "nonblank": true,
+        "off_palette_share": 0,
+        "retention_16": 0.959,
+        "retention_32": 0.984,
+        "unclassified_share": 0.0333,
+        "unique_colour_buckets": 13,
+        "width": 192
+      },
+      "sha256": "df72d8e71cb78b2be7d14a29737d8348b5fd78a32e1cf377e5c11a6c919380f6"
+    }
+  },
+  "mode": "RELEASE",
+  "outcomes": [
+    {
+      "asset_hash": "df72d8e71cb78b2be7d14a29737d8348b5fd78a32e1cf377e5c11a6c919380f6",
+      "candidate_id": "vdc-53fff1b746f5b8cd",
+      "label": "A",
+      "reasons": [
+        "applicable checks satisfied; the existing human decision is pending"
+      ],
+      "verdict": "READY_FOR_APPROVAL"
+    }
+  ],
+  "project_id": "prj-vnx-5f094d97",
+  "recommendation": {
+    "aggregate": null,
+    "candidate_id": "vdc-53fff1b746f5b8cd",
+    "label": "A",
+    "note": "a recommendation is not an approval; human selection uses the existing approval route",
+    "reasons": [
+      "applicable checks satisfied; the existing human decision is pending"
+    ],
+    "verdict": "READY_FOR_APPROVAL"
+  },
+  "regressions": [],
+  "routes": {
+    "gemini.image_critique": "DISABLED",
+    "local.measure": "AVAILABLE"
+  },
+  "rubric_version": "amc-vnexus-review-rubric/1.0.0",
+  "schema_version": "amc-vnexus-directions/v1",
+  "session_id": "vdr-e1f28b0f4391a1e5",
+  "tenant_id": "tenant-vnx-841bf382",
+  "work_orders": []
+}

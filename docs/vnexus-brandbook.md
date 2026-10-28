@@ -62,7 +62,7 @@ Contents (p02), handoff (p23) and release (p24) read every page and are rebuilt 
 
 `assets.resolve_mark` resolves one master per build and every page places it by hash. The order of preference is:
 
-1. An approved master artifact (`visual.logo.master_artifact`), read through Project OS after authorization.
+1. An approved master artifact (`visual.logo.master_artifact`), read through Project OS after authorization. When the genome also pins `visual.logo.master_sha256` (as a master frozen from [creative directions](vnexus-directions.md) does), bytes that do not hash to the pin are `MISSING`, never used under the old approval.
 2. A deterministic vector composed from the approved `visual.logo.mark`.
 3. A proposed concept, in drafts only, labelled.
 

@@ -1,0 +1,146 @@
+{
+  "candidate": {
+    "candidate_id": "vdc-53fff1b746f5b8cd",
+    "cost_measured_minor": 0,
+    "created_at": "2026-10-28T18:50:00.332634Z",
+    "created_by": "alice",
+    "derived_from": "vdc-5c17f2802bf99e47",
+    "direction": "vector reconstruction of led by the approved swiss editorial grammar",
+    "genome_ref": "gv-229463a9817b43b6adadc1182b8b0eab",
+    "intent_dependency_hash": "885681121826aaa558844f5c418b5c7c28f59468371342acb2c1dee13638abab",
+    "intent_id": "vdi-a8201b1dd60f9ccb",
+    "near_duplicate_of": null,
+    "observed": {
+      "artifact_id": "art-prj-vnx-5f094d97-foundry-vdx-a8201b1dd60f9ccb-v551e7a24dc1b-svg",
+      "artifact_version": 1,
+      "bytes": 56646,
+      "format_class": "VECTOR",
+      "height": 192,
+      "mime": "image/svg+xml",
+      "readback_sha256": "df72d8e71cb78b2be7d14a29737d8348b5fd78a32e1cf377e5c11a6c919380f6",
+      "sha256": "df72d8e71cb78b2be7d14a29737d8348b5fd78a32e1cf377e5c11a6c919380f6",
+      "storage_uri": null,
+      "stored_at": "2026-10-28T18:50:00.328728Z",
+      "width": 192
+    },
+    "perceptual_hash": null,
+    "prompt_hash": "ed545e8a06a74675a6805ec6f0b36526e373af83158a5e2f0cddae070d258972",
+    "provenance": "RECORDED",
+    "reconstruction_id": "vdv-551e7a24dc1bf1b7",
+    "reported": {
+      "cost_minor": null,
+      "currency": null,
+      "generated_at": null,
+      "job_ref": null,
+      "model": "avic.optimize",
+      "model_version": null,
+      "parameters": {
+        "budgets": [
+          256,
+          1024
+        ],
+        "method": "controlled_trace",
+        "regions": 773
+      },
+      "prompt_used": null,
+      "provider": "local",
+      "receipt_ref": null,
+      "reference_ids": [],
+      "rights_basis": "operator-owned (fictional)",
+      "seed": null
+    },
+    "route_id": "local.trace",
+    "slot": 1
+  },
+  "reconstruction": {
+    "artifact_id": "art-prj-vnx-5f094d97-foundry-vdx-a8201b1dd60f9ccb-v551e7a24dc1b-svg",
+    "artifact_version": 1,
+    "candidate_id": "vdc-5c17f2802bf99e47",
+    "candidate_sha256": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+    "checks": [
+      {
+        "check": "svg_safety",
+        "detail": "well-formed SVG without active content or external references",
+        "status": "PASS"
+      },
+      {
+        "check": "native_geometry",
+        "detail": "773 shapes, 0 path commands",
+        "status": "PASS"
+      },
+      {
+        "check": "view_box",
+        "detail": "0 0 192 192",
+        "status": "PASS"
+      },
+      {
+        "check": "palette_only_fills",
+        "detail": "palette roles only",
+        "status": "PASS"
+      },
+      {
+        "check": "editable_exact_text",
+        "detail": "no identity text in the brief",
+        "status": "NOT_APPLICABLE"
+      },
+      {
+        "check": "clipping",
+        "detail": "0 clip paths",
+        "status": "PASS"
+      },
+      {
+        "check": "self_intersections",
+        "detail": "no geometry kernel is installed; inspect paths in an editor",
+        "status": "NOT_VERIFIED"
+      },
+      {
+        "check": "curve_quality_and_nodes",
+        "detail": "0 path commands; curve quality needs a designer",
+        "status": "NOT_VERIFIED"
+      },
+      {
+        "check": "rendered_fidelity",
+        "detail": "{\"comparable\": true, \"compare_size\": [96, 96], \"mse\": 400.369, \"psnr_db\": 22.11, \"mean_delta_e76\": 1.531}",
+        "status": "PASS"
+      }
+    ],
+    "classification": "VECTOR",
+    "created_at": "2026-10-28T18:50:00.418987Z",
+    "created_by": "alice",
+    "fidelity": {
+      "measured": {
+        "comparable": true,
+        "compare_size": [
+          96,
+          96
+        ],
+        "mean_delta_e76": 1.531,
+        "mse": 400.369,
+        "psnr_db": 22.11
+      },
+      "note": "measured agreement with the selected candidate; not a claim that the design is better",
+      "rendered_sha256": "e4cadccdb59cc0d265d3c4dff45529e0bf9730f13990a4c135cc25e823bc29b6",
+      "renderer": "local Chromium",
+      "status": "PASS",
+      "text_region_excluded": false,
+      "threshold_mean_delta_e76": 8.0
+    },
+    "intent_id": "vdi-a8201b1dd60f9ccb",
+    "method": "controlled_trace",
+    "need": "REQUIRED",
+    "reasons": [],
+    "reconstruction_id": "vdv-551e7a24dc1bf1b7",
+    "selection_approval_id": "038a5159-6703-43c3-bd1a-8b68924853df",
+    "sha256": "df72d8e71cb78b2be7d14a29737d8348b5fd78a32e1cf377e5c11a6c919380f6",
+    "status": "PASSED",
+    "text_handling": "text decided NONE"
+  },
+  "trace": {
+    "budgets": [
+      256,
+      1024
+    ],
+    "method_state": "PARTIAL: rectangle regions snapped to palette; Bezier contour fitting is PROPOSED",
+    "regions": 773
+  }
+}
