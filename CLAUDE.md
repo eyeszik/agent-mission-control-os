@@ -41,10 +41,15 @@ pnpm --filter @amc/web exec playwright install chromium
 E2E_BASE_URL=http://127.0.0.1:3000 pnpm --filter @amc/web test:e2e  # needs backend+frontend running; runs deliberately without a model key to prove degraded-mode reporting
 ```
 
+- **Postgres CI.** CI runs the whole backend suite on SQLite *and* on PostgreSQL, so a test that passes locally can still fail there (see the row-access rule under Coding standards).
+- **Excluding a file.** To leave out one file locally (e.g. `test_ucpo_build.py` when its pinned Chromium is absent), use `--ignore=<path>`; `--deselect` takes test ids and does not exclude a file.
+- **E2E local principal.** For e2e, start the backend with the local-principal env from the "Start local stack" step in `.github/workflows/ci.yml` (`AMC_LOCAL_USER_ID`, `AMC_LOCAL_TENANT_ID`, `AMC_LOCAL_PROJECT_IDS`, `AMC_LOCAL_ROLE`). Without it, `POST /projects` returns 503 and the specs fail in `beforeAll`.
+- **Stopping servers.** Kill local servers by explicit PID from `ps -eo pid=,args=` filtered on the exact argv. Never use `pkill -f` or a grep pattern that also appears in your own command line; it kills the shell running it.
+
 ### Lint / typecheck / build
 
 ```bash
-ruff check <path>                          # no ruff.toml — defaults
+ruff check --select E4,E7,E9,F <paths>    # no ruff config; recent ruff defaults are much broader and existing code doesn't pass them (CI doesn't run ruff)
 python -m compileall -q services/langgraph scripts
 pnpm --filter @amc/shared typecheck
 pnpm --filter @amc/web typecheck
@@ -173,6 +178,23 @@ Three endpoints, deliberately separated: `/health` is pure liveness (no config/D
 ### Governance planning artifacts (not runtime code)
 
 `AGENTS.md`, `constraint_ledger.yaml`, `risk_register.json`, `governance_decisions.json`, `validation_report.json` at the repo root are a **pre-implementation architecture-planning bundle** (own `status: "draft_until_verified"` / `"not_release_ready_without_repo_audit"`), not a description of runtime components. There is no "Orchestrator Agent" or "Execution Agent (Codex)" dispatching a task DAG anywhere in this codebase — don't go looking for it. `constraint_ledger.yaml`'s `agency_pipeline_decisions` section is the one part that reflects real, still-true decisions: `spend_authority: no_spend_mvp` and `analytics_metrics_source: deferred` match Layer 1's actual fail-closed publication/paid-media/analytics state today.
+
+## Coding standards
+
+These apply to new and changed code. Existing code predates some of them; don't mass-refactor it unprompted.
+
+- **Function length.** Aim for at most 20 lines per function. When a function must be longer (a pipeline stage, a route that maps many fields), split out named helpers before going past it. About a fifth of the existing Python functions are longer.
+- **Error handling.** Handle errors explicitly, with `try`/`catch` in TypeScript and `try`/`except` in Python, at the layer that can act on them.
+  - Never swallow an exception silently.
+  - Catch specific types, or contain a provider fault and record it (`# noqa: BLE001` with a reason, as the media fabric does).
+  - For FastAPI routes, the explicit handler is the error-mapping decorator (`vnexus_errors`, `domain_errors`). Don't wrap every handler body in its own try.
+- **TypeScript.** Use `const`/`let` only; there are no `var`s, keep it that way. Type everything explicitly, with no `any`: use `unknown` plus a Zod parse or a narrow type instead. The remaining `any`s come from the untyped listener signature in `apps/web/lib/events/bus.ts`. Don't add more; type the bus instead.
+- **Database rows.** Read columns by name (`SELECT COUNT(*) AS n …` then `row["n"]`), never by position. `row[0]` works on SQLite rows but raises `KeyError: 0` on the PostgreSQL driver.
+- **Python version.** CI runs 3.11 and `requires-python` is `>=3.10`. Don't reuse the enclosing quote character inside an f-string expression (`f"{d["k"]}"`); that is 3.12+ syntax and a SyntaxError here.
+- **Pydantic field names.** Don't name a field after a `BaseModel` attribute (`copy`, `json`, `dict`, `schema`, `model_*`): it shadows the method. Use a specific name such as `copy_blocks`.
+- **Project OS artifact keys.** `foundry.studio.store` keys become `foundry-<name>`, slugified and truncated to 64 characters, so two long names can silently collide. Use short digest-based names and refuse any name whose `foundry-` key would exceed 64 characters (as `brandbook/service.py` and `vnexus/directions/service.py` do).
+- **Tailwind.** Don't use the `inline-block` class. The `block` spacing token makes Tailwind emit `.inline-block { inline-size: var(--amc-semantic-space-block) }`, which squeezes the element narrower than its content. Use `inline-flex` (or `inline-grid`). Check generated CSS for the same collision before using other `inline-<token>` or `block-<token>` utilities.
+- **Build byproducts.** `next build` and Playwright write `apps/web/next-env.d.ts` changes, `apps/web/AGENTS.md` and `apps/web/test-results/`, and none of them is gitignored. Restore or delete them before `git add -A`.
 
 ## Notes
 
