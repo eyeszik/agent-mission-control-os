@@ -15,7 +15,7 @@ Read `README.md` first — it is current and states the real implementation stat
 ```bash
 pnpm install --frozen-lockfile
 pnpm --filter @amc/shared build      # must run before typecheck/build elsewhere — apps/web imports @amc/shared's dist output
-pnpm --filter "./packages/*" build   # also builds the tier-1 packages (@amc/errors, config, logger, constants, db, testing) in dependency order
+pnpm --filter "./packages/*" build   # also builds the tier-1 packages (@amc/errors, config, logger, constants, db, testing, canonical) in dependency order
 python -m pip install -e "./services/langgraph[dev]"
 ```
 
@@ -107,6 +107,8 @@ This is the one thing that isn't obvious from browsing individual files, and it 
 ### Workspace packages and the backend core — same semantics, no cross-language imports
 
 `packages/{errors,config,logger,constants,db,testing}` (TypeScript, built from root `tsconfig.base.json`, Node16 resolution, CommonJS output except the ESM-only test helper `@amc/testing`) and `services/langgraph/core/{constants,errors,config}.py` are sibling implementations of the same vocabularies, error envelope (`{detail, error: {code, message, status, details?}}`) and config/logging conventions; `tests/test_core.py` reads `packages/constants/src/index.ts` to keep the vocabularies in step. `apps/web/lib/config.ts` must keep reading each `NEXT_PUBLIC_*` variable as a literal `process.env` expression (Next.js only inlines literal references into browser bundles); `@amc/config` loaders take that explicit record and never read `process.env` themselves. `app/config.py` is still the single owner of runtime configuration and the production gates — `core.config` is a typed view that imports it lazily (it imports `core.constants`, so an eager import would cycle). `@amc/db` is a driver-agnostic contract only; the web app has no database access. Details: `docs/workspace-packages.md`.
+
+`@amc/canonical` is the TS twin of `agency/execution/canonical.py` (AMC-CANON-1), proven byte-for-byte by a Python-generated fixture (`tests/test_canonical_parity_fixture.py` owns it; regenerate with `AMC_REGENERATE_FIXTURES=1`). It is the pilot for the module-by-module TypeScript migration in `docs/typescript-migration.md`: Python stays the reference until a module's callers move, and some areas (CrewAI/AutoGen council, LangGraph checkpoints, bpy, the code sandbox) stay Python.
 
 ### Web pages and motion — design skill first
 
