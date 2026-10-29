@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "33c22b01874f021102b9205d2fbd7b48a2dc86ea"
+      "git_blob_sha": "6c19d8e383bd53d9d6b6fca6919d5a1ff234df07"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -156,7 +156,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "0123d06e3c564148c878e1b1518634aaf34f3e19"
+      "git_blob_sha": "5abafb8977e7fbf8a5ce99a5657ddac1ea6638ee"
     },
     {
       "path": "README.md",
@@ -564,7 +564,7 @@
     },
     {
       "path": "services/langgraph/api/routes/foundry.py",
-      "git_blob_sha": "cf2c5214aea9fe8f12b8adedbf4aac6aa4e05800"
+      "git_blob_sha": "5bb9d787f2b994531de922728bf639ae5cc6eaf6"
     },
     {
       "path": "services/langgraph/api/routes/operations.py",
@@ -736,7 +736,7 @@
     },
     {
       "path": "services/langgraph/pyproject.toml",
-      "git_blob_sha": "e14bd5282aca6a202a3879ec21e743cbd079ad25"
+      "git_blob_sha": "bd4972e57e468843ab7dfa4bfc7a30d1bd85b2e5"
     },
     {
       "path": "services/langgraph/quality/brand_safety.py",
@@ -984,15 +984,15 @@
     },
     {
       "path": "services/langgraph/agency/rendering/contracts.py",
-      "git_blob_sha": "7fd0b69a724d84820b200a702ef010b458929f57"
+      "git_blob_sha": "bcf307353248094c71988da855f9130c1b736287"
     },
     {
       "path": "services/langgraph/agency/rendering/runtime.py",
-      "git_blob_sha": "a3841388d52c57f3930879e2c67485acaf7a55cf"
+      "git_blob_sha": "4062e91b0eb5da89a0dffd204c61d1c96551f0c9"
     },
     {
       "path": "services/langgraph/agency/rendering/service.py",
-      "git_blob_sha": "0e0f628b6ce4e543ffe999793fb94b1060b5b79e"
+      "git_blob_sha": "6749e6a33047401980fb3f8f90483ff48e3e3c47"
     },
     {
       "path": "services/langgraph/agency/rendering/worker.py",
@@ -1000,11 +1000,11 @@
     },
     {
       "path": "services/langgraph/api/routes/rendering.py",
-      "git_blob_sha": "8b7ce33276554b07d2b0b25057028b20e485165f"
+      "git_blob_sha": "9445e3ba852b02c200c32dfd84cdf07b53248ced"
     },
     {
       "path": "services/langgraph/tests/test_rendering.py",
-      "git_blob_sha": "cc1e9fa41a2bd913590a3c3a0dfc25018408305d"
+      "git_blob_sha": "b681dc0e5a7a14d286ffa4422d9a83d503debb00"
     },
     {
       "path": "packages/shared/src/schemas/rendering.ts",
@@ -1016,7 +1016,7 @@
     },
     {
       "path": "packages/creative-renderer/package.json",
-      "git_blob_sha": "397cac9e5b968146e45f0d5e308f61506c825b7d"
+      "git_blob_sha": "145baf8e682f5d22259c4e9910473d0fe052f797"
     },
     {
       "path": "packages/creative-renderer/worker.mjs",
@@ -1024,7 +1024,7 @@
     },
     {
       "path": "packages/creative-renderer/build.mjs",
-      "git_blob_sha": "08133572b39e492ec2ef5da70ce4c64a81f52f05"
+      "git_blob_sha": "6aee6dfff93764095f5ce2483fe9ce756fd85751"
     },
     {
       "path": "packages/creative-renderer/worker.test.mjs",
@@ -1032,15 +1032,15 @@
     },
     {
       "path": "apps/web/components/rendering/CreativeRendering.tsx",
-      "git_blob_sha": "df34a058a136ef7d9ae284e4b2301b2bb6342a52"
+      "git_blob_sha": "94a581251942cda4fd7007f2a72ab57c474d1b8f"
     },
     {
       "path": "apps/web/components/rendering/RenderPreview.tsx",
-      "git_blob_sha": "9ca1ddf593b693120ee8b759a53354710585e679"
+      "git_blob_sha": "8795cf70812b05d13c65f9f8f8c3e18f6ec4e68f"
     },
     {
       "path": "apps/web/lib/api/rendering.ts",
-      "git_blob_sha": "96b0201fb16bc3665ddec7a276a40c1fde4e3bef"
+      "git_blob_sha": "2dc1524c4981ffa8a19443e8f37db295a6e48a3b"
     },
     {
       "path": "apps/web/app/creative/page.tsx",
@@ -1104,7 +1104,7 @@
     },
     {
       "path": "apps/web/e2e/creative-rendering.spec.ts",
-      "git_blob_sha": "ef3792a25c13f3e145eba8f2e14b5963239d35ee"
+      "git_blob_sha": "29000bc3ed535dddb539f098fee62bca237c2e01"
     },
     {
       "path": "services/langgraph/tests/test_ucpo_qa_discovery.py",
@@ -1153,6 +1153,62 @@
     {
       "path": "services/langgraph/agency/vnexus/directions/providers.py",
       "git_blob_sha": "85ab2178176a91f5358f2d86850e06005cd5455c"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/media.py",
+      "git_blob_sha": "4d087388645c72dce160b9a02c036bbdabb7e753"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/remote.py",
+      "git_blob_sha": "6c63694dd0d0596877512af1a9e2eff4890b5cc3"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/remote_worker.py",
+      "git_blob_sha": "5d0bc76b34201b77a96e448829b8916f89523831"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/licenses.py",
+      "git_blob_sha": "7ac54777879eb350503b900ab2adec0f03104d43"
+    },
+    {
+      "path": "services/langgraph/tests/test_rendering_media_remote.py",
+      "git_blob_sha": "7d9c11644ccb955f117e70dc5169fcbe1ffc9afd"
+    },
+    {
+      "path": "packages/creative-renderer/browser-runner.cjs",
+      "git_blob_sha": "fd304ef1d08cd629db4d5466bc9ebf61b2ac4c0b"
+    },
+    {
+      "path": "packages/creative-renderer/licenses/react-three-fiber.txt",
+      "git_blob_sha": "493cfb3c8335c31bea327e0e27a8cb22004111d7"
+    },
+    {
+      "path": "packages/creative-renderer/licenses/sources.json",
+      "git_blob_sha": "4bac99a2e48754fede68ae384d9ec3d972617ee9"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/common.mjs",
+      "git_blob_sha": "a05400f50641151f8dc62c866847f89e22f02c40"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/motion_canvas.mjs",
+      "git_blob_sha": "77caf97bae2e043b57471ba6947e42a0e5b33e74"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/p5_js.mjs",
+      "git_blob_sha": "2b37a54d2035b50276c45694af4601027f29e836"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/pixi_js.mjs",
+      "git_blob_sha": "dbe230080bdac4529ea97661e3d2c03c0b8c7d62"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/react_three_fiber.mjs",
+      "git_blob_sha": "55b509130604e34d23cd48cc230da56504bdcb3b"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/remotion.mjs",
+      "git_blob_sha": "352cf2b63069ab5bdba8507b4742f860f8b6de8c"
     }
   ]
 }

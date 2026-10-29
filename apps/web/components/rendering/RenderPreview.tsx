@@ -5,6 +5,7 @@ import { fetchFoundryContent } from '../../lib/api/foundry';
 
 export default function RenderPreview({ project, artifact }: { project: string; artifact: string }) {
   const [url, setUrl] = useState<string | null>(null);
+  const [video, setVideo] = useState(false);
   const [error, setError] = useState('');
   useEffect(() => {
     let disposed = false;
@@ -12,12 +13,13 @@ export default function RenderPreview({ project, artifact }: { project: string; 
     setUrl(null); setError('');
     void fetchFoundryContent(project, artifact).then(({ blob }) => {
       if (disposed) return;
-      objectUrl = URL.createObjectURL(blob); setUrl(objectUrl);
+      setVideo(blob.type.startsWith('video/')); objectUrl = URL.createObjectURL(blob); setUrl(objectUrl);
     }).catch(() => { if (!disposed) setError('Preview unavailable.'); });
     return () => { disposed = true; if (objectUrl) URL.revokeObjectURL(objectUrl); };
   }, [project, artifact]);
   if (error) return <p role="alert">{error}</p>;
   if (!url) return <p role="status">Loading persisted artifact…</p>;
   // Image context does not execute SVG scripts; no arbitrary source is injected.
+  if (video) return <video src={url} controls aria-label="Persisted rendered video awaiting human review" className="h-auto max-w-full" />;
   return <img src={url} alt="Persisted geometric rendering awaiting human review" className="h-auto max-w-full" />;
 }
