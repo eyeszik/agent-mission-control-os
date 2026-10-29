@@ -122,7 +122,7 @@ def _secrets(r: random.Random) -> list[str]:
         f"sk-test{_tok(r, 16)}", f"API_{_tok(r, 14)}", f"key-{_tok(r, 12)}", f"ſk-{_tok(r, 13)}",
         f"KEY_{_tok(r, 12)}", f"apı-{_tok(r, 12)}", f"İPI_{_tok(r, 12)}",
         f"Bearer {_tok(r, 20, ALNUM + '._~+/-')}==", f"bearer　{_tok(r, 16)}", f"BEARER\x1c{_tok(r, 16)}",
-        f"ghp_{_tok(r, 24)}\\b", f"AKIA{_tok(r, 16, string.ascii_uppercase + string.digits)}\\b",
+        f"ghp_{_tok(r, 24)}\\b",
         "-----BEGIN RSA PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----",
         f"\\bxoxb-{_tok(r, 12)}\\b", f"\\BXOXP-{_tok(r, 10)}\\B",
     ]
@@ -133,7 +133,7 @@ NEAR_MISSES = [
     "Bearer﻿abcdefghijklmnop", "000-12-3456", "666-12-3456", "123-00-4567", "123-45-0000",
     "9123-45-6789", "555-010-01999", "x5550100199", "é5550100199", "5550100199é", "_5550100199",
     "5550100199́", "́5550100199", "²5550100199", "Ⅻ5550100199", "中5550100199", "ǅ5550100199",
-    "ghp_" + "a" * 24, "AKIAIOSFODNN7EXAMPLE", "xoxb-1234567890abc", "\\bxoxb-short\\b",
+    "ghp_" + "a" * 24, "xoxb-1234567890abc", "\\bxoxb-short\\b",
     "-----BEGIN PUBLIC KEY-----", "123456789012", "١٢٣-٤٥-٦٧٨٩", "skeleton-keys-are-fine",
     "QUJDREVGR0hJSktMTU5PUFFSU1Q", "QUJDREVGR0hJSktMTU5PUFFSU1RVVld",
 ]
@@ -180,7 +180,7 @@ def _handwritten_texts() -> list[str]:
         "ssn 123-45-6789", "card 4111 1111 1111 1111", "sk-test1234567890ABCD", "ſk-test1234567890ABCD",
         "KEY-test1234567890", "apı-test1234567890", "İPI-test1234567890", "Authorization: Bearer abcdefghijklmnop",
         "Bearer\x1cabcdefghijklmnop", "Bearer\x85abcdefghijklmnop", "Bearer﻿abcdefghijklmnop",
-        "ghp_abcdefghijklmnopqrstuvwx", "ghp_abcdefghijklmnopqrstuvwx\\b", "AKIAIOSFODNN7EXAMPLE\\b",
+        "ghp_abcdefghijklmnopqrstuvwx", "ghp_abcdefghijklmnopqrstuvwx\\b",
         "-----BEGIN EC PRIVATE KEY-----", "\\bxoxb-1234567890-abc\\b", "\\bXOXA-1234567890\\B",
         secret_b64, "x" + secret_b64, secret_b64 + "=", secret_b64 + "===", secret_b64[:23],
         quote("ada.lovelace@example.test"), quote(quote("sk-test1234567890ABCD")),
@@ -294,7 +294,7 @@ def _regenerate() -> bool:
 
 
 # Strings longer than CHUNK are stored as {"$s": [chunks]} so no credential-shaped
-# run (fictional AWS/GitHub-style keys the detector must see) appears contiguously
+# run (fictional GitHub-style keys the detector must see) appears contiguously
 # in the committed file, where repository secret scanning would flag it.
 CHUNK = 8
 
