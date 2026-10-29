@@ -66,7 +66,7 @@ describe('@amc/assets parity with the Python reference', () => {
       if (initials(`${ch}x`) !== (fixture.upper[String(cp)] ?? ch)) mismatches.push(cp.toString(16));
     }
     expect(mismatches).toStrictEqual([]);
-  });
+  }, 30_000); // exhaustive over all code points: ~2s alone, slower when CI runs every package in parallel
 });
 
 describe('@amc/assets Python string semantics', () => {
