@@ -142,6 +142,101 @@ def _content(ctx, report, cell_id) -> str:
     return LocalStorageAdapter(ctx.export_root).get_bytes(artifact["content_location"]).decode()
 
 
+def test_instruction_opt_in_preserves_release_gate_and_persists_readable_proof(registry, tmp_path):
+    from services.langgraph.agency.compiled.instruction_models import InstructionSelection, InstructionPackage
+    from services.langgraph.agency.execution_fabric.instructions import instruction_input
+    from services.langgraph.agency.compiled.instructions import verify_package
+    from services.langgraph.agency.project_os.storage import LocalStorageAdapter
+
+    ctx = _ctx(tmp_path, instructions=InstructionSelection())
+    schedule = _schedule(registry, ctx.project_id)
+    first = execute_mission(schedule, ctx, brand=BRAND)
+    second = execute_mission(schedule, ctx, brand=BRAND)
+    assert all(o.state is ExecutionState.SUCCEEDED for o in first.cells.values())
+    assert all(o.replayed for o in second.cells.values())
+    assert all(b["state"] == "NEEDS_HUMAN" for b in first.release_boundary.values())
+    events = [e for e in list_project_events(ctx.project_id) if e.payload.get("instruction_hash")]
+    assert len(events) == 2
+    for event in events:
+        raw = LocalStorageAdapter(ctx.export_root).get_bytes(event.payload["instruction_location"])
+        assert __import__("hashlib").sha256(raw).hexdigest() == event.payload["instruction_byte_hash"]
+        candidate = InstructionPackage.model_validate_json(raw)
+        cp = schedule.cells[event.payload["cell_id"]]
+        data = instruction_input(ctx, cp, fabric_skills.ARTIFACT_SKILLS[cp.artifact_type])
+        assert verify_package(candidate, data, ctx.instructions) == ()
+    assert all(a.version == 1 for a in list_project_artifacts(ctx.project_id))
+
+
+def test_instruction_selection_changes_identity_without_changing_legacy_serialization(registry, tmp_path):
+    from services.langgraph.agency.compiled.instruction_models import InstructionSelection
+
+    legacy = _ctx(tmp_path)
+    assert "instructions" not in legacy.model_dump(mode="json")
+    schedule = _schedule(registry, legacy.project_id, (TOKENS,))
+    baseline = execute_mission(schedule, legacy, brand=BRAND)
+    selected = legacy.model_copy(update={"instructions": InstructionSelection()})
+    candidate = execute_mission(schedule, selected, brand=BRAND)
+    a, b = baseline.cells["cell:design_token_set"], candidate.cells["cell:design_token_set"]
+    assert a.state is b.state is ExecutionState.SUCCEEDED
+    assert a.idempotency_key != b.idempotency_key and not b.replayed
+    assert _content(legacy, baseline, "cell:design_token_set") == _content(selected, candidate, "cell:design_token_set")
+
+
+@pytest.mark.parametrize("point", ["after_intent", "before_commit"])
+def test_instruction_policy_change_refuses_dispatch_or_commit(registry, tmp_path, monkeypatch, point):
+    from services.langgraph.agency.compiled.instruction_models import InstructionSelection
+    from services.langgraph.agency.compiled import instructions
+
+    ctx = _ctx(tmp_path, instructions=InstructionSelection())
+    schedule = _schedule(registry, ctx.project_id, (TOKENS,))
+    def change_policy(_cell, _data):
+        monkeypatch.setattr(instructions, "policy_hash", lambda: "f" * 64)
+    report = execute_mission(schedule, ctx, brand=BRAND, hooks={point: change_policy})
+    out = report.cells["cell:design_token_set"]
+    assert out.state is ExecutionState.BLOCKED_CONTRACT
+    assert out.reasons == ("CONTRACT_INSTRUCTION_STALE_OR_TAMPERED",)
+    assert list_project_artifacts(ctx.project_id) == []
+
+
+def test_instruction_crash_recovery_and_changed_selection_never_adopt_old_result(registry, tmp_path):
+    from services.langgraph.agency.compiled.instruction_models import InstructionSelection
+
+    ctx = _ctx(tmp_path, instructions=InstructionSelection(), lease_seconds=0)
+    schedule = _schedule(registry, ctx.project_id, (TOKENS,))
+    with pytest.raises(SimulatedCrash):
+        execute_mission(schedule, ctx, brand=BRAND, hooks=_crash("after_artifact"))
+    resumed = execute_mission(schedule, ctx, brand=BRAND)
+    assert resumed.cells["cell:design_token_set"].state is ExecutionState.SUCCEEDED
+    assert list_project_artifacts(ctx.project_id)[0].version == 1
+    changed = ctx.model_copy(update={"instructions": InstructionSelection(task_type="architecture")})
+    again = execute_mission(schedule, changed, brand=BRAND)
+    a, b = resumed.cells["cell:design_token_set"], again.cells["cell:design_token_set"]
+    assert a.idempotency_key != b.idempotency_key and not b.replayed
+
+
+def test_instruction_packages_do_not_supply_missing_providers_or_authority(registry, tmp_path):
+    from services.langgraph.agency.compiled.instruction_models import InstructionSelection
+
+    ctx = _ctx(tmp_path, instructions=InstructionSelection(task_type="research"))
+    report = execute_mission(_schedule(registry, ctx.project_id, (QA,)), ctx, brand=BRAND)
+    assert all(o.state is not ExecutionState.SUCCEEDED for o in report.cells.values())
+    assert not list_project_artifacts(ctx.project_id)
+
+
+def test_instruction_enrollment_cannot_be_downgraded_or_set_from_another_scope(registry, tmp_path):
+    from services.langgraph.agency.compiled.instruction_models import InstructionSelection
+    from services.langgraph.persistence.runs import require_run_instructions
+
+    ctx = _ctx(tmp_path, instructions=InstructionSelection())
+    schedule = _schedule(registry, ctx.project_id, (TOKENS,))
+    report = execute_mission(schedule, ctx, brand=BRAND)
+    with pytest.raises(PermissionError):
+        require_run_instructions(report.run_id, "wrong-tenant", ctx.project_id)
+    downgraded = execute_mission(schedule, ctx.model_copy(update={"instructions": None}), brand=BRAND)
+    assert downgraded.cells["cell:design_token_set"].reasons == ("CONTRACT_INSTRUCTION_DOWNGRADE_REFUSED",)
+    assert list_project_artifacts(ctx.project_id)[0].version == 1
+
+
 def test_text_artifacts_without_a_provider_are_provider_gaps_and_dependents_block(registry, tmp_path):
     ctx = _ctx(tmp_path)
     report = execute_mission(_schedule(registry, ctx.project_id, (TOKENS, QA)), ctx, brand=BRAND)

@@ -23,3 +23,4 @@ export * from './schemas/ucpo';
 export * from './schemas/avic';
 export * from './schemas/vnexusBrandbook';
 export * from './schemas/vnexusDirections';
+export * from './schemas/instructions';

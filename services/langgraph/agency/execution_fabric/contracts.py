@@ -26,6 +26,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from services.langgraph.agency.execution.canonical import canonical_hash
 from services.langgraph.agency.execution.models import DispatchPermit
+from services.langgraph.agency.compiled.instruction_models import InstructionSelection
 
 FABRIC_VERSION = "amc-execution-fabric/v1"
 ELIGIBILITY_POLICY_VERSION = "amc-execution-fabric/eligibility-v1"
@@ -152,6 +153,8 @@ class ExecutionContext(_Strict):
     # a crashed attempt and reconciled before any retry.
     lease_seconds: int = Field(default=600, ge=0, le=86_400)
     client_inputs: dict[str, Any] = Field(default_factory=dict)
+    # Server-selected configuration, never accepted as client authority or serialized into legacy context.
+    instructions: InstructionSelection | None = Field(default=None, exclude=True)
 
     @field_validator("mode", mode="before")
     @classmethod
@@ -173,6 +176,7 @@ class ExecutionContext(_Strict):
         approval_refs: tuple[str, ...] = (),
         budget: FabricBudget | None = None,
         client_payload: Mapping[str, Any] | None = None,
+        instructions: InstructionSelection | None = None,
         **limits: int,
     ) -> "ExecutionContext":
         if mode not in {"LOCAL", "SANDBOX"}:
@@ -187,6 +191,7 @@ class ExecutionContext(_Strict):
             approval_refs=tuple(sorted(set(approval_refs))),
             budget=budget or FabricBudget(),
             client_inputs=sanitize_client_payload(client_payload or {}),
+            instructions=instructions,
             **limits,
         )
 
