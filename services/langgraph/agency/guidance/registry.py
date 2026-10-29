@@ -9,12 +9,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 from .models import GuidancePack
 
 REGISTRY_VERSION = "amc-guidance-registry/v1"
+_MAX_CACHED_PACK_BYTES = 1_048_576
 
 
 def _no_duplicate_object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -32,6 +34,29 @@ def _canonical(value: Any) -> str:
 
 def stable_guidance_hash(value: Any) -> str:
     return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
+
+
+def _validate_pack_json(name: str, data: bytes) -> str:
+    payload = json.loads(data.decode("utf-8"), object_pairs_hook=_no_duplicate_object_pairs)
+    raw_pack = GuidancePack.model_validate(payload)
+    canonical = raw_pack.model_dump(mode="json", exclude={"content_hash"})
+    computed = stable_guidance_hash(canonical)
+    if raw_pack.content_hash and raw_pack.content_hash != computed:
+        raise ValueError(f"{name} content_hash mismatch: expected {raw_pack.content_hash}, got {computed}")
+    return raw_pack.model_copy(update={"content_hash": computed}).model_dump_json()
+
+
+@lru_cache(maxsize=32)
+def _cached_pack_json(name: str, data: bytes) -> str:
+    """Cache immutable verified serialization, never a caller-owned model."""
+    return _validate_pack_json(name, data)
+
+
+def _read_pack(path: Path) -> GuidancePack:
+    # Read actual bytes every time: mtime/size are insufficient integrity keys.
+    data = path.read_bytes()
+    validate = _cached_pack_json if len(data) <= _MAX_CACHED_PACK_BYTES else _validate_pack_json
+    return GuidancePack.model_validate_json(validate(path.name, data))
 
 
 class GuidanceRegistry:
@@ -56,20 +81,7 @@ class GuidanceRegistry:
     @classmethod
     def from_directory(cls, directory: str | Path) -> "GuidanceRegistry":
         root = Path(directory)
-        packs: list[GuidancePack] = []
-        for path in sorted(root.glob("*.yaml")):
-            payload = json.loads(
-                path.read_text(encoding="utf-8"),
-                object_pairs_hook=_no_duplicate_object_pairs,
-            )
-            raw_pack = GuidancePack.model_validate(payload)
-            canonical = raw_pack.model_dump(mode="json", exclude={"content_hash"})
-            computed = stable_guidance_hash(canonical)
-            if raw_pack.content_hash and raw_pack.content_hash != computed:
-                raise ValueError(
-                    f"{path.name} content_hash mismatch: expected {raw_pack.content_hash}, got {computed}"
-                )
-            packs.append(raw_pack.model_copy(update={"content_hash": computed}))
+        packs = [_read_pack(path) for path in sorted(root.glob("*.yaml"))]
         if not packs:
             raise ValueError(f"no guidance packs found in {root}")
         return cls(packs)

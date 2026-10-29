@@ -1,0 +1,65 @@
+{
+  "schema": "amc-prompt-benchmark-summary/v1",
+  "baseline_revision": "d0c78fc78167702c77054d8529d7864b8aa6812c",
+  "baseline_registry_sha256": "f90835257eff696b688884908f771c4e2edfbf0816539ff749fc37001ce3d21c",
+  "candidate_registry_sha256": "bcb6e97f1749d01918f51e003815c9cb0e964c636fee701bc1f224b8b3f73927",
+  "python": "3.11.17",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "trial_order": [
+    "candidate",
+    "baseline",
+    "baseline",
+    "candidate"
+  ],
+  "samples_per_domain_per_version": 70,
+  "timing_scope": "compile_prompt_packages only; no provider or rendering",
+  "fixture_only": true,
+  "cases": {
+    "graphic": {
+      "baseline_ms": 4.809682499999999,
+      "candidate_ms": 2.859074,
+      "reduction_pct": 40.555868292761524,
+      "speedup": 1.6822518409806808,
+      "identical_output": true,
+      "samples_per_version": 70
+    },
+    "ui_ux": {
+      "baseline_ms": 10.156787999999999,
+      "candidate_ms": 7.9945425,
+      "reduction_pct": 21.28867413595715,
+      "speedup": 1.2704651954755384,
+      "identical_output": true,
+      "samples_per_version": 70
+    },
+    "storytelling": {
+      "baseline_ms": 4.6294185,
+      "candidate_ms": 2.6022975,
+      "reduction_pct": 43.78781049931001,
+      "speedup": 1.7789735800768358,
+      "identical_output": true,
+      "samples_per_version": 70
+    },
+    "branding": {
+      "baseline_ms": 4.3521540000000005,
+      "candidate_ms": 2.4440445000000004,
+      "reduction_pct": 43.842876423950074,
+      "speedup": 1.7807179861086817,
+      "identical_output": true,
+      "samples_per_version": 70
+    },
+    "marketing": {
+      "baseline_ms": 4.7090045,
+      "candidate_ms": 2.7476125,
+      "reduction_pct": 41.65194575626335,
+      "speedup": 1.7138532089222918,
+      "identical_output": true,
+      "samples_per_version": 70
+    }
+  },
+  "limitations": [
+    "Single shared runner, not an isolated performance lab",
+    "Warm compilation only; no measured model, renderer, network or conversion gains",
+    "No claim of statistical significance or better creative quality",
+    "Raw samples retained in the implementation evidence bundle"
+  ]
+}
