@@ -56,35 +56,74 @@ def _probe_worker(source_hash: str, runtime_version: str, engine: str = 'rough_j
         return False
 
 
-def inventory() -> list[dict]:
+def inventory(tenant_id=None, project_id=None) -> list[dict]:
     fp = fingerprint()
     available = {engine: _probe_worker(fp['worker_source_hash'], fp['runtime_version'], engine.value) for engine in ADAPTERS}
-    return [{'engine': engine.value, 'adapter_version': ADAPTERS.get(engine),
-             'available': available.get(engine, False),
-             'profiles': ['svg:typed-primitives'] if available.get(engine) else [],
-             'blockers': ([] if available.get(engine) else ['WORKER_NOT_AVAILABLE']) if engine in ADAPTERS else ['ADAPTER_NOT_IMPLEMENTED'],
-             'arbitrary_code': False, 'remote_storage': False, 'isolation_profile': 'typed-primitives/process-v1'}
-            for engine in RenderEngineId]
+    from . import media
+    from .licenses import decision_hash
+    browser_hash=media.fingerprint()
+    records=[]
+    for engine in RenderEngineId:
+        is_browser=engine in media.ENGINES
+        licensed=engine is not RenderEngineId.REMOTION or bool(decision_hash(tenant_id,project_id))
+        ok=_probe_media(engine.value,browser_hash) if is_browser and browser_hash and licensed else available.get(engine,False)
+        reasons=[] if ok else ['WORKER_NOT_AVAILABLE']
+        if is_browser and not browser_hash: reasons=['MEDIA_RUNTIME_UNAVAILABLE']
+        if not licensed:
+            reasons.append('LICENSE_APPROVAL_REQUIRED');ok=False
+        profiles=['png:typed-primitives'] if is_browser else ['svg:typed-primitives']
+        if is_browser and ok:
+            encoders=media._encoders(browser_hash)
+            if 'libx264' in encoders:profiles.append('mp4:h264')
+            if 'libvpx-vp9' in encoders:profiles.append('webm:vp9')
+        records.append({'engine':engine.value,'adapter_version':media.ENGINES.get(engine) or ADAPTERS.get(engine),
+          'available':ok,'profiles':profiles if ok else [],
+          'blockers':reasons,'arbitrary_code':False,'remote_storage':False,'isolation_profile':'typed-primitives/network-namespace-v1' if is_browser else 'typed-primitives/process-v1'})
+    return records
+
+
+@lru_cache(maxsize=32)
+def _probe_media(engine, runtime_hash):
+    from . import media
+    request=RenderRequest(workflow_id='probe',task_id='probe',brief='Non-commercial adapter evaluation',engine=engine,output_format='png',dimensions={'width':64,'height':64},scene={'primitives':[{'kind':'rectangle','x':8,'y':8,'width':32,'height':32}]})
+    try:
+        data=media.render(request)
+        return data.startswith(b'\x89PNG\r\n\x1a\n')
+    except (ValueError,RuntimeError,OSError,subprocess.TimeoutExpired):
+        return False
 
 
 def compile_spec(tenant: str, project: str, request: RenderRequest) -> RenderSpecification:
+    from . import media
+    from .licenses import decision_hash
+    extra={}
+    if request.engine in media.ENGINES:
+        extra={'isolation_profile':'typed-primitives/network-namespace-v1','media_runtime_hash':media.fingerprint(),'license_decision_hash':decision_hash(tenant,project) if request.engine is RenderEngineId.REMOTION else None}
     return RenderSpecification(tenant_id=tenant, project_id=project, request=request,
-                               adapter_version=ADAPTERS.get(request.engine), **fingerprint())
+                               adapter_version=media.ENGINES.get(request.engine) or ADAPTERS.get(request.engine), **extra, **fingerprint())
 
 
 def blockers(spec: RenderSpecification) -> list[str]:
-    cap = next(c for c in inventory() if c['engine'] == spec.request.engine.value)
-    reasons = list(cap['blockers'])
-    if spec.request.output_format != 'svg':
-        reasons.append('OUTPUT_PROFILE_NOT_IMPLEMENTED')
-    if spec.adapter_version != ADAPTERS.get(spec.request.engine) or any(getattr(spec, k) != v for k, v in fingerprint().items()):
-        reasons.append('RUNTIME_SPEC_STALE')
+    from . import media
+    from .licenses import decision_hash
+    if spec.request.engine in media.ENGINES:
+        reasons=media.profile_blockers(spec.request)
+        if spec.media_runtime_hash!=media.fingerprint():reasons.append('RUNTIME_SPEC_STALE')
+        if spec.request.engine is RenderEngineId.REMOTION:
+            if not spec.license_decision_hash or spec.license_decision_hash!=decision_hash(spec.tenant_id,spec.project_id):reasons.append('LICENSE_APPROVAL_REQUIRED')
+    else:
+        fp=fingerprint()
+        reasons=[] if spec.request.engine in ADAPTERS and _probe_worker(fp['worker_source_hash'],fp['runtime_version'],spec.request.engine.value) else ['WORKER_NOT_AVAILABLE']
+        if spec.request.output_format!='svg':reasons.append('OUTPUT_PROFILE_NOT_IMPLEMENTED')
+    expected=media.ENGINES.get(spec.request.engine) or ADAPTERS.get(spec.request.engine)
+    if spec.adapter_version!=expected or any(getattr(spec,k)!=v for k,v in fingerprint().items()):reasons.append('RUNTIME_SPEC_STALE')
     return reasons
-
 
 def render(spec: RenderSpecification) -> bytes:
     if reasons := blockers(spec):
         raise ValueError(','.join(reasons))
+    from . import media
+    if spec.request.engine in media.ENGINES:return media.render(spec.request)
     node = shutil.which('node')
     # Node's permission model denies filesystem reads except the sealed worker,
     # child processes, native addons and workers. Input is a strict data schema.
@@ -101,6 +140,8 @@ def render(spec: RenderSpecification) -> bytes:
 
 
 def verify(data: bytes, spec: RenderSpecification) -> VerificationReport:
+    from . import media
+    if spec.request.engine in media.ENGINES and spec.request.output_format in {'png','mp4','webm'}:return media.verify(data,spec)
     findings: list[str] = []
     observed = hashlib.sha256(data).hexdigest()
     checks = ['SHA256_READBACK', 'BYTE_LIMIT', 'SVG_SCHEMA', 'SVG_ACTIVE_CONTENT', 'DIMENSIONS']

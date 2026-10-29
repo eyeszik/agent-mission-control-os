@@ -1,43 +1,86 @@
 # Governed rendering
 
-The corrected architecture is implemented as a local typed-primitives vertical slice. This is **not the complete eight-engine platform**. Three data-only SVG profiles are implemented: Rough.js seeded paths, Paper.js headless paths, and SVG.js PathArray geometry. Five engine IDs report ADAPTER_NOT_IMPLEMENTED. Paper.js does not run PaperScript, import SVG, use Canvas or render text; SVG.js does not provide a browser DOM/export adapter. PNG/video, arbitrary source execution, GPU workers, remote presigned storage and execution-spend approvals are not implemented and cannot be enabled by request wording. No production project foundations or human approvals are synthesized.
+Eight render engines now have bounded **data-only primitive profiles**, not arbitrary source-code execution. Existing SVG profiles and legacy identities remain supported. The browser profiles add still PNG and frame-based MP4/WebM output. GPU-backed libraries use Chromium's explicitly selected software WebGL path; physical GPU execution is not claimed.
 
-## Run
+| Engine | Implemented profile | Outputs |
+| --- | --- | --- |
+| Rough.js | seeded paths | SVG |
+| Paper.js | headless paths, no PaperScript/DOM/text | SVG |
+| SVG.js | PathArray geometry | SVG |
+| p5 | seeded P2D instance, explicit frame drawing | PNG, MP4, WebM |
+| Pixi | WebGL Graphics, manual render calls | PNG, MP4, WebM |
+| React Three Fiber | React-19-compatible orthographic shapes and strokes | PNG, MP4, WebM |
+| Remotion | Player frame seeking and useCurrentFrame composition | PNG, MP4, WebM, **license-gated** |
+| Motion Canvas | Scene2D rendering at an explicit playback frame | PNG, MP4, WebM |
 
-Use the package manager declared by package.json:
+The frame encoder is local FFmpeg, not Remotion Lambda or Motion Canvas's Vite exporter. MP4 is H.264/yuv420p; WebM is VP9/yuv420p. Audio, fonts, imported assets, arbitrary JS/TSX, general 3D scenes, shaders, browser URLs and remote object storage remain unsupported. A request cannot enable them. Browser profiles require a working network namespace and refuse execution if it cannot be established.
+
+## Install and run
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm --filter @amc/creative-renderer build
-python -m pip install -e './services/langgraph[dev]'
+python -m pip install -e './services/langgraph[dev,rendering]'
+pnpm --filter @amc/web exec playwright install --with-deps chromium
+# Install ffmpeg and ffprobe through your host's package manager.
 ```
 
-Start the normal backend and web application. Open `/creative`, select a real authorized project, and queue a bounded scene. A separately supervised **trusted control-plane driver** processes its durable job:
+Use the normal backend/web setup and open `/creative`. The selected engine determines valid output choices. Video defaults to 30 frames at 30 fps and a bounded horizontal translation; API callers may specify the rational frame rate, frame count and optional motion.x/motion.y end offsets. Browser requests are limited to 120 frames and 64 million total pixels; video requires even dimensions. No long render runs inside the submit endpoint.
+
+The existing trusted local driver still works:
 
 ```sh
 python -m services.langgraph.agency.rendering.worker --job RENDER_JOB_ID
-# Or have a process supervisor invoke this bounded command periodically:
 python -m services.langgraph.agency.rendering.worker --once
 ```
 
-The driver has database access; its isolated Node child does not receive database environment variables or credentials. The worker accepts only bounded typed primitives, not JavaScript, TSX, URLs or uploaded source. Its Node permission profile denies filesystem reads outside its generated worker directory, child processes, addons and worker threads. This is not an OS/container network sandbox and does not support untrusted executable sketches. The host Node permission flag is selected by its observed major version.
+Existing SVG fields and omitted optional fields preserve legacy spec-hash projections. New media identities bind the browser bundles, direct dependency license bytes, actual Chromium/FFmpeg/ffprobe binaries, driver/contract code, pinned package graph and request/frame parameters. Transitive implementation code is bundled with legal comments retained. This records identity and notices; it does not constitute organization-specific license clearance. The R3F npm archive omitted a license; its exact release-source license and provenance are checked into packages/creative-renderer/licenses.
 
-## Contracts and authority
+## Remotion license decisions
 
-POST `/foundry/projects/{id}/renders` requires authentication, recorded project scope and Idempotency-Key. GET of that resource is observational. Cancellation revokes the database fence; a late worker can leave immutable orphan bytes but cannot register a canonical artifact. Artifact acceptance composes existing Project OS APIs in an explicit atomic database scope and checks the live fence under a row lock. Normal persistence calls outside this scope retain their previous transaction behavior. Canonical run FSM v2 adds lease-revoked STOPPED transitions for in-flight work; regenerated ABC manifests record the changed transition graph. PostgreSQL and SQLite use the same APIs. No new tables or migrations.
+Installing Remotion does not authorize use. Its pinned license distinguishes free eligibility and company licensing. An authorized approver must record a scoped decision through `POST /foundry/projects/{project_id}/render-license`, with `permitted`, a substantive `basis`, and nonempty `evidence_refs` to the applicable eligibility or license records. The server binds the actual pinned license hash to that decision. This is an accountable operator decision, not automatic legal verification. Revocation, conflicting memory or changed license bytes blocks dispatch; it does not supply artifact-release approval.
 
-The canonical hash binds tenant/project, workflow/task, scene revision, dimensions, frame clock, seed, strict scene, adapter, worker bytes, runtime version and lockfile. Fences/attempts are absent from semantic identity. SVG verification independently re-reads stored bytes, checks SHA-256, structure, dimensions, allowed elements, active-content restrictions and the admitted scene palette. It does not establish full WCAG conformance or approved brand identity.
+The capability endpoint accepts an optional `project_id`; it authorizes access before checking that project's decision. Without a decision, Remotion does not execute even its capability probe. Tests use explicitly fictional projects and the pinned license's non-commercial evaluation provision, never an invented production entitlement.
 
-Real compute success, artifact verification and human release approval remain separate. The existing approval inbox decides the exact artifact. The explicit resume command applies that authoritative decision; rejection never restarts rendering. No publication occurs. Existing authenticated `/runs/{id}/events` replay is reused; streaming never invokes the renderer. The UI switches to the approval run stream when that resource exists.
+## Remote execution
 
-## Quarantine
+A remote worker pulls one explicit job over the existing authenticated API. It needs a narrowly project-scoped operator/service principal, the exact repository/bundles and matching runtime binaries. It receives no database connection, storage credentials, export-root path or permission to release. The control plane retains storage and verification authority.
 
-POST `/foundry/projects/{id}/render-quarantine` requires an approver role and a reason. It records an operator-authored project policy record and revokes up to 200 matching active/queued jobs per request; additional work remains blocked at admission and canonical acceptance. Repeat bounded administrative cleanup if needed. PostgreSQL policy locks serialize quarantine with artifact acceptance. Existing accepted artifact bytes/history are retained; release checks consult current quarantine. No Redis keys or direct operator SQL are required.
-
-## Verification and rollback
+- `POST /foundry/projects/{project}/renders/{job}/claim`: atomically allocates a 300-second lease/fence and persists the durable intent before returning the sealed spec. An immutable saved candidate is recovered by server readback rather than blindly rerendered.
+- `POST .../{job}/heartbeat`: extends only that authenticated worker's unexpired lease.
+- `POST .../{job}/complete`: accepts a fence, SHA-256 and bounded base64 bytes (16 MB decoded maximum), independently verifies the received bytes, and registers an artifact under the live fence. No worker-supplied URI/path is accepted.
 
 ```sh
-python -m pytest services/langgraph/tests/test_rendering.py -q
+# Obtain the token through your established identity system. Do not put it in CLI args.
+# AMC_RENDER_WORKER_TOKEN is read only by the authenticated HTTP client.
+python -m services.langgraph.agency.rendering.remote_worker \
+  --url https://CONTROL_PLANE --tenant TENANT_ID --project PROJECT_ID \
+  --job RENDER_JOB_ID --out /private/render-receipt
+```
+
+HTTPS is mandatory outside explicit loopback tests. Redirects are refused before forwarding Authorization. Child render/encoder processes receive a scrubbed environment and no worker token. Same-worker completion retries for identical bytes are idempotent; different bytes, other workers, expired leases and cancelled/taken-over fences are refused. The local receipt contains candidate data, not credentials, and is written with private permissions. A lost response can be retried without rendering again:
+
+```sh
+python -m services.langgraph.agency.rendering.remote_worker \
+  --url https://CONTROL_PLANE --tenant TENANT_ID --project PROJECT_ID \
+  --job RENDER_JOB_ID --out /private/render-receipt \
+  --completion /private/render-receipt/completion.json
+```
+
+This implements transport, not a deployment: no remote worker fleet, queue broker, presigned object store, production credentials, paid compute or always-on supervisor has been provisioned. Use existing production auth and TLS. The current role model uses project-scoped operators; it does not introduce a separate worker-only permission vocabulary. Deployment hardening, quotas and large streaming uploads require separate review.
+
+## Verification and lifecycle
+
+Compute success is recorded separately from artifact verification. PNG checks fully decode persisted pixels, verify dimensions/CRC and refuse blank/flat output. Video checks actual container, codec, dimensions, rational fps and decoded frame count, then independently decodes every frame. These checks do not certify semantic equivalence to every scene constraint, brand approval or full accessibility conformance. The final artifact always needs current, exact, scoped human release approval.
+
+Cancellation revokes canonical acceptance; it does not claim a remote process stopped. A late worker may finish computing but cannot register an accepted artifact. Release checks re-read current stored bytes, subject/version/hash and purpose-bound approval. Authenticated existing SSE observes committed events; GET never executes work. The preview uses video controls without autoplay for video artifacts.
+
+Quarantine remains approver-only through `POST /foundry/projects/{id}/render-quarantine`: new dispatch and canonical acceptance are blocked; scoped cancellation revokes active leases; accepted historical bytes and audit records remain.
+
+## Tests and rollback
+
+```sh
+python -m pytest services/langgraph/tests/test_rendering.py services/langgraph/tests/test_rendering_media_remote.py -q -rs
 pnpm --filter @amc/creative-renderer test
 pnpm typecheck
 pnpm test
@@ -45,44 +88,6 @@ pnpm build
 python scripts/verify_manifest.py
 ```
 
-Real worker tests skip explicitly when the worker has not been built. A skip is not proof of runtime readiness. Hosted backend jobs do not currently build Node workers; frontend CI builds/tests the real Rough.js worker.
+The dedicated `Rendering adapters + video + remote protocol` CI job builds the actual dependencies, installs Chromium/FFmpeg/Pillow, establishes namespaces and fails if any capability test skips. Other backend cohorts may explicitly skip unavailable media; their counts are not equivalent coverage. Local HTTP tests validate transport and refusal behavior with a fictional principal; production bearer-token verification remains owned by the existing authentication stack.
 
-Revert the implementation commit to remove the feature. No database migration is required. Retain already stored artifacts and historical approval/audit records. Manifest regeneration must use scripts.verify_manifest.git_blob_sha on listed file bytes; do not replace Git blob hashes with raw SHA-256.
-
-
-## Completion pass and remaining specification work
-
-The completion pass adds independently observed compute outcomes, fenced durable candidate
-receipts, and recovery by read-back instead of unconditional re-rendering. Rejected output
-can correctly have compute `succeeded` and artifact `rejected`. Candidate writes after
-cancellation or lease takeover are refused. Corrupt or missing persisted output invalidates
-release eligibility on subsequent reads. The exact release subject, purpose, policy and
-version remain separate from compute state. SVG verification rejects unreviewed attributes
-and missing paths; it is not a visual-equivalence or accessibility audit.
-
-The creative browser smoke test uses a clearly fictional local project. It exercises actual
-capabilities, unavailable-engine refusal, scoped queueing and cancellation through the real
-UI/API. Rendering and human review are tested separately in the database-backed cohort;
-the browser test does not claim to approve or render a production brand.
-
-The complete corrected design is still **PENDING_IMPLEMENTATION** beyond these profiles:
-
-| Requirement | Current implementation / smallest remaining action |
-| --- | --- |
-| p5, Pixi, R3F, Remotion, Motion Canvas | No adapters; implement and validate each runtime/profile individually. Do not enable from package declarations. |
-| Raster/video and codecs | No renderer/encoder/verifier; select exact output profile and validate decoded persisted bytes. |
-| Executable scene source and GPU | Not supported by typed-primitives isolation; select and validate an OS/worker isolation substrate before admitting code. |
-| Execution budget approvals | No spend is dispatched here. Add purpose-bound execution grants before introducing paid/high-resource dispatch. |
-| Remote worker transport/presigned storage | Local trusted driver only. A reviewed staging/promotion adapter and worker authentication are still required. |
-| Real brand foundations | No scoped source artifacts or approval records were supplied. Use the existing intake/planning evidence gates; generic geometric fixtures establish no brand readiness. |
-| Brand/accessibility verification | No production claim. Bind actual approved token/artifact versions and execute the required rendered checks for the selected profile. |
-
-Missing live project evidence must be reported as: “Live evidence was unavailable. This
-claim remains unverified.” Human creative-direction acceptance and artifact release are
-separate approvals. None of the tests or generic geometry requests supplies either.
-
-Regenerate manifest hashes after reviewing changed tracked files with
-`scripts.verify_manifest.git_blob_sha`; preserve every existing entry. Run
-`python scripts/verify_manifest.py` afterward. Dependency bumps on master had left five
-entries stale; this pass refreshes those alongside its own files and updates the explicit
-PostCSS lockfile invariant from 8.5.28 to the installed 8.5.31.
+Revert this feature's commit to remove it; no database migration is required. Preserve artifacts, approvals and audit history already written. Regenerate affected manifest entries with scripts.verify_manifest.git_blob_sha (Git blob SHA-1), never raw SHA-256. No project foundations, creative-direction decisions or production approvals are synthesized by installation.

@@ -31,6 +31,7 @@ drive-export = ["cryptography>=44.0.0"]
 eval = ["deepeval>=3.0.0"]
 # Local visual engine (docs/local-visual-engine.md). Pillow decodes PNG renders for verification;
 # bpy is Blender as a Python module (wheels exist for CPython 3.11 only). FFmpeg is a system package.
+rendering = ["Pillow>=10.0"]
 visual = ["Pillow>=10.0", "bpy==4.2.0; python_version == '3.11'"]
 # Mission council engines and the MCP client (docs/mission-council.md). LangGraph is a
 # base dependency; without this extra the CrewAI/AutoGen engines report NOT_INSTALLED and

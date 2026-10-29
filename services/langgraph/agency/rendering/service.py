@@ -15,6 +15,7 @@ from services.langgraph.persistence.events import record_event
 from services.langgraph.persistence.runs import create_run_record, get_run_record, update_run_status
 from services.langgraph.security.auth import Principal
 from .contracts import RenderRequest, RenderSpecification
+from .media import MIMES
 from .runtime import blockers, compile_spec, render, verify
 
 KIND = 'governed_creative_render'
@@ -113,6 +114,10 @@ def inspect(principal, project, job_id):
                 raise ValueError('PERSISTED_OUTPUT_CHANGED')
         except (OSError, ValueError, RuntimeError, KeyError, TypeError):
             release = release.model_copy(update={'allowed': False, 'reasons': (*release.reasons, 'VERIFICATION_STALE: persisted output unavailable or changed')})
+    from .licenses import decision_hash
+    spec=_spec(job)
+    if spec.request.engine.value=='remotion' and (not spec.license_decision_hash or spec.license_decision_hash!=decision_hash(job['tenant_id'],project)):
+        release=release.model_copy(update={'allowed':False,'reasons':(*release.reasons,'LICENSE_DECISION_STALE')})
     if quarantined(job):
         release = release.model_copy(update={'allowed': False, 'reasons': (*release.reasons, 'ENGINE_QUARANTINED')})
     state = job['state']
@@ -247,6 +252,10 @@ class RenderHandler:
             store._active_fence(db, job_id=job['job_id'], fencing_token=job['lease_token'], now=_now())
             if quarantined(job):
                 raise PermissionError('ENGINE_QUARANTINED')
+            from .licenses import decision_hash
+            spec=_spec(job)
+            if spec.request.engine.value=='remotion' and (not spec.license_decision_hash or spec.license_decision_hash!=decision_hash(job['tenant_id'],job['project_id'])):
+                raise PermissionError('LICENSE_DECISION_STALE')
             adapter = LocalStorageAdapter(Path(job['spec']['export_root']))
             data = adapter.get_bytes(observation['storage_uri'])
             readback = verify(data, _spec(job))
@@ -258,7 +267,7 @@ class RenderHandler:
                 meta = create_project_artifact(tenant_id=job['tenant_id'], project_id=job['project_id'], actor=job['requested_by'],
                     artifact_key=self.target(job), artifact_type='media_asset', adapter=adapter,
                     content_hash=readback.content_hash, storage_uri=observation['storage_uri'],
-                    v2={'mime_type': 'image/svg+xml', 'media_type': 'image'})
+                    v2={'mime_type': MIMES[_spec(job).request.output_format], 'media_type': 'video' if _spec(job).request.output_format in {'mp4','webm'} else 'image'})
                 version = meta.version
             else:
                 if head['content_hash'] != readback.content_hash:
@@ -268,7 +277,7 @@ class RenderHandler:
                 mission_id=job['job_id'], contract_hash=job['spec_hash'], artifact_id=aid, version=version,
                 content_hash=readback.content_hash, run_pipeline=KIND, policy_version='amc-render-release/v1',
                 subject_type='RENDER_ARTIFACT', reason='Rendered output requires independent human review before release')
-            result = {'compute_status': 'succeeded', 'candidate': {k: observation[k] for k in ('storage_uri', 'content_hash', 'route')},
+            result = {**{key: value for key, value in (store.get_job(job['job_id']).get('result') or {}).items() if key in {'remote_worker','remote_fence'}}, 'compute_status': 'succeeded', 'candidate': {k: observation[k] for k in ('storage_uri', 'content_hash', 'route')},
                       'artifact_id': aid, 'version': version, 'content_hash': readback.content_hash,
                       'verification': readback.model_dump(mode='json'), 'approval': approval}
             db.execute(f"UPDATE {table('durable_jobs')} SET result = ? WHERE job_id = ? AND lease_token = ?", (json_param(result), job['job_id'], job['lease_token']))

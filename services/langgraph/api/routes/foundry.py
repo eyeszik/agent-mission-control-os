@@ -28,7 +28,7 @@ from services.langgraph.persistence.projects import list_project_artifacts
 from services.langgraph.security.auth import Principal, get_principal
 
 router = APIRouter()
-INLINE_TYPES = {"image/svg+xml", "image/png", "image/webp", "video/mp4", "application/json", "text/css", "text/html"}
+INLINE_TYPES = {"image/svg+xml", "image/png", "image/webp", "video/mp4", "video/webm", "application/json", "text/css", "text/html"}
 
 
 class MissionRequest(BaseModel):

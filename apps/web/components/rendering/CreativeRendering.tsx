@@ -22,6 +22,7 @@ export function CreativeRendering() {
   const [projects, setProjects] = useState<{ project_id: string; display_name: string }[]>([]);
   const [capabilities, setCapabilities] = useState<RenderCapability[]>([]);
   const [engine, setEngine] = useState<RenderEngineId>('rough_js');
+  const [format, setFormat] = useState<'svg'|'png'|'mp4'|'webm'>('svg');
   const [brief, setBrief] = useState('Create a seeded geometric study using the supplied bounded rectangle scene.');
   const [job, setJob] = useState<RenderJob | null>(null);
   const [busy, setBusy] = useState(false);
@@ -35,12 +36,12 @@ export function CreativeRendering() {
   useEffect(() => {
     if (usesSupabaseAuth() && !readSession()) { router.replace('/login'); return; }
     const controller = new AbortController(); let active = true;
-    void Promise.all([listProjects(), renderCapabilities(controller.signal)]).then(([p, c]) => {
+    void Promise.all([listProjects(), renderCapabilities(controller.signal, project)]).then(([p, c]) => {
       if (!active) return;
       setProjects(p.projects); setCapabilities(c.engines);
     }).catch(() => { if (active) setError('Unable to load authorized projects or render capabilities.'); });
     return () => { active = false; controller.abort(); actionController.current?.abort(); };
-  }, [router]);
+  }, [router, project]);
   useEffect(() => { generation.current++; actionController.current?.abort(); key.current = null; setJob(null); setEvents([]); actionPending.current = false; setBusy(false); }, [project]);
   useEffect(() => {
     if (!job || !project || job.workflow_status === 'completed' || job.workflow_status === 'cancelled') return;
@@ -68,7 +69,7 @@ export function CreativeRendering() {
     actionPending.current = true;
     key.current ??= crypto.randomUUID(); setBusy(true); setError('');
     try {
-      const next = await submitRender(project, brief, engine, key.current, controller.signal);
+      const next = await submitRender(project, brief, engine, key.current, controller.signal, format);
       if (expected === generation.current) setJob(next);
     } catch { if (!controller.signal.aborted) setError('Dispatch failed. Retry preserves the same request key.'); }
     finally { if (expected === generation.current) { actionPending.current = false; setBusy(false); } }
@@ -93,8 +94,11 @@ export function CreativeRendering() {
     <label className="grid gap-2">Project<select className="rounded border border-line bg-surface p-2" value={project ?? ''} onChange={e => setProject(e.target.value || null)}>
       <option value="">Select an authorized project</option>{projects.map(p => <option key={p.project_id} value={p.project_id}>{p.display_name}</option>)}
     </select></label>
-    <label className="grid gap-2">Rendering engine<select className="rounded border border-line bg-surface p-2" value={engine} onChange={e => { setEngine(e.target.value as RenderEngineId); key.current = null; }}>
+    <label className="grid gap-2">Rendering engine<select className="rounded border border-line bg-surface p-2" value={engine} onChange={e => { const next=e.target.value as RenderEngineId; setEngine(next); setFormat(['paper_js','svg_js','rough_js'].includes(next) ? 'svg' : 'png'); key.current = null; }}>
       {capabilities.map(c => <option key={c.engine} value={c.engine}>{c.engine}{c.available ? '' : ' — unavailable'}</option>)}
+    </select></label>
+    <label className="grid gap-2">Output format<select className="rounded border border-line bg-surface p-2" value={format} onChange={e=>{setFormat(e.target.value as typeof format);key.current=null;}}>
+      {(selected?.profiles.length ? selected.profiles.map(profile=>profile.split(':')[0]) : ['paper_js','svg_js','rough_js'].includes(engine) ? ['svg'] : ['png']).map(value=><option key={value} value={value}>{value}</option>)}
     </select></label>
     {selected && !selected.available && <p role="status">Unavailable: {selected.blockers.join(', ')}</p>}
     <label className="grid gap-2">Brief<textarea className="min-h-28 rounded border border-line bg-surface p-2" value={brief} maxLength={4000} onChange={e => { setBrief(e.target.value); key.current = null; }} /></label>
