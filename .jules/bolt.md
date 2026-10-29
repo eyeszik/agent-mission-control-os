@@ -58,3 +58,7 @@
 ## 2023-11-04 - Zero-Allocation Derived State Counting
 **Learning:** Running `.filter(condition).length` inside a React component's render body, or within callback functions that get recreated/executed frequently, allocates temporary arrays simply to determine a count. This causes needless garbage collection overhead, particularly if the arrays are non-trivial in size or processed frequently.
 **Action:** Replace `.filter(condition).length` with zero-allocation alternatives such as `.reduce((acc, item) => acc + (condition ? 1 : 0), 0)`.
+
+## 2026-11-20 - Reducing Complex Array Transformation Allocations
+**Learning:** When transforming an array inside a React render loop via chains like `.filter(c => c.status === 'FAIL').map(c => c.check).join(', ')`, chaining operations allocate intermediate arrays which are immediately discarded. Specifically, when you are outputting to a string (using `.join()`), replacing `.filter().map()` with a single `.map()` that returns `null` for filtered items is an anti-pattern, because `.join()` stringifies the nulls into "null".
+**Action:** Use a single zero-allocation pass with `.reduce()` (e.g., `acc.fails = acc.fails ? acc.fails + ', ' + c.check : c.check`) to construct the final string iteratively without any intermediate array allocations, reducing garbage collection pressure.
