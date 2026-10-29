@@ -1,0 +1,4867 @@
+{
+ "source": "services/langgraph/agency/execution/models.py",
+ "not_measured": "NOT_MEASURED",
+ "enums": {
+  "ArtifactLifecycle": [
+   "DRAFT",
+   "REVIEW_REQUIRED",
+   "VALIDATED",
+   "APPROVED",
+   "RELEASED",
+   "INVALIDATED"
+  ],
+  "DependencyImpact": [
+   "UNAFFECTED",
+   "REVIEW_REQUIRED",
+   "STALE",
+   "REBUILD_REQUIRED"
+  ],
+  "DependencyPolicy": [
+   "HARD",
+   "SOFT"
+  ],
+  "SemanticChange": [
+   "NONE",
+   "COMPATIBLE",
+   "BREAKING",
+   "UNKNOWN"
+  ],
+  "ApprovalStatus": [
+   "PENDING",
+   "APPROVED",
+   "REJECTED",
+   "STALE"
+  ],
+  "WorkOrderState": [
+   "PLANNED",
+   "READY",
+   "RUNNING",
+   "BLOCKED",
+   "SUCCEEDED",
+   "FAILED",
+   "ESCALATED",
+   "INVESTIGATION_REQUIRED"
+  ],
+  "CriterionStatus": [
+   "SATISFIED",
+   "UNSATISFIED",
+   "STALE",
+   "BLOCKED",
+   "NOT_APPLICABLE"
+  ]
+ },
+ "models": {
+  "ArtifactIdentity": [
+   "artifact_id",
+   "project_id",
+   "engagement_id",
+   "artifact_type",
+   "owner_department"
+  ],
+  "ArtifactVersion": [
+   "artifact_version_id",
+   "artifact_id",
+   "version",
+   "parent_version_ref",
+   "branch",
+   "content_hash",
+   "semantic_fingerprint",
+   "generation_mode",
+   "dependency_version_refs",
+   "validation_refs",
+   "work_order_ref",
+   "lifecycle",
+   "created_at"
+  ],
+  "ArtifactDependency": [
+   "upstream_artifact_id",
+   "downstream_artifact_id",
+   "policy"
+  ],
+  "VersionDependencyBinding": [
+   "output_artifact_version_id",
+   "input_artifact_version_ids"
+  ],
+  "ApprovalBinding": [
+   "approval_id",
+   "subject_type",
+   "subject_ref",
+   "subject_version_ref",
+   "subject_hash",
+   "authority_ref",
+   "policy_version",
+   "status",
+   "reviewer_ref",
+   "decision",
+   "created_at",
+   "decided_at",
+   "staled_at",
+   "stale_reason"
+  ],
+  "ExecutionReceipt": [
+   "operation_id",
+   "work_order_id",
+   "actor_role_id",
+   "tool",
+   "tool_contract_ref",
+   "args_hash",
+   "target",
+   "idempotency_key",
+   "attempt",
+   "started_at",
+   "ended_at",
+   "returned_state",
+   "result_ref"
+  ],
+  "ObservationReceipt": [
+   "operation_id",
+   "target",
+   "expected_postcondition",
+   "observed_postcondition",
+   "observation_method",
+   "evidence_refs",
+   "observed_at",
+   "matches"
+  ],
+  "FailureFingerprint": [
+   "fingerprint",
+   "failure_class",
+   "causal_node",
+   "work_order_input_hash",
+   "dependency_snapshot_hash",
+   "tool_contract_hash",
+   "environment_signature",
+   "error_class",
+   "error_code",
+   "observed_postcondition"
+  ],
+  "ProjectExecutionProjection": [
+   "project_id",
+   "engagement_id",
+   "mission_id",
+   "current_phase",
+   "causal_epoch",
+   "active_work_order_ids",
+   "ready_work_order_ids",
+   "blocked_work_order_ids",
+   "awaiting_approval_ids",
+   "artifact_head_refs",
+   "stale_artifact_ids",
+   "blockers",
+   "proof_coverage",
+   "updated_at",
+   "snapshot_hash"
+  ],
+  "DispatchPermit": [
+   "permit_id",
+   "work_order_id",
+   "project_snapshot_hash",
+   "causal_epoch",
+   "dependency_version_refs",
+   "authority_refs",
+   "approval_refs",
+   "tool_contract_refs",
+   "eligibility_policy_version",
+   "issued_at"
+  ],
+  "CompletionCriterion": [
+   "criterion_ref",
+   "mandatory",
+   "required_artifact_version_refs",
+   "required_test_refs",
+   "required_execution_receipt_refs",
+   "required_observation_refs",
+   "required_evidence_refs",
+   "required_approval_refs",
+   "required_metric_refs"
+  ],
+  "CompletionCriterionResult": [
+   "criterion_ref",
+   "status",
+   "missing_refs",
+   "stale_refs"
+  ],
+  "CompletionEvaluation": [
+   "terminal_candidate",
+   "criteria",
+   "proof_coverage",
+   "evidence_score",
+   "quality_score",
+   "confidence"
+  ]
+ },
+ "valid": [
+  {
+   "name": "ArtifactIdentity: minimal",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": "art-1",
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "artifact_type": "brand_core",
+    "owner_department": "strategy"
+   },
+   "dump": {
+    "artifact_id": "art-1",
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "artifact_type": "brand_core",
+    "owner_department": "strategy"
+   },
+   "dynamic": [],
+   "hash": "3f0a8055d4d0fd6b1649eedf1b9c6693120f36629f14d4ca6c2ae56c66a349fe"
+  },
+  {
+   "name": "ArtifactVersion: minimal",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   },
+   "dump": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "parent_version_ref": null,
+    "branch": "main",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "semantic_fingerprint": null,
+    "generation_mode": "UNKNOWN",
+    "dependency_version_refs": [],
+    "validation_refs": [],
+    "work_order_ref": "wo-1",
+    "lifecycle": "DRAFT",
+    "created_at": "2026-01-01T00:00:00Z"
+   },
+   "dynamic": [],
+   "hash": "1f0608f519d5a4b19aee74f97b9cc0267dbd6fd2a8dd37d6a3f5704165f139bc"
+  },
+  {
+   "name": "ArtifactDependency: minimal",
+   "model": "ArtifactDependency",
+   "input": {
+    "upstream_artifact_id": "a",
+    "downstream_artifact_id": "b",
+    "policy": "HARD"
+   },
+   "dump": {
+    "upstream_artifact_id": "a",
+    "downstream_artifact_id": "b",
+    "policy": "HARD"
+   },
+   "dynamic": [],
+   "hash": "1e37f124240f51017eda3a58beb96415d34ae8e27d2caa7a1808a000a0efb498"
+  },
+  {
+   "name": "VersionDependencyBinding: minimal",
+   "model": "VersionDependencyBinding",
+   "input": {
+    "output_artifact_version_id": "av-2",
+    "input_artifact_version_ids": []
+   },
+   "dump": {
+    "output_artifact_version_id": "av-2",
+    "input_artifact_version_ids": []
+   },
+   "dynamic": [],
+   "hash": "2a0a851a6ed1a01a62a40bb6145329ea51c3fa6c12ac30f495ba664f1944c159"
+  },
+  {
+   "name": "ApprovalBinding: minimal",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   },
+   "dump": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "status": "PENDING",
+    "reviewer_ref": null,
+    "decision": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "decided_at": null,
+    "staled_at": null,
+    "stale_reason": null
+   },
+   "dynamic": [],
+   "hash": "e2242c90edbce78ba5c51b4e81cf88f1d46154a25a80c57860deeb8d2f9f28e7"
+  },
+  {
+   "name": "ExecutionReceipt: minimal",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   },
+   "dump": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK",
+    "result_ref": null
+   },
+   "dynamic": [],
+   "hash": "186dc251877b76dd317a785d4136673869bf4219c496c9cec441f8d5928e5985"
+  },
+  {
+   "name": "ObservationReceipt: minimal",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   },
+   "dump": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "evidence_refs": [],
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   },
+   "dynamic": [],
+   "hash": "eac7d298a95c686dffa88c54f3a04860eef3b5fed356bbe7cb88bfb317043028"
+  },
+  {
+   "name": "FailureFingerprint: minimal",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   },
+   "dump": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E",
+    "error_code": null,
+    "observed_postcondition": null
+   },
+   "dynamic": [],
+   "hash": "fbfd2dbc85120f88d2a01b7220188c61fda3483cb7ff45e4a21784b5b140f4b0"
+  },
+  {
+   "name": "ProjectExecutionProjection: minimal",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   },
+   "dump": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "active_work_order_ids": [],
+    "ready_work_order_ids": [],
+    "blocked_work_order_ids": [],
+    "awaiting_approval_ids": [],
+    "artifact_head_refs": [],
+    "stale_artifact_ids": [],
+    "blockers": [],
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   },
+   "dynamic": [],
+   "hash": "ead6723c2ad362f9605f65ad6473b9bcc29d5e778a1492d8a9d01eee89542489"
+  },
+  {
+   "name": "DispatchPermit: minimal",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   },
+   "dump": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "dependency_version_refs": [],
+    "authority_refs": [],
+    "approval_refs": [],
+    "tool_contract_refs": [],
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   },
+   "dynamic": [],
+   "hash": "b9700de8f68459cf145f77ddc7b49dfd44132aadd68f51917562a76ce13924e9"
+  },
+  {
+   "name": "CompletionCriterion: minimal",
+   "model": "CompletionCriterion",
+   "input": {
+    "criterion_ref": "c-1"
+   },
+   "dump": {
+    "criterion_ref": "c-1",
+    "mandatory": true,
+    "required_artifact_version_refs": [],
+    "required_test_refs": [],
+    "required_execution_receipt_refs": [],
+    "required_observation_refs": [],
+    "required_evidence_refs": [],
+    "required_approval_refs": [],
+    "required_metric_refs": []
+   },
+   "dynamic": [],
+   "hash": "600b13f6110248f42557fd05558b4d69414dd69f9ab91f2754335b5af0d90264"
+  },
+  {
+   "name": "CompletionCriterionResult: minimal",
+   "model": "CompletionCriterionResult",
+   "input": {
+    "criterion_ref": "c-1",
+    "status": "SATISFIED"
+   },
+   "dump": {
+    "criterion_ref": "c-1",
+    "status": "SATISFIED",
+    "missing_refs": [],
+    "stale_refs": []
+   },
+   "dynamic": [],
+   "hash": "a4781b09ff297d7c92946a10a592965e68aec8160a7b946885a1ea191843cfc7"
+  },
+  {
+   "name": "CompletionEvaluation: minimal",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 0.25
+   },
+   "dump": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "evidence_score": "NOT_MEASURED",
+    "quality_score": "NOT_MEASURED",
+    "confidence": 0.25
+   },
+   "dynamic": [],
+   "hash": "d319457aa09dde07eb127d9f22ddd955dee77c91134285dcb83265b38ea46740"
+  },
+  {
+   "name": "ArtifactVersion: every field",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 7,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-02T03:04:05.250000+02:00",
+    "parent_version_ref": "av-0",
+    "branch": "feature/\u00e9",
+    "semantic_fingerprint": "sf",
+    "generation_mode": "LIVE",
+    "dependency_version_refs": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ],
+    "validation_refs": [
+     "v"
+    ],
+    "lifecycle": "RELEASED"
+   },
+   "dump": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 7,
+    "parent_version_ref": "av-0",
+    "branch": "feature/\u00e9",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "semantic_fingerprint": "sf",
+    "generation_mode": "LIVE",
+    "dependency_version_refs": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ],
+    "validation_refs": [
+     "v"
+    ],
+    "work_order_ref": "wo-1",
+    "lifecycle": "RELEASED",
+    "created_at": "2026-01-02T03:04:05.250000+02:00"
+   },
+   "dynamic": [],
+   "hash": "e3411287a539aee8881c586100a4a3caa1e74cc94c27a67966ec968138b17a6f"
+  },
+  {
+   "name": "VersionDependencyBinding: every field",
+   "model": "VersionDependencyBinding",
+   "input": {
+    "output_artifact_version_id": "av-2",
+    "input_artifact_version_ids": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ]
+   },
+   "dump": {
+    "output_artifact_version_id": "av-2",
+    "input_artifact_version_ids": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ]
+   },
+   "dynamic": [],
+   "hash": "a9128726fa4a550fc1a540b17d7f401b7fb12b4882ddc5bcde53c2c71de9518f"
+  },
+  {
+   "name": "ApprovalBinding: every field",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "RELEASE_SUBJECT",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "status": "STALE",
+    "reviewer_ref": "u-1",
+    "decision": "approve",
+    "decided_at": "2026-01-03T00:00:00.000001Z",
+    "staled_at": "2026-01-04T00:00:00-05:30",
+    "stale_reason": "upstream changed"
+   },
+   "dump": {
+    "approval_id": "ap-1",
+    "subject_type": "RELEASE_SUBJECT",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "status": "STALE",
+    "reviewer_ref": "u-1",
+    "decision": "approve",
+    "created_at": "2026-01-01T00:00:00Z",
+    "decided_at": "2026-01-03T00:00:00.000001Z",
+    "staled_at": "2026-01-04T00:00:00-05:30",
+    "stale_reason": "upstream changed"
+   },
+   "dynamic": [],
+   "hash": "76d2f2daa614d7ede59217362e45b9e9122943e157e98f04940ea9f7f4582859"
+  },
+  {
+   "name": "ExecutionReceipt: every field",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 2,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK",
+    "result_ref": "res-1"
+   },
+   "dump": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 2,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK",
+    "result_ref": "res-1"
+   },
+   "dynamic": [],
+   "hash": "387be53518bb2fd347390489abef406b31013f6da6a9d6a5cf8764029951c8cb"
+  },
+  {
+   "name": "ObservationReceipt: every field",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": [
+     1,
+     "two",
+     {
+      "three": [
+       null,
+       true
+      ]
+     },
+     0.5
+    ],
+    "observed_postcondition": "\ud83c\udfa8 done",
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": true,
+    "evidence_refs": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ]
+   },
+   "dump": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": [
+     1,
+     "two",
+     {
+      "three": [
+       null,
+       true
+      ]
+     },
+     0.5
+    ],
+    "observed_postcondition": "\ud83c\udfa8 done",
+    "observation_method": "read_back",
+    "evidence_refs": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ],
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": true
+   },
+   "dynamic": [],
+   "hash": "c0a15b54a15356b4202dfe50b53aceb60f2a3b1ab817104b17f0fcda2d0ed6e3"
+  },
+  {
+   "name": "FailureFingerprint: every field",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E",
+    "error_code": "E42",
+    "observed_postcondition": {
+     "n": -3,
+     "x": 2.5
+    }
+   },
+   "dump": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E",
+    "error_code": "E42",
+    "observed_postcondition": {
+     "n": -3,
+     "x": 2.5
+    }
+   },
+   "dynamic": [],
+   "hash": "046c571d12abd0c7d0db95b33b84399c336183dc881eca5222937f43c376e443"
+  },
+  {
+   "name": "ProjectExecutionProjection: every field",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 12,
+    "proof_coverage": 1,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "active_work_order_ids": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ],
+    "ready_work_order_ids": [
+     "a"
+    ],
+    "blocked_work_order_ids": [
+     "b"
+    ],
+    "awaiting_approval_ids": [
+     "c"
+    ],
+    "artifact_head_refs": [
+     "d"
+    ],
+    "stale_artifact_ids": [
+     "e"
+    ],
+    "blockers": [
+     "f"
+    ]
+   },
+   "dump": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 12,
+    "active_work_order_ids": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ],
+    "ready_work_order_ids": [
+     "a"
+    ],
+    "blocked_work_order_ids": [
+     "b"
+    ],
+    "awaiting_approval_ids": [
+     "c"
+    ],
+    "artifact_head_refs": [
+     "d"
+    ],
+    "stale_artifact_ids": [
+     "e"
+    ],
+    "blockers": [
+     "f"
+    ],
+    "proof_coverage": 1.0,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   },
+   "dynamic": [],
+   "hash": "57c4581dd2f38ea72ef80e76b2e9e951cdace26f74db60db0fb8814b87a0847b"
+  },
+  {
+   "name": "DispatchPermit: every field",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z",
+    "dependency_version_refs": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ],
+    "authority_refs": [
+     "a"
+    ],
+    "approval_refs": [
+     "b"
+    ],
+    "tool_contract_refs": [
+     "c"
+    ]
+   },
+   "dump": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "dependency_version_refs": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ],
+    "authority_refs": [
+     "a"
+    ],
+    "approval_refs": [
+     "b"
+    ],
+    "tool_contract_refs": [
+     "c"
+    ],
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   },
+   "dynamic": [],
+   "hash": "a360bbe46de46c2843e33db5e1dd637d205747f1b5cba09e6a8f2ce08e597b18"
+  },
+  {
+   "name": "CompletionCriterion: every field",
+   "model": "CompletionCriterion",
+   "input": {
+    "criterion_ref": "c-1",
+    "mandatory": false,
+    "required_artifact_version_refs": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ],
+    "required_test_refs": [
+     "t"
+    ],
+    "required_execution_receipt_refs": [
+     "e"
+    ],
+    "required_observation_refs": [
+     "o"
+    ],
+    "required_evidence_refs": [
+     "v"
+    ],
+    "required_approval_refs": [
+     "a"
+    ],
+    "required_metric_refs": [
+     "m"
+    ]
+   },
+   "dump": {
+    "criterion_ref": "c-1",
+    "mandatory": false,
+    "required_artifact_version_refs": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ],
+    "required_test_refs": [
+     "t"
+    ],
+    "required_execution_receipt_refs": [
+     "e"
+    ],
+    "required_observation_refs": [
+     "o"
+    ],
+    "required_evidence_refs": [
+     "v"
+    ],
+    "required_approval_refs": [
+     "a"
+    ],
+    "required_metric_refs": [
+     "m"
+    ]
+   },
+   "dynamic": [],
+   "hash": "8b9a8ded79b8dfafde9d0ffb346e2804b41250bae6a54f5a3c0d22248ec9fb80"
+  },
+  {
+   "name": "CompletionCriterionResult: every field",
+   "model": "CompletionCriterionResult",
+   "input": {
+    "criterion_ref": "c-1",
+    "status": "STALE",
+    "missing_refs": [
+     "m"
+    ],
+    "stale_refs": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ]
+   },
+   "dump": {
+    "criterion_ref": "c-1",
+    "status": "STALE",
+    "missing_refs": [
+     "m"
+    ],
+    "stale_refs": [
+     "r-2",
+     "r-1",
+     "r-1"
+    ]
+   },
+   "dynamic": [],
+   "hash": "4692dd0342f079b4707343347d00c5530e4b7cfc14773dd12fd6993d93584f20"
+  },
+  {
+   "name": "CompletionEvaluation: every field",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "COMPLETE",
+    "criteria": [
+     {
+      "criterion_ref": "c-1",
+      "status": "SATISFIED"
+     },
+     {
+      "criterion_ref": "c-2",
+      "status": "NOT_APPLICABLE",
+      "missing_refs": [
+       "x"
+      ]
+     }
+    ],
+    "proof_coverage": 1,
+    "confidence": 0,
+    "evidence_score": 1,
+    "quality_score": 0.875
+   },
+   "dump": {
+    "terminal_candidate": "COMPLETE",
+    "criteria": [
+     {
+      "criterion_ref": "c-1",
+      "status": "SATISFIED",
+      "missing_refs": [],
+      "stale_refs": []
+     },
+     {
+      "criterion_ref": "c-2",
+      "status": "NOT_APPLICABLE",
+      "missing_refs": [
+       "x"
+      ],
+      "stale_refs": []
+     }
+    ],
+    "proof_coverage": 1.0,
+    "evidence_score": 1.0,
+    "quality_score": 0.875,
+    "confidence": 0.0
+   },
+   "dynamic": [],
+   "hash": "ea9d21f9eeebaa09c6b7ef948e4d4dbf9ada49967e9f440bb9b50dedcf78e1f6"
+  },
+  {
+   "name": "ArtifactVersion: every lifecycle value",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "lifecycle": "INVALIDATED"
+   },
+   "dump": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "parent_version_ref": null,
+    "branch": "main",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "semantic_fingerprint": null,
+    "generation_mode": "UNKNOWN",
+    "dependency_version_refs": [],
+    "validation_refs": [],
+    "work_order_ref": "wo-1",
+    "lifecycle": "INVALIDATED",
+    "created_at": "2026-01-01T00:00:00Z"
+   },
+   "dynamic": [],
+   "hash": "751a40c3ae11505832e19f735edc0a36f9d3c9a494c3fa9fc00b7d4f707fa911"
+  },
+  {
+   "name": "ArtifactVersion: version int given as integral float",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 2.0,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   },
+   "dump": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 2,
+    "parent_version_ref": null,
+    "branch": "main",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "semantic_fingerprint": null,
+    "generation_mode": "UNKNOWN",
+    "dependency_version_refs": [],
+    "validation_refs": [],
+    "work_order_ref": "wo-1",
+    "lifecycle": "DRAFT",
+    "created_at": "2026-01-01T00:00:00Z"
+   },
+   "dynamic": [],
+   "hash": "8cd7467d818a2e98e31d41881cb0e3c077e9950e0be2e8a2028cea5c575a976e"
+  },
+  {
+   "name": "ArtifactDependency: soft policy",
+   "model": "ArtifactDependency",
+   "input": {
+    "upstream_artifact_id": "a",
+    "downstream_artifact_id": "b",
+    "policy": "SOFT"
+   },
+   "dump": {
+    "upstream_artifact_id": "a",
+    "downstream_artifact_id": "b",
+    "policy": "SOFT"
+   },
+   "dynamic": [],
+   "hash": "a7a275e6e3b2741786eee7b7da91c687794b45ed81c73e1e9833f4518da95f93"
+  },
+  {
+   "name": "ExecutionReceipt: attempt upper bound",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 3,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   },
+   "dump": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 3,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK",
+    "result_ref": null
+   },
+   "dynamic": [],
+   "hash": "80dc206611024ac459b6c823b20643af7458bb28c9204851ee65068760f5ffb8"
+  },
+  {
+   "name": "ObservationReceipt: null expected postcondition",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": null,
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   },
+   "dump": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": null,
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "evidence_refs": [],
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   },
+   "dynamic": [],
+   "hash": "9c4d580166cad9de427b0d66815842e21dc826dbde166e1646ea67d6388264af"
+  },
+  {
+   "name": "FailureFingerprint: explicit null observed postcondition",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E",
+    "observed_postcondition": null
+   },
+   "dump": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E",
+    "error_code": null,
+    "observed_postcondition": null
+   },
+   "dynamic": [],
+   "hash": "fbfd2dbc85120f88d2a01b7220188c61fda3483cb7ff45e4a21784b5b140f4b0"
+  },
+  {
+   "name": "ProjectExecutionProjection: proof coverage zero",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   },
+   "dump": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "active_work_order_ids": [],
+    "ready_work_order_ids": [],
+    "blocked_work_order_ids": [],
+    "awaiting_approval_ids": [],
+    "artifact_head_refs": [],
+    "stale_artifact_ids": [],
+    "blockers": [],
+    "proof_coverage": 0.0,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   },
+   "dynamic": [],
+   "hash": "ac4aac653fee9eba24372ecf788ed0838efd35e8442b11c8e91838ccffe21334"
+  },
+  {
+   "name": "CompletionEvaluation: scores at bounds",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 1,
+    "evidence_score": 0,
+    "quality_score": 1.0
+   },
+   "dump": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "evidence_score": 0.0,
+    "quality_score": 1.0,
+    "confidence": 1.0
+   },
+   "dynamic": [],
+   "hash": "36f0a260b59e695f23b90bec44b5ce6539e1307bb46c5168213fbb92a3cc60e4"
+  },
+  {
+   "name": "CompletionEvaluation: awkward float",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.3333333333333333,
+    "confidence": 0.30000000000000004
+   },
+   "dump": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.3333333333333333,
+    "evidence_score": "NOT_MEASURED",
+    "quality_score": "NOT_MEASURED",
+    "confidence": 0.30000000000000004
+   },
+   "dynamic": [],
+   "hash": "745d68300437162e54dd41acb6f898c692fe5b9987bf32f3a4af50797d71d234"
+  },
+  {
+   "name": "CompletionCriterionResult: blocked",
+   "model": "CompletionCriterionResult",
+   "input": {
+    "criterion_ref": "c-1",
+    "status": "BLOCKED"
+   },
+   "dump": {
+    "criterion_ref": "c-1",
+    "status": "BLOCKED",
+    "missing_refs": [],
+    "stale_refs": []
+   },
+   "dynamic": [],
+   "hash": "43737948dd289f6a9a15b7d57039c294c92908eb5a2af57bcfb20fa59f471dc7"
+  },
+  {
+   "name": "ApprovalBinding: every status",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "status": "REJECTED"
+   },
+   "dump": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "status": "REJECTED",
+    "reviewer_ref": null,
+    "decision": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "decided_at": null,
+    "staled_at": null,
+    "stale_reason": null
+   },
+   "dynamic": [],
+   "hash": "5b0a1d0de0b4461a292c32e938965ac5f981a8e827a11c1d1183c548e3a35e81"
+  },
+  {
+   "name": "ArtifactVersion: default timestamp",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1"
+   },
+   "dump": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "parent_version_ref": null,
+    "branch": "main",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "semantic_fingerprint": null,
+    "generation_mode": "UNKNOWN",
+    "dependency_version_refs": [],
+    "validation_refs": [],
+    "work_order_ref": "wo-1",
+    "lifecycle": "DRAFT"
+   },
+   "dynamic": [
+    "created_at"
+   ]
+  },
+  {
+   "name": "ApprovalBinding: default timestamp",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1"
+   },
+   "dump": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "status": "PENDING",
+    "reviewer_ref": null,
+    "decision": null,
+    "decided_at": null,
+    "staled_at": null,
+    "stale_reason": null
+   },
+   "dynamic": [
+    "created_at"
+   ]
+  },
+  {
+   "name": "ObservationReceipt: default timestamp",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "matches": false
+   },
+   "dump": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "evidence_refs": [],
+    "matches": false
+   },
+   "dynamic": [
+    "observed_at"
+   ]
+  },
+  {
+   "name": "ProjectExecutionProjection: default timestamp",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   },
+   "dump": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "active_work_order_ids": [],
+    "ready_work_order_ids": [],
+    "blocked_work_order_ids": [],
+    "awaiting_approval_ids": [],
+    "artifact_head_refs": [],
+    "stale_artifact_ids": [],
+    "blockers": [],
+    "proof_coverage": 0.5,
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   },
+   "dynamic": [
+    "updated_at"
+   ]
+  },
+  {
+   "name": "DispatchPermit: default timestamp",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1"
+   },
+   "dump": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "dependency_version_refs": [],
+    "authority_refs": [],
+    "approval_refs": [],
+    "tool_contract_refs": [],
+    "eligibility_policy_version": "v1"
+   },
+   "dynamic": [
+    "issued_at"
+   ]
+  }
+ ],
+ "invalid": [
+  {
+   "name": "ArtifactIdentity: missing artifact_id",
+   "model": "ArtifactIdentity",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "artifact_type": "brand_core",
+    "owner_department": "strategy"
+   }
+  },
+  {
+   "name": "ArtifactIdentity: missing project_id",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": "art-1",
+    "engagement_id": "e-1",
+    "artifact_type": "brand_core",
+    "owner_department": "strategy"
+   }
+  },
+  {
+   "name": "ArtifactIdentity: missing engagement_id",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": "art-1",
+    "project_id": "p-1",
+    "artifact_type": "brand_core",
+    "owner_department": "strategy"
+   }
+  },
+  {
+   "name": "ArtifactIdentity: missing artifact_type",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": "art-1",
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "owner_department": "strategy"
+   }
+  },
+  {
+   "name": "ArtifactIdentity: missing owner_department",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": "art-1",
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "artifact_type": "brand_core"
+   }
+  },
+  {
+   "name": "ArtifactIdentity: extra key",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": "art-1",
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "artifact_type": "brand_core",
+    "owner_department": "strategy",
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "ArtifactIdentity: null artifact_id",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": null,
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "artifact_type": "brand_core",
+    "owner_department": "strategy"
+   }
+  },
+  {
+   "name": "ArtifactIdentity: null project_id",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": "art-1",
+    "project_id": null,
+    "engagement_id": "e-1",
+    "artifact_type": "brand_core",
+    "owner_department": "strategy"
+   }
+  },
+  {
+   "name": "ArtifactIdentity: null engagement_id",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": "art-1",
+    "project_id": "p-1",
+    "engagement_id": null,
+    "artifact_type": "brand_core",
+    "owner_department": "strategy"
+   }
+  },
+  {
+   "name": "ArtifactIdentity: null artifact_type",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": "art-1",
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "artifact_type": null,
+    "owner_department": "strategy"
+   }
+  },
+  {
+   "name": "ArtifactIdentity: null owner_department",
+   "model": "ArtifactIdentity",
+   "input": {
+    "artifact_id": "art-1",
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "artifact_type": "brand_core",
+    "owner_department": null
+   }
+  },
+  {
+   "name": "ArtifactVersion: missing artifact_version_id",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: missing artifact_id",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: missing version",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: missing content_hash",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: missing work_order_ref",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: extra key",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "ArtifactVersion: null artifact_version_id",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": null,
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: null artifact_id",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": null,
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: null version",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": null,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: null content_hash",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": null,
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: null work_order_ref",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": null,
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: null created_at",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": null
+   }
+  },
+  {
+   "name": "ArtifactDependency: missing upstream_artifact_id",
+   "model": "ArtifactDependency",
+   "input": {
+    "downstream_artifact_id": "b",
+    "policy": "HARD"
+   }
+  },
+  {
+   "name": "ArtifactDependency: missing downstream_artifact_id",
+   "model": "ArtifactDependency",
+   "input": {
+    "upstream_artifact_id": "a",
+    "policy": "HARD"
+   }
+  },
+  {
+   "name": "ArtifactDependency: missing policy",
+   "model": "ArtifactDependency",
+   "input": {
+    "upstream_artifact_id": "a",
+    "downstream_artifact_id": "b"
+   }
+  },
+  {
+   "name": "ArtifactDependency: extra key",
+   "model": "ArtifactDependency",
+   "input": {
+    "upstream_artifact_id": "a",
+    "downstream_artifact_id": "b",
+    "policy": "HARD",
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "ArtifactDependency: null upstream_artifact_id",
+   "model": "ArtifactDependency",
+   "input": {
+    "upstream_artifact_id": null,
+    "downstream_artifact_id": "b",
+    "policy": "HARD"
+   }
+  },
+  {
+   "name": "ArtifactDependency: null downstream_artifact_id",
+   "model": "ArtifactDependency",
+   "input": {
+    "upstream_artifact_id": "a",
+    "downstream_artifact_id": null,
+    "policy": "HARD"
+   }
+  },
+  {
+   "name": "ArtifactDependency: null policy",
+   "model": "ArtifactDependency",
+   "input": {
+    "upstream_artifact_id": "a",
+    "downstream_artifact_id": "b",
+    "policy": null
+   }
+  },
+  {
+   "name": "VersionDependencyBinding: missing output_artifact_version_id",
+   "model": "VersionDependencyBinding",
+   "input": {
+    "input_artifact_version_ids": []
+   }
+  },
+  {
+   "name": "VersionDependencyBinding: missing input_artifact_version_ids",
+   "model": "VersionDependencyBinding",
+   "input": {
+    "output_artifact_version_id": "av-2"
+   }
+  },
+  {
+   "name": "VersionDependencyBinding: extra key",
+   "model": "VersionDependencyBinding",
+   "input": {
+    "output_artifact_version_id": "av-2",
+    "input_artifact_version_ids": [],
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "VersionDependencyBinding: null output_artifact_version_id",
+   "model": "VersionDependencyBinding",
+   "input": {
+    "output_artifact_version_id": null,
+    "input_artifact_version_ids": []
+   }
+  },
+  {
+   "name": "VersionDependencyBinding: null input_artifact_version_ids",
+   "model": "VersionDependencyBinding",
+   "input": {
+    "output_artifact_version_id": "av-2",
+    "input_artifact_version_ids": null
+   }
+  },
+  {
+   "name": "ApprovalBinding: missing approval_id",
+   "model": "ApprovalBinding",
+   "input": {
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: missing subject_type",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: missing subject_ref",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: missing subject_version_ref",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: missing subject_hash",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: missing authority_ref",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: missing policy_version",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: extra key",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "ApprovalBinding: null approval_id",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": null,
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: null subject_type",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": null,
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: null subject_ref",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": null,
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: null subject_version_ref",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": null,
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: null subject_hash",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": null,
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: null authority_ref",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": null,
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: null policy_version",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": null,
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: null created_at",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": null
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing operation_id",
+   "model": "ExecutionReceipt",
+   "input": {
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing work_order_id",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing actor_role_id",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing tool",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing tool_contract_ref",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing args_hash",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing target",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing idempotency_key",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing attempt",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing started_at",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing ended_at",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: missing returned_state",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: extra key",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK",
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null operation_id",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": null,
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null work_order_id",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": null,
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null actor_role_id",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": null,
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null tool",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": null,
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null tool_contract_ref",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": null,
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null args_hash",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": null,
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null target",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": null,
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null idempotency_key",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": null,
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null attempt",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": null,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null started_at",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": null,
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null ended_at",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": null,
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: null returned_state",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": null
+   }
+  },
+  {
+   "name": "ObservationReceipt: missing operation_id",
+   "model": "ObservationReceipt",
+   "input": {
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   }
+  },
+  {
+   "name": "ObservationReceipt: missing target",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   }
+  },
+  {
+   "name": "ObservationReceipt: missing expected_postcondition",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   }
+  },
+  {
+   "name": "ObservationReceipt: missing observed_postcondition",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   }
+  },
+  {
+   "name": "ObservationReceipt: missing observation_method",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   }
+  },
+  {
+   "name": "ObservationReceipt: missing matches",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ObservationReceipt: extra key",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false,
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "ObservationReceipt: null operation_id",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": null,
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   }
+  },
+  {
+   "name": "ObservationReceipt: null target",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": null,
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   }
+  },
+  {
+   "name": "ObservationReceipt: null observation_method",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": null,
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   }
+  },
+  {
+   "name": "ObservationReceipt: null observed_at",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": null,
+    "matches": false
+   }
+  },
+  {
+   "name": "ObservationReceipt: null matches",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": null
+   }
+  },
+  {
+   "name": "FailureFingerprint: missing fingerprint",
+   "model": "FailureFingerprint",
+   "input": {
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: missing failure_class",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: missing causal_node",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: missing work_order_input_hash",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: missing dependency_snapshot_hash",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: missing tool_contract_hash",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: missing environment_signature",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: missing error_class",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env"
+   }
+  },
+  {
+   "name": "FailureFingerprint: extra key",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E",
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "FailureFingerprint: null fingerprint",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": null,
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: null failure_class",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": null,
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: null causal_node",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": null,
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: null work_order_input_hash",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": null,
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: null dependency_snapshot_hash",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": null,
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: null tool_contract_hash",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": null,
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: null environment_signature",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": null,
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: null error_class",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": null
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: missing project_id",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: missing engagement_id",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: missing mission_id",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: missing current_phase",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: missing causal_epoch",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: missing proof_coverage",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: missing snapshot_hash",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: extra key",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: null project_id",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": null,
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: null engagement_id",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": null,
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: null mission_id",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": null,
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: null current_phase",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": null,
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: null causal_epoch",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": null,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: null proof_coverage",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": null,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: null updated_at",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": null,
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: null snapshot_hash",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": null
+   }
+  },
+  {
+   "name": "DispatchPermit: missing permit_id",
+   "model": "DispatchPermit",
+   "input": {
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: missing work_order_id",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: missing project_snapshot_hash",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: missing causal_epoch",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: missing eligibility_policy_version",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: extra key",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z",
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "DispatchPermit: null permit_id",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": null,
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: null work_order_id",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": null,
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: null project_snapshot_hash",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": null,
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: null causal_epoch",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": null,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: null eligibility_policy_version",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": null,
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: null issued_at",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": null
+   }
+  },
+  {
+   "name": "CompletionCriterion: missing criterion_ref",
+   "model": "CompletionCriterion",
+   "input": {}
+  },
+  {
+   "name": "CompletionCriterion: extra key",
+   "model": "CompletionCriterion",
+   "input": {
+    "criterion_ref": "c-1",
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "CompletionCriterion: null criterion_ref",
+   "model": "CompletionCriterion",
+   "input": {
+    "criterion_ref": null
+   }
+  },
+  {
+   "name": "CompletionCriterionResult: missing criterion_ref",
+   "model": "CompletionCriterionResult",
+   "input": {
+    "status": "SATISFIED"
+   }
+  },
+  {
+   "name": "CompletionCriterionResult: missing status",
+   "model": "CompletionCriterionResult",
+   "input": {
+    "criterion_ref": "c-1"
+   }
+  },
+  {
+   "name": "CompletionCriterionResult: extra key",
+   "model": "CompletionCriterionResult",
+   "input": {
+    "criterion_ref": "c-1",
+    "status": "SATISFIED",
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "CompletionCriterionResult: null criterion_ref",
+   "model": "CompletionCriterionResult",
+   "input": {
+    "criterion_ref": null,
+    "status": "SATISFIED"
+   }
+  },
+  {
+   "name": "CompletionCriterionResult: null status",
+   "model": "CompletionCriterionResult",
+   "input": {
+    "criterion_ref": "c-1",
+    "status": null
+   }
+  },
+  {
+   "name": "CompletionEvaluation: missing terminal_candidate",
+   "model": "CompletionEvaluation",
+   "input": {
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 0.25
+   }
+  },
+  {
+   "name": "CompletionEvaluation: missing criteria",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "proof_coverage": 0.0,
+    "confidence": 0.25
+   }
+  },
+  {
+   "name": "CompletionEvaluation: missing proof_coverage",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "confidence": 0.25
+   }
+  },
+  {
+   "name": "CompletionEvaluation: missing confidence",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0
+   }
+  },
+  {
+   "name": "CompletionEvaluation: extra key",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 0.25,
+    "unexpected": 1
+   }
+  },
+  {
+   "name": "CompletionEvaluation: null terminal_candidate",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": null,
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 0.25
+   }
+  },
+  {
+   "name": "CompletionEvaluation: null criteria",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": null,
+    "proof_coverage": 0.0,
+    "confidence": 0.25
+   }
+  },
+  {
+   "name": "CompletionEvaluation: null proof_coverage",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": null,
+    "confidence": 0.25
+   }
+  },
+  {
+   "name": "CompletionEvaluation: null confidence",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": null
+   }
+  },
+  {
+   "name": "ArtifactVersion: bad content_hash 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: bad content_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: bad content_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: bad content_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\n'",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: bad content_hash 'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg'",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: bad content_hash ''",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: bad subject_hash 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: bad subject_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: bad subject_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: bad subject_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\n'",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: bad subject_hash 'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg'",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: bad subject_hash ''",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: bad args_hash 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: bad args_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: bad args_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: bad args_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\n'",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: bad args_hash 'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg'",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: bad args_hash ''",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "FailureFingerprint: bad fingerprint 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: bad fingerprint 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: bad fingerprint 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: bad fingerprint 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\n'",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: bad fingerprint 'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg'",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "FailureFingerprint: bad fingerprint ''",
+   "model": "FailureFingerprint",
+   "input": {
+    "fingerprint": "",
+    "failure_class": "TOOL",
+    "causal_node": "copywriting",
+    "work_order_input_hash": "x",
+    "dependency_snapshot_hash": "y",
+    "tool_contract_hash": "z",
+    "environment_signature": "env",
+    "error_class": "E"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: bad snapshot_hash 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: bad snapshot_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: bad snapshot_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: bad snapshot_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\n'",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: bad snapshot_hash 'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg'",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: bad snapshot_hash ''",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": ""
+   }
+  },
+  {
+   "name": "DispatchPermit: bad project_snapshot_hash 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: bad project_snapshot_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: bad project_snapshot_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: bad project_snapshot_hash 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\n'",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: bad project_snapshot_hash 'gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg'",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "DispatchPermit: bad project_snapshot_hash ''",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "",
+    "causal_epoch": 3,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: version below 1",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 0,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: fractional version",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1.5,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: list for int",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": [
+     1
+    ],
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ArtifactVersion: lowercase lifecycle",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "lifecycle": "draft"
+   }
+  },
+  {
+   "name": "ArtifactVersion: unknown lifecycle",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "lifecycle": "SHIPPED"
+   }
+  },
+  {
+   "name": "ArtifactVersion: int for str field",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "branch": 5
+   }
+  },
+  {
+   "name": "ArtifactVersion: string for tuple",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "validation_refs": "ab"
+   }
+  },
+  {
+   "name": "ArtifactVersion: int inside tuple",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "validation_refs": [
+     "a",
+     1
+    ]
+   }
+  },
+  {
+   "name": "ArtifactVersion: object for tuple",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "validation_refs": {
+     "a": 1
+    }
+   }
+  },
+  {
+   "name": "ArtifactDependency: unknown policy",
+   "model": "ArtifactDependency",
+   "input": {
+    "upstream_artifact_id": "a",
+    "downstream_artifact_id": "b",
+    "policy": "MEDIUM"
+   }
+  },
+  {
+   "name": "ApprovalBinding: unknown subject type",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "PROJECT",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "ApprovalBinding: unknown status",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "status": "WITHDRAWN"
+   }
+  },
+  {
+   "name": "ApprovalBinding: invalid decided_at",
+   "model": "ApprovalBinding",
+   "input": {
+    "approval_id": "ap-1",
+    "subject_type": "ARTIFACT_VERSION",
+    "subject_ref": "art-1",
+    "subject_version_ref": "av-1",
+    "subject_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_ref": "role:cd",
+    "policy_version": "v1",
+    "created_at": "2026-01-01T00:00:00Z",
+    "decided_at": "yesterday"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: attempt below 1",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 0,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: attempt above 3",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 4,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ExecutionReceipt: invalid ended_at",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-02-30T00:00:00Z",
+    "returned_state": "OK"
+   }
+  },
+  {
+   "name": "ObservationReceipt: string for bool",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": "maybe"
+   }
+  },
+  {
+   "name": "ObservationReceipt: number 2 for bool",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "state": "OK"
+    },
+    "observed_postcondition": null,
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": 2
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: negative causal epoch",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": -1,
+    "proof_coverage": 0.5,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: proof coverage above 1",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": 1.0000001,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: proof coverage below 0",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": -0.1,
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "ProjectExecutionProjection: string for float",
+   "model": "ProjectExecutionProjection",
+   "input": {
+    "project_id": "p-1",
+    "engagement_id": "e-1",
+    "mission_id": "m-1",
+    "current_phase": "BUILD",
+    "causal_epoch": 0,
+    "proof_coverage": "half",
+    "updated_at": "2026-01-01T00:00:00Z",
+    "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   }
+  },
+  {
+   "name": "DispatchPermit: negative causal epoch",
+   "model": "DispatchPermit",
+   "input": {
+    "permit_id": "pm-1",
+    "work_order_id": "wo-1",
+    "project_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "causal_epoch": -5,
+    "eligibility_policy_version": "v1",
+    "issued_at": "2026-01-01T00:00:00Z"
+   }
+  },
+  {
+   "name": "CompletionCriterion: string for bool",
+   "model": "CompletionCriterion",
+   "input": {
+    "criterion_ref": "c-1",
+    "mandatory": "maybe"
+   }
+  },
+  {
+   "name": "CompletionCriterionResult: lowercase status",
+   "model": "CompletionCriterionResult",
+   "input": {
+    "criterion_ref": "c-1",
+    "status": "satisfied"
+   }
+  },
+  {
+   "name": "CompletionCriterionResult: unknown status",
+   "model": "CompletionCriterionResult",
+   "input": {
+    "criterion_ref": "c-1",
+    "status": "DONE"
+   }
+  },
+  {
+   "name": "CompletionEvaluation: unknown terminal candidate",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "RUNNING",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 0.25
+   }
+  },
+  {
+   "name": "CompletionEvaluation: confidence above 1",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 1.5
+   }
+  },
+  {
+   "name": "CompletionEvaluation: evidence score above 1",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 0.25,
+    "evidence_score": 2
+   }
+  },
+  {
+   "name": "CompletionEvaluation: quality score below 0",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 0.25,
+    "quality_score": -1
+   }
+  },
+  {
+   "name": "CompletionEvaluation: lowercase not measured",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 0.25,
+    "evidence_score": "not_measured"
+   }
+  },
+  {
+   "name": "CompletionEvaluation: null score",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 0.25,
+    "quality_score": null
+   }
+  },
+  {
+   "name": "CompletionEvaluation: invalid nested criterion",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [
+     {
+      "criterion_ref": "c",
+      "status": "NOPE"
+     }
+    ],
+    "proof_coverage": 0.0,
+    "confidence": 0.25
+   }
+  },
+  {
+   "name": "CompletionEvaluation: extra key in nested criterion",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [
+     {
+      "criterion_ref": "c",
+      "status": "SATISFIED",
+      "note": "x"
+     }
+    ],
+    "proof_coverage": 0.0,
+    "confidence": 0.25
+   }
+  }
+ ],
+ "datetimes": {
+  "valid": [
+   {
+    "input": "2026-01-01T00:00:00Z",
+    "dump": "2026-01-01T00:00:00Z"
+   },
+   {
+    "input": "2026-01-01t00:00:00z",
+    "dump": "2026-01-01T00:00:00Z"
+   },
+   {
+    "input": "2026-01-01 00:00:00Z",
+    "dump": "2026-01-01T00:00:00Z"
+   },
+   {
+    "input": "2026-01-01T00:00Z",
+    "dump": "2026-01-01T00:00:00Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00+00:00",
+    "dump": "2026-01-01T00:00:00Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00-00:00",
+    "dump": "2026-01-01T00:00:00Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00+0000",
+    "dump": "2026-01-01T00:00:00Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00+0530",
+    "dump": "2026-01-01T00:00:00+05:30"
+   },
+   {
+    "input": "2026-01-01T00:00:00-03:30",
+    "dump": "2026-01-01T00:00:00-03:30"
+   },
+   {
+    "input": "2026-01-01T00:00:00+23:59",
+    "dump": "2026-01-01T00:00:00+23:59"
+   },
+   {
+    "input": "2026-01-01T00:00:00.5Z",
+    "dump": "2026-01-01T00:00:00.500000Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00,5Z",
+    "dump": "2026-01-01T00:00:00.500000Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00.120Z",
+    "dump": "2026-01-01T00:00:00.120000Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00.000Z",
+    "dump": "2026-01-01T00:00:00Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00.123456789Z",
+    "dump": "2026-01-01T00:00:00.123456Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00.0000005Z",
+    "dump": "2026-01-01T00:00:00Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00.9999999Z",
+    "dump": "2026-01-01T00:00:00.999999Z"
+   },
+   {
+    "input": "2026-01-01T00:00:00",
+    "dump": "2026-01-01T00:00:00"
+   },
+   {
+    "input": "2026-01-01T00:00",
+    "dump": "2026-01-01T00:00:00"
+   },
+   {
+    "input": "2026-01-01T12:34:56.789",
+    "dump": "2026-01-01T12:34:56.789000"
+   },
+   {
+    "input": "2026-01-01",
+    "dump": "2026-01-01T00:00:00"
+   },
+   {
+    "input": "2024-02-29T00:00:00Z",
+    "dump": "2024-02-29T00:00:00Z"
+   },
+   {
+    "input": "2000-02-29",
+    "dump": "2000-02-29T00:00:00"
+   },
+   {
+    "input": "0001-01-01T00:00:00Z",
+    "dump": "0001-01-01T00:00:00Z"
+   },
+   {
+    "input": "9999-12-31T23:59:59.999999Z",
+    "dump": "9999-12-31T23:59:59.999999Z"
+   },
+   {
+    "input": "2026-06-30T23:59:59+14:00",
+    "dump": "2026-06-30T23:59:59+14:00"
+   }
+  ],
+  "invalid": [
+   "",
+   "now",
+   "2026-01-01T00:00:60Z",
+   "2026-01-01T24:00:00Z",
+   "2026-01-01T00:60:00Z",
+   "2025-02-29T00:00:00Z",
+   "1900-02-29",
+   "2026-04-31",
+   "2026-13-01",
+   "2026-00-10",
+   "2026-01-00",
+   "0000-01-01T00:00:00Z",
+   "2026-01-01T00:00:00+24:00",
+   "2026-01-01T00:00:00+05:60",
+   "2026-01-01T00:00:00+05:30:15",
+   "2026-01-01T00:00:00+05",
+   "2026-01-01T00:00:00+00",
+   "2026-01-01T00:00:00.Z",
+   " 2026-01-01T00:00:00Z",
+   "2026-01-01T00:00:00Z ",
+   "2026-1-01T00:00:00Z",
+   "2026-01-01T00Z",
+   "2026-01-01T00:00:00UTC",
+   "2026-01-01x",
+   "20260101T000000Z",
+   "2026-01-01Z",
+   "1e3",
+   "2026-01-01T1:00:00Z"
+  ]
+ },
+ "lax_divergences": [
+  {
+   "name": "ExecutionReceipt: numeric string for int",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": "2",
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   },
+   "python_dump": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 2,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK",
+    "result_ref": null
+   }
+  },
+  {
+   "name": "ExecutionReceipt: bool for int",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": true,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   },
+   "python_dump": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2026-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK",
+    "result_ref": null
+   }
+  },
+  {
+   "name": "ExecutionReceipt: unix seconds for datetime",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": 0,
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   },
+   "python_dump": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "1970-01-01T00:00:00Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK",
+    "result_ref": null
+   }
+  },
+  {
+   "name": "ExecutionReceipt: unix seconds string for datetime",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "1700000000",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   },
+   "python_dump": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "2023-11-14T22:13:20Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK",
+    "result_ref": null
+   }
+  },
+  {
+   "name": "ExecutionReceipt: negative unix string for datetime",
+   "model": "ExecutionReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "-1",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK"
+   },
+   "python_dump": {
+    "operation_id": "op-1",
+    "work_order_id": "wo-1",
+    "actor_role_id": "copywriter",
+    "tool": "llm",
+    "tool_contract_ref": "tc-1",
+    "args_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "t",
+    "idempotency_key": "k-1",
+    "attempt": 1,
+    "started_at": "1969-12-31T23:59:59Z",
+    "ended_at": "2026-01-02T03:04:05.250000+02:00",
+    "returned_state": "OK",
+    "result_ref": null
+   }
+  },
+  {
+   "name": "CompletionCriterion: yes string for bool",
+   "model": "CompletionCriterion",
+   "input": {
+    "criterion_ref": "c-1",
+    "mandatory": "yes"
+   },
+   "python_dump": {
+    "criterion_ref": "c-1",
+    "mandatory": true,
+    "required_artifact_version_refs": [],
+    "required_test_refs": [],
+    "required_execution_receipt_refs": [],
+    "required_observation_refs": [],
+    "required_evidence_refs": [],
+    "required_approval_refs": [],
+    "required_metric_refs": []
+   }
+  },
+  {
+   "name": "CompletionCriterion: int for bool",
+   "model": "CompletionCriterion",
+   "input": {
+    "criterion_ref": "c-1",
+    "mandatory": 0
+   },
+   "python_dump": {
+    "criterion_ref": "c-1",
+    "mandatory": false,
+    "required_artifact_version_refs": [],
+    "required_test_refs": [],
+    "required_execution_receipt_refs": [],
+    "required_observation_refs": [],
+    "required_evidence_refs": [],
+    "required_approval_refs": [],
+    "required_metric_refs": []
+   }
+  },
+  {
+   "name": "CompletionEvaluation: numeric string for float",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": "0.5"
+   },
+   "python_dump": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "evidence_score": "NOT_MEASURED",
+    "quality_score": "NOT_MEASURED",
+    "confidence": 0.5
+   }
+  },
+  {
+   "name": "CompletionEvaluation: bool for float union",
+   "model": "CompletionEvaluation",
+   "input": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "confidence": 0.25,
+    "evidence_score": true
+   },
+   "python_dump": {
+    "terminal_candidate": "BLOCKED",
+    "criteria": [],
+    "proof_coverage": 0.0,
+    "evidence_score": 1.0,
+    "quality_score": "NOT_MEASURED",
+    "confidence": 0.25
+   }
+  },
+  {
+   "name": "ArtifactVersion: int beyond 2^53",
+   "model": "ArtifactVersion",
+   "input": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1152921504606846976,
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work_order_ref": "wo-1",
+    "created_at": "2026-01-01T00:00:00Z"
+   },
+   "python_dump": {
+    "artifact_version_id": "av-1",
+    "artifact_id": "art-1",
+    "version": 1152921504606846976,
+    "parent_version_ref": null,
+    "branch": "main",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "semantic_fingerprint": null,
+    "generation_mode": "UNKNOWN",
+    "dependency_version_refs": [],
+    "validation_refs": [],
+    "work_order_ref": "wo-1",
+    "lifecycle": "DRAFT",
+    "created_at": "2026-01-01T00:00:00Z"
+   }
+  }
+ ],
+ "hash_divergences": [
+  {
+   "name": "ObservationReceipt: integral floats inside Any fields",
+   "model": "ObservationReceipt",
+   "input": {
+    "operation_id": "op-1",
+    "target": "t",
+    "expected_postcondition": {
+     "ratio": 1.0,
+     "n": 1
+    },
+    "observed_postcondition": [
+     2.0
+    ],
+    "observation_method": "read_back",
+    "observed_at": "2026-01-01T00:00:00Z",
+    "matches": false
+   },
+   "float_paths": [
+    [
+     "expected_postcondition",
+     "ratio"
+    ],
+    [
+     "observed_postcondition",
+     0
+    ]
+   ],
+   "hash": "a9b8c9a63a01c2664eaf583467d3844282864f04c8cb324ac1aa0f2b863c8ae9"
+  }
+ ],
+ "proof_coverage": [
+  {
+   "criteria": [],
+   "value": 0.0
+  },
+  {
+   "criteria": [
+    {
+     "criterion_ref": "c-0",
+     "status": "SATISFIED"
+    }
+   ],
+   "value": 1.0
+  },
+  {
+   "criteria": [
+    {
+     "criterion_ref": "c-0",
+     "status": "UNSATISFIED"
+    }
+   ],
+   "value": 0.0
+  },
+  {
+   "criteria": [
+    {
+     "criterion_ref": "c-0",
+     "status": "BLOCKED"
+    },
+    {
+     "criterion_ref": "c-1",
+     "status": "BLOCKED"
+    }
+   ],
+   "value": 0.0
+  },
+  {
+   "criteria": [
+    {
+     "criterion_ref": "c-0",
+     "status": "SATISFIED"
+    },
+    {
+     "criterion_ref": "c-1",
+     "status": "STALE"
+    },
+    {
+     "criterion_ref": "c-2",
+     "status": "NOT_APPLICABLE"
+    }
+   ],
+   "value": 0.3333333333333333
+  },
+  {
+   "criteria": [
+    {
+     "criterion_ref": "c-0",
+     "status": "SATISFIED"
+    },
+    {
+     "criterion_ref": "c-1",
+     "status": "SATISFIED"
+    },
+    {
+     "criterion_ref": "c-2",
+     "status": "UNSATISFIED"
+    }
+   ],
+   "value": 0.6666666666666666
+  },
+  {
+   "criteria": [
+    {
+     "criterion_ref": "c-0",
+     "status": "SATISFIED"
+    },
+    {
+     "criterion_ref": "c-1",
+     "status": "SATISFIED"
+    },
+    {
+     "criterion_ref": "c-2",
+     "status": "SATISFIED"
+    },
+    {
+     "criterion_ref": "c-3",
+     "status": "SATISFIED"
+    },
+    {
+     "criterion_ref": "c-4",
+     "status": "SATISFIED"
+    },
+    {
+     "criterion_ref": "c-5",
+     "status": "SATISFIED"
+    },
+    {
+     "criterion_ref": "c-6",
+     "status": "SATISFIED"
+    },
+    {
+     "criterion_ref": "c-7",
+     "status": "STALE"
+    },
+    {
+     "criterion_ref": "c-8",
+     "status": "STALE"
+    },
+    {
+     "criterion_ref": "c-9",
+     "status": "STALE"
+    }
+   ],
+   "value": 0.7
+  }
+ ]
+}
