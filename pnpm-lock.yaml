@@ -84,6 +84,15 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.0.14(@types/node@26.6.5)(jiti@2.7.0))
 
+  packages/assets:
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@26.6.5)(vite@8.0.14(@types/node@26.6.5)(jiti@2.7.0))
+
   packages/canonical:
     devDependencies:
       typescript:
@@ -201,6 +210,15 @@ importers:
       '@amc/constants':
         specifier: workspace:*
         version: link:../constants
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@26.6.5)(vite@8.0.14(@types/node@26.6.5)(jiti@2.7.0))
+
+  packages/pii:
     devDependencies:
       typescript:
         specifier: 7.0.2

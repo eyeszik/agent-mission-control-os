@@ -1,6 +1,6 @@
 # TypeScript migration plan
 
-Status: **plan + pilot.** The pilot (`@amc/canonical`) has landed. No backend module has been switched over to it, and nothing in this plan is active until a wave is started on purpose.
+Status: **Wave 1 (core utilities) ported.** `@amc/canonical`, `@amc/execution`, `@amc/kernel`, `@amc/design-tokens`, `@amc/assets` and `@amc/pii` each reproduce a Python-generated parity fixture. No Python caller has been switched to them yet; Python is still the reference.
 
 ## Why not a big-bang port
 
@@ -47,11 +47,12 @@ There are three waves: core utilities, then services, then components. Inside a 
 
 | Module | Lines | Internal deps | Used by | Notes |
 |---|---|---|---|---|
-| `agency/execution/canonical.py` | 90 | 0 | 93 modules | **Done (pilot)** → `@amc/canonical` |
-| rest of `agency/execution` | ~240 | 0 | 17 areas | Pydantic records → Zod twins already exist for the API-visible ones; uses `@amc/canonical` |
-| `agency/kernel` (N1–N4) | 1,761 | 0 | 12 areas | Zod twins exist and `verify_ontology_parity.py` enforces them; port the lifecycle guards (`release_guard_failures`) with a transition-matrix parity fixture |
-| `agency/design_tokens` | 472 | 0 | 6 areas | No external deps; DTCG output can be compared byte-for-byte |
-| `agency/assets` | 89 | 0 | 5 areas | |
+| `agency/execution/canonical.py` | 90 | 0 | 93 modules | **Ported** → `@amc/canonical` (525 cases) |
+| `agency/execution/models.py` | 239 | 0 | 17 areas | **Ported** → `@amc/execution`, strict Zod schemas (312 cases) |
+| `agency/kernel` (N1–N4) | 1,761 | 0 | 12 areas | **Ported** → `@amc/kernel`: guards, roles, registry and merge matrix (6,683 cases) |
+| `agency/design_tokens.py` | 472 | 0 | 6 areas | **Ported** → `@amc/design-tokens`; the real `amc.tokens.json` compiles to identical CSS (1,176 cases) |
+| `agency/assets.py` | 89 | 0 | 5 areas | **Ported** → `@amc/assets` (364 render cases) |
+| `security/pii.py`, `security/sanitize.py` | 131 | 0 | redaction callers | **Ported** → `@amc/pii` (1,933 cases); never more permissive than Python |
 | `core` | 329 | 0 | 6 areas | Already mirrored by `@amc/{errors,config,constants,logger}`; just keep `test_core.py` in step |
 
 ### Wave 2: services (pure compilers over Wave 1)
@@ -89,6 +90,16 @@ Moving them means a new HTTP runtime, and either a Postgres driver plus a SQLite
 | Verifier gates (`scripts/verify_*.py`) | They are the CI contract. They move only once each has a TS twin that is proven equivalent. |
 
 So the realistic end state is a **TypeScript core and services behind the existing API, with a Python worker tier** for the areas above. It is not a backend with no Python in it.
+
+## What Wave 1 taught (applies to every later wave)
+
+- **Read JSON the way Python does.** `JSON.parse` loses `1.0` vs `1`, and that changes hashes. The real `amc.tokens.json` is a concrete case. `@amc/design-tokens` exports `parseTokenJson`, which keeps the distinction; it needs JSON.parse source-text access, available on Node 21+ (CI pins 22.12). Every package uses `CanonicalFloat` from `@amc/canonical` as the one float marker.
+- **Pydantic lax mode is the main source of divergence.** Python accepts `"2"` for an int, `"yes"` for a bool and unix timestamps for datetimes. The TS twins refuse these, and each fixture records them as explicit "Python accepts, TS refuses" cases, so the gap is visible rather than silent.
+- **Python's text formatting has to be rebuilt.** `repr(float)` switches to exponent form outside [1e-4, 1e16), while JS does so outside [1e-6, 1e21). `round()` and `f"{x:.4f}"` round half to even on the exact binary value, while `toFixed` rounds ties up. `json.dumps` defaults to `ensure_ascii`. Error messages embed `repr()`. Each package has a small `python*.ts` helper for these.
+- **Regex and Unicode.** JS `\w`, `\d` and `\b` are ASCII-only. JS `\s` and Python's whitespace sets differ (U+FEFF, U+001C–U+001F, U+0085). JS `.` also stops at `\r`, U+2028 and U+2029. Python's IGNORECASE matches `İ`, `ı`, `ſ` and K where the JS `i` flag does not. Python's `$` matches before a trailing `\n`. `@amc/pii` and `@amc/assets` use Python-generated Unicode tables (`src/python-unicode.ts`, owned by their parity tests), so the JS engine's Unicode version never decides a match.
+- **Sorting and key order.** Sort by code point or UTF-8 bytes, never by JS's default UTF-16 order. JS objects move integer-like keys first, so use `Map` wherever order is observable.
+- **Hashing stays synchronous.** Web Crypto only digests asynchronously, but Python's `commit()` and token hashing are synchronous, so `@amc/kernel` and `@amc/design-tokens` bundle a small synchronous SHA-256, checked against the standard test vectors.
+- **Ports find real bugs.** Mirroring `security/pii.py` exactly showed that the `gh*_` and `AKIA` patterns end in a raw-string `\\b`, a literal backslash followed by `b`. So GitHub tokens and AWS access-key ids are **not detected** unless that text follows them (Slack `xox*` tokens are only caught incidentally by another pattern). The TS twin mirrors this faithfully, since a twin must not quietly fix its reference. The fix belongs in Python first; then the fixture is regenerated. This is tracked separately.
 
 ## Rules for every wave
 
