@@ -400,7 +400,7 @@
     },
     {
       "path": "services/langgraph/agency/guidance/registry.py",
-      "git_blob_sha": "3e4d4ac5124da08cbd56ad55a8f66124fb67fa14"
+      "git_blob_sha": "2e685c9b1950de18c666e1bb525e8c21055df897"
     },
     {
       "path": "services/langgraph/agency/guidance/router.py",
