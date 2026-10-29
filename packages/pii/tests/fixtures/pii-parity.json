@@ -170,7 +170,7 @@
      "uvwx"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -1737,7 +1737,7 @@
      "aaaa"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -1747,7 +1747,7 @@
      "MPLE"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -1757,7 +1757,7 @@
      "bc"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -2089,7 +2089,7 @@
      "6PF\\b"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -2099,7 +2099,7 @@
      "8\\B"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -2361,7 +2361,7 @@
      "PBD\\b"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -2371,7 +2371,7 @@
      "k\\B"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -2633,7 +2633,7 @@
      "Y7U\\b"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -2643,7 +2643,7 @@
      "X\\B"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": "\u0130\n\u0130",
@@ -2725,7 +2725,7 @@
      "QzHm\\B"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -2949,7 +2949,7 @@
      "Oelxi"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -3703,7 +3703,7 @@
      "+"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -3857,7 +3857,7 @@
      "pv"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -3962,7 +3962,7 @@
      "d\nWp\n="
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -4168,7 +4168,7 @@
      " \\r"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -4236,7 +4236,7 @@
      "wThjerW"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -4418,7 +4418,7 @@
      "\u0669-%C5%BF"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -4566,7 +4566,7 @@
      "rWqMflh"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -4644,7 +4644,7 @@
      "aaaa"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -5182,7 +5182,7 @@
      "OAl"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -5603,7 +5603,7 @@
      "U5Wcg=="
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -5738,7 +5738,7 @@
      "50100199"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -6385,7 +6385,7 @@
      "6q"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -6464,7 +6464,7 @@
      "7890abc"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -6576,7 +6576,7 @@
      "E\\B"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -6632,7 +6632,7 @@
      "c"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -6692,7 +6692,7 @@
      "arer abc"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -7059,7 +7059,7 @@
      "4NLoP\\b"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -7137,7 +7137,7 @@
      "c"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -7244,7 +7244,7 @@
      "99"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -7382,7 +7382,7 @@
      "opzgdE"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -7799,7 +7799,7 @@
      "a"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -7825,7 +7825,7 @@
      "YWFhYQ=="
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -7854,7 +7854,7 @@
      "aaaaaa"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -8411,7 +8411,7 @@
      "aaaa"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -8579,7 +8579,7 @@
      "MPLE"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -8634,7 +8634,7 @@
      "XAMPLE"
     ]
    },
-   "expected": false
+   "expected": true
   },
   {
    "text": {
@@ -8887,7 +8887,7 @@
      "XEI=-\u017f"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -9033,7 +9033,7 @@
      "50100199"
     ]
    },
-   "expected": true
+   "expected": false
   },
   {
    "text": {
@@ -9561,7 +9561,7 @@
        "$s": [
         "[REDACTE",
         "D_SECRET",
-        "]"
+        "]\\b"
        ]
       }
      ]
@@ -10326,9 +10326,9 @@
     },
     "\u0130d": {
      "$s": [
-      "[REDACTE",
-      "D_SECRET",
-      "]"
+      "\\BXOXP-d",
+      "mGgZGyZA",
+      "M\\B"
      ]
     }
    }
@@ -10649,9 +10649,9 @@
     },
     "2": {
      "$s": [
-      "xoxb-123",
-      "4567890a",
-      "bc"
+      "[REDACTE",
+      "D_SECRET",
+      "]"
      ]
     }
    }
@@ -11499,7 +11499,7 @@
      "$s": [
       "[REDACTE",
       "D_SECRET",
-      "]"
+      "]\\b"
      ]
     },
     "refresh-token": {
@@ -12762,11 +12762,9 @@
    "output": {
     "10": {
      "$s": [
-      "xoxb-123",
-      "4567890a",
-      "bckey-cq",
-      "WV8eR6vB",
-      "El.\n"
+      "[REDACTE",
+      "D_SECRET",
+      "].\n"
      ]
     },
     "client-secret": {
@@ -12993,10 +12991,10 @@
      "$s": [
       "[REDACTE",
       "D_SECRET",
-      "]=jK+ePL",
-      "T8QaTcOz",
-      "v123-00-",
-      "4567"
+      "]\\b=jK+e",
+      "PLT8QaTc",
+      "Ozv123-0",
+      "0-4567"
      ]
     },
     "Authorization": {
@@ -13553,10 +13551,9 @@
      [
       {
        "$s": [
-        "ghp_aaaa",
-        "aaaaaaaa",
-        "aaaaaaaa",
-        "aaaa"
+        "[REDACTE",
+        "D_SECRET",
+        "]"
        ]
       }
      ],
@@ -13853,7 +13850,7 @@
       "$s": [
        "[REDACTE",
        "D_SECRET",
-       "]"
+       "]\\b"
       ]
      },
      {
@@ -14165,9 +14162,9 @@
       },
       {
        "$s": [
-        "AKIAIOSF",
-        "ODNN7EXA",
-        "MPLE"
+        "[REDACTE",
+        "D_SECRET",
+        "]"
        ]
       }
      ]
@@ -16300,9 +16297,9 @@
     },
     "1": {
      "$s": [
-      "xoxb-123",
-      "4567890a",
-      "bc"
+      "[REDACTE",
+      "D_SECRET",
+      "]"
      ]
     },
     "notes": {
@@ -16553,9 +16550,9 @@
     "apikey": {
      "secrets": {
       "$s": [
-       "xoxb-123",
-       "4567890a",
-       "bc"
+       "[REDACTE",
+       "D_SECRET",
+       "]"
       ]
      },
      "api_key": {
@@ -16829,11 +16826,11 @@
      "$s": [
       "[REDACTE",
       "D_SECRET",
-      "]\n123-45",
-      "-0000\n\u0661\n",
-      "nedo2EAf",
-      "UpDNb5Hs",
-      "ku"
+      "]\\b\n123-",
+      "45-0000\n",
+      "\u0661\nnedo2E",
+      "AfUpDNb5",
+      "Hsku"
      ]
     },
     "10": {
@@ -18300,7 +18297,7 @@
      "$s": [
       "[REDACTE",
       "D_SECRET",
-      "]"
+      "]\\b"
      ]
     },
     "apikey": "sk-short",
@@ -19165,9 +19162,9 @@
     "notes": {
      "\u0130d": {
       "$s": [
-       "AKIAIOSF",
-       "ODNN7EXA",
-       "MPLE"
+       "[REDACTE",
+       "D_SECRET",
+       "]"
       ]
      },
      "10": "\u0085",
@@ -19311,11 +19308,11 @@
       "\n[REDACT",
       "ED_CREDI",
       "T_CARD]\n",
-      "xoxb-123",
-      "4567890a",
-      "bc\nxoxb-",
-      "12345678",
-      "90abc"
+      "[REDACTE",
+      "D_SECRET",
+      "]\n[REDAC",
+      "TED_SECR",
+      "ET]"
      ]
     },
     "PASSWORD": {
@@ -20028,10 +20025,11 @@
         "user at ",
         "example ",
         "dot test",
-        "\u212a[REDACT",
-        "ED_SECRE",
-        "T]555\u25cf01",
-        "0\u25cf0912"
+        "\u212a\\bxoxb-",
+        "Q3e313SP",
+        "Zihg\\b55",
+        "5\u25cf010\u25cf09",
+        "12"
        ]
       }
      },
@@ -20187,9 +20185,9 @@
      },
      {
       "$s": [
-       "AKIAIOSF",
-       "ODNN7EXA",
-       "MPLE"
+       "[REDACTE",
+       "D_SECRET",
+       "]"
       ]
      },
      1.5
@@ -21107,9 +21105,9 @@
     },
     "notes": {
      "$s": [
-      "xoxb-123",
-      "4567890a",
-      "bc"
+      "[REDACTE",
+      "D_SECRET",
+      "]"
      ]
     },
     "client-secret": {
@@ -21667,10 +21665,9 @@
    },
    "output": {
     "$s": [
-     "ghp_abcd",
-     "efghijkl",
-     "mnopqrst",
-     "uvwx"
+     "[REDACTE",
+     "D_SECRET",
+     "]"
     ]
    }
   },
@@ -21687,7 +21684,7 @@
     "$s": [
      "[REDACTE",
      "D_SECRET",
-     "]"
+     "]\\b"
     ]
    }
   },
@@ -21703,7 +21700,7 @@
     "$s": [
      "[REDACTE",
      "D_SECRET",
-     "]"
+     "]\\b"
     ]
    }
   },
@@ -24601,10 +24598,9 @@
    },
    "output": {
     "$s": [
-     "ghp_aaaa",
-     "aaaaaaaa",
-     "aaaaaaaa",
-     "aaaa"
+     "[REDACTE",
+     "D_SECRET",
+     "]"
     ]
    }
   },
@@ -24618,9 +24614,9 @@
    },
    "output": {
     "$s": [
-     "AKIAIOSF",
-     "ODNN7EXA",
-     "MPLE"
+     "[REDACTE",
+     "D_SECRET",
+     "]"
     ]
    }
   },
@@ -24634,9 +24630,9 @@
    },
    "output": {
     "$s": [
-     "xoxb-123",
-     "4567890a",
-     "bc"
+     "[REDACTE",
+     "D_SECRET",
+     "]"
     ]
    }
   },
@@ -25099,7 +25095,7 @@
     "$s": [
      "[REDACTE",
      "D_SECRET",
-     "]"
+     "]\\b"
     ]
    }
   },
@@ -25115,7 +25111,7 @@
     "$s": [
      "[REDACTE",
      "D_SECRET",
-     "]"
+     "]\\b"
     ]
    }
   },
@@ -25163,9 +25159,9 @@
    },
    "output": {
     "$s": [
-     "[REDACTE",
-     "D_SECRET",
-     "]"
+     "\\bxoxb-3",
+     "WWWqWibY",
+     "6PF\\b"
     ]
    }
   },
@@ -25179,9 +25175,9 @@
    },
    "output": {
     "$s": [
-     "[REDACTE",
-     "D_SECRET",
-     "]"
+     "\\BXOXP-c",
+     "v7DJzk3i",
+     "8\\B"
     ]
    }
   },
@@ -25532,7 +25528,7 @@
     "$s": [
      "[REDACTE",
      "D_SECRET",
-     "]"
+     "]\\b"
     ]
    }
   },
@@ -25548,7 +25544,7 @@
     "$s": [
      "[REDACTE",
      "D_SECRET",
-     "]"
+     "]\\b"
     ]
    }
   },
@@ -25596,9 +25592,9 @@
    },
    "output": {
     "$s": [
-     "[REDACTE",
-     "D_SECRET",
-     "]"
+     "\\bxoxb-t",
+     "DEF30uU0",
+     "PBD\\b"
     ]
    }
   },
@@ -25612,9 +25608,9 @@
    },
    "output": {
     "$s": [
-     "[REDACTE",
-     "D_SECRET",
-     "]"
+     "\\BXOXP-e",
+     "VsS53fP2",
+     "k\\B"
     ]
    }
   },
@@ -25965,7 +25961,7 @@
     "$s": [
      "[REDACTE",
      "D_SECRET",
-     "]"
+     "]\\b"
     ]
    }
   },
@@ -25981,7 +25977,7 @@
     "$s": [
      "[REDACTE",
      "D_SECRET",
-     "]"
+     "]\\b"
     ]
    }
   },
@@ -26029,9 +26025,9 @@
    },
    "output": {
     "$s": [
-     "[REDACTE",
-     "D_SECRET",
-     "]"
+     "\\bxoxb-P",
+     "sVdj8F0d",
+     "Y7U\\b"
     ]
    }
   },
@@ -26045,9 +26041,9 @@
    },
    "output": {
     "$s": [
-     "[REDACTE",
-     "D_SECRET",
-     "]"
+     "\\BXOXP-i",
+     "tOZEqThx",
+     "X\\B"
     ]
    }
   },
@@ -26174,9 +26170,9 @@
     "$s": [
      "\u0664\u0661\u0661\u0661\u0664\u0661\u0661\u0661",
      "\u0664\u0661\u0661\u0661\u0664\u0661\u0661\u0661",
-     "8aU[REDA",
-     "CTED_SEC",
-     "RET]"
+     "8aU\\BXOX",
+     "P-rZkqX7",
+     "QzHm\\B"
     ]
    }
   },
@@ -26458,7 +26454,7 @@
     "$s": [
      "[REDACTE",
      "D_SECRET",
-     "]"
+     "]\\b"
     ]
    }
   },
@@ -26516,10 +26512,16 @@
    },
    "output": {
     "$s": [
-     "[REDACTE",
-     "D_ENCODE",
-     "D_SECRET",
-     "]"
+     ":-\u4e2d55501",
+     "00199-%2",
+     "5zz-OcQT",
+     "CeyHIJy/",
+     "1Qv1m8P=",
+     "9wBnC0Kh",
+     "-XGJ4b3h",
+     "iLW9XUkZ",
+     "qZVZEakJ",
+     "Oelxi"
     ]
    }
   },
@@ -26719,14 +26721,14 @@
    },
    "output": {
     "$s": [
-     "\u212a-AKIAIO",
-     "SFODNN7E",
-     "XAMPLE-[",
-     "REDACTED",
-     "_PHONE]-",
-     "[REDACTE",
-     "D_SECRET",
-     "]"
+     "\u212a-[REDAC",
+     "TED_SECR",
+     "ET]-[RED",
+     "ACTED_PH",
+     "ONE]-\\bx",
+     "oxb-UddJ",
+     "SZsFhrDW",
+     "\\b"
     ]
    }
   },
@@ -26981,7 +26983,7 @@
        "$s": [
         "[REDACTE",
         "D_SECRET",
-        "]"
+        "]\\b"
        ]
       }
      ]
@@ -27746,9 +27748,9 @@
     },
     "\u0130d": {
      "$s": [
-      "[REDACTE",
-      "D_SECRET",
-      "]"
+      "\\BXOXP-d",
+      "mGgZGyZA",
+      "M\\B"
      ]
     }
    }
@@ -28069,9 +28071,9 @@
     },
     "2": {
      "$s": [
-      "xoxb-123",
-      "4567890a",
-      "bc"
+      "[REDACTE",
+      "D_SECRET",
+      "]"
      ]
     }
    }
@@ -28919,7 +28921,7 @@
      "$s": [
       "[REDACTE",
       "D_SECRET",
-      "]"
+      "]\\b"
      ]
     },
     "refresh-token": {
