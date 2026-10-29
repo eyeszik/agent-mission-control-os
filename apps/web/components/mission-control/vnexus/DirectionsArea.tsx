@@ -216,9 +216,17 @@ function IntentWorkspace({ brandId, projectId, intentId }: { brandId: string; pr
             {b.kind} · {short(b.subject_sha256, 12)} · approval {short(b.approval_id, 10)} · {b.kind === 'SELECTION' ? (b.selected ? 'selected' : `not selected: ${(b.reasons ?? []).join(', ')}`) : `genome ${b.genome_status ?? b.status}`}
           </li>
         ))}</ul>
-        {state.reconstructions.map((r) => (
-          <p key={r.reconstruction_id} className="text-zinc-300">Vector rebuild {short(r.reconstruction_id, 10)}: {r.status} · {r.checks.filter((c) => c.status === 'FAIL').map((c) => c.check).join(', ') || 'no failed checks'} · {r.checks.filter((c) => c.status === 'NOT_VERIFIED').length} not verified</p>
-        ))}
+        {state.reconstructions.map((r) => {
+          // ⚡ Bolt: Replace .filter().length and .filter().map().join() with a single zero-allocation reduce pass
+          const { fails, notVerified } = r.checks.reduce((acc, c) => {
+            if (c.status === 'FAIL') acc.fails = acc.fails ? acc.fails + ', ' + c.check : c.check;
+            else if (c.status === 'NOT_VERIFIED') acc.notVerified++;
+            return acc;
+          }, { fails: '', notVerified: 0 });
+          return (
+            <p key={r.reconstruction_id} className="text-zinc-300">Vector rebuild {short(r.reconstruction_id, 10)}: {r.status} · {fails || 'no failed checks'} · {notVerified} not verified</p>
+          );
+        })}
       </Panel>
       <StatusLine state={action} />
     </div>
