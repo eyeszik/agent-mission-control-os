@@ -72,6 +72,11 @@ class Scene(Strict):
     primitives: tuple[Primitive, ...] = Field(min_length=1, max_length=200)
 
 
+class Motion(Strict):
+    x: float = Field(default=0, ge=-4096, le=4096, allow_inf_nan=False)
+    y: float = Field(default=0, ge=-4096, le=4096, allow_inf_nan=False)
+
+
 class RenderRequest(Strict):
     workflow_id: Name
     task_id: Name
@@ -83,9 +88,12 @@ class RenderRequest(Strict):
     clock: FrameClock = Field(default_factory=FrameClock)
     output_format: Literal["svg", "png", "mp4", "webm"] = "svg"
     scene: Scene
+    motion: Motion | None = None
 
     @model_validator(mode="after")
     def admission(self):
+        if self.motion is not None and self.clock.total_frames == 1:
+            raise ValueError('motion requires multiple frames')
         if not self.brief.strip() or len(self.brief.strip()) < 10:
             raise ValueError("brief must contain at least 10 non-padding characters")
         if self.output_format in {"svg", "png"} and self.clock.total_frames != 1:
@@ -104,11 +112,18 @@ class RenderSpecification(Strict):
     package_lock_hash: Hash
     worker_source_hash: Hash
     runtime_version: str
-    isolation_profile: Literal["typed-primitives/process-v1"] = "typed-primitives/process-v1"
+    isolation_profile: Literal["typed-primitives/process-v1", "typed-primitives/network-namespace-v1"] = "typed-primitives/process-v1"
+
+    media_runtime_hash: Hash | None = None
+    license_decision_hash: Hash | None = None
 
     @property
     def spec_hash(self) -> str:
-        return canonical_hash(self.model_dump(mode="json"))
+        body = self.model_dump(mode="json")
+        if self.media_runtime_hash is None: body.pop('media_runtime_hash')
+        if self.license_decision_hash is None: body.pop('license_decision_hash')
+        if self.request.motion is None: body['request'].pop('motion')
+        return canonical_hash(body)
 
 
 class VerificationReport(Strict):
@@ -118,4 +133,4 @@ class VerificationReport(Strict):
     spec_hash: Hash
     checks: tuple[str, ...]
     findings: tuple[str, ...] = ()
-    verifier: Literal["amc-render-svg/v1"] = "amc-render-svg/v1"
+    verifier: Literal["amc-render-svg/v1", "amc-render-media/v1"] = "amc-render-svg/v1"

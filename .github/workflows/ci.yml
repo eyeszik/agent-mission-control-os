@@ -254,6 +254,43 @@ jobs:
             exit 1
           fi
 
+  render-adapters:
+    name: Rendering adapters + video + remote protocol
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22.12.0"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - name: Install exact dependencies and renderer bundles
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @amc/creative-renderer build
+          python -m pip install -e "./services/langgraph[dev,rendering]"
+      - name: Install Chromium and encoder runtime
+        run: |
+          pnpm --filter @amc/web exec playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      # Fixtures exercise the pinned Remotion license's non-commercial evaluation use.
+      - name: Verify all adapters and remote refusal boundaries without skips
+        env:
+          AMC_DATABASE_BACKEND: sqlite
+          AMC_DB_PATH: /tmp/amc-render-adapters.db
+        run: |
+          set -o pipefail
+          python -m pytest services/langgraph/tests/test_rendering.py services/langgraph/tests/test_rendering_media_remote.py -q -rs | tee /tmp/render-adapters.log
+          if grep -q "SKIPPED" /tmp/render-adapters.log; then
+            echo "::error::Renderer capability tests skipped; runtime verification is incomplete"
+            exit 1
+          fi
+
   browser-e2e:
     name: Browser E2E (local degraded HITL)
     runs-on: ubuntu-latest

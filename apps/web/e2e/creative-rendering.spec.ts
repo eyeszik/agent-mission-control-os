@@ -19,7 +19,7 @@ test('creative workspace queues and cancels real scoped work without inventing v
   await expect(engine.getByRole('option', { name: 'svg_js', exact: true })).toHaveCount(1);
   await engine.selectOption('remotion');
   await expect(page.getByRole('button', { name: 'Queue render' })).toBeDisabled();
-  await expect(page.getByRole('status')).toContainText('ADAPTER_NOT_IMPLEMENTED');
+  await expect(page.getByRole('status')).toContainText('LICENSE_APPROVAL_REQUIRED');
   await engine.selectOption('paper_js');
   await expect(page.getByRole('button', { name: 'Queue render' })).toBeEnabled();
   const queued = page.waitForResponse(response => response.url().endsWith('/foundry/projects/proj_1/renders') && response.request().method() === 'POST');

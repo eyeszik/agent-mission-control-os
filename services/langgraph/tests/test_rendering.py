@@ -70,7 +70,7 @@ def test_missing_engine_stays_blocked_and_does_not_create_artifact(scope):
     submitted = service.submit(principal, project, request(engine='remotion'), root)
     report = run_tick(worker_id='fixture-controller', handlers={service.KIND: service.RenderHandler()}, job_id=submitted['job_id'])
     assert report.final_state == 'BLOCKED_ENVIRONMENT'
-    assert 'ADAPTER_NOT_IMPLEMENTED' in report.reasons
+    assert 'LICENSE_APPROVAL_REQUIRED' in report.reasons
     assert not list_project_artifacts(project)
 
 
