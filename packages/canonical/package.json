@@ -1,0 +1,20 @@
+{
+  "name": "@amc/canonical",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AMC-CANON-1 deterministic encoding and hashing, byte-for-byte with services/langgraph/agency/execution/canonical.py.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
