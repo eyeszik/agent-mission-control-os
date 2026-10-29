@@ -37,7 +37,6 @@ const BASE64_FRAGMENT = pyRegExp(String.raw`(?<![A-Za-z0-9+/])(?:[A-Za-z0-9+/]{2
 export const EXTRA_SECRET_PATTERNS: readonly RegExp[] = [
   pyRegExp(String.raw`${B}gh[pousr]_[A-Za-z0-9_]{20,}${B}`),
   pyRegExp(String.raw`-----BEGIN [A-Z ]*PRIVATE KEY-----`),
-  pyRegExp(String.raw`${B}${ignoreCase('xox')}${ignoreCaseSet('abprs')}-[A-Za-z0-9\-${CI}]{10,}${B}`),
 ];
 
 const MAX_BASE64_FRAGMENT = 4096;

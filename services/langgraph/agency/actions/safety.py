@@ -30,7 +30,7 @@ _BLOCKED_HOST_SUFFIXES = (".local", ".localhost", ".internal", ".intranet", ".la
 _BLOCKED_HOSTS = {"localhost", "metadata.google.internal", "metadata", "instance-data"}
 _SECRET = re.compile(
     r"(?i)(?:\b(?:sk|pk|rk)-[a-z0-9_-]{16,}\b|-----BEGIN [A-Z ]*PRIVATE KEY-----|"
-    r"\bxox[abprs]-[a-z0-9-]{10,}\b|\bghp_[a-z0-9]{30,}\b|\b(?:api|secret|token|password)[_-]?key?\s*[:=]\s*\S{8,}|"
+    r"\bghp_[a-z0-9]{30,}\b|\b(?:api|secret|token|password)[_-]?key?\s*[:=]\s*\S{8,}|"
     r"\bbearer\s+[a-z0-9._~+/-]{16,}=*)"
 )
 _BASE64_FRAGMENT = re.compile(r"(?<![A-Za-z0-9+/])[A-Za-z0-9+/]{24,4096}={0,2}(?![A-Za-z0-9+/=])")

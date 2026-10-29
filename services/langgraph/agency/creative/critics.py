@@ -45,7 +45,6 @@ _SECRETS = (
     PII_PATTERNS["api_key_like"],
     re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b"),
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
-    re.compile(r"\bxox[abpr]-[A-Za-z0-9-]{10,}\b"),
 )
 # Reference categories whose "Inspired by X" names are style vocabulary, not marks.
 _STYLE_CATEGORIES = frozenset({"bold-expressive", "creative-artistic", "layout-structure", "modern-minimal",
