@@ -168,6 +168,20 @@ def get_run_record(run_id: str) -> Optional[dict]:
         return _row_to_record(row) if row else None
 
 
+def require_run_instructions(run_id: str, tenant_id: str, project_id: str) -> None:
+    """Monotonic opt-in marker: a bound run may never silently resume as legacy."""
+    with transaction(write=True) as db:
+        lock = " FOR UPDATE" if is_postgres() else ""
+        row = db.execute(f"SELECT * FROM {table('runs')} WHERE run_id = ?{lock}", (run_id,)).fetchone()
+        record = _row_to_record(row) if row else None
+        if record is None or (record["tenant_id"], record["project_id"]) != (tenant_id, project_id):
+            raise PermissionError("instruction enrollment requires the exact run scope")
+        metadata = record["metadata"]
+        metadata["instructions_required"] = True
+        db.execute(f"UPDATE {table('runs')} SET metadata = ?, updated_at = ? WHERE run_id = ?",
+                   (json_param(metadata), _now(), run_id))
+
+
 def update_run_status(run_id: str, status: str, result: Optional[dict] = None) -> Optional[dict]:
     now = _now()
     tenant_id: Optional[str] = None

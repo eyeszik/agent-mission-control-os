@@ -34,6 +34,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from pydantic import BaseModel, Field, ValidationError
+from services.langgraph.agency.compiled.instruction_models import InstructionSelection
 
 from services.langgraph.agency.prompt_compiler import (
     CompilerState,
@@ -554,6 +555,7 @@ class FabricMissionRequest(BaseModel):
     existing_artifacts: dict[str, str] = Field(default_factory=dict)
     volatile_constraints: list[dict[str, Any]] = Field(default_factory=list)
     node_inputs: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    instructions: InstructionSelection | None = None
 
 
 def _cmd_fabric_run(args: argparse.Namespace) -> int:
@@ -586,10 +588,15 @@ def _cmd_fabric_run(args: argparse.Namespace) -> int:
         context = ExecutionContext.from_server(
             tenant_id=request.tenant_id, project_id=request.project_id, actor="cli:fabric-run", mode=request.mode,
             export_root=Path(args.export_root) if args.export_root else resolve_export_root(),
+            instructions=request.instructions,
         )
     except (OSError, ValueError, ValidationError, ExecutionModeError) as exc:
         raise BriefError(f"could not read fabric mission request: {exc}") from exc
     schedule = from_compiled_agency_plan(compile_agency_plan(plan_request, registry=role_os_registry()))
+    if getattr(args, "compile_only", False):
+        from services.langgraph.agency.compiled.instruction_cli import write_compilation
+
+        return write_compilation(schedule, context, Path(args.output))
     report = execute_mission(schedule, context, brand=brand, node_inputs=request.node_inputs)
     clean = all(o.state.value == "SUCCEEDED" for o in report.cells.values()) and all(
         b["state"] == "NEEDS_HUMAN" for b in report.release_boundary.values()
@@ -877,6 +884,11 @@ def build_parser() -> argparse.ArgumentParser:
     fabric_run.add_argument("--export-root", default=None, help="Object-storage root (defaults to the configured export root).")
     fabric_run.add_argument("--json", action="store_true", help="Print the full execution report as JSON.")
     fabric_run.set_defaults(handler=_cmd_fabric_run)
+
+    instructions = sub.add_parser("compile-instructions", help="Compile opt-in instruction packages without executing work.")
+    instructions.add_argument("--input", required=True, help="Fabric mission JSON with an instructions selection.")
+    instructions.add_argument("--output", required=True, help="Local compilation artifact JSON path.")
+    instructions.set_defaults(handler=_cmd_fabric_run, compile_only=True, export_root=None)
 
     creative_run = sub.add_parser(
         "creative-run",

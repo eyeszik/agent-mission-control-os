@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import concurrent.futures
 import hashlib
+import json
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, Mapping
@@ -302,6 +303,12 @@ class _Consumer:
             capsules.append(capsule_for("client_inputs", payload["client"], "CLIENT_INPUT"))
         capsules += [capsule_for(f"upstream:{k}", v, "UPSTREAM_ARTIFACT") for k, v in sorted(upstream.items())]
         reasons += list(quarantine_reasons(capsules))
+        from .instructions import bind_instructions
+
+        instruction_blockers, package = bind_instructions(self.ctx, cp, skill_id)
+        reasons += list(instruction_blockers)
+        if package is not None:
+            payload["instruction_package"] = package.model_dump(mode="json")
         return reasons, skill_id, payload
 
     def _prepare(self, cp: CellPlan, wave: int) -> _Prepared | None:
@@ -347,8 +354,24 @@ class _Consumer:
             authority_refs=tuple(p.plan.authority_refs), approval_refs=tuple(p.plan.approval_refs), now=now,
         )
         put_dispatch_permit(self.run_id, self.ctx.tenant_id, self.ctx.project_id, p.permit.permit)
+        if "instruction_package" in p.payload:
+            self._record_instructions(p)
         self._hook("after_intent", p.plan.cell.cell_id, {"key": key})
         return True
+
+    def _record_instructions(self, p: _Prepared) -> None:
+        package = p.payload["instruction_package"]
+        stored = self.adapter.put_bytes(
+            tenant_id=self.ctx.tenant_id, project_id=self.ctx.project_id,
+            data=json.dumps(package, sort_keys=True, ensure_ascii=False).encode("utf-8"),
+        )
+        append_project_event(
+            tenant_id=self.ctx.tenant_id, project_id=self.ctx.project_id,
+            event_type=ActivityType.WORK_STARTED, actor=self.ctx.actor, subject_ref=self.run_id,
+            payload={"instruction_hash": package["content_hash"], "cell_id": p.plan.cell.cell_id,
+                     "idempotency_key": p.request.idempotency_key, "instruction_location": stored.storage_uri,
+                     "instruction_byte_hash": stored.content_hash},
+        )
 
     def _reconcile(self, p: _Prepared, wave: int, record: dict) -> bool | None:
         key = p.request.idempotency_key
@@ -393,6 +416,12 @@ class _Consumer:
 
     # ------------------------------------------------------------ phase 2a: dispatch (pure, concurrent)
     def _dispatch(self, p: _Prepared) -> None:
+        from .instructions import check_instructions
+
+        blockers = check_instructions(self.ctx, p.plan, p.request.skill_id, p.payload.get("instruction_package"))
+        if blockers or canonical_hash(p.payload) != p.request.input_hash:
+            p.failure = (ExecutionState.BLOCKED_CONTRACT, blockers or ("CONTRACT_INPUT_CHANGED",))
+            return
         spec = FABRIC_SKILLS[p.request.skill_id]
         try:
             verify_permit(p.permit, p.request, now=self.clock(), max_skew_seconds=self.ctx.max_clock_skew_seconds)
@@ -402,6 +431,10 @@ class _Consumer:
         fingerprints: list[str] = []
         p.started_at = self.clock()
         while p.attempts < min(p.plan.max_attempts, self.ctx.budget.max_attempts_per_cell):
+            blockers = check_instructions(self.ctx, p.plan, p.request.skill_id, p.payload.get("instruction_package"))
+            if blockers:
+                p.failure = (ExecutionState.BLOCKED_CONTRACT, blockers)
+                return
             p.attempts += 1
             try:
                 outcome = dispatch_skill(p.request.role_id, p.request.skill_id, p.payload)
@@ -438,6 +471,13 @@ class _Consumer:
     # ------------------------------------------------------------ phase 2b: commit (serial)
     def _commit(self, p: _Prepared, wave: int) -> None:
         key = p.request.idempotency_key
+        if p.failure is None and not p.timed_out:
+            self._hook("before_commit", p.plan.cell.cell_id, {"artifact_id": p.artifact_id})
+            from .instructions import check_instructions
+
+            blockers = check_instructions(self.ctx, p.plan, p.request.skill_id, p.payload.get("instruction_package"))
+            if blockers:
+                p.failure = (ExecutionState.BLOCKED_CONTRACT, blockers)
         if p.timed_out:
             p.failure, p.verdicts = (ExecutionState.FAILED, ("SKILL_TIMEOUT",)), ()
         if p.failure is not None:
@@ -458,7 +498,6 @@ class _Consumer:
                         attempts=p.attempts, idempotency_key=key, verdicts=p.verdicts)
             return
 
-        self._hook("before_commit", p.plan.cell.cell_id, {"artifact_id": p.artifact_id})
         result = p.result or {}
         v2 = {"mime_type": result.get("mime_type"), "media_type": "data" if result.get("mime_type") == "application/json" else None,
               "provenance_ref": f"execution:{key}", "source_refs": [ref for ref, _ in p.request.dependency_hashes]}
@@ -557,6 +596,14 @@ class _Consumer:
     def run(self) -> MissionExecutionReport:
         ensure_project_workspace(tenant_id=self.ctx.tenant_id, project_id=self.ctx.project_id, actor=self.ctx.actor)
         _ensure_run(self.run_id, self.ctx, self.s)
+        if self.ctx.instructions is not None:
+            from services.langgraph.persistence.runs import require_run_instructions
+
+            require_run_instructions(self.run_id, self.ctx.tenant_id, self.ctx.project_id)
+        elif get_run_record(self.run_id)["metadata"].get("instructions_required"):
+            for cp in self.s.cells.values():
+                self._block(cp, None, ["CONTRACT_INSTRUCTION_DOWNGRADE_REFUSED"])
+            return self._report(wave_plan_fresh(self.s))
         fresh = wave_plan_fresh(self.s)
         append_project_event(tenant_id=self.ctx.tenant_id, project_id=self.ctx.project_id, event_type=ActivityType.WORK_STARTED,
                              actor=self.ctx.actor, subject_ref=self.run_id,

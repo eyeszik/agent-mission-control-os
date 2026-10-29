@@ -116,7 +116,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "git_blob_sha": "c1d169d54cd2ce1c26e6d87b02c24db1a966810f"
+      "git_blob_sha": "0f6a2a5331a5a6250d0dbac03e069a5b6ed02e82"
     },
     {
       "path": "packages/shared/src/schemas/ace-fixtures.json",
@@ -324,11 +324,11 @@
     },
     {
       "path": "services/langgraph/agency/execution_fabric/consumer.py",
-      "git_blob_sha": "da75d68389beb0294b9462421ac0738f98fca964"
+      "git_blob_sha": "7004b06f6a7ad53ab0b092de6d4c762377bafbfe"
     },
     {
       "path": "services/langgraph/agency/execution_fabric/contracts.py",
-      "git_blob_sha": "5141dd68b7e73aed20c1d9fc1176cd036b20dd15"
+      "git_blob_sha": "608eab9fdaa6944696d3491f35c168d65ff14eca"
     },
     {
       "path": "services/langgraph/agency/execution_fabric/skills.py",
@@ -736,7 +736,7 @@
     },
     {
       "path": "services/langgraph/pyproject.toml",
-      "git_blob_sha": "bd4972e57e468843ab7dfa4bfc7a30d1bd85b2e5"
+      "git_blob_sha": "b33b62dc9fe12bab66d017e05265bbb0286c97c5"
     },
     {
       "path": "services/langgraph/quality/brand_safety.py",
@@ -1209,6 +1209,30 @@
     {
       "path": "packages/creative-renderer/adapters/remotion.mjs",
       "git_blob_sha": "352cf2b63069ab5bdba8507b4742f860f8b6de8c"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/instruction_models.py",
+      "git_blob_sha": "c2b0e60a7aecd9b1bfaa68255b90167f1434e648"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/instructions.py",
+      "git_blob_sha": "98f76e73716632e67ed81bf9b4212afc0fedffa4"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/instruction_cli.py",
+      "git_blob_sha": "d3889e3cf8a527f060fcbf028c4d921faf2508b7"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/instructions.py",
+      "git_blob_sha": "3cd58c6c8dd68d54d24fa237f8ead2b07cb19082"
+    },
+    {
+      "path": "services/langgraph/persistence/runs.py",
+      "git_blob_sha": "f596b8f932d6944ac4bc1c7d7a0bb514c9309a61"
+    },
+    {
+      "path": "services/langgraph/agency/cli.py",
+      "git_blob_sha": "d12148fbb75c43e1a6d159d2dfce01f22f740888"
     }
   ]
 }
