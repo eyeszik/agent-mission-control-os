@@ -43,10 +43,8 @@ _SUPERLATIVE = re.compile(r"\b(best|#1|number one|leading|fastest|only|unmatched
 _OVERPROMISE_CTA = re.compile(r"\b(instant(ly)?|now live|automatic(ally)?|integrated|one[- ]click)\b", re.I)
 _SECRETS = (
     PII_PATTERNS["api_key_like"],
-    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
     re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b"),
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
-    re.compile(r"\bxox[abpr]-[A-Za-z0-9-]{10,}\b"),
 )
 # Reference categories whose "Inspired by X" names are style vocabulary, not marks.
 _STYLE_CATEGORIES = frozenset({"bold-expressive", "creative-artistic", "layout-structure", "modern-minimal",

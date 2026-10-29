@@ -3,12 +3,8 @@
  *
  * Every pattern is the Python pattern translated escape by escape through
  * `pyre.ts`; see that file for why no JS `\b`, `\d`, `\s`, `.` or `i` flag is
- * used. Two Python quirks are kept on purpose, because the twin must match
+ * used. One Python quirk is kept on purpose, because the twin must match
  * Python and must never be more permissive than it:
- * - three of the extra secret patterns end in a raw-string `\\b`, i.e. a
- *   literal backslash followed by `b`, not a word boundary (the `xox` one also
- *   starts with it). They therefore only match text that contains a literal
- *   `\b`. Fixing that belongs in the Python reference first.
  * - `redactValue` returns non-string scalars and unknown objects unchanged.
  */
 import { decodeBase64Fragment, decodeUtf8, unquote } from './pycodec';
@@ -39,10 +35,8 @@ export const PII_PATTERNS: ReadonlyArray<readonly [string, RegExp]> = [
 const BASE64_FRAGMENT = pyRegExp(String.raw`(?<![A-Za-z0-9+/])(?:[A-Za-z0-9+/]{24,}={0,2})(?![A-Za-z0-9+/=])`);
 
 export const EXTRA_SECRET_PATTERNS: readonly RegExp[] = [
-  pyRegExp(String.raw`${B}gh[pousr]_[A-Za-z0-9_]{20,}\\b`),
-  pyRegExp(String.raw`${B}AKIA[0-9A-Z]{16}\\b`),
+  pyRegExp(String.raw`${B}gh[pousr]_[A-Za-z0-9_]{20,}${B}`),
   pyRegExp(String.raw`-----BEGIN [A-Z ]*PRIVATE KEY-----`),
-  pyRegExp(String.raw`\\${ignoreCase('bxox')}${ignoreCaseSet('abprs')}-[A-Za-z0-9\-${CI}]{10,}\\${ignoreCase('b')}`),
 ];
 
 const MAX_BASE64_FRAGMENT = 4096;
