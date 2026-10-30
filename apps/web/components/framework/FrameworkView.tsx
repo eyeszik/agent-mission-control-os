@@ -59,7 +59,9 @@ function ModuleNavigator({ view, modules, selected, onSelect }: {
         <div key={d} className="flex flex-col gap-1">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-fg">{d} <span className="font-normal normal-case">· {ratioLabel(view.progress.disciplines[d])}</span></h4>
           <ul className="flex flex-col gap-1">
-            {modules.filter((m) => m.phase === d).map((m) => {
+            {/* ⚡ Bolt: Removed .filter().map() chain to prevent intermediate array allocation on every render */}
+            {modules.map((m) => {
+              if (m.phase !== d) return null;
               const c = view.progress.modules[m.module_id];
               const pct = ratioPercent(c);
               return (
