@@ -187,3 +187,12 @@ CI starts the real local stack, installs Chromium, executes the browser gate, an
 Production startup fails closed unless the required Supabase/Postgres/CORS configuration is valid. Publication must remain `disabled` or `dry_run`, and paid-media execution must remain `disabled`, until reviewed adapters are installed.
 
 Do not expose `AMC_AUTH_MODE=local` to a network. Production activation must use Supabase authentication, explicit membership assignment, a verified deployment binding, deployment-secret injection, and authenticated smoke tests as defined in the production activation runbook.
+
+## UNBOUND Innovation Foundry (development)
+
+Mission Control includes a project-scoped, explicitly simulated H02 innovation pipeline.
+It persists brief/run history, 35 authored fixture concepts, synthesis lineage, simulated
+evaluations and five unapproved experiment drafts through ProjectOS and durable ticks.
+Live generation, research and experiment execution remain unavailable. See the
+[integration ledger and runbook](docs/innovation/README.md) and
+[validation record](docs/innovation/validation.md). No public deployment is implied.

@@ -1,0 +1,245 @@
+{
+  "baseline_revision": "9f12745a8d566e794a9b6e286972ee2033e7d5ee",
+  "sources": [
+    {
+      "source_id": "H02-S01",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/security/auth.py",
+      "immutable_version": "sha256:2a2add4c867d3134c2eecbd8f49920bed5ec0866855052f143c128b021efbd11",
+      "locator": "services/langgraph/security/auth.py",
+      "observed_at": "2026-10-31T19:15:08.148363+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "2a2add4c867d3134c2eecbd8f49920bed5ec0866855052f143c128b021efbd11",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S02",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/persistence/database.py",
+      "immutable_version": "sha256:6f27f1c2a70a596210d9aeeb048177c129cd9fcca98269f5d8b93cb95d5647e3",
+      "locator": "services/langgraph/persistence/database.py",
+      "observed_at": "2026-10-31T19:15:08.148405+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "6f27f1c2a70a596210d9aeeb048177c129cd9fcca98269f5d8b93cb95d5647e3",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S03",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/persistence/projects.py",
+      "immutable_version": "sha256:49ceddbdc0cd4351ad96900eef6bbf87ecbcd4a4ddb5c7f9364c6bc98c69353f",
+      "locator": "services/langgraph/persistence/projects.py",
+      "observed_at": "2026-10-31T19:15:08.148459+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "49ceddbdc0cd4351ad96900eef6bbf87ecbcd4a4ddb5c7f9364c6bc98c69353f",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S04",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/agency/durable/ticks.py",
+      "immutable_version": "sha256:04dcc3da613ef63538e326613900de53bb7d47f6a6fe9f7ae178bce6c85aa5f7",
+      "locator": "services/langgraph/agency/durable/ticks.py",
+      "observed_at": "2026-10-31T19:15:08.148491+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "04dcc3da613ef63538e326613900de53bb7d47f6a6fe9f7ae178bce6c85aa5f7",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S05",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/agency/innovation/contracts.py",
+      "immutable_version": "sha256:4f2573c84bab90677bdf400558ed1680eccc00cca219ce3a75bba565c991fe70",
+      "locator": "services/langgraph/agency/innovation/contracts.py",
+      "observed_at": "2026-10-31T19:15:08.148514+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "4f2573c84bab90677bdf400558ed1680eccc00cca219ce3a75bba565c991fe70",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S06",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/agency/innovation/compiler.py",
+      "immutable_version": "sha256:91887b8907f55cceb72e2e60c87154947f7a4bb0750f9c6cff00293d94cccd55",
+      "locator": "services/langgraph/agency/innovation/compiler.py",
+      "observed_at": "2026-10-31T19:15:08.148535+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "91887b8907f55cceb72e2e60c87154947f7a4bb0750f9c6cff00293d94cccd55",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S07",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/agency/innovation/service.py",
+      "immutable_version": "sha256:eecac65c624bf4e9ba0b081eb2fc85b07e162d2a3e36eae69ce05ea728b3502c",
+      "locator": "services/langgraph/agency/innovation/service.py",
+      "observed_at": "2026-10-31T19:15:08.148559+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "eecac65c624bf4e9ba0b081eb2fc85b07e162d2a3e36eae69ce05ea728b3502c",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S08",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/api/routes/innovation.py",
+      "immutable_version": "sha256:6d5b6d5a2bcbd39617844286daf655af1101a3c6a7f72f8ef0ffab2e95cddbce",
+      "locator": "services/langgraph/api/routes/innovation.py",
+      "observed_at": "2026-10-31T19:15:08.148574+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "6d5b6d5a2bcbd39617844286daf655af1101a3c6a7f72f8ef0ffab2e95cddbce",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S09",
+      "source_kind": "repository_file",
+      "canonical_ref": "apps/web/components/innovation/InnovationFoundryPanel.tsx",
+      "immutable_version": "sha256:45efb1908d780a3d734d70061c3a2a838b14595c5f7d5392dd6aa9bbdf5e29c0",
+      "locator": "apps/web/components/innovation/InnovationFoundryPanel.tsx",
+      "observed_at": "2026-10-31T19:15:08.148624+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "45efb1908d780a3d734d70061c3a2a838b14595c5f7d5392dd6aa9bbdf5e29c0",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S10",
+      "source_kind": "repository_file",
+      "canonical_ref": "apps/web/e2e/innovation.spec.ts",
+      "immutable_version": "sha256:7999d1f36c21884eaf0349291176380ff4b58229c21d6f48006affecc2559326",
+      "locator": "apps/web/e2e/innovation.spec.ts",
+      "observed_at": "2026-10-31T19:15:08.148643+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "7999d1f36c21884eaf0349291176380ff4b58229c21d6f48006affecc2559326",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S11",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/tests/test_innovation_api.py",
+      "immutable_version": "sha256:e5e488c8a37f3b6c25ce909a9b043e7931a270ca21008787055bbfbe2e0916e9",
+      "locator": "services/langgraph/tests/test_innovation_api.py",
+      "observed_at": "2026-10-31T19:15:08.148664+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "e5e488c8a37f3b6c25ce909a9b043e7931a270ca21008787055bbfbe2e0916e9",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    },
+    {
+      "source_id": "H02-S12",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/tests/test_innovation_contracts.py",
+      "immutable_version": "sha256:c72041933cb1f8891056586988103049595442b4e19e5686812718714267f596",
+      "locator": "services/langgraph/tests/test_innovation_contracts.py",
+      "observed_at": "2026-10-31T19:15:08.148682+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "c72041933cb1f8891056586988103049595442b4e19e5686812718714267f596",
+      "tenant_id": null,
+      "project_id": null,
+      "authority": "repository implementation; not runtime approval",
+      "verification_method": "read source bytes; behavioral coverage recorded separately",
+      "verification_status": "REVIEWED",
+      "recheck": "Recompute on any byte change",
+      "limitations": [
+        "Candidate file identities are content-addressed; final Git revision is the commit containing this manifest.",
+        "Source review alone does not prove runtime correctness."
+      ]
+    }
+  ]
+}
