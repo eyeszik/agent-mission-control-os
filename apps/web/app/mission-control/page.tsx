@@ -14,6 +14,7 @@ import { ConsequentialLifecyclePanel } from "../../components/mission-control/Co
 import { ArtifactPreviewPanel } from "../../components/mission-control/ArtifactPreviewPanel";
 import { FileOrganizationPanel } from "../../components/mission-control/FileOrganizationPanel";
 import { DesignStyleComposerPanel } from "../../components/mission-control/DesignStyleComposerPanel";
+import { InnovationFoundryPanel } from "../../components/innovation/InnovationFoundryPanel";
 import { CreativeFoundryPanel } from "../../components/mission-control/CreativeFoundryPanel";
 import { VnexusStudio } from "../../components/mission-control/vnexus/VnexusStudio";
 import { ProjectWorkspacePanel } from "../../components/mission-control/ProjectWorkspacePanel";
@@ -28,7 +29,11 @@ export default function MissionControlPage() {
   const router = useRouter();
   const productionAuth = usesSupabaseAuth();
   const [ready, setReady] = useState(!productionAuth);
-  const [mode, setMode] = useState<'operations' | 'projects' | 'design' | 'foundry' | 'vnexus'>('operations');
+  const [mode, setMode] = useState<'operations' | 'projects' | 'design' | 'foundry' | 'vnexus' | 'innovation'>('operations');
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('mode') === 'innovation') setMode('innovation');
+  }, []);
 
   useEffect(() => {
     if (!productionAuth) return;
@@ -45,7 +50,7 @@ export default function MissionControlPage() {
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 min-w-0">
           <h1 className="text-zinc-100 font-medium tracking-tight whitespace-nowrap">Mission Control</h1>
           <div role="group" aria-label="Mission Control mode" className="flex flex-wrap rounded-md border border-zinc-800 p-0.5 bg-zinc-900/60">
-            {([["operations", "Operations"], ["projects", "Projects"], ["design", "Design Mode"], ["foundry", "Creative Foundry"], ["vnexus", "VNEXUS Studio"]] as const).map(([value, label]) => (
+            {([["operations", "Operations"], ["projects", "Projects"], ["design", "Design Mode"], ["foundry", "Creative Foundry"], ["innovation", "Innovation Foundry"], ["vnexus", "VNEXUS Studio"]] as const).map(([value, label]) => (
               <button
                 key={value}
                 type="button"
@@ -69,8 +74,10 @@ export default function MissionControlPage() {
         </div>
       </header>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
-        <div className="lg:col-span-3 flex flex-col gap-4"><CommandInputPanel /><ConsequentialLifecyclePanel /></div>
-        {mode === 'vnexus' ? (
+        <div className="lg:col-span-3 flex flex-col gap-4">{mode === 'innovation' ? <ProjectWorkspacePanel /> : <><CommandInputPanel /><ConsequentialLifecyclePanel /></>}</div>
+        {mode === 'innovation' ? (
+          <div className="lg:col-span-9 min-w-0"><InnovationFoundryPanel /></div>
+        ) : mode === 'vnexus' ? (
           <div className="lg:col-span-9 flex flex-col gap-4 min-h-0"><VnexusStudio /></div>
         ) : mode === 'foundry' ? (
           <div className="lg:col-span-9 flex flex-col gap-4 min-h-0"><CreativeFoundryPanel /></div>
