@@ -22,6 +22,7 @@ from services.langgraph.api.routes import (
     design,
     events,
     foundry,
+    innovation,
     rendering,
     missions,
     operations,
@@ -119,6 +120,7 @@ app.include_router(operations.router, prefix="/operations", tags=["Operations"])
 app.include_router(runtime.router, prefix="/runtime", tags=["Runtime"])
 app.include_router(design.router, prefix="/design", tags=["Design Mode"])
 app.include_router(foundry.router, prefix="/foundry", tags=["Creative Foundry"])
+app.include_router(innovation.router, prefix="/innovation", tags=["UNBOUND Innovation Foundry"])
 app.include_router(rendering.router, prefix="/foundry", tags=["Governed Rendering"])
 app.include_router(ucpo.router, prefix="/ucpo", tags=["Website Production Line"])
 app.include_router(avic.router, prefix="/avic", tags=["Visual Compiler (AVIC)"])
