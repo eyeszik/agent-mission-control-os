@@ -62,3 +62,7 @@
 ## 2026-11-20 - Reducing Complex Array Transformation Allocations
 **Learning:** When transforming an array inside a React render loop via chains like `.filter(c => c.status === 'FAIL').map(c => c.check).join(', ')`, chaining operations allocate intermediate arrays which are immediately discarded. Specifically, when you are outputting to a string (using `.join()`), replacing `.filter().map()` with a single `.map()` that returns `null` for filtered items is an anti-pattern, because `.join()` stringifies the nulls into "null".
 **Action:** Use a single zero-allocation pass with `.reduce()` (e.g., `acc.fails = acc.fails ? acc.fails + ', ' + c.check : c.check`) to construct the final string iteratively without any intermediate array allocations, reducing garbage collection pressure.
+
+## 2026-11-20 - Set Allocation from Filtered Arrays
+**Learning:** Using `new Set(array.filter(condition))` allocates an intermediate array just to populate the Set, creating unnecessary GC pressure.
+**Action:** Replace it with a zero-allocation `array.reduce((acc, item) => { if (condition) acc.add(item); return acc; }, new Set())`.
