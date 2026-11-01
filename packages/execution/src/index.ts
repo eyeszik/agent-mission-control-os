@@ -299,6 +299,7 @@ export async function canonicalRecordHash(model: ExecutionModelName, record: obj
 /** Python `proof_coverage_from`: share of criteria satisfied; empty is 0, never a guess. */
 export function proofCoverageFrom(criteria: readonly CompletionCriterionResult[]): number {
   if (criteria.length === 0) return 0;
-  const satisfied = criteria.filter((item) => item.status === 'SATISFIED').length;
+  // ⚡ Bolt: Use a zero-allocation reduce instead of .filter().length
+  const satisfied = criteria.reduce((acc, item) => acc + (item.status === 'SATISFIED' ? 1 : 0), 0);
   return satisfied / criteria.length;
 }

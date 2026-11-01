@@ -62,3 +62,7 @@
 ## 2026-11-20 - Reducing Complex Array Transformation Allocations
 **Learning:** When transforming an array inside a React render loop via chains like `.filter(c => c.status === 'FAIL').map(c => c.check).join(', ')`, chaining operations allocate intermediate arrays which are immediately discarded. Specifically, when you are outputting to a string (using `.join()`), replacing `.filter().map()` with a single `.map()` that returns `null` for filtered items is an anti-pattern, because `.join()` stringifies the nulls into "null".
 **Action:** Use a single zero-allocation pass with `.reduce()` (e.g., `acc.fails = acc.fails ? acc.fails + ', ' + c.check : c.check`) to construct the final string iteratively without any intermediate array allocations, reducing garbage collection pressure.
+
+## 2023-11-20 - Array Length Counting Optimization Tradeoff
+**Learning:** Replacing `.filter().length` with `.reduce()` to count items in small, short-lived arrays is an unmeasurable micro-optimization that sacrifices readability in modern JS engines. Only apply such zero-allocation array transformations if profiling proves a measurable garbage collection bottleneck on large datasets.
+**Action:** Do not make PRs that blindly replace `.filter().length` with `.reduce()` unless performance metrics (like memory allocation profiles) justify it for specific large data flows.

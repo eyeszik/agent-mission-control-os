@@ -300,7 +300,11 @@ export function assertTransition(
 /** States with no outbound edges. */
 export function terminalStates(entity: string): ReadonlySet<LifecycleStatus> {
   const tables = tablesOrKeyError(entity);
-  return new Set(tables.statuses.filter((state) => targetsOf(tables, state).length === 0));
+  // ⚡ Bolt: Use a zero-allocation reduce to avoid intermediate array allocation
+  return tables.statuses.reduce((acc, state) => {
+    if (targetsOf(tables, state).length === 0) acc.add(state);
+    return acc;
+  }, new Set<LifecycleStatus>());
 }
 
 function entityProblems(entity: LifecycleEntity): string[] {
