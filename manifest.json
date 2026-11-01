@@ -116,7 +116,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "git_blob_sha": "fa789a08a48b3f4ff09def4047cbd32f1ba90154"
+      "git_blob_sha": "f5eea33b43b2a82cd26c814728bbb43708b6f67f"
     },
     {
       "path": "packages/shared/src/schemas/ace-fixtures.json",
@@ -160,7 +160,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "e9a5fbcc335c4569960199581eb56816672a0322"
+      "git_blob_sha": "6cd95d6c3056b9e1928f9916389bb938b559ecdd"
     },
     {
       "path": "runtime/abc/run-fsm.yaml",
@@ -332,7 +332,7 @@
     },
     {
       "path": "services/langgraph/agency/execution_fabric/skills.py",
-      "git_blob_sha": "52780564ff7e9de9436a27d3f56ca7eba2744431"
+      "git_blob_sha": "3f4092944e027da5b866174ec52e74b67264d0f9"
     },
     {
       "path": "services/langgraph/agency/exporter.py",
@@ -452,7 +452,7 @@
     },
     {
       "path": "services/langgraph/agency/model_router.py",
-      "git_blob_sha": "791f8df08d2c9866082bbe951a6a68c347a15eca"
+      "git_blob_sha": "5790bbf905d7824e232ad09721d55c748f92c935"
     },
     {
       "path": "services/langgraph/agency/project_os/publishing.py",
@@ -1248,7 +1248,27 @@
     },
     {
       "path": "services/langgraph/api/routes/innovation.py",
-      "git_blob_sha": "bfe0e2528c8f0553b6ff94248b119a86b3c6a937"
+      "git_blob_sha": "229e04e37d11d1d39cb4759c6e27332499e527d9"
+    },
+    {
+      "path": "services/langgraph/agency/innovation/generation.py",
+      "git_blob_sha": "7a94d753291d4333b431a74e494beff7648798ab"
+    },
+    {
+      "path": "services/langgraph/agency/innovation/generation_service.py",
+      "git_blob_sha": "c49aec1e1141cdb8847569cedc596c4a5200bb76"
+    },
+    {
+      "path": "services/langgraph/agency/innovation/local_experiment.py",
+      "git_blob_sha": "7bcae0902c51e0ef1b7517a6401e1cc0fef8cc1c"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/adapters/innovation.py",
+      "git_blob_sha": "8275cf580028e10e4846ff906d559837f5c95767"
+    },
+    {
+      "path": "packages/shared/src/schemas/innovationCapabilities.ts",
+      "git_blob_sha": "f1654295f41b417d5ed946a4c288622e0350fa0a"
     }
   ]
 }

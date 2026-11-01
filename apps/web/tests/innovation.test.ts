@@ -29,3 +29,21 @@ describe('Innovation Foundry API boundary', () => {
     expect(JSON.parse(String(fetcher.mock.calls[0][1].body))).toEqual({ expected_version: 4, action: 'cancel' });
   });
 });
+
+describe('UNBOUND capability request boundaries', () => {
+  it('binds local computation to the displayed source version and rejects fake receipts', async () => {
+    const { runLocalExperiment } = await import('../lib/api/innovation');
+    const fetcher = vi.fn(async (_url: string, _options: RequestInit) => new Response(JSON.stringify({ status: 'COMPLETED', approval: true }), { status: 200 }));
+    vi.stubGlobal('fetch', fetcher);
+    await expect(runLocalExperiment('p/a', 'r/b', 7)).rejects.toThrow();
+    expect(String(fetcher.mock.calls[0][0])).toContain('/projects/p%2Fa/runs/r%2Fb/local-experiment');
+    expect(JSON.parse(String(fetcher.mock.calls[0][1].body))).toEqual({ expected_version: 7 });
+  });
+  it('prepares a generation intent without sending approval or permission fields', async () => {
+    const { prepareGenerationStage } = await import('../lib/api/innovation');
+    const fetcher = vi.fn(async (_url: string, _options: RequestInit) => malformed());
+    vi.stubGlobal('fetch', fetcher);
+    await expect(prepareGenerationStage('p', 'r', 3)).rejects.toThrow();
+    expect(JSON.parse(String(fetcher.mock.calls[0][1].body))).toEqual({ expected_version: 3 });
+  });
+});

@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { InnovationConcept, InnovationDetail, InnovationList, InnovationRun } from '@amc/shared';
 import { controlInnovationRun, createInnovationRun, getInnovationRun, listInnovationRuns, tickInnovationRun } from '../../lib/api/innovation';
+import { InnovationCapabilitiesPanel } from './InnovationCapabilitiesPanel';
 import { useProjectStore } from '../../lib/stores/projectStore';
 
-const VIEWS = ['Brief', 'Runs', 'Ideas', 'Lineage', 'Experiments', 'Evidence', 'Reviews', 'Results', 'Configuration'] as const;
+const VIEWS = ['Brief', 'Runs', 'Ideas', 'Lineage', 'Research', 'Evaluations', 'Experiments', 'Evidence', 'Reviews', 'Results', 'Configuration'] as const;
 type View = typeof VIEWS[number];
 const input = 'rounded-md border border-zinc-700 bg-zinc-950 p-2 text-zinc-100 focus-visible:ring-2 focus-visible:ring-emerald-400';
 const button = 'rounded-md border border-zinc-700 px-3 py-2 text-sm text-zinc-100 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-emerald-400';
@@ -44,6 +45,8 @@ function Results({ view, detail }: { view: View; detail: InnovationDetail }) {
     <p>Measurements: {e.measurements.join('; ')}</p><p>Disconfirmation: {e.falsification_criteria}</p><p>Success: {e.success_rule}</p><p>Stop: {e.stop_conditions.join('; ')}</p>
     <p className="text-amber-300">{e.execution_state} · approval {e.approval_state}. Experiment execution is unavailable.</p>
   </article>) : <p>No experiment drafts recorded.</p>}</div>;
+  if (view === 'Research') return <p>No research adapter has retrieved sources for this run. Generated hypotheses and fixture content remain unverified.</p>;
+  if (view === 'Evaluations') return <div className="space-y-2"><p>These are SIMULATED subjective scores, not provider-backed or independent judgments.</p>{run.evaluations.map((entry) => <div key={entry.concept_id}><p>{entry.concept_id}: {entry.composite}/5 · {entry.rubric_version}</p><p>{entry.reviewer_notes}</p></div>)}</div>;
   if (view === 'Evidence') return <p>No live evidence has been retrieved. Claims remain unverified. Simulation does not establish originality, market demand, or experiment outcomes.</p>;
   if (view === 'Reviews') return <div className="space-y-3"><p>No release or experiment approvals have been requested. This slice creates drafts only.</p><button className={button} disabled title="Experiment execution and approval linkage are not implemented">Approve experiment (unavailable)</button></div>;
   if (view === 'Configuration') return <dl className="space-y-2"><dt>Prompt version</dt><dd>{run.prompt_version}</dd><dt>Mode</dt><dd>{run.mode}</dd><dt>Provider</dt><dd>{run.simulation ? 'Deterministic offline simulation' : 'Unavailable live provider'}</dd><dt>Usage and cost</dt><dd>Not measured</dd><dt>External execution</dt><dd>Disabled</dd></dl>;
@@ -56,6 +59,7 @@ export function InnovationFoundryPanel() {
   const [view, setView] = useState<View>('Brief');
   const [objective, setObjective] = useState('');
   const [mode, setMode] = useState<'AUTO' | 'GENERAL' | 'VENTURE' | 'HYBRID'>('AUTO');
+  const [provider, setProvider] = useState<'simulated' | 'live'>('simulated');
   const [constraints, setConstraints] = useState('');
   const [runs, setRuns] = useState<InnovationList | null>(null);
   const [detail, setDetail] = useState<InnovationDetail | null>(null);
@@ -119,7 +123,7 @@ export function InnovationFoundryPanel() {
       let result: InnovationDetail;
       if (kind === 'start') {
         submissionKey.current ??= crypto.randomUUID();
-        result = await createInnovationRun(target, { objective, mode, provider: 'simulated', constraints: constraints.split('\n').map((v) => v.trim()).filter(Boolean) }, submissionKey.current, controller.signal);
+        result = await createInnovationRun(target, { objective, mode, provider, constraints: constraints.split('\n').map((v) => v.trim()).filter(Boolean) }, submissionKey.current, controller.signal);
         submissionKey.current = null;
       } else {
         if (!detail) return;
@@ -139,12 +143,12 @@ export function InnovationFoundryPanel() {
   const paused = detail?.run.status === 'PAUSED';
   return <section aria-labelledby="innovation-title" className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-4 text-sm min-w-0">
     <h2 id="innovation-title" className="text-lg text-zinc-100">UNBOUND Innovation Foundry</h2>
-    <p className="text-amber-300">SIMULATED development preview. Experiment execution, live research, and external actions are disabled.</p>
+    <p className="text-amber-300">Fixture runs remain SIMULATED. Provider-backed generation needs exact approval and an eligible provider. Local lexical computation is separate; external experiments and live research remain unavailable.</p>
     {!project ? <p>Select a project in Project Workspace to begin.</p> : <>
       <nav aria-label="Innovation Foundry views" className="flex flex-wrap gap-2">{VIEWS.map((entry) => <button key={entry} className={button} aria-pressed={view === entry} onClick={() => setView(entry)}>{entry}</button>)}</nav>
       {busy && <p role="status">Saving bounded operation…</p>}{error && <p role="alert" className="text-rose-300">{error}</p>}
-      {detail && <div className="space-y-2"><p role="status">{detail.run.status} · {detail.run.phase} · version {detail.version}</p><div className="flex flex-wrap gap-2">
-        <button className={button} disabled={busy || !received} onClick={() => void perform('tick')}>Advance simulation</button>
+      {detail && <div className="space-y-2"><p role="status">{detail.run.simulation ? 'Fixture pipeline ' : 'Brief state '}{detail.run.status} · {detail.run.phase} · version {detail.version}</p><div className="flex flex-wrap gap-2">
+        <button className={button} disabled={busy || !received || !detail?.run.simulation} onClick={() => void perform('tick')}>Advance simulation</button>
         <button className={button} disabled={busy || !received} onClick={() => void perform('pause')}>Pause</button>
         <button className={button} disabled={busy || !paused} onClick={() => void perform('resume')}>Resume</button>
         <button className={button} disabled={busy || !(received || paused)} onClick={() => void perform('cancel')}>Cancel</button>
@@ -152,10 +156,12 @@ export function InnovationFoundryPanel() {
       {view === 'Brief' ? <form className="grid gap-3" onSubmit={(event) => { event.preventDefault(); void perform('start'); }}>
         <label className="grid gap-1">Innovation objective<textarea className={input} minLength={10} maxLength={4000} required value={objective} onChange={(event) => { setObjective(event.target.value); submissionKey.current = null; }} /></label>
         <label className="grid gap-1">Innovation mode<select className={input} value={mode} onChange={(event) => { setMode(event.target.value as typeof mode); submissionKey.current = null; }}>{['AUTO', 'GENERAL', 'VENTURE', 'HYBRID'].map((value) => <option key={value}>{value}</option>)}</select></label>
+        <label className="grid gap-1">Generation source<select className={input} value={provider} onChange={(event) => { setProvider(event.target.value as typeof provider); submissionKey.current = null; }}><option value="simulated">SIMULATED offline fixtures</option><option value="live">Provider-backed generation (approval required)</option></select></label>
         <label className="grid gap-1">Constraints (one per line, up to 20)<textarea className={input} value={constraints} onChange={(event) => { setConstraints(event.target.value); submissionKey.current = null; }} /></label>
-        <button className={button} disabled={busy || objective.trim().length < 10}>Start simulated run</button>
+        <button className={button} disabled={busy || objective.trim().length < 10}>{provider === 'simulated' ? 'Start simulated run' : 'Save live-generation brief'}</button>
         <p>Start persists the brief. Advance simulation performs an explicit bounded tick; no background scheduler is claimed.</p>
       </form> : view === 'Runs' ? <div className="space-y-2"><h3>Persisted run history</h3><button className={button} disabled={busy} onClick={() => setRefresh((n) => n + 1)}>Refresh history</button>{runs ? <><p>{runs.total} persisted runs · showing first 20</p><ul className="space-y-2">{runs.runs.map((run) => <li key={run.run_id}><button className={`${button} text-left break-words w-full`} disabled={busy} onClick={() => { setSelected(run.run_id); setView('Results'); }}>{run.objective} · {run.status} · {run.simulation ? 'SIMULATED' : 'PROVIDER_GAP'}</button></li>)}</ul>{runs.total === 0 && <p>No runs yet.</p>}</> : <p role="status">Loading run history…</p>}</div> : detail ? <Results view={view} detail={detail} /> : <p>Select a persisted run from Runs, or start a new brief.</p>}
+      {detail && <InnovationCapabilitiesPanel key={`${project}:${detail.run.run_id}:${detail.version}`} project={project} detail={detail} />}
     </>}
   </section>;
 }

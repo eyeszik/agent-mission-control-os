@@ -19,7 +19,7 @@ from services.langgraph.agency.kernel.ontology import ArtifactType, Capability
 from services.langgraph.agency.skills.dispatcher import Skill, register_skill
 from services.langgraph.integrations.zo import zo_available
 
-from .adapters import brand, cinematic, code_sandbox, seo, uiux
+from .adapters import brand, cinematic, code_sandbox, innovation, seo, uiux
 from .verifiers import Verdict
 
 
@@ -69,6 +69,7 @@ def sandbox_blocker(requirement: str) -> str | None:
 
 Validator = Callable[[dict[str, Any], dict[str, Any]], Verdict]
 VALIDATORS: dict[str, Validator] = {
+    innovation.VALIDATOR_ID: innovation.verify_measurement,
     "svg_safety": brand.validate_svg,
     "palette_delta_e": brand.validate_palette,
     "dtcg_recompile": brand.validate_dtcg,
@@ -93,6 +94,9 @@ def _spec(skill_id, capability, produces, handler, description, **meta) -> Skill
 FABRIC_SKILLS: dict[str, SkillSpec] = {
     s.skill.skill_id: s
     for s in (
+        _spec(innovation.SKILL_ID, Capability.research_synthesis, ArtifactType.research_brief, innovation.lexical_measurement,
+              "Actual bounded lexical-normalization counts over disclosed local input; no semantic or market claims.",
+              side_effect_class="DRAFT", validator_ids=(innovation.VALIDATOR_ID,), timeout_class="FAST"),
         _spec("brand_logo_svg", Capability.art_direction, ArtifactType.media_asset, brand.brand_logo_svg,
               "Deterministic SVG mark from the brand capsule (agency.assets.render_logo_svg).",
               side_effect_class="DRAFT", validator_ids=("svg_safety", "palette_delta_e"), timeout_class="FAST"),

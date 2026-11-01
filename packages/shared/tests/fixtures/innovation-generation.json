@@ -1,0 +1,38 @@
+{
+  "schema_version": "unbound-generation-stage/v1",
+  "artifact_id": "art-plan",
+  "version": 1,
+  "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "job_id": "job-fixture",
+  "spec": {
+    "schema_version": "unbound.generation-spec/v1",
+    "run_id": "ir-fixture",
+    "source_artifact_id": "art-fixture",
+    "source_version": 1,
+    "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "brief_hash": "2adef237c56d7539d53796afbf17f2d0e6dcd026603153ca466dbb41b09cfd0e",
+    "provider_profile": {
+      "schema_version": "amc.model-profile/v1",
+      "source": "deployment",
+      "primary": {
+        "provider": "openai",
+        "model": "gpt-4o-mini"
+      },
+      "fallbacks": []
+    },
+    "profile_hash": "59fa0d936232347ef7165c71d7f89d2ffae4536db7057b1a9eec61c0af75fb80",
+    "prompt_version": "unbound-raw-ideas/v1",
+    "graph_version": "unbound-generation/v1",
+    "max_output_tokens": 8192,
+    "max_prompt_bytes": 60000,
+    "max_calls": 1,
+    "timeout_seconds": 30,
+    "max_cost_usd": 0.0
+  },
+  "approval": null,
+  "status": "BLOCKED",
+  "reasons": [
+    "CREDENTIALS_UNAVAILABLE_OR_PROVIDER_REVOKED"
+  ],
+  "output": null
+}
