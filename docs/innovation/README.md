@@ -1,5 +1,8 @@
 # UNBOUND Innovation Foundry — H02 development slice
 
+This page records the original PR #199 slice. See [the v3 capability increment](v3.md)
+and [its validation report](v3-validation.md) for the newer, separately scoped work.
+
 Baseline: `9f12745a8d566e794a9b6e286972ee2033e7d5ee` (`master`, inspected 2026-10-31).
 This is a reversible development feature, not production activation or a new agency runtime.
 

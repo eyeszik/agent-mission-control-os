@@ -41,3 +41,44 @@ def tick(project_id: str, run_id: str, req: TickRequest, principal: Principal = 
 @domain_errors
 def control(project_id: str, run_id: str, req: ControlRequest, principal: Principal = Depends(get_principal)) -> dict:
     return service.control_run(principal, project_id, run_id, req, storage_adapter())
+
+
+# V3 generation plans are separate versioned artifacts; v1 fixture bytes stay intact.
+from services.langgraph.agency.innovation import generation_service
+from services.langgraph.agency.innovation.generation_service import GenerationEnvelope
+
+
+@router.post("/projects/{project_id}/runs/{run_id}/generation", response_model=GenerationEnvelope)
+@domain_errors
+def prepare_generation(project_id: str, run_id: str, req: TickRequest, principal: Principal = Depends(get_principal)) -> dict:
+    return generation_service.prepare_generation(principal, project_id, run_id, req.expected_version, storage_adapter())
+
+
+@router.get("/projects/{project_id}/runs/{run_id}/generation", response_model=GenerationEnvelope)
+@domain_errors
+def generation(project_id: str, run_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return generation_service.get_generation(principal, project_id, run_id, storage_adapter())
+
+
+@router.post("/projects/{project_id}/runs/{run_id}/generation/tick", response_model=GenerationEnvelope)
+@domain_errors
+def tick_generation(project_id: str, run_id: str, req: TickRequest, principal: Principal = Depends(get_principal)) -> dict:
+    return generation_service.tick_generation(principal, project_id, run_id, req.expected_version, storage_adapter())
+
+
+from services.langgraph.agency.innovation.local_experiment import (
+    LocalExperimentReport, read_report, run_local_experiment,
+)
+
+
+@router.post("/projects/{project_id}/runs/{run_id}/local-experiment", response_model=LocalExperimentReport)
+@domain_errors
+def execute_local(project_id: str, run_id: str, req: TickRequest, principal: Principal = Depends(get_principal)) -> dict:
+    return run_local_experiment(principal, project_id, run_id, req.expected_version, storage_adapter())
+
+
+@router.get("/projects/{project_id}/runs/{run_id}/local-experiment", response_model=LocalExperimentReport)
+@domain_errors
+def local_report(project_id: str, run_id: str, expected_version: int = Query(..., ge=1, le=2**31 - 1),
+                 principal: Principal = Depends(get_principal)) -> dict:
+    return read_report(principal, project_id, run_id, expected_version, storage_adapter())

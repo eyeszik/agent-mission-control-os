@@ -241,5 +241,7 @@
         "Source review alone does not prove runtime correctness."
       ]
     }
-  ]
+  ],
+  "recorded_revision": "6bfc3c9a83abc5b5c495a8d511d2a27c56c6c26b",
+  "scope": "Historical source observations from PR #199; not a current-byte assertion for later increments."
 }

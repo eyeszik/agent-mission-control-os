@@ -196,3 +196,8 @@ evaluations and five unapproved experiment drafts through ProjectOS and durable 
 Live generation, research and experiment execution remain unavailable. See the
 [integration ledger and runbook](docs/innovation/README.md) and
 [validation record](docs/innovation/validation.md). No public deployment is implied.
+
+The [v3 capability increment](docs/innovation/v3.md) adds exact generation intents and
+canonical approval checks, a one-call local model adapter, and actual bounded lexical
+experiments with execution receipts and learning. Live model availability, research,
+general concept experimentation, production release and public HTTPS remain separate gates.

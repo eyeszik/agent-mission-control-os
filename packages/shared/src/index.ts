@@ -26,3 +26,4 @@ export * from './schemas/vnexusDirections';
 export * from './schemas/instructions';
 
 export * from './schemas/innovation';
+export * from './schemas/innovationCapabilities';

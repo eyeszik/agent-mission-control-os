@@ -184,8 +184,10 @@ class HttpModelAdapter:
         else:
             body = {
                 "model": model, "messages": [{"role": "user", "content": prompt}],
-                "stream": False, "options": {"temperature": temperature},
+                "stream": False, "options": {"temperature": temperature, "num_predict": max_output_tokens},
             }
+            if json_output:
+                body["format"] = "json"
             if tools:
                 body["tools"] = [
                     {"type": "function", "function": {
@@ -255,6 +257,8 @@ class HttpModelAdapter:
                     + int(usage.get("thoughtsTokenCount") or 0),
                 ) if usage else {}
             else:
+                if payload.get("done_reason") == "length":
+                    stop = "OUTPUT_TRUNCATED"
                 message = payload["message"]
                 text = message.get("content") or ""
                 calls = _tool_message(message.get("tool_calls"))
