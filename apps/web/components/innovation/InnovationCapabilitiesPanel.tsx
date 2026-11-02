@@ -30,7 +30,7 @@ function Generation({ stage }: { stage: InnovationGenerationStage }) {
     <p>Generation stage: {stage.status}. Plan version {stage.version}.</p>
     <p>Target: {stage.spec.provider_profile.primary.provider} / {stage.spec.provider_profile.primary.model}</p>
     <p>Limits: {stage.spec.max_calls} call; {stage.spec.max_output_tokens} output tokens; {stage.spec.timeout_seconds}s timeout; ${stage.spec.max_cost_usd} paid API ceiling. Remote pricing enforcement is unavailable.</p>
-    <p>Approval: {stage.approval?.status ?? 'NOT_REQUESTED'}{stage.approval?.decision ? ` / ${stage.approval.decision}` : ''}. Separate approval authority is enforced by the server.</p>
+    <p>Approval: {stage.approval?.status ?? 'NOT_REQUESTED'}{stage.approval?.decision ? ` / ${stage.approval.decision}` : ''}. {stage.approval?.policy_version === 'unbound-local-owner/v1' ? 'Solo-owner approval: this exact local generation plan only; no release or external-effect authority.' : 'Separate approval authority is enforced by the server.'}</p>
     {stage.reasons.length > 0 && <ul aria-label="Generation blockers">{stage.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>}
     {stage.output && <><p>{stage.output.state}: {stage.output.ideas.length} model-generated hypotheses, {stage.output.coverage.length}/12 lenses. This is not a researched or completed innovation run.</p>
       <p>Invocation receipt: {stage.output.receipt?.outcome ?? 'NONE'}. Reported usage: {stage.output.receipt?.usage ? JSON.stringify(stage.output.receipt.usage) : 'UNKNOWN'}. Monetary cost: UNKNOWN.</p>

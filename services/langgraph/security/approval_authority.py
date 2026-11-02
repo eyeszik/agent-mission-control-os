@@ -63,6 +63,13 @@ def assert_may_decide(principal: Principal, initiator: str | None, decision: str
 
 
 def assert_may_decide_approval(principal: Principal, run: dict, decision: str, approval: dict | None = None) -> None:
+    # A separately authorized, opt-in policy applies only to one exact local
+    # generation plan. The global self-approval switch is not used for it.
+    from services.langgraph.security.local_generation_approval import SOLO_POLICY, permits_owner
+    if approval and approval.get("policy_version") == SOLO_POLICY and decision == "approve":
+        if principal.role.strip().lower() not in approver_roles() or not permits_owner(principal, run, approval):
+            raise HTTPException(status_code=403, detail="Local generation owner approval requirements are not satisfied")
+        return
     assert_may_decide(principal, run_initiator(run), decision, subject="run")
     if approval is None:
         return

@@ -32,6 +32,8 @@ from .contracts import Contract, InnovationBrief
 from .generation import GenerationResult, GenerationSpec, create_spec, invoke_generation, provider_blocker
 from .service import _read, _check_version, MAX_BYTES
 
+from services.langgraph.security.local_generation_approval import SOLO_POLICY, enabled as solo_enabled, permits_owner
+
 POLICY = "unbound-generation/v1"
 KIND = "unbound_live_generation"
 PURPOSE = "INNOVATION_GENERATION"
@@ -42,6 +44,7 @@ class GenerationPlan(Contract):
     run_id: str
     brief: InnovationBrief
     spec: GenerationSpec
+    approval_mode: Literal["independent", "solo_owner_local"] = "independent"
 
     @model_validator(mode="after")
     def bind_brief(self):
@@ -101,7 +104,7 @@ def _read_bytes(head: dict, adapter: StorageAdapter) -> bytes:
 def _approval(head: dict, project: str) -> dict | None:
     approvals = list_approvals_for_subject_refs(project, [head["artifact_id"]])
     matching = [a for a in approvals if a.get("subject_hash") == head["content_hash"] and a.get("subject_version_ref") == str(head["version"])
-                and a.get("subject_type") == PURPOSE and a.get("policy_version") == POLICY]
+                and a.get("subject_type") == PURPOSE and a.get("policy_version") in {POLICY, SOLO_POLICY}]
     return next((a for a in matching if a.get("status") == "resolved" and a.get("decision") == "approve"), matching[-1] if matching else None)
 
 
@@ -121,11 +124,19 @@ def _reasons(principal: Principal, project: str, plan: GenerationPlan, head: dic
         verdict = artifact_release_verdict(simulated=False, verification_passed=True, artifact_id=head["artifact_id"],
             verified_version=int(head["version"]), verified_hash=head["content_hash"], approval_id=approval["approval_id"],
             tenant_id=principal.tenant_id, project_id=project)
-        reasons.extend(verdict.reasons)
+        anchor = get_run_record(approval["run_id"])
+        owner_exception = bool(plan.approval_mode == "solo_owner_local" and anchor
+                               and permits_owner(principal, anchor, approval))
+        expected_policy = SOLO_POLICY if plan.approval_mode == "solo_owner_local" else POLICY
+        if approval.get("policy_version") != expected_policy:
+            reasons.append("APPROVAL_POLICY_MISMATCH")
+        if plan.approval_mode == "solo_owner_local" and not owner_exception:
+            reasons.append("SOLO_OWNER_POLICY_NOT_SATISFIED")
+        reasons.extend(r for r in verdict.reasons if not (owner_exception and r == "SEPARATION_OF_DUTIES"))
         if approval.get("status") == "resolved" and approval.get("decision") == "approve":
             anchor = get_run_record(approval["run_id"])
             initiator = run_initiator(anchor) if anchor else None
-            if not initiator or not approval.get("reviewer") or approval["reviewer"] == initiator:
+            if not initiator or not approval.get("reviewer") or (approval["reviewer"] == initiator and not owner_exception):
                 reasons.append("GENERATION_SEPARATION_OF_DUTIES")
         if approval.get("subject_ref") != head["artifact_id"]:
             reasons.append("APPROVAL_TARGET_MISMATCH")
@@ -173,7 +184,8 @@ def prepare_generation(principal: Principal, project: str, run_id: str, expected
         existing = get_artifact(project_artifact_id(project, _key(run_id)))
         if existing is None:
             spec = create_spec(document.brief, run_id, source["artifact_id"], int(source["version"]), source["content_hash"])
-            plan = GenerationPlan(run_id=run_id, brief=document.brief, spec=spec)
+            mode = "solo_owner_local" if solo_enabled() and principal.role.strip().lower() == "owner" and spec.provider_profile.primary.provider == "ollama" else "independent"
+            plan = GenerationPlan(run_id=run_id, brief=document.brief, spec=spec, approval_mode=mode)
             created = create_project_artifact(tenant_id=principal.tenant_id, project_id=project, actor=principal.user_id,
                 artifact_key=_key(run_id), artifact_type="research_brief", subtype="innovation_generation_plan", adapter=adapter,
                 content_text=plan.model_dump_json(), depends_on=(source["artifact_id"],), v2={"mime_type": "application/json", "media_type": "data"})
@@ -181,17 +193,18 @@ def prepare_generation(principal: Principal, project: str, run_id: str, expected
             durable_runs.create_job(tenant_id=principal.tenant_id, project_id=project, kind=KIND,
                 spec={"run_id": run_id, "plan_hash": existing["content_hash"]}, spec_hash=existing["content_hash"],
                 requested_by=principal.user_id, due_at=datetime.now(timezone.utc), max_attempts=1, job_id=_key(run_id))
-        _open_approval(principal, project, run_id, existing)
+        plan = GenerationPlan.model_validate_json(_read_bytes(existing, adapter))
+        _open_approval(principal, project, run_id, existing, plan)
     return get_generation(principal, project, run_id, adapter)
 
 
-def _open_approval(principal, project, run_id, head):
+def _open_approval(principal, project, run_id, head, plan):
     if _approval(head, project) is not None:
         return
     open_artifact_approval(principal, tenant_id=principal.tenant_id, project_id=project,
         mission_id=f"{project}:{run_id}:generation", contract_hash=head["content_hash"], artifact_id=head["artifact_id"],
         version=int(head["version"]), content_hash=head["content_hash"], run_pipeline="innovation_generation",
-        policy_version=POLICY, subject_type=PURPOSE,
+        policy_version=SOLO_POLICY if plan.approval_mode == "solo_owner_local" else POLICY, subject_type=PURPOSE,
         reason="Authorize exactly one model invocation of the immutable generation plan; this is not artifact-release approval",
         metadata={"approval_policy": {PURPOSE: {"no_self_approval": True}}})
 
