@@ -145,8 +145,8 @@ importers:
         specifier: 4.0.539
         version: 4.0.539(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@svgdotjs/svg.js':
-        specifier: 3.2.4
-        version: 3.2.4
+        specifier: 3.2.8
+        version: 3.2.8
       p5:
         specifier: 2.3.4
         version: 2.3.4
@@ -893,8 +893,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@svgdotjs/svg.js@3.2.4':
-    resolution: {integrity: sha512-BjJ/7vWNowlX3Z8O4ywT58DqbNRyYlkk6Yz/D13aB7hGmfQTvGX4Tkgtm/ApYlu9M7lCQi15xUEidqMUmdMYwg==}
+  '@svgdotjs/svg.js@3.2.8':
+    resolution: {integrity: sha512-NUdbI/7FDdqGpzKmqr09IQoy9MUcrAC/3bC8gLgXi6OfJuyri450zMLvJekFUhuq3iN5gpdPjoSoStNl9Eijfg==}
 
   '@swc/helpers@0.5.23':
     resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
@@ -2289,7 +2289,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@svgdotjs/svg.js@3.2.4': {}
+  '@svgdotjs/svg.js@3.2.8': {}
 
   '@swc/helpers@0.5.23':
     dependencies:
