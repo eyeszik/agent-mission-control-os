@@ -13,7 +13,7 @@
     "@motion-canvas/core": "3.17.2",
     "@react-three/fiber": "9.8.2",
     "@remotion/player": "4.0.539",
-    "@svgdotjs/svg.js": "3.2.4",
+    "@svgdotjs/svg.js": "3.2.8",
     "p5": "2.3.4",
     "paper": "0.12.18",
     "pixi.js": "8.22.0",
