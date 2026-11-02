@@ -11,7 +11,7 @@
   "dependencies": {
     "@motion-canvas/2d": "3.17.2",
     "@motion-canvas/core": "3.17.2",
-    "@react-three/fiber": "9.4.0",
+    "@react-three/fiber": "9.8.2",
     "@remotion/player": "4.0.539",
     "@svgdotjs/svg.js": "3.2.4",
     "p5": "2.3.4",
