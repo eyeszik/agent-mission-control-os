@@ -7,7 +7,7 @@ from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffec
 from services.langgraph.app.runtime_support import trust_kernel
 from services.langgraph.persistence.projects import record_run_activity
 from services.langgraph.persistence.analytics import emit_lifecycle_event
-from services.langgraph.persistence.approvals import get_approval, list_pending_approvals, resolve_approval
+from services.langgraph.persistence.approvals import FramingAcknowledgementRequired, get_approval, list_pending_approvals, resolve_approval
 from services.langgraph.persistence.events import record_event
 from services.langgraph.persistence.idempotency import (
     complete_idempotency,
@@ -25,6 +25,7 @@ IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
 
 class ApprovalDecision(BaseModel):
     decision: str  # "approve" | "reject"
+    framing_acknowledged: bool = False  # ASI09: reviewer has read the framing warning on a HIGH summary
 
 
 def _scope(principal: Principal, approval_id: str) -> str:
@@ -109,11 +110,17 @@ def decide_approval(
         trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=None, status=IdempotencyStatus.FAILED)
         raise HTTPException(status_code=409, detail="Approval is stale and must be regenerated")
 
-    resolved = resolve_approval(
-        approval_id,
-        reviewer=principal.user_id,
-        decision=body.decision,
-    )
+    try:
+        resolved = resolve_approval(
+            approval_id,
+            reviewer=principal.user_id,
+            decision=body.decision,
+            framing_acknowledged=body.framing_acknowledged,
+        )
+    except FramingAcknowledgementRequired as exc:
+        fail_idempotency(scope, idempotency_key, "framing_acknowledgement_required")
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=None, status=IdempotencyStatus.FAILED)
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     if not resolved:
         fail_idempotency(scope, idempotency_key, "approval_terminal")
         trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=None, status=IdempotencyStatus.FAILED)

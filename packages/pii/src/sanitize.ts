@@ -2,12 +2,12 @@
  * Twin of `services/langgraph/security/sanitize.py` (Python is the reference).
  *
  * Heuristic prompt-injection and `<script>` stripping. Python's `(?i)` and
- * `\b` are translated through `pyre.ts`, and `.` becomes `PY_DOT` (anything
- * but `\n`, as in Python, rather than JS's narrower `.`).
+ * `\\b` are translated through `pyre.ts`, and `.` becomes `PY_DOT` (anything
+ * but `\\n`, as in Python, rather than JS's narrower `.`).
  *
- * Python's recursion shape is kept exactly, gaps included: strings inside
- * lists are NOT sanitized and nested lists are not walked; only dicts found
- * directly in a list are. Widening that belongs in the Python reference first.
+ * Recursion matches the Python reference: every string inside nested dicts,
+ * lists and lists-of-lists is sanitized. Script tags are stripped in any case
+ * and until stable, so nested fragments cannot reassemble a tag.
  */
 import { PY_BOUNDARY as B, PY_DOT, ignoreCase, pyRegExp, pySearch, pySub } from './pyre';
 import { isPlainObject } from './pii';
@@ -22,21 +22,31 @@ export const INJECTION_PATTERNS: readonly RegExp[] = [
 
 export const INJECTION_REPLACEMENT = '[MALICIOUS_INTENT_REDACTED]';
 
+/** Any script open/close tag, any case, with attributes (Python `_SCRIPT_TAG`). */
+const SCRIPT_TAG = pyRegExp(`</?${ignoreCase('script')}${B}[^>]*>`);
+
+function stripScriptTags(text: string): string {
+  let previous: string | null = null;
+  let current = text;
+  while (previous !== current) {
+    previous = current;
+    current = pySub(SCRIPT_TAG, '', current);
+  }
+  return current;
+}
+
 function sanitizeString(value: string): string {
   let clean = value;
   for (const pattern of INJECTION_PATTERNS) {
     if (pySearch(pattern, clean)) clean = pySub(pattern, INJECTION_REPLACEMENT, clean);
   }
-  // Basic XSS stripping: one pass each, exactly like Python's str.replace.
-  return clean.replaceAll('<script>', '').replaceAll('</script>', '');
+  return stripScriptTags(clean);
 }
 
 function sanitizeEntry(value: unknown): unknown {
   if (typeof value === 'string') return sanitizeString(value);
   if (isPlainObject(value)) return sanitizeInput(value);
-  if (Array.isArray(value)) {
-    return value.map((item: unknown) => (isPlainObject(item) ? sanitizeInput(item) : item));
-  }
+  if (Array.isArray(value)) return value.map((item: unknown) => sanitizeEntry(item));
   return value;
 }
 

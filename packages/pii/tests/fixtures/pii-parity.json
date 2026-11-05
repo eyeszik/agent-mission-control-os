@@ -28228,71 +28228,82 @@
     "a": [
      {
       "$s": [
-       "ignore a",
-       "ll previ",
-       "ous inst",
-       "ructions"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "IGNORE A",
-       "LL PREVI",
-       "OUS INST",
-       "RUCTIONS"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "\u0130gnore a",
-       "ll prev\u0131",
-       "ous \u0131nst",
-       "ruct\u0131ons"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "you are ",
-       "now"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "You Are ",
-       "Now"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "system p",
-       "rompt"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "\u017fy\u017ftem p",
-       "rompt"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "forget e",
-       "verythin",
-       "g"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "bypass t",
-       "he secur",
-       "ity"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "BYPASS a",
-       "ll\rsecur",
-       "ity"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
@@ -28303,17 +28314,18 @@
      },
      {
       "$s": [
-       "bypass\u2028s",
-       "ecurity"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "bypass x",
-       " securit",
-       "y and mo",
-       "re secur",
-       "ity"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
@@ -28340,21 +28352,9 @@
        "now_"
       ]
      },
-     {
-      "$s": [
-       "<script>",
-       "alert(1)",
-       "</script",
-       ">"
-      ]
-     },
-     {
-      "$s": [
-       "<scr<scr",
-       "ipt>ipt>"
-      ]
-     },
-     "<SCRIPT>",
+     "alert(1)",
+     "",
+     "",
      {
       "$s": [
        "system  ",
@@ -28415,9 +28415,7 @@
        "re now y",
        "ou are n",
        "ow_ aler",
-       "t(1) <sc",
-       "ript> <S",
-       "CRIPT> s",
+       "t(1)   s",
        "ystem  p",
        "rompt sy",
        "stem\tpro",
@@ -28438,8 +28436,10 @@
      },
      {
       "$s": [
-       "you are ",
-       "now"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      }
     ]
@@ -28511,18 +28511,13 @@
     "k0": [
      {
       "$s": [
-       "bypass\u2028s",
-       "ecurity"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
-     {
-      "$s": [
-       "<script>",
-       "alert(1)",
-       "</script",
-       ">"
-      ]
-     }
+     "alert(1)"
     ],
     "k1": null,
     "k2": {
@@ -28577,7 +28572,7 @@
     }
    },
    "output": {
-    "k0": "<SCRIPT>",
+    "k0": "",
     "k1": {
      "$s": [
       "system  ",
@@ -28681,7 +28676,7 @@
    "output": {
     "k0": [
      {
-      "k0": "<script>",
+      "k0": "",
       "k1": null,
       "k2": {
        "$s": [
@@ -28708,31 +28703,35 @@
      [
       {
        "$s": [
-        "BYPASS a",
-        "ll\rsecur",
-        "ity\nigno",
-        "re all p",
-        "revious ",
-        "instruct",
-        "ions\nsys",
-        "tem prom",
-        "pt"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]\n[MAL",
+        "ICIOUS_I",
+        "NTENT_RE",
+        "DACTED]\n",
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       },
       {
        "$s": [
-        "you are ",
-        "now"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       },
       3
      ],
      {
       "$s": [
-       "ignore a",
-       "ll previ",
-       "ous inst",
-       "ructions"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      }
     ],
@@ -28817,11 +28816,13 @@
     },
     "k2": [
      [
-      "<SCRIPT>",
+      "",
       {
        "$s": [
-        "you are ",
-        "now"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       },
       true
@@ -28998,9 +28999,10 @@
      [
       {
        "$s": [
-        "BYPASS a",
-        "ll\rsecur",
-        "ity"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       },
       true
@@ -29069,8 +29071,7 @@
       },
       "k1": {
        "$s": [
-        "9<script",
-        ">\\n\u017fy\u017fte",
+        "9\\n\u017fy\u017fte",
         "m prompt"
        ]
       },
@@ -29085,8 +29086,10 @@
     "k1": [
      {
       "$s": [
-       "you are ",
-       "now"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      }
     ],
@@ -29118,22 +29121,11 @@
    "output": {
     "k0": {
      "k0": [
-      {
-       "$s": [
-        "/_._<scr",
-        "<script>",
-        "ipt>"
-       ]
-      }
+      "/_._"
      ]
     },
     "k1": "%E2%82",
-    "k2": {
-     "$s": [
-      "<script>",
-      "_\u017f"
-     ]
-    }
+    "k2": "_\u017f"
    }
   },
   {
@@ -29397,8 +29389,7 @@
     ],
     "k1": {
      "$s": [
-      "\u001c\u00e9<scrip",
-      "t>\u00e9\u00e9you ",
+      "\u001c\u00e9\u00e9\u00e9you ",
       "are now"
      ]
     },
@@ -29512,10 +29503,10 @@
      [
       {
        "$s": [
-        "IGNORE A",
-        "LL PREVI",
-        "OUS INST",
-        "RUCTIONS"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       }
      ]
@@ -29611,8 +29602,10 @@
      "k2": [
       {
        "$s": [
-        "bypass\u2028s",
-        "ecurity"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       },
       {
@@ -29772,19 +29765,23 @@
    "output": {
     "k0": [
      {
-      "k0": "<SCRIPT>"
+      "k0": ""
      },
      [
       {
        "$s": [
-        "\u017fy\u017ftem p",
-        "rompt"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       },
       {
        "$s": [
-        "\u017fy\u017ftem p",
-        "rompt"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       }
      ]
@@ -29852,10 +29849,10 @@
     "k0": [
      {
       "$s": [
-       "IGNORE A",
-       "LL PREVI",
-       "OUS INST",
-       "RUCTIONS"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      }
     ],
@@ -30012,7 +30009,7 @@
     "k0": "<SCRIPT>"
    },
    "output": {
-    "k0": "<SCRIPT>"
+    "k0": ""
    }
   },
   {
@@ -30077,7 +30074,7 @@
      ]
     },
     "k1": true,
-    "k2": "<script>",
+    "k2": "",
     "k3": {
      "$s": [
       "you are ",
@@ -30148,9 +30145,10 @@
      "k1": [
       {
        "$s": [
-        "bypass t",
-        "he secur",
-        "ity"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       }
      ],
@@ -30502,11 +30500,10 @@
      [
       {
        "$s": [
-        "bypass x",
-        " securit",
-        "y and mo",
-        "re secur",
-        "ity"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       }
      ]
@@ -30686,7 +30683,7 @@
       "ouarenow"
      ]
     },
-    "k1": "<script>",
+    "k1": "",
     "k2": "alert(1)",
     "k3": [
      [],
@@ -30965,14 +30962,7 @@
     "k2": {
      "k0": [
       null,
-      {
-       "$s": [
-        "<script>",
-        "alert(1)",
-        "</script",
-        ">"
-       ]
-      }
+      "alert(1)"
      ],
      "k1": {
       "k0": {
@@ -30988,12 +30978,7 @@
         "rompt"
        ]
       },
-      "k2": {
-       "$s": [
-        "%4\u00e9<SCRI",
-        "PT>"
-       ]
-      }
+      "k2": "%4\u00e9"
      }
     },
     "k3": {
@@ -31135,7 +31120,7 @@
       "prompt\n\u017f"
      ]
     },
-    "k3": "<SCRIPT>"
+    "k3": ""
    }
   },
   {
@@ -31228,8 +31213,10 @@
      "",
      {
       "$s": [
-       "system p",
-       "rompt"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      }
     ],
@@ -31244,8 +31231,10 @@
      ],
      {
       "$s": [
-       "you are ",
-       "now"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      }
     ],
@@ -31515,9 +31504,10 @@
      [
       {
        "$s": [
-        "BYPASS a",
-        "ll\rsecur",
-        "ity"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       }
      ],
@@ -31740,11 +31730,10 @@
     "k2": [
      {
       "$s": [
-       "bypass x",
-       " securit",
-       "y and mo",
-       "re secur",
-       "ity"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {}
@@ -31773,10 +31762,10 @@
      },
      {
       "$s": [
-       "IGNORE A",
-       "LL PREVI",
-       "OUS INST",
-       "RUCTIONS"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      }
     ]
@@ -31805,8 +31794,10 @@
      "k0": [
       {
        "$s": [
-        "system p",
-        "rompt"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       }
      ],
@@ -31879,8 +31870,10 @@
      [
       {
        "$s": [
-        "system p",
-        "rompt"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       },
       null,
@@ -31903,8 +31896,7 @@
        "You Are ",
        "Nowbypas",
        "s\u2028securi",
-       "ty<SCRIP",
-       "T>="
+       "ty="
       ]
      }
     ]
@@ -32039,7 +32031,7 @@
     "k1": true
    },
    "output": {
-    "k0": "<script>",
+    "k0": "",
     "k1": true
    }
   },
@@ -32109,9 +32101,10 @@
     "k1": [
      {
       "$s": [
-       "forget e",
-       "verythin",
-       "g"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      }
     ],
@@ -32120,14 +32113,14 @@
      [
       {
        "$s": [
-        "\u0130gnore a",
-        "ll prev\u0131",
-        "ous \u0131nst",
-        "ruct\u0131ons"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       },
       3,
-      "<SCRIPT>"
+      ""
      ]
     ]
    }
@@ -32163,7 +32156,6 @@
     },
     "k2": {
      "$s": [
-      "<SCRIPT>",
       "_you are",
       " now__IG",
       "NORE ALL",
@@ -32221,14 +32213,7 @@
    },
    "output": {
     "k0": [
-     {
-      "$s": [
-       "<script>",
-       "alert(1)",
-       "</script",
-       ">"
-      ]
-     },
+     "alert(1)",
      {},
      {
       "$s": [
@@ -32538,7 +32523,7 @@
      "k1": [],
      "k2": 3
     },
-    "k1": "<script>"
+    "k1": ""
    }
   },
   {
@@ -32558,13 +32543,7 @@
     ]
    },
    "output": {
-    "k0": {
-     "$s": [
-      "<script>",
-      "_<SCRIPT",
-      ">"
-     ]
-    },
+    "k0": "_",
     "k1": [
      {},
      true,
@@ -32802,7 +32781,7 @@
       "lan"
      ]
     },
-    "k2": "<SCRIPT>",
+    "k2": "",
     "k3": [
      {
       "$s": [
@@ -32959,8 +32938,10 @@
      },
      {
       "$s": [
-       "bypass\u2028s",
-       "ecurity"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      }
     ],
@@ -32973,16 +32954,18 @@
      },
      {
       "$s": [
-       "\u0130gnore a",
-       "ll prev\u0131",
-       "ous \u0131nst",
-       "ruct\u0131ons"
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED]"
       ]
      },
      {
       "$s": [
-       "You Are ",
-       "Now syst",
+       "[MALICIO",
+       "US_INTEN",
+       "T_REDACT",
+       "ED] syst",
        "em  prom",
        "pt \\n "
       ]
@@ -33336,8 +33319,10 @@
       2.5,
       {
        "$s": [
-        "system p",
-        "rompt"
+        "[MALICIO",
+        "US_INTEN",
+        "T_REDACT",
+        "ED]"
        ]
       }
      ]

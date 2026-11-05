@@ -1,4 +1,6 @@
+from contextlib import contextmanager
 import os
+import fcntl
 import sqlite3
 
 DB_PATH = os.environ.get("AMC_DB_PATH", "amc_local.db")
@@ -1476,6 +1478,16 @@ _MIGRATIONS = [
         );
         CREATE INDEX IF NOT EXISTS idx_agency_task_instances_project ON agency_task_instances(project_id, module_id);
     """),
+    (21, """
+        -- HMAC ingress replay protection (ASI07): accepted nonces shared by every worker and process
+        -- on this database, kept until their replay window closes. Mirrors the Postgres migration.
+        CREATE TABLE IF NOT EXISTS hmac_replay_nonces (
+            nonce TEXT PRIMARY KEY,
+            expires_at INTEGER NOT NULL,
+            recorded_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_hmac_replay_nonces_expiry ON hmac_replay_nonces(expires_at);
+    """),
 
 ]
 
@@ -1491,13 +1503,34 @@ def _ensure_approval_columns(conn: sqlite3.Connection) -> None:
         "policy_version",
         "stale_reason",
         "staled_at",
+        "framing_level",
+        "framing_codes",
     ):
         if name not in columns:
             conn.execute(f"ALTER TABLE approvals ADD COLUMN {name} TEXT")
 
 
+@contextmanager
+def _migration_lock(db_path: str):
+    """Serialize schema migration across worker processes.
+
+    Without this, several workers starting on a fresh database race on ``schema_migrations`` and one
+    fails with IntegrityError at import time (reproduced: 1 of 12 concurrent cold starts). ``flock`` is
+    per open file description, so it also serializes threads that open the lock file separately.
+    """
+    if db_path == ":memory:":
+        yield
+        return
+    with open(f"{db_path}.migrate.lock", "a") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+
 def init_db() -> None:
-    with sqlite3.connect(DB_PATH) as conn:
+    with _migration_lock(DB_PATH), sqlite3.connect(DB_PATH) as conn:
         conn.execute("PRAGMA foreign_keys = ON")
         conn.execute("PRAGMA busy_timeout = 5000")
         conn.execute("CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")

@@ -13,7 +13,7 @@ import pytest
 from freevideoforge.audio import pad_wav, peak_amplitude, wav_duration, write_silence
 from freevideoforge.config import ResourceGovernor, Settings
 from freevideoforge.errors import ConfigError, RenderError, ResourceError
-from freevideoforge.ffmpeg import FFTools, _frame_rate, find_ffmpeg, run
+from freevideoforge.ffmpeg import _frame_rate, find_ffmpeg, run
 from freevideoforge.hashing import scene_input_hash, sha256_file, sha256_obj
 from freevideoforge.models import Project, Scene
 from freevideoforge.visuals.palette import Palette, contrast_ratio, hex_to_rgb, readable_ink
@@ -130,6 +130,28 @@ class TestAudioHelpers:
         path = tmp_path / "not.wav"
         path.write_bytes(b"nonsense")
         assert peak_amplitude(path) == 0.0
+
+
+class TestCompressedAudioPeak:
+    """The structural gate must measure real compressed narration, not report it as unmeasured (QC honesty)."""
+
+    def test_peak_of_an_aac_track_is_measured_not_guessed(self, tmp_path):
+        import subprocess
+
+        from freevideoforge.ffmpeg import find_ffmpeg
+
+        ffmpeg = find_ffmpeg()
+        if not ffmpeg:
+            pytest.skip("ffmpeg not installed on this host")
+        out = tmp_path / "tone.m4a"
+        # ffmpeg's lavfi sine defaults to amplitude 0.125. AAC adds a small overshoot, so the decoded peak
+        # should sit near 0.125, well above the 0.0 that means "unmeasured".
+        subprocess.run([ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi",
+                        "-i", "sine=frequency=440:duration=1", "-c:a", "aac", str(out)], check=True)
+        assert peak_amplitude(out) == pytest.approx(0.125, abs=0.03)
+
+    def test_a_readable_silent_wav_still_reads_as_zero(self, tmp_path):
+        assert peak_amplitude(write_silence(tmp_path / "quiet.wav", 0.5)) == 0.0
 
 
 class TestFFmpegLayer:

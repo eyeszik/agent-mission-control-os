@@ -35,7 +35,7 @@ from .contracts import SourceFile, SourceTreeManifest, WebsiteIR
 # Exact versions, as pinned in apps/web/package.json and installed by the workspace lockfile.
 # The build verifies the installed packages match before it runs anything.
 DEPENDENCIES = {
-    "next": "16.4.2",
+    "next": "16.4.3",
     "react": "19.3.1",
     "react-dom": "19.3.1",
 }

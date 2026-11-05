@@ -43,6 +43,23 @@ needs_sandbox = pytest.mark.skipif(not isolation().available,
                                    reason=f"NOT_RUN: sandbox unavailable on this host ({'; '.join(isolation().reasons)})")
 
 
+def _browser_missing() -> str:
+    """Empty when the owner's QA probe finds Playwright and a Chromium cache; otherwise why not."""
+    from services.langgraph.agency.ucpo import qa as qa_mod
+
+    _root, cache, module = qa_mod._playwright_paths()
+    if not module:
+        return "Playwright package not installed"
+    if not cache or not any(Path(cache).glob("chromium*")):
+        return "Playwright Chromium not installed (PLAYWRIGHT_BROWSERS_PATH / playwright install chromium)"
+    return ""
+
+
+# Browser QA tests run in CI (which installs Chromium); here they are NOT_RUN, never a fake pass.
+needs_browser = pytest.mark.skipif(bool(_browser_missing()),
+                                   reason=f"NOT_RUN: {_browser_missing() or 'browser available'}")
+
+
 @pytest.fixture
 def root(tmp_path, monkeypatch):
     export = tmp_path / "exports"
@@ -82,6 +99,7 @@ def test_a_role_cannot_store_a_stage_outside_its_contract(root):
 
 
 @needs_sandbox
+@needs_browser
 def test_sandboxed_build_browser_qa_release_and_stale_after_change(root, monkeypatch):
     tenant, project, alice = _project(root)
     adapter = LocalStorageAdapter(root)
@@ -134,6 +152,7 @@ def test_sandboxed_build_browser_qa_release_and_stale_after_change(root, monkeyp
 
 
 @needs_sandbox
+@needs_browser
 def test_browser_qa_catches_a_defective_generator(tmp_path):
     brief = WebsiteBrief.model_validate(SAMPLE)
     pkg = compile_requirements(brief, project_ref="p")
