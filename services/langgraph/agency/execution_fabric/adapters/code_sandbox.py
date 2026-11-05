@@ -12,12 +12,14 @@ What it does, exactly:
   patch that does not parse is rejected;
 * runs commands from a closed allowlist (``py_compile``) with a scrubbed
   environment (no inherited secrets or proxies), resource limits (address
-  space, CPU, open files, file size) and a timeout, inside a Linux network
-  namespace (``unshare -rn``) when one can be created. The skill declares
-  ``NETWORK_ISOLATED``, so the fabric refuses it on hosts without one.
+  space, CPU, open files, file size) and a timeout, inside a Linux user, mount
+  and network namespace (``unshare -rmn``). Inside the mount namespace the root
+  filesystem is remounted read-only (OWASP ASI05), so a patch-validation command
+  cannot write to the host, the repository or the scratch copy. The sandbox
+  refuses to run when that namespace cannot be created (fail closed).
 
-What it does not do: no read-only overlay filesystem, no seccomp profile and
-no socket proxy. Isolation is reported as observed, never assumed.
+What it does not do: no seccomp profile and no socket proxy. Isolation is
+reported as observed, never assumed.
 """
 
 from __future__ import annotations
@@ -38,7 +40,10 @@ _SAFE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_./-]{0,199}$")
 ALLOWED_SUFFIXES = (".py",)
 MAX_FILES = 50
 MAX_FILE_BYTES = 200_000
-COMMAND_ALLOWLIST = {"py_compile": ("-I", "-m", "py_compile")}
+# ``py_compile`` writes bytecode into the source tree, which the read-only root forbids. This check
+# performs the same syntax compilation in memory and writes nothing.
+_COMPILE_ONLY = "import sys\nwith open(sys.argv[-1], 'rb') as handle:\n    compile(handle.read(), sys.argv[-1], 'exec')\n"
+COMMAND_ALLOWLIST = {"py_compile": ("-I", "-c", _COMPILE_ONLY)}
 _ENV = {"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8", "PYTHONDONTWRITEBYTECODE": "1", "PYTHONHASHSEED": "0"}
 
 
@@ -69,6 +74,31 @@ def network_namespace_available() -> bool:
         return subprocess.run([unshare, "-rn", "true"], capture_output=True, timeout=5, env=_ENV).returncode == 0
     except (OSError, subprocess.SubprocessError):
         return False
+
+
+@functools.lru_cache(maxsize=1)
+def mount_namespace_available() -> bool:
+    """True when a user+mount+network namespace can be created and its root remounted read-only."""
+    unshare = shutil.which("unshare")
+    if not unshare:
+        return False
+    probe = "mount --make-rprivate / && mount -o remount,bind,ro /"
+    try:
+        return subprocess.run([unshare, "-rmn", "sh", "-c", probe], capture_output=True, timeout=5,
+                              env=_ENV).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+# The shell step runs inside the new mount namespace. It makes the namespace private, remounts the root
+# read-only, then replaces itself with the requested command. $0 is the interpreter, $@ its arguments.
+_READONLY_ROOT_STEP = 'mount --make-rprivate / && mount -o remount,bind,ro / && exec "$0" "$@"'
+
+
+def isolated_argv(inner: list[str]) -> list[str]:
+    """The argv that runs ``inner`` in a fresh user, mount and network namespace with a read-only root."""
+    unshare = shutil.which("unshare") or "unshare"
+    return [unshare, "-rmn", "sh", "-c", _READONLY_ROOT_STEP, *inner]
 
 
 # Limits are applied by a tiny exec shim in the child rather than with
@@ -103,6 +133,8 @@ def run_patch(base: dict[str, str], patch: dict[str, str], commands: list[list[s
             raise SandboxViolation("FILE_REJECTED", "file content missing or too large")
     if not network_namespace_available():
         raise SandboxViolation("SANDBOX_UNAVAILABLE", "no network namespace can be created on this host")
+    if not mount_namespace_available():
+        raise SandboxViolation("SANDBOX_UNAVAILABLE", "no read-only mount namespace can be created on this host")
 
     diffs = {}
     for rel, text in sorted(checked_patch.items(), key=lambda kv: str(kv[0])):
@@ -120,8 +152,8 @@ def run_patch(base: dict[str, str], patch: dict[str, str], commands: list[list[s
             if not command or command[0] not in COMMAND_ALLOWLIST or len(command) != 2:
                 raise SandboxViolation("COMMAND_REJECTED", repr(command))
             target = safe_relpath(command[1])
-            argv = [shutil.which("unshare") or "unshare", "-rn", sys.executable, "-I", "-c", _LIMITER,
-                    sys.executable, *COMMAND_ALLOWLIST[command[0]], str(target)]
+            argv = isolated_argv([sys.executable, "-I", "-c", _LIMITER,
+                                  sys.executable, *COMMAND_ALLOWLIST[command[0]], str(target)])
             try:
                 proc = subprocess.run(argv, cwd=root, env=dict(_ENV), capture_output=True, text=True, timeout=timeout)
                 results.append({"command": command[0], "target": str(target), "returncode": proc.returncode,
@@ -136,6 +168,7 @@ def run_patch(base: dict[str, str], patch: dict[str, str], commands: list[list[s
         "applied_to_repository": False,
         "isolation": {
             "filesystem": "FRESH_TEMP_COPY",
+            "root_mount": "READ_ONLY_IN_MOUNT_NAMESPACE",
             "network": "LINUX_NETNS",
             "environment": "SCRUBBED",
             "resource_limits": ["RLIMIT_AS=1GiB", "RLIMIT_CPU=20s", "RLIMIT_NOFILE=64", "RLIMIT_FSIZE=10MiB"],

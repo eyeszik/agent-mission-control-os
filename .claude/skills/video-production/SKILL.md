@@ -83,3 +83,14 @@ FreeVideoForge never downloads a model checkpoint, starts a local service, uses
 a credential or contacts a paid API. If a user wants tier A/B generative media,
 tell them what `doctor` says is missing and let them decide — installing a
 multi-gigabyte checkpoint is their call, not yours.
+
+## Local media tools in this sandbox (verified)
+- `ffmpeg`: provided by the PyPI package `imageio-ffmpeg` (installed in the venv). FreeVideoForge resolves it automatically.
+- `ffprobe`: not shipped by `imageio-ffmpeg`. The npm package `ffprobe-static@3.1.0` bundles a static binary and needs no
+  install script. Install it into a scratch directory outside the repo, then run tests with `FVF_FFPROBE=<path>`.
+- Without `ffprobe`, 40 FreeVideoForge tests skip (`ffmpeg/ffprobe not installed`). With it, 182 pass, 1 fails, 1 skips.
+- The failing test is `tests/test_gates.py::TestG7QualityControl::test_a_good_render_passes_every_mandatory_gate`.
+  Cause: no local TTS engine is installed, so the narration track is timed silence (`bootstrap.py`). The QC gate correctly
+  flags it as effectively silent. Do not weaken the gate. The fix is a real TTS engine, not a QC change.
+- Generative video and image need a local backend at `127.0.0.1:8188` (ComfyUI). None is present, so those tests are
+  `NOT_APPLICABLE`. Paid providers are not authorized.

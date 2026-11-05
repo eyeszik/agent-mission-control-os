@@ -1,22 +1,24 @@
 {
   "approval_response": {
-    "approval_id": "9cad1b08-6bcc-4767-9755-6cdabb281527",
+    "approval_id": "8e1b448b-be74-412b-a68f-f4479dfe4cd5",
     "approval_status": "pending",
     "authority_ref": "human-review",
     "confidence": null,
-    "created_at": "2026-10-26T18:14:50.677623+00:00",
+    "created_at": "2026-11-05T20:09:49.032489+00:00",
     "decided_at": null,
     "decision": null,
+    "framing_codes": [],
+    "framing_level": "NONE",
     "policy_version": "amc-avic-approval/v1",
-    "project_id": "prj-test-d6382e5e2802",
+    "project_id": "prj-test-56535afe76c9",
     "reason": "Compiled SVG requires human visual, brand and accessibility review before local release",
     "reviewer": null,
-    "run_id": "mission-c0eba5fb89f3924dd48a58d4",
+    "run_id": "mission-09aebe05c38215d1eccbf7bb",
     "stale_reason": null,
     "staled_at": null,
     "status": "PENDING",
     "subject_hash": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
-    "subject_ref": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+    "subject_ref": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-svg",
     "subject_type": "CREATIVE_ARTIFACT",
     "subject_version_ref": "2",
     "tenant_id": "tenant-events-test"
@@ -25,7 +27,7 @@
     "assets": [
       {
         "asset_id": "halden-kiln-poster",
-        "scene_artifact": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "scene_artifact": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-scene",
         "version": 2
       }
     ]
@@ -163,7 +165,7 @@
         },
         {
           "check": "nonblank",
-          "detail": "{'distinct_colours_128px': 526, 'luminance_mean': 35.13, 'luminance_std': 25.24}",
+          "detail": "{'distinct_colours_128px': 525, 'luminance_mean': 35.71, 'luminance_std': 27.29}",
           "level": "Q7",
           "result": "PASS"
         },
@@ -175,15 +177,15 @@
         },
         {
           "check": "headline_rendered",
-          "detail": "41.1% of the headline box is headline ink",
+          "detail": "44.1% of the headline box is headline ink",
           "level": "Q7",
           "result": "PASS"
         }
       ],
       "passed": true,
-      "png_sha256": "21cc9345efeb1ea48cdd4a6616a6d75f761930547261062faa7f5114f827b020",
+      "png_sha256": "bfbc84880301d99d23b3197dc0d2cfbc2b8277f164ad546f610af6eb889b3cf0",
       "renderer": "raster.chromium",
-      "renderer_version": "141.0.7390.37",
+      "renderer_version": "153.0.8010.0",
       "svg_sha256": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3"
     },
     "exact_text": [
@@ -322,47 +324,47 @@
       "paper": "#f0eee9",
       "signal_red": "#ff4c2f"
     },
-    "project_id": "prj-test-d6382e5e2802",
+    "project_id": "prj-test-56535afe76c9",
     "release": null,
     "scene_hash": "a9cf15b0861c4c96294569675a73c4a4c6105ef4844d356876fb5ef307906333",
     "stages": {
       "brand": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-brand",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-brand",
         "content_hash": "a2fc78b11122f6fa6e5898bb5465e3309380c47b94f7396444cf379799feb1e2",
         "version": 1
       },
       "evaluation": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
-        "content_hash": "0d29beecc696b10ee870de83c84d9307eca0ceb6a692e085c58a78e1e66c8464",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-evaluation",
+        "content_hash": "6310d6758b29fb23d33998501dba569d8cf9ba91b5dfb817fa51cf77a7bc0ffe",
         "version": 1
       },
       "intent": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-intent",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-intent",
         "content_hash": "2a58c59c0d9e30622bf6e19437c837f3baf3f5c31d7c6909df0897560d3636b2",
         "version": 1
       },
       "preview": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
-        "content_hash": "21cc9345efeb1ea48cdd4a6616a6d75f761930547261062faa7f5114f827b020",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-preview",
+        "content_hash": "bfbc84880301d99d23b3197dc0d2cfbc2b8277f164ad546f610af6eb889b3cf0",
         "version": 1
       },
       "provenance": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-provenance",
-        "content_hash": "810cfd5a421cc4aa614b5b846b292ef73ea2a49d7262e059478ab43cb211362f",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-provenance",
+        "content_hash": "93958780dbc6e4889520ef3bfd0d3b53d99d40d3387c7d4b9075fe03892b6f96",
         "version": 1
       },
       "references": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-references",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-references",
         "content_hash": "4e2dbd3f43caafca0d1cebda43e3acaa12a1920e02440918aab44964d90eda94",
         "version": 1
       },
       "scene": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-scene",
         "content_hash": "f7a6a775ddca2d492c7b889e0e0207fec2eb31244d7f7ac45258dd41876d6536",
         "version": 1
       },
       "svg": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-svg",
         "content_hash": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3",
         "version": 1
       }
@@ -374,8 +376,8 @@
   "asset_view_after": {
     "approvals": [
       {
-        "approval_id": "9cad1b08-6bcc-4767-9755-6cdabb281527",
-        "created_at": "2026-10-26T18:14:50.677623+00:00",
+        "approval_id": "8e1b448b-be74-412b-a68f-f4479dfe4cd5",
+        "created_at": "2026-11-05T20:09:49.032489+00:00",
         "current": true,
         "decision": null,
         "reviewer": null,
@@ -520,7 +522,7 @@
         },
         {
           "check": "nonblank",
-          "detail": "{'distinct_colours_128px': 521, 'luminance_mean': 34.89, 'luminance_std': 24.9}",
+          "detail": "{'distinct_colours_128px': 524, 'luminance_mean': 35.48, 'luminance_std': 26.99}",
           "level": "Q7",
           "result": "PASS"
         },
@@ -532,15 +534,15 @@
         },
         {
           "check": "headline_rendered",
-          "detail": "41.1% of the headline box is headline ink",
+          "detail": "44.1% of the headline box is headline ink",
           "level": "Q7",
           "result": "PASS"
         }
       ],
       "passed": true,
-      "png_sha256": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+      "png_sha256": "0ab2f9f9c474c6ce7422bbb139b7a09019eabf189031b8909b4ae00bf28bbc01",
       "renderer": "raster.chromium",
-      "renderer_version": "141.0.7390.37",
+      "renderer_version": "153.0.8010.0",
       "svg_sha256": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530"
     },
     "exact_text": [
@@ -679,9 +681,9 @@
       "paper": "#f0eee9",
       "signal_red": "#ff4c2f"
     },
-    "project_id": "prj-test-d6382e5e2802",
+    "project_id": "prj-test-56535afe76c9",
     "release": {
-      "approval_id": "9cad1b08-6bcc-4767-9755-6cdabb281527",
+      "approval_id": "8e1b448b-be74-412b-a68f-f4479dfe4cd5",
       "external_effects": "none",
       "reasons": [
         "APPROVAL_PENDING"
@@ -692,47 +694,47 @@
     "scene_hash": "63a2862ba0e7e82c4bf775439d20c5b090f8c0b6b021a3ee8339fe6cbb1748d2",
     "stages": {
       "brand": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-brand",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-brand",
         "content_hash": "a2fc78b11122f6fa6e5898bb5465e3309380c47b94f7396444cf379799feb1e2",
         "version": 1
       },
       "evaluation": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
-        "content_hash": "b1a3c61c117221d4b70e69ff38a4d9d2ba37d98434baf8f10f149e37667ed3f0",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-evaluation",
+        "content_hash": "ccd71b18f4c3ee4ee0a9f93cf7305a4fae5516d6340214ce45dcf199b9921cc7",
         "version": 2
       },
       "intent": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-intent",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-intent",
         "content_hash": "2a58c59c0d9e30622bf6e19437c837f3baf3f5c31d7c6909df0897560d3636b2",
         "version": 1
       },
       "preview": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
-        "content_hash": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-preview",
+        "content_hash": "0ab2f9f9c474c6ce7422bbb139b7a09019eabf189031b8909b4ae00bf28bbc01",
         "version": 2
       },
       "provenance": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-provenance",
-        "content_hash": "986bf9b21d78ac08d0699eb1ed542ea1ca37f9c64a455307dc32c73bff022db8",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-provenance",
+        "content_hash": "efe5247ad8ba84ae8188394163f13307e1e4d96d5105e1b11fddf4cbeb6e0a7b",
         "version": 2
       },
       "references": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-references",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-references",
         "content_hash": "4e2dbd3f43caafca0d1cebda43e3acaa12a1920e02440918aab44964d90eda94",
         "version": 1
       },
       "release": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-release",
-        "content_hash": "1fc0055b4a3039ab04a300ca1ba1a70b20d8272a12ef06f2e33b6b9ca8b63c6d",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-release",
+        "content_hash": "8270219cecd4db01af57de86a4cd9679e5e161964cb74d694c583016b6a7873f",
         "version": 1
       },
       "scene": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-scene",
         "content_hash": "02984ee4217f3a0734446a1bb3579f11a82f1b4b43c4312a2433704d8713cc4c",
         "version": 2
       },
       "svg": {
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-svg",
         "content_hash": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
         "version": 2
       }
@@ -947,10 +949,34 @@
         "tests": []
       },
       {
-        "limit": "Python and CLI only until the `/avic` route lands",
-        "name": "API route / web UI",
-        "state": "NOT_ADDED",
-        "tests": []
+        "limit": "brand is the server projection; client authority fields are rejected; route sweep covers every path",
+        "name": "`/avic` API: tenant-scoped, operator-gated writes, idempotent, stale edits are 409, inert SVG serving",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_another_tenant_learns_nothing",
+          "test_read_only_role_reads_but_cannot_write",
+          "test_every_route_requires_authentication",
+          "test_client_supplied_authority_is_rejected",
+          "test_stored_svg_is_served_inert",
+          "test_operator_path_edit_conflict_recovery_approval_release",
+          "test_recorded_fixture_matches_live_responses"
+        ]
+      },
+      {
+        "limit": "browser test `apps/web/e2e/visuals.spec.ts` (axe WCAG 2.2 AA, stale-edit conflict, phone width); approval is decided in the queue",
+        "name": "Visual Compiler section in `/agency` (compile, inspect, edit, recover, request approval, release)",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_operator_path_edit_conflict_recovery_approval_release"
+        ]
+      },
+      {
+        "limit": "`AMC_AVIC_RENDER_CONCURRENCY` (default 2); no slot in time is BLOCKED",
+        "name": "Bounded render concurrency",
+        "state": "IMPLEMENTED_VERIFIED",
+        "tests": [
+          "test_render_capacity_is_bounded_and_reported"
+        ]
       }
     ],
     "renderer": {
@@ -1104,7 +1130,7 @@
     "artifacts": {
       "brand": {
         "action": "created",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-brand",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-brand",
         "file": "brand.json",
         "role": "design_lead",
         "sha256": "a2fc78b11122f6fa6e5898bb5465e3309380c47b94f7396444cf379799feb1e2",
@@ -1112,15 +1138,15 @@
       },
       "evaluation": {
         "action": "created",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-evaluation",
         "file": "evaluation.json",
         "role": "brand_safety_reviewer",
-        "sha256": "0d29beecc696b10ee870de83c84d9307eca0ceb6a692e085c58a78e1e66c8464",
+        "sha256": "6310d6758b29fb23d33998501dba569d8cf9ba91b5dfb817fa51cf77a7bc0ffe",
         "version": 1
       },
       "intent": {
         "action": "created",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-intent",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-intent",
         "file": "requirements.json",
         "role": "creative_director",
         "sha256": "2a58c59c0d9e30622bf6e19437c837f3baf3f5c31d7c6909df0897560d3636b2",
@@ -1128,23 +1154,23 @@
       },
       "preview": {
         "action": "created",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-preview",
         "file": "preview.png",
         "role": "creative_director",
-        "sha256": "21cc9345efeb1ea48cdd4a6616a6d75f761930547261062faa7f5114f827b020",
+        "sha256": "bfbc84880301d99d23b3197dc0d2cfbc2b8277f164ad546f610af6eb889b3cf0",
         "version": 1
       },
       "provenance": {
         "action": "created",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-provenance",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-provenance",
         "file": "provenance.json",
         "role": "brand_safety_reviewer",
-        "sha256": "810cfd5a421cc4aa614b5b846b292ef73ea2a49d7262e059478ab43cb211362f",
+        "sha256": "93958780dbc6e4889520ef3bfd0d3b53d99d40d3387c7d4b9075fe03892b6f96",
         "version": 1
       },
       "references": {
         "action": "created",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-references",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-references",
         "file": "reference.json",
         "role": "creative_director",
         "sha256": "4e2dbd3f43caafca0d1cebda43e3acaa12a1920e02440918aab44964d90eda94",
@@ -1152,7 +1178,7 @@
       },
       "scene": {
         "action": "created",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-scene",
         "file": "scene.json",
         "role": "creative_director",
         "sha256": "f7a6a775ddca2d492c7b889e0e0207fec2eb31244d7f7ac45258dd41876d6536",
@@ -1160,7 +1186,7 @@
       },
       "svg": {
         "action": "created",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-svg",
         "file": "master.svg",
         "role": "creative_director",
         "sha256": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3",
@@ -1170,7 +1196,7 @@
     "asset_id": "halden-kiln-poster",
     "candidate": {
       "candidate_id": "cand-a9cf15b0861c4c96",
-      "evaluation_hash": "e8d94f7a906b50820df5edfa2ca9e5fccf80e3b25852e893315bfdea2f940fc4",
+      "evaluation_hash": "298b5de6db66cf806b831b763d7330f0a8e82f550107ca4d4a3cf165af1bf539",
       "metrics": {
         "repair_attempts": 0,
         "repair_success_rate": null,
@@ -1357,7 +1383,7 @@
         },
         {
           "check": "nonblank",
-          "detail": "{'distinct_colours_128px': 526, 'luminance_mean': 35.13, 'luminance_std': 25.24}",
+          "detail": "{'distinct_colours_128px': 525, 'luminance_mean': 35.71, 'luminance_std': 27.29}",
           "level": "Q7",
           "result": "PASS"
         },
@@ -1369,33 +1395,33 @@
         },
         {
           "check": "headline_rendered",
-          "detail": "41.1% of the headline box is headline ink",
+          "detail": "44.1% of the headline box is headline ink",
           "level": "Q7",
           "result": "PASS"
         }
       ],
       "metrics": {
-        "distinct_colours_128px": 526,
-        "luminance_mean": 35.13,
-        "luminance_std": 25.24
+        "distinct_colours_128px": 525,
+        "luminance_mean": 35.71,
+        "luminance_std": 27.29
       },
-      "png_sha256": "21cc9345efeb1ea48cdd4a6616a6d75f761930547261062faa7f5114f827b020",
+      "png_sha256": "bfbc84880301d99d23b3197dc0d2cfbc2b8277f164ad546f610af6eb889b3cf0",
       "renderer": "raster.chromium",
-      "renderer_version": "141.0.7390.37",
+      "renderer_version": "153.0.8010.0",
       "scene_hash": "a9cf15b0861c4c96294569675a73c4a4c6105ef4844d356876fb5ef307906333",
       "schema_version": "amc-avic/1",
       "svg_sha256": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3"
     },
     "metrics": {
       "compile_latency_ms": 0.4,
-      "render_latency_ms": 1865.2,
+      "render_latency_ms": 1288.8,
       "render_variance_vs_stored": null,
       "renderer_status": "PASSED",
       "repair_attempts": 0,
       "repair_success_rate": null,
       "svg_bytes": 3097,
       "svg_elements": 25,
-      "verify_latency_ms": 1600.2
+      "verify_latency_ms": 2027.9
     },
     "repairs": [],
     "status": "EVALUATED"
@@ -1412,39 +1438,39 @@
     "artifacts": {
       "evaluation": {
         "action": "revised",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
-        "sha256": "b1a3c61c117221d4b70e69ff38a4d9d2ba37d98434baf8f10f149e37667ed3f0",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-evaluation",
+        "sha256": "ccd71b18f4c3ee4ee0a9f93cf7305a4fae5516d6340214ce45dcf199b9921cc7",
         "version": 2
       },
       "preview": {
         "action": "revised",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
-        "sha256": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-preview",
+        "sha256": "0ab2f9f9c474c6ce7422bbb139b7a09019eabf189031b8909b4ae00bf28bbc01",
         "version": 2
       },
       "scene": {
         "action": "revised",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-scene",
         "sha256": "02984ee4217f3a0734446a1bb3579f11a82f1b4b43c4312a2433704d8713cc4c",
         "version": 2
       },
       "svg": {
         "action": "revised",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-svg",
         "sha256": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
         "version": 2
       }
     },
     "metrics": {
       "compile_latency_ms": 0.3,
-      "render_latency_ms": 1835.8,
+      "render_latency_ms": 1299.1,
       "render_variance_vs_stored": null,
       "renderer_status": "PASSED",
       "repair_attempts": 0,
       "repair_success_rate": null,
       "svg_bytes": 3097,
       "svg_elements": 25,
-      "verify_latency_ms": 1532.6
+      "verify_latency_ms": 2103.6
     },
     "status": "EVALUATED",
     "transformations": [
@@ -1461,31 +1487,31 @@
     "artifacts": {
       "evaluation": {
         "action": "reused_unchanged",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
-        "sha256": "b1a3c61c117221d4b70e69ff38a4d9d2ba37d98434baf8f10f149e37667ed3f0",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-evaluation",
+        "sha256": "ccd71b18f4c3ee4ee0a9f93cf7305a4fae5516d6340214ce45dcf199b9921cc7",
         "version": 2
       },
       "preview": {
         "action": "reused_unchanged",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
-        "sha256": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-preview",
+        "sha256": "0ab2f9f9c474c6ce7422bbb139b7a09019eabf189031b8909b4ae00bf28bbc01",
         "version": 2
       },
       "provenance": {
         "action": "reused_unchanged",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-provenance",
-        "sha256": "986bf9b21d78ac08d0699eb1ed542ea1ca37f9c64a455307dc32c73bff022db8",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-provenance",
+        "sha256": "efe5247ad8ba84ae8188394163f13307e1e4d96d5105e1b11fddf4cbeb6e0a7b",
         "version": 2
       },
       "scene": {
         "action": "reused_unchanged",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-scene",
         "sha256": "02984ee4217f3a0734446a1bb3579f11a82f1b4b43c4312a2433704d8713cc4c",
         "version": 2
       },
       "svg": {
         "action": "reused_unchanged",
-        "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+        "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-svg",
         "sha256": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
         "version": 2
       }
@@ -1495,59 +1521,59 @@
   },
   "release_response": {
     "artifact": {
-      "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-release",
-      "sha256": "1fc0055b4a3039ab04a300ca1ba1a70b20d8272a12ef06f2e33b6b9ca8b63c6d",
+      "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-release",
+      "sha256": "8270219cecd4db01af57de86a4cd9679e5e161964cb74d694c583016b6a7873f",
       "version": 1
     },
     "manifest": {
-      "approval_id": "9cad1b08-6bcc-4767-9755-6cdabb281527",
+      "approval_id": "8e1b448b-be74-412b-a68f-f4479dfe4cd5",
       "compiler_version": "amc-avic-compiler/0.1.0",
       "external_effects": "none",
       "files": {
         "brand.json": {
-          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-brand",
+          "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-brand",
           "sha256": "a2fc78b11122f6fa6e5898bb5465e3309380c47b94f7396444cf379799feb1e2",
           "version": 1
         },
         "evaluation.json": {
-          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-evaluation",
-          "sha256": "b1a3c61c117221d4b70e69ff38a4d9d2ba37d98434baf8f10f149e37667ed3f0",
+          "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-evaluation",
+          "sha256": "ccd71b18f4c3ee4ee0a9f93cf7305a4fae5516d6340214ce45dcf199b9921cc7",
           "version": 2
         },
         "master.svg": {
-          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-svg",
+          "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-svg",
           "sha256": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530",
           "version": 2
         },
         "preview.png": {
-          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-preview",
-          "sha256": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+          "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-preview",
+          "sha256": "0ab2f9f9c474c6ce7422bbb139b7a09019eabf189031b8909b4ae00bf28bbc01",
           "version": 2
         },
         "provenance.json": {
-          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-provenance",
-          "sha256": "986bf9b21d78ac08d0699eb1ed542ea1ca37f9c64a455307dc32c73bff022db8",
+          "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-provenance",
+          "sha256": "efe5247ad8ba84ae8188394163f13307e1e4d96d5105e1b11fddf4cbeb6e0a7b",
           "version": 2
         },
         "reference.json": {
-          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-references",
+          "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-references",
           "sha256": "4e2dbd3f43caafca0d1cebda43e3acaa12a1920e02440918aab44964d90eda94",
           "version": 1
         },
         "requirements.json": {
-          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-intent",
+          "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-intent",
           "sha256": "2a58c59c0d9e30622bf6e19437c837f3baf3f5c31d7c6909df0897560d3636b2",
           "version": 1
         },
         "scene.json": {
-          "artifact_id": "art-prj-test-d6382e5e2802-foundry-avic-halden-kiln-poster-scene",
+          "artifact_id": "art-prj-test-56535afe76c9-foundry-avic-halden-kiln-poster-scene",
           "sha256": "02984ee4217f3a0734446a1bb3579f11a82f1b4b43c4312a2433704d8713cc4c",
           "version": 2
         }
       },
       "output_profile": "NATIVE_EDITABLE_VECTOR",
       "policy_version": "amc-avic-policy/1",
-      "project_id": "prj-test-d6382e5e2802",
+      "project_id": "prj-test-56535afe76c9",
       "quality": {
         "accent_budget": "PASS",
         "allowlist_attributes": "PASS",
@@ -1579,10 +1605,10 @@
         "APPROVAL_PENDING"
       ],
       "renderer": "raster.chromium",
-      "renderer_version": "141.0.7390.37",
+      "renderer_version": "153.0.8010.0",
       "schema_version": "amc-avic/1",
       "source_hashes": {
-        "png": "e2fb97f636874b69f4736f3e9954b17f242857e49317b749b046c65b9e5d420d",
+        "png": "0ab2f9f9c474c6ce7422bbb139b7a09019eabf189031b8909b4ae00bf28bbc01",
         "scene": "63a2862ba0e7e82c4bf775439d20c5b090f8c0b6b021a3ee8339fe6cbb1748d2",
         "svg": "a1d1302bd5bad588fd8e2e85ca3c95a1ae694ae9635248be834f1bace3ddd530"
       }

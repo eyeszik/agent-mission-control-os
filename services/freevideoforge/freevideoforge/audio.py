@@ -62,19 +62,48 @@ def pad_wav(path: str | Path, target_duration: float) -> float:
     return target_duration
 
 
-def peak_amplitude(path: str | Path, max_frames: int = 2_000_000) -> float:
-    """Peak sample magnitude in [0, 1] for a 16-bit PCM WAV.
+def _peak_via_ffmpeg(path: str | Path) -> float:
+    """Peak from ffmpeg's ``volumedetect`` for containers the WAV reader cannot open (e.g. AAC in MP4).
 
-    Used by the structural QC gate to catch silent or clipped audio. Returns
-    0.0 for formats it cannot read rather than guessing.
+    Returns 0.0 when ffmpeg is unavailable, the file has no audio, or the output cannot be parsed.
+    """
+    import re
+    import subprocess
+
+    from .ffmpeg import find_ffmpeg
+
+    binary = find_ffmpeg()
+    if not binary:
+        return 0.0
+    try:
+        proc = subprocess.run(
+            [binary, "-hide_banner", "-nostats", "-i", str(path), "-map", "0:a:0", "-af", "volumedetect",
+             "-f", "null", "-"],
+            capture_output=True, text=True, timeout=120, check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return 0.0
+    match = re.search(r"max_volume:\s*(-?[\d.]+)\s*dB", proc.stderr)
+    if proc.returncode != 0 or not match:
+        return 0.0
+    return min(1.0, 10 ** (float(match.group(1)) / 20.0))
+
+
+def peak_amplitude(path: str | Path, max_frames: int = 2_000_000) -> float:
+    """Peak sample magnitude in [0, 1].
+
+    16-bit PCM WAV is read directly. Any other readable container (for example the AAC track in
+    final.mp4) is measured with ffmpeg's volumedetect. Used by the structural QC gate to catch
+    silent or clipped audio. Returns 0.0 when nothing can be measured, rather than guessing.
     """
     try:
         with contextlib.closing(wave.open(str(path), "rb")) as handle:
             if handle.getsampwidth() != 2:
-                return 0.0
+                # Readable WAV at another sample width (24-bit, float, ...): measure it with ffmpeg.
+                return _peak_via_ffmpeg(path)
             frames = handle.readframes(min(handle.getnframes(), max_frames))
     except (wave.Error, OSError):
-        return 0.0
+        return _peak_via_ffmpeg(path)
     if not frames:
         return 0.0
     count = len(frames) // 2

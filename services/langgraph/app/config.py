@@ -227,6 +227,32 @@ def hmac_ingress_enabled() -> bool:
     return bool(_env("AMC_HMAC_SECRET"))
 
 
+def worker_count() -> int:
+    """Worker processes the server is configured to run (WEB_CONCURRENCY or UVICORN_WORKERS; default 1)."""
+    for name in ("WEB_CONCURRENCY", "UVICORN_WORKERS"):
+        raw = (_env(name) or "").strip()
+        if raw:
+            try:
+                return max(1, int(raw))
+            except ValueError as exc:
+                raise RuntimeError(f"{name} must be an integer") from exc
+    return 1
+
+
+def hmac_replay_backend() -> str:
+    """Nonce store for ASI07 replay protection. ``database`` (default) is shared across workers.
+
+    ``memory`` is process-local and is refused when more than one worker is configured, because a
+    replay could then succeed on a different worker. It exists for single-process development only.
+    """
+    value = (_env("AMC_HMAC_REPLAY_STORE") or "database").strip().lower()
+    if value not in ("database", "memory"):
+        raise RuntimeError("AMC_HMAC_REPLAY_STORE must be 'database' or 'memory'")
+    if value == "memory" and worker_count() > 1:
+        raise RuntimeError("AMC_HMAC_REPLAY_STORE=memory is refused with multiple workers; use 'database'")
+    return value
+
+
 def hmac_ingress_header_name() -> str:
     return _env("AMC_HMAC_HEADER") or "X-AMC-Signature"
 

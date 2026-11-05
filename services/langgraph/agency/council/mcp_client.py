@@ -6,6 +6,19 @@ Servers and the tools exposed from each are declared by the operator in
     {"docs": {"command": "/usr/bin/python3", "args": ["-I", "/opt/mcp/docs_server.py"],
               "tools": {"search": {"sensitivity": "READ", "scopes": ["mcp:read"], "timeout_s": 10}}}}
 
+Every server must pin the SHA-256 of its command and of each argument that is a file
+(OWASP ASI04). The pin is checked when the configuration is read and again immediately
+before the server process is started. A missing pin, a mismatch, or a pinned file that is
+group- or world-writable disables that server, and the refusal is reported::
+
+    {"docs": {"command": "/usr/bin/python3", "args": ["-I", "/opt/mcp/docs_server.py"],
+              "pins": {"/usr/bin/python3": "<sha256>", "/opt/mcp/docs_server.py": "<sha256>"},
+              "tools": {...}}}
+
+Limit: the pin covers the command and the listed files only. Modules that the server imports
+from elsewhere are not covered, so pin the complete entry point or run the server from a
+read-only tree.
+
 The server process gets a minimal environment (no credentials are passed
 through), its declared input schema is enforced before a call, and errors,
 timeouts and unavailable servers become typed gateway errors. Requires the
@@ -16,15 +29,19 @@ from __future__ import annotations
 
 import asyncio
 import builtins
+import hashlib
 import importlib.util
 import json
 import os
+import stat
 from datetime import timedelta
 from pathlib import Path
 
+from .capability import METADATA_KEY
 from .gateway import GatewayDenied, ToolSpec
 
 SENSITIVITIES = {"READ", "WRITE", "EXTERNAL", "SHELL"}
+_HASH_CHUNK = 1 << 20
 _SAFE_ENV = ("PATH", "LANG", "LC_ALL")
 
 
@@ -60,8 +77,50 @@ def configured_servers() -> tuple[dict[str, dict], list[str]]:
         if bad:
             errors.append(f"{name}: tools {bad} need a sensitivity in {sorted(SENSITIVITIES)}")
             continue
-        valid[name] = {"command": command, "args": [str(a) for a in entry.get("args") or []], "tools": tools}
+        args = [str(a) for a in entry.get("args") or []]
+        pin_error = _pin_problem(name, command, args, entry.get("pins"))
+        if pin_error:
+            errors.append(pin_error)
+            continue
+        valid[name] = {"command": command, "args": args, "tools": tools, "pins": dict(entry["pins"])}
     return valid, errors
+
+
+def pinned_paths(command: str, args: list[str]) -> list[str]:
+    """The command plus every argument that names an existing file. Each must be pinned."""
+    return [command, *(a for a in args if os.path.isfile(a))]
+
+
+def file_sha256(path: str) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(_HASH_CHUNK), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _pin_problem(name: str, command: str, args: list[str], pins) -> str | None:
+    if not isinstance(pins, dict) or not pins:
+        return f"{name}: no pins; every command and file argument needs a sha256 pin"
+    for path in pinned_paths(command, args):
+        expected = pins.get(path)
+        if not isinstance(expected, str) or len(expected) != 64:
+            return f"{name}: {path} is not pinned"
+        if not os.path.isfile(path):
+            return f"{name}: pinned file {path} does not exist"
+        mode = os.stat(path).st_mode
+        if mode & (stat.S_IWGRP | stat.S_IWOTH):
+            return f"{name}: {path} is group- or world-writable"
+        if file_sha256(path) != expected.lower():
+            return f"{name}: {path} does not match its pin"
+    return None
+
+
+def verify_pins(server: str, entry: dict) -> None:
+    """Re-check the pins at the moment of use. Raises a typed gateway denial on any mismatch."""
+    problem = _pin_problem(server, entry["command"], entry["args"], entry.get("pins"))
+    if problem:
+        raise GatewayDenied("MCP_PIN_MISMATCH", problem[:300], 403)
 
 
 def mcp_tools() -> dict[str, ToolSpec]:
@@ -80,7 +139,7 @@ def mcp_tools() -> dict[str, ToolSpec]:
     return out
 
 
-async def _call(spec: ToolSpec, args: dict) -> dict:
+async def _call(spec: ToolSpec, args: dict, capability: str | None = None) -> dict:
     import jsonschema
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
@@ -89,6 +148,7 @@ async def _call(spec: ToolSpec, args: dict) -> dict:
     entry = servers.get(spec.server or "")
     if entry is None:
         raise GatewayDenied("MCP_SERVER_NOT_CONFIGURED", f"MCP server {spec.server} is not configured", 502)
+    verify_pins(spec.server or "", entry)
     tool_name = spec.tool_id.split(".", 2)[2]
     params = StdioServerParameters(command=entry["command"], args=entry["args"],
                                    env={k: os.environ[k] for k in _SAFE_ENV if k in os.environ})
@@ -101,7 +161,9 @@ async def _call(spec: ToolSpec, args: dict) -> dict:
             jsonschema.validate(args, listed[tool_name].inputSchema or {"type": "object"})
         except jsonschema.ValidationError as exc:
             raise GatewayDenied("SCHEMA_INVALID", f"arguments rejected by the server schema: {exc.message[:200]}", 422) from exc
-        result = await session.call_tool(tool_name, args, read_timeout_seconds=timedelta(seconds=spec.timeout_s))
+        meta = {METADATA_KEY: capability} if capability else None
+        result = await session.call_tool(tool_name, args, read_timeout_seconds=timedelta(seconds=spec.timeout_s),
+                                         meta=meta)
     texts = [c.text for c in result.content if getattr(c, "type", "") == "text"]
     if result.isError:
         raise GatewayDenied("MCP_TOOL_ERROR", ("; ".join(texts) or "tool reported an error")[:300], 502)
@@ -117,11 +179,11 @@ def _unwrap(exc: BaseException) -> BaseException:
     return exc
 
 
-def call_mcp_tool(spec: ToolSpec, args: dict) -> dict:
+def call_mcp_tool(spec: ToolSpec, args: dict, *, capability: str | None = None) -> dict:
     if not mcp_installed():
         raise GatewayDenied("MCP_NOT_INSTALLED", "the mcp package is not installed", 503)
     try:
-        return asyncio.run(asyncio.wait_for(_call(spec, args), timeout=spec.timeout_s + 5))
+        return asyncio.run(asyncio.wait_for(_call(spec, args, capability), timeout=spec.timeout_s + 5))
     except GatewayDenied:
         raise
     except BaseException as exc:  # noqa: BLE001 - anyio wraps failures in exception groups
@@ -135,4 +197,4 @@ def call_mcp_tool(spec: ToolSpec, args: dict) -> dict:
         raise GatewayDenied("MCP_CALL_FAILED", f"{spec.tool_id}: {type(inner).__name__}", 502) from None
 
 
-__all__ = ["call_mcp_tool", "configured_servers", "mcp_installed", "mcp_tools"]
+__all__ = ["call_mcp_tool", "configured_servers", "file_sha256", "mcp_installed", "mcp_tools", "pinned_paths", "verify_pins"]

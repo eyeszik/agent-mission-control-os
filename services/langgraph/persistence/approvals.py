@@ -5,6 +5,11 @@ from typing import Optional
 from uuid import uuid4
 
 from services.langgraph.persistence.database import is_postgres, normalize_record, table, transaction
+from services.langgraph.security.approval_framing import HIGH, assess
+
+
+class FramingAcknowledgementRequired(PermissionError):
+    """An approve decision on a summary with high persuasive framing needs an explicit acknowledgement (ASI09)."""
 
 
 def _now() -> str:
@@ -40,7 +45,11 @@ init_approvals_table()
 
 
 def _row_to_dict(row) -> Optional[dict]:
-    return normalize_record(row) if row else None
+    record = normalize_record(row) if row else None
+    if record is not None:
+        # Framing codes are stored comma-joined (ASI09). The API contract is a list.
+        record["framing_codes"] = [c for c in (record.get("framing_codes") or "").split(",") if c]
+    return record
 
 
 def create_approval_request(
@@ -56,14 +65,16 @@ def create_approval_request(
     subject_hash: Optional[str] = None,
     authority_ref: str = "human-review",
     policy_version: str = "amc-approval/v1",
+    targets: tuple[str, ...] = (),
 ) -> dict:
     approval_id = str(uuid4())
+    framing = assess(reason, targets=targets)  # ASI09: evidence stored with the request, not only logged
     with transaction(write=True) as db:
         db.execute(
             f"""
             INSERT INTO {table('approvals')}
-            (approval_id, run_id, tenant_id, project_id, reason, confidence, status, subject_type, subject_ref, subject_version_ref, subject_hash, authority_ref, policy_version, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)
+            (approval_id, run_id, tenant_id, project_id, reason, confidence, status, subject_type, subject_ref, subject_version_ref, subject_hash, authority_ref, policy_version, created_at, framing_level, framing_codes)
+            VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 approval_id,
@@ -79,6 +90,8 @@ def create_approval_request(
                 authority_ref,
                 policy_version,
                 _now(),
+                framing.level,
+                framing.codes_text,
             ),
         )
     approval = get_approval(approval_id)
@@ -153,11 +166,18 @@ def mark_approval_stale(approval_id: str, reason: str) -> Optional[dict]:
     return get_approval(approval_id)
 
 
-def resolve_approval(approval_id: str, reviewer: str, decision: str) -> Optional[dict]:
+def resolve_approval(approval_id: str, reviewer: str, decision: str, *,
+                      framing_acknowledged: bool = False) -> Optional[dict]:
     if decision not in ("approve", "reject"):
         raise ValueError("decision must be 'approve' or 'reject'")
     decided_at = _now()
     with transaction(write=True) as db:
+        if decision == "approve" and not framing_acknowledged:
+            row = db.execute(f"SELECT framing_level FROM {table('approvals')} WHERE approval_id = ?",
+                             (approval_id,)).fetchone()
+            if row is not None and row["framing_level"] == HIGH:
+                raise FramingAcknowledgementRequired(
+                    "this summary has high persuasive framing; the reviewer must acknowledge it before approving")
         cursor = db.execute(
             f"UPDATE {table('approvals')} SET status = 'resolved', reviewer = ?, decision = ?, decided_at = ? WHERE approval_id = ? AND status = 'pending'",
             (reviewer, decision, decided_at, approval_id),

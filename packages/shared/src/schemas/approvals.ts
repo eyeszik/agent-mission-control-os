@@ -17,6 +17,8 @@ export const ApprovalRequestSchema = z.object({
   authority_ref: z.string().nullable().optional(),
   policy_version: z.string().nullable().optional(),
   stale_reason: z.string().nullable().optional(),
+  framing_level: z.enum(['NONE', 'REVIEW', 'HIGH']).nullable().optional(),
+  framing_codes: z.array(z.string()).optional(),
   staled_at: z.string().nullable().optional(),
   created_at: z.string(),
   decided_at: z.string().nullable(),

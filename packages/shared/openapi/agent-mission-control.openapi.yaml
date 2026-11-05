@@ -212,7 +212,7 @@ paths:
         '401': { description: Authentication required or token invalid }
         '403': { description: Approval belongs to another authorization scope }
         '404': { description: Approval not found }
-        '409': { description: Approval is terminal, run state changed, or idempotency conflict }
+        '409': { description: Approval is terminal, run state changed, idempotency conflict, or HIGH framing not acknowledged }
         '503': { description: Authentication provider or runtime configuration unavailable }
   /runs/{run_id}/events:
     get:
@@ -668,11 +668,14 @@ components:
         staled_at: { type: string, nullable: true }
         created_at: { type: string }
         decided_at: { type: string, nullable: true }
+        framing_level: { type: string, enum: [NONE, REVIEW, HIGH], nullable: true, description: 'Heuristic persuasion-pressure level of the summary (ASI09). Not a judgement of truth.' }
+        framing_codes: { type: array, items: { type: string }, description: 'Stable codes that produced framing_level.' }
     ApprovalDecision:
       type: object
       required: [decision]
       properties:
         decision: { type: string, enum: [approve, reject] }
+        framing_acknowledged: { type: boolean, description: 'Required true to approve a request whose framing_level is HIGH.' }
     ApprovalDecisionResponse:
       type: object
       required: [approval_id, status, decision, reviewer, decided_at]

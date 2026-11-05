@@ -31,6 +31,8 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from services.langgraph.agency.execution.canonical import canonical_hash
+from services.langgraph.agency.reliability import execution_bounds
+from services.langgraph.agency.council import capability as capability_mod
 from services.langgraph.persistence import council as store
 from services.langgraph.security.pii import redact_value
 
@@ -50,6 +52,10 @@ class GatewayDenied(Exception):
     def __init__(self, code: str, message: str, status: int = 403) -> None:
         super().__init__(message)
         self.code, self.status = code, status
+
+
+# One accepted jti per capability, process-wide and bounded (ASI03).
+_CAPABILITY_JTI = capability_mod.JTIRegistry()
 
 
 @dataclass(frozen=True)
@@ -172,6 +178,35 @@ def registry(*, include_mcp: bool = True) -> dict[str, ToolSpec]:
     return tools
 
 
+def _objective_terms(mission: dict | None) -> frozenset[str]:
+    """The goal a mission was started for: its idea's title and description. Empty when unavailable."""
+    if not mission or not mission.get("idea_id"):
+        return frozenset()
+    try:
+        idea = store.get_idea(str(mission["idea_id"])) or {}
+    except Exception:  # noqa: BLE001 - drift detection must never break a call; it simply stays off
+        return frozenset()
+    return execution_bounds.objective_terms(f"{idea.get('title') or ''} {idea.get('description') or ''}")
+
+
+def _args_text(args: dict) -> str:
+    """All string values in the arguments, joined, for drift comparison. Bounded."""
+    parts: list[str] = []
+
+    def walk(value) -> None:
+        if isinstance(value, str):
+            parts.append(value)
+        elif isinstance(value, dict):
+            for item in value.values():
+                walk(item)
+        elif isinstance(value, (list, tuple)):
+            for item in value:
+                walk(item)
+
+    walk(args)
+    return " ".join(parts)[:4000]
+
+
 def action_target(tool_id: str, mission_id: str) -> str:
     """The target an approval names for a tool. Derived server-side, never taken from the caller."""
     return f"council/{mission_id}/scaffold/" if tool_id == "workspace.write_scaffold" else tool_id
@@ -250,11 +285,32 @@ def invoke(tool_id: str, args: dict, *, ctx: dict, seat: str, mission: dict | No
     missing = spec.scopes - SEAT_SCOPES.get(seat, frozenset())
     if missing:
         raise deny("SCOPE_NOT_GRANTED", f"seat {seat} lacks scopes {sorted(missing)}", sensitivity=spec.sensitivity)
+    # ASI08/ASI10: bound depth, call budget, identical-call loops and per-tool circuit state
+    # before any approval consumption or execution. Refusals are audited as DENIED.
+    try:
+        guard = execution_bounds.guard_for((ctx["tenant_id"], ctx["project_id"], ctx.get("mission_id") or "-"))
+        # ASI10: the objective and the call text feed goal-drift detection. A halted session is refused with 423.
+        guard.admit(tool_id, audit["args_hash"], depth=int(ctx.get("depth", 1)),
+                    objective=_objective_terms(mission), text=_args_text(args),
+                    spawns_session=bool(getattr(spec, "spawns_session", False)))
+    except execution_bounds.BoundViolation as exc:
+        status = 423 if exc.code == "SESSION_HALTED" else 429
+        raise deny(exc.code, str(exc), status, spec.sensitivity) from exc
     try:
         parsed = spec.args_model.model_validate(args) if spec.args_model else _validate_json_schema(spec, args)
     except (ValidationError, ValueError) as exc:
         raise deny("SCHEMA_INVALID", f"arguments do not match the tool schema: {str(exc)[:200]}", 422,
                    spec.sensitivity) from exc
+    # ASI03: mint a short-lived capability bound to this tool, these exact arguments and the scopes the
+    # call needs, then verify it. Done before the approval is consumed, so a refusal burns nothing.
+    try:
+        issuer = capability_mod.default_issuer()
+        capability_token = issuer.mint(tool_id=tool_id, seat=seat, scopes=spec.scopes, args=args, ctx=ctx)
+        capability_claims = capability_mod.verify(
+            capability_token, public_key=issuer.public_key(), tool_id=tool_id, args=args,
+            required_scopes=spec.scopes, registry=_CAPABILITY_JTI)
+    except capability_mod.CapabilityError as exc:
+        raise deny("CAPABILITY_INVALID", str(exc)[:200], 403, spec.sensitivity) from exc
     hashed = None
     if spec.sensitivity != "READ":
         try:
@@ -273,26 +329,33 @@ def invoke(tool_id: str, args: dict, *, ctx: dict, seat: str, mission: dict | No
         else:
             from .mcp_client import call_mcp_tool
 
-            future = pool.submit(call_mcp_tool, spec, args)
+            future = pool.submit(call_mcp_tool, spec, args, capability=capability_token)
         result = future.result(timeout=spec.timeout_s)
     except concurrent.futures.TimeoutError:
+        guard.record(tool_id, ok=False)
         store.record_tool_audit(**audit, sensitivity=spec.sensitivity, decision="TIMEOUT", reason_code="TOOL_TIMEOUT",
                                 duration_ms=int((time.monotonic() - started) * 1000))
         raise GatewayDenied("TOOL_TIMEOUT", f"{tool_id} exceeded {spec.timeout_s}s", 504) from None
     except GatewayDenied as exc:
+        guard.record(tool_id, ok=False)
         store.record_tool_audit(**audit, sensitivity=spec.sensitivity, decision="FAILED", reason_code=exc.code,
                                 duration_ms=int((time.monotonic() - started) * 1000))
         raise
     except Exception as exc:
+        guard.record(tool_id, ok=False)
         store.record_tool_audit(**audit, sensitivity=spec.sensitivity, decision="FAILED", reason_code="TOOL_FAILED",
                                 result_summary=type(exc).__name__, duration_ms=int((time.monotonic() - started) * 1000))
         raise GatewayDenied("TOOL_FAILED", f"{tool_id} failed: {type(exc).__name__}", 502) from exc
     finally:
         pool.shutdown(wait=False, cancel_futures=True)
+    guard.record(tool_id, ok=True)
+    capability_summary = {"jti": capability_claims["jti"], "exp": capability_claims["exp"],
+                          "scopes": capability_claims["scopes"]}
     store.record_tool_audit(**audit, sensitivity=spec.sensitivity, decision="ALLOWED", reason_code="OK",
                             result_summary=json.dumps(redact_value(result), default=str)[:500],
                             duration_ms=int((time.monotonic() - started) * 1000))
-    return {"tool_id": tool_id, "result": redact_value(result), "action_hash": hashed}
+    return {"tool_id": tool_id, "result": redact_value(result), "action_hash": hashed,
+            "capability": capability_summary}
 
 
 def _validate_json_schema(spec: ToolSpec, args: dict) -> dict:

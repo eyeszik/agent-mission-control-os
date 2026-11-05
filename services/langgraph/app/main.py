@@ -37,6 +37,7 @@ from services.langgraph.app.config import (
     assert_runtime_configuration,
     hmac_ingress_enabled,
     hmac_ingress_header_name,
+    hmac_replay_backend,
     load_runtime_config,
     readiness_errors,
     runtime_environment,
@@ -109,6 +110,7 @@ if hmac_ingress_enabled():
             header_name=hmac_ingress_header_name(),
             secret=os.environ["AMC_HMAC_SECRET"].encode("utf-8"),
             protected_paths=("/runtime/ingest",),
+            replay_backend=hmac_replay_backend(),
         ),
     )
 
