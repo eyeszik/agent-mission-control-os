@@ -14,9 +14,10 @@ function config() {
 }
 
 function store(payload: SupabaseTokenResponse, tenantId?: string): StoredSession {
+  // Only store access_token and metadata - NOT refresh_token
+  // Refresh tokens should be handled server-side via httpOnly cookies
   const session: StoredSession = {
     access_token: payload.access_token,
-    refresh_token: payload.refresh_token,
     expires_at: Math.floor(Date.now() / 1000) + payload.expires_in,
     tenant_id: tenantId,
   };
@@ -48,18 +49,16 @@ export async function signUp(email: string, password: string): Promise<void> {
 export async function ensureAccessToken(): Promise<string | null> {
   const session = readSession();
   if (!session) return null;
-  if (session.expires_at - Math.floor(Date.now() / 1000) > 60) return session.access_token;
-  const { url, key } = config();
-  const response = await fetch(`${url}/auth/v1/token?grant_type=refresh_token`, {
-    method: 'POST',
-    headers: { apikey: key, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token: session.refresh_token }),
-  });
-  if (!response.ok) {
-    clearSession();
-    return null;
+  
+  // Check if access token is still valid (with 60s buffer)
+  if (session.expires_at - Math.floor(Date.now() / 1000) > 60) {
+    return session.access_token;
   }
-  return store((await response.json()) as SupabaseTokenResponse, session.tenant_id).access_token;
+  
+  // Access token expired - clear session and require re-authentication
+  // This is more secure than storing refresh tokens in sessionStorage
+  clearSession();
+  return null;
 }
 
 export function signOut(): void {

@@ -7,6 +7,7 @@ import { useApprovalStore } from '../../lib/stores/approvalStore';
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { useRunStore } from '../../lib/stores/runStore';
+import { useProjectStore } from '../../lib/stores/projectStore';
 
 export function CommandInputPanel() {
   const [brandName, setBrandName] = useState('');
@@ -19,14 +20,15 @@ export function CommandInputPanel() {
   const addArtifact = useArtifactStore((state) => state.addArtifact);
   const upsertApproval = useApprovalStore((state) => state.upsertApproval);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
+  const currentProjectId = useProjectStore((state) => state.currentProjectId);
 
   const handleLaunchCampaign = async () => {
-    if (!brandName.trim() || !targetAudience.trim()) return;
+    if (!brandName.trim() || !targetAudience.trim() || !currentProjectId) return;
     setLoading(true);
     setError(null);
     try {
       const run = await createAgencyRun(
-        'proj_1',
+        currentProjectId,
         {
           brand_name: brandName.trim(),
           target_audience: targetAudience.trim(),
@@ -77,21 +79,27 @@ export function CommandInputPanel() {
         <div role="alert" className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</div>
       )}
 
+      {!currentProjectId && (
+        <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2">
+          No project selected. Please select a project to continue.
+        </div>
+      )}
+
       <div className="flex flex-col gap-2">
         <label className="text-xs text-zinc-500" htmlFor="brand-name">Brand name</label>
-        <input id="brand-name" value={brandName} onChange={(event) => setBrandName(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+        <input id="brand-name" value={brandName} onChange={(event) => setBrandName(event.target.value)} disabled={loading || !currentProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
 
         <label className="text-xs text-zinc-500" htmlFor="target-audience">Target audience</label>
-        <input id="target-audience" value={targetAudience} onChange={(event) => setTargetAudience(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+        <input id="target-audience" value={targetAudience} onChange={(event) => setTargetAudience(event.target.value)} disabled={loading || !currentProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
 
         <label className="text-xs text-zinc-500" htmlFor="campaign-goals">Goals <span className="text-zinc-600">(comma separated, optional)</span></label>
-        <input id="campaign-goals" value={goals} onChange={(event) => setGoals(event.target.value)} disabled={loading} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+        <input id="campaign-goals" value={goals} onChange={(event) => setGoals(event.target.value)} disabled={loading || !currentProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
 
         <div className="flex justify-end pt-1">
           <button
             type="button"
             onClick={handleLaunchCampaign}
-            disabled={loading || !brandName.trim() || !targetAudience.trim()}
+            disabled={loading || !brandName.trim() || !targetAudience.trim() || !currentProjectId}
             className="px-4 py-1.5 bg-zinc-100 text-zinc-900 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
           >
             {loading ? 'Running pipeline…' : 'Launch Campaign'}

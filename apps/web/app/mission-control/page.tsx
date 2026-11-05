@@ -13,11 +13,19 @@ import { FileOrganizationPanel } from "../../components/mission-control/FileOrga
 import { ArtifactPreviewPanel } from "../../components/mission-control/ArtifactPreviewPanel";
 import { readSession } from "../../lib/auth/session";
 import { signOut } from "../../lib/auth/supabase";
+import { useProjectStore } from "../../lib/stores/projectStore";
 
 export default function MissionControlPage() {
   const router = useRouter();
   const productionAuth = process.env.NEXT_PUBLIC_AUTH_MODE === 'supabase';
   const [ready, setReady] = useState(!productionAuth);
+  const setCurrentProject = useProjectStore((state) => state.setCurrentProject);
+
+  useEffect(() => {
+    // Initialize project from environment or default
+    const defaultProjectId = process.env.NEXT_PUBLIC_DEFAULT_PROJECT_ID || 'proj_1';
+    setCurrentProject(defaultProjectId);
+  }, [setCurrentProject]);
 
   useEffect(() => {
     if (!productionAuth) return;
