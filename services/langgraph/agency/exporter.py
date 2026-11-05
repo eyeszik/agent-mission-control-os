@@ -35,12 +35,16 @@ def _slugify(value: str) -> str:
 
 
 def _write_text(path: Path, body: str) -> str:
+    if ".." in str(path):
+        raise Exception("Invalid file path")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(body.rstrip() + "\n", encoding="utf-8")
     return str(path)
 
 
 def _write_json(path: Path, payload: Any) -> str:
+    if ".." in str(path):
+        raise Exception("Invalid file path")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return str(path)
@@ -68,6 +72,12 @@ def _write_rendered_assets(root: Path, package: dict) -> list[str]:
     files_written: list[str] = []
     for asset in rendered_assets:
         output_path = root / asset["output_path"]
+        base_dir = root.resolve()
+        resolved_output_path = output_path.resolve()
+        try:
+            resolved_output_path.relative_to(base_dir)
+        except ValueError:
+            raise Exception("Invalid file path")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         asset_type = asset.get("asset_type")
         if asset_type == "logo_mark":
@@ -95,8 +105,8 @@ def _write_rendered_assets(root: Path, package: dict) -> list[str]:
                 surface=surface,
                 accent=secondary,
             )
-        output_path.write_text(body, encoding="utf-8")
-        files_written.append(str(output_path))
+        resolved_output_path.write_text(body, encoding="utf-8")
+        files_written.append(str(resolved_output_path))
     review_queue = asset_execution.get("review_queue") or {}
     if review_queue.get("review_artifact_path"):
         checklist = "\n".join(f"- {item}" for item in review_queue.get("checklist") or [])
