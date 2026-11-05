@@ -25,6 +25,13 @@ _JSON_FIELDS = {
     "agency_artifacts": ("assumptions", "validation", "approval", "metadata"),
 }
 
+# Dynamic SQL identifiers (table/column names) cannot be bound as parameters.
+# Every dynamic identifier used below is constrained to these closed allowlists
+# so an unexpected value can never reach statement construction (defense in
+# depth: callers use these helpers only with the same literal constants).
+_KERNEL_ENTITIES = frozenset(_JSON_FIELDS)
+_KERNEL_ID_COLUMNS = frozenset({"engagement_id", "workstream_id", "evidence_id", "decision_id", "artifact_id"})
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -40,6 +47,10 @@ def _row_to_record(row: Any, entity: str) -> dict:
 
 
 def _get(entity: str, id_column: str, value: str) -> Optional[dict]:
+    if entity not in _KERNEL_ENTITIES:
+        raise ValueError(f"Unknown agency kernel entity: {entity}")
+    if id_column not in _KERNEL_ID_COLUMNS:
+        raise ValueError(f"Unknown agency kernel id column: {id_column}")
     with transaction() as db:
         row = db.execute(f"SELECT * FROM {table(entity)} WHERE {id_column} = ?", (value,)).fetchone()
     return _row_to_record(row, entity) if row else None

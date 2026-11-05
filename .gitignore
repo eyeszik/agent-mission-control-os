@@ -15,7 +15,11 @@ node_modules/
 dist/
 build/
 coverage/
+tsconfig.tsbuildinfo
 
+# AMCS runtime outputs (created by tests / preview server, never committed)
+amc_artifacts/
+apps/web/test-results/
 # Python
 __pycache__/
 *.pyc

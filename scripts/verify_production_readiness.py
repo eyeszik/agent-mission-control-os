@@ -27,6 +27,12 @@ def main() -> None:
     require("services/langgraph/security/auth.py", "X-AMC-Tenant")
     require("services/langgraph/integrations/publication.py", "publication_disabled")
     require("services/langgraph/integrations/paid_media.py", "and False")
+    require("services/langgraph/persistence/jobs.py", "expire_stale_leases")
+    require("services/langgraph/persistence/jobs.py", "dead_letter")
+    require("services/langgraph/runtime/worker.py", "_LeaseHeartbeat")
+    require("services/langgraph/persistence/artifacts.py", "ArtifactIntegrityError")
+    require("supabase/migrations/20261104_amc_durable_execution_v1_jobs_artifacts.sql", "amc.amc_jobs")
+    require("supabase/migrations/20261104_amc_durable_execution_v1_jobs_artifacts.sql", "amc.artifact_versions")
     require("services/langgraph/persistence/analytics.py", "emit_lifecycle_event")
     require("services/langgraph/api/routes/agency.py", "agency_run_created")
     require("services/langgraph/api/routes/agency.py", "agency_run_completed")
@@ -92,6 +98,7 @@ def main() -> None:
     os.environ["AMC_CORS_ALLOWED_ORIGINS"] = "https://mission.example.com"
     os.environ["AMC_PUBLICATION_MODE"] = "disabled"
     os.environ["AMC_PAID_MEDIA_MODE"] = "disabled"
+    os.environ["AMC_EXECUTION_MODE"] = "background"
     from services.langgraph.app.config import production_config_errors
 
     errors = production_config_errors()

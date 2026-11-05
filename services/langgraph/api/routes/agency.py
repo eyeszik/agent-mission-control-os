@@ -5,9 +5,10 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
-from services.langgraph.agency.kernel.lifecycle import TransitionContext, release_guard_failures
+from services.langgraph.agency.kernel.lifecycle import release_guard_failures
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.models import AgentRun
+from services.langgraph.app.config import execution_mode
 from services.langgraph.persistence.analytics import emit_lifecycle_event
 from services.langgraph.persistence.approvals import get_approvals_for_run
 from services.langgraph.persistence.events import record_event
@@ -17,12 +18,14 @@ from services.langgraph.persistence.idempotency import (
     hash_payload,
     reserve_idempotency,
 )
+from services.langgraph.persistence.jobs import enqueue_job
 from services.langgraph.persistence.runs import (
     compare_and_set_run_status,
     create_run_record,
     get_run_record,
     update_run_status,
 )
+from services.langgraph.runtime import execution as _exec
 from services.langgraph.security.auth import Principal, authorize_project, authorize_resource, get_principal
 from services.langgraph.security.pii import quarantine_payload
 from services.langgraph.security.preprocess import sanitize_deep
@@ -31,6 +34,16 @@ router = APIRouter()
 
 PIPELINE_NAME = "branding_marketing_agency"
 IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
+
+# Route-level aliases over the shared execution core so inline HTTP execution
+# and the background worker cannot drift apart.
+_now = _exec.now_iso
+_run_config = _exec.run_config
+_agency_payload = _exec.agency_payload
+_run_and_record_events = _exec.run_and_record_events
+_delivery_context = _exec.delivery_context
+_ANALYTICS_REPORTED_BLOCKS = _exec.ANALYTICS_REPORTED_BLOCKS
+_DELIVERY_BLOCK_DETAIL = _exec.DELIVERY_BLOCK_DETAIL
 
 
 class CampaignBriefRequest(BaseModel):
@@ -49,93 +62,8 @@ class CreateAgencyRunRequest(BaseModel):
     brief: CampaignBriefRequest
 
 
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
-def _run_config(run_id: str) -> dict:
-    return {"configurable": {"thread_id": run_id}}
-
-
-def _agency_payload(state: dict) -> dict:
-    return (state.get("extracted_data") or {}).get("agency", {}) if state else {}
-
-
 def _safe_brief(req: CreateAgencyRunRequest) -> dict:
     return quarantine_payload(sanitize_deep(req.brief.model_dump()))
-
-
-def _run_and_record_events(graph, input_state, config: dict, run: AgentRun) -> dict:
-    """
-    Execute synchronously and persist causally honest completion observations.
-
-    The current execution API does not expose a pre-node callback from this
-    wrapper, so we intentionally do NOT fabricate node_start timestamps. Each
-    event records the point at which a completed node update was observed.
-    """
-
-    for step in graph.stream(input_state, config=config, stream_mode="updates"):
-        for node_id, _delta in step.items():
-            if node_id == "__interrupt__":
-                continue
-            completed_at = _now()
-            record_event(
-                str(run.id),
-                run.tenant_id,
-                run.project_id,
-                node_id,
-                "node_complete",
-                observed_at=completed_at,
-                completed_at=completed_at,
-            )
-
-    snapshot = graph.get_state(config)
-    return dict(snapshot.values) if snapshot and snapshot.values else {}
-
-
-def _delivery_context(stored_agency: dict, approval: Optional[dict]) -> TransitionContext:
-    """Build the N2 guard context from the run's persisted facts.
-
-    ``brand_safety_advisory`` is True because this route's established policy is
-    that the HITL gate is the authority: a reviewer may approve a campaign whose
-    brand-safety heuristic flagged terms. Degraded provider output is *not*
-    discharged that way and remains a hard block.
-    """
-    qa_report = stored_agency.get("qa_report") or {}
-    return TransitionContext(
-        # release_blocked is set by brand_safety_qa when any generation stage
-        # fell back, so it is the persisted form of degraded provenance.
-        generation_mode="FALLBACK_DEGRADED" if qa_report.get("release_blocked") else "PROVIDER_SUCCESS",
-        approval_exists=approval is not None,
-        approval_resolved=bool(approval and approval.get("status") == "resolved"),
-        approval_decision=(approval or {}).get("decision"),
-        brand_safety_passed=bool(qa_report.get("brand_safety_passed")),
-        brand_safety_advisory=True,
-    )
-
-
-# Guard codes that represent a substantive release block worth recording in
-# lifecycle analytics, as opposed to a run simply awaiting its approval
-# decision. Matches the pre-refactor emission behavior.
-_ANALYTICS_REPORTED_BLOCKS = frozenset({"degraded_release_block", "brand_safety_failed", "spend_unauthorized"})
-
-_DELIVERY_BLOCK_DETAIL = {
-    "degraded_release_block": lambda _approval: (
-        "Run contains degraded provider output and cannot be delivered; "
-        "rerun with a configured provider"
-    ),
-    "approval_missing": lambda _approval: "No approval found for this run",
-    "approval_pending": lambda _approval: "Run still has an unresolved approval",
-    "approval_not_approved": lambda approval: (
-        f"Run was not approved (decision={(approval or {}).get('decision')})"
-    ),
-    "brand_safety_failed": lambda _approval: (
-        "Run failed brand-safety review and cannot be delivered"
-    ),
-    "spend_unauthorized": lambda _approval: (
-        "Delivery requires an explicit spend/publication authorization"
-    ),
-}
 
 
 def _authorize_run(principal: Principal, record: dict) -> None:
@@ -178,23 +106,52 @@ def create_agency_run(
     run_id = str(uuid4())
     now = datetime.now(timezone.utc)
     metadata = {"input_data": {"brief": safe_brief}}
+
+    background = execution_mode() == "background"
     run = AgentRun(
         id=run_id,
         tenant_id=principal.tenant_id,
         project_id=req.project_id,
-        status="running",
+        status="queued" if background else "running",
         created_at=now,
         updated_at=now,
         metadata=metadata,
     )
-    create_run_record(run_id, principal.tenant_id, req.project_id, PIPELINE_NAME, "running", metadata)
+    create_run_record(
+        run_id, principal.tenant_id, req.project_id, PIPELINE_NAME,
+        "queued" if background else "running", metadata,
+    )
     emit_lifecycle_event(
         principal.tenant_id,
         req.project_id,
         "agency_run_created",
-        {"pipeline": PIPELINE_NAME, "status": "running"},
+        {"pipeline": PIPELINE_NAME, "status": "queued" if background else "running"},
         run_id,
     )
+
+    if background:
+        job = enqueue_job(
+            "agency.create",
+            principal.tenant_id,
+            req.project_id,
+            {
+                "run_id": run_id,
+                "idempotency_scope": scope,
+                "idempotency_key": idempotency_key,
+                "brief": safe_brief,
+            },
+            run_id=run_id,
+        )
+        return {
+            "run_id": run_id,
+            "status": "queued",
+            "pipeline": PIPELINE_NAME,
+            "stages": AGENCY_PIPELINE_STAGES,
+            "job_id": job["job_id"],
+            "execution_mode": "background",
+            "pending_approval": None,
+            "degraded": False,
+        }
 
     graph = build_agency_workflow()
     config = _run_config(run_id)
@@ -305,6 +262,25 @@ def resume_agency_run(
     if record["status"] != "needs_approval":
         fail_idempotency(scope, idempotency_key, f"invalid_status:{record['status']}")
         raise HTTPException(status_code=409, detail=f"Run is not awaiting delivery (status={record['status']})")
+
+    if execution_mode() == "background":
+        job = enqueue_job(
+            "agency.resume",
+            principal.tenant_id,
+            record["project_id"],
+            {
+                "run_id": run_id,
+                "idempotency_scope": scope,
+                "idempotency_key": idempotency_key,
+            },
+            run_id=run_id,
+        )
+        return {
+            "run_id": run_id,
+            "status": record["status"],
+            "job_id": job["job_id"],
+            "execution_mode": "background",
+        }
 
     stored_agency = (record.get("result") or {}).get("agency", {})
     run_approvals = get_approvals_for_run(run_id)
