@@ -101,10 +101,29 @@ def _build_cors_config(environment: str) -> CorsConfig:
     return CorsConfig(allowed_origins=tuple(allowed.keys()), errors=tuple(errors))
 
 
+def _build_execution_config() -> ExecutionConfig:
+    """Validate AMC_EXECUTION_MODE / AMC_ARTIFACT_BACKEND.
+
+    ``inline`` executes the pipeline inside the HTTP request (local and CI
+    default). ``background`` enqueues durable jobs executed by
+    services/langgraph/runtime/worker.py, which is what production must use so
+    run execution survives request and worker lifetimes.
+    """
+    mode = (_env("AMC_EXECUTION_MODE") or "inline").lower()
+    if mode not in _VALID_EXECUTION_MODES:
+        raise RuntimeError(f"Unsupported AMC_EXECUTION_MODE={mode!r}")
+    backend = (_env("AMC_ARTIFACT_BACKEND") or "local").lower()
+    if backend not in _VALID_ARTIFACT_BACKENDS:
+        raise RuntimeError(f"Unsupported AMC_ARTIFACT_BACKEND={backend!r}")
+    missing = tuple(name for name in _R2_REQUIRED_ENV if not _env(name))
+    return ExecutionConfig(mode=mode, artifact_backend=backend, missing_r2_env=missing)
+
+
 @dataclass(frozen=True)
 class DatabaseConfig:
     backend: str
     has_database_url: bool
+
 
 
 @dataclass(frozen=True)
@@ -113,9 +132,27 @@ class AuthConfig:
 
 
 @dataclass(frozen=True)
+class ExecutionConfig:
+    """Durable-execution and artifact-storage selection.
+
+    Carries only the R2 credential *presence* flag, never the values, so the
+    config stays safe to log or return from /ready.
+    """
+
+    mode: str
+    artifact_backend: str
+    missing_r2_env: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class ProviderConfig:
     has_supabase_url: bool
     has_supabase_publishable_key: bool
+
+
+_VALID_EXECUTION_MODES = ("inline", "background")
+_VALID_ARTIFACT_BACKENDS = ("local", "r2")
+_R2_REQUIRED_ENV = ("R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET")
 
 
 @dataclass(frozen=True)
@@ -137,6 +174,7 @@ class RuntimeConfig:
     providers: ProviderConfig
     publication: PublicationConfig
     paid_media: PaidMediaConfig
+    execution: ExecutionConfig
     errors: tuple[str, ...]
 
 
@@ -148,6 +186,7 @@ def _production_errors(
     providers: ProviderConfig,
     publication: PublicationConfig,
     paid_media: PaidMediaConfig,
+    execution: ExecutionConfig,
 ) -> list[str]:
     if environment != ENV_PRODUCTION:
         return []
@@ -174,6 +213,14 @@ def _production_errors(
         errors.append("AMC_ALLOW_SELF_APPROVAL must not be enabled in production")
     if (_env("AMC_OBJECT_STORAGE_BACKEND") or "local").lower() not in {"local"}:
         errors.append("AMC_OBJECT_STORAGE_BACKEND has no reviewed remote adapter; R2 stays fail-closed")
+    # NOTE: the durable queue (persistence/jobs.py + runtime/worker.py) is in place, but the
+    # agency create/resume routes still execute inline: they own trust-kernel policy records,
+    # dispatch permits, pin/contract-seeded initial state and enforce_limits, none of which the
+    # worker reproduces yet. Requiring "background" here would therefore force production onto the
+    # degraded path, so the mode is validated but not mandated until the routes hand work to the
+    # worker (follow-up PR). See services/langgraph/runtime/worker.py:_execute_create_job.
+    if execution.artifact_backend == "r2" and execution.missing_r2_env:
+        errors.append(f"AMC_ARTIFACT_BACKEND=r2 requires {', '.join(execution.missing_r2_env)}")
     return errors
 
 
@@ -198,8 +245,11 @@ def load_runtime_config() -> RuntimeConfig:
     )
     publication = PublicationConfig(mode=(_env("AMC_PUBLICATION_MODE") or "disabled").lower())
     paid_media = PaidMediaConfig(mode=(_env("AMC_PAID_MEDIA_MODE") or "disabled").lower())
+    execution = _build_execution_config()
 
-    errors = _production_errors(environment, cors, database, auth, providers, publication, paid_media)
+    errors = _production_errors(
+        environment, cors, database, auth, providers, publication, paid_media, execution
+    )
 
     return RuntimeConfig(
         environment=environment,
@@ -209,6 +259,7 @@ def load_runtime_config() -> RuntimeConfig:
         providers=providers,
         publication=publication,
         paid_media=paid_media,
+        execution=execution,
         errors=tuple(errors),
     )
 
@@ -221,6 +272,16 @@ def assert_runtime_configuration() -> None:
     errors = production_config_errors()
     if errors:
         raise RuntimeError("Invalid production configuration: " + "; ".join(errors))
+
+
+def execution_mode() -> str:
+    """``inline`` (local/CI default) or ``background`` (durable queue, required in production)."""
+    return load_runtime_config().execution.mode
+
+
+def artifact_backend() -> str:
+    """Where artifact bytes live: ``local`` filesystem directory or ``r2`` content-addressed store."""
+    return load_runtime_config().execution.artifact_backend
 
 
 def hmac_ingress_enabled() -> bool:

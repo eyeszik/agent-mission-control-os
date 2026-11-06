@@ -29,13 +29,10 @@ from services.langgraph.agency.delivery.release import (
     safe_attributes,
 )
 from services.langgraph.agency.delivery.workflow import (
-    CONTRACT_CHECK_NODE,
     WorkflowPin,
     WorkflowPinError,
-    assert_pin_current,
     contract_mode_from_env,
     pin_for_new_run,
-    pinned_workflow,
 )
 from services.langgraph.agency.design import UnknownStyleError, get_style
 from services.langgraph.agency.design.style_composer import DesignStyleSelection
@@ -54,7 +51,10 @@ from services.langgraph.agency.execution.models import (
 from services.langgraph.agency.kernel.lifecycle import TransitionContext, release_guard_failures
 from services.langgraph.agency.model_profiles import pin_metadata as pin_model_profile
 from services.langgraph.agency.reliability import IdempotencyStatus, PolicyEffect
+from services.langgraph.app.config import execution_mode
 from services.langgraph.app.runtime_support import trust_kernel
+from services.langgraph.persistence.jobs import enqueue_job
+from services.langgraph.runtime import execution as _exec
 from services.langgraph.graph.agency.build import AGENCY_PIPELINE_STAGES, build_agency_workflow
 from services.langgraph.graph.agency.nodes import LIVE_STAGE_ROLE_BINDINGS
 from services.langgraph.graph.models import AgentRun
@@ -156,16 +156,19 @@ class RebindArtifactRequest(BaseModel):
     revision_note: str = Field(min_length=1)
 
 
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
-def _run_config(run_id: str) -> dict:
-    return {"configurable": {"thread_id": run_id}}
-
-
-def _agency_payload(state: dict) -> dict:
-    return (state.get("extracted_data") or {}).get("agency", {}) if state else {}
+# Route-level aliases over the shared execution core (services/langgraph/runtime/
+# execution.py), so inline HTTP execution and the durable background worker cannot
+# drift into different semantics. Behaviour is master's: the shared core also emits
+# master's node-event provenance (safe_payload).
+_now = _exec.now_iso
+_run_config = _exec.run_config
+_agency_payload = _exec.agency_payload
+_run_and_record_events = _exec.run_and_record_events
+_delivery_context = _exec.delivery_context
+_ANALYTICS_REPORTED_BLOCKS = _exec.ANALYTICS_REPORTED_BLOCKS
+_DELIVERY_BLOCK_DETAIL = _exec.DELIVERY_BLOCK_DETAIL
+_run_pin = _exec.run_pin
+_initial_extracted_data = _exec.initial_extracted_data
 
 
 def _safe_brief(req: CreateAgencyRunRequest) -> dict:
@@ -619,101 +622,6 @@ def _record_completion(
     return put_completion_evaluation(run_id, tenant_id, project_id, evaluation)
 
 
-def _node_event_payload(node_id: str, delta) -> Optional[dict]:
-    """Safe, query-free provenance attached to selected node_complete events."""
-    if not isinstance(delta, dict):
-        return None
-    if node_id == CONTRACT_CHECK_NODE:
-        evaluation = (((delta.get("extracted_data") or {}).get("agency") or {}).get("contract_evaluation") or {})
-        return {
-            "contract_check": safe_attributes(
-                node_id=node_id,
-                contract_hash=evaluation.get("contract_hash"),
-                critic_verdict=evaluation.get("dod") or evaluation.get("status"),
-                contract_mode=evaluation.get("contract_mode"),
-            )
-        }
-    if node_id != "creative_concepting":
-        return None
-    agency = ((delta.get("extracted_data") or {}).get("agency") or {})
-    corpus = agency.get("design_corpus_provenance")
-    return {"design_corpus": corpus} if corpus else None
-
-
-def _run_and_record_events(graph, input_state, config: dict, run: AgentRun) -> dict:
-    """
-    Execute synchronously and persist causally honest completion observations.
-
-    The current execution API does not expose a pre-node callback from this
-    wrapper, so we intentionally do NOT fabricate node_start timestamps. Each
-    event records the point at which a completed node update was observed.
-    """
-
-    for step in graph.stream(input_state, config=config, stream_mode="updates"):
-        for node_id, _delta in step.items():
-            if node_id == "__interrupt__":
-                continue
-            completed_at = _now()
-            record_event(
-                str(run.id),
-                run.tenant_id,
-                run.project_id,
-                node_id,
-                "node_complete",
-                safe_payload=_node_event_payload(node_id, _delta),
-                observed_at=completed_at,
-                completed_at=completed_at,
-            )
-
-    snapshot = graph.get_state(config)
-    return dict(snapshot.values) if snapshot and snapshot.values else {}
-
-
-def _delivery_context(stored_agency: dict, approval: Optional[dict]) -> TransitionContext:
-    """Build the N2 guard context from the run's persisted facts.
-
-    ``brand_safety_advisory`` is True because this route's established policy is
-    that the HITL gate is the authority: a reviewer may approve a campaign whose
-    brand-safety heuristic flagged terms. Degraded provider output is *not*
-    discharged that way and remains a hard block.
-    """
-    qa_report = stored_agency.get("qa_report") or {}
-    return TransitionContext(
-        # release_blocked is set by brand_safety_qa when any generation stage
-        # fell back, so it is the persisted form of degraded provenance.
-        generation_mode="FALLBACK_DEGRADED" if qa_report.get("release_blocked") else "PROVIDER_SUCCESS",
-        approval_exists=approval is not None,
-        approval_resolved=bool(approval and approval.get("status") == "resolved"),
-        approval_decision=(approval or {}).get("decision"),
-        brand_safety_passed=bool(qa_report.get("brand_safety_passed")),
-        brand_safety_advisory=True,
-    )
-
-
-# Guard codes that represent a substantive release block worth recording in
-# lifecycle analytics, as opposed to a run simply awaiting its approval
-# decision. Matches the pre-refactor emission behavior.
-_ANALYTICS_REPORTED_BLOCKS = frozenset({"degraded_release_block", "brand_safety_failed", "spend_unauthorized"})
-
-_DELIVERY_BLOCK_DETAIL = {
-    "degraded_release_block": lambda _approval: (
-        "Run contains degraded provider output and cannot be delivered; "
-        "rerun with a configured provider"
-    ),
-    "approval_missing": lambda _approval: "No approval found for this run",
-    "approval_pending": lambda _approval: "Run still has an unresolved approval",
-    "approval_not_approved": lambda approval: (
-        f"Run was not approved (decision={(approval or {}).get('decision')})"
-    ),
-    "brand_safety_failed": lambda _approval: (
-        "Run failed brand-safety review and cannot be delivered"
-    ),
-    "spend_unauthorized": lambda _approval: (
-        "Delivery requires an explicit spend/publication authorization"
-    ),
-}
-
-
 def _authorize_run(principal: Principal, record: dict) -> None:
     authorize_resource(principal, record["tenant_id"], record["project_id"])
 
@@ -751,22 +659,6 @@ def _resolve_contract_pin(req: CreateAgencyRunRequest) -> tuple[WorkflowPin, Opt
         except ContractValidationError as exc:
             raise HTTPException(status_code=422, detail={"code": exc.code, "detail": exc.detail}) from exc
     return pin_for_new_run(mode), contract
-
-
-def _initial_extracted_data(pin: WorkflowPin, contract: Optional[DeliveryContract]) -> dict:
-    if not pin.uses_contract:
-        return {}
-    return {
-        "delivery_contract": contract.model_dump(mode="json") if contract is not None else None,
-        "contract_mode": pin.contract_mode,
-    }
-
-
-def _run_pin(record: dict) -> WorkflowPin:
-    """The run's own pin, verified against the code's current topology."""
-    pin = pinned_workflow(record.get("metadata"))
-    assert_pin_current(pin)
-    return pin
 
 
 def _candidate_artifact_ids(agency_data: dict, protected_artifact_id: str) -> list[str]:
@@ -896,6 +788,11 @@ def create_agency_run(
         request={"project_id": req.project_id, "brief": safe_brief},
     )
     now = datetime.now(timezone.utc)
+    # In background mode the run is submitted, not executed here; the worker replays it
+    # through the same pin/contract the route resolved, via runtime/execution.py.
+    background = execution_mode() == "background"
+    run_status = "queued" if background else "running"
+    now = datetime.now(timezone.utc)
     metadata = {"input_data": {"brief": safe_brief}, "initiated_by": principal.user_id, "workflow": pin.as_metadata(),
                 # Pinned for the life of the run; stages and resumes never re-read the environment.
                 "model_profile": pin_model_profile()}
@@ -906,14 +803,14 @@ def create_agency_run(
         id=run_id,
         tenant_id=principal.tenant_id,
         project_id=req.project_id,
-        status="running",
+        status=run_status,
         created_at=now,
         updated_at=now,
         metadata=metadata,
     )
     try:
         create_run_record(
-            run_id, principal.tenant_id, req.project_id, PIPELINE_NAME, "running", metadata, enforce_limits=True
+            run_id, principal.tenant_id, req.project_id, PIPELINE_NAME, run_status, metadata, enforce_limits=True
         )
     except RunLimitExceeded as exc:
         fail_idempotency(scope, idempotency_key, "run_limit_exceeded")
@@ -927,7 +824,7 @@ def create_agency_run(
         principal.tenant_id,
         req.project_id,
         "agency_run_created",
-        {"pipeline": PIPELINE_NAME, "status": "running"},
+        {"pipeline": PIPELINE_NAME, "status": run_status},
         run_id,
     )
     # Runs are executions within a project: the run starts in the project's
@@ -949,6 +846,35 @@ def create_agency_run(
         project_id=req.project_id,
         phase="generation",
     )
+    if background:
+        job = enqueue_job(
+            "agency.create",
+            principal.tenant_id,
+            req.project_id,
+            {
+                "run_id": run_id,
+                "idempotency_scope": scope,
+                "idempotency_key": idempotency_key,
+                "brief": safe_brief,
+            },
+            run_id=run_id,
+        )
+        # The submission itself is complete and durable: close the trust-kernel
+        # idempotency claim exactly as the inline path does, or every background run
+        # would leave a permanently open operation in the governance ledger. The run's
+        # own result is completed later by the worker against persistence idempotency.
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)
+        return {
+            "run_id": run_id,
+            "status": "queued",
+            "pipeline": PIPELINE_NAME,
+            "stages": AGENCY_PIPELINE_STAGES,
+            "job_id": job["job_id"],
+            "execution_mode": "background",
+            "pending_approval": None,
+            "degraded": False,
+        }
+
     initial_state = {
         "run": run,
         "current_node": "start",
@@ -1482,6 +1408,22 @@ def resume_agency_run(
     if record["status"] != "needs_approval":
         fail_idempotency(scope, idempotency_key, f"invalid_status:{record['status']}")
         raise HTTPException(status_code=409, detail=f"Run is not awaiting delivery (status={record['status']})")
+
+    if execution_mode() == "background":
+        job = enqueue_job(
+            "agency.resume",
+            principal.tenant_id,
+            record["project_id"],
+            {"run_id": run_id, "idempotency_scope": scope, "idempotency_key": idempotency_key},
+            run_id=run_id,
+        )
+        trust.complete_idempotency(idempotency_key=idempotency_key, result_ref=run_id)
+        return {
+            "run_id": run_id,
+            "status": record["status"],
+            "job_id": job["job_id"],
+            "execution_mode": "background",
+        }
 
     # Resume rebuilds the graph the run was created with. A run whose pinned
     # topology no longer matches the code refuses to replay through a

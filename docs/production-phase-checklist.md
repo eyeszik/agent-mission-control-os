@@ -11,5 +11,15 @@
 - [x] Paid-media approval/policy boundary implemented; spend disabled by default
 - [x] First-party analytics ingestion implemented
 - [x] CI production-readiness verifier added
+- [x] Durable execution: job queue (claim fencing, leases/heartbeat, retry budget, dead-letter, cancellation), background execution mode with worker process, crash-recovery tests (2026-11-04)
+- [x] Artifact content storage: content-addressed objects, versioning, tombstoning, upload/download API with tenant isolation and read-back integrity (2026-11-04)
+- [x] Postgres connection pooling (opt-in via AMC_DB_POOL_MAX) (2026-11-04)
+- [x] Structured JSON logging + request-id middleware + /health execution/artifact/revision fields (2026-11-04)
+- [x] OpenAPI + integrity manifest + production-readiness verifier extended for the new contract (2026-11-04)
 - [ ] Preview deployment validated with production secrets
-- [x] Production activation blockers recorded explicitly
+- [ ] Live PostgreSQL execution drill (needs DATABASE_URL)
+- [ ] Live-Postgres CI shard
+- [ ] Canonical domain + TLS
+- [ ] R2 artifact backend credentialed and verified
+- [ ] OpenTelemetry export + alerting
+- [x] Production activation blockers recorded explicitly (see docs/capability_gap_register.md)

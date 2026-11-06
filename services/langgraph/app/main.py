@@ -18,6 +18,7 @@ from services.langgraph.api.routes import (
     agency,
     analytics,
     approvals,
+    artifacts,
     compiled_agency,
     design,
     events,
@@ -34,7 +35,9 @@ from services.langgraph.api.routes import (
     vnexus,
 )
 from services.langgraph.app.config import (
+    artifact_backend,
     assert_runtime_configuration,
+    execution_mode,
     hmac_ingress_enabled,
     hmac_ingress_header_name,
     hmac_replay_backend,
@@ -42,17 +45,52 @@ from services.langgraph.app.config import (
     readiness_errors,
     runtime_environment,
 )
+from services.langgraph.app.observability import AMCTracingMiddleware, configure_logging
 from services.langgraph.security.hmac_ingress import HMACIngressConfig, HMACIngressMiddleware
 from services.langgraph.persistence.checkpoints import close_checkpointer
-from services.langgraph.persistence.database import database_backend, ping_database
+from services.langgraph.persistence.database import database_backend, ping_database, pool_stats
 from services.langgraph.persistence.tenancy import ProjectOwnershipError
 
 API_VERSION = "0.2.0"
 
+_worker_thread = None
+
+
+def _maybe_start_worker() -> None:
+    """Optionally run the durable-execution poller inside the API process.
+
+    Intended for single-node deployments and previews. Multi-node production
+    deployments should run services.langgraph.runtime.worker as its own process
+    instead (AMC_WORKER_INPROCESS defaults to disabled).
+    """
+
+    global _worker_thread
+    enabled = (os.environ.get("AMC_WORKER_INPROCESS") or "0").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    if not enabled or execution_mode() != "background":
+        return
+
+    def _loop() -> None:
+        interval = float(os.environ.get("AMC_WORKER_POLL_INTERVAL", "2") or 2)
+        from services.langgraph.runtime.worker import run_worker_loop
+
+        run_worker_loop(poll_interval=interval)
+
+    import threading
+
+    _worker_thread = threading.Thread(target=_loop, name="amc-runtime-worker", daemon=True)
+    _worker_thread.start()
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    configure_logging()
     assert_runtime_configuration()
+    _maybe_start_worker()
     if (os.environ.get("COUNCIL_RECOVER_ON_STARTUP") or "").strip().lower() in {"1", "true", "yes", "on"}:
         # Resubmit council missions whose worker stopped (expired lease); paused missions need nothing.
         from services.langgraph.agency.council.service import recover_stale
@@ -114,9 +152,14 @@ if hmac_ingress_enabled():
         ),
     )
 
+# Outermost so it can time the whole stack and read the request id that
+# request_id_middleware (innermost) puts on the shared scope state.
+app.add_middleware(AMCTracingMiddleware)
+
 app.include_router(events.router, prefix="/runs", tags=["Events"])
 app.include_router(approvals.router, prefix="/approvals", tags=["Approvals"])
 app.include_router(agency.router, prefix="/agency", tags=["Agency Pipeline"])
+app.include_router(artifacts.router, prefix="/agency/artifacts", tags=["Artifacts"])
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
 app.include_router(operations.router, prefix="/operations", tags=["Operations"])
 app.include_router(runtime.router, prefix="/runtime", tags=["Runtime"])
@@ -182,6 +225,12 @@ def readiness_check():
         "publication_mode": config.publication.mode,
         "paid_media_mode": config.paid_media.mode,
         "hmac_ingress_enabled": hmac_ingress_enabled(),
+        # Durable-execution posture. Reported here rather than on /health, which is
+        # deliberately pure liveness and must not validate configuration.
+        "execution_mode": config.execution.mode,
+        "artifact_backend": config.execution.artifact_backend,
+        "deployed_revision": os.environ.get("AMC_DEPLOYED_REVISION", "").strip(),
+        "pool": pool_stats(),
         "errors": errors,
     }
     return JSONResponse(content=body, status_code=200 if not errors else 503)

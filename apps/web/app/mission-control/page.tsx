@@ -24,6 +24,7 @@ import { PortfolioCommandCenter } from "../../components/mission-control/Portfol
 import { readSession } from "../../lib/auth/session";
 import { signOut } from "../../lib/auth/supabase";
 import { usesSupabaseAuth } from "../../lib/config";
+import { useProjectStore } from "../../lib/stores/projectStore";
 
 export default function MissionControlPage() {
   const router = useRouter();
@@ -34,6 +35,15 @@ export default function MissionControlPage() {
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('mode') === 'innovation') setMode('innovation');
   }, []);
+
+  // Seed the active project before any panel reads it. Runs, activity and the launch
+  // gate in CommandInputPanel all key off activeProjectId, which until now had no
+  // default; NEXT_PUBLIC_DEFAULT_PROJECT_ID makes it configurable while 'proj_1'
+  // preserves the single-project local/dev behaviour.
+  const setActiveProject = useProjectStore((state) => state.setActiveProject);
+  useEffect(() => {
+    setActiveProject(process.env.NEXT_PUBLIC_DEFAULT_PROJECT_ID || 'proj_1');
+  }, [setActiveProject]);
 
   useEffect(() => {
     if (!productionAuth) return;
