@@ -127,12 +127,12 @@ export function CommandInputPanel() {
 
       {error && (
         <div role="alert" className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-sm px-3 py-2">{error}</div>
+      )}
 
       {missingProject && (
         <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-sm px-3 py-2">
           No project selected. Choose one in Project Workspace, or set NEXT_PUBLIC_DEFAULT_PROJECT_ID.
         </div>
-      )}
       )}
 
       {lastProvenance && (

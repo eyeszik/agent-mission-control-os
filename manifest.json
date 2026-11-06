@@ -36,7 +36,7 @@
     },
     {
       "path": "apps/web/components/mission-control/CommandInputPanel.tsx",
-      "git_blob_sha": "505a98007ff7d7ccaedd946980babb50113d4b3d"
+      "git_blob_sha": "95d6edafa01e032fe9d80ff58d9fceebb42be934"
     },
     {
       "path": "apps/web/components/rendering/CreativeRendering.tsx",
