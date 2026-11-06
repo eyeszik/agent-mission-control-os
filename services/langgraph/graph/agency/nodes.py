@@ -1,27 +1,54 @@
 import json
-import logging
+import re
 from datetime import datetime, timezone
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
-from services.langgraph.graph.agency.llm import GenerationOutcome, generate_structured
+from services.langgraph.agency.assets import (
+    render_background_pattern_svg,
+    render_hero_svg,
+    render_logo_svg,
+)
+from services.langgraph.agency.design import InvalidSelectionError, UnknownStyleError
+from services.langgraph.agency.design.style_composer import (
+    DesignStyleDirection,
+    DesignStyleSelection,
+    direction_from_selection,
+    unresolved_direction,
+)
+from services.langgraph.agency import design_corpus
+from services.langgraph.agency.design_tokens import TokenError, compile_css, hex_to_color
+from services.langgraph.agency.full_service import compile_agency_operations
+from services.langgraph.agency.kernel import ArtifactType, assert_role_may_produce, get_role
+from services.langgraph.agency.ui_ux import BrandContext, UIUXRequest, compile_uiux
+from services.langgraph.agency.ui_ux.models import SourceKind, SourceRef
+from services.langgraph.graph.agency.llm import GenerationOutcome, generate_structured, tokens_spent
 from services.langgraph.graph.agency.models import (
+    AssetExecutionPackage,
+    AssetReviewQueue,
     BrandStrategy,
+    BrandingWorkspace,
+    BusinessWorkspace,
     CampaignBrief,
     CampaignPackage,
     CopyVariant,
     CreativeConcept,
+    DesignSystemPackage,
     DesignBrief,
+    PublishingAdapter,
     QAReport,
+    RenderedAsset,
+    WorkspaceDocument,
 )
 from services.langgraph.graph.state import GraphState
 from services.langgraph.persistence.approvals import create_approval_request
-from services.langgraph.quality.brand_safety import check_brand_safety
+from services.langgraph.quality.brand_safety import evaluate_brand_compliance
 from services.langgraph.quality.evaluator import evaluate_quality
 from services.langgraph.security.pii import quarantine_payload
 from services.langgraph.security.preprocess import sanitize_deep
+from services.langgraph.core.config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 AGENCY_PIPELINE_STAGES = [
     "brief_intake",
@@ -34,6 +61,592 @@ AGENCY_PIPELINE_STAGES = [
     "hitl_gate",
     "delivery",
 ]
+
+LIVE_STAGE_ROLE_BINDINGS = {
+    "brief_intake": "market_researcher",
+    "brand_strategy": "brand_strategist",
+    "creative_concepting": "creative_director",
+    "copywriting": "copywriter",
+    "design_brief": "design_lead",
+    "campaign_assembly": "growth_lead",
+    "brand_safety_qa": "brand_safety_reviewer",
+    "hitl_gate": "release_manager",
+    "delivery": "release_manager",
+}
+
+LIVE_STAGE_ARTIFACTS = {
+    "brand_strategy": ArtifactType.positioning_statement,
+    "creative_concepting": ArtifactType.creative_concept,
+    "copywriting": ArtifactType.copy_variant,
+    "design_brief": ArtifactType.design_brief,
+    "campaign_assembly": ArtifactType.campaign_package,
+    "brand_safety_qa": ArtifactType.qa_report,
+    "delivery": ArtifactType.release_record,
+}
+
+
+def _assert_live_stage_contract(stage: str) -> str:
+    """Resolve every live stage through the N3 registry before it executes.
+
+    This is deliberately a guard, not a permission grant: role titles never
+    create external authority. Artifact-producing stages additionally prove
+    that the bound role is allowed to emit that canonical artifact type.
+    """
+    role_id = LIVE_STAGE_ROLE_BINDINGS[stage]
+    get_role(role_id)
+    artifact_type = LIVE_STAGE_ARTIFACTS.get(stage)
+    if artifact_type is not None:
+        assert_role_may_produce(role_id, artifact_type)
+    return role_id
+
+
+def _slugify(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return slug or "idea"
+
+
+def _workspace_doc(path: str, title: str, kind: str, body: str, **metadata) -> WorkspaceDocument:
+    return WorkspaceDocument(path=path, title=title, kind=kind, body=body, metadata=metadata)
+
+
+def _build_business_workspace(brief: CampaignBrief, strategy: BrandStrategy, concepts: list[CreativeConcept]) -> BusinessWorkspace:
+    idea = brief.business_idea or brief.offer_summary or f"{brief.brand_name} business concept"
+    overview = {
+        "idea_name": brief.brand_name,
+        "business_idea": idea,
+        "product_type": brief.product_type or "digital_product",
+        "business_model": brief.business_model or ("affiliate" if brief.affiliate_model else "direct"),
+        "workflow_idea": brief.workflow_idea,
+        "target_audience": brief.target_audience,
+        "goals": brief.goals,
+        "differentiators": brief.differentiators,
+    }
+    internal_docs = [
+        _workspace_doc(
+            "business/overview.md",
+            "Business Overview",
+            "document",
+            "\n".join(
+                [
+                    f"# {brief.brand_name} — Business Overview",
+                    "",
+                    "## Concept",
+                    idea,
+                    "",
+                    "## Offer",
+                    brief.offer_summary or "Offer not explicitly provided; derive from strategy and concept package.",
+                    "",
+                    "## Audience",
+                    brief.target_audience,
+                    "",
+                    "## Goals",
+                    *(
+                        [f"- {goal}" for goal in brief.goals]
+                        if brief.goals
+                        else [
+                            "- Establish positioning",
+                            "- Validate offer",
+                            "- Prepare brand and product system",
+                        ]
+                    ),
+                ]
+            ),
+        ),
+        _workspace_doc(
+            "business/operations/production-plan.md",
+            "Production Plan",
+            "document",
+            "\n".join(
+                [
+                    "# Production Plan",
+                    "",
+                    "1. Finalize product scope and deliverables.",
+                    "2. Generate branded product prompts, workflows, and internal SOPs.",
+                    "3. Approve design system, asset prompts, and implementation scaffolds.",
+                    "4. Build the product/app on the approved brand system.",
+                    "5. Prepare launch, measurement, and iteration loops.",
+                ]
+            ),
+        ),
+    ]
+    production_docs = [
+        _workspace_doc(
+            "business/production/product-requirements.md",
+            "Product Requirements",
+            "document",
+            "\n".join(
+                [
+                    f"# {brief.brand_name} Product Requirements",
+                    "",
+                    f"- Product type: {brief.product_type or 'digital_product'}",
+                    f"- Workflow idea: {brief.workflow_idea or 'To be refined'}",
+                    f"- Core positioning: {strategy.positioning_statement}",
+                    "",
+                    "## Launch-ready deliverables",
+                    "- branded landing copy",
+                    "- user journey and feature outline",
+                    "- internal operating docs",
+                    "- marketing asset prompts",
+                ]
+            ),
+        ),
+    ]
+    prompt_library = [
+        _workspace_doc(
+            "business/prompts/product-generation.prompt.md",
+            "Product Generation Prompt",
+            "prompt",
+            "\n".join(
+                [
+                    f"Build a {brief.product_type or 'digital product'} for {brief.brand_name}.",
+                    f"Audience: {brief.target_audience}.",
+                    f"Positioning: {strategy.positioning_statement}.",
+                    f"Differentiators: {', '.join(brief.differentiators) or 'clarity, speed, trust'}.",
+                    "Return feature spec, user flow, launch copy, and internal operations checklist.",
+                ]
+            ),
+        ),
+        _workspace_doc(
+            "business/prompts/marketing-automation.prompt.md",
+            "Marketing Automation Prompt",
+            "prompt",
+            "\n".join(
+                [
+                    f"Generate internal and external marketing assets for {brief.brand_name}.",
+                    f"Use tone: {strategy.tone_of_voice}.",
+                    f"Channels: {', '.join(brief.channels) or 'web, email, social'}.",
+                    "Output campaign plan, copy matrix, CTA variants, and approval checkpoints.",
+                ]
+            ),
+        ),
+    ]
+    return BusinessWorkspace(
+        overview=overview,
+        internal_docs=internal_docs,
+        production_docs=production_docs,
+        prompt_library=prompt_library,
+    )
+
+
+
+def _style_direction_document(direction: DesignStyleDirection) -> str:
+    lines = [
+        "# Style Direction",
+        "",
+        f"Composition: {direction.composition_id}",
+        f"Catalog version: {direction.catalog_version}",
+        f"Applied to generation: {'yes' if direction.applied else 'no'}",
+        "",
+        "## Layers",
+        *(
+            f"- {layer.style_id} ({layer.role}, strength {layer.strength:.2f}"
+            f"{', locked' if layer.locked else ''}): {', '.join(layer.dimensions) or 'declared dimensions'}"
+            for layer in direction.selections
+        ),
+        "",
+        "## Resolved dimensions",
+        *(f"- {dimension}: {style_id}" for dimension, style_id in direction.resolved_dimensions.items()),
+    ]
+    if direction.rationale:
+        lines += ["", "## Rationale", direction.rationale]
+    if direction.conflicts:
+        lines += ["", "## Blocking conflicts", *(f"- {item}" for item in direction.conflicts)]
+    if direction.warnings:
+        lines += ["", "## Warnings", *(f"- {item}" for item in direction.warnings)]
+    if direction.prompt:
+        lines += ["", "## Compiled prompt", direction.prompt]
+    if direction.negative_prompt:
+        lines += ["", "## Negative prompt", direction.negative_prompt]
+    return "\n".join(lines)
+
+
+def _build_branding_workspace(brief: CampaignBrief, strategy: BrandStrategy, design_brief: DesignBrief, concepts: list[CreativeConcept]) -> BrandingWorkspace:
+    raw_brand_data = {
+        "brand_name": brief.brand_name,
+        "industry": brief.industry,
+        "style_notes": brief.brand_style_notes,
+        "tone": strategy.tone_of_voice,
+        "brand_pillars": strategy.brand_pillars,
+        "palette": design_brief.palette,
+        "typography_direction": design_brief.typography_direction,
+        "imagery_style": design_brief.imagery_style,
+        "concept_angles": [item.model_dump() for item in concepts],
+    }
+    internal_assets = [
+        _workspace_doc(
+            "branding/raw/brand-foundation.md",
+            "Brand Foundation",
+            "document",
+            "\n".join(
+                [
+                    f"# {brief.brand_name} Brand Foundation",
+                    "",
+                    f"Positioning: {strategy.positioning_statement}",
+                    "",
+                    "Pillars:",
+                    *(f"- {pillar}" for pillar in strategy.brand_pillars),
+                    "",
+                    f"Typography: {design_brief.typography_direction}",
+                    f"Imagery: {design_brief.imagery_style}",
+                ]
+            ),
+        ),
+        _workspace_doc(
+            "branding/raw/messaging-house.md",
+            "Messaging House",
+            "document",
+            "\n".join(
+                [
+                    "# Messaging House",
+                    "",
+                    "Core claim:",
+                    strategy.positioning_statement,
+                    "",
+                    "Proof themes:",
+                    *[f"- {concept.rationale}" for concept in concepts],
+                ]
+            ),
+        ),
+    ]
+    external_assets = [
+        _workspace_doc(
+            "branding/external/style-guide.md",
+            "Brand Style Guide",
+            "document",
+            "\n".join(
+                [
+                    f"# {brief.brand_name} Style Guide",
+                    "",
+                    f"Tone: {strategy.tone_of_voice}",
+                    f"Palette: {', '.join(design_brief.palette)}",
+                    f"Layout notes: {design_brief.layout_notes}",
+                ]
+            ),
+        ),
+    ]
+    visual_asset_prompts = [
+        _workspace_doc(
+            "branding/prompts/logo-mark.prompt.md",
+            "Logo Mark Prompt",
+            "prompt",
+            f"Create a flat vector geometric silhouette logo for {brief.brand_name}. Palette anchor {design_brief.palette[0]}. Avoid rendered text, noise, gradients, or malformed glyphs.",
+            asset_type="logo_mark",
+        ),
+        _workspace_doc(
+            "branding/prompts/background-pattern.prompt.md",
+            "Background Pattern Prompt",
+            "prompt",
+            f"Create a repeating abstract line-art pattern for {brief.brand_name} using {', '.join(design_brief.palette[:3])}. Keep it modular and crop-safe across mobile through ultrawide layouts.",
+            asset_type="background_pattern",
+        ),
+        _workspace_doc(
+            "branding/prompts/hero-illustration.prompt.md",
+            "Hero Illustration Prompt",
+            "prompt",
+            f"Create an editorial bento-grid style hero illustration for {brief.brand_name}, matching the brand tone {strategy.tone_of_voice} and typography direction {design_brief.typography_direction}.",
+            asset_type="hero_illustration",
+        ),
+    ]
+    direction = design_brief.style_direction
+    if direction is not None:
+        # Lineage: always record the direction, even when it was blocked.
+        raw_brand_data["style_direction"] = direction.model_dump(mode="json")
+        internal_assets.append(
+            _workspace_doc(
+                "branding/raw/style-direction.md",
+                "Style Direction",
+                "document",
+                _style_direction_document(direction),
+                composition_id=direction.composition_id,
+                catalog_version=direction.catalog_version,
+                applied=direction.applied,
+                blocking=direction.blocking,
+            )
+        )
+        if direction.applied:
+            # Appended, never prepended: artifact rebinds edit visual_asset_prompts[0].
+            body = direction.prompt
+            if direction.negative_prompt:
+                body = f"{body}\n\nNegative: {direction.negative_prompt}"
+            visual_asset_prompts.append(
+                _workspace_doc(
+                    "branding/prompts/style-direction.prompt.md",
+                    "Style Direction Prompt",
+                    "prompt",
+                    body,
+                    asset_type="style_direction",
+                    composition_id=direction.composition_id,
+                )
+            )
+    return BrandingWorkspace(
+        raw_brand_data=raw_brand_data,
+        internal_assets=internal_assets,
+        external_assets=external_assets,
+        visual_asset_prompts=visual_asset_prompts,
+    )
+
+
+_FALLBACK_PALETTE = ["#1F2937", "#F59E0B", "#F9FAFB"]
+
+
+def _brand_token_document(palette: list[str], design_brief: DesignBrief, strategy: BrandStrategy) -> dict:
+    """DTCG 2025.10 brand tokens. Qualitative direction (typography, tone) is not
+    a token type, so it travels as $extensions metadata instead of fake values."""
+    primary, secondary, surface = palette[0], palette[1] if len(palette) > 1 else palette[0], palette[-1]
+    return {
+        "brand": {
+            "$type": "color",
+            "primary": {"$value": hex_to_color(primary)},
+            "secondary": {"$value": hex_to_color(secondary)},
+            "surface": {"$value": hex_to_color(surface)},
+        },
+        "semantic": {
+            "color": {
+                "$type": "color",
+                "bg": {"$value": "{brand.surface}"},
+                "fg": {"$value": "{brand.primary}"},
+                "accent": {"$value": "{brand.secondary}"},
+            },
+        },
+        "$extensions": {
+            "amc": {
+                "format": "DTCG 2025.10",
+                "typography_direction": design_brief.typography_direction,
+                "body_tone": strategy.tone_of_voice,
+            }
+        },
+    }
+
+
+def _build_design_system(brief: CampaignBrief, strategy: BrandStrategy, design_brief: DesignBrief) -> DesignSystemPackage:
+    slug = _slugify(brief.brand_name)
+    notes: list[str] = []
+    palette = [value for value in (design_brief.palette or []) if isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", value.strip())]
+    dropped = len(design_brief.palette or []) - len(palette)
+    if dropped:
+        notes.append(f"{dropped} palette value(s) were not 6-digit hex colors and were excluded from tokens.")
+    if not palette:
+        palette = list(_FALLBACK_PALETTE)
+        notes.append("No valid palette colors; the fallback palette was used and must be replaced before release.")
+    tokens = _brand_token_document([value.strip().lower() for value in palette], design_brief, strategy)
+    try:
+        _, compiled_css = compile_css(tokens, source_label=f"brand:{slug}")
+    except TokenError as exc:  # pragma: no cover - inputs are validated above
+        compiled_css = ""
+        notes.append(f"Token compilation failed closed: {exc}")
+    tailwind = {
+        "theme": {
+            "extend": {
+                "colors": {
+                    "brand-primary": "var(--brand-primary)",
+                    "brand-secondary": "var(--brand-secondary)",
+                    "brand-surface": "var(--brand-surface)",
+                }
+            }
+        }
+    }
+    css = compiled_css
+    components = [
+        _workspace_doc(
+            "branding/design-system/components/Button.tsx",
+            "Button Component",
+            "code",
+            "\n".join(
+                [
+                    "export function Button({ children }: { children: React.ReactNode }) {",
+                    "  return <button className=\"rounded-md bg-[var(--brand-primary)] px-4 py-2 text-white\">{children}</button>;",
+                    "}",
+                ]
+            ),
+            component="Button",
+        ),
+        _workspace_doc(
+            "branding/design-system/components/Card.tsx",
+            "Card Component",
+            "code",
+            "\n".join(
+                [
+                    "export function Card({ children }: { children: React.ReactNode }) {",
+                    "  return <div className=\"rounded-xl border border-zinc-200 bg-[var(--brand-surface)] p-4 shadow-sm\">{children}</div>;",
+                    "}",
+                ]
+            ),
+            component="Card",
+        ),
+    ]
+    asset_recipes = [
+        _workspace_doc(
+            "branding/design-system/assets/logo-spec.md",
+            "Logo Spec",
+            "document",
+            f"Use {palette[0]} as the primary mark color for {brief.brand_name}. Preserve geometric silhouette discipline and avoid embedded text.",
+            asset="logo_mark",
+        ),
+        _workspace_doc(
+            "branding/design-system/assets/asset-runbook.md",
+            "Asset Runbook",
+            "document",
+            "\n".join(
+                [
+                    "# Asset Runbook",
+                    "",
+                    f"1. Read `branding/raw/brand-foundation.md` for {brief.brand_name}.",
+                    "2. Load `branding/design-system/tokens.json` and `global-tokens.css`.",
+                    "3. Generate logo mark, background pattern, and hero illustration from the prompt files.",
+                    "4. Review outputs for contrast, glyph integrity, and crop safety.",
+                ]
+            ),
+        ),
+    ]
+    if design_brief.ui_ux is not None:
+        spec = design_brief.ui_ux
+        asset_recipes += [
+            _workspace_doc(
+                "branding/design-system/ui-ux/design-spec.json",
+                "UI/UX Design Specification",
+                "code",
+                spec.model_dump_json(indent=2),
+                spec_hash=spec.spec_hash,
+                terminal=spec.terminal.value,
+                compiler=spec.compiler_version,
+            ),
+            _workspace_doc(
+                "branding/design-system/ui-ux/tokens.css",
+                "UI/UX Tokens (generated)",
+                "code",
+                spec.tokens.css,
+                source_hash=spec.tokens.source_hash,
+            ),
+        ]
+    return DesignSystemPackage(
+        tokens_json=tokens,
+        tailwind_config=tailwind,
+        global_tokens_css=css,
+        component_scaffolds=components,
+        asset_recipes=asset_recipes,
+        validation_notes=[
+            "Tokens are DTCG 2025.10 and compiled by agency/design_tokens.py (aliases verified, cycles and unknown aliases fail closed).",
+            "Contrast must be validated against WCAG 2.2 before live UI use.",
+            "Dynamic class names should map to CSS variables or safelisted tokens only.",
+            f"Namespace brand tokens under brand.{slug} if merged into a larger system.",
+            *notes,
+        ],
+    )
+
+
+def _build_asset_execution(
+    brief: CampaignBrief,
+    strategy: BrandStrategy,
+    package: CampaignPackage,
+) -> AssetExecutionPackage:
+    prompt_docs = {doc.path: doc for doc in (package.branding_workspace.visual_asset_prompts if package.branding_workspace else [])}
+    recipe_docs = {doc.path: doc for doc in (package.design_system.asset_recipes if package.design_system else [])}
+    tokens = (package.design_system.tokens_json if package.design_system else {}) or {}
+    raw = (((tokens.get("brand") or {}).get("raw")) or {})
+    primary = ((raw.get("primary") or {}).get("value")) or "#1F2937"
+    secondary = ((raw.get("secondary") or {}).get("value")) or "#F59E0B"
+    surface = ((raw.get("surface") or {}).get("value")) or "#F9FAFB"
+    slug = _slugify(brief.brand_name)
+    rendered_assets = [
+        RenderedAsset(
+            asset_id=f"{slug}-logo-mark",
+            asset_type="logo_mark",
+            title="Canonical Logo Mark",
+            prompt_path="branding/prompts/logo-mark.prompt.md",
+            spec_path="branding/design-system/assets/logo-spec.md",
+            output_path="branding/rendered/logo-mark.svg",
+            format="image/svg+xml",
+            review_status="pending_review",
+            generation_mode="deterministic_svg_v1",
+            lineage_refs=[
+                "campaign_package.design_system.tokens_json",
+                "campaign_package.branding_workspace.raw_brand_data",
+            ],
+            notes=[
+                "Rendered from canonical brand tokens on the Zo server.",
+                "Review silhouette clarity and glyph exclusion before publish.",
+            ],
+        ),
+        RenderedAsset(
+            asset_id=f"{slug}-background-pattern",
+            asset_type="background_pattern",
+            title="Canonical Background Pattern",
+            prompt_path="branding/prompts/background-pattern.prompt.md",
+            spec_path="branding/design-system/assets/asset-runbook.md",
+            output_path="branding/rendered/background-pattern.svg",
+            format="image/svg+xml",
+            review_status="pending_review",
+            generation_mode="deterministic_svg_v1",
+            lineage_refs=[
+                "campaign_package.design_system.tokens_json",
+                "campaign_package.design_system.asset_recipes",
+            ],
+            notes=[
+                "Crop-safe modular pattern for responsive surfaces.",
+            ],
+        ),
+        RenderedAsset(
+            asset_id=f"{slug}-hero-illustration",
+            asset_type="hero_illustration",
+            title="Canonical Hero Illustration",
+            prompt_path="branding/prompts/hero-illustration.prompt.md",
+            spec_path="branding/design-system/assets/asset-runbook.md",
+            output_path="branding/rendered/hero-illustration.svg",
+            format="image/svg+xml",
+            review_status="pending_review",
+            generation_mode="deterministic_svg_v1",
+            lineage_refs=[
+                "campaign_package.copy_variants",
+                "campaign_package.design_system.tokens_json",
+                "campaign_package.brand_strategy",
+            ],
+            notes=[
+                "Use as the base render for landing pages and internal app hero surfaces.",
+            ],
+        ),
+    ]
+    review_queue = AssetReviewQueue(
+        review_status="pending_review",
+        review_artifact_path="branding/review/asset-approval-inbox.md",
+        checklist=[
+            "Confirm asset matches brand pillars and tone.",
+            "Confirm token-derived colors remain accessible on target surfaces.",
+            "Confirm no malformed text or glyph artifacts are present.",
+            "Confirm hero and pattern crops are safe across target aspect ratios.",
+        ],
+        blocking_issues=[],
+    )
+    adapters = [
+        PublishingAdapter(
+            adapter_id="brand-profile-export",
+            target="brand_profile_bundle",
+            status="draft_only",
+            exported_asset_types=["logo_mark", "background_pattern", "hero_illustration"],
+            notes=[
+                "Adapter manifest only. External profile upload remains approval-gated and unexecuted.",
+            ],
+        ),
+        PublishingAdapter(
+            adapter_id="social-launch-kit",
+            target="social_launch_bundle",
+            status="draft_only",
+            exported_asset_types=["logo_mark", "hero_illustration"],
+            notes=[
+                "Prepares export metadata for downstream publishing tools without mutating external systems.",
+            ],
+        ),
+    ]
+    execution_notes = [
+        "Asset execution runs from the compiled design-system package, not ad hoc prompts.",
+        "Rendered outputs remain internal artifacts until explicit human approval authorizes downstream publishing.",
+        "Any design token change should trigger asset regeneration through the same canonical path.",
+    ]
+    return AssetExecutionPackage(
+        rendered_assets=rendered_assets,
+        review_queue=review_queue,
+        publishing_adapters=adapters,
+        execution_notes=execution_notes,
+    )
 
 
 def _agency_data(state: GraphState) -> tuple[dict, dict]:
@@ -63,18 +676,39 @@ def _log_node(state: GraphState, node_id: str) -> None:
     )
 
 
+def _generation_binding(state: GraphState) -> dict:
+    """The run's pinned model profile and an operation-specific call reference."""
+    run = state.get("run")
+    return {"run_metadata": getattr(run, "metadata", None) or {},
+            "authorization_ref": f"agency-run:{getattr(run, 'id', 'unbound')}"}
+
+
 def brief_intake_node(state: GraphState) -> dict:
     _log_node(state, "brief_intake")
+    _assert_live_stage_contract("brief_intake")
     raw_input = state["run"].metadata.get("input_data", {}) if state["run"].metadata else {}
     raw_brief = quarantine_payload(sanitize_deep(raw_input)).get("brief", {})
     brief = CampaignBrief(
         brand_name=raw_brief.get("brand_name", "Unnamed Brand"),
         industry=raw_brief.get("industry"),
+        business_idea=raw_brief.get("business_idea"),
+        offer_summary=raw_brief.get("offer_summary"),
+        product_type=raw_brief.get("product_type"),
         goals=raw_brief.get("goals", []),
         target_audience=raw_brief.get("target_audience", "General audience"),
         tone=raw_brief.get("tone"),
         channels=raw_brief.get("channels", []),
         constraints=raw_brief.get("constraints", []),
+        business_model=raw_brief.get("business_model"),
+        affiliate_model=raw_brief.get("affiliate_model"),
+        workflow_idea=raw_brief.get("workflow_idea"),
+        differentiators=raw_brief.get("differentiators", []),
+        brand_style_notes=raw_brief.get("brand_style_notes", []),
+        market=raw_brief.get("market"),
+        language=raw_brief.get("language"),
+        locale=raw_brief.get("locale"),
+        # Validated at the API boundary; carried through so design_brief can recompose it.
+        style_selection=raw_brief.get("style_selection"),
     )
     data, agency = _agency_data(state)
     agency["brief"] = brief.model_dump()
@@ -91,6 +725,7 @@ def brief_intake_node(state: GraphState) -> dict:
 
 def brand_strategy_node(state: GraphState) -> dict:
     _log_node(state, "brand_strategy")
+    _assert_live_stage_contract("brand_strategy")
     data, agency = _agency_data(state)
     brief = agency.get("brief", {})
     prompt = (
@@ -105,7 +740,7 @@ def brand_strategy_node(state: GraphState) -> dict:
         "tone_of_voice": brief.get("tone") or "confident and approachable",
         "target_audience_summary": brief.get("target_audience", "General audience"),
     }
-    outcome = generate_structured(prompt, fallback, schema_version="brand-strategy-v1")
+    outcome = generate_structured(prompt, fallback, schema_version="brand-strategy-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")), **_generation_binding(state))
     result = _record_generation(agency, "brand_strategy", outcome)
     strategy = BrandStrategy(**{**fallback, **{k: v for k, v in result.items() if k in fallback}})
     agency["brand_strategy"] = strategy.model_dump()
@@ -119,15 +754,39 @@ def brand_strategy_node(state: GraphState) -> dict:
     }
 
 
+# Brief/strategy fields that describe the work. The client's brand name is
+# deliberately excluded so retrieval never steers toward a namesake third-party
+# brand; the query itself is never stored.
+_CORPUS_BRIEF_FIELDS = (
+    "industry", "business_idea", "offer_summary", "product_type", "goals", "target_audience",
+    "tone", "channels", "brand_style_notes", "differentiators", "market", "workflow_idea",
+)
+
+
+def _retrieve_design_corpus(brief: dict, strategy: dict) -> dict:
+    """Rights-bounded design-corpus context for concepting and the design brief."""
+    inputs = sanitize_deep({
+        "brief": {key: brief.get(key) for key in _CORPUS_BRIEF_FIELDS},
+        "strategy": {key: strategy.get(key) for key in ("brand_pillars", "tone_of_voice")},
+    })
+    fields = [*inputs["brief"].values(), *inputs["strategy"].values()]
+    return design_corpus.retrieve(fields)
+
+
 def creative_concepting_node(state: GraphState) -> dict:
     _log_node(state, "creative_concepting")
+    _assert_live_stage_contract("creative_concepting")
     data, agency = _agency_data(state)
     brief = agency.get("brief", {})
     strategy = agency.get("brand_strategy", {})
+    corpus_context = _retrieve_design_corpus(brief, strategy)
+    agency["design_corpus"] = corpus_context
+    agency["design_corpus_provenance"] = design_corpus.provenance(corpus_context)
     prompt = (
         "You are a creative director. Given this brand strategy and brief, return a JSON object with key "
         "'concepts': an array of exactly 3 objects, each with 'id', 'name', 'tagline', and 'rationale'.\n"
         f"Brand strategy: {json.dumps(strategy)}\nBrief: {json.dumps(brief)}"
+        f"{design_corpus.prompt_block(corpus_context)}"
     )
     pillar = (strategy.get("brand_pillars") or ["Clarity"])[0]
     fallback = {
@@ -137,7 +796,7 @@ def creative_concepting_node(state: GraphState) -> dict:
             {"id": "concept-3", "name": "Proof Over Promises", "tagline": "Results you can see.", "rationale": "Counters category skepticism with evidence-led messaging."},
         ]
     }
-    outcome = generate_structured(prompt, fallback, schema_version="creative-concepts-v1")
+    outcome = generate_structured(prompt, fallback, schema_version="creative-concepts-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")), **_generation_binding(state))
     result = _record_generation(agency, "creative_concepting", outcome)
     concepts = [CreativeConcept(**item) for item in (result.get("concepts") or fallback["concepts"])]
     agency["creative_concepts"] = [item.model_dump() for item in concepts]
@@ -152,6 +811,7 @@ def creative_concepting_node(state: GraphState) -> dict:
 
 def copywriting_node(state: GraphState) -> dict:
     _log_node(state, "copywriting")
+    _assert_live_stage_contract("copywriting")
     data, agency = _agency_data(state)
     concepts = agency.get("creative_concepts", [])
     strategy = agency.get("brand_strategy", {})
@@ -165,7 +825,7 @@ def copywriting_node(state: GraphState) -> dict:
         for item in concepts
     ]
     fallback = {"copy": fallback_variants}
-    outcome = generate_structured(prompt, fallback, schema_version="campaign-copy-v1")
+    outcome = generate_structured(prompt, fallback, schema_version="campaign-copy-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")), **_generation_binding(state))
     result = _record_generation(agency, "copywriting", outcome)
     variants = [CopyVariant(**item) for item in (result.get("copy") or fallback_variants)]
     agency["copy_variants"] = [item.model_dump() for item in variants]
@@ -178,15 +838,102 @@ def copywriting_node(state: GraphState) -> dict:
     }
 
 
+def _resolve_style_direction(brief: dict) -> DesignStyleDirection | None:
+    """Recompose the brief's Design Mode selection server-side.
+
+    The client's composition is never trusted as-is: the selection is recomposed
+    against the canonical catalog here. A selection that cannot be composed is
+    recorded as a blocking, unapplied direction for human review.
+    """
+    raw = brief.get("style_selection")
+    if not raw:
+        return None
+    selection = DesignStyleSelection.model_validate(raw)
+    context = {
+        "objective": ", ".join(brief.get("goals") or []) or brief.get("business_idea") or brief.get("offer_summary") or "",
+        "audience": brief.get("target_audience") or "",
+        "format": ", ".join(brief.get("channels") or []),
+    }
+    try:
+        return direction_from_selection(selection, context)
+    except UnknownStyleError as exc:
+        return unresolved_direction(selection, f"style {exc.args[0]!r} is no longer in the catalog")
+    except InvalidSelectionError as exc:
+        return unresolved_direction(selection, str(exc))
+
+
+_UI_PRODUCT_TERMS = (
+    "app", "application", "saas", "software", "website", "web", "landing", "dashboard", "platform",
+    "portal", "mobile", "tool", "marketplace", "assistant", "chatbot", "copilot", "digital product",
+)
+
+
+def _is_ui_brief(brief: dict) -> bool:
+    text = " ".join(
+        str(brief.get(key) or "") for key in ("product_type", "business_idea", "offer_summary", "workflow_idea")
+    ) + " " + " ".join(str(item) for item in brief.get("channels", []))
+    lowered = text.lower()
+    return any(re.search(rf"\b{re.escape(term)}\b", lowered) for term in _UI_PRODUCT_TERMS)
+
+
+def _compile_brief_ui_ux(brief: dict, strategy: dict, design_brief: DesignBrief, *, degraded: bool):
+    """Deterministic UI/UX subprocess of design_brief. Never calls a provider and
+    never changes degraded/release semantics; it only adds a governed spec."""
+    if not _is_ui_brief(brief):
+        return None, {"status": "SKIPPED", "reason": "brief does not describe a digital product"}
+    mode = "FALLBACK_DEGRADED" if degraded else "PROVIDER_SUCCESS"
+    tone = [item.strip() for item in re.split(r"[,;/]", str(strategy.get("tone_of_voice") or brief.get("tone") or "")) if item.strip()]
+    try:
+        request = UIUXRequest(
+            project_ref=_slugify(brief.get("brand_name") or "brand") or "brand",
+            surface_hint=str(brief.get("product_type") or ""),
+            purpose=str(brief.get("business_idea") or brief.get("offer_summary") or ""),
+            primary_user=str(brief.get("target_audience") or ""),
+            primary_task=str(brief.get("workflow_idea") or brief.get("offer_summary") or ""),
+            business_goal="; ".join(str(goal) for goal in brief.get("goals", [])),
+            content_requirements=[str(item) for item in brief.get("differentiators", [])],
+            constraints=[str(item) for item in brief.get("constraints", [])],
+            brand=BrandContext(
+                brand_name=str(brief.get("brand_name") or "Unnamed Brand"),
+                positioning=strategy.get("positioning_statement"),
+                tone_attributes=tone,
+                typography_direction=design_brief.typography_direction,
+                imagery_style=design_brief.imagery_style,
+                palette_hex=list(design_brief.palette),
+                palette_source=SourceKind.design_brief,
+            ),
+            sources=[
+                SourceRef(kind=SourceKind.design_brief, ref="design_brief", detail=mode),
+                SourceRef(kind=SourceKind.strategy, ref="brand_strategy", detail="agency state"),
+            ],
+        )
+        spec = compile_uiux(request)
+    except Exception as exc:  # the spec is an enrichment; a failure is recorded, not hidden
+        logger.exception("ui_ux_compilation_failed")
+        return None, {"status": "FAILED", "reason": type(exc).__name__}
+    return spec, {"status": spec.terminal.value, "spec_hash": spec.spec_hash, "mode": spec.mode.value}
+
+
 def design_brief_node(state: GraphState) -> dict:
     _log_node(state, "design_brief")
+    _assert_live_stage_contract("design_brief")
     data, agency = _agency_data(state)
     strategy = agency.get("brand_strategy", {})
     brief = agency.get("brief", {})
+    direction = _resolve_style_direction(brief)
+    style_clause = ""
+    if direction is not None and direction.applied:
+        style_clause = (
+            "\nFollow this resolved style direction. Each dimension is owned by exactly one style; "
+            "do not blend other styles into a dimension:\n"
+            f"{direction.prompt}\nAvoid: {direction.negative_prompt}"
+        )
     prompt = (
         "You are an art director. Produce a JSON design brief with keys 'palette' (array of 3-5 hex colors), "
         "'typography_direction' (string), 'imagery_style' (string), 'layout_notes' (string), consistent with this brand strategy.\n"
         f"Strategy: {json.dumps(strategy)}\nChannels: {brief.get('channels', [])}"
+        f"{style_clause}"
+        f"{design_corpus.prompt_block(agency.get('design_corpus') or {})}"
     )
     fallback = {
         "palette": ["#1F2937", "#F59E0B", "#F9FAFB"],
@@ -194,10 +941,16 @@ def design_brief_node(state: GraphState) -> dict:
         "imagery_style": "Authentic, lightly art-directed photography over stock imagery.",
         "layout_notes": "Generous whitespace, a single dominant focal image per placement, consistent grid across channels.",
     }
-    outcome = generate_structured(prompt, fallback, schema_version="design-brief-v1")
+    outcome = generate_structured(prompt, fallback, schema_version="design-brief-v1", run_tokens_spent=tokens_spent(agency.get("generation_provenance")), **_generation_binding(state))
     result = _record_generation(agency, "design_brief", outcome)
-    design_brief = DesignBrief(**{**fallback, **{k: v for k, v in result.items() if k in fallback}})
-    agency["design_brief"] = design_brief.model_dump()
+    design_brief = DesignBrief(
+        **{**fallback, **{k: v for k, v in result.items() if k in fallback}},
+        style_direction=direction,
+    )
+    ui_ux, ui_ux_status = _compile_brief_ui_ux(brief, strategy, design_brief, degraded=outcome.degraded)
+    design_brief = design_brief.model_copy(update={"ui_ux": ui_ux})
+    agency["ui_ux_compilation"] = ui_ux_status
+    agency["design_brief"] = design_brief.model_dump(mode="json")
     data["agency"] = agency
     return {
         "current_node": "design_brief",
@@ -209,39 +962,112 @@ def design_brief_node(state: GraphState) -> dict:
 
 def campaign_assembly_node(state: GraphState) -> dict:
     _log_node(state, "campaign_assembly")
+    _assert_live_stage_contract("campaign_assembly")
     data, agency = _agency_data(state)
+    brief = CampaignBrief(**agency.get("brief", {}))
+    strategy = BrandStrategy(**agency.get("brand_strategy", {}))
+    concepts = [CreativeConcept(**item) for item in agency.get("creative_concepts", [])]
+    design_brief = DesignBrief(**agency.get("design_brief", {}))
+    business_workspace = _build_business_workspace(brief, strategy, concepts)
+    branding_workspace = _build_branding_workspace(brief, strategy, design_brief, concepts)
+    design_system = _build_design_system(brief, strategy, design_brief)
     package = CampaignPackage(
-        brief=CampaignBrief(**agency.get("brief", {})),
-        strategy=BrandStrategy(**agency.get("brand_strategy", {})),
-        concepts=[CreativeConcept(**item) for item in agency.get("creative_concepts", [])],
+        brief=brief,
+        strategy=strategy,
+        concepts=concepts,
         copy_variants=[CopyVariant(**item) for item in agency.get("copy_variants", [])],
-        design_brief=DesignBrief(**agency.get("design_brief", {})),
+        design_brief=design_brief,
+        business_workspace=business_workspace,
+        branding_workspace=branding_workspace,
+        design_system=design_system,
     )
-    agency["campaign_package"] = package.model_dump()
+    package.asset_execution = _build_asset_execution(brief, strategy, package)
+    operations = compile_agency_operations(
+        brief=brief.model_dump(mode="json"),
+        strategy=strategy.model_dump(mode="json"),
+        copy_variants=[item.model_dump(mode="json") for item in package.copy_variants],
+        asset_execution=package.asset_execution.model_dump(mode="json"),
+        generation_provenance=[
+            item for item in agency.get("generation_provenance", []) if isinstance(item, dict)
+        ],
+    )
+    package.agency_operations = operations
+    if package.business_workspace is not None:
+        package.business_workspace.production_docs.append(
+            _workspace_doc(
+                "business/operations/agency-operations.json",
+                "Full-Service Agency Operations",
+                "code",
+                operations.model_dump_json(indent=2),
+                schema_version=operations.schema_version,
+                legal_readiness=operations.legal_readiness,
+            )
+        )
+    agency["campaign_package"] = package.model_dump(mode="json")
     data["agency"] = agency
     return {"current_node": "campaign_assembly", "extracted_data": data, "messages": [AIMessage(content="Campaign package assembled from all agency workstreams.")]}
 
 
 def brand_safety_qa_node(state: GraphState) -> dict:
     _log_node(state, "brand_safety_qa")
+    _assert_live_stage_contract("brand_safety_qa")
     data, agency = _agency_data(state)
     package = agency.get("campaign_package", {})
     combined_text = " ".join(
         f"{item.get('headline', '')} {item.get('body', '')} {item.get('cta', '')}"
         for item in package.get("copy_variants", [])
     ).strip()
-    flagged = check_brand_safety(combined_text)
+    compliance = evaluate_brand_compliance(combined_text)
+    flagged = compliance["flagged_terms"]
     quality = evaluate_quality(combined_text or package.get("strategy", {}).get("positioning_statement", ""))
     degraded_tasks = [item.get("task", "unknown") for item in agency.get("generation_provenance", []) if item.get("mode") != "PROVIDER_SUCCESS"]
     release_blocked = bool(degraded_tasks)
-    qa_passed = (not flagged) and quality["threshold_passed"] and not release_blocked
+    # A Design Mode direction travels to the reviewer as an advisory. A blocked
+    # direction means the output does not reflect the requested design, so QA
+    # requires review; the human stays the release authority.
+    design = package.get("design_brief") or agency.get("design_brief") or {}
+    direction = design.get("style_direction") or {}
+    style_blocked = bool(direction.get("blocking"))
+    style_findings: list[str] = []
+    if style_blocked:
+        style_findings.append(
+            f"Style direction {direction.get('composition_id')} was not applied "
+            f"({'; '.join(direction.get('conflicts') or [])}); the output does not reflect the requested design direction."
+        )
+    elif direction.get("warnings"):
+        style_findings.append("Style direction warnings: " + "; ".join(direction["warnings"]))
+    if style_findings:
+        compliance = {**compliance, "advisories": [*(compliance.get("advisories") or []), *style_findings]}
+
+    operations = package.get("agency_operations") or {}
+    operations_advisories: list[str] = []
+    unresolved = operations.get("unresolved_gaps") or []
+    external_blockers = operations.get("external_release_blockers") or []
+    if unresolved:
+        operations_advisories.append(
+            "Full-service evidence gaps remain explicit: " + ", ".join(str(item) for item in unresolved)
+        )
+    if external_blockers:
+        operations_advisories.append(
+            "External release remains blocked on: " + ", ".join(str(item) for item in external_blockers)
+        )
+    if operations.get("legal_readiness") == "COUNSEL_REQUIRED":
+        operations_advisories.append("Counsel review is required before external release.")
+    if operations_advisories:
+        compliance = {
+            **compliance,
+            "advisories": [*(compliance.get("advisories") or []), *operations_advisories],
+        }
+    qa_passed = (not flagged) and quality["threshold_passed"] and not release_blocked and not style_blocked
     notes = ["No banned-claim heuristic matches detected." if not flagged else f"Flagged terms requiring review: {', '.join(flagged)}"]
     if release_blocked:
         notes.append("Release blocked because one or more generation stages used degraded fallback output; rerun with a configured provider before delivery.")
+    notes.extend(compliance["advisories"])
     qa_report = QAReport(
         brand_safety_passed=not flagged,
         flagged_terms=flagged,
         quality_metrics=quality,
+        brand_compliance=compliance,
         notes=" ".join(notes),
         release_blocked=release_blocked,
         degradation_reasons=degraded_tasks,
@@ -260,6 +1086,7 @@ def brand_safety_qa_node(state: GraphState) -> dict:
 
 def hitl_gate_node(state: GraphState) -> dict:
     _log_node(state, "hitl_gate")
+    _assert_live_stage_contract("hitl_gate")
     data, agency = _agency_data(state)
     qa_report = agency.get("qa_report", {})
     run = state["run"]
@@ -269,6 +1096,16 @@ def hitl_gate_node(state: GraphState) -> dict:
         reason = "Campaign package ready for human review before external publish."
     else:
         reason = f"Brand-safety QA flagged terms: {', '.join(qa_report.get('flagged_terms', []))}. Human review required before publish."
+    # Brand safety is advisory at the delivery guard because the reviewer is the
+    # authority (see _delivery_context). That only holds if the reviewer is told
+    # what the advisory checks found, so they travel with the approval request.
+    advisories = (qa_report.get("brand_compliance") or {}).get("advisories") or []
+    if advisories:
+        reason = f"{reason} Advisory findings: {' '.join(advisories)}"
+    operations = ((agency.get("campaign_package") or {}).get("agency_operations") or {})
+    reviewers = operations.get("required_reviewers") or []
+    if reviewers:
+        reason = f"{reason} Required review roles: {', '.join(str(item) for item in reviewers)}."
     approval = create_approval_request(
         run_id=str(run.id),
         tenant_id=run.tenant_id,
@@ -283,6 +1120,7 @@ def hitl_gate_node(state: GraphState) -> dict:
 
 def delivery_node(state: GraphState) -> dict:
     _log_node(state, "delivery")
+    _assert_live_stage_contract("delivery")
     data, agency = _agency_data(state)
     if (agency.get("qa_report") or {}).get("release_blocked"):
         raise RuntimeError("Delivery blocked because generation is degraded")

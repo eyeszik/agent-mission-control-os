@@ -1,0 +1,4352 @@
+{
+  "build": {
+    "book": {
+      "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-book-html",
+      "sha256": "8027639ee2b4975b596884b42cdafcd6ed4238d93845a01ac4c1230ad014cc4c",
+      "version": 1
+    },
+    "brand_id": "brand-010409bc",
+    "build_artifact": {
+      "action": "created",
+      "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-build",
+      "version": 1
+    },
+    "build_hash": "91ca916c79ecb891a61a42ca6178f1a51b5e1cded191bc72041f92d8435cf81a",
+    "checks": {
+      "blocking": [],
+      "measured": true,
+      "summary": {
+        "FAILED": 0,
+        "INCONCLUSIVE": 0,
+        "NOT_RUN": 0,
+        "PASSED": 216
+      }
+    },
+    "compiler_version": "amc-brandbook-compiler/1.0.0",
+    "context_hash": "bbbf022d4d3889c6af01c35a65b0d9b082a2576ab2126a922ebf6ef44d9fbf91",
+    "gaps": [],
+    "genome_ref": "gv-1d80c804dabf45dbb320b7b9b6987ffb",
+    "locale": "en",
+    "manifest_hash": "6355b797e60a741201c41ad23463fdd361fe2832116a2429532de35f3961e67b",
+    "mark": {
+      "approved": true,
+      "kind": "VECTOR",
+      "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+      "source": "deterministic composition of visual.logo.mark=ring_dot"
+    },
+    "mode": "PREVIEW",
+    "package": {
+      "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-package",
+      "package_hash": "89c9eb4050c910c5f44ad6c2435551714a711ce3b11eb872b59e2c112723c99d",
+      "sha256": "e99c828dac0048d2945126bed449316bc1876fd063b66afd55029467582ca0f4"
+    },
+    "page_format": {
+      "height": 1123,
+      "name": "a4-portrait",
+      "provisional": true,
+      "width": 794
+    },
+    "pages": [
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p01",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "2969431a293ccdd3149d1064937c735f2a5536c0a1289ae32f15539183a70fef",
+        "gaps": [],
+        "order": 1,
+        "package_hash": "77ac01267e7c7cedc314bb6e44eff468771c10f56db76e5d19d944431e20dd6f",
+        "page_id": "p01",
+        "parts": [
+          "p01"
+        ],
+        "sections_sha256": "e5a463a8957fe01f0a063fcb7d8810f225b17b701bc439299dde08741b7b85e0",
+        "status": "READY",
+        "title": "Cover"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p02",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "e8e9ac211cf83863362343b16619f37ef120510f23646ce81d9bd6081fc42150",
+        "gaps": [],
+        "order": 2,
+        "package_hash": "f5b72d99f2f75ec669a1a27193c9c0d0fda3b4901e3eaf0715d8bd3d919a152d",
+        "page_id": "p02",
+        "parts": [
+          "p02"
+        ],
+        "sections_sha256": "757bb62acfcef17a4c469d19a24cb81a8bc1326e87e7ac32a53a0f8553738207",
+        "status": "READY",
+        "title": "Contents and status"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p03",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "4f265832943ece61842fb0f9a42433ef4489069daaa30ce7b01e0506a6249726",
+        "gaps": [],
+        "order": 3,
+        "package_hash": "1937d69e30dd545bf0921dea2a8e938481ee244642a07685314ea3053108bc97",
+        "page_id": "p03",
+        "parts": [
+          "p03"
+        ],
+        "sections_sha256": "d12ffaa219788fef715c2b4da911b3da5947130fbd1629f0e8f657d41db488fb",
+        "status": "READY",
+        "title": "Premise"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p04",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "c8f7f2077f8e021723dafb11b996092cfc59f462e61fcd342d38b4c5a17f2030",
+        "gaps": [],
+        "order": 4,
+        "package_hash": "ba0e6e53511d964d2e6e6ab42df3d05047a6f078b8e9d798231da61206b0159b",
+        "page_id": "p04",
+        "parts": [
+          "p04"
+        ],
+        "sections_sha256": "7b9417aa737082e9a84a582ae3b56efc99a0cd6125e40df4b1f18f40ab957ba5",
+        "status": "READY",
+        "title": "Voice"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p05",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "fa04800d6a5658e241a2a0ae04be6401448d1e7589e9a64dabaf54fd35a7db88",
+        "gaps": [],
+        "order": 5,
+        "package_hash": "f7dca0d320eed92ef11d2419cba84a970096f8791fb2214838e038177b501c6f",
+        "page_id": "p05",
+        "parts": [
+          "p05"
+        ],
+        "sections_sha256": "04f98799c289ac1eeae5c91cee92cd15c221a5f2930b8f53048f71d479d91ee0",
+        "status": "READY",
+        "title": "References and evidence"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p06",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "afc5814200d04bb4094226ec13354babdf7699a73c4084f6723cbe0f61762033",
+        "gaps": [],
+        "order": 6,
+        "package_hash": "6efde0de19848bdb4934b61c52c180650ccaef4eb7bf28b2468bff57a2c17f2c",
+        "page_id": "p06",
+        "parts": [
+          "p06"
+        ],
+        "sections_sha256": "ded3650daf2c5b0c29ec626fb2a7a1bc4cb468808edadb19381551eed76f259c",
+        "status": "READY",
+        "title": "Identity overview"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p07",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "ef6641f37f32f12575a3f88b09cc32a0a98f6a44925605a286d6e6339d701cf3",
+        "gaps": [],
+        "order": 7,
+        "package_hash": "e0987e6daab7571dfb1410104b7b152bf580fdf87ebe2467ab0d5c44cad2e476",
+        "page_id": "p07",
+        "parts": [
+          "p07"
+        ],
+        "sections_sha256": "18145b004f9c1d41a41a969dc245bee5d12a93dff62c0dea56e9c30b4a6fe9d0",
+        "status": "READY",
+        "title": "Primary logo"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p08",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "2b31d9fb67104d66ddf9af56cb23cd79f57ac01d7a78c1b81847a16383008a6b",
+        "gaps": [],
+        "order": 8,
+        "package_hash": "c06cfec09eb00e21fe108d6816a9605211c176f8cc9b377e0ca3256fda35dcfa",
+        "page_id": "p08",
+        "parts": [
+          "p08"
+        ],
+        "sections_sha256": "85777d445c5287f31a227dca5be011f23eea03c358323f31a8aba46505c284ee",
+        "status": "READY",
+        "title": "Construction"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p09",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "fd698720dd3aa0c61d02002a574385d89b7009c6ea1d83f26c29e2aebcd7a2c2",
+        "gaps": [],
+        "order": 9,
+        "package_hash": "ea6dc04f096148d371dc4cf3349419279b0f8497cc327b6d66120961dbb977a6",
+        "page_id": "p09",
+        "parts": [
+          "p09"
+        ],
+        "sections_sha256": "47e8ce3f5c9534427309ef2e542a794b402f396fd36dc78265fdccd86529db72",
+        "status": "READY",
+        "title": "Wordmark"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p10",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "a0bbd70c38d9a029a37ec51db6bfda307db35062d4f2974e7f4e5c596f0e2039",
+        "gaps": [],
+        "order": 10,
+        "package_hash": "49b9280d286345e78e5eba44687c16ed64c2986b83244d39b45295f73ba81983",
+        "page_id": "p10",
+        "parts": [
+          "p10"
+        ],
+        "sections_sha256": "474e92fd20008c2b89953f8993b960c623f4f7c00b8e224b7a5612f71562339c",
+        "status": "READY",
+        "title": "Lockups"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p11",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "8996592f6b5efd20d9f1a425cfa0fd7c592b2e10a204a3707d5d2f07ee29dde2",
+        "gaps": [],
+        "order": 11,
+        "package_hash": "e2afe4cb3b6c458c53892a96f9721c5d71df90f8ff7ce20c86b493a0cad3a528",
+        "page_id": "p11",
+        "parts": [
+          "p11"
+        ],
+        "sections_sha256": "5827edf04617335d722012df0e08b5eb77bb4984ff81e23d007ef33cf1ba4a70",
+        "status": "READY",
+        "title": "Clear space"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p12",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "d3c27382ece58964e45f68460e76a27eef2ff6a267196788d0badb8dfa23398c",
+        "gaps": [],
+        "order": 12,
+        "package_hash": "1448cab7abf3f0a04a4ca2d9855685d9d55c0e616c0ef3c7ae1d366c6eb24e24",
+        "page_id": "p12",
+        "parts": [
+          "p12"
+        ],
+        "sections_sha256": "a26cf46b4c00a5de7051624a4c7ddcd5a2ebcf398ea1bac1efb935ee2a8354ea",
+        "status": "READY",
+        "title": "Scale"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p13",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "7b0bd8f1b8a582557ce3fdf59cca147ff2e0559eb1d107c1c943e44a38c7f090",
+        "gaps": [],
+        "order": 13,
+        "package_hash": "d1c06aabc9b1da8e8ab24e369e11427fe3ff1398e766756aa7db70270b5cac22",
+        "page_id": "p13",
+        "parts": [
+          "p13"
+        ],
+        "sections_sha256": "2cfbfb19c25b9d5eab9c1bd6888335a2be6ea81b436ba90769246f2f98115118",
+        "status": "READY",
+        "title": "One colour and reverse"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p14",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "172c4ba0e22712a56292a20b8d997e86e53b69de8ac8655c9bab8694434b18c8",
+        "gaps": [],
+        "order": 14,
+        "package_hash": "4d968f49711cee469623069d2b8781be739660839ad8af598cbd72c483ff9ad4",
+        "page_id": "p14",
+        "parts": [
+          "p14"
+        ],
+        "sections_sha256": "7e7425756a491d707aa7ef933c0de3af851375643ea69bce90da5fddf121225c",
+        "status": "READY",
+        "title": "Misuse"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p15",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "d4839c9e5933bd0b94f1f8685a2db875a7adfb3ac5c5d18e405a303193e0b470",
+        "gaps": [],
+        "order": 15,
+        "package_hash": "697885ab68046cce53ae1bf82e860381f31973ca7bcc203254780c347837b37e",
+        "page_id": "p15",
+        "parts": [
+          "p15"
+        ],
+        "sections_sha256": "fca2688d995484ddabb92c53da4de5235fa104f42330cf0075a8d34a40b11d1d",
+        "status": "READY",
+        "title": "Colour"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p16",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "f9a4099cd166721650aaa8e85d6fe38c6b79aa4cc88e4577ac1b053b62eba974",
+        "gaps": [],
+        "order": 16,
+        "package_hash": "1d710b4fe441295e4142debdb5118797bef70722911a3ab7f11851645398b579",
+        "page_id": "p16",
+        "parts": [
+          "p16"
+        ],
+        "sections_sha256": "1387dee6824555b95718b13bff3839a3a6faa224e1df057ace6f421a0fae327f",
+        "status": "READY",
+        "title": "Typography"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p17",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "39faf55cd1bbbe4640e7b0e3c3685b0d254061d562388281d7946fd861d9ef72",
+        "gaps": [],
+        "order": 17,
+        "package_hash": "0c612129dae5dc8cb4ae8db98b8062c9b3c1a85566cc5a442042390db911db2a",
+        "page_id": "p17",
+        "parts": [
+          "p17"
+        ],
+        "sections_sha256": "99a6c32ecf8f27e01d8c9123c2832839f018cbe4153f3fb6b6deed9d85c9b88e",
+        "status": "NOT_APPLICABLE",
+        "title": "Layout"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p18",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "bf2a8d18238b3a7b70e8f9004416f92e8fc9433a41227a77f7ab2a049e7cccd7",
+        "gaps": [],
+        "order": 18,
+        "package_hash": "52c825b0b6efea1b48192b6f527531fe49b8aa365e1b47891a4ef241ffb4e161",
+        "page_id": "p18",
+        "parts": [
+          "p18"
+        ],
+        "sections_sha256": "7d5af31c1008a0c01a6618b84aae5b507f798844141d87a0c104ddfff0303faa",
+        "status": "NOT_APPLICABLE",
+        "title": "Graphics"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p19",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "b05cb960c8f91e0226ecf83a1c0fb36800c0a0a37cf3cb29b278794f690ab7ab",
+        "gaps": [],
+        "order": 19,
+        "package_hash": "bdad53571a778c57d1b33c75d07b37cd715e97d7ca76995a05f99233fda81029",
+        "page_id": "p19",
+        "parts": [
+          "p19"
+        ],
+        "sections_sha256": "149e427e1bc3c68159eef296082b8bd9b071f2c576698fa25c4a7630fbfdff7d",
+        "status": "READY",
+        "title": "Imagery"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p20",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "439bead7d1f555105f5b5c0f667dea354059ccd4e938f624718aa962dc0197ba",
+        "gaps": [],
+        "order": 20,
+        "package_hash": "81effb499c9ddcd1a33295a0f6557a56791191438a29135c6e0b572df677c1d0",
+        "page_id": "p20",
+        "parts": [
+          "p20"
+        ],
+        "sections_sha256": "1784f39cf9ad395d55ba811d52c6c5cbc0bdec16a762d873369994811a91e1e1",
+        "status": "NOT_APPLICABLE",
+        "title": "Editorial and print"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p21",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "e0775be1d68f0409c9822f398e5e54cd9f470ed1bc353385940065d2bcd6ca90",
+        "gaps": [],
+        "order": 21,
+        "package_hash": "d19cbb2617213647084f3addf407a187c59bc0ecd261403bca9fa41519ad6e07",
+        "page_id": "p21",
+        "parts": [
+          "p21"
+        ],
+        "sections_sha256": "8f57481c8887808b5e6e91cb009ac276662ba9dc3cc899a2fbc6f5b0c490ecca",
+        "status": "NOT_APPLICABLE",
+        "title": "Digital"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p22",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "4c4bf7268a0377f2d230f1fe5fbd043b3524e6e431bc754fbabde07f48a00dc5",
+        "gaps": [],
+        "order": 22,
+        "package_hash": "42d5f0b4ae703809be42fee68ddcfba1781f20e40a104a3993bedfd8a0a4a796",
+        "page_id": "p22",
+        "parts": [
+          "p22"
+        ],
+        "sections_sha256": "9fe275e5a4f62122ac24d7d9c4612b00621e5a4d8cb373b694434baa425a7025",
+        "status": "READY",
+        "title": "Motion"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p23",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "e1e71cf94a55797a06eae033ef5ce8fa6b96dafb3c613f30f6f1c7a78bbc5cae",
+        "gaps": [],
+        "order": 23,
+        "package_hash": "b1a5010aa5bd56a2b9475223b9bc64d7376e65d1608f6f68fb0ddccb168d499a",
+        "page_id": "p23",
+        "parts": [
+          "p23"
+        ],
+        "sections_sha256": "858d53aae288f80b7b61f574978ca5faca9ede9173d9ea3b8c2c17f009968db8",
+        "status": "READY",
+        "title": "Handoff"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p24",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "75349a91eaa57a9b9866bd1fd9e6cfcdf032bbb7a19b337fe141cf99f73b5477",
+        "gaps": [],
+        "order": 24,
+        "package_hash": "6b0536b33a9703d74f11e79343d4c8e4a9486fa565ee3cbb93386cb8aace6b93",
+        "page_id": "p24",
+        "parts": [
+          "p24"
+        ],
+        "sections_sha256": "213888fc3cf3207409f2421c87905ef69d3f775a6534db634785740cd5fff504",
+        "status": "READY",
+        "title": "Release"
+      }
+    ],
+    "palette": {
+      "neutral": false
+    },
+    "pdf": null,
+    "project_id": "prj-vnx-5d4f685e",
+    "proposal_ref": null,
+    "renderer_version": "amc-brandbook-render/1.0.0",
+    "resolution_hash": "fb84aa87d902da1bcd6d29c0a5b83026e9daaad09ca4e98c50535d3bb464bed8",
+    "schema_version": "amc-vnexus-brandbook-build/v1",
+    "scope": "brand",
+    "scope_ref": "brand-010409bc",
+    "states": {
+      "prompt": "READY",
+      "released": "NOT_RELEASED",
+      "rendered": "PASSED",
+      "validated": "PASSED"
+    },
+    "status": "PREVIEW_ONLY",
+    "telemetry": {
+      "browser_runs": 2,
+      "cache_hits": 0,
+      "checks_reused": 0,
+      "model_calls": 0,
+      "pages_compiled": 24,
+      "pages_measured": 24,
+      "pages_rendered": 24,
+      "pages_reused": 0,
+      "peak_rss_kb": 156500,
+      "stage_ms": {
+        "assemble": 140.0,
+        "compile": 12.8,
+        "context": 22.2,
+        "measure": 4020.4,
+        "record": 98.5,
+        "render": 1.0,
+        "reuse_lookup": 56.6,
+        "store": 3450.1
+      },
+      "total_ms": 7801.8
+    },
+    "template_id": "amc-brandbook/default",
+    "template_version": "1.0.0",
+    "validator_version": "amc-brandbook-checks/1.0.0"
+  },
+  "compile": {
+    "package": {
+      "brand_id": "brand-010409bc",
+      "brand_name": "Halden & Fen (fictional)",
+      "compiler_version": "amc-brandbook-compiler/1.0.0",
+      "context_hash": "10ecc8d834973c3dfcdeb57d69da576c2580144c79e54fcd049c8906427d0bfe",
+      "gaps": [],
+      "genome_ref": "gv-1d80c804dabf45dbb320b7b9b6987ffb",
+      "locale": "en",
+      "manifest_hash": "6355b797e60a741201c41ad23463fdd361fe2832116a2429532de35f3961e67b",
+      "mark": {
+        "approved": true,
+        "kind": "VECTOR",
+        "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+        "source": "deterministic composition of visual.logo.mark=ring_dot"
+      },
+      "mode": "PROMPTS_ONLY",
+      "package_hash": "d61e27480072a976c29a873fb8e1731c55d1faa44ca0f1896f3fe7d5fd0fd772",
+      "pages": [
+        {
+          "assets": [
+            {
+              "approved": true,
+              "asset": "mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "source": "deterministic composition of visual.logo.mark=ring_dot"
+            }
+          ],
+          "blocks": [
+            {
+              "copy_id": "p01-c01",
+              "proposed": false,
+              "role": "title",
+              "t": "copy",
+              "text": "Halden & Fen (fictional)"
+            },
+            {
+              "copy_id": "p01-c02",
+              "proposed": false,
+              "role": "subtitle",
+              "t": "copy",
+              "text": "Brand guidelines"
+            },
+            {
+              "copy_id": "p01-c03",
+              "proposed": false,
+              "role": "meta",
+              "t": "copy",
+              "text": "Template amc-brandbook/default 1.0.0"
+            },
+            {
+              "copy_id": "p01-c04",
+              "proposed": false,
+              "role": "meta",
+              "t": "copy",
+              "text": "Draft for review: not approved for release"
+            },
+            {
+              "asset": "mark",
+              "caption": "",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 200,
+              "t": "asset",
+              "variant": "master"
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p01-c01",
+              "proposed": false,
+              "source": "brand.display_name",
+              "text": "Halden & Fen (fictional)"
+            },
+            {
+              "copy_id": "p01-c02",
+              "proposed": false,
+              "source": "template",
+              "text": "Brand guidelines"
+            },
+            {
+              "copy_id": "p01-c03",
+              "proposed": false,
+              "source": "template",
+              "text": "Template amc-brandbook/default 1.0.0"
+            },
+            {
+              "copy_id": "p01-c04",
+              "proposed": false,
+              "source": "template",
+              "text": "Draft for review: not approved for release"
+            }
+          ],
+          "dependency_hash": "e871db4682f4d8e094562a43eb6e5b89101b6b59cbbaf5adf839cced42444bd6",
+          "fields": [
+            {
+              "approved": true,
+              "path": "visual.logo.mark",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "ring_dot"
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.master_artifact",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.wordmark",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p01 · Cover (1 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Exact brand identity, document title, template version and approval status.\nExact copy (verbatim, in this order):\n  - [p01-c01] \"Halden & Fen (fictional)\"\n  - [p01-c02] \"Brand guidelines\"\n  - [p01-c03] \"Template amc-brandbook/default 1.0.0\"\n  - [p01-c04] \"Draft for review: not approved for release\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nProhibitions: no invented slogan; no invented date; no endorsement\nLayout: cover. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 1,
+          "package_hash": "2bc1729a6734229dd3609b68ba66ac0f32b3831923909238ba80b0ca6b2c0eb5",
+          "page_id": "p01",
+          "status": "READY",
+          "title": "Cover"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "columns": [
+                "Page",
+                "Section",
+                "Status"
+              ],
+              "rows": [
+                [
+                  "01",
+                  "Cover",
+                  "READY"
+                ],
+                [
+                  "02",
+                  "Contents and status",
+                  "ASSEMBLED"
+                ],
+                [
+                  "03",
+                  "Premise",
+                  "READY"
+                ],
+                [
+                  "04",
+                  "Voice",
+                  "READY"
+                ],
+                [
+                  "05",
+                  "References and evidence",
+                  "READY"
+                ],
+                [
+                  "06",
+                  "Identity overview",
+                  "READY"
+                ],
+                [
+                  "07",
+                  "Primary logo",
+                  "READY"
+                ],
+                [
+                  "08",
+                  "Construction",
+                  "READY"
+                ],
+                [
+                  "09",
+                  "Wordmark",
+                  "READY"
+                ],
+                [
+                  "10",
+                  "Lockups",
+                  "READY"
+                ],
+                [
+                  "11",
+                  "Clear space",
+                  "READY"
+                ],
+                [
+                  "12",
+                  "Scale",
+                  "READY"
+                ],
+                [
+                  "13",
+                  "One colour and reverse",
+                  "READY"
+                ],
+                [
+                  "14",
+                  "Misuse",
+                  "READY"
+                ],
+                [
+                  "15",
+                  "Colour",
+                  "READY"
+                ],
+                [
+                  "16",
+                  "Typography",
+                  "READY"
+                ],
+                [
+                  "17",
+                  "Layout",
+                  "NOT_APPLICABLE"
+                ],
+                [
+                  "18",
+                  "Graphics",
+                  "NOT_APPLICABLE"
+                ],
+                [
+                  "19",
+                  "Imagery",
+                  "READY"
+                ],
+                [
+                  "20",
+                  "Editorial and print",
+                  "NOT_APPLICABLE"
+                ],
+                [
+                  "21",
+                  "Digital",
+                  "NOT_APPLICABLE"
+                ],
+                [
+                  "22",
+                  "Motion",
+                  "READY"
+                ],
+                [
+                  "23",
+                  "Handoff",
+                  "ASSEMBLED"
+                ],
+                [
+                  "24",
+                  "Release",
+                  "ASSEMBLED"
+                ]
+              ],
+              "t": "table"
+            },
+            {
+              "items": [
+                [
+                  "READY",
+                  "all required values approved"
+                ],
+                [
+                  "DRAFT",
+                  "labelled gaps or proposals"
+                ],
+                [
+                  "BLOCKED",
+                  "a required value is missing"
+                ],
+                [
+                  "NOT_APPLICABLE",
+                  "approved decision"
+                ]
+              ],
+              "t": "legend"
+            },
+            {
+              "copy_id": "p02-c01",
+              "proposed": false,
+              "role": "meta",
+              "t": "copy",
+              "text": "Scope: genome gv-1d80c804dabf45dbb320b7b9b6987ffb"
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p02-c01",
+              "proposed": false,
+              "source": "build.genome_ref",
+              "text": "Scope: genome gv-1d80c804dabf45dbb320b7b9b6987ffb"
+            }
+          ],
+          "dependency_hash": "24e86a118a4c51677eb444ce76e9bd689dcf60aa383f8b8248ae7ac36a4728d2",
+          "fields": [],
+          "gaps": [],
+          "instructions": "PAGE p02 · Contents and status (2 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Actual navigation from this manifest, scope, evidence and approval legend.\nExact copy (verbatim, in this order):\n  - [p02-c01] \"Scope: genome gv-1d80c804dabf45dbb320b7b9b6987ffb\"\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 2,
+          "package_hash": "fbc4f25e22a74c83864dc39238d5db8d0bfba8654e438bd74f8a4ae7a2686e1e",
+          "page_id": "p02",
+          "status": "READY",
+          "title": "Contents and status"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "path": "strategy.positioning.statement",
+              "t": "label",
+              "text": "Positioning statement"
+            },
+            {
+              "copy_id": "p03-c01",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "Small-batch stoneware (fictional brand)"
+            },
+            {
+              "path": "strategy.audience.primary",
+              "t": "label",
+              "text": "Audience primary"
+            },
+            {
+              "copy_id": "p03-c02",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "people furnishing a first home (fictional persona)"
+            },
+            {
+              "path": "strategy.positioning.promise",
+              "t": "label",
+              "text": "Positioning promise"
+            },
+            {
+              "copy_id": "p03-c03",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "Made slowly, used daily"
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p03-c01",
+              "proposed": false,
+              "source": "strategy.positioning.statement",
+              "text": "Small-batch stoneware (fictional brand)"
+            },
+            {
+              "copy_id": "p03-c02",
+              "proposed": false,
+              "source": "strategy.audience.primary",
+              "text": "people furnishing a first home (fictional persona)"
+            },
+            {
+              "copy_id": "p03-c03",
+              "proposed": false,
+              "source": "strategy.positioning.promise",
+              "text": "Made slowly, used daily"
+            }
+          ],
+          "dependency_hash": "ea86206464fa759158ae4de78563c92a8adc86b5f931c6bb3c032c3c2b4ca8c8",
+          "fields": [
+            {
+              "approved": false,
+              "path": "strategy.audience.needs",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": true,
+              "path": "strategy.audience.primary",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "people furnishing a first home (fictional persona)"
+            },
+            {
+              "approved": false,
+              "path": "strategy.competitive_territory.summary",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "strategy.differentiation.statement",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": true,
+              "path": "strategy.positioning.promise",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "Made slowly, used daily"
+            },
+            {
+              "approved": true,
+              "path": "strategy.positioning.statement",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "Small-batch stoneware (fictional brand)"
+            },
+            {
+              "approved": false,
+              "path": "strategy.values.list",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p03 · Premise (3 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Offering, audience, positioning, differentiation and values behind the design.\nExact copy (verbatim, in this order):\n  - [p03-c01] \"Small-batch stoneware (fictional brand)\"\n  - [p03-c02] \"people furnishing a first home (fictional persona)\"\n  - [p03-c03] \"Made slowly, used daily\"\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 3,
+          "package_hash": "cbe433713bfcefe571065265970cc2698b6aa763f0652352ba809ab78b22cfb9",
+          "page_id": "p03",
+          "status": "READY",
+          "title": "Premise"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "path": "verbal.voice.tone",
+              "t": "label",
+              "text": "Voice tone"
+            },
+            {
+              "copy_id": "p04-c01",
+              "proposed": false,
+              "role": "item",
+              "t": "copy",
+              "text": "plain"
+            },
+            {
+              "copy_id": "p04-c02",
+              "proposed": false,
+              "role": "item",
+              "t": "copy",
+              "text": "warm"
+            },
+            {
+              "path": "verbal.voice.register",
+              "t": "label",
+              "text": "Voice register"
+            },
+            {
+              "copy_id": "p04-c03",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "plain"
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p04-c01",
+              "proposed": false,
+              "source": "verbal.voice.tone",
+              "text": "plain"
+            },
+            {
+              "copy_id": "p04-c02",
+              "proposed": false,
+              "source": "verbal.voice.tone",
+              "text": "warm"
+            },
+            {
+              "copy_id": "p04-c03",
+              "proposed": false,
+              "source": "verbal.voice.register",
+              "text": "plain"
+            }
+          ],
+          "dependency_hash": "5abb92f06a2a3c11cfc3aa4f64b8cf8fab38b76c4d29fe0fb4148c1bee930bb3",
+          "fields": [
+            {
+              "approved": false,
+              "path": "verbal.content_rules.claims",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "verbal.messaging.avoid",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "verbal.messaging.write",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "verbal.tone.channels",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "verbal.vocabulary.avoid",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "verbal.vocabulary.prefer",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": true,
+              "path": "verbal.voice.register",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "plain"
+            },
+            {
+              "approved": true,
+              "path": "verbal.voice.tone",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": [
+                "plain",
+                "warm"
+              ]
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p04 · Voice (4 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Operational voice traits, channel tone, vocabulary and claims, with write/avoid samples.\nExact copy (verbatim, in this order):\n  - [p04-c01] \"plain\"\n  - [p04-c02] \"warm\"\n  - [p04-c03] \"plain\"\nProhibitions: no claim that is not in verbal.content_rules.claims\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 4,
+          "package_hash": "105094be6dd369a1563395c73a0c730dafd470532c4589d8b2573c12664b6707",
+          "page_id": "p04",
+          "status": "READY",
+          "title": "Voice"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "columns": [
+                "Source",
+                "Locator",
+                "Class",
+                "Observations",
+                "Inferences",
+                "Unknowns",
+                "Reuse",
+                "Privacy"
+              ],
+              "rows": [
+                [
+                  "studio-visit",
+                  "studio visit notes (fictional)",
+                  "USER_REPORTED",
+                  "matte glazes",
+                  "-",
+                  "-",
+                  "evidence_only",
+                  "contains_pii_redacted"
+                ]
+              ],
+              "t": "table"
+            },
+            {
+              "optional": false,
+              "t": "note",
+              "text": "User-reported statements are not independent inspection. [PII] stays redacted; source compositions are evidence only."
+            }
+          ],
+          "copy_blocks": [],
+          "dependency_hash": "ac9ac026878861e822df0456257070c05d98891486877f4634939be17dd7bb11",
+          "fields": [],
+          "gaps": [],
+          "instructions": "PAGE p05 · References and evidence (5 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Per-source observations, inferences, unknowns, reuse and privacy limits.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: never reconstruct [PII]; source compositions stay evidence\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 5,
+          "package_hash": "5e7ad3c07b03475805740f01eaf88d3fecfe10989380389370913d1d74a26541",
+          "page_id": "p05",
+          "status": "READY",
+          "title": "References and evidence"
+        },
+        {
+          "assets": [
+            {
+              "approved": true,
+              "asset": "mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "source": "deterministic composition of visual.logo.mark=ring_dot"
+            }
+          ],
+          "blocks": [
+            {
+              "asset": "mark",
+              "caption": "",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 180,
+              "t": "asset",
+              "variant": "master"
+            },
+            {
+              "copy_id": "p06-c01",
+              "proposed": false,
+              "role": "wordmark",
+              "t": "copy",
+              "text": "Halden & Fen (fictional)"
+            },
+            {
+              "copy_id": "p06-c01",
+              "t": "wordmark"
+            },
+            {
+              "optional": true,
+              "t": "note",
+              "text": "Wordmark text is the brand's registered display name; no separate wordmark is approved."
+            },
+            {
+              "approved": true,
+              "role": "ink",
+              "t": "swatch",
+              "value": "#14161a"
+            },
+            {
+              "approved": true,
+              "role": "paper",
+              "t": "swatch",
+              "value": "#f7f4ee"
+            },
+            {
+              "approved": true,
+              "role": "accent",
+              "t": "swatch",
+              "value": "#c2410c"
+            },
+            {
+              "approved": true,
+              "role": "accent_2",
+              "t": "swatch",
+              "value": "#93c5fd"
+            },
+            {
+              "approved": true,
+              "role": "muted",
+              "t": "swatch",
+              "value": "#4b4540"
+            },
+            {
+              "path": "visual.typography.display",
+              "t": "label",
+              "text": "Typography display"
+            },
+            {
+              "copy_id": "p06-c02",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "Schibsted Grotesk"
+            },
+            {
+              "path": "visual.typography.body",
+              "t": "label",
+              "text": "Typography body"
+            },
+            {
+              "copy_id": "p06-c03",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "Inter"
+            },
+            {
+              "optional": true,
+              "t": "note",
+              "text": "Calibration page: approve this page first; later pages reuse its assets and layout."
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p06-c01",
+              "proposed": false,
+              "source": "brand.display_name",
+              "text": "Halden & Fen (fictional)"
+            },
+            {
+              "copy_id": "p06-c02",
+              "proposed": false,
+              "source": "visual.typography.display",
+              "text": "Schibsted Grotesk"
+            },
+            {
+              "copy_id": "p06-c03",
+              "proposed": false,
+              "source": "visual.typography.body",
+              "text": "Inter"
+            }
+          ],
+          "dependency_hash": "2be5541216885757a5a4294e17fb897ddced16311c181e799c38feefe9500823",
+          "fields": [
+            {
+              "approved": true,
+              "path": "visual.logo.mark",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "ring_dot"
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.master_artifact",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.wordmark",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p06 · Identity overview (6 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Canonical identity, palette and type on one calibration page.\nExact copy (verbatim, in this order):\n  - [p06-c01] \"Halden & Fen (fictional)\"\n  - [p06-c02] \"Schibsted Grotesk\"\n  - [p06-c03] \"Inter\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 6,
+          "package_hash": "22a8d1408a3e016d680efbf210aef5334a90d1fcd2a9217e6903cd617d294b5b",
+          "page_id": "p06",
+          "status": "READY",
+          "title": "Identity overview"
+        },
+        {
+          "assets": [
+            {
+              "approved": true,
+              "asset": "mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "source": "deterministic composition of visual.logo.mark=ring_dot"
+            }
+          ],
+          "blocks": [
+            {
+              "asset": "mark",
+              "caption": "Master mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 320,
+              "t": "asset",
+              "variant": "master"
+            },
+            {
+              "t": "asset_meta",
+              "text": "VECTOR · deterministic composition of visual.logo.mark=ring_dot · sha256 1918a6c278448362"
+            },
+            {
+              "copy_id": "p07-c01",
+              "proposed": false,
+              "role": "wordmark",
+              "t": "copy",
+              "text": "Halden & Fen (fictional)"
+            },
+            {
+              "copy_id": "p07-c01",
+              "t": "wordmark"
+            },
+            {
+              "optional": true,
+              "t": "note",
+              "text": "Wordmark text is the brand's registered display name; no separate wordmark is approved."
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p07-c01",
+              "proposed": false,
+              "source": "brand.display_name",
+              "text": "Halden & Fen (fictional)"
+            }
+          ],
+          "dependency_hash": "74ab41c62264b2bc842de7eb78ae815c341fea119fb85b895042d73eb09184c5",
+          "fields": [
+            {
+              "approved": true,
+              "path": "visual.logo.mark",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "ring_dot"
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.master_artifact",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.placement",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.wordmark",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p07 · Primary logo (7 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: The approved master, its exact text, contexts and placement.\nExact copy (verbatim, in this order):\n  - [p07-c01] \"Halden & Fen (fictional)\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 7,
+          "package_hash": "5a17710de9415dcc799ec46cd9b62de321174b77b99eac962879178026d8e893",
+          "page_id": "p07",
+          "status": "READY",
+          "title": "Primary logo"
+        },
+        {
+          "assets": [
+            {
+              "approved": true,
+              "asset": "mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "source": "deterministic composition of visual.logo.mark=ring_dot"
+            }
+          ],
+          "blocks": [
+            {
+              "asset": "mark",
+              "caption": "",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 320,
+              "t": "asset",
+              "variant": "construction"
+            },
+            {
+              "optional": false,
+              "t": "note",
+              "text": "Shown: the master's canvas boundary and centre axes. Optical construction is not recorded in the approved genome."
+            }
+          ],
+          "copy_blocks": [],
+          "dependency_hash": "f8986c7fa080258723ce8c1048282b0e7e7e7810e313af42b83b1843bc044acf",
+          "fields": [
+            {
+              "approved": false,
+              "path": "visual.logo.construction",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": true,
+              "path": "visual.logo.mark",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "ring_dot"
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.master_artifact",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p08 · Construction (8 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Real axes, boundaries and negative space of the master.\nExact copy (verbatim, in this order):\n  (none)\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 8,
+          "package_hash": "774b28c3d7e76f95e896b53ed9acd1c24f8879ac536e2c64dc194996e5540717",
+          "page_id": "p08",
+          "status": "READY",
+          "title": "Construction"
+        },
+        {
+          "assets": [
+            {
+              "approved": true,
+              "asset": "mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "source": "deterministic composition of visual.logo.mark=ring_dot"
+            }
+          ],
+          "blocks": [
+            {
+              "copy_id": "p09-c01",
+              "proposed": false,
+              "role": "wordmark",
+              "t": "copy",
+              "text": "Halden & Fen (fictional)"
+            },
+            {
+              "copy_id": "p09-c01",
+              "t": "wordmark"
+            },
+            {
+              "optional": true,
+              "t": "note",
+              "text": "Wordmark text is the brand's registered display name; no separate wordmark is approved."
+            },
+            {
+              "optional": true,
+              "t": "note",
+              "text": "Set in the approved display face as live text; custom lettering only if recorded above."
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p09-c01",
+              "proposed": false,
+              "source": "brand.display_name",
+              "text": "Halden & Fen (fictional)"
+            }
+          ],
+          "dependency_hash": "1298a3ade845ab44b912bd88a1527b16010eb2a98c5b1de719bd1af79fc2face",
+          "fields": [
+            {
+              "approved": false,
+              "path": "visual.logo.custom_lettering",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.wordmark",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.wordmark_case",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p09 · Wordmark (9 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Spelling, case, baseline and spacing of the wordmark.\nExact copy (verbatim, in this order):\n  - [p09-c01] \"Halden & Fen (fictional)\"\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 9,
+          "package_hash": "0c41953bb1b5a8cf7f648acace0135557137c5a3e93e80076f13b7a7c3bb50d4",
+          "page_id": "p09",
+          "status": "READY",
+          "title": "Wordmark"
+        },
+        {
+          "assets": [
+            {
+              "approved": true,
+              "asset": "mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "source": "deterministic composition of visual.logo.mark=ring_dot"
+            }
+          ],
+          "blocks": [
+            {
+              "arrangement": "horizontal",
+              "t": "lockup"
+            },
+            {
+              "arrangement": "stacked",
+              "t": "lockup"
+            },
+            {
+              "copy_id": "p10-c01",
+              "proposed": false,
+              "role": "wordmark",
+              "t": "copy",
+              "text": "Halden & Fen (fictional)"
+            },
+            {
+              "copy_id": "p10-c01",
+              "t": "wordmark"
+            },
+            {
+              "optional": true,
+              "t": "note",
+              "text": "Wordmark text is the brand's registered display name; no separate wordmark is approved."
+            },
+            {
+              "asset": "mark",
+              "caption": "Symbol only",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 120,
+              "t": "asset",
+              "variant": "master"
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p10-c01",
+              "proposed": false,
+              "source": "brand.display_name",
+              "text": "Halden & Fen (fictional)"
+            }
+          ],
+          "dependency_hash": "e2b5a24b330509c0fcf0fe864a381b4c88979bd79990c82920298faa3f42ecc3",
+          "fields": [
+            {
+              "approved": false,
+              "path": "visual.logo.lockups",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": true,
+              "path": "visual.logo.mark",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "ring_dot"
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.master_artifact",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.wordmark",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p10 · Lockups (10 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Applicable primary, horizontal, stacked, wordmark-only and symbol-only lockups.\nExact copy (verbatim, in this order):\n  - [p10-c01] \"Halden & Fen (fictional)\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 10,
+          "package_hash": "c0066588f3768a9dd73c676284cfe014bcb5bfd0ca46dbe5e719859d651126d8",
+          "page_id": "p10",
+          "status": "READY",
+          "title": "Lockups"
+        },
+        {
+          "assets": [
+            {
+              "approved": true,
+              "asset": "mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "source": "deterministic composition of visual.logo.mark=ring_dot"
+            }
+          ],
+          "blocks": [
+            {
+              "path": "visual.logo.clear_space",
+              "t": "label",
+              "text": "Logo clear space"
+            },
+            {
+              "copy_id": "p11-c01",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "a quarter of the mark height"
+            },
+            {
+              "asset": "mark",
+              "caption": "",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 220,
+              "t": "asset",
+              "variant": "clearspace"
+            },
+            {
+              "kind": "crowded",
+              "t": "example",
+              "text": "Incorrect: text crowding the mark"
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p11-c01",
+              "proposed": false,
+              "source": "visual.logo.clear_space",
+              "text": "a quarter of the mark height"
+            }
+          ],
+          "dependency_hash": "bb673e0b92d3864525dd167cc2c6782359a56ddc962b3b68784910beb353d872",
+          "fields": [
+            {
+              "approved": true,
+              "path": "visual.logo.clear_space",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "a quarter of the mark height"
+            },
+            {
+              "approved": true,
+              "path": "visual.logo.mark",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "ring_dot"
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.master_artifact",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p11 · Clear space (11 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Approved clear space with correct and crowded examples.\nExact copy (verbatim, in this order):\n  - [p11-c01] \"a quarter of the mark height\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 11,
+          "package_hash": "fab4a639f4050d762f7176287ef0232bd11ff2784f6e3efc73b803aefd2bcf5a",
+          "page_id": "p11",
+          "status": "READY",
+          "title": "Clear space"
+        },
+        {
+          "assets": [
+            {
+              "approved": true,
+              "asset": "mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "source": "deterministic composition of visual.logo.mark=ring_dot"
+            }
+          ],
+          "blocks": [
+            {
+              "path": "visual.logo.min_size",
+              "t": "label",
+              "text": "Logo min size"
+            },
+            {
+              "copy_id": "p12-c01",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "24px"
+            },
+            {
+              "asset": "mark",
+              "caption": "16 px",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 16,
+              "t": "asset",
+              "variant": "scale"
+            },
+            {
+              "asset": "mark",
+              "caption": "32 px",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 32,
+              "t": "asset",
+              "variant": "scale"
+            },
+            {
+              "asset": "mark",
+              "caption": "64 px",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 64,
+              "t": "asset",
+              "variant": "scale"
+            },
+            {
+              "asset": "mark",
+              "caption": "128 px",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 128,
+              "t": "asset",
+              "variant": "scale"
+            },
+            {
+              "optional": false,
+              "t": "note",
+              "text": "Screen renders at CSS px. Physical-size print tests: NOT_RUN."
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p12-c01",
+              "proposed": false,
+              "source": "visual.logo.min_size",
+              "text": "24px"
+            }
+          ],
+          "dependency_hash": "c5aedab5f79c91098ac1086790c604f28db5e04db718ae9b30ad7792f09be49c",
+          "fields": [
+            {
+              "approved": true,
+              "path": "visual.logo.mark",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "ring_dot"
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.master_artifact",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": true,
+              "path": "visual.logo.min_size",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "24px"
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.small_size_variant",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p12 · Scale (12 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Approved minimum size and the mark at 16, 32, 64 and 128 px.\nExact copy (verbatim, in this order):\n  - [p12-c01] \"24px\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 4 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 12,
+          "package_hash": "3f410cf18959b42e95d25c841cdb9592430c9a9329bfaef5c6c11730d8eb138b",
+          "page_id": "p12",
+          "status": "READY",
+          "title": "Scale"
+        },
+        {
+          "assets": [
+            {
+              "approved": true,
+              "asset": "mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "source": "deterministic composition of visual.logo.mark=ring_dot"
+            }
+          ],
+          "blocks": [
+            {
+              "asset": "mark",
+              "caption": "One colour",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 160,
+              "t": "asset",
+              "variant": "silhouette"
+            },
+            {
+              "asset": "mark",
+              "caption": "Reverse",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "size": 160,
+              "t": "asset",
+              "variant": "reverse"
+            },
+            {
+              "optional": false,
+              "t": "note",
+              "text": "Silhouettes are rendered from the master by a colour filter; no separate one-colour master is approved."
+            }
+          ],
+          "copy_blocks": [],
+          "dependency_hash": "bd239188e6e1d74ee697aaca08af7012bf4faceeb6443513676091f2908a0d15",
+          "fields": [
+            {
+              "approved": true,
+              "path": "visual.logo.mark",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "ring_dot"
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.master_artifact",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p13 · One colour and reverse (13 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Canonical silhouette in one colour and reversed, with pairings.\nExact copy (verbatim, in this order):\n  (none)\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 2 placement(s). Place it; do not redraw it.\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 13,
+          "package_hash": "8cbcec76e3ac77a7ba66bdb8bf2f0c957988e9a46be4d72bb010f888736ccf7d",
+          "page_id": "p13",
+          "status": "READY",
+          "title": "One colour and reverse"
+        },
+        {
+          "assets": [
+            {
+              "approved": true,
+              "asset": "mark",
+              "kind": "VECTOR",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "source": "deterministic composition of visual.logo.mark=ring_dot"
+            }
+          ],
+          "blocks": [
+            {
+              "copy_id": "p14-c01",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "t": "misuse",
+              "text": "Incorrect: Do not stretch or squash",
+              "transform": "stretch"
+            },
+            {
+              "copy_id": "p14-c02",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "t": "misuse",
+              "text": "Incorrect: Do not rotate",
+              "transform": "rotate"
+            },
+            {
+              "copy_id": "p14-c03",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "t": "misuse",
+              "text": "Incorrect: Do not recolour outside the palette",
+              "transform": "recolor"
+            },
+            {
+              "copy_id": "p14-c04",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "t": "misuse",
+              "text": "Incorrect: Do not add effects",
+              "transform": "effect"
+            },
+            {
+              "copy_id": "p14-c05",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "t": "misuse",
+              "text": "Incorrect: Do not place on busy backgrounds",
+              "transform": "busy"
+            },
+            {
+              "copy_id": "p14-c06",
+              "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+              "t": "misuse",
+              "text": "Incorrect: Do not crowd or rearrange",
+              "transform": "crowd"
+            },
+            {
+              "optional": false,
+              "t": "note",
+              "text": "Misuse specimens are derived views for teaching; they are never stored or used as masters."
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p14-c01",
+              "proposed": false,
+              "source": "template",
+              "text": "Incorrect: Do not stretch or squash"
+            },
+            {
+              "copy_id": "p14-c02",
+              "proposed": false,
+              "source": "template",
+              "text": "Incorrect: Do not rotate"
+            },
+            {
+              "copy_id": "p14-c03",
+              "proposed": false,
+              "source": "template",
+              "text": "Incorrect: Do not recolour outside the palette"
+            },
+            {
+              "copy_id": "p14-c04",
+              "proposed": false,
+              "source": "template",
+              "text": "Incorrect: Do not add effects"
+            },
+            {
+              "copy_id": "p14-c05",
+              "proposed": false,
+              "source": "template",
+              "text": "Incorrect: Do not place on busy backgrounds"
+            },
+            {
+              "copy_id": "p14-c06",
+              "proposed": false,
+              "source": "template",
+              "text": "Incorrect: Do not crowd or rearrange"
+            }
+          ],
+          "dependency_hash": "b9d18d7c75571a256bf6b65b3e1080443c1555dcee780434ff0e32b44c7eb837",
+          "fields": [
+            {
+              "approved": true,
+              "path": "visual.logo.mark",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "ring_dot"
+            },
+            {
+              "approved": false,
+              "path": "visual.logo.master_artifact",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p14 · Misuse (14 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Labelled misuse specimens, isolated from the masters.\nExact copy (verbatim, in this order):\n  - [p14-c01] \"Incorrect: Do not stretch or squash\"\n  - [p14-c02] \"Incorrect: Do not rotate\"\n  - [p14-c03] \"Incorrect: Do not recolour outside the palette\"\n  - [p14-c04] \"Incorrect: Do not add effects\"\n  - [p14-c05] \"Incorrect: Do not place on busy backgrounds\"\n  - [p14-c06] \"Incorrect: Do not crowd or rearrange\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 6 placement(s). Place it; do not redraw it.\nProhibitions: misuse specimens are never masters\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 14,
+          "package_hash": "85619669189555854cda3705aacc479f16360da68d10b97f4bc3d27933b0542d",
+          "page_id": "p14",
+          "status": "READY",
+          "title": "Misuse"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "approved": true,
+              "path": "visual.color.ink",
+              "role": "ink",
+              "t": "swatch",
+              "value": "#14161a"
+            },
+            {
+              "approved": true,
+              "path": "visual.color.paper",
+              "role": "paper",
+              "t": "swatch",
+              "value": "#f7f4ee"
+            },
+            {
+              "approved": true,
+              "path": "visual.color.accent",
+              "role": "accent",
+              "t": "swatch",
+              "value": "#c2410c"
+            },
+            {
+              "approved": true,
+              "path": "visual.color.accent_2",
+              "role": "accent_2",
+              "t": "swatch",
+              "value": "#93c5fd"
+            },
+            {
+              "approved": true,
+              "path": "visual.color.muted",
+              "role": "muted",
+              "t": "swatch",
+              "value": "#4b4540"
+            },
+            {
+              "columns": [
+                "Foreground",
+                "Background",
+                "Contrast (WCAG 2.2)",
+                "Use"
+              ],
+              "rows": [
+                [
+                  "ink",
+                  "paper",
+                  "16.5:1",
+                  "AA text"
+                ],
+                [
+                  "ink",
+                  "accent",
+                  "3.5:1",
+                  "AA large text only"
+                ],
+                [
+                  "ink",
+                  "accent_2",
+                  "10.04:1",
+                  "AA text"
+                ],
+                [
+                  "ink",
+                  "muted",
+                  "1.92:1",
+                  "Fails AA: decoration only"
+                ],
+                [
+                  "paper",
+                  "ink",
+                  "16.5:1",
+                  "AA text"
+                ],
+                [
+                  "paper",
+                  "accent",
+                  "4.72:1",
+                  "AA text"
+                ],
+                [
+                  "paper",
+                  "accent_2",
+                  "1.64:1",
+                  "Fails AA: decoration only"
+                ],
+                [
+                  "paper",
+                  "muted",
+                  "8.6:1",
+                  "AA text"
+                ],
+                [
+                  "accent",
+                  "ink",
+                  "3.5:1",
+                  "AA large text only"
+                ],
+                [
+                  "accent",
+                  "paper",
+                  "4.72:1",
+                  "AA text"
+                ],
+                [
+                  "accent",
+                  "accent_2",
+                  "2.87:1",
+                  "Fails AA: decoration only"
+                ],
+                [
+                  "accent",
+                  "muted",
+                  "1.82:1",
+                  "Fails AA: decoration only"
+                ],
+                [
+                  "accent_2",
+                  "ink",
+                  "10.04:1",
+                  "AA text"
+                ],
+                [
+                  "accent_2",
+                  "paper",
+                  "1.64:1",
+                  "Fails AA: decoration only"
+                ],
+                [
+                  "accent_2",
+                  "accent",
+                  "2.87:1",
+                  "Fails AA: decoration only"
+                ],
+                [
+                  "accent_2",
+                  "muted",
+                  "5.24:1",
+                  "AA text"
+                ],
+                [
+                  "muted",
+                  "ink",
+                  "1.92:1",
+                  "Fails AA: decoration only"
+                ],
+                [
+                  "muted",
+                  "paper",
+                  "8.6:1",
+                  "AA text"
+                ],
+                [
+                  "muted",
+                  "accent",
+                  "1.82:1",
+                  "Fails AA: decoration only"
+                ],
+                [
+                  "muted",
+                  "accent_2",
+                  "5.24:1",
+                  "AA text"
+                ]
+              ],
+              "t": "table"
+            }
+          ],
+          "copy_blocks": [],
+          "dependency_hash": "a8afa59aab198dd2649bf48cc47af9ccc9d985ce2e25702846b245712380bfc1",
+          "fields": [
+            {
+              "approved": true,
+              "path": "visual.color.ink",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "#14161a"
+            },
+            {
+              "approved": false,
+              "path": "visual.color.names",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": true,
+              "path": "visual.color.paper",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "#f7f4ee"
+            },
+            {
+              "approved": false,
+              "path": "visual.color.usage",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p15 · Colour (15 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Colour roles, approved values, allowed pairings and measured contrast.\nExact copy (verbatim, in this order):\n  (none)\nLayout: matrix. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 15,
+          "package_hash": "519e6a47328a75e31dff952d410a578b8d626b121c7d26b243ef9764faef13db",
+          "page_id": "p15",
+          "status": "READY",
+          "title": "Colour"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "approved": true,
+              "family": "Schibsted Grotesk",
+              "role": "display",
+              "t": "specimen"
+            },
+            {
+              "path": "visual.typography.display",
+              "t": "label",
+              "text": "Typography display"
+            },
+            {
+              "copy_id": "p16-c01",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "Schibsted Grotesk"
+            },
+            {
+              "approved": true,
+              "family": "Inter",
+              "role": "body",
+              "t": "specimen"
+            },
+            {
+              "path": "visual.typography.body",
+              "t": "label",
+              "text": "Typography body"
+            },
+            {
+              "copy_id": "p16-c02",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "Inter"
+            },
+            {
+              "path": "visual.typography.license",
+              "t": "label",
+              "text": "Typography license"
+            },
+            {
+              "path": "visual.typography.license",
+              "t": "gap",
+              "text": "Gap: visual.typography.license is unknown"
+            },
+            {
+              "optional": false,
+              "t": "note",
+              "text": "Font files are not embedded; previews use the installed face or a fallback, and say so in the release checks."
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p16-c01",
+              "proposed": false,
+              "source": "visual.typography.display",
+              "text": "Schibsted Grotesk"
+            },
+            {
+              "copy_id": "p16-c02",
+              "proposed": false,
+              "source": "visual.typography.body",
+              "text": "Inter"
+            }
+          ],
+          "dependency_hash": "b53ab8fbe2703d37a1064e34fcd2b7e6c2391d0c4d30be33a2ec070c232d7823",
+          "fields": [
+            {
+              "approved": true,
+              "path": "visual.typography.display",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "Schibsted Grotesk"
+            },
+            {
+              "approved": false,
+              "path": "visual.typography.fallback",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.typography.languages",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.typography.license",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.typography.scale",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p16 · Typography (16 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Type roles, specimens, hierarchy, licence and fallback status.\nExact copy (verbatim, in this order):\n  - [p16-c01] \"Schibsted Grotesk\"\n  - [p16-c02] \"Inter\"\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 16,
+          "package_hash": "92a3d66f4a8dd4ca407efcb19598902e1db46fdd9e3e5be4456db369eef7657a",
+          "page_id": "p16",
+          "status": "READY",
+          "title": "Typography"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "status": "NOT_APPLICABLE",
+              "t": "status",
+              "text": "Not applicable: not part of this fictional brand's scope"
+            }
+          ],
+          "copy_blocks": [],
+          "dependency_hash": "c76e87ffa68a5e1ea03ba538a84dc9ba5c4a2278169376e548bf5db49c663b6f",
+          "fields": [
+            {
+              "approved": true,
+              "path": "production.brandbook.applicability.p17",
+              "reason": "not part of this fictional brand's scope",
+              "source_scope": "brand-010409bc",
+              "status": "NOT_APPLICABLE",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.grid.columns",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.grid.margin",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.grid.responsive",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.grid.rhythm",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p17 · Layout (17 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Grids, margins, rhythm and responsive rules.\nExact copy (verbatim, in this order):\n  (none)\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 17,
+          "package_hash": "1198f62c6da56623f74850ef7f01f9afa407f59ed31c3857f2f76a36b228b8a3",
+          "page_id": "p17",
+          "status": "NOT_APPLICABLE",
+          "title": "Layout"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "status": "NOT_APPLICABLE",
+              "t": "status",
+              "text": "Not applicable: not part of this fictional brand's scope"
+            }
+          ],
+          "copy_blocks": [],
+          "dependency_hash": "a72d4319c1bc70d994c4e8c1aec287a8dde35ef15f45bd9b3dd6c849e6f3d4a7",
+          "fields": [
+            {
+              "approved": true,
+              "path": "production.brandbook.applicability.p18",
+              "reason": "not part of this fictional brand's scope",
+              "source_scope": "brand-010409bc",
+              "status": "NOT_APPLICABLE",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.shape_grammar.density",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.shape_grammar.icons",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.shape_grammar.summary",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p18 · Graphics (18 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Original primitives, icons, patterns and density.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: no copied compositions; no competing marks\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 18,
+          "package_hash": "1737b66f959c8c665d98a08229f5a99c26dd8672592a45e343f549354f587664",
+          "page_id": "p18",
+          "status": "NOT_APPLICABLE",
+          "title": "Graphics"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "path": "visual.imagery.style",
+              "t": "label",
+              "text": "Imagery style"
+            },
+            {
+              "copy_id": "p19-c01",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "Natural light on matte surfaces"
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p19-c01",
+              "proposed": false,
+              "source": "visual.imagery.style",
+              "text": "Natural light on matte surfaces"
+            }
+          ],
+          "dependency_hash": "de911d058f26ec5a3944e49397ef67b82757600aabbf678e9fd640108cda5026",
+          "fields": [
+            {
+              "approved": false,
+              "path": "production.brandbook.applicability.p19",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.imagery.rights",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": true,
+              "path": "visual.imagery.style",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "Natural light on matte surfaces"
+            },
+            {
+              "approved": false,
+              "path": "visual.imagery.subjects",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "visual.imagery.treatment",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p19 · Imagery (19 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Subjects, framing, light, treatment, rights and privacy.\nExact copy (verbatim, in this order):\n  - [p19-c01] \"Natural light on matte surfaces\"\nProhibitions: appearance is not a manufacturing specification\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 19,
+          "package_hash": "f16be67de6bdd2ede071b7c7e04edba4e0495c113b17f2fd27b596fe7425d06d",
+          "page_id": "p19",
+          "status": "READY",
+          "title": "Imagery"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "status": "NOT_APPLICABLE",
+              "t": "status",
+              "text": "Not applicable: not part of this fictional brand's scope"
+            }
+          ],
+          "copy_blocks": [],
+          "dependency_hash": "6171c63256eddd4a867c5a73f807e864c36b10d3a9648873802a308b1d6acbc6",
+          "fields": [
+            {
+              "approved": true,
+              "path": "production.brandbook.applicability.p20",
+              "reason": "not part of this fictional brand's scope",
+              "source_scope": "brand-010409bc",
+              "status": "NOT_APPLICABLE",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "production.media.print_formats",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "production.output.print",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p20 · Editorial and print (20 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Relevant cover, spread, imprint and collateral rules.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: no fictional client, contact or testimonial\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 20,
+          "package_hash": "e16b40e68b86378e307a6076be165e31b99d33a5008e7459b99483b821c622be",
+          "page_id": "p20",
+          "status": "NOT_APPLICABLE",
+          "title": "Editorial and print"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "status": "NOT_APPLICABLE",
+              "t": "status",
+              "text": "Not applicable: not part of this fictional brand's scope"
+            }
+          ],
+          "copy_blocks": [],
+          "dependency_hash": "a6861eccf0c297d52d2792f0c3561a16b7734d301c2136fa8540a629cdb5126c",
+          "fields": [
+            {
+              "approved": false,
+              "path": "experience.responsive.rules",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": true,
+              "path": "production.brandbook.applicability.p21",
+              "reason": "not part of this fictional brand's scope",
+              "source_scope": "brand-010409bc",
+              "status": "NOT_APPLICABLE",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "production.platform.avatar",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "production.platform.channels",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p21 · Digital (21 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Header, avatar, social and interface crops and responsiveness.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: a static preview is not a working interface\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 21,
+          "package_hash": "82e704edeb79594a22dba7f1a1d677b81eefd30e3c52a4b988da4e18fd75a3db",
+          "page_id": "p21",
+          "status": "NOT_APPLICABLE",
+          "title": "Digital"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "path": "visual.motion.pace",
+              "t": "label",
+              "text": "Motion pace"
+            },
+            {
+              "copy_id": "p22-c01",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "unhurried"
+            },
+            {
+              "path": "visual.motion.emphasis",
+              "t": "label",
+              "text": "Motion emphasis"
+            },
+            {
+              "copy_id": "p22-c02",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "logo reveal"
+            },
+            {
+              "path": "visual.motion.reduced_motion",
+              "t": "label",
+              "text": "Motion reduced motion"
+            },
+            {
+              "copy_id": "p22-c03",
+              "proposed": false,
+              "role": "text",
+              "t": "copy",
+              "text": "static final frame"
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p22-c01",
+              "proposed": false,
+              "source": "visual.motion.pace",
+              "text": "unhurried"
+            },
+            {
+              "copy_id": "p22-c02",
+              "proposed": false,
+              "source": "visual.motion.emphasis",
+              "text": "logo reveal"
+            },
+            {
+              "copy_id": "p22-c03",
+              "proposed": false,
+              "source": "visual.motion.reduced_motion",
+              "text": "static final frame"
+            }
+          ],
+          "dependency_hash": "9164e408462b169cc3c9f9ea62275bc5a2473fce7532884e7b019fb2c97dac9b",
+          "fields": [
+            {
+              "approved": false,
+              "path": "production.brandbook.applicability.p22",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": true,
+              "path": "visual.motion.emphasis",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": [
+                "logo reveal"
+              ]
+            },
+            {
+              "approved": true,
+              "path": "visual.motion.pace",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "unhurried"
+            },
+            {
+              "approved": true,
+              "path": "visual.motion.reduced_motion",
+              "reason": "",
+              "source_scope": "brand-010409bc",
+              "status": "VALUE",
+              "value": "static final frame"
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p22 · Motion (22 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Storyboard, transitions, continuity and the reduced-motion rule.\nExact copy (verbatim, in this order):\n  - [p22-c01] \"unhurried\"\n  - [p22-c02] \"logo reveal\"\n  - [p22-c03] \"static final frame\"\nProhibitions: no claim of a rendered video\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 22,
+          "package_hash": "c9b88be1ff7d829963d63e5d782a43858afd27e07a6a261b7a4dc6d09a3067f7",
+          "page_id": "p22",
+          "status": "READY",
+          "title": "Motion"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "optional": false,
+              "t": "note",
+              "text": "Files below are the artifacts of this build; formats and licences come from the approved genome."
+            },
+            {
+              "path": "production.licensing.fonts",
+              "t": "label",
+              "text": "Licensing fonts"
+            },
+            {
+              "path": "production.licensing.fonts",
+              "t": "gap",
+              "text": "Gap: production.licensing.fonts is unknown"
+            },
+            {
+              "path": "production.delivery.formats",
+              "t": "label",
+              "text": "Delivery formats"
+            },
+            {
+              "path": "production.delivery.formats",
+              "t": "gap",
+              "text": "Gap: production.delivery.formats is unknown"
+            },
+            {
+              "columns": [
+                "Item",
+                "Kind",
+                "Reference",
+                "Status"
+              ],
+              "rows": [
+                [
+                  "Master mark",
+                  "VECTOR",
+                  "1918a6c278448362",
+                  "deterministic composition of visual.logo.mark=ring_dot"
+                ],
+                [
+                  "Colour ink",
+                  "token",
+                  "#14161a",
+                  "approved"
+                ],
+                [
+                  "Colour paper",
+                  "token",
+                  "#f7f4ee",
+                  "approved"
+                ],
+                [
+                  "Colour accent",
+                  "token",
+                  "#c2410c",
+                  "approved"
+                ],
+                [
+                  "Colour accent_2",
+                  "token",
+                  "#93c5fd",
+                  "approved"
+                ],
+                [
+                  "Colour muted",
+                  "token",
+                  "#4b4540",
+                  "approved"
+                ]
+              ],
+              "t": "table"
+            },
+            {
+              "t": "handoff",
+              "text": "Page artifacts and their hashes are listed in the build record."
+            }
+          ],
+          "copy_blocks": [],
+          "dependency_hash": "8e06cc6f219e2d4685f22032b45fce8aa41a7b709cadf0d261e546836c0f1feb",
+          "fields": [
+            {
+              "approved": false,
+              "path": "production.delivery.formats",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            },
+            {
+              "approved": false,
+              "path": "production.licensing.fonts",
+              "reason": "",
+              "source_scope": "",
+              "status": "UNKNOWN",
+              "value": null
+            }
+          ],
+          "gaps": [],
+          "instructions": "PAGE p23 · Handoff (23 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Actual files, formats, licences, tokens and version references.\nExact copy (verbatim, in this order):\n  (none)\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 23,
+          "package_hash": "4287933186a2fd46ac508efaf5fad3d19e1c343d3b17c78a43cb206905617418",
+          "page_id": "p23",
+          "status": "READY",
+          "title": "Handoff"
+        },
+        {
+          "assets": [],
+          "blocks": [
+            {
+              "columns": [
+                "Page",
+                "Key",
+                "Severity",
+                "Next action"
+              ],
+              "rows": [
+                [
+                  "-",
+                  "-",
+                  "-",
+                  "No open gaps"
+                ]
+              ],
+              "t": "table"
+            },
+            {
+              "status": "NOT_RUN",
+              "t": "status",
+              "text": "Checks: NOT_RUN (nothing rendered in this mode)"
+            },
+            {
+              "copy_id": "p24-c01",
+              "proposed": false,
+              "role": "meta",
+              "t": "copy",
+              "text": "Genome gv-1d80c804dabf45dbb320b7b9b6987ffb"
+            },
+            {
+              "copy_id": "p24-c02",
+              "proposed": false,
+              "role": "meta",
+              "t": "copy",
+              "text": "Resolution fb84aa87d902da1b"
+            },
+            {
+              "optional": false,
+              "t": "note",
+              "text": "Approval and release are recorded on the build, not printed here: a printed page is not an approval."
+            }
+          ],
+          "copy_blocks": [
+            {
+              "copy_id": "p24-c01",
+              "proposed": false,
+              "source": "build.genome_ref",
+              "text": "Genome gv-1d80c804dabf45dbb320b7b9b6987ffb"
+            },
+            {
+              "copy_id": "p24-c02",
+              "proposed": false,
+              "source": "build.resolution_hash",
+              "text": "Resolution fb84aa87d902da1b"
+            }
+          ],
+          "dependency_hash": "82808f3ab7ea48ab3094cf9d9dee5e461cf0cc1716c5beac861f48511c564bfb",
+          "fields": [],
+          "gaps": [],
+          "instructions": "PAGE p24 · Release (24 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Actual checks, unresolved decisions, approval and version records.\nExact copy (verbatim, in this order):\n  - [p24-c01] \"Genome gv-1d80c804dabf45dbb320b7b9b6987ffb\"\n  - [p24-c02] \"Resolution fb84aa87d902da1b\"\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+          "order": 24,
+          "package_hash": "137840a8116c735b81871dd7147f6f1f4aa1ea81a586b2b4e07d7c0c80c022bb",
+          "page_id": "p24",
+          "status": "READY",
+          "title": "Release"
+        }
+      ],
+      "resolution_hash": "fb84aa87d902da1bcd6d29c0a5b83026e9daaad09ca4e98c50535d3bb464bed8",
+      "schema_version": "amc-vnexus-brandbook-package/v1",
+      "shared_rules_hash": "31d9843847f0b0648373cf521571971d1f4fd92116e9e0dbfc4c183a264c8af6",
+      "status": "DRAFT",
+      "template_id": "amc-brandbook/default",
+      "template_version": "1.0.0"
+    },
+    "prompts": {
+      "p01": "PAGE p01 · Cover (1 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Exact brand identity, document title, template version and approval status.\nExact copy (verbatim, in this order):\n  - [p01-c01] \"Halden & Fen (fictional)\"\n  - [p01-c02] \"Brand guidelines\"\n  - [p01-c03] \"Template amc-brandbook/default 1.0.0\"\n  - [p01-c04] \"Draft for review: not approved for release\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nProhibitions: no invented slogan; no invented date; no endorsement\nLayout: cover. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p02": "PAGE p02 · Contents and status (2 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Actual navigation from this manifest, scope, evidence and approval legend.\nExact copy (verbatim, in this order):\n  - [p02-c01] \"Scope: genome gv-1d80c804dabf45dbb320b7b9b6987ffb\"\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p03": "PAGE p03 · Premise (3 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Offering, audience, positioning, differentiation and values behind the design.\nExact copy (verbatim, in this order):\n  - [p03-c01] \"Small-batch stoneware (fictional brand)\"\n  - [p03-c02] \"people furnishing a first home (fictional persona)\"\n  - [p03-c03] \"Made slowly, used daily\"\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p04": "PAGE p04 · Voice (4 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Operational voice traits, channel tone, vocabulary and claims, with write/avoid samples.\nExact copy (verbatim, in this order):\n  - [p04-c01] \"plain\"\n  - [p04-c02] \"warm\"\n  - [p04-c03] \"plain\"\nProhibitions: no claim that is not in verbal.content_rules.claims\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p05": "PAGE p05 · References and evidence (5 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Per-source observations, inferences, unknowns, reuse and privacy limits.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: never reconstruct [PII]; source compositions stay evidence\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p06": "PAGE p06 · Identity overview (6 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Canonical identity, palette and type on one calibration page.\nExact copy (verbatim, in this order):\n  - [p06-c01] \"Halden & Fen (fictional)\"\n  - [p06-c02] \"Schibsted Grotesk\"\n  - [p06-c03] \"Inter\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p07": "PAGE p07 · Primary logo (7 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: The approved master, its exact text, contexts and placement.\nExact copy (verbatim, in this order):\n  - [p07-c01] \"Halden & Fen (fictional)\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p08": "PAGE p08 · Construction (8 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Real axes, boundaries and negative space of the master.\nExact copy (verbatim, in this order):\n  (none)\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p09": "PAGE p09 · Wordmark (9 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Spelling, case, baseline and spacing of the wordmark.\nExact copy (verbatim, in this order):\n  - [p09-c01] \"Halden & Fen (fictional)\"\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p10": "PAGE p10 · Lockups (10 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Applicable primary, horizontal, stacked, wordmark-only and symbol-only lockups.\nExact copy (verbatim, in this order):\n  - [p10-c01] \"Halden & Fen (fictional)\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p11": "PAGE p11 · Clear space (11 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Approved clear space with correct and crowded examples.\nExact copy (verbatim, in this order):\n  - [p11-c01] \"a quarter of the mark height\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p12": "PAGE p12 · Scale (12 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Approved minimum size and the mark at 16, 32, 64 and 128 px.\nExact copy (verbatim, in this order):\n  - [p12-c01] \"24px\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 4 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p13": "PAGE p13 · One colour and reverse (13 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Canonical silhouette in one colour and reversed, with pairings.\nExact copy (verbatim, in this order):\n  (none)\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 2 placement(s). Place it; do not redraw it.\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p14": "PAGE p14 · Misuse (14 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Labelled misuse specimens, isolated from the masters.\nExact copy (verbatim, in this order):\n  - [p14-c01] \"Incorrect: Do not stretch or squash\"\n  - [p14-c02] \"Incorrect: Do not rotate\"\n  - [p14-c03] \"Incorrect: Do not recolour outside the palette\"\n  - [p14-c04] \"Incorrect: Do not add effects\"\n  - [p14-c05] \"Incorrect: Do not place on busy backgrounds\"\n  - [p14-c06] \"Incorrect: Do not crowd or rearrange\"\nAssets: canonical master mark VECTOR sha256:1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d (deterministic composition of visual.logo.mark=ring_dot); 6 placement(s). Place it; do not redraw it.\nProhibitions: misuse specimens are never masters\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p15": "PAGE p15 · Colour (15 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Colour roles, approved values, allowed pairings and measured contrast.\nExact copy (verbatim, in this order):\n  (none)\nLayout: matrix. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p16": "PAGE p16 · Typography (16 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Type roles, specimens, hierarchy, licence and fallback status.\nExact copy (verbatim, in this order):\n  - [p16-c01] \"Schibsted Grotesk\"\n  - [p16-c02] \"Inter\"\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p17": "PAGE p17 · Layout (17 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Grids, margins, rhythm and responsive rules.\nExact copy (verbatim, in this order):\n  (none)\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p18": "PAGE p18 · Graphics (18 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Original primitives, icons, patterns and density.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: no copied compositions; no competing marks\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p19": "PAGE p19 · Imagery (19 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Subjects, framing, light, treatment, rights and privacy.\nExact copy (verbatim, in this order):\n  - [p19-c01] \"Natural light on matte surfaces\"\nProhibitions: appearance is not a manufacturing specification\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p20": "PAGE p20 · Editorial and print (20 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Relevant cover, spread, imprint and collateral rules.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: no fictional client, contact or testimonial\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p21": "PAGE p21 · Digital (21 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Header, avatar, social and interface crops and responsiveness.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: a static preview is not a working interface\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p22": "PAGE p22 · Motion (22 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Storyboard, transitions, continuity and the reduced-motion rule.\nExact copy (verbatim, in this order):\n  - [p22-c01] \"unhurried\"\n  - [p22-c02] \"logo reveal\"\n  - [p22-c03] \"static final frame\"\nProhibitions: no claim of a rendered video\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p23": "PAGE p23 · Handoff (23 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Actual files, formats, licences, tokens and version references.\nExact copy (verbatim, in this order):\n  (none)\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently.",
+      "p24": "PAGE p24 · Release (24 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PROMPTS_ONLY; genome gv-1d80c804dabf45dbb320b7b9b6987ffb\nObjective: Actual checks, unresolved decisions, approval and version records.\nExact copy (verbatim, in this order):\n  - [p24-c01] \"Genome gv-1d80c804dabf45dbb320b7b9b6987ffb\"\n  - [p24-c02] \"Resolution fb84aa87d902da1b\"\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.\nRules:\n  1. Use only the values and assets listed for this page; never invent names, slogans, dates, clients, contacts or claims.\n  2. Render exact copy verbatim: same characters, punctuation and case; do not translate, abbreviate or restyle it.\n  3. Place the canonical master by its hash; never redraw, regenerate, recolour or retype the logo.\n  4. Misuse specimens are labelled examples, never masters.\n  5. Meaning is never carried by colour alone; every status has a text label.\n  6. If content does not fit: remove decoration, then optional annotations, then continue on a new page. Never shrink text below the minimum size and never drop required content silently."
+    }
+  },
+  "current": {
+    "book": {
+      "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-book-html",
+      "sha256": "8027639ee2b4975b596884b42cdafcd6ed4238d93845a01ac4c1230ad014cc4c",
+      "version": 1
+    },
+    "brand_id": "brand-010409bc",
+    "build_hash": "91ca916c79ecb891a61a42ca6178f1a51b5e1cded191bc72041f92d8435cf81a",
+    "checks": {
+      "blocking": [],
+      "measured": true,
+      "summary": {
+        "FAILED": 0,
+        "INCONCLUSIVE": 0,
+        "NOT_RUN": 0,
+        "PASSED": 216
+      }
+    },
+    "compiler_version": "amc-brandbook-compiler/1.0.0",
+    "context_hash": "bbbf022d4d3889c6af01c35a65b0d9b082a2576ab2126a922ebf6ef44d9fbf91",
+    "freshness": {
+      "fresh": true,
+      "reasons": []
+    },
+    "gaps": [],
+    "genome_ref": "gv-1d80c804dabf45dbb320b7b9b6987ffb",
+    "locale": "en",
+    "manifest_hash": "6355b797e60a741201c41ad23463fdd361fe2832116a2429532de35f3961e67b",
+    "mark": {
+      "approved": true,
+      "kind": "VECTOR",
+      "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+      "source": "deterministic composition of visual.logo.mark=ring_dot"
+    },
+    "mode": "PREVIEW",
+    "package": {
+      "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-package",
+      "package_hash": "89c9eb4050c910c5f44ad6c2435551714a711ce3b11eb872b59e2c112723c99d",
+      "sha256": "e99c828dac0048d2945126bed449316bc1876fd063b66afd55029467582ca0f4"
+    },
+    "page_format": {
+      "height": 1123,
+      "name": "a4-portrait",
+      "provisional": true,
+      "width": 794
+    },
+    "pages": [
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p01",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "2969431a293ccdd3149d1064937c735f2a5536c0a1289ae32f15539183a70fef",
+        "gaps": [],
+        "order": 1,
+        "package_hash": "77ac01267e7c7cedc314bb6e44eff468771c10f56db76e5d19d944431e20dd6f",
+        "page_id": "p01",
+        "parts": [
+          "p01"
+        ],
+        "sections_sha256": "e5a463a8957fe01f0a063fcb7d8810f225b17b701bc439299dde08741b7b85e0",
+        "status": "READY",
+        "title": "Cover"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p02",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "e8e9ac211cf83863362343b16619f37ef120510f23646ce81d9bd6081fc42150",
+        "gaps": [],
+        "order": 2,
+        "package_hash": "f5b72d99f2f75ec669a1a27193c9c0d0fda3b4901e3eaf0715d8bd3d919a152d",
+        "page_id": "p02",
+        "parts": [
+          "p02"
+        ],
+        "sections_sha256": "757bb62acfcef17a4c469d19a24cb81a8bc1326e87e7ac32a53a0f8553738207",
+        "status": "READY",
+        "title": "Contents and status"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p03",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "4f265832943ece61842fb0f9a42433ef4489069daaa30ce7b01e0506a6249726",
+        "gaps": [],
+        "order": 3,
+        "package_hash": "1937d69e30dd545bf0921dea2a8e938481ee244642a07685314ea3053108bc97",
+        "page_id": "p03",
+        "parts": [
+          "p03"
+        ],
+        "sections_sha256": "d12ffaa219788fef715c2b4da911b3da5947130fbd1629f0e8f657d41db488fb",
+        "status": "READY",
+        "title": "Premise"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p04",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "c8f7f2077f8e021723dafb11b996092cfc59f462e61fcd342d38b4c5a17f2030",
+        "gaps": [],
+        "order": 4,
+        "package_hash": "ba0e6e53511d964d2e6e6ab42df3d05047a6f078b8e9d798231da61206b0159b",
+        "page_id": "p04",
+        "parts": [
+          "p04"
+        ],
+        "sections_sha256": "7b9417aa737082e9a84a582ae3b56efc99a0cd6125e40df4b1f18f40ab957ba5",
+        "status": "READY",
+        "title": "Voice"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p05",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "fa04800d6a5658e241a2a0ae04be6401448d1e7589e9a64dabaf54fd35a7db88",
+        "gaps": [],
+        "order": 5,
+        "package_hash": "f7dca0d320eed92ef11d2419cba84a970096f8791fb2214838e038177b501c6f",
+        "page_id": "p05",
+        "parts": [
+          "p05"
+        ],
+        "sections_sha256": "04f98799c289ac1eeae5c91cee92cd15c221a5f2930b8f53048f71d479d91ee0",
+        "status": "READY",
+        "title": "References and evidence"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p06",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "afc5814200d04bb4094226ec13354babdf7699a73c4084f6723cbe0f61762033",
+        "gaps": [],
+        "order": 6,
+        "package_hash": "6efde0de19848bdb4934b61c52c180650ccaef4eb7bf28b2468bff57a2c17f2c",
+        "page_id": "p06",
+        "parts": [
+          "p06"
+        ],
+        "sections_sha256": "ded3650daf2c5b0c29ec626fb2a7a1bc4cb468808edadb19381551eed76f259c",
+        "status": "READY",
+        "title": "Identity overview"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p07",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "ef6641f37f32f12575a3f88b09cc32a0a98f6a44925605a286d6e6339d701cf3",
+        "gaps": [],
+        "order": 7,
+        "package_hash": "e0987e6daab7571dfb1410104b7b152bf580fdf87ebe2467ab0d5c44cad2e476",
+        "page_id": "p07",
+        "parts": [
+          "p07"
+        ],
+        "sections_sha256": "18145b004f9c1d41a41a969dc245bee5d12a93dff62c0dea56e9c30b4a6fe9d0",
+        "status": "READY",
+        "title": "Primary logo"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p08",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "2b31d9fb67104d66ddf9af56cb23cd79f57ac01d7a78c1b81847a16383008a6b",
+        "gaps": [],
+        "order": 8,
+        "package_hash": "c06cfec09eb00e21fe108d6816a9605211c176f8cc9b377e0ca3256fda35dcfa",
+        "page_id": "p08",
+        "parts": [
+          "p08"
+        ],
+        "sections_sha256": "85777d445c5287f31a227dca5be011f23eea03c358323f31a8aba46505c284ee",
+        "status": "READY",
+        "title": "Construction"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p09",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "fd698720dd3aa0c61d02002a574385d89b7009c6ea1d83f26c29e2aebcd7a2c2",
+        "gaps": [],
+        "order": 9,
+        "package_hash": "ea6dc04f096148d371dc4cf3349419279b0f8497cc327b6d66120961dbb977a6",
+        "page_id": "p09",
+        "parts": [
+          "p09"
+        ],
+        "sections_sha256": "47e8ce3f5c9534427309ef2e542a794b402f396fd36dc78265fdccd86529db72",
+        "status": "READY",
+        "title": "Wordmark"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p10",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "a0bbd70c38d9a029a37ec51db6bfda307db35062d4f2974e7f4e5c596f0e2039",
+        "gaps": [],
+        "order": 10,
+        "package_hash": "49b9280d286345e78e5eba44687c16ed64c2986b83244d39b45295f73ba81983",
+        "page_id": "p10",
+        "parts": [
+          "p10"
+        ],
+        "sections_sha256": "474e92fd20008c2b89953f8993b960c623f4f7c00b8e224b7a5612f71562339c",
+        "status": "READY",
+        "title": "Lockups"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p11",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "8996592f6b5efd20d9f1a425cfa0fd7c592b2e10a204a3707d5d2f07ee29dde2",
+        "gaps": [],
+        "order": 11,
+        "package_hash": "e2afe4cb3b6c458c53892a96f9721c5d71df90f8ff7ce20c86b493a0cad3a528",
+        "page_id": "p11",
+        "parts": [
+          "p11"
+        ],
+        "sections_sha256": "5827edf04617335d722012df0e08b5eb77bb4984ff81e23d007ef33cf1ba4a70",
+        "status": "READY",
+        "title": "Clear space"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p12",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "d3c27382ece58964e45f68460e76a27eef2ff6a267196788d0badb8dfa23398c",
+        "gaps": [],
+        "order": 12,
+        "package_hash": "1448cab7abf3f0a04a4ca2d9855685d9d55c0e616c0ef3c7ae1d366c6eb24e24",
+        "page_id": "p12",
+        "parts": [
+          "p12"
+        ],
+        "sections_sha256": "a26cf46b4c00a5de7051624a4c7ddcd5a2ebcf398ea1bac1efb935ee2a8354ea",
+        "status": "READY",
+        "title": "Scale"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p13",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "7b0bd8f1b8a582557ce3fdf59cca147ff2e0559eb1d107c1c943e44a38c7f090",
+        "gaps": [],
+        "order": 13,
+        "package_hash": "d1c06aabc9b1da8e8ab24e369e11427fe3ff1398e766756aa7db70270b5cac22",
+        "page_id": "p13",
+        "parts": [
+          "p13"
+        ],
+        "sections_sha256": "2cfbfb19c25b9d5eab9c1bd6888335a2be6ea81b436ba90769246f2f98115118",
+        "status": "READY",
+        "title": "One colour and reverse"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p14",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "172c4ba0e22712a56292a20b8d997e86e53b69de8ac8655c9bab8694434b18c8",
+        "gaps": [],
+        "order": 14,
+        "package_hash": "4d968f49711cee469623069d2b8781be739660839ad8af598cbd72c483ff9ad4",
+        "page_id": "p14",
+        "parts": [
+          "p14"
+        ],
+        "sections_sha256": "7e7425756a491d707aa7ef933c0de3af851375643ea69bce90da5fddf121225c",
+        "status": "READY",
+        "title": "Misuse"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p15",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "d4839c9e5933bd0b94f1f8685a2db875a7adfb3ac5c5d18e405a303193e0b470",
+        "gaps": [],
+        "order": 15,
+        "package_hash": "697885ab68046cce53ae1bf82e860381f31973ca7bcc203254780c347837b37e",
+        "page_id": "p15",
+        "parts": [
+          "p15"
+        ],
+        "sections_sha256": "fca2688d995484ddabb92c53da4de5235fa104f42330cf0075a8d34a40b11d1d",
+        "status": "READY",
+        "title": "Colour"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p16",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "f9a4099cd166721650aaa8e85d6fe38c6b79aa4cc88e4577ac1b053b62eba974",
+        "gaps": [],
+        "order": 16,
+        "package_hash": "1d710b4fe441295e4142debdb5118797bef70722911a3ab7f11851645398b579",
+        "page_id": "p16",
+        "parts": [
+          "p16"
+        ],
+        "sections_sha256": "1387dee6824555b95718b13bff3839a3a6faa224e1df057ace6f421a0fae327f",
+        "status": "READY",
+        "title": "Typography"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p17",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "39faf55cd1bbbe4640e7b0e3c3685b0d254061d562388281d7946fd861d9ef72",
+        "gaps": [],
+        "order": 17,
+        "package_hash": "0c612129dae5dc8cb4ae8db98b8062c9b3c1a85566cc5a442042390db911db2a",
+        "page_id": "p17",
+        "parts": [
+          "p17"
+        ],
+        "sections_sha256": "99a6c32ecf8f27e01d8c9123c2832839f018cbe4153f3fb6b6deed9d85c9b88e",
+        "status": "NOT_APPLICABLE",
+        "title": "Layout"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p18",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "bf2a8d18238b3a7b70e8f9004416f92e8fc9433a41227a77f7ab2a049e7cccd7",
+        "gaps": [],
+        "order": 18,
+        "package_hash": "52c825b0b6efea1b48192b6f527531fe49b8aa365e1b47891a4ef241ffb4e161",
+        "page_id": "p18",
+        "parts": [
+          "p18"
+        ],
+        "sections_sha256": "7d5af31c1008a0c01a6618b84aae5b507f798844141d87a0c104ddfff0303faa",
+        "status": "NOT_APPLICABLE",
+        "title": "Graphics"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p19",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "b05cb960c8f91e0226ecf83a1c0fb36800c0a0a37cf3cb29b278794f690ab7ab",
+        "gaps": [],
+        "order": 19,
+        "package_hash": "bdad53571a778c57d1b33c75d07b37cd715e97d7ca76995a05f99233fda81029",
+        "page_id": "p19",
+        "parts": [
+          "p19"
+        ],
+        "sections_sha256": "149e427e1bc3c68159eef296082b8bd9b071f2c576698fa25c4a7630fbfdff7d",
+        "status": "READY",
+        "title": "Imagery"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p20",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "439bead7d1f555105f5b5c0f667dea354059ccd4e938f624718aa962dc0197ba",
+        "gaps": [],
+        "order": 20,
+        "package_hash": "81effb499c9ddcd1a33295a0f6557a56791191438a29135c6e0b572df677c1d0",
+        "page_id": "p20",
+        "parts": [
+          "p20"
+        ],
+        "sections_sha256": "1784f39cf9ad395d55ba811d52c6c5cbc0bdec16a762d873369994811a91e1e1",
+        "status": "NOT_APPLICABLE",
+        "title": "Editorial and print"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p21",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "e0775be1d68f0409c9822f398e5e54cd9f470ed1bc353385940065d2bcd6ca90",
+        "gaps": [],
+        "order": 21,
+        "package_hash": "d19cbb2617213647084f3addf407a187c59bc0ecd261403bca9fa41519ad6e07",
+        "page_id": "p21",
+        "parts": [
+          "p21"
+        ],
+        "sections_sha256": "8f57481c8887808b5e6e91cb009ac276662ba9dc3cc899a2fbc6f5b0c490ecca",
+        "status": "NOT_APPLICABLE",
+        "title": "Digital"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p22",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "4c4bf7268a0377f2d230f1fe5fbd043b3524e6e431bc754fbabde07f48a00dc5",
+        "gaps": [],
+        "order": 22,
+        "package_hash": "42d5f0b4ae703809be42fee68ddcfba1781f20e40a104a3993bedfd8a0a4a796",
+        "page_id": "p22",
+        "parts": [
+          "p22"
+        ],
+        "sections_sha256": "9fe275e5a4f62122ac24d7d9c4612b00621e5a4d8cb373b694434baa425a7025",
+        "status": "READY",
+        "title": "Motion"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p23",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "e1e71cf94a55797a06eae033ef5ce8fa6b96dafb3c613f30f6f1c7a78bbc5cae",
+        "gaps": [],
+        "order": 23,
+        "package_hash": "b1a5010aa5bd56a2b9475223b9bc64d7376e65d1608f6f68fb0ddccb168d499a",
+        "page_id": "p23",
+        "parts": [
+          "p23"
+        ],
+        "sections_sha256": "858d53aae288f80b7b61f574978ca5faca9ede9173d9ea3b8c2c17f009968db8",
+        "status": "READY",
+        "title": "Handoff"
+      },
+      {
+        "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-b128d0f02c797b6d-p24",
+        "checks": {
+          "FAILED": 0,
+          "INCONCLUSIVE": 0,
+          "NOT_RUN": 0,
+          "PASSED": 9
+        },
+        "dependency_hash": "75349a91eaa57a9b9866bd1fd9e6cfcdf032bbb7a19b337fe141cf99f73b5477",
+        "gaps": [],
+        "order": 24,
+        "package_hash": "6b0536b33a9703d74f11e79343d4c8e4a9486fa565ee3cbb93386cb8aace6b93",
+        "page_id": "p24",
+        "parts": [
+          "p24"
+        ],
+        "sections_sha256": "213888fc3cf3207409f2421c87905ef69d3f775a6534db634785740cd5fff504",
+        "status": "READY",
+        "title": "Release"
+      }
+    ],
+    "palette": {
+      "neutral": false
+    },
+    "pdf": null,
+    "project_id": "prj-vnx-5d4f685e",
+    "proposal_ref": null,
+    "renderer_version": "amc-brandbook-render/1.0.0",
+    "resolution_hash": "fb84aa87d902da1bcd6d29c0a5b83026e9daaad09ca4e98c50535d3bb464bed8",
+    "schema_version": "amc-vnexus-brandbook-build/v1",
+    "scope": "brand",
+    "scope_ref": "brand-010409bc",
+    "states": {
+      "prompt": "READY",
+      "released": "NOT_RELEASED",
+      "rendered": "PASSED",
+      "validated": "PASSED"
+    },
+    "status": "PREVIEW_ONLY",
+    "template_id": "amc-brandbook/default",
+    "template_version": "1.0.0",
+    "validator_version": "amc-brandbook-checks/1.0.0"
+  },
+  "gaps": {
+    "decisions": [],
+    "evidence_records": 1,
+    "genome_ref": "gv-1d80c804dabf45dbb320b7b9b6987ffb",
+    "mark": {
+      "approved": true,
+      "kind": "VECTOR",
+      "sha256": "1918a6c27844836262115ac0628dd08203275467c55ab7d5f8ed270ae4da164d",
+      "source": "deterministic composition of visual.logo.mark=ring_dot"
+    },
+    "mode": "PRODUCTION"
+  },
+  "intake": {
+    "intake": {
+      "evidence": [
+        {
+          "contradictions": [],
+          "evidence_class": "USER_REPORTED",
+          "inferences": [],
+          "kind": "other",
+          "locator": "studio visit notes (fictional)",
+          "observations": [
+            "matte glazes"
+          ],
+          "privacy": "contains_pii_redacted",
+          "reuse": "evidence_only",
+          "source_id": "studio-visit",
+          "unknowns": []
+        }
+      ],
+      "proposals": {},
+      "schema_version": "amc-vnexus-brandbook-intake/v1"
+    },
+    "sha256": "853c7eff64ab649fa3193b2c659a62424f353576b3639554146059eb5af277c1"
+  },
+  "intake_saved": {
+    "action": "created",
+    "artifact_id": "art-prj-vnx-5d4f685e-foundry-vbb-13448a1b63f2b7a0-intake",
+    "sha256": "853c7eff64ab649fa3193b2c659a62424f353576b3639554146059eb5af277c1",
+    "version": 1
+  },
+  "template": {
+    "manifest": {
+      "pages": [
+        {
+          "asset_refs": [
+            "mark",
+            "wordmark"
+          ],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [
+            "Brand guidelines"
+          ],
+          "gap_behavior": "LABEL",
+          "id": "p01",
+          "layout": "cover",
+          "objective": "Exact brand identity, document title, template version and approval status.",
+          "optional_paths": [
+            "visual.logo.mark",
+            "visual.logo.master_artifact",
+            "visual.logo.wordmark"
+          ],
+          "order": 1,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [
+            "no invented slogan",
+            "no invented date",
+            "no endorsement"
+          ],
+          "reads_all_pages": false,
+          "required_paths": [],
+          "title": "Cover"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [
+            "Contents"
+          ],
+          "gap_behavior": "LABEL",
+          "id": "p02",
+          "layout": "table",
+          "objective": "Actual navigation from this manifest, scope, evidence and approval legend.",
+          "optional_paths": [],
+          "order": 2,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": true,
+          "required_paths": [],
+          "title": "Contents and status"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "BLOCK",
+          "id": "p03",
+          "layout": "list",
+          "objective": "Offering, audience, positioning, differentiation and values behind the design.",
+          "optional_paths": [
+            "strategy.positioning.promise",
+            "strategy.audience.needs",
+            "strategy.differentiation.statement",
+            "strategy.values.list",
+            "strategy.competitive_territory.summary"
+          ],
+          "order": 3,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [
+            "strategy.positioning.statement",
+            "strategy.audience.primary"
+          ],
+          "title": "Premise"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "BLOCK",
+          "id": "p04",
+          "layout": "list",
+          "objective": "Operational voice traits, channel tone, vocabulary and claims, with write/avoid samples.",
+          "optional_paths": [
+            "verbal.voice.register",
+            "verbal.tone.channels",
+            "verbal.vocabulary.prefer",
+            "verbal.vocabulary.avoid",
+            "verbal.content_rules.claims",
+            "verbal.messaging.write",
+            "verbal.messaging.avoid"
+          ],
+          "order": 4,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [
+            "no claim that is not in verbal.content_rules.claims"
+          ],
+          "reads_all_pages": false,
+          "required_paths": [
+            "verbal.voice.tone"
+          ],
+          "title": "Voice"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": true,
+          "exact_copy": [],
+          "gap_behavior": "LABEL",
+          "id": "p05",
+          "layout": "table",
+          "objective": "Per-source observations, inferences, unknowns, reuse and privacy limits.",
+          "optional_paths": [],
+          "order": 5,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [
+            "never reconstruct [PII]",
+            "source compositions stay evidence"
+          ],
+          "reads_all_pages": false,
+          "required_paths": [],
+          "title": "References and evidence"
+        },
+        {
+          "asset_refs": [
+            "mark",
+            "wordmark"
+          ],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "LABEL",
+          "id": "p06",
+          "layout": "grid",
+          "objective": "Canonical identity, palette and type on one calibration page.",
+          "optional_paths": [
+            "visual.logo.mark",
+            "visual.logo.master_artifact",
+            "visual.logo.wordmark"
+          ],
+          "order": 6,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [],
+          "title": "Identity overview"
+        },
+        {
+          "asset_refs": [
+            "mark"
+          ],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "BLOCK",
+          "id": "p07",
+          "layout": "specimen",
+          "objective": "The approved master, its exact text, contexts and placement.",
+          "optional_paths": [
+            "visual.logo.master_artifact",
+            "visual.logo.wordmark",
+            "visual.logo.placement"
+          ],
+          "order": 7,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [
+            "visual.logo.mark"
+          ],
+          "title": "Primary logo"
+        },
+        {
+          "asset_refs": [
+            "mark"
+          ],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "BLOCK",
+          "id": "p08",
+          "layout": "specimen",
+          "objective": "Real axes, boundaries and negative space of the master.",
+          "optional_paths": [
+            "visual.logo.master_artifact",
+            "visual.logo.construction"
+          ],
+          "order": 8,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [
+            "visual.logo.mark"
+          ],
+          "title": "Construction"
+        },
+        {
+          "asset_refs": [
+            "wordmark"
+          ],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "LABEL",
+          "id": "p09",
+          "layout": "specimen",
+          "objective": "Spelling, case, baseline and spacing of the wordmark.",
+          "optional_paths": [
+            "visual.logo.wordmark",
+            "visual.logo.wordmark_case",
+            "visual.logo.custom_lettering"
+          ],
+          "order": 9,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [],
+          "title": "Wordmark"
+        },
+        {
+          "asset_refs": [
+            "mark",
+            "wordmark",
+            "lockup"
+          ],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "BLOCK",
+          "id": "p10",
+          "layout": "grid",
+          "objective": "Applicable primary, horizontal, stacked, wordmark-only and symbol-only lockups.",
+          "optional_paths": [
+            "visual.logo.master_artifact",
+            "visual.logo.wordmark",
+            "visual.logo.lockups"
+          ],
+          "order": 10,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [
+            "visual.logo.mark"
+          ],
+          "title": "Lockups"
+        },
+        {
+          "asset_refs": [
+            "mark"
+          ],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "LABEL",
+          "id": "p11",
+          "layout": "specimen",
+          "objective": "Approved clear space with correct and crowded examples.",
+          "optional_paths": [
+            "visual.logo.master_artifact"
+          ],
+          "order": 11,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [
+            "visual.logo.mark",
+            "visual.logo.clear_space"
+          ],
+          "title": "Clear space"
+        },
+        {
+          "asset_refs": [
+            "mark"
+          ],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "LABEL",
+          "id": "p12",
+          "layout": "specimen",
+          "objective": "Approved minimum size and the mark at 16, 32, 64 and 128 px.",
+          "optional_paths": [
+            "visual.logo.master_artifact",
+            "visual.logo.small_size_variant"
+          ],
+          "order": 12,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [
+            "visual.logo.mark",
+            "visual.logo.min_size"
+          ],
+          "title": "Scale"
+        },
+        {
+          "asset_refs": [
+            "mark"
+          ],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "BLOCK",
+          "id": "p13",
+          "layout": "grid",
+          "objective": "Canonical silhouette in one colour and reversed, with pairings.",
+          "optional_paths": [
+            "visual.logo.master_artifact"
+          ],
+          "order": 13,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [
+            "visual.logo.mark"
+          ],
+          "title": "One colour and reverse"
+        },
+        {
+          "asset_refs": [
+            "mark"
+          ],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "BLOCK",
+          "id": "p14",
+          "layout": "grid",
+          "objective": "Labelled misuse specimens, isolated from the masters.",
+          "optional_paths": [
+            "visual.logo.master_artifact"
+          ],
+          "order": 14,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [
+            "misuse specimens are never masters"
+          ],
+          "reads_all_pages": false,
+          "required_paths": [
+            "visual.logo.mark"
+          ],
+          "title": "Misuse"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "BLOCK",
+          "id": "p15",
+          "layout": "matrix",
+          "objective": "Colour roles, approved values, allowed pairings and measured contrast.",
+          "optional_paths": [
+            "visual.color.names",
+            "visual.color.usage"
+          ],
+          "order": 15,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [
+            "visual.color.ink",
+            "visual.color.paper"
+          ],
+          "title": "Colour"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "BLOCK",
+          "id": "p16",
+          "layout": "specimen",
+          "objective": "Type roles, specimens, hierarchy, licence and fallback status.",
+          "optional_paths": [
+            "visual.typography.license",
+            "visual.typography.fallback",
+            "visual.typography.languages",
+            "visual.typography.scale"
+          ],
+          "order": 16,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [
+            "visual.typography.display"
+          ],
+          "title": "Typography"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "DECIDE",
+          "id": "p17",
+          "layout": "list",
+          "objective": "Grids, margins, rhythm and responsive rules.",
+          "optional_paths": [
+            "visual.grid.columns",
+            "visual.grid.margin",
+            "visual.grid.rhythm",
+            "visual.grid.responsive"
+          ],
+          "order": 17,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": false,
+          "required_paths": [],
+          "title": "Layout"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "DECIDE",
+          "id": "p18",
+          "layout": "list",
+          "objective": "Original primitives, icons, patterns and density.",
+          "optional_paths": [
+            "visual.shape_grammar.summary",
+            "visual.shape_grammar.density",
+            "visual.shape_grammar.icons"
+          ],
+          "order": 18,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [
+            "no copied compositions",
+            "no competing marks"
+          ],
+          "reads_all_pages": false,
+          "required_paths": [],
+          "title": "Graphics"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "DECIDE",
+          "id": "p19",
+          "layout": "list",
+          "objective": "Subjects, framing, light, treatment, rights and privacy.",
+          "optional_paths": [
+            "visual.imagery.style",
+            "visual.imagery.subjects",
+            "visual.imagery.rights",
+            "visual.imagery.treatment"
+          ],
+          "order": 19,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [
+            "appearance is not a manufacturing specification"
+          ],
+          "reads_all_pages": false,
+          "required_paths": [],
+          "title": "Imagery"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "DECIDE",
+          "id": "p20",
+          "layout": "list",
+          "objective": "Relevant cover, spread, imprint and collateral rules.",
+          "optional_paths": [
+            "production.output.print",
+            "production.media.print_formats"
+          ],
+          "order": 20,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [
+            "no fictional client, contact or testimonial"
+          ],
+          "reads_all_pages": false,
+          "required_paths": [],
+          "title": "Editorial and print"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "DECIDE",
+          "id": "p21",
+          "layout": "list",
+          "objective": "Header, avatar, social and interface crops and responsiveness.",
+          "optional_paths": [
+            "production.platform.channels",
+            "production.platform.avatar",
+            "experience.responsive.rules"
+          ],
+          "order": 21,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [
+            "a static preview is not a working interface"
+          ],
+          "reads_all_pages": false,
+          "required_paths": [],
+          "title": "Digital"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "DECIDE",
+          "id": "p22",
+          "layout": "list",
+          "objective": "Storyboard, transitions, continuity and the reduced-motion rule.",
+          "optional_paths": [
+            "visual.motion.pace",
+            "visual.motion.emphasis",
+            "visual.motion.reduced_motion"
+          ],
+          "order": 22,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [
+            "no claim of a rendered video"
+          ],
+          "reads_all_pages": false,
+          "required_paths": [],
+          "title": "Motion"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "LABEL",
+          "id": "p23",
+          "layout": "table",
+          "objective": "Actual files, formats, licences, tokens and version references.",
+          "optional_paths": [
+            "production.licensing.fonts",
+            "production.delivery.formats"
+          ],
+          "order": 23,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": true,
+          "required_paths": [],
+          "title": "Handoff"
+        },
+        {
+          "asset_refs": [],
+          "checks": [
+            "no_overflow",
+            "exact_copy",
+            "no_unresolved_tokens"
+          ],
+          "evidence_refs": false,
+          "exact_copy": [],
+          "gap_behavior": "LABEL",
+          "id": "p24",
+          "layout": "table",
+          "objective": "Actual checks, unresolved decisions, approval and version records.",
+          "optional_paths": [],
+          "order": 24,
+          "output_modes": [
+            "PROMPTS_ONLY",
+            "PREVIEW",
+            "PRODUCTION"
+          ],
+          "prohibitions": [],
+          "reads_all_pages": true,
+          "required_paths": [],
+          "title": "Release"
+        }
+      ],
+      "template_id": "amc-brandbook/default",
+      "template_version": "1.0.0"
+    },
+    "manifest_hash": "6355b797e60a741201c41ad23463fdd361fe2832116a2429532de35f3961e67b",
+    "modes": [
+      "SYSTEM_SPEC_ONLY",
+      "PROMPTS_ONLY",
+      "PREVIEW",
+      "PRODUCTION"
+    ]
+  }
+}

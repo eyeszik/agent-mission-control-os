@@ -1,0 +1,238 @@
+{
+  "id": "pg.attention.hooks.v1",
+  "schema_version": "1.0.0",
+  "pack_version": "1.0.0",
+  "domain": "ADVERTISING",
+  "guidance_class": "METHODOLOGY",
+  "authority_class": "EVIDENCE_BOUND_ADVISORY",
+  "description": "Evidence-bound attention and hook methodology for advertising, social, short-form video openings, titles, thumbnails, OOH and email subject lines. Principles are generalized operational guidance; performance language is gated on measured evidence. It activates only for attention surfaces and never rewrites general brand copy, BrandCore, claims status, or approvals.",
+  "activation": {
+    "asset_families": [],
+    "asset_types": [
+      "social post",
+      "social ad",
+      "short form video",
+      "video ad",
+      "reel",
+      "thumbnail",
+      "display ad",
+      "ad",
+      "ooh",
+      "billboard",
+      "email subject line",
+      "campaign concept",
+      "headline"
+    ],
+    "channels": [
+      "social",
+      "advertising",
+      "ooh",
+      "youtube",
+      "tiktok",
+      "instagram"
+    ],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": [
+      "hook",
+      "hooks",
+      "attention",
+      "thumbnail",
+      "scroll",
+      "opening",
+      "retention",
+      "ctr",
+      "variants"
+    ]
+  },
+  "excludes": {
+    "asset_families": [],
+    "asset_types": [
+      "brand guidelines",
+      "ux microcopy",
+      "error message",
+      "legal notice",
+      "documentation",
+      "privacy policy"
+    ],
+    "channels": [],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": []
+  },
+  "dependencies": [],
+  "conflicts_with": [],
+  "context_budget": {
+    "max_sections": 5,
+    "max_chars": 12000
+  },
+  "sections": [
+    {
+      "id": "hooks.attention_design",
+      "purpose": "Design attention as entry into a real message, not as the message itself.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Anchor the hook in a real audience need, problem, desire or curiosity the product or story actually answers.",
+        "Compress the initial idea so it can be understood almost instantly.",
+        "Make the hook distinctive without disconnecting it from the underlying brand, story or value -- no bait-and-switch.",
+        "Treat the hook as the entry point; the body, proof and CTA still have to deliver what the hook promised.",
+        "Distinguish a hook from a tagline, USP, mission or purpose statement; any of those may serve as a hook only when it actually performs the attention function."
+      ],
+      "evaluation_criteria": [
+        "the hook's promise is fulfilled by the content that follows",
+        "the hook is tied to a real audience need"
+      ],
+      "anti_patterns": [
+        "clickbait whose promise the content does not keep",
+        "a hook that could belong to any brand"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "strategy",
+        "verbal"
+      ]
+    },
+    {
+      "id": "hooks.variation_and_testing",
+      "purpose": "Generate many strategically different hook candidates and prefer testing to certainty.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "variant",
+          "variants",
+          "test",
+          "series",
+          "campaign",
+          "a/b",
+          "iterations"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Generate many candidates across different hook territories (tension, curiosity, contradiction, outcome, identity, proof) before shortlisting finalists.",
+        "Study successful and weak patterns as research inputs, never as templates to copy.",
+        "Compare candidates against the real alternatives the audience sees, not in isolation.",
+        "Treat a candidate as untested until it has been measured; a creative score is not observed performance.",
+        "Refresh hooks as a format or pattern saturates."
+      ],
+      "evaluation_criteria": [],
+      "anti_patterns": [
+        "declaring a hook 'winning' before it is measured",
+        "copying a competitor's hook verbatim"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "strategy",
+        "quality"
+      ]
+    },
+    {
+      "id": "hooks.short_form_opening",
+      "purpose": "Make the opening seconds of short-form video a clear promise.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "video",
+          "reel",
+          "short",
+          "tiktok",
+          "opening",
+          "intro",
+          "youtube"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Design the first seconds as an explicit promise of what the viewer will receive.",
+        "Balance visual complexity against on-screen text complexity so the viewer is never overloaded.",
+        "Pace cuts and reveals so the viewer can follow without cognitive overload.",
+        "Treat the title, thumbnail, opening visual, caption and format as possible hook mechanisms, not only the first spoken line."
+      ],
+      "evaluation_criteria": [
+        "the opening states or shows a concrete promise",
+        "text and visual load are balanced"
+      ],
+      "anti_patterns": [],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "motion",
+        "camera",
+        "verbal"
+      ]
+    },
+    {
+      "id": "hooks.titles_thumbnails_subjects",
+      "purpose": "Treat titles, thumbnails and subject lines as hook surfaces with honesty constraints.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "thumbnail",
+          "title",
+          "subject line",
+          "headline",
+          "preview"
+        ],
+        "all": []
+      },
+      "directives": [
+        "A title, thumbnail or subject line must preview real content; never promise what the asset does not contain.",
+        "Keep thumbnail text minimal and legible at small size; let one visual idea carry the frame.",
+        "Write subject lines that state a specific benefit or question rather than generic urgency."
+      ],
+      "evaluation_criteria": [],
+      "anti_patterns": [
+        "misleading thumbnails",
+        "fake urgency in subject lines"
+      ],
+      "evidence_requirements": [],
+      "directive_targets": [
+        "verbal",
+        "visual",
+        "composition"
+      ]
+    },
+    {
+      "id": "hooks.performance_evidence",
+      "purpose": "Only measured evidence can call a hook effective.",
+      "directive_class": "EVIDENCE_BOUND_ADVISORY",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Use retention, views, shares, click-through or conversion as performance evidence when available, always with the metric and measurement window stated.",
+        "Treat comments as qualitative evidence; they do not automatically outrank measured behaviour.",
+        "Record hook status as candidate, approved for test, measured, winner by metric, saturated or retired -- and only advance status when the supporting evidence exists."
+      ],
+      "evaluation_criteria": [],
+      "anti_patterns": [
+        "calling an untested hook a winner",
+        "reporting performance without a measurement window"
+      ],
+      "evidence_requirements": [
+        "any performance conclusion requires the metric, value and measurement window",
+        "'winner' status requires a named comparison metric and measured variants"
+      ],
+      "directive_targets": [
+        "governance",
+        "quality"
+      ]
+    }
+  ],
+  "provenance": {
+    "source": "Hook Point attention methodology as summarized in the project owner's integration directive (principles 1-18); the book text was not supplied in the integration session and these principles were not independently verified against it",
+    "version": "1.0.0",
+    "author": "project owner",
+    "created_at": "2026-09-28T00:00:00Z",
+    "updated_at": "2026-09-28T00:00:00Z",
+    "evidence_refs": [
+      "docs/imported-specs/universal-brand-content-visual-prompt-os-v10.md"
+    ],
+    "license_or_ip_status": "summary of principles only; no book text reproduced"
+  },
+  "content_hash": ""
+}

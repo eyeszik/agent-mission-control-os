@@ -1,0 +1,626 @@
+{
+  "id": "pg.studio_identity.v4",
+  "schema_version": "1.0.0",
+  "pack_version": "4.0.0",
+  "domain": "BRANDING",
+  "guidance_class": "METHODOLOGY",
+  "authority_class": "ADVISORY",
+  "description": "Contextual brand-and-design compiler guidance for transforming a company description into a coherent identity system, prioritized asset plan, implementation-aware specifications, and complete downstream prompts without overriding canonical runtime authority.",
+  "activation": {
+    "asset_families": [],
+    "asset_types": [
+      "brand identity system",
+      "studio identity system",
+      "brand guidelines",
+      "design system",
+      "product ui system",
+      "marketing site system",
+      "campaign system",
+      "brand film system",
+      "cross platform identity",
+      "application design system"
+    ],
+    "channels": [],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": [
+      "brand system",
+      "identity system",
+      "design system",
+      "company description",
+      "product ui",
+      "cross platform",
+      "campaign system",
+      "brand film",
+      "implementation plan",
+      "asset prompt system"
+    ]
+  },
+  "excludes": {
+    "asset_families": [],
+    "asset_types": [],
+    "channels": [],
+    "brand_domains": [],
+    "capabilities": [],
+    "task_tags": []
+  },
+  "dependencies": [
+    "pg.branding.core"
+  ],
+  "conflicts_with": [],
+  "context_budget": {
+    "max_sections": 12,
+    "max_chars": 32000
+  },
+  "sections": [
+    {
+      "id": "studio.project_contract",
+      "purpose": "Compile a bounded project contract before creative expansion.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Derive objective, business category, audience, user job, market, channels, platforms, locales, scope, constraints, existing assets, protected decisions, deliverables, and acceptance criteria.",
+        "Record explicit non-goals and avoid expanding a focused design task into unrelated enterprise architecture.",
+        "Preserve exact required spelling, punctuation, capitalization, diacritics, and script.",
+        "Separate company facts from proposed positioning, audiences, values, taglines, and visual choices.",
+        "Proceed with labeled reversible proposals when missing information does not materially change a binding or irreversible decision."
+      ],
+      "evaluation_criteria": [
+        "project scope is explicit",
+        "protected decisions are preserved",
+        "unknown facts remain unresolved rather than invented"
+      ],
+      "anti_patterns": [
+        "silently promoting proposals into company facts",
+        "expanding scope without a project need"
+      ],
+      "evidence_requirements": [
+        "claims attributed to source material are used only after the relevant source has been inspected"
+      ],
+      "output_targets": [
+        "project contract",
+        "completed brand brief"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "project contract",
+        "completed brand brief"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "strategy",
+        "governance"
+      ]
+    },
+    {
+      "id": "studio.evidence_authority",
+      "purpose": "Preserve statement provenance, rule provenance, freshness, and one explicit authority order across creative and implementation decisions.",
+      "directive_class": "EVIDENCE_BOUND_ADVISORY",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Classify material statements as FACT, INFERENCE, PROPOSAL, DECISION, ACTION, or UNRESOLVED and preserve provenance such as USER_PROVIDED, SOURCE_VERIFIED, OBSERVED, INFERRED, PROPOSED, or UNKNOWN.",
+        "Support material claims about results, customers, certifications, awards, history, sustainability, leadership, standards, APIs, packages, and licensing with relevant evidence before treating them as established facts.",
+        "Evaluate evidence freshness according to volatility, implementation version, and decision consequence; distinguish historical accuracy from present applicability.",
+        "Keep numerical confidence absent unless a defined calibrated method supports it.",
+        "Classify material rules as NORMATIVE, PROJECT_STANDARD, REFERENCE_PATTERN, HEURISTIC, TREND_SIGNAL, or EXPERIMENT and record provenance for adopted consequential rules.",
+        "Apply one authority order: verified obligations; explicit user objectives and protected requirements; approved project assets and decisions; verified project evidence and user needs; project design-system contracts; verified external reference patterns; heuristics; trend signals; aesthetic preferences.",
+        "Investigate conflicting mandatory obligations and preserve unresolved constraints instead of silently averaging or overriding them."
+      ],
+      "evaluation_criteria": [
+        "material statements retain provenance",
+        "freshness-sensitive claims are visibly scoped",
+        "adopted rules have an identifiable authority class",
+        "conflict resolution follows one precedence order"
+      ],
+      "anti_patterns": [
+        "using trend popularity as authority",
+        "treating a generated artifact as approved project truth",
+        "reporting arbitrary confidence percentages as evidence"
+      ],
+      "evidence_requirements": [
+        "source-dependent claims must link to inspected relevant material",
+        "changing technical or legal requirements require current verification when material"
+      ],
+      "output_targets": [
+        "evidence record",
+        "rule provenance",
+        "conflict record"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "evidence record",
+        "rule provenance ledger",
+        "conflict record"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "governance",
+        "quality",
+        "strategy"
+      ]
+    },
+    {
+      "id": "studio.identity_system",
+      "purpose": "Translate strategy into a context-specific identity system.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Prioritize contextual fitness over universal styles and derive aesthetic decisions from brand meaning, audience, and application context.",
+        "Define one coherent creative direction by default with a thesis, observable meaning-to-form decisions, and a brand-specific signature behavior.",
+        "Specify useful logo lockups, reduction behavior, typography roles, color roles, layout hierarchy, imagery rules, motion purpose, and voice behavior only to the depth required by the deliverable.",
+        "Treat spacing scales, typography limits, motion timings, and aesthetic conventions as contextual heuristics unless adopted into a higher-authority project contract.",
+        "Keep experimental campaign devices separate from durable core identity."
+      ],
+      "evaluation_criteria": [
+        "distinctive behavior survives removal of fashionable effects",
+        "visual decisions trace to company, audience, and applications",
+        "identity rules are implementable at the requested scale"
+      ],
+      "anti_patterns": [
+        "universalizing an 8-point grid or any single aesthetic",
+        "equating visual distinctiveness with legal clearance",
+        "using decoration, motion, or 3D without communicative purpose"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "identity system",
+        "creative direction"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "identity system",
+        "creative direction"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "visual",
+        "composition",
+        "typography",
+        "motion"
+      ]
+    },
+    {
+      "id": "studio.trend_intelligence",
+      "purpose": "Use current design trends as scoped, reversible evidence rather than brand authority.",
+      "directive_class": "EVIDENCE_BOUND_ADVISORY",
+      "activate_when": {
+        "any": [
+          "trend",
+          "trends",
+          "current",
+          "emerging",
+          "fashionable",
+          "contemporary"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Scope every trend observation to geography, industry, audience, channel, and observation window.",
+        "Classify lifecycle as weak signal, emerging, accelerating, mainstream, saturated, declining, reviving, seasonal, durable pattern, or unknown.",
+        "Evaluate user benefit, novelty loss, accessibility, performance, cultural fit, saturation, implementation cost, reversibility, and brand differentiation.",
+        "Keep trend adoption optional and state what counterevidence would change the decision.",
+        "Separate experimental campaign trends from stable identity and component contracts."
+      ],
+      "evaluation_criteria": [
+        "trend evidence is fresh enough for the decision",
+        "adoption decision is reversible where uncertainty is material"
+      ],
+      "anti_patterns": [
+        "treating popularity as strategic fit",
+        "promoting a trend directly into BrandCore"
+      ],
+      "evidence_requirements": [
+        "material trend claims require current source references and an observation window"
+      ],
+      "output_targets": [
+        "trend record",
+        "adopt-pilot-watch-reject decision"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "trend record",
+        "adopt-pilot-watch-reject decision"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "trend",
+        "governance"
+      ]
+    },
+    {
+      "id": "studio.token_system",
+      "purpose": "Compile reusable cross-platform design tokens only when the scope requires a governed system.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "design system",
+          "token",
+          "tokens",
+          "component library",
+          "ui system",
+          "web app",
+          "application"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Use primitive, semantic, and component token tiers and bind implementation through semantic meaning rather than raw visual literals.",
+        "Define only required modes such as light, dark, high-contrast, brand, or density modes.",
+        "Validate alias cycles, unresolved references, type mismatches, ambiguous semantics, mode gaps, missing platform mappings, undocumented literal overrides, and semantic drift.",
+        "Preserve semantic intent across web, iOS, Android, desktop, motion, print, and 3D while documenting legitimate platform differences.",
+        "Treat 8/4-unit spacing as a starting heuristic only; prefer content, typography, platform, and validated density needs."
+      ],
+      "evaluation_criteria": [
+        "semantic tokens are platform-independent in meaning",
+        "platform adapters document intentional differences"
+      ],
+      "anti_patterns": [
+        "hard-coding one platform token representation as universal",
+        "claiming specification compatibility without verifying the target version"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "token architecture",
+        "platform mapping"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "token architecture",
+        "platform mapping"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "tokens",
+        "engineering",
+        "accessibility"
+      ]
+    },
+    {
+      "id": "studio.product_ui_accessibility",
+      "purpose": "Apply interaction, component, and accessibility guidance to interfaces and journeys.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "ui",
+          "ux",
+          "interface",
+          "product",
+          "website",
+          "web app",
+          "app",
+          "accessibility"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Define component purpose, anatomy, variants, applicable states, semantic tokens, content rules, responsive behavior, accessibility, keyboard behavior, events, platform adapters, and migration concerns.",
+        "Include applicable loading, empty, error, success, offline, permission, degraded, partial, and destructive-confirmation states rather than forcing every state onto every component.",
+        "Use verified governing accessibility requirements and propose WCAG 2.2 AA for web only when no stronger applicable target is supplied.",
+        "Test actual content expansion, script shaping, zoom, reflow, focus order, keyboard operation, non-color meaning, forced colors, screen-reader behavior, reduced motion, localization, RTL, and alternative input where applicable.",
+        "Describe accessibility conformance evidence separately from general usability evidence."
+      ],
+      "evaluation_criteria": [
+        "critical user paths remain operable without pointer-only input",
+        "reduced-motion alternatives preserve information and causality"
+      ],
+      "anti_patterns": [
+        "claiming conformance from specification completeness alone",
+        "waiving accessibility for aesthetic preference"
+      ],
+      "evidence_requirements": [
+        "release-level accessibility claims require executed checks on the actual artifact"
+      ],
+      "output_targets": [
+        "component contract",
+        "accessibility test matrix"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "component contract",
+        "accessibility test matrix"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "interaction",
+        "accessibility",
+        "quality"
+      ]
+    },
+    {
+      "id": "studio.ai_experience",
+      "purpose": "Model AI product behavior according to consequence and reversibility.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "ai",
+          "agent",
+          "assistant",
+          "copilot",
+          "delegated",
+          "automation"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Activate AI experience controls only when the designed product contains AI functionality, not merely because AI creates design assets.",
+        "Select disclosure, provenance, editing, retry, accept-reject, cancel, undo, action history, approval, and recovery controls according to consequence and reversibility.",
+        "For delegated actions expose scope, progress, cancellation, action records, and recovery; for consequential actions provide material preview, authorization, appropriate approval, human override, and recovery or compensation.",
+        "Use numeric confidence only when a valid measurement method supports it.",
+        "Verify cancellation and recovery behavior before representing those controls as functional."
+      ],
+      "evaluation_criteria": [
+        "trust controls match consequence level",
+        "delegated state transitions are understandable"
+      ],
+      "anti_patterns": [
+        "displaying unsupported confidence percentages",
+        "presenting decorative cancel or rollback controls as operational"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "AI experience contract",
+        "delegated-action state model"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "AI experience contract",
+        "delegated-action state model"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "interaction",
+        "governance",
+        "accessibility"
+      ]
+    },
+    {
+      "id": "studio.asset_catalog",
+      "purpose": "Choose the smallest sufficient asset family and preserve dependency order.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Honor explicitly requested assets; otherwise prioritize the smallest set that establishes identity masters before dependent visuals.",
+        "Record each asset's purpose, priority, channel, format, dimensions or ratio, required copy, dependencies, creation method, and acceptance checks.",
+        "Name missing reference dependencies explicitly and do not count partially specified prompts as delivered.",
+        "Separate core identity masters from campaign, product, environment, imagery, motion, and verbal applications."
+      ],
+      "evaluation_criteria": [
+        "dependent assets reference the appropriate identity master",
+        "asset selection is proportional to requested scope"
+      ],
+      "anti_patterns": [
+        "generating a fixed catalog regardless of context",
+        "counting prompt titles or placeholders as complete prompts"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "prioritized asset plan"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "prioritized asset plan"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "strategy",
+        "production"
+      ]
+    },
+    {
+      "id": "studio.prompt_compiler",
+      "purpose": "Compile complete standalone downstream prompts from canonical project state.",
+      "directive_class": "QUALITY_CRITERION",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Write complete company-specific prompts that can run independently with their declared references.",
+        "Repeat essential brand decisions inside each prompt while keeping governance records outside visual render instructions unless operationally necessary.",
+        "Specify company, audience, purpose, exact visible copy or text-free instruction, composition, hierarchy, typography, palette, imagery, lighting, materials, dimensions or ratio, reference preservation, medium-specific constraints, acceptance criteria, and handoff expectations as applicable.",
+        "Adapt prompts by modality: image prompts describe visible composition; UI prompts include states, responsiveness and token bindings; video prompts include duration, shots, camera, continuity, motion, audio and captions; copy prompts include voice, evidence boundaries and action; print and 3D prompts include production dependencies.",
+        "Name required references and readiness state explicitly."
+      ],
+      "evaluation_criteria": [
+        "prompt is self-contained enough for the declared downstream executor",
+        "canonical constraints are distinguishable from advisory methodology"
+      ],
+      "anti_patterns": [
+        "provider-specific syntax without verified capability evidence",
+        "embedding internal governance narration into render prompts when it does not affect execution"
+      ],
+      "evidence_requirements": [
+        "provider-specific features require current capability evidence"
+      ],
+      "output_targets": [
+        "generic master prompt",
+        "verified provider adaptation"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "generic master prompt",
+        "verified provider adaptation"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "production",
+        "quality",
+        "governance"
+      ]
+    },
+    {
+      "id": "studio.engineering_operations",
+      "purpose": "Make implementation guidance production-aware without converting design methodology into runtime authority.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "implement",
+          "implementation",
+          "code",
+          "development",
+          "react",
+          "next.js",
+          "python",
+          "api",
+          "integration"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Verify actual tools, packages, versions, and project conventions before prescribing implementation.",
+        "Use semantic HTML or native equivalents, appropriate accessibility patterns, governed token bindings, and required responsive, locale, direction, and motion settings.",
+        "Set performance budgets for actual platforms and important user paths, then inspect script, media, font, rendering, network, battery, responsiveness, and layout stability as applicable.",
+        "Trace meaningful tests to acceptance criteria and distinguish editable source, preview, implementation, and production exports.",
+        "Treat telemetry as authorized measurement, distinguish usage from quality and correlation from causation, and minimize collected data."
+      ],
+      "evaluation_criteria": [
+        "implementation claims are backed by executed checks",
+        "platform constraints are verified rather than assumed"
+      ],
+      "anti_patterns": [
+        "claiming tool or package support without inspection",
+        "treating a design specification as proof of runtime behavior"
+      ],
+      "evidence_requirements": [
+        "changing package, API, and platform claims require current verification"
+      ],
+      "output_targets": [
+        "implementation plan",
+        "verification plan"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "implementation plan",
+        "verification plan"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "engineering",
+        "governance",
+        "quality"
+      ]
+    },
+    {
+      "id": "studio.versioning_handoff",
+      "purpose": "Preserve approved state and invalidate dependent outputs when upstream decisions change.",
+      "directive_class": "ADVISORY_METHOD",
+      "activate_when": {
+        "any": [
+          "version",
+          "migration",
+          "handoff",
+          "shared system",
+          "component",
+          "token",
+          "deprecated"
+        ],
+        "all": []
+      },
+      "directives": [
+        "Version material changes and preserve the last approved state.",
+        "Record changed decisions, affected assets, dependencies, downstream revalidation, migration, deprecation, and rollback concerns.",
+        "Use actual common ancestry and diffs when merging versioned branches.",
+        "Keep experimental assets separate from approved core assets."
+      ],
+      "evaluation_criteria": [
+        "downstream consumers can identify whether revalidation is required"
+      ],
+      "anti_patterns": [
+        "silently mutating approved shared-system behavior"
+      ],
+      "evidence_requirements": [],
+      "output_targets": [
+        "handoff record",
+        "migration plan"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "handoff record",
+        "migration plan"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "governance",
+        "engineering"
+      ]
+    },
+    {
+      "id": "studio.qa_acceptance",
+      "purpose": "Use evidence-based acceptance checks and truthful completion states.",
+      "directive_class": "QUALITY_CRITERION",
+      "activate_when": {
+        "any": [],
+        "all": []
+      },
+      "directives": [
+        "Preserve company facts and exact required text, distinguish proposals from evidence, and trace major design choices to the company, audience, and applications.",
+        "Require every applicable mandatory release criterion to pass; aggregate coverage cannot override a failed blocking criterion.",
+        "Report pass, fail, untested, and not-applicable states explicitly.",
+        "Treat specification completeness as distinct from visual quality, accessibility conformance, legal clearance, production readiness, and measured outcomes.",
+        "Use evidence-based status and limitations; reserve numerical confidence for calibrated methods.",
+        "Preserve PROMPT_PACKAGE_READY as the terminal state for this repository's prompt-only compiler."
+      ],
+      "evaluation_criteria": [
+        "mandatory checks are explicit",
+        "unperformed checks are reported honestly",
+        "terminal status is supported by actual deliverables"
+      ],
+      "anti_patterns": [
+        "using a confidence percentage to override a failed gate",
+        "claiming generated or implemented artifacts exist when only prompts were compiled"
+      ],
+      "evidence_requirements": [
+        "release readiness claims require actual artifact and test evidence"
+      ],
+      "output_targets": [
+        "acceptance report",
+        "evidence receipt"
+      ],
+      "patterns": {},
+      "dimensions": [],
+      "possible_outputs": [
+        "acceptance report",
+        "evidence receipt"
+      ],
+      "subsections": {},
+      "directive_targets": [
+        "quality",
+        "governance"
+      ]
+    }
+  ],
+  "provenance": {
+    "source": "User-supplied STUDIO_IDENTITY_SYSTEM_BUILDER v4.0.0",
+    "version": "4.0.0",
+    "author": null,
+    "created_at": null,
+    "updated_at": null,
+    "evidence_refs": [],
+    "license_or_ip_status": "user_supplied"
+  },
+  "trend": null,
+  "content_hash": ""
+}

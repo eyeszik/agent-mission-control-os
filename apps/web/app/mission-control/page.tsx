@@ -9,23 +9,41 @@ import { LiveStepProgressPanel } from "../../components/mission-control/LiveStep
 import { IntelligentResultsList } from "../../components/mission-control/IntelligentResultsList";
 import { ApprovalInbox } from "../../components/mission-control/ApprovalInbox";
 import { QualityScorePanel } from "../../components/mission-control/QualityScorePanel";
-import { FileOrganizationPanel } from "../../components/mission-control/FileOrganizationPanel";
+import { TrustStatusPanel } from "../../components/mission-control/TrustStatusPanel";
+import { ConsequentialLifecyclePanel } from "../../components/mission-control/ConsequentialLifecyclePanel";
 import { ArtifactPreviewPanel } from "../../components/mission-control/ArtifactPreviewPanel";
+import { FileOrganizationPanel } from "../../components/mission-control/FileOrganizationPanel";
+import { DesignStyleComposerPanel } from "../../components/mission-control/DesignStyleComposerPanel";
+import { InnovationFoundryPanel } from "../../components/innovation/InnovationFoundryPanel";
+import { CreativeFoundryPanel } from "../../components/mission-control/CreativeFoundryPanel";
+import { VnexusStudio } from "../../components/mission-control/vnexus/VnexusStudio";
+import { ProjectWorkspacePanel } from "../../components/mission-control/ProjectWorkspacePanel";
+import { ProjectActivityPanel } from "../../components/mission-control/ProjectActivityPanel";
+import { ContentCalendarPanel } from "../../components/mission-control/ContentCalendarPanel";
+import { PortfolioCommandCenter } from "../../components/mission-control/PortfolioCommandCenter";
 import { readSession } from "../../lib/auth/session";
 import { signOut } from "../../lib/auth/supabase";
+import { usesSupabaseAuth } from "../../lib/config";
 import { useProjectStore } from "../../lib/stores/projectStore";
 
 export default function MissionControlPage() {
   const router = useRouter();
-  const productionAuth = process.env.NEXT_PUBLIC_AUTH_MODE === 'supabase';
+  const productionAuth = usesSupabaseAuth();
   const [ready, setReady] = useState(!productionAuth);
-  const setCurrentProject = useProjectStore((state) => state.setCurrentProject);
+  const [mode, setMode] = useState<'operations' | 'projects' | 'design' | 'foundry' | 'vnexus' | 'innovation'>('operations');
 
   useEffect(() => {
-    // Initialize project from environment or default
-    const defaultProjectId = process.env.NEXT_PUBLIC_DEFAULT_PROJECT_ID || 'proj_1';
-    setCurrentProject(defaultProjectId);
-  }, [setCurrentProject]);
+    if (new URLSearchParams(window.location.search).get('mode') === 'innovation') setMode('innovation');
+  }, []);
+
+  // Seed the active project before any panel reads it. Runs, activity and the launch
+  // gate in CommandInputPanel all key off activeProjectId, which until now had no
+  // default; NEXT_PUBLIC_DEFAULT_PROJECT_ID makes it configurable while 'proj_1'
+  // preserves the single-project local/dev behaviour.
+  const setActiveProject = useProjectStore((state) => state.setActiveProject);
+  useEffect(() => {
+    setActiveProject(process.env.NEXT_PUBLIC_DEFAULT_PROJECT_ID || 'proj_1');
+  }, [setActiveProject]);
 
   useEffect(() => {
     if (!productionAuth) return;
@@ -38,25 +56,60 @@ export default function MissionControlPage() {
   return (
     <main className="min-h-[100dvh] p-4 lg:p-6 flex flex-col gap-4 max-w-[1920px] mx-auto">
       <MissionControlProvider />
-      <header className="flex justify-between items-center pb-2 border-b border-zinc-800/50">
-        <h1 className="text-zinc-100 font-medium tracking-tight">Mission Control</h1>
-        <div className="flex items-center gap-3">
+      <header className="flex flex-wrap justify-between items-center gap-x-4 gap-y-2 pb-2 border-b border-zinc-800/50">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 min-w-0">
+          <h1 className="text-zinc-100 font-medium tracking-tight whitespace-nowrap">Mission Control</h1>
+          <div role="group" aria-label="Mission Control mode" className="flex flex-wrap rounded-md border border-zinc-800 p-0.5 bg-zinc-900/60">
+            {([["operations", "Operations"], ["projects", "Projects"], ["design", "Design Mode"], ["foundry", "Creative Foundry"], ["innovation", "Innovation Foundry"], ["vnexus", "VNEXUS Studio"]] as const).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={mode === value}
+                onClick={() => setMode(value)}
+                className={`text-xs px-2.5 py-1 rounded-sm whitespace-nowrap focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60 ${mode === value ? "bg-zinc-100 text-zinc-900" : "text-zinc-400 hover:text-zinc-100"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-3 min-w-0">
           <QualityScorePanel />
+          <TrustStatusPanel />
           <div className="h-6 w-px bg-zinc-800" />
           <ApprovalInbox />
+          <a href="/agency" className="text-xs text-zinc-300 underline-offset-2 hover:text-zinc-100 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60">Agency OS</a>
+          <a href="/missions" className="text-xs text-zinc-300 underline-offset-2 hover:text-zinc-100 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60">Mission Council</a>
           {productionAuth && <button type="button" onClick={() => { signOut(); router.replace('/login'); }} className="text-xs text-zinc-400 hover:text-zinc-100">Sign out</button>}
         </div>
       </header>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
-        <div className="lg:col-span-3 flex flex-col gap-4"><CommandInputPanel /><FileOrganizationPanel /></div>
+        <div className="lg:col-span-3 flex flex-col gap-4">{mode === 'innovation' ? <ProjectWorkspacePanel /> : <><CommandInputPanel /><ConsequentialLifecyclePanel /></>}</div>
+        {mode === 'innovation' ? (
+          <div className="lg:col-span-9 min-w-0"><InnovationFoundryPanel /></div>
+        ) : mode === 'vnexus' ? (
+          <div className="lg:col-span-9 flex flex-col gap-4 min-h-0"><VnexusStudio /></div>
+        ) : mode === 'foundry' ? (
+          <div className="lg:col-span-9 flex flex-col gap-4 min-h-0"><CreativeFoundryPanel /></div>
+        ) : mode === 'design' ? (
+          <div className="lg:col-span-9 flex flex-col gap-4 min-h-0"><DesignStyleComposerPanel /></div>
+        ) : mode === 'projects' ? (
+          <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-2 gap-4 min-h-0">
+            <div className="flex flex-col gap-4 min-h-0"><ProjectWorkspacePanel /><ContentCalendarPanel /></div>
+            <div className="flex flex-col gap-4 min-h-0"><ProjectActivityPanel /><PortfolioCommandCenter /></div>
+          </div>
+        ) : (
+          <>
         <div className="lg:col-span-5 flex flex-col gap-4">
           <div className="flex-1 bg-zinc-900/40 border border-zinc-800/60 rounded-xl overflow-hidden relative flex flex-col">
-            <div className="p-3 border-b border-zinc-800/60 bg-zinc-900/80 backdrop-blur-sm z-10 flex justify-between items-center"><span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Topology Map</span></div>
+            <div className="p-3 border-b border-zinc-800/60 bg-zinc-900/80 backdrop-blur-xs z-10 flex justify-between items-center"><span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Topology Map</span></div>
             <WorkflowMapPanel />
           </div>
           <div className="h-48 shrink-0"><LiveStepProgressPanel /></div>
         </div>
-        <div className="lg:col-span-4 flex flex-col gap-4"><IntelligentResultsList /><div className="flex-1 border border-zinc-800/60 rounded-xl overflow-hidden bg-zinc-900/40"><ArtifactPreviewPanel /></div></div>
+        <div className="lg:col-span-4 flex flex-col gap-4"><IntelligentResultsList /><FileOrganizationPanel /><div className="flex-1 border border-zinc-800/60 rounded-xl overflow-hidden bg-zinc-900/40"><ArtifactPreviewPanel /></div></div>
+          </>
+        )}
       </div>
     </main>
   );

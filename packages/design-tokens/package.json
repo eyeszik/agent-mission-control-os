@@ -1,0 +1,23 @@
+{
+  "name": "@amc/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DTCG design-token compiler, byte-for-byte with services/langgraph/agency/design_tokens.py.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@amc/canonical": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

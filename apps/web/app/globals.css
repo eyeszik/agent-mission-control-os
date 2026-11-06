@@ -1,18 +1,33 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.ts";
 
+/* Preserve v3 preflight defaults during the v4 migration. */
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+  input::placeholder, textarea::placeholder { color: var(--color-gray-400); }
+  button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
+  dialog { margin: auto; }
+}
+@theme {
+  --default-ring-width: 3px;
+  --default-ring-color: var(--color-blue-500);
+}
+
+/* Legacy names kept for existing consumers; values come from the generated
+ * DTCG tokens (tokens.css, imported first in layout.tsx). */
 :root {
-  --background: #09090b; /* zinc-950 */
-  --foreground: #a1a1aa; /* zinc-400 */
+  --background: var(--amc-semantic-color-background);
+  --foreground: var(--amc-semantic-color-foreground);
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
   /* Avoiding Inter. Using system sans-serif */
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  antialiased: true;
+  font-family: var(--amc-semantic-font-family-body);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Reduced motion preference */

@@ -24,3 +24,13 @@ export const useApprovalStore = create<ApprovalState>((set) => ({
     return { approvals: next };
   }),
 }));
+
+declare global {
+  interface Window {
+    __amcApprovalStore?: typeof useApprovalStore;
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.__amcApprovalStore = useApprovalStore;
+}

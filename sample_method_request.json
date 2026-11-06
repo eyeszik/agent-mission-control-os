@@ -1,0 +1,9 @@
+{
+  "objective": "Checkout defect keeps recurring after every release",
+  "desired_outcome": "Defect stops recurring and stays fixed",
+  "problem_recurs": true,
+  "root_cause_known": false,
+  "process_exists": true,
+  "measurement_available": false,
+  "consequence": "medium"
+}

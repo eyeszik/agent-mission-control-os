@@ -32,10 +32,8 @@ def test_store_roundtrip_dedup_and_versioning(tmp_path, monkeypatch):
     monkeypatch.setenv("AMC_DB_PATH", db_path)
     monkeypatch.setenv("AMC_ARTIFACT_ROOT", art_root)
 
-    import services.langgraph.persistence.database as database
     from services.langgraph.persistence import sqlite_db
 
-    monkeypatch.setattr(database, "DB_PATH", db_path)
     monkeypatch.setattr(sqlite_db, "DB_PATH", db_path)
     sqlite_db.init_db()
 
@@ -60,10 +58,8 @@ def test_artifact_integrity_verifies_read_back(tmp_path, monkeypatch):
     monkeypatch.setenv("AMC_DB_PATH", db_path)
     monkeypatch.setenv("AMC_ARTIFACT_ROOT", art_root)
 
-    import services.langgraph.persistence.database as database
     from services.langgraph.persistence import sqlite_db
 
-    monkeypatch.setattr(database, "DB_PATH", db_path)
     monkeypatch.setattr(sqlite_db, "DB_PATH", db_path)
     sqlite_db.init_db()
 
@@ -89,10 +85,8 @@ def test_artifact_api_upload_list_download_delete_isolation(monkeypatch, tmp_pat
     monkeypatch.setenv("AMC_LOCAL_TENANT_ID", "tenant-art")
     monkeypatch.setenv("AMC_LOCAL_PROJECT_IDS", "proj-art")
 
-    import services.langgraph.persistence.database as database
     from services.langgraph.persistence import sqlite_db
 
-    monkeypatch.setattr(database, "DB_PATH", db_path)
     monkeypatch.setattr(sqlite_db, "DB_PATH", db_path)
     sqlite_db.init_db()
 

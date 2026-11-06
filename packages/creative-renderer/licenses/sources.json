@@ -1,0 +1,10 @@
+{
+  "@react-three/fiber": {
+    "version": "9.4.0",
+    "npm_git_head": "9ca52648e9dbf595b9bf71ed1f63db55f8a20506",
+    "license_source": "https://raw.githubusercontent.com/pmndrs/react-three-fiber/9ca52648e9dbf595b9bf71ed1f63db55f8a20506/LICENSE",
+    "local_file": "react-three-fiber.txt",
+    "reason": "The npm distribution omits a root license file. License bytes were retrieved from the release's immutable source revision.",
+    "sha256": "9c35b5de7b7493a707fffe4eb23bd2f7f449153c1911f7c6eefb4e591fd5349a"
+  }
+}

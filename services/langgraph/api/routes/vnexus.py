@@ -1,0 +1,1041 @@
+"""VNEXUS API: brand genome versions, resolution, approval binding and audit.
+
+Every route requires an authenticated principal. Tenant and project authority
+come from the server-side principal and the project's recorded tenant, never
+from the request body. Approval decisions are not made here: submitting opens
+an approval on the existing ``/approvals/{id}/decide`` route, and ``settle``
+applies a decision that a different, authorized human already made.
+"""
+
+from __future__ import annotations
+
+import functools
+import inspect
+from typing import Any, Callable, Optional
+
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+
+from services.langgraph.agency.vnexus import (
+    creative_service,
+    fabric_service,
+    intelligence_service,
+    media_fabric,
+    production,
+    service,
+    twin,
+)
+from services.langgraph.agency.vnexus.brandbook import service as brandbook
+from services.langgraph.agency.vnexus.brandbook.fields import IntakeRecord
+from services.langgraph.agency.vnexus.brandbook.manifest import DEFAULT_MANIFEST, Mode as BookMode
+from services.langgraph.agency.vnexus.directions import providers as direction_routes
+from services.langgraph.agency.vnexus.directions import service as directions
+from services.langgraph.agency.vnexus.directions.records import CandidateReported, DirectionBrief, FindingIn, ReviewMode
+from services.langgraph.agency.vnexus.marketing import CampaignRequest, forecast
+from services.langgraph.agency.vnexus.prompt_genome import PromptGenomeDocument
+from services.langgraph.agency.vnexus.art_director import ArtDirectionRequest
+from services.langgraph.agency.vnexus.experience import ExperienceRequest
+from services.langgraph.agency.vnexus.video import VideoBrief
+from services.langgraph.agency.vnexus.genome import GenomeDocument, GenomeTransitionError, Scope
+from services.langgraph.agency.vnexus.graph import EdgeKind, GraphError, NodeKind
+from services.langgraph.agency.vnexus.multiverse import BranchTransitionError, ChangeSet
+from services.langgraph.api.routes._project_common import domain_errors
+from services.langgraph.persistence.idempotency import complete_idempotency, fail_idempotency, hash_payload, reserve_idempotency
+from services.langgraph.persistence.vnexus import VnexusConflict, VnexusNotFound
+from services.langgraph.security.auth import Principal, get_principal
+
+router = APIRouter()
+
+_VNEXUS_ERRORS: tuple[tuple[type[BaseException], int], ...] = (
+    (VnexusNotFound, 404),
+    (VnexusConflict, 409),
+    (GenomeTransitionError, 409),
+    (service.GenomeIntegrityError, 409),
+    (GraphError, 409),
+    (BranchTransitionError, 409),
+    (LookupError, 404),
+)
+
+
+def vnexus_errors(handler: Callable[..., Any]) -> Callable[..., Any]:
+    """VNEXUS domain errors first (several subclass ValueError), then the shared project-OS mapping."""
+
+    @functools.wraps(handler)
+    def mapped(*args: Any, **kwargs: Any) -> Any:
+        try:
+            return handler(*args, **kwargs)
+        except service.GenomeBlocked as exc:
+            return _blocked("VNEXUS_BLOCKED", str(exc), {"message": str(exc), "readiness": exc.report})
+        except brandbook.BrandBookBlocked as exc:
+            return _blocked("VNEXUS_BRANDBOOK_BLOCKED", str(exc), {"message": str(exc), "report": exc.report})
+        except directions.DirectionBlocked as exc:
+            return _blocked("VNEXUS_DIRECTION_BLOCKED", str(exc), {"message": str(exc), "report": exc.report})
+        except fabric_service.RateLimited as exc:
+            raise HTTPException(status_code=429, detail=str(exc)) from exc
+        except creative_service.MergeConflict as exc:
+            return _blocked("VNEXUS_MERGE_CONFLICT", str(exc), {"message": str(exc), "report": exc.report})
+        except HTTPException:
+            raise
+        except Exception as exc:  # noqa: BLE001 - re-raised unless mapped
+            for error_type, status in _VNEXUS_ERRORS:
+                if isinstance(exc, error_type):
+                    raise HTTPException(status_code=status, detail=str(exc) or error_type.__name__) from exc
+            raise
+
+    mapped.__signature__ = inspect.signature(handler)  # type: ignore[attr-defined]
+    return domain_errors(mapped)
+
+
+def _blocked(code: str, message: str, detail: dict) -> JSONResponse:
+    """409 with the structured report in ``detail`` and the AMC error envelope, so clients get a readable message."""
+    return JSONResponse(status_code=409, content={"detail": detail, "error": {"code": code, "message": message, "status": 409,
+                                                                              "details": detail}})
+
+
+def idempotent(principal: Principal, operation: str, key: str, payload: dict, run: Callable[[], dict]) -> dict:
+    scope = f"{principal.tenant_id}:{principal.user_id}:vnexus.{operation}"
+    reservation = reserve_idempotency(scope, key, hash_payload(payload))
+    if reservation["state"] == "replay":
+        return reservation["record"]["result"]
+    if reservation["state"] in {"in_progress", "conflict"}:
+        raise HTTPException(status_code=409, detail="Idempotency-Key is in use or was reused with different input")
+    try:
+        result = run()
+    except Exception as exc:
+        fail_idempotency(scope, key, type(exc).__name__)
+        raise
+    complete_idempotency(scope, key, result)
+    return result
+
+
+class BrandCreate(BaseModel):
+    brand_id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{1,62}$")
+    display_name: str = Field(min_length=1, max_length=120)
+    owner_project_id: str = Field(min_length=1, max_length=120)
+
+    model_config = {"extra": "forbid"}
+
+
+class VersionCreate(BaseModel):
+    scope: Scope
+    scope_ref: str = Field(min_length=1, max_length=300)
+    document: GenomeDocument
+    experimental: bool = False
+
+    model_config = {"extra": "forbid"}
+
+
+class VersionEdit(BaseModel):
+    expected_revision: int = Field(ge=1)
+    document: GenomeDocument
+
+    model_config = {"extra": "forbid"}
+
+
+def _public(row: dict) -> dict:
+    return {k: row.get(k) for k in ("version_id", "brand_id", "scope", "scope_ref", "project_id", "version", "parent_version_id",
+                                    "status", "document", "content_hash", "revision", "origin", "origin_ref", "created_by",
+                                    "created_at", "updated_at", "submitted_by", "submitted_at", "approval_id", "decided_by",
+                                    "decided_at")}
+
+
+@router.post("/brands", status_code=201)
+@vnexus_errors
+def create_brand(req: BrandCreate, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                 principal: Principal = Depends(get_principal)) -> dict:
+    return idempotent(principal, "brand.create", idempotency_key, req.model_dump(),
+                      lambda: {"brand": service.create_brand(principal, **req.model_dump())})
+
+
+@router.get("/brands")
+@vnexus_errors
+def list_brands(principal: Principal = Depends(get_principal)) -> dict:
+    return {"brands": service.list_brands(principal)}
+
+
+@router.get("/brands/{brand_id}")
+@vnexus_errors
+def get_brand(brand_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    brand = service.brand_for(principal, brand_id)
+    service.authorize(principal, brand["owner_project_id"])
+    return {"brand": brand}
+
+
+@router.post("/brands/{brand_id}/versions", status_code=201)
+@vnexus_errors
+def create_version(brand_id: str, req: VersionCreate, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                   principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "genome.create", idempotency_key, payload, lambda: {"version": _public(service.create_draft(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, document=req.document, experimental=req.experimental))})
+
+
+@router.get("/brands/{brand_id}/versions")
+@vnexus_errors
+def list_versions(brand_id: str, scope: Optional[Scope] = None, scope_ref: Optional[str] = None,
+                  principal: Principal = Depends(get_principal)) -> dict:
+    return {"versions": [_public(r) for r in service.list_versions(principal, brand_id, scope=scope, scope_ref=scope_ref)]}
+
+
+@router.get("/brands/{brand_id}/resolve")
+@vnexus_errors
+def resolve_scope(brand_id: str, scope: Scope, scope_ref: str, preview_version_id: Optional[str] = None,
+                  principal: Principal = Depends(get_principal)) -> dict:
+    resolution, layers = service.resolve_scope(principal, brand_id, scope=scope, scope_ref=scope_ref,
+                                               preview_version_id=preview_version_id)
+    return {"resolution": resolution.model_dump(mode="json"), "resolution_hash": resolution.resolution_hash,
+            "layers": [{"scope": layer.scope.value, "scope_ref": layer.scope_ref, "status": layer.status.value, "version_id": layer.version_id,
+                        "version": layer.version, "content_hash": layer.document.content_hash} for layer in layers]}
+
+
+@router.get("/brands/{brand_id}/audit")
+@vnexus_errors
+def audit(brand_id: str, subject_id: Optional[str] = None, principal: Principal = Depends(get_principal)) -> dict:
+    return service.audit_trail(principal, brand_id, subject_id=subject_id)
+
+
+@router.get("/versions/{version_id}")
+@vnexus_errors
+def get_version(version_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"version": _public(service.get_version(principal, version_id))}
+
+
+@router.put("/versions/{version_id}")
+@vnexus_errors
+def edit_version(version_id: str, req: VersionEdit, principal: Principal = Depends(get_principal)) -> dict:
+    return {"version": _public(service.edit_draft(principal, version_id, expected_revision=req.expected_revision,
+                                                  document=req.document))}
+
+
+@router.get("/versions/{version_id}/readiness")
+@vnexus_errors
+def readiness(version_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"readiness": service.readiness(service.get_version(principal, version_id, settle=False))}
+
+
+@router.post("/versions/{version_id}/submit")
+@vnexus_errors
+def submit(version_id: str, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+           principal: Principal = Depends(get_principal)) -> dict:
+    return idempotent(principal, "genome.submit", idempotency_key, {"version_id": version_id},
+                      lambda: {"version": _public(service.submit_version(principal, version_id))})
+
+
+@router.post("/versions/{version_id}/withdraw")
+@vnexus_errors
+def withdraw(version_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"version": _public(service.withdraw_version(principal, version_id))}
+
+
+@router.post("/versions/{version_id}/settle")
+@vnexus_errors
+def settle(version_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"version": _public(service.settle_version(principal, version_id))}
+
+
+@router.post("/versions/{version_id}/revert", status_code=201)
+@vnexus_errors
+def revert(version_id: str, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+           principal: Principal = Depends(get_principal)) -> dict:
+    return idempotent(principal, "genome.revert", idempotency_key, {"version_id": version_id},
+                      lambda: {"version": _public(service.revert_to(principal, version_id))})
+
+
+@router.get("/compare")
+@vnexus_errors
+def compare(from_version: str = Query(..., alias="from"), to_version: str = Query(..., alias="to"),
+            principal: Principal = Depends(get_principal)) -> dict:
+    return service.compare_versions(principal, from_version, to_version)
+
+
+# --------------------------------------------------------------------------- knowledge graph
+
+
+class NodeCreate(BaseModel):
+    kind: NodeKind
+    label: str = Field(min_length=1, max_length=200)
+    attributes: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = {"extra": "forbid"}
+
+
+class EdgeCreate(BaseModel):
+    kind: EdgeKind
+    src_node_id: str = Field(min_length=1, max_length=80)
+    dst_node_id: str = Field(min_length=1, max_length=80)
+    provenance: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = {"extra": "forbid"}
+
+
+class NodeSupersede(BaseModel):
+    label: str = Field(min_length=1, max_length=200)
+    attributes: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = {"extra": "forbid"}
+
+
+class ImpactRequest(BaseModel):
+    node_ids: list[str] = Field(min_length=1, max_length=50)
+    as_of: Optional[str] = None
+
+    model_config = {"extra": "forbid"}
+
+
+@router.get("/brands/{brand_id}/graph")
+@vnexus_errors
+def graph_view(brand_id: str, as_of: Optional[str] = None, principal: Principal = Depends(get_principal)) -> dict:
+    return creative_service.graph_view(principal, brand_id, as_of=as_of)
+
+
+@router.post("/brands/{brand_id}/graph/nodes", status_code=201)
+@vnexus_errors
+def add_node(brand_id: str, req: NodeCreate, principal: Principal = Depends(get_principal)) -> dict:
+    return {"node": creative_service.add_node(principal, brand_id, kind=req.kind, label=req.label, attributes=req.attributes)}
+
+
+@router.post("/brands/{brand_id}/graph/edges", status_code=201)
+@vnexus_errors
+def add_edge(brand_id: str, req: EdgeCreate, principal: Principal = Depends(get_principal)) -> dict:
+    return {"edge": creative_service.add_edge(principal, brand_id, kind=req.kind, src=req.src_node_id, dst=req.dst_node_id,
+                                              provenance=req.provenance)}
+
+
+@router.delete("/brands/{brand_id}/graph/edges/{edge_id}")
+@vnexus_errors
+def retire_edge(brand_id: str, edge_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    creative_service.retire_edge(principal, brand_id, edge_id)
+    return {"retired": edge_id}
+
+
+@router.post("/graph/nodes/{node_id}/supersede", status_code=201)
+@vnexus_errors
+def supersede_node(node_id: str, req: NodeSupersede, principal: Principal = Depends(get_principal)) -> dict:
+    return {"node": creative_service.supersede_node(principal, node_id, label=req.label, attributes=req.attributes)}
+
+
+@router.get("/graph/nodes/{node_id}/evidence")
+@vnexus_errors
+def node_evidence(node_id: str, as_of: Optional[str] = None, principal: Principal = Depends(get_principal)) -> dict:
+    return creative_service.evidence(principal, node_id, as_of=as_of)
+
+
+@router.post("/brands/{brand_id}/graph/impact")
+@vnexus_errors
+def graph_impact(brand_id: str, req: ImpactRequest, principal: Principal = Depends(get_principal)) -> dict:
+    return creative_service.impact(principal, brand_id, req.node_ids, as_of=req.as_of)
+
+
+@router.get("/brands/{brand_id}/graph/diff")
+@vnexus_errors
+def graph_diff(brand_id: str, from_ts: str = Query(..., alias="from"), to_ts: Optional[str] = Query(None, alias="to"),
+               principal: Principal = Depends(get_principal)) -> dict:
+    return creative_service.snapshot_diff(principal, brand_id, from_ts=from_ts, to_ts=to_ts)
+
+
+# --------------------------------------------------------------------------- creative multiverse
+
+
+class BranchCreate(BaseModel):
+    base_version_id: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=120)
+    hypothesis: str = Field(default="", max_length=1000)
+    changes: ChangeSet
+    parent_branch_id: Optional[str] = None
+
+    model_config = {"extra": "forbid"}
+
+
+class BranchEdit(BaseModel):
+    expected_revision: int = Field(ge=1)
+    changes: ChangeSet
+
+    model_config = {"extra": "forbid"}
+
+
+class BranchFeedback(BaseModel):
+    text: str = Field(min_length=1, max_length=4000)
+    decision: Optional[str] = None
+
+    model_config = {"extra": "forbid"}
+
+
+class BranchMerge(BaseModel):
+    other_branch_id: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=120)
+
+    model_config = {"extra": "forbid"}
+
+
+@router.get("/brands/{brand_id}/branches")
+@vnexus_errors
+def list_branches(brand_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"branches": creative_service.list_branches(principal, brand_id)}
+
+
+@router.post("/brands/{brand_id}/branches", status_code=201)
+@vnexus_errors
+def fork_branch(brand_id: str, req: BranchCreate, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "branch.fork", idempotency_key, payload, lambda: {"branch": creative_service.fork(
+        principal, brand_id, base_version_id=req.base_version_id, name=req.name, hypothesis=req.hypothesis, changes=req.changes,
+        parent_branch_id=req.parent_branch_id)})
+
+
+@router.get("/branches/{branch_id}")
+@vnexus_errors
+def get_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"branch": creative_service.get_branch(principal, branch_id)}
+
+
+@router.put("/branches/{branch_id}")
+@vnexus_errors
+def edit_branch(branch_id: str, req: BranchEdit, principal: Principal = Depends(get_principal)) -> dict:
+    return {"branch": creative_service.edit(principal, branch_id, expected_revision=req.expected_revision, changes=req.changes)}
+
+
+@router.get("/branches/{branch_id}/compare")
+@vnexus_errors
+def compare_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"comparison": creative_service.compare(principal, branch_id)}
+
+
+@router.get("/branches/{branch_id}/compare/{other_id}")
+@vnexus_errors
+def compare_two_branches(branch_id: str, other_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"comparison": creative_service.compare_two(principal, branch_id, other_id)}
+
+
+@router.post("/branches/{branch_id}/evaluations", status_code=201)
+@vnexus_errors
+def evaluate_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"evaluation": creative_service.evaluate(principal, branch_id)}
+
+
+@router.post("/branches/{branch_id}/feedback", status_code=201)
+@vnexus_errors
+def branch_feedback(branch_id: str, req: BranchFeedback, principal: Principal = Depends(get_principal)) -> dict:
+    return {"evaluation": creative_service.record_feedback(principal, branch_id, text=req.text, decision=req.decision)}
+
+
+@router.post("/branches/{branch_id}/merge", status_code=201)
+@vnexus_errors
+def merge_branches(branch_id: str, req: BranchMerge, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                   principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"branch_id": branch_id, **req.model_dump()}
+    return idempotent(principal, "branch.merge", idempotency_key, payload,
+                      lambda: creative_service.merge(principal, branch_id, req.other_branch_id, name=req.name))
+
+
+@router.post("/branches/{branch_id}/rebase")
+@vnexus_errors
+def rebase_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return creative_service.rebase_branch(principal, branch_id)
+
+
+@router.post("/branches/{branch_id}/submit")
+@vnexus_errors
+def submit_branch(branch_id: str, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                  principal: Principal = Depends(get_principal)) -> dict:
+    return idempotent(principal, "branch.submit", idempotency_key, {"branch_id": branch_id},
+                      lambda: _jsonable(creative_service.submit(principal, branch_id)))
+
+
+@router.post("/branches/{branch_id}/settle")
+@vnexus_errors
+def settle_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"branch": creative_service.settle(principal, branch_id)}
+
+
+@router.post("/branches/{branch_id}/archive")
+@vnexus_errors
+def archive_branch(branch_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"branch": creative_service.archive(principal, branch_id)}
+
+
+def _jsonable(result: dict) -> dict:
+    return {"branch": result["branch"], "proposal": _public(result["proposal"])}
+
+
+# --------------------------------------------------------------------------- media fabric
+
+
+class MediaJobCreate(BaseModel):
+    provider_id: str = Field(min_length=1, max_length=80)
+    request: media_fabric.MediaRequest
+    budget_ceiling_minor: int = Field(default=0, ge=0, le=10_000_000)
+    run: bool = True
+
+    model_config = {"extra": "forbid"}
+
+
+@router.get("/fabric/providers")
+@vnexus_errors
+def providers(principal: Principal = Depends(get_principal)) -> dict:
+    return {"providers": media_fabric.discover(), "fabric_version": media_fabric.FABRIC_VERSION,
+            "hosted_generation": "DISABLED: no hosted adapter is implemented or authorized"}
+
+
+@router.post("/projects/{project_id}/media-jobs", status_code=201)
+@vnexus_errors
+def create_media_job(project_id: str, req: MediaJobCreate, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                     principal: Principal = Depends(get_principal)) -> dict:
+    if req.run:
+        row = fabric_service.execute(principal, project_id, provider_id=req.provider_id, request=req.request,
+                                     idempotency_key=idempotency_key, budget_ceiling_minor=req.budget_ceiling_minor)
+    else:
+        row = fabric_service.plan(principal, project_id, provider_id=req.provider_id, request=req.request,
+                                  idempotency_key=idempotency_key, budget_ceiling_minor=req.budget_ceiling_minor)
+        row = fabric_service.validate(principal, row["job_id"])
+    return {"job": fabric_service.public(row)}
+
+
+@router.get("/projects/{project_id}/media-jobs")
+@vnexus_errors
+def list_media_jobs(project_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"jobs": fabric_service.list_jobs(principal, project_id)}
+
+
+@router.get("/media-jobs/{job_id}")
+@vnexus_errors
+def get_media_job(job_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"job": fabric_service.get_job(principal, job_id)}
+
+
+@router.post("/media-jobs/{job_id}/authorize")
+@vnexus_errors
+def authorize_media_job(job_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"job": fabric_service.public(fabric_service.authorize(principal, job_id))}
+
+
+@router.post("/media-jobs/{job_id}/run")
+@vnexus_errors
+def run_media_job(job_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"job": fabric_service.public(fabric_service.run(principal, job_id))}
+
+
+@router.post("/media-jobs/{job_id}/retry")
+@vnexus_errors
+def retry_media_job(job_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"job": fabric_service.public(fabric_service.retry(principal, job_id))}
+
+
+@router.post("/media-jobs/{job_id}/cancel")
+@vnexus_errors
+def cancel_media_job(job_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"job": fabric_service.public(fabric_service.cancel(principal, job_id))}
+
+
+# --------------------------------------------------------------------------- production from an approved genome
+
+
+class ProductionTarget(BaseModel):
+    scope: Scope
+    scope_ref: str = Field(min_length=1, max_length=300)
+    project_id: str = Field(min_length=1, max_length=120)
+
+    model_config = {"extra": "forbid"}
+
+
+class IdentityProduction(ProductionTarget):
+    deliverables: list[str] = Field(min_length=1, max_length=11)
+    copy_text: dict[str, str] = Field(default_factory=dict)
+
+
+class ExperienceProduction(ProductionTarget):
+    request: ExperienceRequest
+
+
+class ArtDirectionProduction(ProductionTarget):
+    request: ArtDirectionRequest
+
+
+class VideoProduction(ProductionTarget):
+    brief: VideoBrief
+
+
+@router.post("/brands/{brand_id}/production/identity")
+@vnexus_errors
+def produce_identity(brand_id: str, req: IdentityProduction, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                     principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "production.identity", idempotency_key, payload, lambda: production.produce_identity(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, deliverables=tuple(req.deliverables),
+        copy={k: v[:200] for k, v in req.copy_text.items()}, run_key=f"identity:{idempotency_key}"))
+
+
+@router.post("/brands/{brand_id}/production/experience")
+@vnexus_errors
+def produce_experience(brand_id: str, req: ExperienceProduction, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                       principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "production.experience", idempotency_key, payload, lambda: production.produce_experience(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, request=req.request))
+
+
+@router.post("/brands/{brand_id}/production/art-direction")
+@vnexus_errors
+def produce_art_direction(brand_id: str, req: ArtDirectionProduction, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                          principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "production.art_direction", idempotency_key, payload, lambda: production.art_direction(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, request=req.request))
+
+
+@router.post("/brands/{brand_id}/production/video")
+@vnexus_errors
+def produce_video(brand_id: str, req: VideoProduction, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                  principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "production.video", idempotency_key, payload, lambda: production.produce_video(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, brief=req.brief,
+        run_key=f"video:{idempotency_key}"))
+
+
+# --------------------------------------------------------------------------- marketing intelligence
+
+
+class CampaignPlan(ProductionTarget):
+    request: CampaignRequest
+
+
+class MeasurementIn(BaseModel):
+    campaign_ref: str = Field(pattern=r"^[a-z0-9][a-z0-9_-]{0,60}$")
+    metric: str = Field(min_length=1, max_length=60)
+    value: float
+    unit: str = Field(min_length=1, max_length=20)
+    source: str = Field(min_length=1, max_length=80)
+    source_ref: str = Field(min_length=1, max_length=300)
+    observed_at: str = Field(min_length=10, max_length=40)
+
+    model_config = {"extra": "forbid"}
+
+
+class ForecastIn(BaseModel):
+    audience_size: int = Field(gt=0, le=10**10)
+    assumed_rate: float = Field(gt=0, lt=1)
+    assumption_source: str = Field(min_length=1, max_length=300)
+
+    model_config = {"extra": "forbid"}
+
+
+@router.post("/brands/{brand_id}/campaigns")
+@vnexus_errors
+def plan_campaign(brand_id: str, req: CampaignPlan, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                  principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "campaign.plan", idempotency_key, payload, lambda: intelligence_service.plan_campaign(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, request=req.request))
+
+
+@router.post("/projects/{project_id}/measurements", status_code=201)
+@vnexus_errors
+def record_measurement(project_id: str, req: MeasurementIn, principal: Principal = Depends(get_principal)) -> dict:
+    return {"measurement": intelligence_service.record_measurement(principal, project_id, **req.model_dump())}
+
+
+@router.get("/projects/{project_id}/campaigns/{campaign_ref}/report")
+@vnexus_errors
+def campaign_report(project_id: str, campaign_ref: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"report": intelligence_service.campaign_report(principal, project_id, campaign_ref)}
+
+
+@router.post("/forecast")
+@vnexus_errors
+def simulate_forecast(req: ForecastIn, principal: Principal = Depends(get_principal)) -> dict:
+    return {"forecast": forecast(**req.model_dump())}
+
+
+# --------------------------------------------------------------------------- prompt genomes
+
+
+class PromptCreate(BaseModel):
+    prompt_id: str = Field(pattern=r"^[a-z0-9][a-z0-9_-]{0,60}$")
+    document: PromptGenomeDocument
+
+    model_config = {"extra": "forbid"}
+
+
+class PromptImport(BaseModel):
+    prompt_id: str = Field(pattern=r"^[a-z0-9][a-z0-9_-]{0,60}$")
+    text: str = Field(min_length=1, max_length=50_000)
+    source_ref: str = Field(min_length=1, max_length=300)
+    family: str = "COPY"
+    asset_type: str = Field(default="source prompt", min_length=1, max_length=120)
+
+    model_config = {"extra": "forbid"}
+
+
+class PromptCompile(BaseModel):
+    scope: Scope
+    scope_ref: str = Field(min_length=1, max_length=300)
+    adapt_to: Optional[str] = Field(default=None, pattern=r"^(generic_text_to_image|generic_text_to_video|structured_json)$")
+
+    model_config = {"extra": "forbid"}
+
+
+@router.get("/brands/{brand_id}/prompts")
+@vnexus_errors
+def list_prompts(brand_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return intelligence_service.list_prompts(principal, brand_id)
+
+
+@router.post("/brands/{brand_id}/prompts", status_code=201)
+@vnexus_errors
+def create_prompt(brand_id: str, req: PromptCreate, principal: Principal = Depends(get_principal)) -> dict:
+    return {"prompt": intelligence_service.create_prompt(principal, brand_id, prompt_id=req.prompt_id, document=req.document)}
+
+
+@router.post("/brands/{brand_id}/prompts/import", status_code=201)
+@vnexus_errors
+def import_prompt(brand_id: str, req: PromptImport, principal: Principal = Depends(get_principal)) -> dict:
+    return {"prompt": intelligence_service.import_original(principal, brand_id, **req.model_dump())}
+
+
+@router.post("/prompts/{prompt_version_id}/compile")
+@vnexus_errors
+def compile_prompt(prompt_version_id: str, req: PromptCompile, principal: Principal = Depends(get_principal)) -> dict:
+    return intelligence_service.compile_prompt(principal, prompt_version_id, scope=req.scope, scope_ref=req.scope_ref, adapt_to=req.adapt_to)
+
+
+@router.post("/brands/{brand_id}/prompts/{prompt_id}/regression")
+@vnexus_errors
+def prompt_regression(brand_id: str, prompt_id: str, req: PromptCompile, principal: Principal = Depends(get_principal)) -> dict:
+    return intelligence_service.regression(principal, brand_id, prompt_id, scope=req.scope, scope_ref=req.scope_ref)
+
+
+# --------------------------------------------------------------------------- design immune system and digital twin
+
+
+class ScopeRef(BaseModel):
+    scope: Scope
+    scope_ref: str = Field(min_length=1, max_length=300)
+
+    model_config = {"extra": "forbid"}
+
+
+class Remediation(ScopeRef):
+    finding_ids: list[str] = Field(min_length=1, max_length=100)
+
+
+class TwinChange(ScopeRef):
+    changes: ChangeSet
+
+
+@router.post("/brands/{brand_id}/immune/scan")
+@vnexus_errors
+def immune_scan(brand_id: str, req: ScopeRef, principal: Principal = Depends(get_principal)) -> dict:
+    return intelligence_service.scan(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref)
+
+
+@router.post("/brands/{brand_id}/immune/remediate")
+@vnexus_errors
+def immune_remediate(brand_id: str, req: Remediation, principal: Principal = Depends(get_principal)) -> dict:
+    return intelligence_service.remediate(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, finding_ids=req.finding_ids)
+
+
+@router.get("/brands/{brand_id}/twin")
+@vnexus_errors
+def twin_snapshot(brand_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return twin.snapshot(principal, brand_id)
+
+
+@router.post("/brands/{brand_id}/twin/simulate")
+@vnexus_errors
+def twin_simulate(brand_id: str, req: TwinChange, principal: Principal = Depends(get_principal)) -> dict:
+    return twin.simulate_change(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, changes=req.changes)
+
+
+@router.get("/projects/{project_id}/twin/provider-outage/{provider_id}")
+@vnexus_errors
+def twin_outage(project_id: str, provider_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return twin.simulate_provider_outage(principal, provider_id, project_id=project_id)
+
+
+# --------------------------------------------------------------------------- brand book (projection of the approved genome)
+
+BOOK_HEADERS = {"Content-Security-Policy": "default-src 'none'; img-src data:; style-src 'unsafe-inline'; sandbox",
+                "X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store"}
+
+
+class BookTarget(ProductionTarget):
+    mode: BookMode
+    preview_version_id: Optional[str] = Field(default=None, max_length=120)
+
+
+class BookRelease(ProductionTarget):
+    approval_id: Optional[str] = Field(default=None, max_length=200)
+
+
+class IntakeIn(BaseModel):
+    intake: IntakeRecord
+    expected_sha256: Optional[str] = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+
+    model_config = {"extra": "forbid"}
+
+
+class ScopeOnly(BaseModel):
+    scope: Scope
+    scope_ref: str = Field(min_length=1, max_length=300)
+
+    model_config = {"extra": "forbid"}
+
+
+@router.get("/brandbook/template")
+def brandbook_template(principal: Principal = Depends(get_principal)) -> dict:
+    return {"manifest": DEFAULT_MANIFEST.model_dump(mode="json"), "manifest_hash": DEFAULT_MANIFEST.manifest_hash,
+            "modes": [m.value for m in BookMode]}
+
+
+@router.get("/brands/{brand_id}/brandbook/intake")
+@vnexus_errors
+def brandbook_intake(brand_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    intake, sha = brandbook.load_intake(principal, brand_id)
+    return {"intake": intake.model_dump(mode="json"), "sha256": sha}
+
+
+@router.put("/brands/{brand_id}/brandbook/intake")
+@vnexus_errors
+def brandbook_save_intake(brand_id: str, req: IntakeIn, principal: Principal = Depends(get_principal)) -> dict:
+    return brandbook.save_intake(principal, brand_id, req.intake, expected_sha256=req.expected_sha256)
+
+
+@router.post("/brands/{brand_id}/brandbook/intake/propose", status_code=201)
+@vnexus_errors
+def brandbook_propose(brand_id: str, req: ScopeOnly, principal: Principal = Depends(get_principal)) -> dict:
+    """Intake proposals become a genome DRAFT; the existing submit/approve flow decides them."""
+    return {"version": _public(brandbook.propose_draft(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref))}
+
+
+@router.get("/brands/{brand_id}/brandbook/gaps")
+@vnexus_errors
+def brandbook_gaps(brand_id: str, scope: Scope, scope_ref: str, project_id: str, mode: BookMode = BookMode.PRODUCTION,
+                   principal: Principal = Depends(get_principal)) -> dict:
+    return brandbook.gaps_report(principal, brand_id, scope=scope, scope_ref=scope_ref, project_id=project_id, mode=mode)
+
+
+@router.post("/brands/{brand_id}/brandbook/compile")
+@vnexus_errors
+def brandbook_compile(brand_id: str, req: BookTarget, principal: Principal = Depends(get_principal)) -> dict:
+    """Page packages and readable prompts. Nothing is rendered, stored, generated or sent."""
+    return brandbook.compile_package(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id,
+                                     mode=req.mode, preview_version_id=req.preview_version_id)
+
+
+@router.post("/brands/{brand_id}/brandbook/builds", status_code=201)
+@vnexus_errors
+def brandbook_build(brand_id: str, req: BookTarget, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                    principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "brandbook.build", idempotency_key, payload, lambda: brandbook.build(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, mode=req.mode,
+        preview_version_id=req.preview_version_id))
+
+
+@router.get("/brands/{brand_id}/brandbook/builds/current")
+@vnexus_errors
+def brandbook_current(brand_id: str, scope: Scope, scope_ref: str, project_id: str, mode: BookMode,
+                      principal: Principal = Depends(get_principal)) -> dict:
+    return brandbook.get_build(principal, brand_id, scope=scope, scope_ref=scope_ref, project_id=project_id, mode=mode)
+
+
+@router.get("/brands/{brand_id}/brandbook/book.html")
+@vnexus_errors
+def brandbook_book(brand_id: str, scope: Scope, scope_ref: str, project_id: str, mode: BookMode,
+                   principal: Principal = Depends(get_principal)) -> Response:
+    data, mime = brandbook.read_output(principal, brand_id, scope=scope, scope_ref=scope_ref, project_id=project_id, mode=mode, kind="book")
+    return Response(data, media_type=mime, headers=BOOK_HEADERS)
+
+
+@router.get("/brands/{brand_id}/brandbook/book.pdf")
+@vnexus_errors
+def brandbook_pdf(brand_id: str, scope: Scope, scope_ref: str, project_id: str, principal: Principal = Depends(get_principal)) -> Response:
+    data, mime = brandbook.read_output(principal, brand_id, scope=scope, scope_ref=scope_ref, project_id=project_id,
+                                       mode=BookMode.PRODUCTION, kind="pdf")
+    return Response(data, media_type=mime, headers={"X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store"})
+
+
+@router.get("/brands/{brand_id}/brandbook/pages/{page_id}/preview.png")
+@vnexus_errors
+def brandbook_preview(brand_id: str, page_id: str, scope: Scope, scope_ref: str, project_id: str, mode: BookMode,
+                      principal: Principal = Depends(get_principal)) -> Response:
+    if page_id not in {p.id for p in DEFAULT_MANIFEST.pages}:
+        raise HTTPException(status_code=404, detail="Unknown page")
+    data, mime = brandbook.read_output(principal, brand_id, scope=scope, scope_ref=scope_ref, project_id=project_id, mode=mode,
+                                       kind="preview", page_id=page_id)
+    return Response(data, media_type=mime, headers={"X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store"})
+
+
+@router.post("/brands/{brand_id}/brandbook/approval")
+@vnexus_errors
+def brandbook_approval(brand_id: str, req: ProductionTarget, principal: Principal = Depends(get_principal)) -> dict:
+    """Opens the approval bound to the production book's bytes; decided only on /approvals/{id}/decide."""
+    return brandbook.request_approval(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id)
+
+
+@router.post("/brands/{brand_id}/brandbook/release")
+@vnexus_errors
+def brandbook_release(brand_id: str, req: BookRelease, principal: Principal = Depends(get_principal)) -> dict:
+    return brandbook.release(principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id,
+                             approval_id=req.approval_id)
+
+
+# --------------------------------------------------------------------------- creative directions
+
+
+class DirectionTarget(BaseModel):
+    project_id: str = Field(min_length=1, max_length=120)
+
+    model_config = {"extra": "forbid"}
+
+
+class DirectionIntentIn(ProductionTarget):
+    brief: DirectionBrief
+
+
+class DirectionGenerateIn(DirectionTarget):
+    route_id: str = Field(min_length=1, max_length=80)
+
+
+class DirectionImportIn(DirectionTarget):
+    slot: int = Field(ge=1, le=4)
+    mime: str = Field(pattern=r"^(image/png|image/svg\+xml)$")
+    data_base64: str = Field(min_length=4, max_length=16_100_000)
+    reported: CandidateReported = Field(default_factory=CandidateReported)
+
+
+class DirectionReviewIn(DirectionTarget):
+    mode: ReviewMode
+    candidate_ids: list[str] = Field(min_length=1, max_length=8)
+    findings: list[FindingIn] = Field(default_factory=list, max_length=200)
+    base_session_id: Optional[str] = Field(default=None, max_length=40)
+
+
+class DirectionSelectIn(DirectionTarget):
+    candidate_id: str = Field(min_length=1, max_length=40)
+    session_id: str = Field(min_length=1, max_length=40)
+
+
+class DirectionReconstructIn(DirectionTarget):
+    candidate_id: str = Field(min_length=1, max_length=40)
+    method: str = Field(pattern=r"^(controlled_trace|native_path_import)$")
+    svg: Optional[str] = Field(default=None, max_length=2_000_000)
+    text_region: Optional[tuple[int, int, int, int]] = None
+    optional_requested: bool = False
+
+
+class DirectionFreezeIn(DirectionTarget):
+    master_candidate_id: str = Field(min_length=1, max_length=40)
+    session_id: str = Field(min_length=1, max_length=40)
+
+
+_INERT = {"X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store",
+          "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox"}
+
+
+@router.get("/directions/routes")
+def direction_route_registry(principal: Principal = Depends(get_principal)) -> dict:
+    """Generation, critique and research routes with their health. Disabled routes are listed, never called."""
+    return direction_routes.describe()
+
+
+@router.get("/brands/{brand_id}/directions/intents")
+@vnexus_errors
+def direction_intents(brand_id: str, project_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return {"intents": directions.list_intents(principal, brand_id, project_id)}
+
+
+@router.post("/brands/{brand_id}/directions/intents", status_code=201)
+@vnexus_errors
+def direction_create_intent(brand_id: str, req: DirectionIntentIn, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                            principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "directions.intent", idempotency_key, payload, lambda: directions.create_intent(
+        principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, brief=req.brief))
+
+
+@router.get("/brands/{brand_id}/directions/intents/{intent_id}")
+@vnexus_errors
+def direction_state(brand_id: str, intent_id: str, project_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    return directions.state(principal, brand_id, intent_id, project_id)
+
+
+@router.get("/brands/{brand_id}/directions/intents/{intent_id}/handoff")
+@vnexus_errors
+def direction_handoff(brand_id: str, intent_id: str, project_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    """The manual route's prompt package. Exporting it calls no provider and grants no entitlement."""
+    return directions.handoff(principal, brand_id, intent_id, project_id)
+
+
+@router.post("/brands/{brand_id}/directions/intents/{intent_id}/generate")
+@vnexus_errors
+def direction_generate(brand_id: str, intent_id: str, req: DirectionGenerateIn, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                       principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, "intent_id": intent_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "directions.generate", idempotency_key, payload, lambda: directions.generate(
+        principal, brand_id, intent_id, req.project_id, route_id=req.route_id, run_key=idempotency_key[:64]))
+
+
+@router.post("/brands/{brand_id}/directions/intents/{intent_id}/candidates", status_code=201)
+@vnexus_errors
+def direction_import(brand_id: str, intent_id: str, req: DirectionImportIn, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                     principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, "intent_id": intent_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "directions.import", idempotency_key, payload, lambda: directions.import_candidate(
+        principal, brand_id, intent_id, req.project_id, slot=req.slot, mime=req.mime, data_base64=req.data_base64,
+        reported=req.reported))
+
+
+@router.get("/brands/{brand_id}/directions/intents/{intent_id}/candidates/{candidate_id}/content")
+@vnexus_errors
+def direction_candidate_content(brand_id: str, intent_id: str, candidate_id: str, project_id: str,
+                                principal: Principal = Depends(get_principal)) -> Response:
+    data, mime = directions.read_candidate(principal, brand_id, intent_id, project_id, candidate_id)
+    return Response(data, media_type=mime, headers=_INERT)
+
+
+@router.post("/brands/{brand_id}/directions/intents/{intent_id}/reviews", status_code=201)
+@vnexus_errors
+def direction_review(brand_id: str, intent_id: str, req: DirectionReviewIn, idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                     principal: Principal = Depends(get_principal)) -> dict:
+    """Computes and stores a review session. It cannot regenerate, spend, approve, mutate a master or publish."""
+    payload = {"brand_id": brand_id, "intent_id": intent_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "directions.review", idempotency_key, payload, lambda: directions.create_review(
+        principal, brand_id, intent_id, req.project_id, mode=req.mode, candidate_ids=req.candidate_ids, findings=req.findings,
+        base_session_id=req.base_session_id))
+
+
+@router.get("/brands/{brand_id}/directions/intents/{intent_id}/reviews/{session_id}")
+@vnexus_errors
+def direction_get_review(brand_id: str, intent_id: str, session_id: str, project_id: str,
+                         principal: Principal = Depends(get_principal)) -> dict:
+    return {"session": directions.load_session(principal, brand_id, intent_id, project_id, session_id).model_dump(mode="json")}
+
+
+@router.post("/brands/{brand_id}/directions/intents/{intent_id}/selection")
+@vnexus_errors
+def direction_select(brand_id: str, intent_id: str, req: DirectionSelectIn, principal: Principal = Depends(get_principal)) -> dict:
+    """Opens the existing approval on the candidate's exact bytes; decided only on /approvals/{id}/decide."""
+    return directions.request_selection(principal, brand_id, intent_id, req.project_id, candidate_id=req.candidate_id,
+                                        session_id=req.session_id)
+
+
+@router.post("/brands/{brand_id}/directions/intents/{intent_id}/reconstructions", status_code=201)
+@vnexus_errors
+def direction_reconstruct(brand_id: str, intent_id: str, req: DirectionReconstructIn,
+                          idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                          principal: Principal = Depends(get_principal)) -> dict:
+    payload = {"brand_id": brand_id, "intent_id": intent_id, **req.model_dump(mode="json")}
+    return idempotent(principal, "directions.reconstruct", idempotency_key, payload, lambda: directions.reconstruct_candidate(
+        principal, brand_id, intent_id, req.project_id, candidate_id=req.candidate_id, method=req.method, svg=req.svg,
+        text_region=req.text_region, optional_requested=req.optional_requested))
+
+
+@router.post("/brands/{brand_id}/directions/intents/{intent_id}/freeze")
+@vnexus_errors
+def direction_freeze(brand_id: str, intent_id: str, req: DirectionFreezeIn, principal: Principal = Depends(get_principal)) -> dict:
+    """Submits a genome draft pinning the master (artifact id + sha256) to the existing genome review."""
+    return directions.freeze(principal, brand_id, intent_id, req.project_id, master_candidate_id=req.master_candidate_id,
+                             session_id=req.session_id)

@@ -4,18 +4,18 @@ from __future__ import annotations
 
 - AMC_LOG_FORMAT=json emits one JSON object per log record with patch-friendly
   fields; the default remains readable text for local development.
-- AMCTracingMiddleware assigns an X-Request-ID (or honors an inbound one),
-  returns it in the response, and emits a request log line carrying
-  method/path/status/duration plus the request id, so a request can be traced
-  through frontend logs, API access logs and application logs.
-- AMC_DEPLOYED_REVISION is surfaced via /health for deploy verification; never
-  fabricate a revision value.
+- AMCTracingMiddleware emits a request log line carrying
+  method/path/status/duration plus the request id already assigned by
+  ``request_id_middleware`` in ``app/main.py`` (the single owner of X-Request-ID
+  and of its format validation), so a request can be traced through frontend
+  logs, API access logs and application logs.
+- AMC_DEPLOYED_REVISION is surfaced via /ready for deploy verification; never
+  fabricate a revision value. /health stays pure liveness by design.
 """
 
 import json
 import logging
 import time
-import uuid
 
 from fastapi import Request, Response
 
@@ -60,15 +60,21 @@ class AMCTracingMiddleware:
             await self.app(scope, receive, send)
             return
 
-        headers = [(k.decode("latin-1").lower(), v.decode("latin-1")) for k, v in scope.get("headers", [])]
-        inbound = next((v for k, v in headers if k == "x-request-id"), "")
-        request_id = inbound.strip() or f"req_{uuid.uuid4().hex}"
+        # The request id is owned by request_id_middleware in app/main.py, which also
+        # validates its shape. Reading it from the shared ASGI scope on the response
+        # path (instead of parsing the inbound header here) keeps one correlation id
+        # per request and never echoes an unvalidated client header into log output.
         started = time.perf_counter()
 
         async def send_with_request_id(message) -> None:
             if message.get("type") == "http.response.start":
-                mmessage_headers = message.setdefault("headers", [])
-                mmessage_headers.append((b"x-request-id", request_id.encode()))
+                response_headers = message.setdefault("headers", [])
+                request_id = str(scope.get("state", {}).get("request_id") or "")
+                has_header = any(
+                    k.decode("latin-1").lower() == "x-request-id" for k, _v in response_headers
+                )
+                if request_id and not has_header:
+                    response_headers.append((b"x-request-id", request_id.encode()))
                 status = message.get("status", 0)
                 path = scope.get("path", "")
                 method = scope.get("method", "")

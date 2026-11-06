@@ -1,0 +1,1557 @@
+{
+  "art_direction_claims": [
+    {
+      "basis": [
+        "request.objective"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "objective",
+      "statement": "Launch"
+    },
+    {
+      "basis": [
+        "genome:strategy.audience.primary"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "objective",
+      "statement": "Audience: people furnishing a first home (fictional persona)"
+    },
+    {
+      "basis": [
+        "genome:visual.shape_grammar.swiss_editorial"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "composition_system",
+      "statement": "Lead grammar: Swiss editorial (70%)"
+    },
+    {
+      "basis": [
+        "grammar:swiss_editorial"
+      ],
+      "claim_class": "INFERRED_DECISION",
+      "rationale": "operators declared by the grammar",
+      "section": "composition_system",
+      "statement": "Operators: modular_grid, flush_left_stack, rule_division, accent_block"
+    },
+    {
+      "basis": [
+        "grammar:swiss_editorial",
+        "medium:POSTER"
+      ],
+      "claim_class": "INFERRED_DECISION",
+      "rationale": "single-entry reading order for a constrained format",
+      "section": "visual_hierarchy",
+      "statement": "One focal element, then headline, then supporting copy, then action"
+    },
+    {
+      "basis": [
+        "genome:visual.typography.display"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "typography_direction",
+      "statement": "Display face: Schibsted Grotesk"
+    },
+    {
+      "basis": [
+        "genome:visual.typography.body"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "typography_direction",
+      "statement": "Body face: Inter"
+    },
+    {
+      "basis": [
+        "compiler floor"
+      ],
+      "claim_class": "INFERRED_DECISION",
+      "rationale": "",
+      "section": "typography_direction",
+      "statement": "Body text at least 16px equivalent; headline uses a fluid scale"
+    },
+    {
+      "basis": [
+        "genome:visual.color.ink"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "color_system",
+      "statement": "ink is #14161a"
+    },
+    {
+      "basis": [
+        "genome:visual.color.paper"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "color_system",
+      "statement": "paper is #f7f4ee"
+    },
+    {
+      "basis": [
+        "genome:visual.color.accent"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "color_system",
+      "statement": "accent is #c2410c"
+    },
+    {
+      "basis": [
+        "genome:visual.color.accent_2"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "color_system",
+      "statement": "accent_2 is #93c5fd"
+    },
+    {
+      "basis": [
+        "genome:visual.color.muted"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "color_system",
+      "statement": "muted is #4b4540"
+    },
+    {
+      "basis": [
+        "genome:visual.color.ink",
+        "genome:visual.color.paper"
+      ],
+      "claim_class": "INFERRED_DECISION",
+      "rationale": "WCAG 2.2 contrast ratio",
+      "section": "color_system",
+      "statement": "Use ink on paper for body text (16.5:1)"
+    },
+    {
+      "basis": [
+        "genome:visual.color.accent",
+        "genome:visual.color.paper"
+      ],
+      "claim_class": "INFERRED_DECISION",
+      "rationale": "WCAG 2.2 contrast ratio",
+      "section": "color_system",
+      "statement": "Use accent on paper for graphic elements and large text (4.72:1)"
+    },
+    {
+      "basis": [
+        "medium:POSTER"
+      ],
+      "claim_class": "INFERRED_DECISION",
+      "rationale": "medium default; replace with approved material rules when they exist",
+      "section": "material_language",
+      "statement": "matte, low sheen"
+    },
+    {
+      "basis": [
+        "genome:visual.imagery.style"
+      ],
+      "claim_class": "VERIFIED_REQUIREMENT",
+      "rationale": "",
+      "section": "lighting_direction",
+      "statement": "Natural light on matte surfaces"
+    },
+    {
+      "basis": [
+        "request.platform"
+      ],
+      "claim_class": "UNSUPPORTED_ASSUMPTION",
+      "rationale": "",
+      "section": "production_constraints",
+      "statement": "No platform specification supplied"
+    }
+  ],
+  "audit": {
+    "entries": [
+      {
+        "action": "create",
+        "actor": "alice",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.033971Z",
+        "detail": {
+          "display_name": "Halden & Fen (fictional)",
+          "owner_project_id": "prj-vnx-dc4e68f7"
+        },
+        "entry_hash": "fa2abf162cd597f7205d252aaceec1f614ac277534e8da2b89595e45ea235aeb",
+        "entry_id": 457,
+        "from_state": null,
+        "prev_hash": null,
+        "subject_id": "brand-b29fd08b",
+        "subject_type": "brand",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "ACTIVE"
+      },
+      {
+        "action": "create",
+        "actor": "alice",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.077262Z",
+        "detail": {
+          "content_hash": "c1a82fa1da510ac0dee0acf76d831ca1f5c86ee4073dedcb40efa86827536c12",
+          "origin": "AUTHORED",
+          "origin_ref": null,
+          "parent_version_id": null,
+          "scope": "brand",
+          "scope_ref": "brand-b29fd08b",
+          "version": 1
+        },
+        "entry_hash": "0b467a19fbd1ebbf5ad207a5246636ee8d469c58daef9c0745508809117ce836",
+        "entry_id": 458,
+        "from_state": null,
+        "prev_hash": "fa2abf162cd597f7205d252aaceec1f614ac277534e8da2b89595e45ea235aeb",
+        "subject_id": "gv-31dcfe3fd1184ae1aa4aff10af043184",
+        "subject_type": "genome_version",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "DRAFT"
+      },
+      {
+        "action": "submit",
+        "actor": "alice",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.178568Z",
+        "detail": {
+          "approval_id": "69dc2970-fdfa-4859-a7fe-fd8b6c041c3d",
+          "content_hash": "c1a82fa1da510ac0dee0acf76d831ca1f5c86ee4073dedcb40efa86827536c12",
+          "readiness": "2649fc40346a9ba1e65ed9b927ae6f221debfcd31a1acca6e5e0406ac833cfc2"
+        },
+        "entry_hash": "e7d5e65dcced6bf5aa3d8a39b329593fdf984b3fe2c41fa3695a950e2e1784b6",
+        "entry_id": 459,
+        "from_state": "DRAFT",
+        "prev_hash": "0b467a19fbd1ebbf5ad207a5246636ee8d469c58daef9c0745508809117ce836",
+        "subject_id": "gv-31dcfe3fd1184ae1aa4aff10af043184",
+        "subject_type": "genome_version",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "IN_REVIEW"
+      },
+      {
+        "action": "approve",
+        "actor": "bob",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.311098Z",
+        "detail": {
+          "approval_id": "69dc2970-fdfa-4859-a7fe-fd8b6c041c3d",
+          "content_hash": "c1a82fa1da510ac0dee0acf76d831ca1f5c86ee4073dedcb40efa86827536c12"
+        },
+        "entry_hash": "677813b52ce9b9e855856cbd5da84c34ed71241ee0a49ac50dc5f42d2686c5bd",
+        "entry_id": 460,
+        "from_state": "IN_REVIEW",
+        "prev_hash": "e7d5e65dcced6bf5aa3d8a39b329593fdf984b3fe2c41fa3695a950e2e1784b6",
+        "subject_id": "gv-31dcfe3fd1184ae1aa4aff10af043184",
+        "subject_type": "genome_version",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "APPROVED"
+      },
+      {
+        "action": "create",
+        "actor": "system",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.318418Z",
+        "detail": {
+          "content_hash": "9ebc50204512f9ef34321c665e1bb5f01c5bb35e32486e67172d18cd608a7719",
+          "kind": "GenomeVersion"
+        },
+        "entry_hash": "b5438b338d1c4187fb6c863b0fb802c48970d0f1adb34b7650836f51f64703a3",
+        "entry_id": 461,
+        "from_state": null,
+        "prev_hash": "677813b52ce9b9e855856cbd5da84c34ed71241ee0a49ac50dc5f42d2686c5bd",
+        "subject_id": "node-bcf87f1c0c4d405faa99735cb8b2d1ca",
+        "subject_type": "graph_node",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      },
+      {
+        "action": "create",
+        "actor": "system",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.318643Z",
+        "detail": {
+          "content_hash": "9cb71c9631e4536a62ea155a98cdea4a9beef4e55b26704f2578fa5c77f31845",
+          "kind": "Approval"
+        },
+        "entry_hash": "12590451e9c92941092cf77a62e9fab7214660da6e02a70566f3a0fc33c643d0",
+        "entry_id": 462,
+        "from_state": null,
+        "prev_hash": "b5438b338d1c4187fb6c863b0fb802c48970d0f1adb34b7650836f51f64703a3",
+        "subject_id": "node-5aa0b9f31b724572a5a4bc20e835e1ca",
+        "subject_type": "graph_node",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      },
+      {
+        "action": "create",
+        "actor": "system",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.318904Z",
+        "detail": {
+          "dst": "node-5aa0b9f31b724572a5a4bc20e835e1ca",
+          "kind": "APPROVED_BY",
+          "src": "node-bcf87f1c0c4d405faa99735cb8b2d1ca"
+        },
+        "entry_hash": "daa2e03402e77ffb89c5c5bcc15cfb7cc428cc607c29b8584f6d3dbfaceef7e0",
+        "entry_id": 463,
+        "from_state": null,
+        "prev_hash": "12590451e9c92941092cf77a62e9fab7214660da6e02a70566f3a0fc33c643d0",
+        "subject_id": "edge-30cda2d56a8745198433e96c03043cbd",
+        "subject_type": "graph_edge",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      },
+      {
+        "action": "fork",
+        "actor": "alice",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.358830Z",
+        "detail": {
+          "base_version_id": "gv-31dcfe3fd1184ae1aa4aff10af043184",
+          "changes_hash": "8b81d18a2ac8dac714af881a325f506861d38aed4ba13b930b3c821372272bdb",
+          "parent_branch_id": null
+        },
+        "entry_hash": "aa79f8efb8b869a2c2a27bdf7991f23f4ec5ca502bf87d384474628e62708df4",
+        "entry_id": 464,
+        "from_state": null,
+        "prev_hash": "daa2e03402e77ffb89c5c5bcc15cfb7cc428cc607c29b8584f6d3dbfaceef7e0",
+        "subject_id": "br-badc02c6d5e647a4a589da510c4fb1cf",
+        "subject_type": "branch",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "OPEN"
+      },
+      {
+        "action": "create",
+        "actor": "alice",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.365463Z",
+        "detail": {
+          "content_hash": "b53a28c2b430b07ca309d2055924187e7b29d10bf31f3bce1621d48ab20e66e8",
+          "kind": "Branch"
+        },
+        "entry_hash": "98f7ff5f94761143fedc551b2e0f843cc22815b05ae5db514c47afba04ee8c6d",
+        "entry_id": 465,
+        "from_state": null,
+        "prev_hash": "aa79f8efb8b869a2c2a27bdf7991f23f4ec5ca502bf87d384474628e62708df4",
+        "subject_id": "node-f871689ea96d443a8e26c68101c39a18",
+        "subject_type": "graph_node",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      },
+      {
+        "action": "create",
+        "actor": "alice",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.365762Z",
+        "detail": {
+          "dst": "node-bcf87f1c0c4d405faa99735cb8b2d1ca",
+          "kind": "DERIVED_FROM",
+          "src": "node-f871689ea96d443a8e26c68101c39a18"
+        },
+        "entry_hash": "4be9e04c88f41f9555d605c9549448b6ad8fb65563d2fc8d1ea08c1edbfafc88",
+        "entry_id": 466,
+        "from_state": null,
+        "prev_hash": "98f7ff5f94761143fedc551b2e0f843cc22815b05ae5db514c47afba04ee8c6d",
+        "subject_id": "edge-28c8e6396c6f4cd3952dd55a96acf4f8",
+        "subject_type": "graph_edge",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      },
+      {
+        "action": "create",
+        "actor": "alice",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.454101Z",
+        "detail": {
+          "content_hash": "df3f8ab5ff4c29c1a6fcc3960bb0c5e2c2ede8948a97b9e790ea145ef0f4be89",
+          "origin": "AUTHORED",
+          "origin_ref": null,
+          "parent_version_id": "gv-31dcfe3fd1184ae1aa4aff10af043184",
+          "scope": "brand",
+          "scope_ref": "brand-b29fd08b",
+          "version": 2
+        },
+        "entry_hash": "4605ea8c1cec1a93368fa7f7c9dccb65eaa64b465f7cbe5541618702f030173e",
+        "entry_id": 467,
+        "from_state": null,
+        "prev_hash": "4be9e04c88f41f9555d605c9549448b6ad8fb65563d2fc8d1ea08c1edbfafc88",
+        "subject_id": "gv-55bf87432dfd488299740ddf54c0eca5",
+        "subject_type": "genome_version",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "DRAFT"
+      },
+      {
+        "action": "submit",
+        "actor": "alice",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.512687Z",
+        "detail": {
+          "approval_id": "e60ca98e-8b48-4976-8ac8-11456e6d14ff",
+          "content_hash": "df3f8ab5ff4c29c1a6fcc3960bb0c5e2c2ede8948a97b9e790ea145ef0f4be89",
+          "readiness": "348ef323785bc7e0df87f8330af891be685900dec17bb5c7a670e4face9969c3"
+        },
+        "entry_hash": "c776316e6c351bcb028d35993cebf6d0b3b20ef4b8bbaf788b74d508898f1774",
+        "entry_id": 468,
+        "from_state": "DRAFT",
+        "prev_hash": "4605ea8c1cec1a93368fa7f7c9dccb65eaa64b465f7cbe5541618702f030173e",
+        "subject_id": "gv-55bf87432dfd488299740ddf54c0eca5",
+        "subject_type": "genome_version",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "IN_REVIEW"
+      },
+      {
+        "action": "supersede",
+        "actor": "bob",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.654541Z",
+        "detail": {
+          "superseded_by": "gv-55bf87432dfd488299740ddf54c0eca5"
+        },
+        "entry_hash": "d533e6c1383eb41ad952a3ba4b6e0e5cc372044f9aa8baf8f1ddba1055126f45",
+        "entry_id": 469,
+        "from_state": "APPROVED",
+        "prev_hash": "c776316e6c351bcb028d35993cebf6d0b3b20ef4b8bbaf788b74d508898f1774",
+        "subject_id": "gv-31dcfe3fd1184ae1aa4aff10af043184",
+        "subject_type": "genome_version",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "SUPERSEDED"
+      },
+      {
+        "action": "approve",
+        "actor": "bob",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.654883Z",
+        "detail": {
+          "approval_id": "e60ca98e-8b48-4976-8ac8-11456e6d14ff",
+          "content_hash": "df3f8ab5ff4c29c1a6fcc3960bb0c5e2c2ede8948a97b9e790ea145ef0f4be89"
+        },
+        "entry_hash": "5cdea29912060a4722e30aca3861836d6a5623c2b2e6e3fa7908af9f26158578",
+        "entry_id": 470,
+        "from_state": "IN_REVIEW",
+        "prev_hash": "d533e6c1383eb41ad952a3ba4b6e0e5cc372044f9aa8baf8f1ddba1055126f45",
+        "subject_id": "gv-55bf87432dfd488299740ddf54c0eca5",
+        "subject_type": "genome_version",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "APPROVED"
+      },
+      {
+        "action": "create",
+        "actor": "system",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.664415Z",
+        "detail": {
+          "content_hash": "5e79a1d3a8bc05b176c5959da2929a7ddd814224dff7b44b41c7023e7b38096e",
+          "kind": "GenomeVersion"
+        },
+        "entry_hash": "9f71d9f8f20172acf865bc1833d11210b9df70c70ac0f374fc0485a0f86c2d6b",
+        "entry_id": 471,
+        "from_state": null,
+        "prev_hash": "5cdea29912060a4722e30aca3861836d6a5623c2b2e6e3fa7908af9f26158578",
+        "subject_id": "node-be86cf3355ab4301b914692cec6d2c53",
+        "subject_type": "graph_node",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      },
+      {
+        "action": "create",
+        "actor": "system",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.664599Z",
+        "detail": {
+          "content_hash": "999f5baeb7329b81997f865d3460c90a8a949a76a28525bc4a11b7ac604800fd",
+          "kind": "Approval"
+        },
+        "entry_hash": "d3e5288e0f7b7d927468ebfce6708424ce6cc1edd6e838daee85e40821415e56",
+        "entry_id": 472,
+        "from_state": null,
+        "prev_hash": "9f71d9f8f20172acf865bc1833d11210b9df70c70ac0f374fc0485a0f86c2d6b",
+        "subject_id": "node-33b4c6d0c9c14f25a1624a4c1b91a3b5",
+        "subject_type": "graph_node",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      },
+      {
+        "action": "create",
+        "actor": "system",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.664786Z",
+        "detail": {
+          "dst": "node-33b4c6d0c9c14f25a1624a4c1b91a3b5",
+          "kind": "APPROVED_BY",
+          "src": "node-be86cf3355ab4301b914692cec6d2c53"
+        },
+        "entry_hash": "673399279d64f487cf8e7f67e508fe256b970a11c96978b383b40cc0ef17b2b5",
+        "entry_id": 473,
+        "from_state": null,
+        "prev_hash": "d3e5288e0f7b7d927468ebfce6708424ce6cc1edd6e838daee85e40821415e56",
+        "subject_id": "edge-053f01bd0d3b4658921e6ba2437ed767",
+        "subject_type": "graph_edge",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      },
+      {
+        "action": "create",
+        "actor": "system",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.664903Z",
+        "detail": {
+          "dst": "node-bcf87f1c0c4d405faa99735cb8b2d1ca",
+          "kind": "SUPERSEDES",
+          "src": "node-be86cf3355ab4301b914692cec6d2c53"
+        },
+        "entry_hash": "4ef1ab7a222f7e27ede75d44e681cad0ad21ce3146b27a10f70dc06cc63bda23",
+        "entry_id": 474,
+        "from_state": null,
+        "prev_hash": "673399279d64f487cf8e7f67e508fe256b970a11c96978b383b40cc0ef17b2b5",
+        "subject_id": "edge-ea1d4a0b8a3c49e6affee8bb9931a797",
+        "subject_type": "graph_edge",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      },
+      {
+        "action": "supersede",
+        "actor": "system",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:40.665072Z",
+        "detail": {
+          "superseded_by": "node-be86cf3355ab4301b914692cec6d2c53"
+        },
+        "entry_hash": "2e91a037e83850ccf60a89fd80928480480668d746d6a6cae64f650eb486e79e",
+        "entry_id": 475,
+        "from_state": "VALID",
+        "prev_hash": "4ef1ab7a222f7e27ede75d44e681cad0ad21ce3146b27a10f70dc06cc63bda23",
+        "subject_id": "node-bcf87f1c0c4d405faa99735cb8b2d1ca",
+        "subject_type": "graph_node",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "CLOSED"
+      },
+      {
+        "action": "create",
+        "actor": "alice",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:41.013929Z",
+        "detail": {
+          "content_hash": "6183151ba0348d1e45f535a1d9d431a46013b6e473d7b4877e8f97c68275d481",
+          "kind": "DesignDecision"
+        },
+        "entry_hash": "20cb0d127cd028881f48c2aec36380a97236e10f80fd20744443c67a93a2d3da",
+        "entry_id": 476,
+        "from_state": null,
+        "prev_hash": "2e91a037e83850ccf60a89fd80928480480668d746d6a6cae64f650eb486e79e",
+        "subject_id": "node-f0e26bbe689e49c093cf7dfe81274f11",
+        "subject_type": "graph_node",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      },
+      {
+        "action": "create",
+        "actor": "alice",
+        "chain_ref": "brand-b29fd08b",
+        "created_at": "2026-10-11T09:40:41.014315Z",
+        "detail": {
+          "dst": "node-be86cf3355ab4301b914692cec6d2c53",
+          "kind": "DERIVED_FROM",
+          "src": "node-f0e26bbe689e49c093cf7dfe81274f11"
+        },
+        "entry_hash": "5b2d9b0ba599d5d386d370ac19fccf65d63bbf307a50e0740e1b9d9123fb6264",
+        "entry_id": 477,
+        "from_state": null,
+        "prev_hash": "20cb0d127cd028881f48c2aec36380a97236e10f80fd20744443c67a93a2d3da",
+        "subject_id": "edge-da28aadb064d4cbab2a2658d5bf652f5",
+        "subject_type": "graph_edge",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALID"
+      }
+    ],
+    "verification": {
+      "entries": 21,
+      "head": "5b2d9b0ba599d5d386d370ac19fccf65d63bbf307a50e0740e1b9d9123fb6264",
+      "intact": true
+    }
+  },
+  "branch": {
+    "base_version_id": "gv-31dcfe3fd1184ae1aa4aff10af043184",
+    "branch_id": "br-badc02c6d5e647a4a589da510c4fb1cf",
+    "brand_id": "brand-b29fd08b",
+    "changes": {
+      "add_constraints": [],
+      "remove_constraints": [],
+      "set": {
+        "visual.color.accent": "#1d4ed8"
+      },
+      "unset": []
+    },
+    "changes_hash": "8b81d18a2ac8dac714af881a325f506861d38aed4ba13b930b3c821372272bdb",
+    "created_at": "2026-10-11T09:40:40.356430Z",
+    "created_by": "alice",
+    "decision_note": null,
+    "evaluations": [
+      {
+        "branch_id": "br-badc02c6d5e647a4a589da510c4fb1cf",
+        "changes_hash": "8b81d18a2ac8dac714af881a325f506861d38aed4ba13b930b3c821372272bdb",
+        "created_at": "2026-10-11T09:40:40.387007Z",
+        "evaluation_id": "ev-8e82a71e508a4d788c26623eea94537a",
+        "evaluator": "alice",
+        "kind": "HUMAN",
+        "payload": {
+          "decision": "revise",
+          "kind": "HUMAN",
+          "text": "worth a look"
+        },
+        "payload_hash": "15123d4e57bade674ea917c05affe412aa35a64c5aeaee48ee116fa947e2410a",
+        "tenant_id": "tenant-vnx-7b25b82e"
+      }
+    ],
+    "hypothesis": "",
+    "name": "blue",
+    "parent_branch_id": null,
+    "project_id": "prj-vnx-dc4e68f7",
+    "proposal_version_id": null,
+    "revision": 1,
+    "scope": "brand",
+    "scope_ref": "brand-b29fd08b",
+    "state": "OPEN",
+    "tenant_id": "tenant-vnx-7b25b82e",
+    "updated_at": "2026-10-11T09:40:40.356430Z"
+  },
+  "branch_comparison": {
+    "base_document_hash": "c1a82fa1da510ac0dee0acf76d831ca1f5c86ee4073dedcb40efa86827536c12",
+    "base_is_current": true,
+    "branch_document_hash": "0977bab7b5a898ddd768012f76225c27607f1692c985f26f6be42a7cdb884c81",
+    "changes_hash": "8b81d18a2ac8dac714af881a325f506861d38aed4ba13b930b3c821372272bdb",
+    "constraints": {
+      "added": [],
+      "modified": [],
+      "removed": [],
+      "unchanged_inherited": [],
+      "unchanged_own": [
+        "ink-contrast",
+        "ink-hex",
+        "ink-lock",
+        "promise-required",
+        "register"
+      ]
+    },
+    "failed_findings": [],
+    "invariant_violations": [],
+    "promotable": true,
+    "resolution_hash": "71bb585b366408f358c6aca257a8b14e364fc5ca77c6ca73dee713a3efe3c4d6",
+    "values": {
+      "added": [],
+      "modified": [
+        {
+          "after": "#1d4ed8",
+          "before": "#c2410c",
+          "key": "visual.color.accent"
+        }
+      ],
+      "removed": [],
+      "unchanged": [
+        "strategy.audience.primary",
+        "strategy.positioning.promise",
+        "strategy.positioning.statement",
+        "verbal.voice.register",
+        "verbal.voice.tone",
+        "visual.color.accent_2",
+        "visual.color.ink",
+        "visual.color.muted",
+        "visual.color.paper",
+        "visual.imagery.style",
+        "visual.logo.clear_space",
+        "visual.logo.mark",
+        "visual.logo.min_size",
+        "visual.motion.emphasis",
+        "visual.motion.pace",
+        "visual.motion.reduced_motion",
+        "visual.shape_grammar.bauhaus_geometry",
+        "visual.shape_grammar.swiss_editorial",
+        "visual.typography.body",
+        "visual.typography.display"
+      ]
+    }
+  },
+  "brand": {
+    "brand_id": "brand-b29fd08b",
+    "created_at": "2026-10-11T09:40:40.031863Z",
+    "created_by": "alice",
+    "display_name": "Halden & Fen (fictional)",
+    "owner_project_id": "prj-vnx-dc4e68f7",
+    "tenant_id": "tenant-vnx-7b25b82e"
+  },
+  "compare": {
+    "diff": {
+      "added": [],
+      "constraints_added": [],
+      "constraints_modified": [],
+      "constraints_removed": [],
+      "modified": [
+        {
+          "after": "warm",
+          "before": "plain",
+          "key": "verbal.voice.register"
+        }
+      ],
+      "removed": [],
+      "unchanged": [
+        "strategy.audience.primary",
+        "strategy.positioning.promise",
+        "strategy.positioning.statement",
+        "verbal.voice.tone",
+        "visual.color.accent",
+        "visual.color.accent_2",
+        "visual.color.ink",
+        "visual.color.muted",
+        "visual.color.paper",
+        "visual.imagery.style",
+        "visual.logo.clear_space",
+        "visual.logo.mark",
+        "visual.logo.min_size",
+        "visual.motion.emphasis",
+        "visual.motion.pace",
+        "visual.motion.reduced_motion",
+        "visual.shape_grammar.bauhaus_geometry",
+        "visual.shape_grammar.swiss_editorial",
+        "visual.typography.body",
+        "visual.typography.display"
+      ]
+    },
+    "from": {
+      "content_hash": "c1a82fa1da510ac0dee0acf76d831ca1f5c86ee4073dedcb40efa86827536c12",
+      "scope": "brand",
+      "scope_ref": "brand-b29fd08b",
+      "status": "SUPERSEDED",
+      "version": 1,
+      "version_id": "gv-31dcfe3fd1184ae1aa4aff10af043184"
+    },
+    "identical": false,
+    "to": {
+      "content_hash": "df3f8ab5ff4c29c1a6fcc3960bb0c5e2c2ede8948a97b9e790ea145ef0f4be89",
+      "scope": "brand",
+      "scope_ref": "brand-b29fd08b",
+      "status": "APPROVED",
+      "version": 2,
+      "version_id": "gv-55bf87432dfd488299740ddf54c0eca5"
+    }
+  },
+  "graph": {
+    "as_of": null,
+    "edges": [
+      {
+        "dst_node_id": "node-33b4c6d0c9c14f25a1624a4c1b91a3b5",
+        "edge_id": "edge-053f01bd0d3b4658921e6ba2437ed767",
+        "kind": "APPROVED_BY",
+        "provenance": {
+          "approval_id": "e60ca98e-8b48-4976-8ac8-11456e6d14ff"
+        },
+        "src_node_id": "node-be86cf3355ab4301b914692cec6d2c53",
+        "valid_from": "2026-10-11T09:40:40.664659Z",
+        "valid_to": null
+      },
+      {
+        "dst_node_id": "node-be86cf3355ab4301b914692cec6d2c53",
+        "edge_id": "edge-da28aadb064d4cbab2a2658d5bf652f5",
+        "kind": "DERIVED_FROM",
+        "provenance": {
+          "genome_version_id": "gv-55bf87432dfd488299740ddf54c0eca5"
+        },
+        "src_node_id": "node-f0e26bbe689e49c093cf7dfe81274f11",
+        "valid_from": "2026-10-11T09:40:41.014180Z",
+        "valid_to": null
+      }
+    ],
+    "lineage_cycles": [],
+    "nodes": [
+      {
+        "attributes": {
+          "decided_at": "2026-10-11T09:40:40.254690+00:00",
+          "decision": "approve",
+          "ref": "69dc2970-fdfa-4859-a7fe-fd8b6c041c3d",
+          "reviewer": "bob",
+          "subject_hash": "c1a82fa1da510ac0dee0acf76d831ca1f5c86ee4073dedcb40efa86827536c12"
+        },
+        "content_hash": "9cb71c9631e4536a62ea155a98cdea4a9beef4e55b26704f2578fa5c77f31845",
+        "kind": "Approval",
+        "label": "approval 69dc2970",
+        "node_id": "node-5aa0b9f31b724572a5a4bc20e835e1ca",
+        "superseded_by": null,
+        "valid_from": "2026-10-11T09:40:40.318601Z",
+        "valid_to": null
+      },
+      {
+        "attributes": {
+          "base_version_id": "gv-31dcfe3fd1184ae1aa4aff10af043184",
+          "hypothesis": "",
+          "name": "blue",
+          "ref": "br-badc02c6d5e647a4a589da510c4fb1cf"
+        },
+        "content_hash": "b53a28c2b430b07ca309d2055924187e7b29d10bf31f3bce1621d48ab20e66e8",
+        "kind": "Branch",
+        "label": "blue",
+        "node_id": "node-f871689ea96d443a8e26c68101c39a18",
+        "superseded_by": null,
+        "valid_from": "2026-10-11T09:40:40.365255Z",
+        "valid_to": null
+      },
+      {
+        "attributes": {
+          "content_hash": "df3f8ab5ff4c29c1a6fcc3960bb0c5e2c2ede8948a97b9e790ea145ef0f4be89",
+          "ref": "gv-55bf87432dfd488299740ddf54c0eca5",
+          "scope": "brand",
+          "scope_ref": "brand-b29fd08b",
+          "version": 2
+        },
+        "content_hash": "5e79a1d3a8bc05b176c5959da2929a7ddd814224dff7b44b41c7023e7b38096e",
+        "kind": "GenomeVersion",
+        "label": "brand:brand-b29fd08b v2",
+        "node_id": "node-be86cf3355ab4301b914692cec6d2c53",
+        "superseded_by": null,
+        "valid_from": "2026-10-11T09:40:40.664202Z",
+        "valid_to": null
+      },
+      {
+        "attributes": {
+          "decided_at": "2026-10-11T09:40:40.593938+00:00",
+          "decision": "approve",
+          "ref": "e60ca98e-8b48-4976-8ac8-11456e6d14ff",
+          "reviewer": "bob",
+          "subject_hash": "df3f8ab5ff4c29c1a6fcc3960bb0c5e2c2ede8948a97b9e790ea145ef0f4be89"
+        },
+        "content_hash": "999f5baeb7329b81997f865d3460c90a8a949a76a28525bc4a11b7ac604800fd",
+        "kind": "Approval",
+        "label": "approval e60ca98e",
+        "node_id": "node-33b4c6d0c9c14f25a1624a4c1b91a3b5",
+        "superseded_by": null,
+        "valid_from": "2026-10-11T09:40:40.664560Z",
+        "valid_to": null
+      },
+      {
+        "attributes": {
+          "brief_hash": "616e67fff89be5bd03fcad13bd7477313372dca9facb9e4b31d0f5513736a80e",
+          "claim_counts": {
+            "EXPERIMENTAL_SUGGESTION": 0,
+            "INFERRED_DECISION": 6,
+            "UNSUPPORTED_ASSUMPTION": 1,
+            "VERIFIED_REQUIREMENT": 11
+          },
+          "ref": "art-prj-vnx-dc4e68f7-foundry-vnexus-art-direction-616e67fff89b-json"
+        },
+        "content_hash": "6183151ba0348d1e45f535a1d9d431a46013b6e473d7b4877e8f97c68275d481",
+        "kind": "DesignDecision",
+        "label": "art direction: Launch",
+        "node_id": "node-f0e26bbe689e49c093cf7dfe81274f11",
+        "superseded_by": null,
+        "valid_from": "2026-10-11T09:40:41.013571Z",
+        "valid_to": null
+      }
+    ],
+    "snapshot": {
+      "as_of": null,
+      "edges": [
+        "node-be86cf3355ab4301b914692cec6d2c53|APPROVED_BY|node-33b4c6d0c9c14f25a1624a4c1b91a3b5",
+        "node-f0e26bbe689e49c093cf7dfe81274f11|DERIVED_FROM|node-be86cf3355ab4301b914692cec6d2c53"
+      ],
+      "nodes": {
+        "node-33b4c6d0c9c14f25a1624a4c1b91a3b5": "999f5baeb7329b81997f865d3460c90a8a949a76a28525bc4a11b7ac604800fd",
+        "node-5aa0b9f31b724572a5a4bc20e835e1ca": "9cb71c9631e4536a62ea155a98cdea4a9beef4e55b26704f2578fa5c77f31845",
+        "node-be86cf3355ab4301b914692cec6d2c53": "5e79a1d3a8bc05b176c5959da2929a7ddd814224dff7b44b41c7023e7b38096e",
+        "node-f0e26bbe689e49c093cf7dfe81274f11": "6183151ba0348d1e45f535a1d9d431a46013b6e473d7b4877e8f97c68275d481",
+        "node-f871689ea96d443a8e26c68101c39a18": "b53a28c2b430b07ca309d2055924187e7b29d10bf31f3bce1621d48ab20e66e8"
+      },
+      "snapshot_hash": "a21d4d0ffcf786f33cfed5ed9dce01599de23c99bb8bd08fff8992c84761bbe7"
+    }
+  },
+  "immune_scan": {
+    "brand_id": "brand-b29fd08b",
+    "counts": {
+      "BLOCKING": 0,
+      "ERROR": 0,
+      "INFO": 0,
+      "WARNING": 0
+    },
+    "findings": [],
+    "healthy": true,
+    "outputs_scanned": 1,
+    "scan_hash": "bfb5597b08922e201d559f43f007e1257d7e20e12a093cd1b135efa4d8128684",
+    "scope": "brand",
+    "scope_ref": "brand-b29fd08b"
+  },
+  "impact": {
+    "affected": [
+      {
+        "kind": "DesignDecision",
+        "label": "art direction: Launch",
+        "node_id": "node-f0e26bbe689e49c093cf7dfe81274f11",
+        "path": [
+          "node-be86cf3355ab4301b914692cec6d2c53",
+          "<-DERIVED_FROM-",
+          "node-f0e26bbe689e49c093cf7dfe81274f11"
+        ]
+      }
+    ],
+    "changed": [
+      "node-be86cf3355ab4301b914692cec6d2c53"
+    ]
+  },
+  "media_job": {
+    "artifact": {
+      "artifact_id": "art-prj-vnx-dc4e68f7-foundry-vnexus-vector-svg-dd12f19b2ef6-svg",
+      "bytes": 144,
+      "label": "synthetic render (not a photograph)",
+      "mime": "image/svg+xml",
+      "readback_sha256": "23d7dfc85bd9b88dc17c7f1131c3d6100fff9c595bf606565b31c8ab2e4e6d0a",
+      "renderer": "local.svg",
+      "renderer_version": "amc-vnexus-media-fabric/v1",
+      "sha256": "23d7dfc85bd9b88dc17c7f1131c3d6100fff9c595bf606565b31c8ab2e4e6d0a",
+      "simulated": false,
+      "storage_uri": "local://tenant-vnx-7b25b82e/prj-vnx-dc4e68f7/23d7dfc85bd9b88dc17c7f1131c3d6100fff9c595bf606565b31c8ab2e4e6d0a",
+      "version": 1
+    },
+    "attempts": 1,
+    "authorized_at": "2026-10-11T09:40:40.724399Z",
+    "authorized_by": "alice",
+    "budget_ceiling_minor": 0,
+    "capability": "VECTOR_SVG",
+    "claimable_as_generated": true,
+    "created_at": "2026-10-11T09:40:40.693547Z",
+    "created_by": "alice",
+    "currency": "USD",
+    "error": null,
+    "estimate": {
+      "amount_minor": 0,
+      "basis": "local compute only; no charge",
+      "currency": "USD"
+    },
+    "idempotency_key": "86c400e3-2f9e-4839-996f-2cbbeb8e4246",
+    "job_id": "mjob-bd9c0f03be164415b7a9dd12f19b2ef6",
+    "label": "",
+    "max_attempts": 2,
+    "project_id": "prj-vnx-dc4e68f7",
+    "provider_id": "local.svg",
+    "provider_job_ref": "mjob-bd9c0f03be164415b7a9dd12f19b2ef6",
+    "qc": {
+      "checks": [
+        {
+          "check": "svg_root",
+          "detail": "starts with <svg or <?xml",
+          "level": "Q0_VALID_FILE",
+          "passed": true
+        },
+        {
+          "check": "svg_safety",
+          "detail": "well-formed SVG without active content or external references",
+          "level": "Q1_DECODABLE",
+          "passed": true
+        },
+        {
+          "check": "viewbox",
+          "detail": "0 0 8 8",
+          "level": "Q2_DIMENSIONS_FORMAT",
+          "passed": true
+        },
+        {
+          "check": "geometry_present",
+          "detail": "1 geometry element(s)",
+          "level": "Q3_NONBLANK",
+          "passed": true
+        },
+        {
+          "check": "source_rights",
+          "detail": "procedural only",
+          "level": "Q4_RIGHTS",
+          "passed": true
+        }
+      ],
+      "inconclusive": [],
+      "passed": true,
+      "simulated": false,
+      "verdict": "PASSED"
+    },
+    "request_hash": "6479622b7a6f1ccba360cf00d74c5b688199aedf65a794f8fe753bb1ecf8ad6d",
+    "simulated": false,
+    "state": "QC_PASSED",
+    "transitions": [
+      {
+        "actor": "alice",
+        "from_state": "NONE",
+        "job_id": "mjob-bd9c0f03be164415b7a9dd12f19b2ef6",
+        "observed_at": "2026-10-11T09:40:40.693547Z",
+        "reason": "created",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "PLANNED",
+        "transition_id": 382
+      },
+      {
+        "actor": "alice",
+        "from_state": "PLANNED",
+        "job_id": "mjob-bd9c0f03be164415b7a9dd12f19b2ef6",
+        "observed_at": "2026-10-11T09:40:40.708244Z",
+        "reason": "validated",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "VALIDATED",
+        "transition_id": 383
+      },
+      {
+        "actor": "alice",
+        "from_state": "VALIDATED",
+        "job_id": "mjob-bd9c0f03be164415b7a9dd12f19b2ef6",
+        "observed_at": "2026-10-11T09:40:40.724443Z",
+        "reason": "zero-cost local work; requester has write access",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "AUTHORIZED",
+        "transition_id": 384
+      },
+      {
+        "actor": "alice",
+        "from_state": "AUTHORIZED",
+        "job_id": "mjob-bd9c0f03be164415b7a9dd12f19b2ef6",
+        "observed_at": "2026-10-11T09:40:40.736487Z",
+        "reason": "queued",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "QUEUED",
+        "transition_id": 385
+      },
+      {
+        "actor": "alice",
+        "from_state": "QUEUED",
+        "job_id": "mjob-bd9c0f03be164415b7a9dd12f19b2ef6",
+        "observed_at": "2026-10-11T09:40:40.751288Z",
+        "reason": "attempt 1",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "RUNNING",
+        "transition_id": 386
+      },
+      {
+        "actor": "system",
+        "from_state": "RUNNING",
+        "job_id": "mjob-bd9c0f03be164415b7a9dd12f19b2ef6",
+        "observed_at": "2026-10-11T09:40:40.837659Z",
+        "reason": "artifact stored and read back",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "ARTIFACT_RECEIVED",
+        "transition_id": 387
+      },
+      {
+        "actor": "system",
+        "from_state": "ARTIFACT_RECEIVED",
+        "job_id": "mjob-bd9c0f03be164415b7a9dd12f19b2ef6",
+        "observed_at": "2026-10-11T09:40:40.842252Z",
+        "reason": "quality control",
+        "tenant_id": "tenant-vnx-7b25b82e",
+        "to_state": "QC_PASSED",
+        "transition_id": 388
+      }
+    ],
+    "updated_at": "2026-10-11T09:40:40.842252Z",
+    "version": 7
+  },
+  "prompt_inventory": {
+    "expected_originals": 14,
+    "imported_ids": [],
+    "imported_originals": 0,
+    "missing": 14,
+    "note": "missing originals are never reconstructed; import the exact source text to fill a slot",
+    "status": "SOURCE_REQUIRED"
+  },
+  "providers": [
+    {
+      "blockers": [],
+      "capabilities": [
+        "VECTOR_SVG"
+      ],
+      "cost_per_job_minor": 0,
+      "currency": "USD",
+      "description": "Self-contained SVG supplied by a deterministic composer (foundry compose, identity templates)",
+      "kind": "LOCAL",
+      "provider_id": "local.svg",
+      "rate_limit_per_minute": 30,
+      "simulated": false,
+      "status": "AVAILABLE",
+      "timeout_s": 10,
+      "version": "amc-vnexus-media-fabric/v1"
+    },
+    {
+      "blockers": [],
+      "capabilities": [
+        "RASTER_PNG"
+      ],
+      "cost_per_job_minor": 0,
+      "currency": "USD",
+      "description": "Exact-size PNG of an SVG rendered by local Chromium with all remote requests blocked",
+      "kind": "LOCAL",
+      "provider_id": "local.chromium_raster",
+      "rate_limit_per_minute": 30,
+      "simulated": false,
+      "status": "AVAILABLE",
+      "timeout_s": 120,
+      "version": "amc-vnexus-media-fabric/v1"
+    },
+    {
+      "blockers": [],
+      "capabilities": [
+        "RASTER_WEBP"
+      ],
+      "cost_per_job_minor": 0,
+      "currency": "USD",
+      "description": "Chromium PNG re-encoded losslessly to WebP by Pillow",
+      "kind": "LOCAL",
+      "provider_id": "local.pillow_webp",
+      "rate_limit_per_minute": 30,
+      "simulated": false,
+      "status": "AVAILABLE",
+      "timeout_s": 120,
+      "version": "amc-vnexus-media-fabric/v1"
+    },
+    {
+      "blockers": [],
+      "capabilities": [
+        "DOCUMENT_PDF"
+      ],
+      "cost_per_job_minor": 0,
+      "currency": "USD",
+      "description": "Vector PDF printed by local Chromium from self-contained HTML or SVG",
+      "kind": "LOCAL",
+      "provider_id": "local.chromium_pdf",
+      "rate_limit_per_minute": 30,
+      "simulated": false,
+      "status": "AVAILABLE",
+      "timeout_s": 120,
+      "version": "amc-vnexus-media-fabric/v1"
+    },
+    {
+      "blockers": [],
+      "capabilities": [
+        "MOTION_MP4"
+      ],
+      "cost_per_job_minor": 0,
+      "currency": "USD",
+      "description": "SVG keyframes rendered frame by frame in local Chromium and encoded with FFmpeg (H.264)",
+      "kind": "LOCAL",
+      "provider_id": "local.svg_motion",
+      "rate_limit_per_minute": 30,
+      "simulated": false,
+      "status": "AVAILABLE",
+      "timeout_s": 600,
+      "version": "amc-vnexus-media-fabric/v1"
+    },
+    {
+      "blockers": [
+        "ADAPTER_NOT_IMPLEMENTED",
+        "NO_CREDENTIALS",
+        "PAID_CALLS_NOT_AUTHORIZED"
+      ],
+      "capabilities": [
+        "TEXT_TO_IMAGE"
+      ],
+      "cost_per_job_minor": 0,
+      "currency": "USD",
+      "description": "Hosted text-to-image slot (no adapter installed)",
+      "kind": "HOSTED",
+      "provider_id": "hosted.text_to_image",
+      "rate_limit_per_minute": 30,
+      "simulated": false,
+      "status": "DISABLED",
+      "timeout_s": 120,
+      "version": "amc-vnexus-media-fabric/v1"
+    },
+    {
+      "blockers": [
+        "ADAPTER_NOT_IMPLEMENTED",
+        "NO_CREDENTIALS",
+        "PAID_CALLS_NOT_AUTHORIZED"
+      ],
+      "capabilities": [
+        "TEXT_TO_VIDEO"
+      ],
+      "cost_per_job_minor": 0,
+      "currency": "USD",
+      "description": "Hosted text-to-video slot (no adapter installed)",
+      "kind": "HOSTED",
+      "provider_id": "hosted.text_to_video",
+      "rate_limit_per_minute": 30,
+      "simulated": false,
+      "status": "DISABLED",
+      "timeout_s": 120,
+      "version": "amc-vnexus-media-fabric/v1"
+    },
+    {
+      "blockers": [
+        "ADAPTER_NOT_IMPLEMENTED",
+        "NO_CREDENTIALS",
+        "PAID_CALLS_NOT_AUTHORIZED"
+      ],
+      "capabilities": [
+        "IMAGE_TO_VIDEO",
+        "VIDEO_TRANSFORM"
+      ],
+      "cost_per_job_minor": 0,
+      "currency": "USD",
+      "description": "Hosted image-to-video / video transform slot (no adapter installed)",
+      "kind": "HOSTED",
+      "provider_id": "hosted.image_to_video",
+      "rate_limit_per_minute": 30,
+      "simulated": false,
+      "status": "DISABLED",
+      "timeout_s": 120,
+      "version": "amc-vnexus-media-fabric/v1"
+    },
+    {
+      "blockers": [
+        "MOCK_PROVIDERS_DISABLED"
+      ],
+      "capabilities": [
+        "VECTOR_SVG",
+        "RASTER_PNG",
+        "RASTER_WEBP",
+        "DOCUMENT_PDF",
+        "MOTION_MP4",
+        "TEXT_TO_IMAGE",
+        "TEXT_TO_VIDEO",
+        "IMAGE_TO_VIDEO",
+        "VIDEO_TRANSFORM"
+      ],
+      "cost_per_job_minor": 0,
+      "currency": "USD",
+      "description": "SIMULATED output for testing the job lifecycle; never a generated asset",
+      "kind": "MOCK",
+      "provider_id": "mock.simulated",
+      "rate_limit_per_minute": 30,
+      "simulated": true,
+      "status": "DISABLED",
+      "timeout_s": 120,
+      "version": "amc-vnexus-media-fabric/v1"
+    }
+  ],
+  "readiness": {
+    "blocking_findings": [],
+    "conflicts": [],
+    "content_hash": "c1a82fa1da510ac0dee0acf76d831ca1f5c86ee4073dedcb40efa86827536c12",
+    "ready": true,
+    "resolution_hash": "2649fc40346a9ba1e65ed9b927ae6f221debfcd31a1acca6e5e0406ac833cfc2",
+    "self_findings": [],
+    "version_id": "gv-31dcfe3fd1184ae1aa4aff10af043184"
+  },
+  "resolve": {
+    "layers": [
+      {
+        "content_hash": "c1a82fa1da510ac0dee0acf76d831ca1f5c86ee4073dedcb40efa86827536c12",
+        "scope": "brand",
+        "scope_ref": "brand-b29fd08b",
+        "status": "APPROVED",
+        "version": 1,
+        "version_id": "gv-31dcfe3fd1184ae1aa4aff10af043184"
+      }
+    ],
+    "resolution": {
+      "applied_scopes": [
+        "brand-b29fd08b"
+      ],
+      "authoritative": true,
+      "conflicts": [],
+      "constraint_owner": {
+        "ink-contrast": "brand-b29fd08b",
+        "ink-hex": "brand-b29fd08b",
+        "ink-lock": "brand-b29fd08b",
+        "promise-required": "brand-b29fd08b",
+        "register": "brand-b29fd08b"
+      },
+      "constraints": [
+        {
+          "constraint_id": "ink-contrast",
+          "key": "visual.color.ink",
+          "kind": "MIN_CONTRAST",
+          "params": {
+            "against": "visual.color.paper",
+            "ratio": 4.5
+          },
+          "rationale": "",
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "ink-hex",
+          "key": "visual.color.ink",
+          "kind": "HEX_COLOR",
+          "params": {},
+          "rationale": "",
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "ink-lock",
+          "key": "visual.color.ink",
+          "kind": "IMMUTABLE",
+          "params": {},
+          "rationale": "",
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "promise-required",
+          "key": "strategy.positioning.promise",
+          "kind": "REQUIRED",
+          "params": {},
+          "rationale": "",
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "register",
+          "key": "verbal.voice.register",
+          "kind": "ALLOWED_VALUES",
+          "params": {
+            "values": [
+              "plain",
+              "warm"
+            ]
+          },
+          "rationale": "",
+          "severity": "BLOCKING"
+        }
+      ],
+      "findings": [
+        {
+          "constraint_id": "ink-contrast",
+          "declared_by": "brand-b29fd08b",
+          "detail": "satisfied",
+          "key": "visual.color.ink",
+          "kind": "MIN_CONTRAST",
+          "passed": true,
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "ink-hex",
+          "declared_by": "brand-b29fd08b",
+          "detail": "satisfied",
+          "key": "visual.color.ink",
+          "kind": "HEX_COLOR",
+          "passed": true,
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "ink-lock",
+          "declared_by": "brand-b29fd08b",
+          "detail": "locked for descendant scopes",
+          "key": "visual.color.ink",
+          "kind": "IMMUTABLE",
+          "passed": true,
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "promise-required",
+          "declared_by": "brand-b29fd08b",
+          "detail": "satisfied",
+          "key": "strategy.positioning.promise",
+          "kind": "REQUIRED",
+          "passed": true,
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "register",
+          "declared_by": "brand-b29fd08b",
+          "detail": "satisfied",
+          "key": "verbal.voice.register",
+          "kind": "ALLOWED_VALUES",
+          "passed": true,
+          "severity": "BLOCKING"
+        }
+      ],
+      "preview_scope": null,
+      "sources": {
+        "strategy.audience.primary": "brand-b29fd08b",
+        "strategy.positioning.promise": "brand-b29fd08b",
+        "strategy.positioning.statement": "brand-b29fd08b",
+        "verbal.voice.register": "brand-b29fd08b",
+        "verbal.voice.tone": "brand-b29fd08b",
+        "visual.color.accent": "brand-b29fd08b",
+        "visual.color.accent_2": "brand-b29fd08b",
+        "visual.color.ink": "brand-b29fd08b",
+        "visual.color.muted": "brand-b29fd08b",
+        "visual.color.paper": "brand-b29fd08b",
+        "visual.imagery.style": "brand-b29fd08b",
+        "visual.logo.clear_space": "brand-b29fd08b",
+        "visual.logo.mark": "brand-b29fd08b",
+        "visual.logo.min_size": "brand-b29fd08b",
+        "visual.motion.emphasis": "brand-b29fd08b",
+        "visual.motion.pace": "brand-b29fd08b",
+        "visual.motion.reduced_motion": "brand-b29fd08b",
+        "visual.shape_grammar.bauhaus_geometry": "brand-b29fd08b",
+        "visual.shape_grammar.swiss_editorial": "brand-b29fd08b",
+        "visual.typography.body": "brand-b29fd08b",
+        "visual.typography.display": "brand-b29fd08b"
+      },
+      "values": {
+        "strategy.audience.primary": "people furnishing a first home (fictional persona)",
+        "strategy.positioning.promise": "Made slowly, used daily",
+        "strategy.positioning.statement": "Small-batch stoneware (fictional brand)",
+        "verbal.voice.register": "plain",
+        "verbal.voice.tone": [
+          "plain",
+          "warm"
+        ],
+        "visual.color.accent": "#c2410c",
+        "visual.color.accent_2": "#93c5fd",
+        "visual.color.ink": "#14161a",
+        "visual.color.muted": "#4b4540",
+        "visual.color.paper": "#f7f4ee",
+        "visual.imagery.style": "Natural light on matte surfaces",
+        "visual.logo.clear_space": "a quarter of the mark height",
+        "visual.logo.mark": "ring_dot",
+        "visual.logo.min_size": "24px",
+        "visual.motion.emphasis": [
+          "logo reveal"
+        ],
+        "visual.motion.pace": "unhurried",
+        "visual.motion.reduced_motion": "static final frame",
+        "visual.shape_grammar.bauhaus_geometry": 0.3,
+        "visual.shape_grammar.swiss_editorial": 0.7,
+        "visual.typography.body": "Inter",
+        "visual.typography.display": "Schibsted Grotesk"
+      }
+    },
+    "resolution_hash": "17b2409e6ae5e8de2aee408976d0096e5e3bb2a2815be2c73ea5d266a020bb64"
+  },
+  "twin": {
+    "approved_scopes": [
+      {
+        "conflicts": [],
+        "failed_findings": [],
+        "resolution_hash": "ee4143633d0998e31776bf1e23ab6846da46da4723e9c54bf7c22ff7f017cd01",
+        "scope": "brand",
+        "scope_ref": "brand-b29fd08b",
+        "version": 2,
+        "version_id": "gv-55bf87432dfd488299740ddf54c0eca5"
+      }
+    ],
+    "brand_id": "brand-b29fd08b",
+    "graph": {
+      "as_of": null,
+      "edges": [
+        "node-be86cf3355ab4301b914692cec6d2c53|APPROVED_BY|node-33b4c6d0c9c14f25a1624a4c1b91a3b5",
+        "node-f0e26bbe689e49c093cf7dfe81274f11|DERIVED_FROM|node-be86cf3355ab4301b914692cec6d2c53"
+      ],
+      "nodes": {
+        "node-33b4c6d0c9c14f25a1624a4c1b91a3b5": "999f5baeb7329b81997f865d3460c90a8a949a76a28525bc4a11b7ac604800fd",
+        "node-5aa0b9f31b724572a5a4bc20e835e1ca": "9cb71c9631e4536a62ea155a98cdea4a9beef4e55b26704f2578fa5c77f31845",
+        "node-be86cf3355ab4301b914692cec6d2c53": "5e79a1d3a8bc05b176c5959da2929a7ddd814224dff7b44b41c7023e7b38096e",
+        "node-f0e26bbe689e49c093cf7dfe81274f11": "6183151ba0348d1e45f535a1d9d431a46013b6e473d7b4877e8f97c68275d481",
+        "node-f871689ea96d443a8e26c68101c39a18": "b53a28c2b430b07ca309d2055924187e7b29d10bf31f3bce1621d48ab20e66e8"
+      },
+      "snapshot_hash": "a21d4d0ffcf786f33cfed5ed9dce01599de23c99bb8bd08fff8992c84761bbe7"
+    },
+    "label": "SIMULATION: computed from stored state; nothing changed and no outcome is measured",
+    "open_branches": 1,
+    "produced_outputs": 0,
+    "release_readiness": {
+      "pending_human_decisions": 0,
+      "scopes_with_conflicts": 0,
+      "scopes_with_failed_findings": 0
+    },
+    "versions_in_review": 0
+  },
+  "version": {
+    "approval_id": "69dc2970-fdfa-4859-a7fe-fd8b6c041c3d",
+    "brand_id": "brand-b29fd08b",
+    "content_hash": "c1a82fa1da510ac0dee0acf76d831ca1f5c86ee4073dedcb40efa86827536c12",
+    "created_at": "2026-10-11T09:40:40.074523Z",
+    "created_by": "alice",
+    "decided_at": "2026-10-11T09:40:40.254690+00:00",
+    "decided_by": "bob",
+    "document": {
+      "chromosomes": {
+        "strategy": {
+          "audience.primary": "people furnishing a first home (fictional persona)",
+          "positioning.promise": "Made slowly, used daily",
+          "positioning.statement": "Small-batch stoneware (fictional brand)"
+        },
+        "verbal": {
+          "voice.register": "plain",
+          "voice.tone": [
+            "plain",
+            "warm"
+          ]
+        },
+        "visual": {
+          "color.accent": "#c2410c",
+          "color.accent_2": "#93c5fd",
+          "color.ink": "#14161a",
+          "color.muted": "#4b4540",
+          "color.paper": "#f7f4ee",
+          "imagery.style": "Natural light on matte surfaces",
+          "logo.clear_space": "a quarter of the mark height",
+          "logo.mark": "ring_dot",
+          "logo.min_size": "24px",
+          "motion.emphasis": [
+            "logo reveal"
+          ],
+          "motion.pace": "unhurried",
+          "motion.reduced_motion": "static final frame",
+          "shape_grammar.bauhaus_geometry": 0.3,
+          "shape_grammar.swiss_editorial": 0.7,
+          "typography.body": "Inter",
+          "typography.display": "Schibsted Grotesk"
+        }
+      },
+      "constraints": [
+        {
+          "constraint_id": "ink-lock",
+          "key": "visual.color.ink",
+          "kind": "IMMUTABLE",
+          "params": {},
+          "rationale": "",
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "ink-hex",
+          "key": "visual.color.ink",
+          "kind": "HEX_COLOR",
+          "params": {},
+          "rationale": "",
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "ink-contrast",
+          "key": "visual.color.ink",
+          "kind": "MIN_CONTRAST",
+          "params": {
+            "against": "visual.color.paper",
+            "ratio": 4.5
+          },
+          "rationale": "",
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "register",
+          "key": "verbal.voice.register",
+          "kind": "ALLOWED_VALUES",
+          "params": {
+            "values": [
+              "plain",
+              "warm"
+            ]
+          },
+          "rationale": "",
+          "severity": "BLOCKING"
+        },
+        {
+          "constraint_id": "promise-required",
+          "key": "strategy.positioning.promise",
+          "kind": "REQUIRED",
+          "params": {},
+          "rationale": "",
+          "severity": "BLOCKING"
+        }
+      ],
+      "provenance": [],
+      "schema_version": "amc-vnexus-genome/v1"
+    },
+    "origin": "AUTHORED",
+    "origin_ref": null,
+    "parent_version_id": null,
+    "project_id": "prj-vnx-dc4e68f7",
+    "revision": 1,
+    "scope": "brand",
+    "scope_ref": "brand-b29fd08b",
+    "status": "APPROVED",
+    "submitted_at": "2026-10-11T09:40:40.175821Z",
+    "submitted_by": "alice",
+    "updated_at": "2026-10-11T09:40:40.308511Z",
+    "version": 1,
+    "version_id": "gv-31dcfe3fd1184ae1aa4aff10af043184"
+  }
+}

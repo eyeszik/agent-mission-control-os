@@ -1,0 +1,29 @@
+{
+  "schema": "amc-roleos-release-checkpoint/v1",
+  "primary_objective": "Prepare Agency Role OS v2 for governed integration into eyeszik/agent-mission-control-os without production install/deploy.",
+  "source_archive_sha256": "d98182dd14b4c1493232d59d2783ce05e8dfb120ebeeb865c88317d06075a757",
+  "base_commit": "64c5a29d66cf6129792e5bb8dc310212ec5efa8c",
+  "release_candidate_branch": "roleos-release-candidate-2026-09-25",
+  "completed": [
+    "source archive identity verified",
+    "28 review records dispositioned",
+    "deterministic nine-stage AMC RoleOS profile implemented",
+    "active invalidation dependencies scoped without deleting hook-gap evidence",
+    "release-guard regression expectations updated",
+    "real-tool and approver contract prepared"
+  ],
+  "pending_machine_verification": [
+    "GitHub CI on draft PR",
+    "staging approved-delivery proof",
+    "failure/recovery regression suite"
+  ],
+  "human_gates": [
+    "deployment approval on exact tested revision",
+    "production identity/secret provisioning",
+    "genuine acceptance by authenticated authorized human"
+  ],
+  "production_actions_taken": false,
+  "production_deployed": false,
+  "publication_enabled": false,
+  "paid_media_enabled": false
+}

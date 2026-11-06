@@ -8,37 +8,76 @@ import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useProjectStore } from '../../lib/stores/projectStore';
+import { useDesignStore } from '../../lib/stores/designStore';
+import { summarizeProvenance, type ProvenanceSummary } from '../../lib/ai/provenance';
+import { AITrustEnvelope } from './AITrustEnvelope';
+import { getLogger } from '../../lib/logger';
 
 export function CommandInputPanel() {
   const [brandName, setBrandName] = useState('');
   const [targetAudience, setTargetAudience] = useState('');
+  const [market, setMarket] = useState('');
+  const [language, setLanguage] = useState('');
+  const [locale, setLocale] = useState('');
+  const [businessIdea, setBusinessIdea] = useState('');
+  const [offerSummary, setOfferSummary] = useState('');
+  const [productType, setProductType] = useState('app');
+  const [workflowIdea, setWorkflowIdea] = useState('');
+  const [brandStyleNotes, setBrandStyleNotes] = useState('');
   const [goals, setGoals] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastProvenance, setLastProvenance] = useState<ProvenanceSummary | null>(null);
 
   const setActiveRun = useRunStore((state) => state.setActiveRun);
+  const upsertRun = useRunStore((state) => state.upsertRun);
   const addArtifact = useArtifactStore((state) => state.addArtifact);
   const upsertApproval = useApprovalStore((state) => state.upsertApproval);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
-  const currentProjectId = useProjectStore((state) => state.currentProjectId);
+  const activeProjectId = useProjectStore((state) => state.activeProjectId);
+  const missingProject = !activeProjectId;
+  // Stable references: these only change when a direction is attached or detached.
+  const styleSelection = useDesignStore((state) => state.attached?.selection ?? null);
+  const styleLabel = useDesignStore((state) => state.attached?.label ?? null);
+  const styleCompositionId = useDesignStore((state) => state.attached?.compositionId ?? null);
+  const detachStyle = useDesignStore((state) => state.detach);
 
   const handleLaunchCampaign = async () => {
-    if (!brandName.trim() || !targetAudience.trim() || !currentProjectId) return;
+    if (!brandName.trim() || !targetAudience.trim() || !activeProjectId) return;
     setLoading(true);
     setError(null);
     try {
       const run = await createAgencyRun(
-        currentProjectId,
+        activeProjectId,
         {
           brand_name: brandName.trim(),
+          business_idea: businessIdea.trim() || null,
+          offer_summary: offerSummary.trim() || null,
+          product_type: productType.trim() || null,
           target_audience: targetAudience.trim(),
+          market: market.trim() || null,
+          language: language.trim() || null,
+          locale: locale.trim() || null,
+          workflow_idea: workflowIdea.trim() || null,
           goals: goals.split(',').map((goal) => goal.trim()).filter(Boolean),
+          differentiators: [],
+          brand_style_notes: brandStyleNotes.split(',').map((note) => note.trim()).filter(Boolean),
           channels: [],
           constraints: [],
+          style_selection: styleSelection,
         },
         generateIdempotencyKey()
       );
 
+      upsertRun({
+        id: run.run_id,
+        tenant_id: 'tenant_1',
+        project_id: run.project_id ?? activeProjectId,
+        status: run.status === 'needs_approval' ? 'needs_approval' : 'running',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        metadata: { proof: run.proof ?? null },
+      });
       setActiveRun(run.run_id);
       for (const stage of run.stages ?? []) {
         if (stage === 'delivery') break;
@@ -56,12 +95,23 @@ export function CommandInputPanel() {
         });
       }
       if (run.pending_approval) upsertApproval(run.pending_approval);
+      setLastProvenance(
+        summarizeProvenance(run.generation_provenance, { pendingApproval: Boolean(run.pending_approval) })
+      );
 
       setBrandName('');
       setTargetAudience('');
+      setMarket('');
+      setLanguage('');
+      setLocale('');
+      setBusinessIdea('');
+      setOfferSummary('');
+      setProductType('app');
+      setWorkflowIdea('');
+      setBrandStyleNotes('');
       setGoals('');
     } catch (err) {
-      console.error('Failed to launch campaign', err);
+      getLogger().error('Failed to launch campaign', { err });
       setError(err instanceof Error ? err.message : 'Failed to launch campaign');
     } finally {
       setLoading(false);
@@ -72,37 +122,89 @@ export function CommandInputPanel() {
     <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-xl p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Campaign Terminal</span>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">AGENCY</span>
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded-sm bg-emerald-500/20 text-emerald-400">AGENCY</span>
       </div>
 
       {error && (
-        <div role="alert" className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</div>
+        <div role="alert" className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-sm px-3 py-2">{error}</div>
+
+      {missingProject && (
+        <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-sm px-3 py-2">
+          No project selected. Choose one in Project Workspace, or set NEXT_PUBLIC_DEFAULT_PROJECT_ID.
+        </div>
+      )}
       )}
 
-      {!currentProjectId && (
-        <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2">
-          No project selected. Please select a project to continue.
+      {lastProvenance && (
+        <div role="status">
+          <AITrustEnvelope summary={lastProvenance} />
         </div>
       )}
 
       <div className="flex flex-col gap-2">
         <label className="text-xs text-zinc-500" htmlFor="brand-name">Brand name</label>
-        <input id="brand-name" value={brandName} onChange={(event) => setBrandName(event.target.value)} disabled={loading || !currentProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+        <input id="brand-name" value={brandName} onChange={(event) => setBrandName(event.target.value)} disabled={loading || !activeProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <label className="text-xs text-zinc-500" htmlFor="business-idea">Business idea</label>
+        <textarea id="business-idea" value={businessIdea} onChange={(event) => setBusinessIdea(event.target.value)} disabled={loading || !activeProjectId} rows={3} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <label className="text-xs text-zinc-500" htmlFor="offer-summary">Offer summary</label>
+        <textarea id="offer-summary" value={offerSummary} onChange={(event) => setOfferSummary(event.target.value)} disabled={loading || !activeProjectId} rows={2} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
 
         <label className="text-xs text-zinc-500" htmlFor="target-audience">Target audience</label>
-        <input id="target-audience" value={targetAudience} onChange={(event) => setTargetAudience(event.target.value)} disabled={loading || !currentProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+        <input id="target-audience" value={targetAudience} onChange={(event) => setTargetAudience(event.target.value)} disabled={loading || !activeProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-zinc-500" htmlFor="market">Market</label>
+            <input id="market" value={market} onChange={(event) => setMarket(event.target.value)} disabled={loading || !activeProjectId} placeholder="e.g. Los Angeles" className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 placeholder:text-zinc-700 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-zinc-500" htmlFor="language">Language</label>
+            <input id="language" value={language} onChange={(event) => setLanguage(event.target.value)} disabled={loading || !activeProjectId} placeholder="e.g. English" className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 placeholder:text-zinc-700 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-zinc-500" htmlFor="locale">Locale</label>
+            <input id="locale" value={locale} onChange={(event) => setLocale(event.target.value)} disabled={loading || !activeProjectId} placeholder="e.g. en-US" className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 placeholder:text-zinc-700 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+          </div>
+        </div>
+
+        <label className="text-xs text-zinc-500" htmlFor="product-type">Product type</label>
+        <input id="product-type" value={productType} onChange={(event) => setProductType(event.target.value)} disabled={loading || !activeProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <label className="text-xs text-zinc-500" htmlFor="workflow-idea">Workflow / automation idea</label>
+        <textarea id="workflow-idea" value={workflowIdea} onChange={(event) => setWorkflowIdea(event.target.value)} disabled={loading || !activeProjectId} rows={2} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
 
         <label className="text-xs text-zinc-500" htmlFor="campaign-goals">Goals <span className="text-zinc-600">(comma separated, optional)</span></label>
-        <input id="campaign-goals" value={goals} onChange={(event) => setGoals(event.target.value)} disabled={loading || !currentProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+        <input id="campaign-goals" value={goals} onChange={(event) => setGoals(event.target.value)} disabled={loading || !activeProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        <label className="text-xs text-zinc-500" htmlFor="brand-style-notes">Brand style notes <span className="text-zinc-600">(comma separated)</span></label>
+        <input id="brand-style-notes" value={brandStyleNotes} onChange={(event) => setBrandStyleNotes(event.target.value)} disabled={loading || !activeProjectId} className="w-full bg-zinc-950/50 border border-zinc-800/80 rounded-lg p-2 text-sm text-zinc-300 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60" />
+
+        {styleLabel && (
+          <div className="flex items-center justify-between gap-2 text-xs bg-emerald-500/10 border border-emerald-500/20 rounded-sm px-3 py-2">
+            <span className="text-emerald-300 min-w-0 truncate" title={styleCompositionId ?? undefined}>
+              Style direction: {styleLabel}
+            </span>
+            <button
+              type="button"
+              onClick={detachStyle}
+              disabled={loading || !activeProjectId}
+              className="shrink-0 text-[11px] text-zinc-400 hover:text-zinc-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500/60 rounded-sm"
+            >
+              Detach
+            </button>
+          </div>
+        )}
 
         <div className="flex justify-end pt-1">
           <button
             type="button"
             onClick={handleLaunchCampaign}
-            disabled={loading || !brandName.trim() || !targetAudience.trim() || !currentProjectId}
-            className="px-4 py-1.5 bg-zinc-100 text-zinc-900 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
+            disabled={loading || !brandName.trim() || !targetAudience.trim() || !activeProjectId}
+            className="px-4 py-1.5 bg-zinc-100 text-zinc-900 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
           >
-            {loading ? 'Running pipeline…' : 'Launch Campaign'}
+            {loading ? 'Running pipeline…' : 'Compile Idea Workspace'}
           </button>
         </div>
       </div>

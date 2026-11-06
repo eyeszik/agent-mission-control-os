@@ -17,9 +17,9 @@ jobs:
     name: Backend (compile + invariants + pytest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
           cache: "pip"
@@ -39,8 +39,14 @@ jobs:
       - name: Verify N1/N2 ontology parity across Python and TypeScript
         run: python scripts/verify_ontology_parity.py
 
+      - name: Verify frontend consumes design tokens, not raw colors
+        run: python scripts/verify_design_tokens.py
+
       - name: Verify integrity manifest
         run: python scripts/verify_manifest.py
+
+      - name: Verify prompt guidance registry
+        run: python scripts/verify_guidance_registry.py
 
       - name: Compile Python sources
         run: python -m compileall -q services/langgraph scripts
@@ -52,19 +58,98 @@ jobs:
         env:
           AMC_DATABASE_BACKEND: sqlite
           AMC_DB_PATH: /tmp/amc_ci_${{ github.run_id }}.db
+          AMC_EXPORT_ROOT: /tmp/amc-exports-${{ github.run_id }}
         run: python -m pytest services/langgraph/tests -q
+
+  backend-postgres:
+    name: Backend on PostgreSQL (migrations + pytest)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: amc
+          POSTGRES_PASSWORD: amc
+          POSTGRES_DB: amc_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U amc -d amc_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install backend dependencies
+        run: python -m pip install -e "./services/langgraph[dev]"
+
+      - name: Apply Supabase stand-ins and every production migration in order
+        env:
+          PGPASSWORD: amc
+        run: |
+          psql -h 127.0.0.1 -U amc -d amc_test -v ON_ERROR_STOP=1 -q -f supabase/ci/supabase_shim.sql
+          for migration in supabase/migrations/*.sql; do
+            echo "applying $migration"
+            psql -h 127.0.0.1 -U amc -d amc_test -v ON_ERROR_STOP=1 -q -f "$migration"
+          done
+
+      - name: Run backend tests against PostgreSQL
+        env:
+          AMC_DATABASE_BACKEND: postgres
+          DATABASE_URL: postgresql://amc:amc@127.0.0.1:5432/amc_test
+          AMC_EXPORT_ROOT: /tmp/amc-exports-pg-${{ github.run_id }}
+        run: python -m pytest services/langgraph/tests -q
+
+  backend-council:
+    name: Mission Council engines (CrewAI + AutoGen + MCP, offline)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install backend with the council extra
+        run: python -m pip install -e "./services/langgraph[dev,council]"
+
+      - name: Verify installed dependency consistency
+        run: python -m pip check
+
+      # Every engine runs on the deterministic mock model: no key, no network.
+      - name: Run mission council tests on all three engines
+        env:
+          AMC_DATABASE_BACKEND: sqlite
+          AMC_DB_PATH: /tmp/amc_council_${{ github.run_id }}.db
+          AMC_EXPORT_ROOT: /tmp/amc-council-exports-${{ github.run_id }}
+          CREWAI_DISABLE_TELEMETRY: "true"
+          OTEL_SDK_DISABLED: "true"
+        run: >-
+          python -m pytest -q
+          services/langgraph/tests/test_missions_council.py
+          services/langgraph/tests/test_council_engines.py
+          services/langgraph/tests/test_council_gateway.py
+          services/langgraph/tests/test_council_ported_scenarios.py
+          services/langgraph/tests/test_council_contracts.py
 
   frontend:
     name: Frontend (contracts + typecheck + test + build)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "20.20.2"
+          node-version: "22.12.0"
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -78,11 +163,25 @@ jobs:
       - name: Test shared package
         run: pnpm --filter @amc/shared test
 
+      # Tier-1 workspace packages (@amc/errors, config, logger, constants, db,
+      # testing); pnpm runs them in dependency order.
+      - name: Build workspace packages
+        run: pnpm --filter "./packages/*" --filter "!@amc/shared" build
+
+      - name: Typecheck workspace packages
+        run: pnpm --filter "./packages/*" --filter "!@amc/shared" typecheck
+
+      - name: Test workspace packages
+        run: pnpm --filter "./packages/*" --filter "!@amc/shared" test
+
       - name: Typecheck web app
         run: pnpm --filter @amc/web typecheck
 
       - name: Test web app
         run: pnpm --filter @amc/web test
+
+      - name: Verify UI token consumption (TypeScript AST gate)
+        run: pnpm --filter @amc/web verify:ui
 
       - name: Build web app
         env:
@@ -90,32 +189,141 @@ jobs:
           NEXT_PUBLIC_AUTH_MODE: local
         run: pnpm --filter @amc/web build
 
-  browser-e2e:
-    name: Browser E2E (local degraded HITL)
+  ucpo-sandbox:
+    name: UCPO sandboxed build + browser QA (must not skip)
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 40  # the Chromium install step alone may take up to 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
           cache: "pip"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "20.20.2"
+          node-version: "22.12.0"
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Install application dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          python -m pip install -e "./services/langgraph[dev]"
+
+      # The sandbox runs Chromium with HOME set to a scratch dir, so browsers live at a fixed path.
+      - name: Install Chromium runtime
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+        timeout-minutes: 25
+        run: |
+          # The runner's apt mirror is occasionally very slow. Let apt retry stalled downloads itself and
+          # cap the whole step. Never kill and re-run the installer: an interrupted apt-get keeps the dpkg
+          # lock, so every retry would fail immediately.
+          printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-network >/dev/null
+          pnpm --filter @amc/web exec playwright install --with-deps chromium
+
+      # Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor; the UCPO sandbox needs them.
+      - name: Allow unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      # A skip here means the sandbox was unavailable, which would hide regressions, so it fails the job.
+      - name: Run sandboxed build and browser QA tests
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+          AMC_DATABASE_BACKEND: sqlite
+        run: |
+          set -o pipefail  # without it, tee hides a pytest failure
+          python -m pytest services/langgraph/tests/test_ucpo_build.py -q -rs | tee /tmp/ucpo-sandbox.log
+          if grep -q "SKIPPED" /tmp/ucpo-sandbox.log; then
+            echo "::error::UCPO sandbox tests were skipped; the sandbox is not available on this runner"
+            exit 1
+          fi
+
+      # AVIC renders through the same local Chromium; its browser tests must run here, not skip.
+      - name: Run AVIC, brand book and creative-direction render, release and API tests
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+          AMC_DATABASE_BACKEND: sqlite
+        run: |
+          set -o pipefail
+          python -m pytest services/langgraph/tests/test_avic.py services/langgraph/tests/test_avic_api.py services/langgraph/tests/test_avic_contracts.py services/langgraph/tests/test_vnexus_brandbook.py services/langgraph/tests/test_vnexus_brandbook_contracts.py services/langgraph/tests/test_vnexus_directions.py services/langgraph/tests/test_vnexus_directions_contracts.py -q -rs | tee /tmp/avic.log
+          if grep -q "SKIPPED" /tmp/avic.log; then
+            echo "::error::AVIC, brand book or creative-direction browser tests were skipped; Chromium is not available to the renderer on this runner"
+            exit 1
+          fi
+
+  render-adapters:
+    name: Rendering adapters + video + remote protocol
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22.12.0"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - name: Install exact dependencies and renderer bundles
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @amc/creative-renderer build
+          python -m pip install -e "./services/langgraph[dev,rendering]"
+      - name: Install Chromium and encoder runtime
+        run: |
+          pnpm --filter @amc/web exec playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      # Fixtures exercise the pinned Remotion license's non-commercial evaluation use.
+      - name: Verify all adapters and remote refusal boundaries without skips
+        env:
+          AMC_DATABASE_BACKEND: sqlite
+          AMC_DB_PATH: /tmp/amc-render-adapters.db
+        run: |
+          set -o pipefail
+          python -m pytest services/langgraph/tests/test_rendering.py services/langgraph/tests/test_rendering_media_remote.py -q -rs | tee /tmp/render-adapters.log
+          if grep -q "SKIPPED" /tmp/render-adapters.log; then
+            echo "::error::Renderer capability tests skipped; runtime verification is incomplete"
+            exit 1
+          fi
+
+  browser-e2e:
+    name: Browser E2E (local degraded HITL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40  # the Chromium install step alone may take up to 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22.12.0"
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Install application dependencies
         run: |
           pnpm install --frozen-lockfile
           pnpm --filter @amc/shared build
+          pnpm --filter "./packages/*" --filter "!@amc/shared" build
           python -m pip install -e "./services/langgraph[dev]"
 
       - name: Install Chromium runtime
-        run: pnpm --filter @amc/web exec playwright install --with-deps chromium
+        timeout-minutes: 25
+        run: |
+          # The runner's apt mirror is occasionally very slow. Let apt retry stalled downloads itself and
+          # cap the whole step. Never kill and re-run the installer: an interrupted apt-get keeps the dpkg
+          # lock, so every retry would fail immediately.
+          printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-network >/dev/null
+          pnpm --filter @amc/web exec playwright install --with-deps chromium
 
       - name: Start local stack
         env:
@@ -127,6 +335,7 @@ jobs:
           AMC_LOCAL_PROJECT_IDS: proj_1
           AMC_LOCAL_ROLE: operator
           AMC_DB_PATH: /tmp/amc_e2e_${{ github.run_id }}.db
+          AMC_EXPORT_ROOT: /tmp/amc-exports-${{ github.run_id }}
           AMC_CORS_ALLOWED_ORIGINS: http://127.0.0.1:3000
           NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000
           NEXT_PUBLIC_AUTH_MODE: local
@@ -156,29 +365,51 @@ jobs:
           done
           test "$frontend_ready" -eq 1
 
+          # The agency scenario exercises desktop sidebar navigation. Verifying
+          # the route at startup makes deployment-mode failures diagnosable.
+          agency_ready=0
+          for _ in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/agency >/dev/null; then
+              agency_ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$agency_ready" -eq 1
+
       - name: Run browser release smoke
         env:
           CI: "true"
           E2E_BASE_URL: http://127.0.0.1:3000
-        run: pnpm --filter @amc/web test:e2e
+        run: |
+          echo "Playwright artifacts: apps/web/playwright-report, apps/web/test-results (PNG, WebM, trace.zip)"
+          ls -ld apps/web/playwright-report apps/web/test-results 2>/dev/null || true
+          pnpm --filter @amc/web test:e2e
 
+      # Capture diagnostics and artifacts before Stop local stack tears down services.
       - name: Print service logs on failure
         if: failure()
-        run: |
-          echo "===== backend ====="
-          cat /tmp/amc-backend.log || true
-          echo "===== frontend ====="
-          cat /tmp/amc-frontend.log || true
+        timeout-minutes: 1
+        run: bash .github/scripts/dump-browser-e2e-logs.sh
 
       - name: Upload Playwright failure artifacts
         if: failure()
-        uses: actions/upload-artifact@v4
+        timeout-minutes: 3
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: playwright-failure-${{ github.run_id }}
+          name: playwright-failure-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
+            ci-diagnostics/browser-e2e.log
             apps/web/playwright-report
             apps/web/test-results
-          if-no-files-found: ignore
+            apps/web/traces
+            apps/web/.playwright/artifacts
+            playwright-report
+            test-results
+            traces
+            .playwright/artifacts
+          include-hidden-files: true
+          if-no-files-found: warn
           retention-days: 7
 
       - name: Stop local stack
@@ -192,9 +423,9 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
 
@@ -205,10 +436,30 @@ jobs:
           python -m pip install --upgrade "setuptools>=83.0.0"
           python -m pip_audit
 
-      - uses: actions/setup-node@v4
+      # The optional council extra (CrewAI, AutoGen, MCP). CrewAI 1.15.28, the latest
+      # release, pins chromadb~=1.5.9, mcp~=1.28.1 and (via crewai-cli) uv~=0.11.6, so
+      # these advisories cannot be upgraded away while CrewAI is installed. None is
+      # reachable from the council (docs/mission-council.md, "Dependency advisories"):
+      #   PYSEC-2026-311/3813/3814/3815  chromadb server API/RBAC; no Chroma server runs
+      #   CVE-2026-59951                 mcp Streamable HTTP server; council uses stdio client
+      #   PYSEC-2026-4321                uv CLI TLS roots; nothing runs uv
+      # Any other advisory in this tree fails the job. Remove an ID once its pin lifts.
+      - name: Audit the optional council extra
+        run: |
+          python -m pip install -e "./services/langgraph[dev,council]"
+          python -m pip install --upgrade "setuptools>=83.0.0"
+          python -m pip_audit \
+            --ignore-vuln PYSEC-2026-311 \
+            --ignore-vuln PYSEC-2026-3813 \
+            --ignore-vuln PYSEC-2026-3814 \
+            --ignore-vuln PYSEC-2026-3815 \
+            --ignore-vuln CVE-2026-59951 \
+            --ignore-vuln PYSEC-2026-4321
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "20.20.2"
-      - uses: pnpm/action-setup@v4
+          node-version: "22.12.0"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Audit production JavaScript dependencies
         run: |

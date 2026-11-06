@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/amc-agency-operating-framework-seed-v1.schema.json",
+  "title": "AMC proposed agency operating framework catalog \u2014 structural schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "catalog_id",
+    "catalog_status",
+    "task_count",
+    "module_count",
+    "user_explicit_task_count",
+    "newly_authored_task_count",
+    "phase_order",
+    "stage_gates",
+    "modules",
+    "tasks"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "amc-agency-operating-framework/seed-v1"
+    },
+    "catalog_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "catalog_status": {
+      "const": "PROPOSED_NOT_INSTALLED"
+    },
+    "task_count": {
+      "const": 295
+    },
+    "module_count": {
+      "const": 24
+    },
+    "user_explicit_task_count": {
+      "const": 35
+    },
+    "newly_authored_task_count": {
+      "const": 260
+    },
+    "date_context": {
+      "type": "string"
+    },
+    "phase_order": {
+      "const": [
+        "Discover",
+        "Strategize",
+        "Design",
+        "Build",
+        "Activate",
+        "Optimize"
+      ]
+    },
+    "stage_gates": {
+      "type": "object",
+      "minProperties": 5
+    },
+    "seed_implementation_note": {
+      "type": "string"
+    },
+    "modules": {
+      "type": "array",
+      "minItems": 24,
+      "maxItems": 24,
+      "items": {
+        "type": "object",
+        "required": [
+          "module_id",
+          "title",
+          "phase",
+          "stage_gate",
+          "expected_task_count",
+          "depends_on_modules",
+          "required_deliverable",
+          "owner_role",
+          "acceptance_policy"
+        ],
+        "properties": {
+          "module_id": {
+            "type": "string",
+            "pattern": "^AGM-(0[1-9]|1[0-9]|2[0-4])$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 3
+          },
+          "phase": {
+            "enum": [
+              "Discover",
+              "Strategize",
+              "Design",
+              "Build",
+              "Activate",
+              "Optimize"
+            ]
+          },
+          "stage_gate": {
+            "enum": [
+              "01_DISCOVERY",
+              "02_STRATEGY",
+              "03_PRODUCTION",
+              "04_ACTIVATION",
+              "05_GROWTH"
+            ]
+          },
+          "expected_task_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "depends_on_modules": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^AGM-\\d{2}$"
+            }
+          },
+          "required_deliverable": {
+            "type": "string",
+            "minLength": 10
+          },
+          "owner_role": {
+            "type": "string",
+            "minLength": 3
+          },
+          "acceptance_policy": {
+            "type": "string",
+            "minLength": 10
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 295,
+      "maxItems": 295,
+      "items": {
+        "type": "object",
+        "required": [
+          "task_id",
+          "module_id",
+          "sequence",
+          "title",
+          "definition_source",
+          "owner_role",
+          "phase",
+          "stage_gate",
+          "depends_on_modules",
+          "output_class",
+          "module_deliverable",
+          "acceptance",
+          "status",
+          "applicability",
+          "evidence_refs",
+          "artifact_refs",
+          "approval_ref",
+          "last_validation"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "pattern": "^AGM-\\d{2}-\\d{3}$"
+          },
+          "module_id": {
+            "type": "string",
+            "pattern": "^AGM-\\d{2}$"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 12
+          },
+          "definition_source": {
+            "enum": [
+              "user_supplied",
+              "newly_authored_expansion"
+            ]
+          },
+          "owner_role": {
+            "type": "string",
+            "minLength": 3
+          },
+          "phase": {
+            "enum": [
+              "Discover",
+              "Strategize",
+              "Design",
+              "Build",
+              "Activate",
+              "Optimize"
+            ]
+          },
+          "stage_gate": {
+            "enum": [
+              "01_DISCOVERY",
+              "02_STRATEGY",
+              "03_PRODUCTION",
+              "04_ACTIVATION",
+              "05_GROWTH"
+            ]
+          },
+          "depends_on_modules": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^AGM-\\d{2}$"
+            }
+          },
+          "output_class": {
+            "enum": [
+              "evidence",
+              "decision",
+              "artifact",
+              "approval_or_plan",
+              "measurement"
+            ]
+          },
+          "module_deliverable": {
+            "type": "string",
+            "minLength": 8
+          },
+          "acceptance": {
+            "type": "string",
+            "minLength": 8
+          },
+          "status": {
+            "const": "NOT_STARTED"
+          },
+          "applicability": {
+            "const": "UNASSESSED"
+          },
+          "evidence_refs": {
+            "type": "array",
+            "maxItems": 0
+          },
+          "artifact_refs": {
+            "type": "array",
+            "maxItems": 0
+          },
+          "approval_ref": {
+            "type": "null"
+          },
+          "last_validation": {
+            "type": "null"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,993 @@
+{
+  "schema_version": "amc-creative-capabilities/v1",
+  "capabilities": [
+    {
+      "id": "cap.mission.compile",
+      "version": "1",
+      "disposition": "ADD_NEW",
+      "status": "implemented",
+      "stages": [
+        "intake"
+      ],
+      "artifact_types": [
+        "brand_identity",
+        "logo",
+        "landing_page",
+        "marketing_site",
+        "dashboard",
+        "mobile_ui",
+        "social_post",
+        "image",
+        "illustration",
+        "motion",
+        "video",
+        "design_system",
+        "design_handoff"
+      ],
+      "provides": [
+        "mission_ir"
+      ],
+      "consumes": [
+        "brief"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.mission:compile_mission",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/product-discovery-brief.md",
+            "sha256": "a728f7368c8d77e6fff37d92d5a0942c428ffe079093ab99738e3771467cbbd0"
+          }
+        ],
+        "repository_owner": null
+      },
+      "rationale": "No repository owner turns a creative brief into a hashed, zoned constraint contract; compiled DeliverableSpec plans governance work, not creative constraints."
+    },
+    {
+      "id": "cap.organization.compile",
+      "version": "1",
+      "disposition": "ADD_NEW",
+      "status": "implemented",
+      "stages": [
+        "plan"
+      ],
+      "artifact_types": [
+        "brand_identity",
+        "logo",
+        "landing_page",
+        "marketing_site",
+        "dashboard",
+        "mobile_ui",
+        "social_post",
+        "image",
+        "illustration",
+        "motion",
+        "video",
+        "design_system",
+        "design_handoff"
+      ],
+      "provides": [
+        "execution_plan"
+      ],
+      "consumes": [
+        "mission_ir",
+        "capability_registry"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.organization:compile_plan",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/master-builder-experience-compiler.md",
+            "sha256": "8ee3564dc037858c9a2be40268e822a0a1cf3b1cc3def1b1967de47ff9df6a0c"
+          }
+        ],
+        "repository_owner": null
+      },
+      "rationale": "Selects the minimum topology T0-T4 per mission; the compiled-agency planner schedules N3 governance work and is not reused for creative topology."
+    },
+    {
+      "id": "cap.context.portfolio",
+      "version": "1",
+      "disposition": "EXTEND_EXISTING",
+      "status": "implemented",
+      "stages": [
+        "context"
+      ],
+      "artifact_types": [
+        "brand_identity",
+        "logo",
+        "landing_page",
+        "marketing_site",
+        "dashboard",
+        "mobile_ui",
+        "social_post",
+        "image",
+        "illustration",
+        "motion",
+        "video",
+        "design_system",
+        "design_handoff"
+      ],
+      "provides": [
+        "context_portfolio"
+      ],
+      "consumes": [
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.context:select_context",
+      "source_provenance": {
+        "guides": [],
+        "repository_owner": "services.langgraph.agency.design_corpus:load_validated_corpus"
+      },
+      "rationale": "Reuses the hash-validated corpus loader and its rights classification; adds utility-ranked, budgeted selection with receipts."
+    },
+    {
+      "id": "cap.concept.direction",
+      "version": "1",
+      "disposition": "ADD_NEW",
+      "status": "implemented",
+      "stages": [
+        "plan",
+        "generate",
+        "mutate"
+      ],
+      "artifact_types": [
+        "landing_page",
+        "marketing_site"
+      ],
+      "provides": [
+        "concept_specs"
+      ],
+      "consumes": [
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.search:concept_candidates",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/eyeszik-claude-design-skills-creative-direction.md",
+            "sha256": "446ce4a1db58da702b49169f03ef529c493e0b82cdf7a943853ef89bda2603a4"
+          }
+        ],
+        "repository_owner": null
+      },
+      "rationale": "Materially different concept axes for bounded search; no existing owner."
+    },
+    {
+      "id": "cap.landing.generate",
+      "version": "1",
+      "disposition": "ADD_NEW",
+      "status": "implemented",
+      "stages": [
+        "generate",
+        "correct"
+      ],
+      "artifact_types": [
+        "landing_page",
+        "marketing_site"
+      ],
+      "provides": [
+        "artifact_ir.landing_page"
+      ],
+      "consumes": [
+        "mission_ir",
+        "concept_spec",
+        "context_portfolio"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [
+        "constraint_validator",
+        "accessibility_critic",
+        "brand_critic",
+        "implementation_critic",
+        "content_critic"
+      ],
+      "implementation": "services.langgraph.agency.creative.landing:generate_landing",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/eyeszik-claude-design-skills-landing-page-design.md",
+            "sha256": "0e25466a6998865f171b38fb1e3ca85cb60f800b2faee9c68c7f35670fa7c1d2"
+          },
+          {
+            "path": "guides/ux-copy.md",
+            "sha256": "a503f3e5cf19d746e5c386f37cb9edc92f0df7dd6bd9681d4d08d437bc655665"
+          }
+        ],
+        "repository_owner": null
+      },
+      "rationale": "The UI/UX compiler emits specifications, not page content; no landing generator exists. Copy is composed only from brief text and verified claims."
+    },
+    {
+      "id": "cap.landing.render",
+      "version": "1",
+      "disposition": "COMPOSE_EXISTING",
+      "status": "implemented",
+      "stages": [
+        "generate"
+      ],
+      "artifact_types": [
+        "landing_page",
+        "marketing_site"
+      ],
+      "provides": [
+        "render.html"
+      ],
+      "consumes": [
+        "artifact_ir.landing_page"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.landing:render_landing_html",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/eyeszik-claude-design-skills-design-taste-frontend.md",
+            "sha256": "039bee58e8365b1b05096d4ec46ef6388729c2d76ed73be91ce4f890c0069f87"
+          }
+        ],
+        "repository_owner": "services.langgraph.agency.design_tokens:compile_css"
+      },
+      "rationale": "Renders through the repository's only DTCG compiler for tokens."
+    },
+    {
+      "id": "cap.validate.constraints",
+      "version": "1",
+      "disposition": "ADD_NEW",
+      "status": "implemented",
+      "stages": [
+        "evaluate"
+      ],
+      "artifact_types": [
+        "brand_identity",
+        "logo",
+        "landing_page",
+        "marketing_site",
+        "dashboard",
+        "mobile_ui",
+        "social_post",
+        "image",
+        "illustration",
+        "motion",
+        "video",
+        "design_system",
+        "design_handoff"
+      ],
+      "provides": [
+        "feasibility"
+      ],
+      "consumes": [
+        "mission_ir",
+        "artifact_ir",
+        "render"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.critics:ConstraintValidator",
+      "source_provenance": {
+        "guides": [],
+        "repository_owner": null
+      },
+      "rationale": "Non-compensable hard gate over MissionIR constraints."
+    },
+    {
+      "id": "cap.critic.accessibility",
+      "version": "1",
+      "disposition": "COMPOSE_EXISTING",
+      "status": "implemented",
+      "stages": [
+        "evaluate"
+      ],
+      "artifact_types": [
+        "landing_page",
+        "marketing_site",
+        "dashboard",
+        "mobile_ui"
+      ],
+      "provides": [
+        "evaluation.accessibility"
+      ],
+      "consumes": [
+        "render.html",
+        "artifact_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.critics:AccessibilityCritic",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/accessibility-review.md",
+            "sha256": "ba5afd0244345c613b2a12d9d34c8b46035a62d17cd50a7267c08e7c8b9bebc9"
+          },
+          {
+            "path": "guides/eyeszik-claude-design-skills-accessibility.md",
+            "sha256": "08b7d6b5786b36d0d3c484a64dba88b66e2a880c8e04702e7026d4b73318e56a"
+          }
+        ],
+        "repository_owner": "services.langgraph.agency.execution_fabric.adapters.uiux:dom_audit"
+      },
+      "rationale": "Two corpus guides describe the same capability (CAPABILITY_DUPLICATE resolved by merging); composes the existing WCAG 2.2 DOM audit."
+    },
+    {
+      "id": "cap.critic.brand",
+      "version": "1",
+      "disposition": "COMPOSE_EXISTING",
+      "status": "implemented",
+      "stages": [
+        "evaluate"
+      ],
+      "artifact_types": [
+        "landing_page",
+        "marketing_site",
+        "logo",
+        "design_system"
+      ],
+      "provides": [
+        "evaluation.brand"
+      ],
+      "consumes": [
+        "render",
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.critics:BrandCritic",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/brand-guidelines.md",
+            "sha256": "ba571beb1394909c974bdae89e681d0be04e4bd83cbd8cbf8127a6451adc1dfb"
+          }
+        ],
+        "repository_owner": "services.langgraph.agency.execution_fabric.verifiers:palette_conformance"
+      },
+      "rationale": ""
+    },
+    {
+      "id": "cap.critic.design",
+      "version": "1",
+      "disposition": "ADD_NEW",
+      "status": "implemented",
+      "stages": [
+        "evaluate"
+      ],
+      "artifact_types": [
+        "landing_page",
+        "marketing_site"
+      ],
+      "provides": [
+        "evaluation.artifact"
+      ],
+      "consumes": [
+        "artifact_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.critics:ArtifactCritic",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/design-critique.md",
+            "sha256": "b376be8b40ea9914ab1aae15e9f2c3e53a4d08ea29dfc485dc6bcac5058ba567"
+          }
+        ],
+        "repository_owner": null
+      },
+      "rationale": ""
+    },
+    {
+      "id": "cap.critic.implementation",
+      "version": "1",
+      "disposition": "COMPOSE_EXISTING",
+      "status": "implemented",
+      "stages": [
+        "evaluate"
+      ],
+      "artifact_types": [
+        "landing_page",
+        "marketing_site",
+        "dashboard",
+        "mobile_ui"
+      ],
+      "provides": [
+        "evaluation.implementation"
+      ],
+      "consumes": [
+        "render.html"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.critics:ImplementationCritic",
+      "source_provenance": {
+        "guides": [],
+        "repository_owner": "services.langgraph.agency.execution_fabric.verifiers:parse_dom"
+      },
+      "rationale": ""
+    },
+    {
+      "id": "cap.critic.content",
+      "version": "1",
+      "disposition": "ADD_NEW",
+      "status": "implemented",
+      "stages": [
+        "evaluate"
+      ],
+      "artifact_types": [
+        "landing_page",
+        "marketing_site"
+      ],
+      "provides": [
+        "evaluation.content"
+      ],
+      "consumes": [
+        "artifact_ir",
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.critics:ContentCritic",
+      "source_provenance": {
+        "guides": [],
+        "repository_owner": null
+      },
+      "rationale": ""
+    },
+    {
+      "id": "cap.search.pareto",
+      "version": "1",
+      "disposition": "ADD_NEW",
+      "status": "implemented",
+      "stages": [
+        "generate",
+        "evaluate"
+      ],
+      "artifact_types": [
+        "landing_page",
+        "marketing_site"
+      ],
+      "provides": [
+        "pareto_front"
+      ],
+      "consumes": [
+        "evaluations"
+      ],
+      "required_dependencies": [
+        "cap.concept.direction"
+      ],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.search:pareto_front",
+      "source_provenance": {
+        "guides": [],
+        "repository_owner": null
+      },
+      "rationale": "Bounded candidate search (T4) with novelty reservoir; used only when the mission justifies exploration."
+    },
+    {
+      "id": "cap.diff.tri",
+      "version": "1",
+      "disposition": "ADD_NEW",
+      "status": "implemented",
+      "stages": [
+        "diff"
+      ],
+      "artifact_types": [
+        "brand_identity",
+        "logo",
+        "landing_page",
+        "marketing_site",
+        "dashboard",
+        "mobile_ui",
+        "social_post",
+        "image",
+        "illustration",
+        "motion",
+        "video",
+        "design_system",
+        "design_handoff"
+      ],
+      "provides": [
+        "tri_diff"
+      ],
+      "consumes": [
+        "mission_ir",
+        "artifact_ir",
+        "render"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.creative.tridiff:tri_diff",
+      "source_provenance": {
+        "guides": [],
+        "repository_owner": null
+      },
+      "rationale": ""
+    },
+    {
+      "id": "cap.logo.svg",
+      "version": "1",
+      "disposition": "REUSE_EXISTING",
+      "status": "implemented",
+      "stages": [
+        "generate"
+      ],
+      "artifact_types": [
+        "logo"
+      ],
+      "provides": [
+        "render.svg"
+      ],
+      "consumes": [
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [
+        "constraint_validator",
+        "brand_critic"
+      ],
+      "implementation": "services.langgraph.agency.creative.generators:generate_logo",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/logo-mark-generator.md",
+            "sha256": "04fd9c8de1a25b221ca6a9eed0aefa9c3a156926c9248b67b76796a94d576656"
+          }
+        ],
+        "repository_owner": "services.langgraph.agency.assets:render_logo_svg"
+      },
+      "rationale": "Deterministic geometric mark already exists; exploration of identity directions needs an image provider (not installed)."
+    },
+    {
+      "id": "cap.design_system.spec",
+      "version": "1",
+      "disposition": "REUSE_EXISTING",
+      "status": "implemented",
+      "stages": [
+        "generate"
+      ],
+      "artifact_types": [
+        "design_system"
+      ],
+      "provides": [
+        "render.json"
+      ],
+      "consumes": [
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [
+        "constraint_validator",
+        "brand_critic"
+      ],
+      "implementation": "services.langgraph.agency.creative.generators:generate_design_system",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/design-system.md",
+            "sha256": "02d8fc1d8f52f8c74a7cc36cd28d8aff869e288986cab866d65ede85149c0434"
+          },
+          {
+            "path": "guides/typography-pairing.md",
+            "sha256": "f7bff557c7a4dbbd457f1ca7b0eea26b355e781ca7b6fbeae87a8e0f78885fe1"
+          }
+        ],
+        "repository_owner": "services.langgraph.agency.execution_fabric.adapters.uiux:design_system_spec"
+      },
+      "rationale": ""
+    },
+    {
+      "id": "cap.interface.spec",
+      "version": "1",
+      "disposition": "REUSE_EXISTING",
+      "status": "implemented",
+      "stages": [
+        "generate"
+      ],
+      "artifact_types": [
+        "dashboard",
+        "mobile_ui"
+      ],
+      "provides": [
+        "uiux_design_ir"
+      ],
+      "consumes": [
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.ui_ux.compiler:compile_uiux",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/eyeszik-claude-design-skills-interface-design.md",
+            "sha256": "e118c9f0f75df064c6fce4fbd7ee9c884b760a995088196073068d0ca938b5af"
+          }
+        ],
+        "repository_owner": "services.langgraph.agency.ui_ux.compiler:compile_uiux"
+      },
+      "rationale": "The UI/UX compiler already produces the interface IR; rendering screens is out of its (and this runtime's) scope."
+    },
+    {
+      "id": "cap.visual.prompt",
+      "version": "1",
+      "disposition": "REUSE_EXISTING",
+      "status": "provider_gap",
+      "stages": [
+        "generate"
+      ],
+      "artifact_types": [
+        "image",
+        "illustration"
+      ],
+      "provides": [
+        "prompt_package"
+      ],
+      "consumes": [
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [
+        "t2i"
+      ],
+      "cost_class": "model",
+      "latency_class": "s",
+      "idempotency_class": "NON_RETRYABLE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.prompt_compiler:compile_prompt_packages",
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/canvas-design-2.md",
+            "sha256": "3029058566f685bdf60c1a57f36d84ea9c6f960942c5e9e64c0c96941fa498f4"
+          },
+          {
+            "path": "guides/algorithmic-art.md",
+            "sha256": "d721f8db0369f9075e3f43b1214c5b9b7a61ac298ecd13e963c65b1bd743a0cf"
+          }
+        ],
+        "repository_owner": "services.langgraph.agency.prompt_compiler:compile_prompt_packages"
+      },
+      "rationale": "Prompt packages exist; rendering needs a text-to-image provider that is not installed."
+    },
+    {
+      "id": "cap.motion.prompt",
+      "version": "1",
+      "disposition": "REUSE_EXISTING",
+      "status": "provider_gap",
+      "stages": [
+        "generate"
+      ],
+      "artifact_types": [
+        "motion",
+        "video"
+      ],
+      "provides": [
+        "prompt_package"
+      ],
+      "consumes": [
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [
+        "ai_video"
+      ],
+      "cost_class": "model",
+      "latency_class": "s",
+      "idempotency_class": "NON_RETRYABLE",
+      "validators": [],
+      "implementation": "services.langgraph.agency.cinematic:route_request",
+      "source_provenance": {
+        "guides": [],
+        "repository_owner": "services.langgraph.agency.cinematic:route_request"
+      },
+      "rationale": "Cinematic compiler stops at prompts; AI video rendering has no provider adapter."
+    },
+    {
+      "id": "cap.social.draft",
+      "version": "1",
+      "disposition": "BLOCKED",
+      "status": "provider_gap",
+      "stages": [
+        "generate"
+      ],
+      "artifact_types": [
+        "social_post"
+      ],
+      "provides": [
+        "copy"
+      ],
+      "consumes": [
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [
+        "llm_drafting"
+      ],
+      "cost_class": "model",
+      "latency_class": "s",
+      "idempotency_class": "NON_RETRYABLE",
+      "validators": [],
+      "implementation": null,
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/social-content.md",
+            "sha256": "16d4859c7c7812a5194f87f8921d061954ccbe485a1e3808ae11ad373701785f"
+          }
+        ],
+        "repository_owner": null
+      },
+      "rationale": "Authored copy needs a reviewed drafting provider; publishing stays live-gated."
+    },
+    {
+      "id": "cap.brand.identity",
+      "version": "1",
+      "disposition": "BLOCKED",
+      "status": "provider_gap",
+      "stages": [
+        "generate"
+      ],
+      "artifact_types": [
+        "brand_identity"
+      ],
+      "provides": [
+        "brand_core"
+      ],
+      "consumes": [
+        "mission_ir"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [
+        "llm_drafting"
+      ],
+      "cost_class": "model",
+      "latency_class": "s",
+      "idempotency_class": "NON_RETRYABLE",
+      "validators": [],
+      "implementation": null,
+      "source_provenance": {
+        "guides": [],
+        "repository_owner": "services.langgraph.graph.agency.build:build_agency_workflow"
+      },
+      "rationale": "Brand strategy is owned by the Layer 1 LangGraph pipeline (brand_strategy node); the creative runtime does not duplicate it."
+    },
+    {
+      "id": "cap.handoff.spec",
+      "version": "1",
+      "disposition": "DOCUMENTATION_ONLY",
+      "status": "guidance_only",
+      "stages": [
+        "handoff"
+      ],
+      "artifact_types": [
+        "design_handoff"
+      ],
+      "provides": [],
+      "consumes": [
+        "artifact_twin"
+      ],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": null,
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/design-handoff.md",
+            "sha256": "50c36600f1cabf34b006ae5345943a9a01d21b793c65026adb45ade5d7e8df65"
+          }
+        ],
+        "repository_owner": null
+      },
+      "rationale": "Handoff evidence is the artifact twin, TriDiff and receipts; no separate generator is justified."
+    },
+    {
+      "id": "cap.creative_tech.concept",
+      "version": "1",
+      "disposition": "DOCUMENTATION_ONLY",
+      "status": "guidance_only",
+      "stages": [
+        "plan"
+      ],
+      "artifact_types": [],
+      "provides": [],
+      "consumes": [],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": null,
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/creative-technology-concept.md",
+            "sha256": "e5fcd750a115bbb65e00da46e3d05045a3cf4e56579c39780f35fcacef867895"
+          }
+        ],
+        "repository_owner": null
+      },
+      "rationale": "Prototype-evidence workflow; no runtime binding."
+    },
+    {
+      "id": "cap.design_md",
+      "version": "1",
+      "disposition": "DOCUMENTATION_ONLY",
+      "status": "guidance_only",
+      "stages": [
+        "handoff"
+      ],
+      "artifact_types": [],
+      "provides": [],
+      "consumes": [],
+      "required_dependencies": [],
+      "optional_dependencies": [],
+      "conflicts": [],
+      "tools": [],
+      "model_requirements": [],
+      "cost_class": "zero",
+      "latency_class": "ms",
+      "idempotency_class": "RETRY_SAFE",
+      "validators": [],
+      "implementation": null,
+      "source_provenance": {
+        "guides": [
+          {
+            "path": "guides/design-md.md",
+            "sha256": "98755737901b42010cf31e5bcf0c426d2d494cf556e1483c7d4db2def9dca352"
+          }
+        ],
+        "repository_owner": null
+      },
+      "rationale": "DESIGN.md tooling is not present in the repository."
+    }
+  ]
+}

@@ -1,0 +1,228 @@
+[
+  {
+    "phase_id": "P0",
+    "slug": "opportunity",
+    "name": "Opportunity / signal intake",
+    "entry_criteria": [
+      "Qualified problem signal or inbound/outbound opportunity"
+    ],
+    "orchestrator_ids": [
+      "revenue-orchestrator"
+    ],
+    "output_contract": "qualification record",
+    "gate_id": "G0",
+    "source_orchestrator_label": "Revenue Orchestrator"
+  },
+  {
+    "phase_id": "P1",
+    "slug": "qualification",
+    "name": "Qualification and fit",
+    "entry_criteria": [
+      "Evidence of problem, buyer/stakeholder, timing, economics, agency fit"
+    ],
+    "orchestrator_ids": [
+      "revenue-orchestrator"
+    ],
+    "output_contract": "go/no-go decision",
+    "gate_id": "G1",
+    "source_orchestrator_label": "Revenue Orchestrator"
+  },
+  {
+    "phase_id": "P2",
+    "slug": "discovery",
+    "name": "Discovery",
+    "entry_criteria": [
+      "Stakeholder access and discovery plan"
+    ],
+    "orchestrator_ids": [
+      "client-delivery-orchestrator"
+    ],
+    "output_contract": "discovery record + problem definition",
+    "gate_id": "G2",
+    "source_orchestrator_label": "Client & Delivery Orchestrator"
+  },
+  {
+    "phase_id": "P3",
+    "slug": "scope-contract",
+    "name": "Scope, commercial, contract",
+    "entry_criteria": [
+      "Approved problem/success criteria"
+    ],
+    "orchestrator_ids": [
+      "approval-governance-orchestrator"
+    ],
+    "output_contract": "SOW + commercial + legal baseline",
+    "gate_id": "G3",
+    "source_orchestrator_label": "Governance Orchestrator"
+  },
+  {
+    "phase_id": "P4",
+    "slug": "onboarding-research",
+    "name": "Onboarding and evidence collection",
+    "entry_criteria": [
+      "Contracted scope + access"
+    ],
+    "orchestrator_ids": [
+      "strategy-orchestrator"
+    ],
+    "output_contract": "evidence pack + source catalog",
+    "gate_id": "G4",
+    "source_orchestrator_label": "Strategy Orchestrator"
+  },
+  {
+    "phase_id": "P5",
+    "slug": "strategy",
+    "name": "Business/market/brand/product strategy",
+    "entry_criteria": [
+      "Sufficient evidence + explicit assumptions"
+    ],
+    "orchestrator_ids": [
+      "strategy-orchestrator"
+    ],
+    "output_contract": "approved strategy + KPI tree",
+    "gate_id": "G5",
+    "source_orchestrator_label": "Strategy Orchestrator"
+  },
+  {
+    "phase_id": "P6",
+    "slug": "brand-platform",
+    "name": "Brand platform",
+    "entry_criteria": [
+      "Approved strategy"
+    ],
+    "orchestrator_ids": [
+      "brand-orchestrator"
+    ],
+    "output_contract": "approved brand platform",
+    "gate_id": "G6",
+    "source_orchestrator_label": "Brand Orchestrator"
+  },
+  {
+    "phase_id": "P7",
+    "slug": "creative-concept",
+    "name": "Creative/campaign concept",
+    "entry_criteria": [
+      "Approved brand/strategy + creative brief"
+    ],
+    "orchestrator_ids": [
+      "creative-orchestrator"
+    ],
+    "output_contract": "approved creative direction",
+    "gate_id": "G7",
+    "source_orchestrator_label": "Creative Orchestrator"
+  },
+  {
+    "phase_id": "P8",
+    "slug": "experience-product",
+    "name": "UX/UI/product/architecture",
+    "entry_criteria": [
+      "Approved requirements/concept"
+    ],
+    "orchestrator_ids": [
+      "experience-product-orchestrator"
+    ],
+    "output_contract": "approved design/requirements/architecture",
+    "gate_id": "G8",
+    "source_orchestrator_label": "Experience & Product Orchestrator"
+  },
+  {
+    "phase_id": "P9",
+    "slug": "production-build",
+    "name": "Production and implementation",
+    "entry_criteria": [
+      "Approved production/build package"
+    ],
+    "orchestrator_ids": [
+      "production-orchestrator",
+      "technology-orchestrator"
+    ],
+    "output_contract": "release candidate / masters",
+    "gate_id": "G9",
+    "source_orchestrator_label": "Production / Technology Orchestrators"
+  },
+  {
+    "phase_id": "P10",
+    "slug": "qa-governance",
+    "name": "QA, accessibility, legal, security, brand QA",
+    "entry_criteria": [
+      "Release candidate + acceptance criteria"
+    ],
+    "orchestrator_ids": [
+      "approval-governance-orchestrator"
+    ],
+    "output_contract": "verified release candidate",
+    "gate_id": "G10",
+    "source_orchestrator_label": "Governance Orchestrator"
+  },
+  {
+    "phase_id": "P11",
+    "slug": "client-approval",
+    "name": "Client/executive acceptance",
+    "entry_criteria": [
+      "All required internal gates passed"
+    ],
+    "orchestrator_ids": [
+      "client-delivery-orchestrator"
+    ],
+    "output_contract": "signed approval / revision request",
+    "gate_id": "G11",
+    "source_orchestrator_label": "Client & Delivery Orchestrator"
+  },
+  {
+    "phase_id": "P12",
+    "slug": "launch",
+    "name": "Launch, publish, deploy, distribute",
+    "entry_criteria": [
+      "Signed release approval"
+    ],
+    "orchestrator_ids": [
+      "launch-orchestrator"
+    ],
+    "output_contract": "production release + launch record",
+    "gate_id": "G12",
+    "source_orchestrator_label": "Launch Orchestrator"
+  },
+  {
+    "phase_id": "P13",
+    "slug": "measurement",
+    "name": "Measurement and learning",
+    "entry_criteria": [
+      "Stable instrumentation + live system/campaign"
+    ],
+    "orchestrator_ids": [
+      "measurement-orchestrator"
+    ],
+    "output_contract": "performance analysis",
+    "gate_id": "G13",
+    "source_orchestrator_label": "Measurement Orchestrator"
+  },
+  {
+    "phase_id": "P14",
+    "slug": "optimization",
+    "name": "Optimization/experimentation",
+    "entry_criteria": [
+      "Measured baseline + hypotheses"
+    ],
+    "orchestrator_ids": [
+      "growth-media-orchestrator"
+    ],
+    "output_contract": "validated changes + learning",
+    "gate_id": "G14",
+    "source_orchestrator_label": "Growth Orchestrator"
+  },
+  {
+    "phase_id": "P15",
+    "slug": "expansion-close",
+    "name": "Expansion, renewal, archive, close",
+    "entry_criteria": [
+      "Outcome review"
+    ],
+    "orchestrator_ids": [
+      "revenue-orchestrator",
+      "client-delivery-orchestrator"
+    ],
+    "output_contract": "renewal/expansion/closure + archive tag",
+    "gate_id": "G15",
+    "source_orchestrator_label": "Revenue / Client Orchestrators"
+  }
+]

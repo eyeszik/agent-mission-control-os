@@ -1,6 +1,6 @@
 -- AMC durable execution foundation: job queue and content-addressed artifact storage.
 -- PostgreSQL (Supabase) authoritative production schema; SQLite mirrors these in
--- local/CI with the equivalent CREATE TABLE statements (sqlite_db.py migrations 6/7).
+-- local/CI with the equivalent CREATE TABLE statements (sqlite_db.py migrations 22/23).
 -- Date: 2026-11-04
 
 create table if not exists amc.amc_jobs (
@@ -38,7 +38,7 @@ create table if not exists amc.artifact_objects (
     unique (tenant_id, object_id)
 );
 
-create table if not exists amc.artifact_versions (
+create table if not exists amc.amc_artifact_versions (
     artifact_id text primary key,
     tenant_id text not null,
     project_id text not null references amc.projects(project_id) on delete restrict,
@@ -53,9 +53,9 @@ create table if not exists amc.artifact_versions (
     unique (tenant_id, project_id, kind, version)
 );
 
-create index if not exists idx_amc_artifacts_tenant on amc.artifact_versions(tenant_id, project_id, created_at desc);
-create index if not exists idx_amc_artifacts_run on amc.artifact_versions(run_id);
+create index if not exists idx_amc_artifacts_tenant on amc.amc_artifact_versions(tenant_id, project_id, created_at desc);
+create index if not exists idx_amc_artifacts_run on amc.amc_artifact_versions(run_id);
 
 comment on table amc.amc_jobs is 'Durable execution queue. Workers claim with compare-and-swap status fencing tokens; leases expire via recover_expired_leases().';
 comment on table amc.artifact_objects is 'Content-addressed artifact bytes. Deduplicated per tenant by sha256 object_id.';
-comment on table amc.artifact_versions is 'Immutable artifact version records pointing at content-addressed bytes.';
+comment on table amc.amc_artifact_versions is 'Immutable artifact version records pointing at content-addressed bytes.';

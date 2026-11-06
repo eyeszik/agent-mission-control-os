@@ -1,0 +1,26 @@
+{
+  "project_id": "demo-project",
+  "as_of": "2026-09-27T00:00:00Z",
+  "deliverables": [
+    {
+      "id": "launch-campaign",
+      "requested_outcome": "Integrated launch campaign for a new brand",
+      "output_contract": "campaign_package",
+      "acceptance_criteria": ["on-brief", "brand-safe", "claims substantiated"],
+      "constraints": ["no unsubstantiated performance claims"],
+      "domains": ["BRAND", "CONTENT", "DIGITAL_MARKETING"],
+      "external_action": "publish"
+    },
+    {
+      "id": "brand-guidelines",
+      "requested_outcome": "Brand guidelines document",
+      "output_contract": "brand_guidelines_doc",
+      "acceptance_criteria": ["complete", "accessible colour combinations documented"],
+      "domains": ["BRAND"]
+    }
+  ],
+  "genome": [
+    {"key": "audience.primary", "domain": "BRAND", "value_or_ref": "independent founders", "source_refs": ["brief:intake-1"], "epistemic_status": "VERIFIED_FACT"},
+    {"key": "tone", "domain": "CONTENT", "value_or_ref": "warm, direct", "epistemic_status": "ASSUMPTION"}
+  ]
+}

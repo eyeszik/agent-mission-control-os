@@ -1,5 +1,7 @@
 import { z } from 'zod';
+import { UIUXDesignIRSchema } from './uiux';
 import { ApprovalRequestSchema } from './approvals';
+import { DesignStyleDirectionSchema, DesignStyleSelectionSchema } from './styleLibrary';
 
 export const AGENCY_PIPELINE_STAGES = [
   'brief_intake',
@@ -18,11 +20,24 @@ export const AgencyPipelineStageSchema = z.enum(AGENCY_PIPELINE_STAGES);
 export const CampaignBriefSchema = z.object({
   brand_name: z.string(),
   industry: z.string().optional().nullable(),
+  business_idea: z.string().optional().nullable(),
+  offer_summary: z.string().optional().nullable(),
+  product_type: z.string().optional().nullable(),
   goals: z.array(z.string()).default([]),
   target_audience: z.string(),
   tone: z.string().optional().nullable(),
   channels: z.array(z.string()).default([]),
   constraints: z.array(z.string()).default([]),
+  business_model: z.string().optional().nullable(),
+  affiliate_model: z.boolean().optional().nullable(),
+  workflow_idea: z.string().optional().nullable(),
+  differentiators: z.array(z.string()).default([]),
+  brand_style_notes: z.array(z.string()).default([]),
+  market: z.string().optional().nullable(),
+  language: z.string().optional().nullable(),
+  locale: z.string().optional().nullable(),
+  // Design Mode selection; the backend recomposes it against the catalog.
+  style_selection: DesignStyleSelectionSchema.optional().nullable(),
 });
 
 export const BrandStrategySchema = z.object({
@@ -51,6 +66,115 @@ export const DesignBriefSchema = z.object({
   typography_direction: z.string(),
   imagery_style: z.string(),
   layout_notes: z.string(),
+  // The resolved style direction that shaped this brief (artifact lineage).
+  style_direction: DesignStyleDirectionSchema.optional().nullable(),
+  // Deterministic UI/UX spec compiled inside design_brief for digital-product briefs.
+  ui_ux: UIUXDesignIRSchema.optional().nullable(),
+});
+
+export const WorkspaceDocumentSchema = z.object({
+  path: z.string(),
+  title: z.string(),
+  kind: z.string(),
+  body: z.string(),
+  metadata: z.record(z.string(), z.unknown()).default({}),
+});
+
+export const BusinessWorkspaceSchema = z.object({
+  overview: z.record(z.string(), z.unknown()).default({}),
+  internal_docs: z.array(WorkspaceDocumentSchema).default([]),
+  production_docs: z.array(WorkspaceDocumentSchema).default([]),
+  prompt_library: z.array(WorkspaceDocumentSchema).default([]),
+});
+
+export const BrandingWorkspaceSchema = z.object({
+  raw_brand_data: z.record(z.string(), z.unknown()).default({}),
+  internal_assets: z.array(WorkspaceDocumentSchema).default([]),
+  external_assets: z.array(WorkspaceDocumentSchema).default([]),
+  visual_asset_prompts: z.array(WorkspaceDocumentSchema).default([]),
+});
+
+export const DesignSystemPackageSchema = z.object({
+  tokens_json: z.record(z.string(), z.unknown()).default({}),
+  tailwind_config: z.record(z.string(), z.unknown()).default({}),
+  global_tokens_css: z.string(),
+  component_scaffolds: z.array(WorkspaceDocumentSchema).default([]),
+  asset_recipes: z.array(WorkspaceDocumentSchema).default([]),
+  validation_notes: z.array(z.string()).default([]),
+});
+
+export const RenderedAssetSchema = z.object({
+  asset_id: z.string(),
+  asset_type: z.string(),
+  title: z.string(),
+  prompt_path: z.string(),
+  spec_path: z.string(),
+  output_path: z.string(),
+  format: z.string(),
+  review_status: z.string(),
+  approval_required: z.boolean().default(true),
+  generation_mode: z.string(),
+  lineage_refs: z.array(z.string()).default([]),
+  notes: z.array(z.string()).default([]),
+});
+
+export const AssetReviewQueueSchema = z.object({
+  review_status: z.string(),
+  approval_required: z.boolean().default(true),
+  review_artifact_path: z.string(),
+  checklist: z.array(z.string()).default([]),
+  blocking_issues: z.array(z.string()).default([]),
+});
+
+export const PublishingAdapterSchema = z.object({
+  adapter_id: z.string(),
+  target: z.string(),
+  status: z.string(),
+  approval_required: z.boolean().default(true),
+  exported_asset_types: z.array(z.string()).default([]),
+  notes: z.array(z.string()).default([]),
+});
+
+export const AssetExecutionPackageSchema = z.object({
+  rendered_assets: z.array(RenderedAssetSchema).default([]),
+  review_queue: AssetReviewQueueSchema,
+  publishing_adapters: z.array(PublishingAdapterSchema).default([]),
+  execution_notes: z.array(z.string()).default([]),
+});
+
+export const WorkspaceExportSchema = z.object({
+  root_folder: z.string(),
+  business_folder: z.string(),
+  branding_folder: z.string(),
+  design_system_folder: z.string(),
+  rendered_assets_folder: z.string(),
+  files_written: z.array(z.string()).default([]),
+});
+
+/** Dual-materialized copy of a run export under the project workspace
+ * (`projects/<tenant>/<project>/`). Additive: legacy `workspace_export` is unchanged. */
+export const ProjectWorkspaceMirrorSchema = z.object({
+  ok: z.boolean(),
+  project_root: z.string().optional(),
+  run_root: z.string().optional(),
+  file_count: z.number().int().min(0).optional(),
+  hashes_verified: z.boolean().optional(),
+  mismatches: z.array(z.string()).optional(),
+  folders: z.array(z.string()).optional(),
+  error: z.string().optional(),
+});
+
+export const ArtifactBindingSchema = z.object({
+  artifact_key: z.string(),
+  artifact_id: z.string(),
+  artifact_type: z.string(),
+  owner_department: z.string(),
+  version: z.number().int().positive(),
+  version_ref: z.string(),
+  content_location: z.string().nullable().optional(),
+  content_hash: z.string().nullable().optional(),
+  changed: z.boolean(),
+  created: z.boolean(),
 });
 
 export const QualityMetricsSchema = z.object({
@@ -66,13 +190,143 @@ export const QualityMetricsSchema = z.object({
   threshold_passed: z.boolean(),
 });
 
+export const BrandComplianceViolationSchema = z.object({
+  pattern_id: z.string(),
+  matched_text: z.string(),
+  description: z.string(),
+});
+
+export const BrandComplianceReadabilitySchema = z.object({
+  flesch_kincaid_grade: z.union([z.number(), z.literal('NOT_MEASURED')]),
+  within_target_band: z.union([z.boolean(), z.literal('NOT_MEASURED')]),
+  target_grade_min: z.number(),
+  target_grade_max: z.number(),
+});
+
+export const BrandComplianceSentimentSchema = z.object({
+  compound: z.union([z.number(), z.literal('NOT_MEASURED')]),
+  within_target_band: z.union([z.boolean(), z.literal('NOT_MEASURED')]),
+  target_min: z.number(),
+  target_max: z.number(),
+});
+
+export const BrandComplianceSchema = z.object({
+  engine_version: z.string(),
+  passed: z.boolean(),
+  flagged_terms: z.array(z.string()).default([]),
+  violations: z.array(BrandComplianceViolationSchema).default([]),
+  missing_disclaimers: z.array(z.string()).default([]),
+  readability: BrandComplianceReadabilitySchema,
+  sentiment: BrandComplianceSentimentSchema,
+  advisories: z.array(z.string()).default([]),
+});
+
 export const QAReportSchema = z.object({
   brand_safety_passed: z.boolean(),
   flagged_terms: z.array(z.string()).default([]),
   quality_metrics: QualityMetricsSchema,
+  brand_compliance: BrandComplianceSchema.partial().default({}),
   notes: z.string(),
   release_blocked: z.boolean().default(false),
   degradation_reasons: z.array(z.string()).default([]),
+});
+
+export const ResearchCoverageSchema = z.object({
+  audience_brief: z.string(),
+  interview_guide: z.array(z.string()).default([]),
+  competitive_audit: z.array(z.string()).default([]),
+  stakeholder_map: z.array(z.record(z.string(), z.string())).default([]),
+  perception_gaps: z.array(z.string()).default([]),
+  category_language: z.array(z.string()).default([]),
+  evidence_refs: z.array(z.string()).default([]),
+  unresolved: z.array(z.string()).default([]),
+});
+
+export const ClaimProofRecordSchema = z.object({
+  claim_id: z.string(),
+  text: z.string(),
+  status: z.enum(['PROVED', 'UNPROVED', 'UNKNOWN']),
+  source_ref: z.string().nullable().optional(),
+  release_note: z.string(),
+});
+
+export const RightsRecordSchema = z.object({
+  asset_ref: z.string(),
+  owner: z.string(),
+  license_status: z.string(),
+  portfolio_permission: z.string(),
+  territory: z.string(),
+  expiry: z.string().nullable().optional(),
+  access_expiry: z.string().nullable().optional(),
+  offboarding_status: z.string(),
+  contact: z.string(),
+});
+
+export const AccessibilityEvidenceSchema = z.object({
+  standard_ref: z.string(),
+  contrast: z.enum(['MEASURED', 'NOT_MEASURED']),
+  keyboard: z.enum(['MEASURED', 'NOT_MEASURED']),
+  semantics: z.enum(['MEASURED', 'NOT_MEASURED']),
+  assistive_technology: z.enum(['MEASURED', 'NOT_MEASURED']),
+  evidence_refs: z.array(z.string()).default([]),
+  status: z.enum(['SOURCE_ATTACHED', 'GAP', 'COUNSEL_REQUIRED']),
+});
+
+export const MediaPlanningHandoffSchema = z.object({
+  audience: z.string(),
+  flight: z.string(),
+  market: z.string(),
+  budget: z.string(),
+  kpis: z.array(z.string()).default([]),
+  creative_specs: z.array(z.string()).default([]),
+  trafficking_sheet: z.array(z.record(z.string(), z.string())).default([]),
+  execution_mode: z.literal('PLANNING_ONLY'),
+});
+
+export const ObservabilityContractSchema = z.object({
+  required_signals: z.array(z.enum(['logs', 'metrics', 'traces'])),
+  service_identity: z.string(),
+  owner: z.string(),
+  retention_policy: z.string(),
+  alert_conditions: z.array(z.string()).default([]),
+  runtime_binding_status: z.literal('UNVERIFIED_EXTERNAL_BINDING'),
+});
+
+export const SLORecordSchema = z.object({
+  name: z.string(),
+  target: z.string(),
+  measurement_ref: z.string().nullable().optional(),
+  status: z.enum(['GAP_NO_BASELINE', 'SOURCE_ATTACHED']),
+});
+
+export const ModelCardRecordSchema = z.object({
+  task: z.string(),
+  provider: z.string().nullable().optional(),
+  model: z.string().nullable().optional(),
+  mode: z.string(),
+  prompt_version: z.string().nullable().optional(),
+  schema_version: z.string().nullable().optional(),
+  evaluation_status: z.enum(['NOT_MEASURED', 'SOURCE_ATTACHED']),
+  limitations: z.array(z.string()).default([]),
+});
+
+export const AgencyOperationsPackageSchema = z.object({
+  schema_version: z.literal('amc-agency-operations/v1'),
+  market: z.string(),
+  language: z.string(),
+  locale: z.string(),
+  research: ResearchCoverageSchema,
+  claims: z.array(ClaimProofRecordSchema).default([]),
+  rights_handoff: z.array(RightsRecordSchema).default([]),
+  accessibility: AccessibilityEvidenceSchema,
+  media: MediaPlanningHandoffSchema,
+  observability: ObservabilityContractSchema,
+  slos: z.array(SLORecordSchema).default([]),
+  model_cards: z.array(ModelCardRecordSchema).default([]),
+  legal_readiness: z.enum(['SOURCE_ATTACHED', 'GAP', 'COUNSEL_REQUIRED']),
+  required_reviewers: z.array(z.string()).default([]),
+  unresolved_gaps: z.array(z.string()).default([]),
+  external_release_blockers: z.array(z.string()).default([]),
 });
 
 export const CampaignPackageSchema = z.object({
@@ -82,6 +336,12 @@ export const CampaignPackageSchema = z.object({
   copy_variants: z.array(CopyVariantSchema),
   design_brief: DesignBriefSchema,
   qa_report: QAReportSchema.optional(),
+  business_workspace: BusinessWorkspaceSchema.optional(),
+  branding_workspace: BrandingWorkspaceSchema.optional(),
+  design_system: DesignSystemPackageSchema.optional(),
+  asset_execution: AssetExecutionPackageSchema.optional(),
+  workspace_export: WorkspaceExportSchema.nullable().optional(),
+  agency_operations: AgencyOperationsPackageSchema.optional(),
 });
 
 export const GenerationProvenanceSchema = z.object({
@@ -97,6 +357,18 @@ export const GenerationProvenanceSchema = z.object({
   completed_at: z.string().datetime({ offset: true }),
   fallback_used: z.boolean(),
   error_class: z.string().nullable(),
+  // Provider routes tried in order; more than one means a configured fallback ran.
+  route: z.array(z.string()).default([]),
+  // Pinned model profile hash; null for runs created before profiles were pinned.
+  profile_hash: z.string().nullable().default(null),
+  usage: z.object({
+    input_tokens: z.number().int().nonnegative(),
+    output_tokens: z.number().int().nonnegative(),
+    total_tokens: z.number().int().nonnegative(),
+  }).default({ input_tokens: 0, output_tokens: 0, total_tokens: 0 }),
+  // False when any call's usage was unreported; the unreported estimate then counts toward the run budget.
+  usage_reported: z.boolean().default(true),
+  unreported_token_estimate: z.number().int().nonnegative().default(0),
 });
 
 export const AgencyRunStatusSchema = z.enum([
@@ -108,13 +380,118 @@ export const AgencyRunStatusSchema = z.enum([
   'failed',
 ]);
 
+export const DispatchPermitSchema = z.object({
+  run_id: z.string().uuid(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  permit_id: z.string(),
+  work_order_id: z.string(),
+  project_snapshot_hash: z.string().regex(/^[a-f0-9]{64}$/),
+  causal_epoch: z.number().int().nonnegative(),
+  dependency_version_refs: z.array(z.string()).default([]),
+  authority_refs: z.array(z.string()).default([]),
+  approval_refs: z.array(z.string()).default([]),
+  tool_contract_refs: z.array(z.string()).default([]),
+  eligibility_policy_version: z.string(),
+  issued_at: z.string().datetime({ offset: true }),
+});
+
+export const ExecutionReceiptSchema = z.object({
+  run_id: z.string().uuid(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  operation_id: z.string(),
+  work_order_id: z.string(),
+  actor_role_id: z.string(),
+  tool: z.string(),
+  tool_contract_ref: z.string(),
+  args_hash: z.string().regex(/^[a-f0-9]{64}$/),
+  target: z.string(),
+  idempotency_key: z.string(),
+  attempt: z.number().int().min(1).max(3),
+  started_at: z.string().datetime({ offset: true }),
+  ended_at: z.string().datetime({ offset: true }),
+  returned_state: z.string(),
+  result_ref: z.string().nullable().optional(),
+});
+
+export const ObservationReceiptSchema = z.object({
+  run_id: z.string().uuid(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  operation_id: z.string(),
+  target: z.string(),
+  expected_postcondition: z.record(z.string(), z.unknown()),
+  observed_postcondition: z.record(z.string(), z.unknown()),
+  observation_method: z.string(),
+  evidence_refs: z.array(z.string()).default([]),
+  observed_at: z.string().datetime({ offset: true }),
+  matches: z.boolean(),
+});
+
+export const FailureFingerprintSchema = z.object({
+  run_id: z.string().uuid(),
+  tenant_id: z.string(),
+  project_id: z.string(),
+  operation_id: z.string(),
+  fingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  failure_class: z.string(),
+  causal_node: z.string(),
+  work_order_input_hash: z.string().regex(/^[a-f0-9]{64}$/),
+  dependency_snapshot_hash: z.string().regex(/^[a-f0-9]{64}$/),
+  tool_contract_hash: z.string().regex(/^[a-f0-9]{64}$/),
+  environment_signature: z.string(),
+  error_class: z.string(),
+  error_code: z.string().nullable().optional(),
+  observed_postcondition: z.unknown().optional(),
+});
+
+export const CompletionCriterionResultSchema = z.object({
+  criterion_ref: z.string(),
+  status: z.enum(['SATISFIED', 'UNSATISFIED', 'STALE', 'BLOCKED', 'NOT_APPLICABLE']),
+  missing_refs: z.array(z.string()).default([]),
+  stale_refs: z.array(z.string()).default([]),
+});
+
+export const CompletionEvaluationSchema = z.object({
+  terminal_candidate: z.enum(['COMPLETE', 'BLOCKED']),
+  criteria: z.array(CompletionCriterionResultSchema),
+  proof_coverage: z.number().min(0).max(1),
+  evidence_score: z.union([z.number().min(0).max(1), z.literal('NOT_MEASURED')]),
+  quality_score: z.union([z.number().min(0).max(1), z.literal('NOT_MEASURED')]),
+  confidence: z.number().min(0).max(1),
+});
+
+export const ProofSummarySchema = z.object({
+  dispatch_count: z.number().int().nonnegative(),
+  execution_count: z.number().int().nonnegative(),
+  observation_count: z.number().int().nonnegative(),
+  matched_observation_count: z.number().int().nonnegative(),
+  failure_count: z.number().int().nonnegative(),
+  latest_terminal_candidate: z.enum(['COMPLETE', 'BLOCKED']).nullable().optional(),
+  latest_confidence: z.number().min(0).max(1).nullable().optional(),
+});
+
+export const RunProofSchema = z.object({
+  dispatch_permits: z.array(DispatchPermitSchema),
+  execution_receipts: z.array(ExecutionReceiptSchema),
+  observation_receipts: z.array(ObservationReceiptSchema),
+  failure_fingerprints: z.array(FailureFingerprintSchema),
+  completion_evaluation: CompletionEvaluationSchema.nullable().optional(),
+  summary: ProofSummarySchema,
+});
+
 export const AgencyRunSchema = z.object({
   run_id: z.string().uuid(),
+  project_id: z.string().optional(),
   status: AgencyRunStatusSchema,
   pipeline: z.literal('branding_marketing_agency').optional(),
   stages: z.array(AgencyPipelineStageSchema).optional(),
   pending_next_node: z.array(z.string()).optional(),
   campaign_package: CampaignPackageSchema.nullable().optional(),
+  workspace_export: WorkspaceExportSchema.nullable().optional(),
+  project_workspace: ProjectWorkspaceMirrorSchema.nullable().optional(),
+  artifact_bindings: z.array(ArtifactBindingSchema).default([]),
   qa_report: QAReportSchema.nullable().optional(),
   pending_approval: ApprovalRequestSchema.nullable().optional(),
   approvals: z.array(ApprovalRequestSchema).optional(),
@@ -129,6 +506,7 @@ export const AgencyRunSchema = z.object({
     })
     .nullable()
     .optional(),
+  proof: RunProofSchema.optional(),
 });
 
 export type AgencyPipelineStage = z.infer<typeof AgencyPipelineStageSchema>;
@@ -137,8 +515,22 @@ export type BrandStrategy = z.infer<typeof BrandStrategySchema>;
 export type CreativeConcept = z.infer<typeof CreativeConceptSchema>;
 export type CopyVariant = z.infer<typeof CopyVariantSchema>;
 export type DesignBrief = z.infer<typeof DesignBriefSchema>;
+export type BrandCompliance = z.infer<typeof BrandComplianceSchema>;
 export type QAReport = z.infer<typeof QAReportSchema>;
 export type CampaignPackage = z.infer<typeof CampaignPackageSchema>;
+export type AgencyOperationsPackage = z.infer<typeof AgencyOperationsPackageSchema>;
+export type WorkspaceDocument = z.infer<typeof WorkspaceDocumentSchema>;
+export type BusinessWorkspace = z.infer<typeof BusinessWorkspaceSchema>;
+export type BrandingWorkspace = z.infer<typeof BrandingWorkspaceSchema>;
+export type DesignSystemPackage = z.infer<typeof DesignSystemPackageSchema>;
+export type RenderedAsset = z.infer<typeof RenderedAssetSchema>;
+export type AssetReviewQueue = z.infer<typeof AssetReviewQueueSchema>;
+export type PublishingAdapter = z.infer<typeof PublishingAdapterSchema>;
+export type AssetExecutionPackage = z.infer<typeof AssetExecutionPackageSchema>;
+export type WorkspaceExport = z.infer<typeof WorkspaceExportSchema>;
+export type ProjectWorkspaceMirror = z.infer<typeof ProjectWorkspaceMirrorSchema>;
+export type ArtifactBinding = z.infer<typeof ArtifactBindingSchema>;
 export type GenerationProvenance = z.infer<typeof GenerationProvenanceSchema>;
 export type AgencyRunStatus = z.infer<typeof AgencyRunStatusSchema>;
 export type AgencyRun = z.infer<typeof AgencyRunSchema>;
+export type RunProof = z.infer<typeof RunProofSchema>;

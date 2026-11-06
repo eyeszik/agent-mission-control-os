@@ -1,0 +1,69 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "cand-cdd4e61af8718f4c3db8",
+      "generation": 0,
+      "ir_hash": "a863cb33f2d38f3e790c69edabb9854dd98809638bc1eedfcba397811a852a60",
+      "mutations": [],
+      "parents": [],
+      "svg_sha256": "471887750640f29687c30789d8913c1c6a4c4573a5b4c510926e9833b2146b4c"
+    },
+    {
+      "candidate_id": "cand-4e2d22239832ce7c9959",
+      "generation": 1,
+      "ir_hash": "06a8b00d40b5b38192811917e83d951fa6daf8c86515e80fa87b4141ed56a2b7",
+      "mutations": [
+        "color",
+        "composition",
+        "composition"
+      ],
+      "parents": [
+        "cand-cdd4e61af8718f4c3db8"
+      ],
+      "svg_sha256": "53ae1eda9fc88d6859f92a25a371df47c27858d978f14c03c2611505e152ea21"
+    },
+    {
+      "candidate_id": "cand-b9cc8f4316a1efb675b0",
+      "generation": 1,
+      "ir_hash": "46407b60c3f6074eeb5f59e14b2d207a91dfa4886705da4646845d9b96da4359",
+      "mutations": [
+        "geometry",
+        "geometry",
+        "grid",
+        "typography"
+      ],
+      "parents": [
+        "cand-cdd4e61af8718f4c3db8"
+      ],
+      "svg_sha256": "bb64986fefaaa96d398e8d9d7bdb4aa9d4f7f8e7860722cac1d1b298771d3738"
+    }
+  ],
+  "comparisons": [
+    {
+      "a": "cand-cdd4e61af8718f4c3db8",
+      "b": "cand-4e2d22239832ce7c9959",
+      "grammar_distance": 0.2038,
+      "kind": "COMPUTED_DIVERSITY (not a preference score)",
+      "parameter_distance": 0.0,
+      "shape_jaccard_distance": 0.8333
+    },
+    {
+      "a": "cand-cdd4e61af8718f4c3db8",
+      "b": "cand-b9cc8f4316a1efb675b0",
+      "grammar_distance": 0.0,
+      "kind": "COMPUTED_DIVERSITY (not a preference score)",
+      "parameter_distance": 0.2244,
+      "shape_jaccard_distance": 0.0
+    },
+    {
+      "a": "cand-4e2d22239832ce7c9959",
+      "b": "cand-b9cc8f4316a1efb675b0",
+      "grammar_distance": 0.2038,
+      "kind": "COMPUTED_DIVERSITY (not a preference score)",
+      "parameter_distance": 0.2244,
+      "shape_jaccard_distance": 0.8333
+    }
+  ],
+  "feedback": [],
+  "note": "diversity is computed; no audience preference is predicted"
+}

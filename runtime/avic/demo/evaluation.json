@@ -1,0 +1,151 @@
+{
+  "passed": true,
+  "repairs": [],
+  "report": {
+    "checks": [
+      {
+        "check": "svg_safety",
+        "detail": "well-formed SVG without active content or external references",
+        "level": "Q4",
+        "result": "PASS"
+      },
+      {
+        "check": "allowlist_elements",
+        "detail": "all elements allowlisted",
+        "level": "Q4",
+        "result": "PASS"
+      },
+      {
+        "check": "allowlist_attributes",
+        "detail": "all attributes allowlisted",
+        "level": "Q4",
+        "result": "PASS"
+      },
+      {
+        "check": "text_placement",
+        "detail": "ok",
+        "level": "Q3",
+        "result": "PASS"
+      },
+      {
+        "check": "unique_ids",
+        "detail": "16 unique ids",
+        "level": "Q3",
+        "result": "PASS"
+      },
+      {
+        "check": "reference_integrity",
+        "detail": "all references local and resolved",
+        "level": "Q4",
+        "result": "PASS"
+      },
+      {
+        "check": "finite_coordinates",
+        "detail": "all coordinates finite and bounded",
+        "level": "Q3",
+        "result": "PASS"
+      },
+      {
+        "check": "resource_ceiling",
+        "detail": "26 elements, 4 path commands, depth<=24: True",
+        "level": "Q4",
+        "result": "PASS"
+      },
+      {
+        "check": "profile_integrity",
+        "detail": "NATIVE_EDITABLE_VECTOR: 0 embedded raster element(s)",
+        "level": "Q3",
+        "result": "PASS"
+      },
+      {
+        "check": "dimensions",
+        "detail": "declared 1200x1500, expected 1200x1500",
+        "level": "Q3",
+        "result": "PASS"
+      },
+      {
+        "check": "exact_text.headline",
+        "detail": "expected 'MADE SLOWLY', SVG has 'MADE SLOWLY'",
+        "level": "Q5",
+        "result": "PASS"
+      },
+      {
+        "check": "exact_text.annotation",
+        "detail": "expected 'FIG. 07 / KILN OPENING 2027', SVG has 'FIG. 07 / KILN OPENING 2027'",
+        "level": "Q5",
+        "result": "PASS"
+      },
+      {
+        "check": "palette",
+        "detail": "5 colour(s) within dE76<=2.3 of the palette",
+        "level": "Q5",
+        "result": "PASS"
+      },
+      {
+        "check": "accent_budget",
+        "detail": "1 accent colour(s) used: ['#ff4c2f']",
+        "level": "Q5",
+        "result": "PASS"
+      },
+      {
+        "check": "contrast.headline",
+        "detail": "#f0eee9 on #171719 = 15.44:1 (floor 4.5)",
+        "level": "Q5",
+        "result": "PASS"
+      },
+      {
+        "check": "contrast.annotation",
+        "detail": "#838185 on #171719 = 4.64:1 (floor 4.5)",
+        "level": "Q5",
+        "result": "PASS"
+      },
+      {
+        "check": "contrast.motif",
+        "detail": "#ff4c2f on #171719 = 5.39:1 (floor 3.0)",
+        "level": "Q5",
+        "result": "PASS"
+      },
+      {
+        "check": "text_fit.headline",
+        "detail": "estimated right edge 821px of 1200px (glyph-advance estimate)",
+        "level": "Q3",
+        "result": "PASS"
+      },
+      {
+        "check": "text_fit.annotation",
+        "detail": "estimated right edge 365px of 1200px (glyph-advance estimate)",
+        "level": "Q3",
+        "result": "PASS"
+      },
+      {
+        "check": "render_dimensions",
+        "detail": "1200x1500",
+        "level": "Q7",
+        "result": "PASS"
+      },
+      {
+        "check": "nonblank",
+        "detail": "{'distinct_colours_128px': 528, 'luminance_mean': 35.13, 'luminance_std': 25.24}",
+        "level": "Q7",
+        "result": "PASS"
+      },
+      {
+        "check": "headline_rendered",
+        "detail": "41.1% of the headline box is headline ink",
+        "level": "Q7",
+        "result": "PASS"
+      }
+    ],
+    "metrics": {
+      "distinct_colours_128px": 528,
+      "luminance_mean": 35.13,
+      "luminance_std": 25.24
+    },
+    "png_sha256": "cf6929a64c6f31b423b17cf74358f2a25e94775d521832b29c0fcbb8095e3f3f",
+    "renderer": "raster.chromium",
+    "renderer_version": "141.0.7390.37",
+    "scene_hash": "5d0a549043a985499530daeb34a00f7cbf8bb61ef6c0d611ec256107bf16a01b",
+    "schema_version": "amc-avic/1",
+    "svg_sha256": "8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3"
+  }
+}

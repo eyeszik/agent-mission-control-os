@@ -1,0 +1,55 @@
+{
+  "brand_hash": "b8b7fcb3831bcecbf6d5e442c5fc520e1dd61e0796e449397fe40a69b5841664",
+  "compiler_version": "amc-avic-compiler/0.1.0",
+  "evidence": [
+    {
+      "confidence": 1.0,
+      "interpretation": "COLOR reference: colour candidates only, no shapes copied",
+      "observation": "quantised palette ['#446633', '#888888', '#778888', '#556699', '#335599']",
+      "provenance": "OBSERVED",
+      "source": "ref-local"
+    },
+    {
+      "confidence": 0.6,
+      "interpretation": "selects brand accent 'signal_red' (nearest by dE76); adds no colour",
+      "observation": "most saturated observed colour #335599",
+      "provenance": "INFERRED",
+      "source": "ref-local"
+    },
+    {
+      "confidence": 1.0,
+      "interpretation": "below 3:1 for graphics: ink becomes the ground",
+      "observation": "accent #ff4c2f on ground #f0eee9 is 2.86:1",
+      "provenance": "INFERRED",
+      "source": "brand:foundry.psem.PALETTE"
+    },
+    {
+      "confidence": 1.0,
+      "interpretation": "layout and motif chosen by the selected profile",
+      "observation": "one signal accent; monumental negative space; optical asymmetry; matte, fine grain; technical annotation; neo-grotesk type",
+      "provenance": "ARTIST_DEFINED",
+      "source": "profile:post-surrealist-editorial"
+    },
+    {
+      "confidence": 0.7,
+      "interpretation": "estimated width 737px (advance 0.62em, an estimate)",
+      "observation": "headline 11 chars at 108.0px",
+      "provenance": "APPROXIMATED",
+      "source": "compiler"
+    }
+  ],
+  "intent_hash": "0b22ddf758cc4783065fa81762eabe3512331e1cd7c45b0bb3891d16010649cd",
+  "policy_version": "amc-avic-policy/1",
+  "references": [
+    {
+      "ref_id": "ref-local",
+      "role": "COLOR",
+      "sha256": "5ee4eb27b1cc0b744845fac81b17efdd14aacaeb4233c505ac14dd0c4bef5218"
+    }
+  ],
+  "renderer": "raster.chromium",
+  "renderer_version": "141.0.7390.37",
+  "requirement_hash": "76aedfb935ed9a5fd502485e71d6b2f67b9660d8e9f658ee2b51d47046b93d18",
+  "scene_hash": "5d0a549043a985499530daeb34a00f7cbf8bb61ef6c0d611ec256107bf16a01b",
+  "schema_version": "amc-avic/1"
+}

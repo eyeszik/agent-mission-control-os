@@ -16,3 +16,13 @@ export const useRunStore = create<RunState>((set) => ({
     runs: { ...state.runs, [run.id]: run }
   })),
 }));
+
+declare global {
+  interface Window {
+    __amcRunStore?: typeof useRunStore;
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.__amcRunStore = useRunStore;
+}

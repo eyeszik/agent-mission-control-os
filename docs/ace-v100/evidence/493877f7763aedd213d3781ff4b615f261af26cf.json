@@ -1,0 +1,101 @@
+{
+  "check_run_problems": [],
+  "collected_at": "2026-10-15T08:18:33.128975+00:00",
+  "commit_sha": "493877f7763aedd213d3781ff4b615f261af26cf",
+  "gates": [
+    {
+      "evidence_ref": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/38660959124/job/116181810160",
+      "gate": "backend_postgresql",
+      "source_commit": "493877f7763aedd213d3781ff4b615f261af26cf",
+      "status": "PASS"
+    },
+    {
+      "evidence_ref": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/38660959124/job/116181810033",
+      "gate": "backend_sqlite",
+      "source_commit": "493877f7763aedd213d3781ff4b615f261af26cf",
+      "status": "PASS"
+    },
+    {
+      "evidence_ref": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/38660959124/job/116181809963",
+      "gate": "browser_e2e",
+      "source_commit": "493877f7763aedd213d3781ff4b615f261af26cf",
+      "status": "PASS"
+    },
+    {
+      "evidence_ref": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/38660959124/job/116181809878",
+      "gate": "dependency_audit",
+      "source_commit": "493877f7763aedd213d3781ff4b615f261af26cf",
+      "status": "PASS"
+    },
+    {
+      "evidence_ref": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/38660959124/job/116181810033 ; https://github.com/eyeszik/agent-mission-control-os/actions/runs/38660959124/job/116181809950",
+      "gate": "dependency_consistency",
+      "source_commit": "493877f7763aedd213d3781ff4b615f261af26cf",
+      "status": "PASS"
+    },
+    {
+      "evidence_ref": "no independent evidence for this gate; CI success alone does not prove it",
+      "gate": "evidence_integrity",
+      "source_commit": "493877f7763aedd213d3781ff4b615f261af26cf",
+      "status": "UNVERIFIED"
+    },
+    {
+      "evidence_ref": "no independent evidence for this gate; CI success alone does not prove it",
+      "gate": "fault_injection",
+      "source_commit": "493877f7763aedd213d3781ff4b615f261af26cf",
+      "status": "UNVERIFIED"
+    },
+    {
+      "evidence_ref": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/38660959124/job/116181809950",
+      "gate": "frontend_build",
+      "source_commit": "493877f7763aedd213d3781ff4b615f261af26cf",
+      "status": "PASS"
+    },
+    {
+      "evidence_ref": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/38660959124/job/116181810033 ; https://github.com/eyeszik/agent-mission-control-os/actions/runs/38660959124/job/116181809950",
+      "gate": "schema_parity",
+      "source_commit": "493877f7763aedd213d3781ff4b615f261af26cf",
+      "status": "PASS"
+    },
+    {
+      "evidence_ref": "no independent evidence for this gate; CI success alone does not prove it",
+      "gate": "security_regression",
+      "source_commit": "493877f7763aedd213d3781ff4b615f261af26cf",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "note": "Unsigned draft. Not a release authorization.",
+  "schema_version": "ace.release-evidence-draft.v1",
+  "signed": false,
+  "status": {
+    "ci": {
+      "backend_postgresql": "PASS",
+      "backend_sqlite": "PASS",
+      "browser_e2e": "PASS",
+      "dependency_audit": "PASS",
+      "dependency_consistency": "PASS",
+      "evidence_integrity": "UNVERIFIED",
+      "fault_injection": "UNVERIFIED",
+      "frontend_build": "PASS",
+      "schema_parity": "PASS",
+      "security_regression": "UNVERIFIED"
+    },
+    "commit_sha": "493877f7763aedd213d3781ff4b615f261af26cf",
+    "live_effects": "NOT_VERIFIED",
+    "overall_status": "MERGED_NOT_PRODUCTION_VERIFIED",
+    "production_integration": "UNVERIFIED",
+    "release_authorization": "NOT_VERIFIED",
+    "release_permitted": false,
+    "unresolved_gaps": [
+      "gate evidence_integrity: UNVERIFIED",
+      "gate fault_injection: UNVERIFIED",
+      "gate security_regression: UNVERIFIED",
+      "telemetry ingestion not verified in the target environment",
+      "provider effects not reconciled against real provider receipts",
+      "rollback drill not verified",
+      "audit chain integrity not verified for the release",
+      "no verified live canary for every approved action class",
+      "no valid signed human approval for this exact SHA"
+    ]
+  }
+}

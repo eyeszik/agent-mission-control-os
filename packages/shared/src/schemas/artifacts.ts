@@ -6,7 +6,7 @@ export const ArtifactSchema = z.object({
   node_id: z.string(),
   type: z.enum(['code', 'document', 'spec', 'data']),
   content: z.string(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   created_at: z.string().datetime()
 });
 

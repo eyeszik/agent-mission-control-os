@@ -14,6 +14,7 @@ OPENAPI = ROOT / "packages/shared/openapi/agent-mission-control.openapi.yaml"
 REQUIRED_ENV_VARS = {
     "NEXT_PUBLIC_API_BASE_URL",
     "AMC_DB_PATH",
+    "AMC_EXPORT_ROOT",
     "AMC_CORS_ALLOWED_ORIGINS",
     "AMC_AUTH_MODE",
     "AMC_LOCAL_USER_ID",
@@ -65,7 +66,43 @@ def env_keys() -> set[str]:
     return keys
 
 
+_SCRIPT_REFERENCE = re.compile(r"\bpython3?\s+((?:scripts/)?[\w./-]+\.py)\b")
+_PNPM_REFERENCE = re.compile(r"pnpm --filter (@amc/[\w-]+) (?:run )?([\w:-]+)")
+_PACKAGE_DIRS = {"@amc/web": "apps/web", "@amc/shared": "packages/shared"}
+_PNPM_BUILTINS = {"exec", "install", "add", "why", "list"}
+
+
+def missing_validator_references(root: Path = ROOT) -> list[str]:
+    """Every validator CI or `make` invokes must exist.
+
+    An active gate that points at a missing script is repository drift, and it
+    is critical: the gate would either crash or -- worse -- be quietly removed.
+    It is reported, never auto-created.
+    """
+    problems: list[str] = []
+    for source in (".github/workflows/ci.yml", "Makefile"):
+        path = root / source
+        if not path.is_file():
+            problems.append(f"{source}: missing (gate definitions cannot be verified)")
+            continue
+        text = path.read_text(encoding="utf-8")
+        for script in sorted(set(_SCRIPT_REFERENCE.findall(text))):
+            if not (root / script).is_file():
+                problems.append(f"{source}: references missing validator/script {script}")
+        for package, script in sorted(set(_PNPM_REFERENCE.findall(text))):
+            if script in _PNPM_BUILTINS:
+                continue
+            manifest = root / _PACKAGE_DIRS.get(package, "") / "package.json"
+            scripts = json.loads(manifest.read_text()).get("scripts", {}) if manifest.is_file() else {}
+            if script not in scripts:
+                problems.append(f"{source}: `pnpm --filter {package} {script}` has no such package script")
+    return problems
+
+
 def main() -> None:
+    missing = missing_validator_references()
+    if missing:
+        raise SystemExit("Active gates reference missing validators:\n" + "\n".join(missing))
     backend = backend_stages()
     shared = shared_stages()
     documented = openapi_stages()
@@ -87,16 +124,16 @@ def main() -> None:
         raise SystemExit("README must document the browser E2E release gate")
 
     root_package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-    if root_package.get("engines", {}).get("node") != ">=20.9.0":
-        raise SystemExit("Root Node.js engine must match the Next.js 16 minimum: >=20.9.0")
+    if root_package.get("engines", {}).get("node") != ">=22.12.0":
+        raise SystemExit("Root Node.js engine must satisfy the Vitest 5 / Vite 8 minimum: >=22.12.0")
     if "lint" in root_package.get("scripts", {}):
         raise SystemExit("Root package still advertises an unimplemented recursive lint command")
 
     web_package = json.loads((ROOT / "apps/web/package.json").read_text(encoding="utf-8"))
-    if web_package.get("dependencies", {}).get("next") != "16.3.0":
-        raise SystemExit("Web package must remain pinned to audited Next.js 16.3.0")
-    if web_package.get("devDependencies", {}).get("@playwright/test") != "1.61.0":
-        raise SystemExit("Browser gate must pin @playwright/test to 1.61.0")
+    if web_package.get("dependencies", {}).get("next") != "16.4.3":
+        raise SystemExit("Web package must remain pinned to audited Next.js 16.4.3")
+    if web_package.get("devDependencies", {}).get("@playwright/test") != "1.64.1":
+        raise SystemExit("Browser gate must pin @playwright/test to 1.64.1")
     if web_package.get("scripts", {}).get("test") != "vitest run tests":
         raise SystemExit("Web unit tests must be scoped to tests/ so Vitest cannot execute Playwright specs")
     if web_package.get("scripts", {}).get("test:e2e") != "playwright test":
@@ -106,11 +143,11 @@ def main() -> None:
 
     lockfile = (ROOT / "pnpm-lock.yaml").read_text(encoding="utf-8")
     for required in [
-        "specifier: 16.3.0",
-        "sharp@0.35.3",
-        "postcss@8.5.23",
-        "'@playwright/test@1.61.0'",
-        "playwright-core@1.61.0",
+        "specifier: 16.4.3",
+        "sharp@0.35.5",
+        "postcss@8.5.31",
+        "'@playwright/test@1.64.1'",
+        "playwright-core@1.64.1",
     ]:
         if required not in lockfile:
             raise SystemExit(f"Audited frontend lockfile token missing: {required}")

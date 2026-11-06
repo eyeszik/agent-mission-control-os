@@ -1,0 +1,44 @@
+{
+  "schema_version": "freevideoforge/script/v1",
+  "title": "Why the Moon Changes Shape",
+  "topic": "Why the moon changes shape",
+  "shape": "question",
+  "intent": "educate",
+  "audience": "curious general audience",
+  "format": "short-form explainer",
+  "language": "en",
+  "narration_strategy": "single narrator, second person, plain language",
+  "content_source": "scaffold",
+  "content_source_note": "No brief was supplied, so body copy is a generated narrative scaffold phrased around the topic. It asserts no facts about the topic. Supply --brief to drive the body with real content.",
+  "provider": "template",
+  "model": null,
+  "seed": 2026,
+  "target_duration": 9.0,
+  "planned_duration": 9.0,
+  "duration_note": "",
+  "words_per_second": 2.45,
+  "beats": [
+    {
+      "index": 0,
+      "role": "hook",
+      "voiceover": "Why the Moon Changes Shape?",
+      "headline": "Why the Moon Changes Shape?",
+      "kicker": "START HERE",
+      "allocated_duration": 4.6,
+      "target_duration": 4.6,
+      "word_count": 5
+    },
+    {
+      "index": 1,
+      "role": "payoff",
+      "voiceover": "If you remember one thing, make it that.",
+      "headline": "Remember One Thing",
+      "kicker": "REMEMBER THIS",
+      "allocated_duration": 4.4,
+      "target_duration": 4.4,
+      "word_count": 8
+    }
+  ],
+  "unused_brief_sentences": [],
+  "total_words": 13
+}

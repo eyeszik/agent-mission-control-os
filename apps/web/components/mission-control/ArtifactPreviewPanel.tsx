@@ -1,32 +1,105 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useArtifactStore } from '../../lib/stores/artifactStore';
 import { useRunStore } from '../../lib/stores/runStore';
 import { useApprovalStore } from '../../lib/stores/approvalStore';
 import { useShallow } from 'zustand/react/shallow';
 import { resolveApproval } from '../../lib/api/approvals';
-import { resumeAgencyRun } from '../../lib/api/agency';
+import { getAgencyRun, resumeAgencyRun } from '../../lib/api/agency';
+import { getProjectTrust } from '../../lib/api/runtime';
 import { useNodeStatusStore } from '../../lib/stores/nodeStatusStore';
 import { generateIdempotencyKey } from '../../lib/utils/idempotency';
+import { globalBus } from '../../lib/events/bus';
+import type { AgencyRun, TrustSnapshot } from '@amc/shared';
+import { getLogger } from '../../lib/logger';
 
 export function ArtifactPreviewPanel() {
   const activeRunId = useRunStore((state) => state.activeRunId);
-  const artifacts = useArtifactStore((state) => activeRunId ? state.artifacts[activeRunId] : null);
-  const selectedArtifactId = useArtifactStore((state) => state.selectedArtifactId);
+  // ⚡ Bolt: Compute derived state directly inside the selector to avoid
+  // subscribing the component to the entire artifacts array and causing unneeded re-renders.
+  const selectedArtifact = useArtifactStore((state) => {
+    if (!activeRunId || !state.selectedArtifactId) return null;
+    const runArtifacts = state.artifacts[activeRunId];
+    return runArtifacts ? runArtifacts.find(a => a.id === state.selectedArtifactId) || null : null;
+  });
   const addArtifact = useArtifactStore((state) => state.addArtifact);
 
   // Optimization: useShallow prevents unnecessary re-renders by returning the same
   // array reference if the content of pendingApprovals hasn't structurally changed,
   // even if other non-pending approvals update in the record.
-  const pendingApprovals = useApprovalStore(useShallow((state) => Object.values(state.approvals).filter(a => a.status === 'pending')));
+  // ⚡ Bolt: Replaced Object.values().filter() with a single-allocation for...in loop
+  // to reduce excessive garbage collection overhead.
+  const pendingApprovals = useApprovalStore(useShallow((state) => {
+    const pending = [];
+    for (const key in state.approvals) {
+      if (state.approvals[key].status === 'pending') {
+        pending.push(state.approvals[key]);
+      }
+    }
+    return pending;
+  }));
   const removeApproval = useApprovalStore((state) => state.removeApproval);
   const updateNodeStatus = useNodeStatusStore((state) => state.updateNodeStatus);
 
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [run, setRun] = useState<AgencyRun | null>(null);
+  const [trust, setTrust] = useState<TrustSnapshot | null>(null);
 
-  const selectedArtifact = artifacts ? artifacts.find(a => a.id === selectedArtifactId) : null;
+  useEffect(() => {
+    if (!activeRunId) {
+      setRun(null);
+      setTrust(null);
+      return;
+    }
+    let cancelled = false;
+    const refreshRun = async () => {
+      try {
+        const value = await getAgencyRun(activeRunId);
+        if (!cancelled) setRun(value);
+      } catch {
+        if (!cancelled) {
+          setRun(null);
+          setTrust(null);
+        }
+      }
+    };
+    const onLifecycle = (event: { run_id: string }) => {
+      if (event.run_id === activeRunId) void refreshRun();
+    };
+    void refreshRun();
+    globalBus.on('lifecycle_event_received', onLifecycle as any);
+    return () => {
+      cancelled = true;
+      globalBus.off('lifecycle_event_received', onLifecycle as any);
+    };
+  }, [activeRunId]);
+
+  useEffect(() => {
+    if (!run?.project_id) {
+      setTrust(null);
+      return;
+    }
+    let cancelled = false;
+    const refreshTrust = async () => {
+      try {
+        const value = await getProjectTrust(run.project_id!);
+        if (!cancelled) setTrust(value);
+      } catch {
+        if (!cancelled) setTrust(null);
+      }
+    };
+    const onLifecycle = (event: { project_id: string }) => {
+      if (event.project_id === run.project_id) void refreshTrust();
+    };
+    void refreshTrust();
+    globalBus.on('lifecycle_event_received', onLifecycle as any);
+    return () => {
+      cancelled = true;
+      globalBus.off('lifecycle_event_received', onLifecycle as any);
+    };
+  }, [run?.project_id]);
 
   const handleResolve = async (approvalId: string, runId: string, decision: 'approve' | 'reject') => {
     setResolvingId(approvalId);
@@ -52,7 +125,7 @@ export function ArtifactPreviewPanel() {
 
       removeApproval(approvalId);
     } catch (err) {
-      console.error('Failed to resolve approval', err);
+      getLogger().error('Failed to resolve approval', { err });
       setError(err instanceof Error ? err.message : 'Failed to resolve approval');
     } finally {
       setResolvingId(null);
@@ -63,11 +136,20 @@ export function ArtifactPreviewPanel() {
     <div className="h-full p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between pb-2 border-b border-zinc-800/50">
         <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Inspector</span>
-        {selectedArtifact && <span className="text-xs bg-zinc-800 px-2 py-0.5 rounded text-zinc-400 font-mono">{selectedArtifact.type}</span>}
+        {selectedArtifact && <span className="text-xs bg-zinc-800 px-2 py-0.5 rounded-sm text-zinc-400 font-mono">{selectedArtifact.type}</span>}
       </div>
 
       {error && (
-        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</div>
+        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-sm px-3 py-2">{error}</div>
+      )}
+
+      {trust?.compile_blocked && (
+        <div
+          data-testid="mc-compile-blocked-banner"
+          className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-sm px-3 py-2"
+        >
+          Compile/release blocked until demanded obligations are discharged.
+        </div>
       )}
 
       <div className="flex-1 overflow-y-auto">
@@ -89,15 +171,16 @@ export function ArtifactPreviewPanel() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleResolve(approval.approval_id, approval.run_id, 'approve')}
-                      disabled={isResolving}
-                      className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 rounded text-xs font-medium transition-colors disabled:opacity-50"
+                      disabled={isResolving || Boolean(trust?.compile_blocked)}
+                      data-testid="mc-release-btn"
+                      className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-sm text-xs font-medium transition-colors disabled:opacity-50"
                     >
                       {isResolving ? 'Working…' : 'Approve'}
                     </button>
                     <button
                       onClick={() => handleResolve(approval.approval_id, approval.run_id, 'reject')}
                       disabled={isResolving}
-                      className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 rounded text-xs font-medium transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 rounded-sm text-xs font-medium transition-colors disabled:opacity-50"
                     >
                       {isResolving ? 'Working…' : 'Reject'}
                     </button>

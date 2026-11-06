@@ -1,0 +1,1524 @@
+{
+ "checks": [
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p01",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p01",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p01",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "4 copy element(s) verbatim",
+   "page_id": "p01",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p01",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p01",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "1 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p01",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p01",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 01 of 24",
+   "page_id": "p01",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p02",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p02",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p02",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "1 copy element(s) verbatim",
+   "page_id": "p02",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p02",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p02",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p02",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p02",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 02 of 24",
+   "page_id": "p02",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p03",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p03",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p03",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "3 copy element(s) verbatim",
+   "page_id": "p03",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p03",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p03",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p03",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p03",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 03 of 24",
+   "page_id": "p03",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p04",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p04",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p04",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "3 copy element(s) verbatim",
+   "page_id": "p04",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p04",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p04",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p04",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p04",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 04 of 24",
+   "page_id": "p04",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p05",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p05",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p05",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "0 copy element(s) verbatim",
+   "page_id": "p05",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p05",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p05",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p05",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p05",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 05 of 24",
+   "page_id": "p05",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p06",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p06",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p06",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "3 copy element(s) verbatim",
+   "page_id": "p06",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p06",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p06",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "1 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p06",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p06",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 06 of 24",
+   "page_id": "p06",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p07",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p07",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p07",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "1 copy element(s) verbatim",
+   "page_id": "p07",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p07",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p07",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "1 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p07",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p07",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 07 of 24",
+   "page_id": "p07",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p08",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p08",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p08",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "0 copy element(s) verbatim",
+   "page_id": "p08",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p08",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p08",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "1 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p08",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p08",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 08 of 24",
+   "page_id": "p08",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p09",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p09",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p09",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "1 copy element(s) verbatim",
+   "page_id": "p09",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p09",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p09",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p09",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p09",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 09 of 24",
+   "page_id": "p09",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p10",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p10",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p10",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "1 copy element(s) verbatim",
+   "page_id": "p10",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p10",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p10",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "3 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p10",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p10",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 10 of 24",
+   "page_id": "p10",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p11",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p11",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p11",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "1 copy element(s) verbatim",
+   "page_id": "p11",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p11",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p11",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "1 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p11",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p11",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 11 of 24",
+   "page_id": "p11",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p12",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p12",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p12",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "1 copy element(s) verbatim",
+   "page_id": "p12",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p12",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p12",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "4 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p12",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p12",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 12 of 24",
+   "page_id": "p12",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p13",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p13",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p13",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "0 copy element(s) verbatim",
+   "page_id": "p13",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p13",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p13",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "2 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p13",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p13",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 13 of 24",
+   "page_id": "p13",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p14",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p14",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p14",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "6 copy element(s) verbatim",
+   "page_id": "p14",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p14",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p14",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 6 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p14",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p14",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 14 of 24",
+   "page_id": "p14",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p15",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p15",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p15",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "0 copy element(s) verbatim",
+   "page_id": "p15",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p15",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p15",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p15",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p15",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 15 of 24",
+   "page_id": "p15",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p16",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p16",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p16",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "2 copy element(s) verbatim",
+   "page_id": "p16",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p16",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p16",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p16",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p16",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 16 of 24",
+   "page_id": "p16",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p17",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p17",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p17",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "0 copy element(s) verbatim",
+   "page_id": "p17",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p17",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p17",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p17",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p17",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 17 of 24",
+   "page_id": "p17",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p18",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p18",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p18",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "0 copy element(s) verbatim",
+   "page_id": "p18",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p18",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p18",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p18",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p18",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 18 of 24",
+   "page_id": "p18",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p19",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p19",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p19",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "1 copy element(s) verbatim",
+   "page_id": "p19",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p19",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p19",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p19",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p19",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 19 of 24",
+   "page_id": "p19",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p20",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p20",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p20",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "0 copy element(s) verbatim",
+   "page_id": "p20",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p20",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p20",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p20",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p20",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 20 of 24",
+   "page_id": "p20",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p21",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p21",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p21",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "0 copy element(s) verbatim",
+   "page_id": "p21",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p21",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p21",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p21",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p21",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 21 of 24",
+   "page_id": "p21",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p22",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p22",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p22",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "3 copy element(s) verbatim",
+   "page_id": "p22",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p22",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p22",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p22",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p22",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 22 of 24",
+   "page_id": "p22",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p23",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p23",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p23",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "0 copy element(s) verbatim",
+   "page_id": "p23",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p23",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p23",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p23",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p23",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 23 of 24",
+   "page_id": "p23",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_unresolved_tokens",
+   "detail": "labelled gaps: 0; raw tokens: []",
+   "page_id": "p24",
+   "severity": "WARNING",
+   "status": "PASSED"
+  },
+  {
+   "check": "text_contrast",
+   "detail": "body text #14161a on #f7f4ee = 16.5:1 (WCAG 2.2 AA 4.5:1)",
+   "page_id": "p24",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overflow",
+   "detail": "1 part(s) inside the page body",
+   "page_id": "p24",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "exact_copy",
+   "detail": "2 copy element(s) verbatim",
+   "page_id": "p24",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "min_font",
+   "detail": "no text below the minimum",
+   "page_id": "p24",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "no_overlap",
+   "detail": "no overlapping blocks",
+   "page_id": "p24",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "mark_continuity",
+   "detail": "0 master placement(s), 0 labelled misuse view(s), one source sha256 5f465d136445e039",
+   "page_id": "p24",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "status_labelled",
+   "detail": "every status and gap has a text label (no colour-only meaning)",
+   "page_id": "p24",
+   "severity": "ERROR",
+   "status": "PASSED"
+  },
+  {
+   "check": "footer",
+   "detail": "footer reads page 24 of 24",
+   "page_id": "p24",
+   "severity": "ERROR",
+   "status": "PASSED"
+  }
+ ],
+ "format": "a4-portrait",
+ "measured": true,
+ "summary": {
+  "FAILED": 0,
+  "INCONCLUSIVE": 0,
+  "NOT_RUN": 0,
+  "PASSED": 216
+ }
+}

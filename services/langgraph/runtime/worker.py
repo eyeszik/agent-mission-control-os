@@ -29,10 +29,13 @@ from services.langgraph.runtime.execution import (
     ANALYTICS_REPORTED_BLOCKS,
     DELIVERY_BLOCK_DETAIL,
     agency_payload,
+    contract_from_metadata,
     delivery_context,
+    initial_extracted_data,
     now_iso,
     run_and_record_events,
     run_config,
+    run_pin,
 )
 
 AGENCY_PIPELINE_NAME = "branding_marketing_agency"
@@ -123,14 +126,21 @@ def _execute_create_job(job: dict) -> dict:
     if run_record is None:
         return {"run_id": run_id, "status": "cancelled"}
 
-    graph = build_agency_workflow()
+    # Rebuild the graph the run was created with, and seed the same initial state the
+    # inline route uses. Both come from the run's persisted metadata via the shared
+    # execution core, so a background run cannot execute a different pipeline than an
+    # inline one (master pins workflow topology and the delivery contract per run).
+    metadata = run_record.get("metadata") or {"input_data": {"brief": payload["brief"]}}
+    pin = run_pin(run_record)
+    contract = contract_from_metadata(metadata)
+    graph = build_agency_workflow(pin.workflow_version)
     config = run_config(run_id)
-    run = _run_model_from_record(run_record, {"input_data": {"brief": payload["brief"]}})
+    run = _run_model_from_record(run_record, metadata)
     initial_state = {
         "run": run,
         "current_node": "start",
         "messages": [],
-        "extracted_data": {},
+        "extracted_data": initial_extracted_data(pin, contract),
         "validation_status": "pending",
     }
     state = run_and_record_events(graph, initial_state, config, run)
@@ -237,7 +247,8 @@ def _execute_resume_job(job: dict) -> dict:
         run_id,
     )
     try:
-        graph = build_agency_workflow()
+        pin = run_pin(record)
+        graph = build_agency_workflow(pin.workflow_version)
         config = run_config(run_id)
         run = _run_model_from_record(record, record.get("metadata") or {})
         state = run_and_record_events(graph, None, config, run)

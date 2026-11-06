@@ -1,0 +1,45 @@
+{
+  "version": "1.0.0",
+  "source_roles_sha256": "21063d9d1fb0297a0d4e09860d403e6400f9033889761ecf9f0b919070ade194",
+  "role_count": 1097,
+  "orchestrator_count": 14,
+  "phase_count": 16,
+  "files": [
+    {
+      "path": "authority_registry.runtime.json",
+      "sha256": "8d25043c9124a016f0ed4fd26e02de5d5703380a06ea2cba5350429440310188",
+      "bytes": 994
+    },
+    {
+      "path": "capability_index.runtime.json",
+      "sha256": "5626175a69039d79c1c117436d5dac032d7a75f0351969fc6b4620c62bf0d8d6",
+      "bytes": 271681
+    },
+    {
+      "path": "orchestrators.runtime.json",
+      "sha256": "b455bc1a0c1e00720940a9024935f78ef7a3a96fa3690260944072a3c4b2edd4",
+      "bytes": 5299
+    },
+    {
+      "path": "phases.runtime.json",
+      "sha256": "11c78e9a1f3a96e56f6e6ca8123b2d2242ec77a0fd970b5eba1ad0bbb1c51faf",
+      "bytes": 6204
+    },
+    {
+      "path": "roles.runtime.json",
+      "sha256": "e62cc571c52c97a03d96ad5fc1e8005f46d532d15f9e13e779a986b6984986f5",
+      "bytes": 1481549
+    },
+    {
+      "path": "routing_index.runtime.json",
+      "sha256": "2ffd48be69c18765eed0d593ba4dd8530d6d6d3bf7bd01bd610be8b0135550df",
+      "bytes": 127745
+    },
+    {
+      "path": "state_model.runtime.json",
+      "sha256": "deefb9d4273491bd27d22f0913832203387596c1d2e48dfd7e8b7e05d595e75f",
+      "bytes": 518
+    }
+  ],
+  "registry_hash": "050bc4b2d8f3b2551ad163cb7ad0695c2f2eaea197b807ae5120d64512312e4b"
+}

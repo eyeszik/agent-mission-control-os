@@ -1,0 +1,118 @@
+{
+  "project_name": "northwind-research",
+  "content": "",
+  "extract_content_claims": false,
+  "claims": [
+    {
+      "text": "Northwind shipped 12,000 boxes in August 2026.",
+      "claim_type": "METRIC"
+    },
+    {
+      "text": "Northwind shipped about 387 boxes per day in August 2026.",
+      "claim_type": "METRIC"
+    }
+  ],
+  "evidence": [
+    {
+      "source_id": "src-dispatch-aug",
+      "title": "August dispatch ledger (synthetic)",
+      "source_class": "PRIMARY",
+      "claim_ids": [
+        "clm_001_67573d520a"
+      ],
+      "supports": true,
+      "accessed_at": "2026-09-05",
+      "query": "Northwind boxes shipped August 2026",
+      "freshness_class": "STATIC",
+      "summary": "Synthetic fixture: brand, figures and sources are invented for regression testing. Ledger total for August 2026: 12,000 boxes."
+    }
+  ],
+  "computations": [
+    {
+      "computation_id": "cmp-daily-rate",
+      "question": "Average boxes shipped per day in August 2026",
+      "expression_or_operation": "12000 / 31",
+      "inputs": {
+        "boxes": "12000",
+        "days": "31"
+      },
+      "units": {
+        "result": "boxes/day"
+      },
+      "assumptions": [
+        "August 2026 has 31 days"
+      ],
+      "tool_or_engine": "python-stdlib-arithmetic",
+      "result": "387.1",
+      "precision": "1 decimal place",
+      "provenance": "fixture: deterministic arithmetic over the verified ledger total",
+      "reproducible": true,
+      "input_claim_ids": [
+        "clm_001_67573d520a"
+      ],
+      "derived_claim_ids": [
+        "clm_002_def7514f66"
+      ]
+    }
+  ],
+  "brand_core": {
+    "brand_name": "Northwind Coffee",
+    "positioning_essence": "Coffee for people who take their mornings seriously.",
+    "voice": {
+      "tone_attributes": [
+        "confident",
+        "warm",
+        "direct"
+      ],
+      "writing_dos": [
+        "Use short, concrete sentences."
+      ],
+      "writing_donts": [
+        "Do not use hype."
+      ]
+    },
+    "color_story": [
+      {
+        "role": "primary",
+        "description": "Deep indigo used as the authority color.",
+        "reference_hex": "#1a2b4c"
+      },
+      {
+        "role": "accent",
+        "description": "Warm amber used for emphasis.",
+        "reference_hex": "#e08a2c"
+      }
+    ],
+    "typography_direction": "Humanist serif headlines with a neutral grotesk body.",
+    "imagery_style": "Natural light, tactile materials, documentary framing.",
+    "motion": {
+      "pace": "Brisk with confident deceleration.",
+      "emphasis_moments": [
+        "primary CTA activation"
+      ],
+      "reduced_motion_fallback": "Cross-fade only."
+    },
+    "logo_lockups": [
+      {
+        "lockup_id": "primary",
+        "lockup_type": "primary",
+        "usage_context": "Default digital and print mark.",
+        "minimum_size": "24px digital / 0.5in print",
+        "clear_space_rule": "One cap-height around the full mark.",
+        "placement_notes": "Prefer top-left on digital surfaces.",
+        "generation_reference": "Indigo wordmark with a compact compass-needle symbol."
+      }
+    ]
+  },
+  "asset_requirements": [
+    {
+      "asset_id": "ops-post",
+      "family": "COPY",
+      "asset_type": "social caption",
+      "objective": "Caption celebrating August shipping volume.",
+      "audience": "Existing subscribers.",
+      "channel": "social",
+      "destination": "LinkedIn post"
+    }
+  ]
+}

@@ -1,0 +1,954 @@
+"""Command-line entry point into the agency kernel.
+
+What this does and does not do is the whole point of the module. It **plans**
+against the kernel: it resolves the artifacts a brief asks for to the roles N3
+says may produce them, checks the evidence floor and consumed inputs those
+contracts declare, and walks the N2 engagement matrix applying the real release
+guards. It does not generate anything. No copy, no imagery, no assets -- a plan
+is a statement about what the kernel would permit, not a claim that work
+happened.
+
+That distinction is why this reports blockers as its primary output. A run that
+cannot reach `launched` because no human has approved it is the interesting
+answer, not a failure of the tool, and the exit code says so: non-zero when the
+requested phase is unreachable, so a script or CI job can act on it.
+
+Everything it asserts comes from the kernel rather than from this file:
+
+* ``resolve_artifact_type`` rejects a type the ontology does not define.
+* ``ROLE_REGISTRY`` decides which role produces what, and what it consumes.
+* ``assert_evidence_sufficient`` applies the role's own evidence floor.
+* ``transition_failures`` applies the real lifecycle guards, with stable codes.
+
+If the kernel changes, this changes with it; there is no second copy of the
+rules here to drift.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from collections import deque
+from pathlib import Path
+from typing import Any, Iterable
+
+from pydantic import BaseModel, Field, ValidationError
+from services.langgraph.agency.compiled.instruction_models import InstructionSelection
+
+from services.langgraph.agency.prompt_compiler import (
+    CompilerState,
+    compile_prompt_packages,
+    load_request,
+    write_result,
+)
+from services.langgraph.agency.kernel.lifecycle import (
+    ENGAGEMENT_TRANSITIONS,
+    TransitionContext,
+    transition_failures,
+    validate_matrices,
+)
+from services.langgraph.agency.kernel.models import EngagementStatus
+from services.langgraph.agency.kernel.ontology import (
+    ArtifactType,
+    OntologyError,
+    owning_department,
+    resolve_artifact_type,
+)
+from services.langgraph.agency.kernel.registry import validate_merge_matrix
+from services.langgraph.agency.kernel.roles import (
+    ROLE_REGISTRY,
+    RoleContract,
+    validate_registry,
+)
+
+CLI_VERSION = "amc-agency-cli/v1"
+
+# Phases that represent progress. The interrupt states (blocked, degraded,
+# paused, review_required, failed, cancelled) are reachable from almost
+# everywhere, so routing through them would produce a "path" that is really a
+# description of how the engagement can go wrong.
+PROGRESS_PHASES: tuple[EngagementStatus, ...] = (
+    EngagementStatus.intake,
+    EngagementStatus.discovery,
+    EngagementStatus.research,
+    EngagementStatus.strategy,
+    EngagementStatus.brand,
+    EngagementStatus.product,
+    EngagementStatus.build,
+    EngagementStatus.launch_ready,
+    EngagementStatus.launched,
+    EngagementStatus.growth,
+    EngagementStatus.optimizing,
+    EngagementStatus.complete,
+)
+
+
+class RunFacts(BaseModel):
+    """What is known to be true about the run, fed to the lifecycle guards.
+
+    Mirrors ``TransitionContext``. Anything absent is unproven, which is the
+    fail-closed direction: an unstated approval is a missing approval.
+    """
+
+    generation_mode: str | None = None
+    approval_exists: bool = False
+    approval_resolved: bool = False
+    approval_decision: str | None = None
+    brand_safety_passed: bool | None = None
+    spend_authorized: bool = False
+    brand_safety_advisory: bool = False
+
+    model_config = {"extra": "forbid"}
+
+    def to_context(self, *, external_side_effect: bool) -> TransitionContext:
+        return TransitionContext(
+            generation_mode=self.generation_mode,
+            approval_exists=self.approval_exists,
+            approval_resolved=self.approval_resolved,
+            approval_decision=self.approval_decision,
+            brand_safety_passed=self.brand_safety_passed,
+            external_side_effect=external_side_effect,
+            spend_authorized=self.spend_authorized,
+            brand_safety_advisory=self.brand_safety_advisory,
+        )
+
+
+class ProjectBrief(BaseModel):
+    """The input document. Artifact names are validated against the ontology."""
+
+    project_name: str = Field(min_length=1)
+    target_artifacts: list[str] = Field(min_length=1)
+    # Artifact types already in hand, so a consumed input is not reported as a
+    # gap just because this brief does not also ask for it.
+    available_inputs: list[str] = Field(default_factory=list)
+    target_phase: str = EngagementStatus.launched.value
+    evidence_count: int = Field(default=0, ge=0)
+    facts: RunFacts = Field(default_factory=RunFacts)
+
+    model_config = {"extra": "forbid"}
+
+
+class BriefError(ValueError):
+    """Raised when a brief cannot be interpreted against the kernel."""
+
+
+def _resolve_types(values: Iterable[str], field: str) -> list[ArtifactType]:
+    resolved: list[ArtifactType] = []
+    for value in values:
+        try:
+            resolved.append(resolve_artifact_type(value))
+        except OntologyError as exc:
+            # OntologyError already enumerates the known types; don't repeat them.
+            raise BriefError(f"{field}: {exc}") from exc
+    return resolved
+
+
+def producing_roles(artifact_type: ArtifactType) -> list[RoleContract]:
+    return sorted(
+        (contract for contract in ROLE_REGISTRY.values() if artifact_type in contract.produces),
+        key=lambda contract: contract.role_id,
+    )
+
+
+def shortest_progress_path(
+    start: EngagementStatus, target: EngagementStatus
+) -> list[EngagementStatus] | None:
+    """Fewest legal moves from ``start`` to ``target`` through progress phases."""
+    if start == target:
+        return [start]
+    allowed = set(PROGRESS_PHASES) | {target}
+    queue: deque[list[EngagementStatus]] = deque([[start]])
+    seen = {start}
+    while queue:
+        path = queue.popleft()
+        for nxt in sorted(ENGAGEMENT_TRANSITIONS[path[-1]], key=lambda item: item.value):
+            if nxt not in allowed or nxt in seen:
+                continue
+            extended = path + [nxt]
+            if nxt == target:
+                return extended
+            seen.add(nxt)
+            queue.append(extended)
+    return None
+
+
+def build_plan(brief: ProjectBrief) -> dict[str, Any]:
+    """Resolve a brief against the kernel. Never raises for a *blocked* plan."""
+    targets = _resolve_types(brief.target_artifacts, "target_artifacts")
+    available = _resolve_types(brief.available_inputs, "available_inputs")
+
+    try:
+        target_phase = EngagementStatus(brief.target_phase)
+    except ValueError as exc:
+        known = ", ".join(item.value for item in EngagementStatus)
+        raise BriefError(f"target_phase: unknown engagement status '{brief.target_phase}'. Known: {known}") from exc
+
+    satisfied = set(targets) | set(available)
+    steps: list[dict[str, Any]] = []
+    unproducible: list[str] = []
+    external_side_effect = False
+
+    for artifact_type in targets:
+        roles = producing_roles(artifact_type)
+        if not roles:
+            unproducible.append(artifact_type.value)
+            continue
+        contract = roles[0]
+        external_side_effect = external_side_effect or contract.external_side_effect
+        missing = sorted(
+            item.value for item in contract.consumes if item not in satisfied
+        )
+        steps.append(
+            {
+                "artifact_type": artifact_type.value,
+                "department": owning_department(artifact_type).value,
+                "role_id": contract.role_id,
+                "min_evidence": contract.min_evidence,
+                "evidence_satisfied": brief.evidence_count >= contract.min_evidence,
+                "requires_human_approval": contract.requires_human_approval,
+                "external_side_effect": contract.external_side_effect,
+                "missing_inputs": missing,
+            }
+        )
+
+    context = brief.facts.to_context(external_side_effect=external_side_effect)
+    path = shortest_progress_path(EngagementStatus.intake, target_phase)
+
+    transitions: list[dict[str, Any]] = []
+    reached = EngagementStatus.intake
+    blocked_at: dict[str, Any] | None = None
+
+    if path is None:
+        blocked_at = {
+            "from": EngagementStatus.intake.value,
+            "to": target_phase.value,
+            "failures": [
+                {
+                    "code": "unreachable_phase",
+                    "message": (
+                        f"no path of progress phases leads from 'intake' to "
+                        f"'{target_phase.value}'"
+                    ),
+                }
+            ],
+        }
+    else:
+        for current, nxt in zip(path, path[1:]):
+            failures = transition_failures("engagement", current, nxt, context)
+            entry = {
+                "from": current.value,
+                "to": nxt.value,
+                "permitted": not failures,
+                "failures": [
+                    {"code": failure.code, "message": failure.message} for failure in failures
+                ],
+            }
+            transitions.append(entry)
+            if failures:
+                blocked_at = entry
+                break
+            reached = nxt
+
+    blocking_steps = [
+        step for step in steps if step["missing_inputs"] or not step["evidence_satisfied"]
+    ]
+
+    return {
+        "cli_version": CLI_VERSION,
+        "project_name": brief.project_name,
+        "target_phase": target_phase.value,
+        "evidence_count": brief.evidence_count,
+        "production_plan": steps,
+        "unproducible_artifacts": unproducible,
+        "lifecycle_path": [item.value for item in path] if path else [],
+        "transitions": transitions,
+        "reached_phase": reached.value,
+        "blocked_at": blocked_at,
+        "clear": blocked_at is None and not unproducible and not blocking_steps,
+    }
+
+
+def _render_plan(plan: dict[str, Any]) -> str:
+    lines: list[str] = []
+    lines.append(f"Project        {plan['project_name']}")
+    lines.append(f"Target phase   {plan['target_phase']}")
+    lines.append("")
+
+    lines.append("Production plan")
+    if not plan["production_plan"]:
+        lines.append("  (no producible artifacts requested)")
+    for step in plan["production_plan"]:
+        flags = []
+        if step["requires_human_approval"]:
+            flags.append("human-approval")
+        if step["external_side_effect"]:
+            flags.append("external-side-effect")
+        suffix = f"  [{', '.join(flags)}]" if flags else ""
+        lines.append(
+            f"  {step['artifact_type']:<24} {step['role_id']:<22} "
+            f"({step['department']}){suffix}"
+        )
+        if not step["evidence_satisfied"]:
+            lines.append(
+                f"      needs >= {step['min_evidence']} evidence item(s); brief declares "
+                f"{plan.get('evidence_count', 0)}"
+            )
+        for missing in step["missing_inputs"]:
+            lines.append(f"      missing input: {missing}")
+
+    for artifact_type in plan["unproducible_artifacts"]:
+        lines.append(f"  {artifact_type}: no role in the registry produces this type")
+
+    lines.append("")
+    lines.append("Lifecycle")
+    for entry in plan["transitions"]:
+        mark = "ok  " if entry["permitted"] else "BLOCK"
+        lines.append(f"  {mark} {entry['from']} -> {entry['to']}")
+        for failure in entry["failures"]:
+            lines.append(f"        {failure['code']}: {failure['message']}")
+
+    lines.append("")
+    if plan["clear"]:
+        lines.append(f"Reached {plan['reached_phase']}; no blockers. Nothing has been generated.")
+    else:
+        lines.append(f"Stopped at {plan['reached_phase']}. Blockers above must clear first.")
+    return "\n".join(lines)
+
+
+def _load_brief(path: str) -> ProjectBrief:
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except FileNotFoundError as exc:
+        raise BriefError(f"brief not found: {path}") from exc
+    except json.JSONDecodeError as exc:
+        raise BriefError(f"brief is not valid JSON: {exc}") from exc
+
+    try:
+        return ProjectBrief.model_validate(payload)
+    except ValidationError as exc:
+        raise BriefError(f"brief does not match the expected shape:\n{exc}") from exc
+
+
+def _cmd_plan(args: argparse.Namespace) -> int:
+    plan = build_plan(_load_brief(args.input))
+    if args.json:
+        print(json.dumps(plan, indent=2))
+    else:
+        print(_render_plan(plan))
+    return 0 if plan["clear"] else 1
+
+
+def _cmd_roles(args: argparse.Namespace) -> int:
+    contracts = sorted(ROLE_REGISTRY.values(), key=lambda item: (item.department.value, item.role_id))
+    if args.department:
+        contracts = [item for item in contracts if item.department.value == args.department]
+        if not contracts:
+            print(f"no roles in department '{args.department}'", file=sys.stderr)
+            return 1
+    for contract in contracts:
+        print(f"{contract.role_id}  ({contract.department.value})")
+        print(f"  mandate    {contract.mandate}")
+        print(f"  produces   {', '.join(sorted(item.value for item in contract.produces))}")
+        if contract.consumes:
+            print(f"  consumes   {', '.join(sorted(item.value for item in contract.consumes))}")
+        print(
+            f"  gates      min_evidence={contract.min_evidence} "
+            f"human_approval={contract.requires_human_approval} "
+            f"external_side_effect={contract.external_side_effect}"
+        )
+    return 0
+
+
+def _cmd_compile_prompts(args: argparse.Namespace) -> int:
+    try:
+        request = load_request(args.input)
+    except FileNotFoundError as exc:
+        raise BriefError(f"prompt compiler request not found: {args.input}") from exc
+    except json.JSONDecodeError as exc:
+        raise BriefError(f"prompt compiler request is not valid JSON: {exc}") from exc
+    except ValidationError as exc:
+        raise BriefError(f"prompt compiler request does not match the expected shape:\n{exc}") from exc
+
+    result = compile_prompt_packages(request)
+    if args.output:
+        write_result(args.output, result)
+
+    if args.json or not args.output:
+        print(result.model_dump_json(indent=2))
+    else:
+        print(
+            f"{result.final_state.value}: {len(result.prompt_packages)} prompt package(s); "
+            f"confidence={result.confidence:.3f}; generation firewall={result.generation_firewall}"
+        )
+
+    return 0 if result.final_state is CompilerState.prompt_package_ready else 1
+
+
+def _cmd_prompt_family(args: argparse.Namespace) -> int:
+    """Compile a reusable prompt family. Generates no media, creates no ads or
+    products, publishes nothing and spends nothing."""
+    from services.langgraph.agency.prompt_families import PromptFamilyRequest, compile_prompt_family
+
+    try:
+        with open(args.input, "r", encoding="utf-8") as handle:
+            request = PromptFamilyRequest.model_validate(json.load(handle))
+    except FileNotFoundError as exc:
+        raise BriefError(f"prompt family request not found: {args.input}") from exc
+    except json.JSONDecodeError as exc:
+        raise BriefError(f"prompt family request is not valid JSON: {exc}") from exc
+    except ValidationError as exc:
+        raise BriefError(f"prompt family request does not match the expected shape:\n{exc}") from exc
+
+    result = compile_prompt_family(request)
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as handle:
+            handle.write(result.model_dump_json(indent=2) + "\n")
+    if args.json or not args.output:
+        print(result.model_dump_json(indent=2))
+    else:
+        evaluation = result.evaluation
+        print(
+            f"{result.terminal_state}: family {result.family_id}@{result.family_version} "
+            f"({result.family_hash[:16]}); {evaluation.accepted_instances} instance(s) accepted, "
+            f"{evaluation.rejected_duplicates} duplicate(s) rejected, {evaluation.repairs} repair(s)"
+        )
+        for reason in result.blocked_reasons:
+            print(f"  blocked: {reason}")
+        print(f"  {result.execution_statement}")
+    return 0 if result.terminal_state == "PROMPT_PACKAGE_READY" else 1
+
+
+def _cmd_cinematic(args: argparse.Namespace) -> int:
+    # Imported lazily: the cinematic capability is a heavy domain module and must
+    # not load for unrelated CLI commands.
+    from services.langgraph.agency.cinematic import run_pipeline
+    from services.langgraph.agency.cinematic.schemas import CinematicRequest
+
+    if args.input:
+        try:
+            with open(args.input, "r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except FileNotFoundError as exc:
+            raise BriefError(f"cinematic request not found: {args.input}") from exc
+        except json.JSONDecodeError as exc:
+            raise BriefError(f"cinematic request is not valid JSON: {exc}") from exc
+        try:
+            request = CinematicRequest.model_validate(payload)
+        except ValidationError as exc:
+            raise BriefError(f"cinematic request does not match the expected shape:\n{exc}") from exc
+    elif args.text:
+        request = CinematicRequest(text=args.text)
+    else:
+        raise BriefError("cinematic: provide --input <file> or --text <idea>")
+
+    result = run_pipeline(request)
+    print(result.model_dump_json(indent=2))
+    # Exit 0 when the capability produced a usable result (prompts, a storyboard,
+    # or a capability manifest); non-zero only when nothing could be produced.
+    produced = bool(result.prompts or result.storyboard or result.capability)
+    return 0 if produced else 1
+
+
+def _cmd_ui_ux(args: argparse.Namespace) -> int:
+    from services.langgraph.agency.ui_ux import UIUXRequest, UIUXTerminal, compile_uiux
+
+    try:
+        with open(args.input, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except FileNotFoundError as exc:
+        raise BriefError(f"ui-ux request not found: {args.input}") from exc
+    except json.JSONDecodeError as exc:
+        raise BriefError(f"ui-ux request is not valid JSON: {exc}") from exc
+    try:
+        request = UIUXRequest.model_validate(payload)
+    except ValidationError as exc:
+        raise BriefError(f"ui-ux request does not match the expected shape:\n{exc}") from exc
+
+    spec = compile_uiux(request)
+    # Writing is opt-in: without --output/--css this command only prints.
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as handle:
+            handle.write(spec.model_dump_json(indent=2) + "\n")
+    if args.css:
+        with open(args.css, "w", encoding="utf-8") as handle:
+            handle.write(spec.tokens.css)
+
+    if args.json:
+        print(spec.model_dump_json(indent=2))
+    else:
+        unresolved = [f for f in spec.evaluation if not f.repaired and f.severity.value == "BLOCKING"]
+        print(
+            f"{spec.terminal.value}: {spec.mode.value} spec with {len(spec.screens)} screen(s), "
+            f"{len(spec.components)} component(s), {len(spec.states)} state spec(s), "
+            f"{spec.tokens.token_count} DTCG token(s); {len(spec.principles_applied)} principle(s) applied; "
+            f"{spec.repair_iterations} repair iteration(s), {len(unresolved)} unresolved blocking finding(s); "
+            f"confidence={spec.confidence.value:.2f}; spec_hash={spec.spec_hash[:16]}"
+        )
+        for item in spec.approval_required:
+            print(f"  approval: {item}")
+    return 0 if spec.terminal is UIUXTerminal.spec_ready else 1
+
+
+def _cmd_validate(_args: argparse.Namespace) -> int:
+    problems = validate_matrices() + validate_registry() + validate_merge_matrix()
+    if problems:
+        for problem in problems:
+            print(problem, file=sys.stderr)
+        print(f"kernel validation: {len(problems)} problem(s)", file=sys.stderr)
+        return 1
+    print("kernel validation: N1 ontology, N2 lifecycle, N3 roles, and N4 merge matrix agree")
+    return 0
+
+
+def _cmd_compiled_plan(args: argparse.Namespace) -> int:
+    """Compile a Compiled Agency plan: pure, no generation, no external action."""
+    from services.langgraph.agency.compiled.planner import CompiledAgencyRequest, compile_agency_plan
+    from services.langgraph.agency.compiled.role_sources import JITSkillLoader, default_role_source_index
+    from services.langgraph.app.runtime_support import role_os_registry
+
+    try:
+        with open(args.input, encoding="utf-8") as handle:
+            request = CompiledAgencyRequest.model_validate(json.load(handle))
+    except (OSError, ValueError, ValidationError) as exc:
+        raise BriefError(f"could not read compiled-agency request: {exc}") from exc
+    index = default_role_source_index()
+    loader = JITSkillLoader(index, args.source_archive) if args.source_archive else None
+    plan = compile_agency_plan(request, registry=role_os_registry(), source_index=index, jit_loader=loader)
+    structural = {
+        node: [r for r in reasons if not r.startswith("WAIT_HUMAN_DECISION")]
+        for node, reasons in plan.blocked.items()
+    }
+    structural = {k: v for k, v in structural.items() if v}
+    if args.json:
+        print(plan.model_dump_json(indent=2))
+    else:
+        summary = plan.summary()
+        print(f"compiled plan {summary['plan_hash'][:16]}: {summary['work_nodes']} work node(s), "
+              f"{summary['cells']} cell(s), {summary['waves']} wave(s), {summary['held_cells']} held; "
+              f"{summary['activated_specialists']} specialist(s) active, {summary['dormant_specialists']} dormant")
+        for wave in plan.waves.waves:
+            print(f"  wave {wave.index}: {', '.join(wave.cells)}" + (f" [{wave.serialized_reason}]" if wave.serialized_reason else ""))
+        for gate in plan.human_gates:
+            print(f"  human gate: {gate}")
+        for node, reasons in sorted(structural.items()):
+            print(f"  BLOCKED {node}: {', '.join(reasons)}")
+        for root, codes in sorted(plan.release_readiness.items()):
+            print(f"  release {root}: {'READY' if not codes else ', '.join(codes)}")
+        if plan.jit_skills:
+            print(f"  JIT skills: {sorted(set(plan.jit_skills.values()))}")
+    return 1 if structural else 0
+
+
+class FabricMissionRequest(BaseModel):
+    """Input to ``fabric-run``: a compiled-agency request plus the brand capsule."""
+
+    model_config = {"extra": "forbid"}
+
+    tenant_id: str = Field(min_length=1, max_length=200)
+    project_id: str = Field(min_length=1, max_length=200)
+    mode: str = "LOCAL"
+    as_of: str
+    brand: dict[str, Any]
+    deliverables: list[dict[str, Any]] = Field(min_length=1)
+    existing_artifacts: dict[str, str] = Field(default_factory=dict)
+    volatile_constraints: list[dict[str, Any]] = Field(default_factory=list)
+    node_inputs: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    instructions: InstructionSelection | None = None
+
+
+def _cmd_fabric_run(args: argparse.Namespace) -> int:
+    """Plan with the compiled-agency planner, then execute through the fabric.
+
+    Unlike the planning commands this one writes: ProjectOS artifacts, receipts
+    and events go to the configured database (LOCAL/SANDBOX modes only; there
+    is no live mode). Exit 0 = every cell succeeded and every deliverable
+    stopped at the human approval boundary, 1 = anything blocked, failed or a
+    provider gap, 2 = unreadable input.
+    """
+    from pathlib import Path
+
+    from services.langgraph.agency.compiled.planner import CompiledAgencyRequest, compile_agency_plan
+    from services.langgraph.agency.execution_fabric.capsules import BrandContextCapsule
+    from services.langgraph.agency.execution_fabric.consumer import execute_mission
+    from services.langgraph.agency.execution_fabric.contracts import ExecutionContext, ExecutionModeError
+    from services.langgraph.agency.execution_fabric.schedule import from_compiled_agency_plan
+    from services.langgraph.agency.exporter import resolve_export_root
+    from services.langgraph.app.runtime_support import role_os_registry
+
+    try:
+        with open(args.input, encoding="utf-8") as handle:
+            request = FabricMissionRequest.model_validate(json.load(handle))
+        plan_request = CompiledAgencyRequest(
+            project_id=request.project_id, as_of=request.as_of, deliverables=request.deliverables,
+            existing_artifacts=request.existing_artifacts, volatile_constraints=request.volatile_constraints,
+        )
+        brand = BrandContextCapsule.model_validate(request.brand)
+        context = ExecutionContext.from_server(
+            tenant_id=request.tenant_id, project_id=request.project_id, actor="cli:fabric-run", mode=request.mode,
+            export_root=Path(args.export_root) if args.export_root else resolve_export_root(),
+            instructions=request.instructions,
+        )
+    except (OSError, ValueError, ValidationError, ExecutionModeError) as exc:
+        raise BriefError(f"could not read fabric mission request: {exc}") from exc
+    schedule = from_compiled_agency_plan(compile_agency_plan(plan_request, registry=role_os_registry()))
+    if getattr(args, "compile_only", False):
+        from services.langgraph.agency.compiled.instruction_cli import write_compilation
+
+        return write_compilation(schedule, context, Path(args.output))
+    report = execute_mission(schedule, context, brand=brand, node_inputs=request.node_inputs)
+    clean = all(o.state.value == "SUCCEEDED" for o in report.cells.values()) and all(
+        b["state"] == "NEEDS_HUMAN" for b in report.release_boundary.values()
+    )
+    if args.json:
+        print(json.dumps({**report.model_dump(mode="json"), "outcome_hash": report.outcome_hash}, indent=2, default=str))
+    else:
+        print(f"fabric run {report.run_id} ({report.mode}): {report.summary}")
+        for cell_id, outcome in report.cells.items():
+            detail = outcome.artifact_ref or ", ".join(outcome.reasons)
+            print(f"  {outcome.state.value:<20} {cell_id}  {detail}")
+        for root, boundary in report.release_boundary.items():
+            print(f"  boundary {root}: {boundary['state']} ({', '.join(boundary['release_guard_failures'])})")
+    return 0 if clean else 1
+
+
+def _cmd_method_plan(args: argparse.Namespace) -> int:
+    """Route an objective to a minimal method stack and compile its work orders.
+
+    Pure: no generation, no execution (the result is EXECUTOR_GAP by design).
+    Exit 0 = compiled with nothing blocked or unresolved, 1 = blocked or
+    unresolved items reported, 2 = unreadable input.
+    """
+    from services.langgraph.agency.compiled.method_mission import MethodCompileError, compile_method_mission
+    from services.langgraph.agency.compiled.method_models import ObjectiveRequest
+    from services.langgraph.agency.compiled.method_router import compile_method_plan
+    from services.langgraph.app.runtime_support import role_os_registry
+
+    try:
+        with open(args.input, encoding="utf-8") as handle:
+            request = ObjectiveRequest.model_validate(json.load(handle))
+    except (OSError, ValueError, ValidationError) as exc:
+        raise BriefError(f"could not read objective request: {exc}") from exc
+    plan = compile_method_plan(request)
+    compiled = None
+    error = None
+    if plan.delegation_envelopes:
+        try:
+            compiled = compile_method_mission(plan, registry=role_os_registry(), project_id=args.project_id)
+        except MethodCompileError as exc:
+            error = str(exc)
+    if args.json:
+        payload = {"plan": plan.model_dump(mode="json"), "compile_error": error}
+        if compiled is not None:
+            payload["mission"] = {
+                "phase_map": compiled.phase_map,
+                "work_orders": list(compiled.work_orders),
+                "waves": [w.model_dump(mode="json") for w in compiled.wave_plan.waves],
+                "blocked": {k: list(v) for k, v in compiled.blocked_nodes.items()},
+                "executor_status": compiled.executor_status,
+            }
+        print(json.dumps(payload, indent=2, default=str))
+    else:
+        stack = plan.method_stack
+        print(f"method plan {plan.plan_hash[:16]}: families {', '.join(plan.problem_signature.problem_families) or 'none'}")
+        for label, ids in (("macro", stack.macro_methodologies), ("diagnose", stack.diagnostic_methods),
+                           ("decide", stack.decision_methods), ("execute", stack.execution_methods),
+                           ("control", stack.control_methods), ("learn", stack.learning_methods)):
+            if ids:
+                print(f"  {label}: {', '.join(ids)}")
+        for cert in plan.minimality_certificates:
+            print(f"  necessary {cert.method_id}: {', '.join(cert.necessary_for)}")
+        for gate in plan.human_gates:
+            print(f"  human gate {gate.kind}: {gate.node_id or ''} requires {', '.join(gate.requires)}")
+        for item in plan.unresolved:
+            print(f"  unresolved: {item}")
+        if compiled is not None:
+            for wave in compiled.wave_plan.waves:
+                print(f"  wave {wave.index}: {', '.join(wave.cells)}" + (f" [{wave.serialized_reason}]" if wave.serialized_reason else ""))
+            for cell, reasons in sorted(compiled.blocked_nodes.items()):
+                print(f"  BLOCKED {cell}: {', '.join(reasons)}")
+            print(f"  executor: {compiled.executor_status}")
+        if error:
+            print(f"  compile error: {error}")
+    blocked = bool(error) or bool(plan.unresolved) or bool(compiled and compiled.blocked_nodes)
+    return 1 if blocked else 0
+
+
+def _cmd_creative_run(args: argparse.Namespace) -> int:
+    """Run the creative search runtime up to the human selection boundary.
+
+    Deterministic and local: no model, no network, no database write, no
+    approval and no delivery. Exit 0 = READY_FOR_HUMAN_REVIEW, 1 = blocked,
+    partial or needs a human answer, 2 = unreadable input.
+    """
+    from services.langgraph.agency.creative.champion import compare
+    from services.langgraph.agency.creative.runtime import mission_receipt, run_creative_mission
+
+    try:
+        with open(args.input, encoding="utf-8") as handle:
+            brief = json.load(handle)
+        if not isinstance(brief, dict):
+            raise ValueError("a creative brief must be a JSON object")
+    except (OSError, ValueError) as exc:
+        raise BriefError(f"could not read creative brief: {exc}") from exc
+    run = run_creative_mission(brief, run_id=args.run_id)
+    receipt = mission_receipt(run)
+    if args.output:
+        out = Path(args.output)
+        out.mkdir(parents=True, exist_ok=True)
+        for cand in run.candidates:
+            suffix = ".html" if cand.rendering.lstrip().lower().startswith("<!doctype html") else (
+                ".svg" if cand.rendering.lstrip().startswith("<svg") else ".json")
+            (out / f"{cand.candidate_id}{suffix}").write_text(cand.rendering, encoding="utf-8")
+        (out / "mission-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    comparison = compare(brief, run_id_prefix=args.run_id) if args.compare else None
+    if args.json:
+        print(json.dumps({"receipt": receipt, "comparison": comparison}, indent=2, sort_keys=True))
+    else:
+        print(f"creative run {run.run_id}: {run.state} -> {run.terminal_status}")
+        if run.plan:
+            print(f"  topology {run.plan.topology_class}: {run.plan.search_policy.reason}")
+        if run.context:
+            print(f"  context {run.context.status}: {len(run.context.selected)} unit(s), {run.context.total_tokens} tokens; "
+                  f"requirements {', '.join(run.requirements) or 'none'}")
+        for cand in run.candidates:
+            result = run.results.get(cand.candidate_id)
+            mark = "*" if cand.candidate_id in run.front else " "
+            concept = "/".join(cand.concept.model_dump().values()) if cand.concept else cand.artifact.artifact_type
+            print(f"  {mark} {cand.candidate_id} {result.feasibility.verdict if result else '-'} {concept}")
+        for reason in run.reasons:
+            print(f"  reason: {reason}")
+        if comparison:
+            print(f"  champion/challenger: {comparison['verdict']} (better on {', '.join(comparison['challenger_better_on']) or 'nothing'})")
+        print("  next: a human selects, requests a variation, rejects all or returns to the brief; delivery needs an approval")
+    return 0 if run.terminal_status == "READY_FOR_HUMAN_REVIEW" else 1
+
+
+def _cmd_compiled_twin(args: argparse.Namespace) -> int:
+    from services.langgraph.agency.compiled.twin import run_digital_twin
+    from services.langgraph.app.runtime_support import role_os_registry
+
+    results = run_digital_twin(role_os_registry())
+    if args.json:
+        print(json.dumps([r.model_dump(mode="json") for r in results], indent=2))
+    else:
+        for r in results:
+            print(f"{r.id} {r.status} {r.name}")
+            for check in r.checks:
+                if not check.passed:
+                    print(f"    FAIL {check.name}: {check.detail}")
+    return 0 if all(r.status == "PASS" for r in results) else 1
+
+
+def _cmd_source_disposition(args: argparse.Namespace) -> int:
+    from services.langgraph.agency.compiled.role_sources import main as disposition_main
+
+    return disposition_main(["--archive", args.archive] + (["--check"] if args.check else []))
+
+
+def _cmd_website(args: argparse.Namespace) -> int:
+    from services.langgraph.agency.ucpo.contracts import WebsiteBrief
+    from services.langgraph.agency.ucpo.presentation import example_brief
+    from services.langgraph.agency.ucpo.run import run_local
+
+    if bool(args.input) == bool(args.board):
+        raise BriefError("give exactly one of --input or --board")
+    try:
+        brief = example_brief(args.board) if args.board else WebsiteBrief.model_validate_json(Path(args.input).read_text())
+    except (OSError, KeyError, ValidationError, ValueError) as exc:
+        raise BriefError(f"website brief could not be read: {exc}") from exc
+    code, summary = run_local(brief, Path(args.out), preview_seconds=args.preview_seconds)
+    if args.json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+    else:
+        print(f"build: {summary['build']['status']}  browser QA: {(summary['browser_qa'] or {}).get('status', 'NOT_RUN')}  "
+              f"coverage: {summary['coverage']['coverage']}  eligible for approval: {summary['proof']['eligible_for_approval']}")
+        for reason in summary["proof"]["reasons"][:10]:
+            print(f"  blocked: {reason}")
+        print(f"report: {Path(args.out) / 'report.json'}")
+    return code
+
+
+def _cmd_avic(args: argparse.Namespace) -> int:
+    from services.langgraph.agency.avic.run import run_local
+
+    try:
+        request = json.loads(Path(args.input).read_text())
+    except (OSError, ValueError) as exc:
+        raise BriefError(f"AVIC request could not be read: {exc}") from exc
+    try:
+        code, summary = run_local(request, Path(args.out), reference=Path(args.reference) if args.reference else None,
+                                  variants=args.variants)
+    except ValidationError as exc:
+        raise BriefError(f"AVIC request is invalid: {exc}") from exc
+    if args.json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+    else:
+        failed = [k for k, v in summary.get("checks", {}).items() if v != "PASS"]
+        print(f"status: {summary['status']}  failed checks: {failed or 'none'}  repairs: {summary.get('repairs', 0)}")
+        for reason in summary.get("reasons", [])[:10]:
+            print(f"  blocked: {reason}")
+        print(f"package: {Path(args.out)}")
+    return code
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="agency",
+        description=(
+            "Plan work and compile provider-ready creative prompts. This CLI never generates assets."
+        ),
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    plan = sub.add_parser("plan", help="Resolve a project brief against the kernel.")
+    plan.add_argument("-i", "--input", required=True, help="Path to a project brief JSON file.")
+    plan.add_argument("--json", action="store_true", help="Emit the plan as JSON.")
+    plan.set_defaults(handler=_cmd_plan)
+
+    roles = sub.add_parser("roles", help="List N3 role contracts.")
+    roles.add_argument("-d", "--department", help="Filter to one department.")
+    roles.set_defaults(handler=_cmd_roles)
+
+    compile_prompts = sub.add_parser(
+        "compile-prompts",
+        help="Audit content and compile validated prompt packages without generating assets.",
+    )
+    compile_prompts.add_argument(
+        "-i", "--input", required=True, help="Path to a prompt compiler request JSON file."
+    )
+    compile_prompts.add_argument(
+        "-o", "--output", help="Optional path for the compiled result JSON."
+    )
+    compile_prompts.add_argument(
+        "--json", action="store_true", help="Print the compiled result as JSON."
+    )
+    compile_prompts.set_defaults(handler=_cmd_compile_prompts)
+
+    prompt_family = sub.add_parser(
+        "prompt-family",
+        help="Compile a reusable prompt family (invariants, variation axes, concept ledger). "
+        "Generates no media, creates no ads or products, publishes nothing, spends nothing.",
+    )
+    prompt_family.add_argument("-i", "--input", required=True, help="Path to a PromptFamilyRequest JSON file.")
+    prompt_family.add_argument("-o", "--output", help="Optional path for the full result JSON.")
+    prompt_family.add_argument("--json", action="store_true", help="Print the full result as JSON.")
+    prompt_family.set_defaults(handler=_cmd_prompt_family)
+
+    cinematic = sub.add_parser(
+        "cinematic",
+        help="Compile cinematic prompts (T2I/T2V/I2V/storyboard) without generating assets.",
+    )
+    cinematic.add_argument(
+        "-i", "--input", help="Path to a cinematic request JSON file."
+    )
+    cinematic.add_argument(
+        "-t", "--text", help="A one-line idea to compile instead of a request file."
+    )
+    cinematic.set_defaults(handler=_cmd_cinematic)
+
+    ui_ux = sub.add_parser(
+        "ui-ux",
+        help="Compile a governed UI/UX specification (IA, flows, tokens, states, a11y) without generating UI.",
+    )
+    ui_ux.add_argument("-i", "--input", required=True, help="Path to a UIUXRequest JSON file.")
+    ui_ux.add_argument("-o", "--output", help="Optional path to write the full spec JSON.")
+    ui_ux.add_argument("--css", help="Optional path to write the spec's generated DTCG token CSS.")
+    ui_ux.add_argument("--json", action="store_true", help="Print the full spec as JSON.")
+    ui_ux.set_defaults(handler=_cmd_ui_ux)
+
+    compiled_plan = sub.add_parser(
+        "compiled-plan",
+        help="Compile a Compiled Agency plan (backchain, authority, PCWOs, cells, waves). Never executes work.",
+    )
+    compiled_plan.add_argument("-i", "--input", required=True, help="Path to a CompiledAgencyRequest JSON file.")
+    compiled_plan.add_argument("--source-archive", help="Verified agency-role-os-v2 ZIP for JIT SKILL loading.")
+    compiled_plan.add_argument("--json", action="store_true", help="Print the full plan as JSON.")
+    compiled_plan.set_defaults(handler=_cmd_compiled_plan)
+
+    method_plan = sub.add_parser(
+        "method-plan",
+        help="Route an objective to a minimal method stack and compile canonical work orders (no execution).",
+    )
+    method_plan.add_argument("-i", "--input", required=True, help="Path to an ObjectiveRequest JSON file.")
+    method_plan.add_argument("--project-id", default="proj-method-plan", help="Project id for work-order identity.")
+    method_plan.add_argument("--json", action="store_true", help="Emit the full plan and mission as JSON.")
+    method_plan.set_defaults(handler=_cmd_method_plan)
+
+    fabric_run = sub.add_parser(
+        "fabric-run",
+        help="Plan and execute a mission through the execution fabric (LOCAL/SANDBOX; writes ProjectOS artifacts).",
+    )
+    fabric_run.add_argument("--input", required=True, help="Path to a fabric mission request JSON file.")
+    fabric_run.add_argument("--export-root", default=None, help="Object-storage root (defaults to the configured export root).")
+    fabric_run.add_argument("--json", action="store_true", help="Print the full execution report as JSON.")
+    fabric_run.set_defaults(handler=_cmd_fabric_run)
+
+    instructions = sub.add_parser("compile-instructions", help="Compile opt-in instruction packages without executing work.")
+    instructions.add_argument("--input", required=True, help="Fabric mission JSON with an instructions selection.")
+    instructions.add_argument("--output", required=True, help="Local compilation artifact JSON path.")
+    instructions.set_defaults(handler=_cmd_fabric_run, compile_only=True, export_root=None)
+
+    creative_run = sub.add_parser(
+        "creative-run",
+        help="Run the bounded creative search runtime to the human selection gate (deterministic; no model, publish or spend).",
+    )
+    creative_run.add_argument("--input", required=True, help="Path to a creative brief JSON file.")
+    creative_run.add_argument("--run-id", default="creative-cli", help="Run identifier used for candidate ids.")
+    creative_run.add_argument("--output", default=None, help="Directory to write candidate renderings and the mission receipt.")
+    creative_run.add_argument("--compare", action="store_true", help="Also run the champion/challenger benchmark.")
+    creative_run.add_argument("--json", action="store_true", help="Print the mission receipt as JSON.")
+    creative_run.set_defaults(handler=_cmd_creative_run)
+
+    compiled_twin = sub.add_parser("compiled-twin", help="Run digital-twin shadow scenarios S1-S13.")
+    compiled_twin.add_argument("--json", action="store_true", help="Print scenario results as JSON.")
+    compiled_twin.set_defaults(handler=_cmd_compiled_twin)
+
+    source_disposition = sub.add_parser(
+        "source-disposition", help="Rebuild (or --check) the RoleOS source disposition ledger from the archive."
+    )
+    source_disposition.add_argument("--archive", required=True, help="Path to agency-role-os-v2 ZIP.")
+    source_disposition.add_argument("--check", action="store_true", help="Exit 1 if the committed ledger differs.")
+    source_disposition.set_defaults(handler=_cmd_source_disposition)
+
+    website = sub.add_parser(
+        "website",
+        help="Compile a brief into a PSEM site, build and browser-verify it in the sandbox (never deploys).",
+    )
+    website.add_argument("-i", "--input", help="Path to a WebsiteBrief JSON file.")
+    website.add_argument("--board", help="Use a presentation system's example instead of --input.")
+    website.add_argument("-o", "--out", required=True, help="Directory for source, evidence and report.json.")
+    website.add_argument("--preview-seconds", type=float, default=None,
+                         help="Serve the verified build on 127.0.0.1 for this many seconds.")
+    website.add_argument("--json", action="store_true", help="Print the full report as JSON.")
+    website.set_defaults(handler=_cmd_website)
+
+    avic = sub.add_parser(
+        "avic",
+        help="Compile a visual brief into native SVG, render it locally and verify it (never releases or publishes).",
+    )
+    avic.add_argument("-i", "--input", required=True, help="Path to an AVIC request JSON (see sample_avic_request.json).")
+    avic.add_argument("-o", "--out", required=True, help="Directory for the release package.")
+    avic.add_argument("--reference", help="Optional PNG reference: colour hint and H1 fidelity benchmark.")
+    avic.add_argument("--variants", type=int, default=0, help="Explore up to 4 H4 variants (motif, material).")
+    avic.add_argument("--json", action="store_true", help="Print the summary as JSON.")
+    avic.set_defaults(handler=_cmd_avic)
+
+    validate = sub.add_parser("validate", help="Run the kernel's structural self-checks.")
+    validate.set_defaults(handler=_cmd_validate)
+
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        return args.handler(args)
+    except BriefError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,1685 @@
+{
+  "run_id": "ir-fixture",
+  "objective": "Reduce friction in a creative team local workflow",
+  "mode": "GENERAL",
+  "status": "COMPLETED",
+  "phase": "COMPLETED",
+  "simulation": true,
+  "prompt_version": "unbound-h02/simulation-v1",
+  "ideas": [
+    {
+      "concept_id": "ir-fixture-c01",
+      "generation": "raw",
+      "title": "Substitute ownership",
+      "mechanism": "Replace one-time asset ownership with time-bounded access entitlements.",
+      "lens_tags": [
+        "L1"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "8f365c9ac2e2950d09492552e3524582e10a8d465c1c65a929d16e3504b5cfa3"
+    },
+    {
+      "concept_id": "ir-fixture-c02",
+      "generation": "raw",
+      "title": "Combine feedback loops",
+      "mechanism": "Pair action logs with reversible checkpoints to make feedback replayable.",
+      "lens_tags": [
+        "L1"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "d40e7b17f4677f1f3b370b0660888917b0bc1f40abf7dda05f570d9f019c41fe"
+    },
+    {
+      "concept_id": "ir-fixture-c03",
+      "generation": "raw",
+      "title": "Invert delivery order",
+      "mechanism": "Deliver a removable prototype before committing to its supporting infrastructure.",
+      "lens_tags": [
+        "L1"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "310b242c43a7df0e7834600bf5f824e5ab2c4c7f441435f237e148d6256d19ab"
+    },
+    {
+      "concept_id": "ir-fixture-c04",
+      "generation": "raw",
+      "title": "Remove coordination tolls",
+      "mechanism": "Remove per-interaction negotiations by publishing fixed interface commitments.",
+      "lens_tags": [
+        "L2"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "b4415ea52e6ea67d0326d5f0f66e83401905d1a3be930621abaff33fb803c0d5"
+    },
+    {
+      "concept_id": "ir-fixture-c05",
+      "generation": "raw",
+      "title": "Serve nonparticipants",
+      "mechanism": "Offer a read-only rehearsal route to people excluded by setup requirements.",
+      "lens_tags": [
+        "L2"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "dcd1c7eee6ba01045a1d2ecf86885be8d1927a58e04e7039c5e20de0c7e86014"
+    },
+    {
+      "concept_id": "ir-fixture-c06",
+      "generation": "raw",
+      "title": "Unbundle expertise",
+      "mechanism": "Separate specialist diagnosis from implementation procurement decisions.",
+      "lens_tags": [
+        "L2"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "a2a2f37af8e1f6c7dd8c8efc3c57e27239f6aa05b913fe83570b657170fcb3b9"
+    },
+    {
+      "concept_id": "ir-fixture-c07",
+      "generation": "raw",
+      "title": "Separate conflicting modes",
+      "mechanism": "Resolve precision-versus-speed tension with separate exploration and confirmation paths.",
+      "lens_tags": [
+        "L3"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "aab97a6d3de5c5eeefb8ec2b1078ab302c2413e37a857c7c1ab420edb5294a7a"
+    },
+    {
+      "concept_id": "ir-fixture-c08",
+      "generation": "raw",
+      "title": "Localize complexity",
+      "mechanism": "Confine expensive customization to replaceable boundary modules.",
+      "lens_tags": [
+        "L3"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "61c16c2d2fcc934e3fce3b543b55a67035bee0c5fc5e93a00c94e564189f9b42"
+    },
+    {
+      "concept_id": "ir-fixture-c09",
+      "generation": "raw",
+      "title": "Precondition bottlenecks",
+      "mechanism": "Precompute constraint checks before scarce specialist time is reserved.",
+      "lens_tags": [
+        "L3"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "3bedc4dc5f810bc6525f86d175e9f10d33473219f91a9a403b2a09417e1c7b9f"
+    },
+    {
+      "concept_id": "ir-fixture-c10",
+      "generation": "raw",
+      "title": "Immune-style quarantine",
+      "mechanism": "Quarantine anomalous inputs and require independent corroboration before reuse.",
+      "lens_tags": [
+        "L4"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "a074dd449f45dbaaefa10c7fd759cb12931d205fbe9c5f4cf7ff2e16e83d62bb"
+    },
+    {
+      "concept_id": "ir-fixture-c11",
+      "generation": "raw",
+      "title": "Mycelial routing",
+      "mechanism": "Route a request across redundant local paths according to observed availability.",
+      "lens_tags": [
+        "L4"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "ee27e7f5008bd45deb136b919e8fd36c99dded53678c3841e8298c8341395e27"
+    },
+    {
+      "concept_id": "ir-fixture-c12",
+      "generation": "raw",
+      "title": "Dormant resource pools",
+      "mechanism": "Keep infrequently needed capabilities dormant until a measured trigger activates them.",
+      "lens_tags": [
+        "L4"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "250edd788c4b3abcee8f612a6a1e7dbe95c0458084e7816acb4702e7162d3cdb"
+    },
+    {
+      "concept_id": "ir-fixture-c13",
+      "generation": "raw",
+      "title": "Rehearsal quests",
+      "mechanism": "Break a high-stakes task into reversible practice challenges with explicit completion evidence.",
+      "lens_tags": [
+        "L5"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "91f57b3c7cabfd3cdd93eb13a1a8a56858992751ec7131573690a15f28564a13"
+    },
+    {
+      "concept_id": "ir-fixture-c14",
+      "generation": "raw",
+      "title": "Asymmetric collaboration",
+      "mechanism": "Give collaborators complementary information so joint reconciliation creates the result.",
+      "lens_tags": [
+        "L5"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "899c379a45f90e480845b20bd367c1c12e4e2fc876732b6b97ff240b28b59d7b"
+    },
+    {
+      "concept_id": "ir-fixture-c15",
+      "generation": "raw",
+      "title": "Failure budget play",
+      "mechanism": "Allocate a fixed number of safe failed trials before escalation to human review.",
+      "lens_tags": [
+        "L5"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "f2b2ec2604f1a800e5d0c4919f62c53edb86300a237fbd94ffee8550579836e0"
+    },
+    {
+      "concept_id": "ir-fixture-c16",
+      "generation": "raw",
+      "title": "Recovery concierge",
+      "mechanism": "Preserve context after a failure and offer the smallest recoverable next action.",
+      "lens_tags": [
+        "L6"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "07aa1b96b0c67bf16e66b5a6acb7959949a02de28969bd4103305473c67d0e70"
+    },
+    {
+      "concept_id": "ir-fixture-c17",
+      "generation": "raw",
+      "title": "Reciprocal continuity",
+      "mechanism": "Exchange voluntary continuity preferences for fewer repeated setup decisions.",
+      "lens_tags": [
+        "L6"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "3ec2cee2d9045fec2e7c6751733114225d5e79025729b3f51970dcf334e909e8"
+    },
+    {
+      "concept_id": "ir-fixture-c18",
+      "generation": "raw",
+      "title": "Quiet service lane",
+      "mechanism": "Reserve an interruption-free path with deferred nonessential notifications.",
+      "lens_tags": [
+        "L6"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "77fabbca817080286e352c858d1bd258c5f21f775118bf1d9d8678ccdf441262"
+    },
+    {
+      "concept_id": "ir-fixture-c19",
+      "generation": "raw",
+      "title": "Trigger-bound assistance",
+      "mechanism": "Activate assistance at the observable moment an unmet job appears.",
+      "lens_tags": [
+        "L7"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "ebdc0220432d516c1a15fb9b2a356cf77e86343a907806188ddd081171220b66"
+    },
+    {
+      "concept_id": "ir-fixture-c20",
+      "generation": "raw",
+      "title": "Outcome escrow",
+      "mechanism": "Hold completion claims until the recipient checks the purchased outcome.",
+      "lens_tags": [
+        "L7"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "150ae8300783661b8d8ae642b3d0aaec50bac3a30dad6ec8a6a413658a62d6dc"
+    },
+    {
+      "concept_id": "ir-fixture-c21",
+      "generation": "raw",
+      "title": "Switching rehearsal",
+      "mechanism": "Let people test migration with disposable copies before changing their actual workflow.",
+      "lens_tags": [
+        "L7"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "88abed6ac89e899ee964c588a1d85c063d82dba3e88f78a9dcbf651c5c8541f4"
+    },
+    {
+      "concept_id": "ir-fixture-c22",
+      "generation": "raw",
+      "title": "Ratchet commitments",
+      "mechanism": "Advance through one-way documented commitments only after a reversible rehearsal.",
+      "lens_tags": [
+        "L8"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "42c0ea55fb6740256c5814086daabdc1348a92d3530d2e1011d049de22a32c1b"
+    },
+    {
+      "concept_id": "ir-fixture-c23",
+      "generation": "raw",
+      "title": "Flywheel batching",
+      "mechanism": "Accumulate small compatible requests and discharge them as one bounded batch.",
+      "lens_tags": [
+        "L8"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "ac2f26173dec7ebbb9bbae8941ea2b2ed1551dd7ca09c1588a0797bd565c3e09"
+    },
+    {
+      "concept_id": "ir-fixture-c24",
+      "generation": "raw",
+      "title": "Mechanical fuse",
+      "mechanism": "Interrupt a process automatically when independently measured load crosses a limit.",
+      "lens_tags": [
+        "L8"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "c1baccaddf49387122d65f9add0008f4ddd40843eef0a3154bb05f63072cd5db"
+    },
+    {
+      "concept_id": "ir-fixture-c25",
+      "generation": "raw",
+      "title": "No central catalogue",
+      "mechanism": "Discover available capacity from expiring local declarations instead of a global catalogue.",
+      "lens_tags": [
+        "L9"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "33d02d1126577a50b69ef096466896df6c51f05092d2a9c35ef3cbc1af607a0d"
+    },
+    {
+      "concept_id": "ir-fixture-c26",
+      "generation": "raw",
+      "title": "Unadvertised demand",
+      "mechanism": "Collect opt-in problem diaries before describing possible offerings.",
+      "lens_tags": [
+        "L9"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "cebf8a9ab90668d7f340212f030202c8dacaeafc4cd30a55250f5f7c40f1c490"
+    },
+    {
+      "concept_id": "ir-fixture-c27",
+      "generation": "raw",
+      "title": "Deliberate subtraction",
+      "mechanism": "Remove the most popular feature in a reversible sandbox to expose hidden dependencies.",
+      "lens_tags": [
+        "L9"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "4ef643b86e28f161363bdc32b4a55b52db549fc433a5c544edb2c5717d530ada"
+    },
+    {
+      "concept_id": "ir-fixture-c28",
+      "generation": "raw",
+      "title": "Interoperability dividends",
+      "mechanism": "Return reusable compatibility fixes to participants who expose shared integration failures.",
+      "lens_tags": [
+        "L10"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "d99986d26c26297cd41a4a1c564062110e02c866119a72bf4e8f8c6a70ada8a2"
+    },
+    {
+      "concept_id": "ir-fixture-c29",
+      "generation": "raw",
+      "title": "Congestion feedback",
+      "mechanism": "Reduce admission as shared congestion rises rather than maximizing concurrent requests.",
+      "lens_tags": [
+        "L10"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "13158e61f2efd0ad3b97be5be56bf678062773fa58922ab291e9c9afdd90f39c"
+    },
+    {
+      "concept_id": "ir-fixture-c30",
+      "generation": "raw",
+      "title": "Mutual audit rings",
+      "mechanism": "Rotate independent reviewers across isolated projects without transferring private inputs.",
+      "lens_tags": [
+        "L10"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "955c5784e9c124cdb9960ff2c29bcdac7c42e6bcb1f4f5f26dd57513a7ae2bd6"
+    },
+    {
+      "concept_id": "ir-fixture-c31",
+      "generation": "raw",
+      "title": "Executable uncertainty",
+      "mechanism": "Attach machine-readable unknowns to proposals so later evidence can invalidate them.",
+      "lens_tags": [
+        "L11"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "6c80ff3615870a6336054360caf5194df0fac64213c7297cad8fa43eae57097c"
+    },
+    {
+      "concept_id": "ir-fixture-c32",
+      "generation": "raw",
+      "title": "Counterexample memory",
+      "mechanism": "Retrieve previous disconfirmations before proposing another similar solution.",
+      "lens_tags": [
+        "L11"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "4e47a79339d73c6b1fe34de01f754358d9dfffd888ad73fddb50005f3556d897"
+    },
+    {
+      "concept_id": "ir-fixture-c33",
+      "generation": "raw",
+      "title": "Evidence compilation",
+      "mechanism": "Compile source-bound claims into a draft that refuses unsupported release statements.",
+      "lens_tags": [
+        "L11"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "7fea4e2de5184ab284c0aad7f3493ec04b6c7e99628bc24b55e977fb45e02096"
+    },
+    {
+      "concept_id": "ir-fixture-c34",
+      "generation": "raw",
+      "title": "Lift setup constraint",
+      "mechanism": "Replace mandatory installation with a disposable local demonstration.",
+      "lens_tags": [
+        "L12"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "d6a66bcec1e25f44c00e12409e1f9365f8d667dff241c2d121427d90bf203664"
+    },
+    {
+      "concept_id": "ir-fixture-c35",
+      "generation": "raw",
+      "title": "Lift simultaneity",
+      "mechanism": "Replace synchronous attendance with versioned contributions and explicit reconciliation.",
+      "lens_tags": [
+        "L12"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "a610be1151c04f2e210ac33935631a78684aedc4198c1bd7f6ed3a260e17d311"
+    }
+  ],
+  "wildcards": [
+    {
+      "concept_id": "ir-fixture-c25",
+      "broken_assumption": "The current coordination pattern is mandatory.",
+      "mechanism": "Discover available capacity from expiring local declarations instead of a global catalogue.",
+      "insight": "SIMULATED: rehearse removal of this assumption before investing."
+    },
+    {
+      "concept_id": "ir-fixture-c26",
+      "broken_assumption": "The current coordination pattern is mandatory.",
+      "mechanism": "Collect opt-in problem diaries before describing possible offerings.",
+      "insight": "SIMULATED: rehearse removal of this assumption before investing."
+    },
+    {
+      "concept_id": "ir-fixture-c27",
+      "broken_assumption": "The current coordination pattern is mandatory.",
+      "mechanism": "Remove the most popular feature in a reversible sandbox to expose hidden dependencies.",
+      "insight": "SIMULATED: rehearse removal of this assumption before investing."
+    },
+    {
+      "concept_id": "ir-fixture-c28",
+      "broken_assumption": "The current coordination pattern is mandatory.",
+      "mechanism": "Return reusable compatibility fixes to participants who expose shared integration failures.",
+      "insight": "SIMULATED: rehearse removal of this assumption before investing."
+    },
+    {
+      "concept_id": "ir-fixture-c29",
+      "broken_assumption": "The current coordination pattern is mandatory.",
+      "mechanism": "Reduce admission as shared congestion rises rather than maximizing concurrent requests.",
+      "insight": "SIMULATED: rehearse removal of this assumption before investing."
+    }
+  ],
+  "hybrids": [
+    {
+      "concept_id": "ir-fixture-c36",
+      "generation": "hybrid",
+      "title": "Replayable quarantine",
+      "mechanism": "Quarantine a suspect action, rehearse its recorded inverse, and use replay differences as corroboration.",
+      "lens_tags": [
+        "L1",
+        "L4"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [
+        "ir-fixture-c02",
+        "ir-fixture-c10"
+      ],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "7bff9a1384f33526255660d40a6390b36f416463060f1a2e1b1e2930fb1b0692"
+    },
+    {
+      "concept_id": "ir-fixture-c37",
+      "generation": "hybrid",
+      "title": "Precision circuit breaker",
+      "mechanism": "Switch exploration to confirmation mode at a measured load threshold before a scarce-resource queue saturates.",
+      "lens_tags": [
+        "L3",
+        "L8"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [
+        "ir-fixture-c07",
+        "ir-fixture-c24"
+      ],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "891585412a0ed1530cea8a657343182b0132686174b19bf7b2bbe715f4ac1a86"
+    },
+    {
+      "concept_id": "ir-fixture-c38",
+      "generation": "hybrid",
+      "title": "Counterexample concierge",
+      "mechanism": "Recover a failed task by retrieving a matched disconfirmation and proposing a reversible context-preserving trial.",
+      "lens_tags": [
+        "L11",
+        "L6"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [
+        "ir-fixture-c16",
+        "ir-fixture-c32"
+      ],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "3ad334373c0015140cdfb21fa9a6b7d58efafbd1f2a320a40044a111799e9bdb"
+    },
+    {
+      "concept_id": "ir-fixture-c39",
+      "generation": "hybrid",
+      "title": "Independent outcome escrow",
+      "mechanism": "Withhold completion credit until a rotating independent reviewer checks the recipient's outcome evidence.",
+      "lens_tags": [
+        "L10",
+        "L7"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [
+        "ir-fixture-c20",
+        "ir-fixture-c30"
+      ],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "1bdd5baf4e729b9a3b1037e24e966043620b56448f27f4e18415173b65ceb0f7"
+    }
+  ],
+  "meta_hybrids": [
+    {
+      "concept_id": "ir-fixture-c40",
+      "generation": "meta",
+      "title": "Evidence-clearing coordination",
+      "mechanism": "Coordinate quarantined reversals through independent outcome escrow; only corroborated recovery evidence unlocks the next participant.",
+      "lens_tags": [
+        "L1",
+        "L10",
+        "L4",
+        "L7"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [
+        "ir-fixture-c36",
+        "ir-fixture-c39"
+      ],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "d4e2092e9e796f46872edbce7b6fe73619963352204e5b755a093a66b54bd450"
+    },
+    {
+      "concept_id": "ir-fixture-c41",
+      "generation": "meta",
+      "title": "Adaptive recovery architecture",
+      "mechanism": "Use load-triggered precision lanes to schedule counterexample-guided recovery, recycling trial failures as future admission constraints.",
+      "lens_tags": [
+        "L11",
+        "L3",
+        "L6",
+        "L8"
+      ],
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified."
+      ],
+      "speculative": true,
+      "provenance": "SIMULATED_OFFLINE_FIXTURE",
+      "parent_ids": [
+        "ir-fixture-c37",
+        "ir-fixture-c38"
+      ],
+      "commercial_fields": null,
+      "version": 1,
+      "content_hash": "fcf81f8b94ad53f92fa13528d6ab15eef3a4561f067550503a11107e6615bb16"
+    }
+  ],
+  "lineage": [
+    {
+      "parent_id": "ir-fixture-c02",
+      "child_id": "ir-fixture-c36",
+      "source_version": 1,
+      "transformation": "FIRST_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c10",
+      "child_id": "ir-fixture-c36",
+      "source_version": 1,
+      "transformation": "FIRST_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c07",
+      "child_id": "ir-fixture-c37",
+      "source_version": 1,
+      "transformation": "FIRST_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c24",
+      "child_id": "ir-fixture-c37",
+      "source_version": 1,
+      "transformation": "FIRST_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c16",
+      "child_id": "ir-fixture-c38",
+      "source_version": 1,
+      "transformation": "FIRST_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c32",
+      "child_id": "ir-fixture-c38",
+      "source_version": 1,
+      "transformation": "FIRST_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c20",
+      "child_id": "ir-fixture-c39",
+      "source_version": 1,
+      "transformation": "FIRST_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c30",
+      "child_id": "ir-fixture-c39",
+      "source_version": 1,
+      "transformation": "FIRST_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c36",
+      "child_id": "ir-fixture-c40",
+      "source_version": 1,
+      "transformation": "SECOND_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c39",
+      "child_id": "ir-fixture-c40",
+      "source_version": 1,
+      "transformation": "SECOND_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c37",
+      "child_id": "ir-fixture-c41",
+      "source_version": 1,
+      "transformation": "SECOND_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    },
+    {
+      "parent_id": "ir-fixture-c38",
+      "child_id": "ir-fixture-c41",
+      "source_version": 1,
+      "transformation": "SECOND_ORDER_SYNTHESIS",
+      "rationale": "SIMULATED causal combination; inspect emergent mechanism and validate experimentally."
+    }
+  ],
+  "shortlist": [
+    "ir-fixture-c03",
+    "ir-fixture-c04",
+    "ir-fixture-c07",
+    "ir-fixture-c08",
+    "ir-fixture-c27"
+  ],
+  "evaluations": [
+    {
+      "concept_id": "ir-fixture-c01",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c02",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 3.0,
+        "Impact": 4.0,
+        "Coherence": 5.0,
+        "Adaptability": 2.0,
+        "Readiness": 3.0
+      },
+      "composite": 3.5,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c03",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 4.0,
+        "Impact": 5.0,
+        "Coherence": 2.0,
+        "Adaptability": 3.0,
+        "Readiness": 4.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c04",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 5.0,
+        "Impact": 2.0,
+        "Coherence": 3.0,
+        "Adaptability": 4.0,
+        "Readiness": 5.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c05",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c06",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 3.0,
+        "Impact": 4.0,
+        "Coherence": 5.0,
+        "Adaptability": 2.0,
+        "Readiness": 3.0
+      },
+      "composite": 3.5,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c07",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 4.0,
+        "Impact": 5.0,
+        "Coherence": 2.0,
+        "Adaptability": 3.0,
+        "Readiness": 4.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c08",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 5.0,
+        "Impact": 2.0,
+        "Coherence": 3.0,
+        "Adaptability": 4.0,
+        "Readiness": 5.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c09",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c10",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 3.0,
+        "Impact": 4.0,
+        "Coherence": 5.0,
+        "Adaptability": 2.0,
+        "Readiness": 3.0
+      },
+      "composite": 3.5,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c11",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 4.0,
+        "Impact": 5.0,
+        "Coherence": 2.0,
+        "Adaptability": 3.0,
+        "Readiness": 4.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c12",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 5.0,
+        "Impact": 2.0,
+        "Coherence": 3.0,
+        "Adaptability": 4.0,
+        "Readiness": 5.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c13",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c14",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 3.0,
+        "Impact": 4.0,
+        "Coherence": 5.0,
+        "Adaptability": 2.0,
+        "Readiness": 3.0
+      },
+      "composite": 3.5,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c15",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 4.0,
+        "Impact": 5.0,
+        "Coherence": 2.0,
+        "Adaptability": 3.0,
+        "Readiness": 4.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c16",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 5.0,
+        "Impact": 2.0,
+        "Coherence": 3.0,
+        "Adaptability": 4.0,
+        "Readiness": 5.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c17",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c18",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 3.0,
+        "Impact": 4.0,
+        "Coherence": 5.0,
+        "Adaptability": 2.0,
+        "Readiness": 3.0
+      },
+      "composite": 3.5,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c19",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 4.0,
+        "Impact": 5.0,
+        "Coherence": 2.0,
+        "Adaptability": 3.0,
+        "Readiness": 4.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c20",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 5.0,
+        "Impact": 2.0,
+        "Coherence": 3.0,
+        "Adaptability": 4.0,
+        "Readiness": 5.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c21",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c22",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 3.0,
+        "Impact": 4.0,
+        "Coherence": 5.0,
+        "Adaptability": 2.0,
+        "Readiness": 3.0
+      },
+      "composite": 3.5,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c23",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 4.0,
+        "Impact": 5.0,
+        "Coherence": 2.0,
+        "Adaptability": 3.0,
+        "Readiness": 4.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c24",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 5.0,
+        "Impact": 2.0,
+        "Coherence": 3.0,
+        "Adaptability": 4.0,
+        "Readiness": 5.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c25",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c26",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 3.0,
+        "Impact": 4.0,
+        "Coherence": 5.0,
+        "Adaptability": 2.0,
+        "Readiness": 3.0
+      },
+      "composite": 3.5,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c27",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 4.0,
+        "Impact": 5.0,
+        "Coherence": 2.0,
+        "Adaptability": 3.0,
+        "Readiness": 4.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c28",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 5.0,
+        "Impact": 2.0,
+        "Coherence": 3.0,
+        "Adaptability": 4.0,
+        "Readiness": 5.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c29",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c30",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 3.0,
+        "Impact": 4.0,
+        "Coherence": 5.0,
+        "Adaptability": 2.0,
+        "Readiness": 3.0
+      },
+      "composite": 3.5,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c31",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 4.0,
+        "Impact": 5.0,
+        "Coherence": 2.0,
+        "Adaptability": 3.0,
+        "Readiness": 4.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c32",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 5.0,
+        "Impact": 2.0,
+        "Coherence": 3.0,
+        "Adaptability": 4.0,
+        "Readiness": 5.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c33",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c34",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 3.0,
+        "Impact": 4.0,
+        "Coherence": 5.0,
+        "Adaptability": 2.0,
+        "Readiness": 3.0
+      },
+      "composite": 3.5,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c35",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 4.0,
+        "Impact": 5.0,
+        "Coherence": 2.0,
+        "Adaptability": 3.0,
+        "Readiness": 4.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c36",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 5.0,
+        "Impact": 2.0,
+        "Coherence": 3.0,
+        "Adaptability": 4.0,
+        "Readiness": 5.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c37",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c38",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 3.0,
+        "Impact": 4.0,
+        "Coherence": 5.0,
+        "Adaptability": 2.0,
+        "Readiness": 3.0
+      },
+      "composite": 3.5,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c39",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 4.0,
+        "Impact": 5.0,
+        "Coherence": 2.0,
+        "Adaptability": 3.0,
+        "Readiness": 4.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c40",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 5.0,
+        "Impact": 2.0,
+        "Coherence": 3.0,
+        "Adaptability": 4.0,
+        "Readiness": 5.0
+      },
+      "composite": 3.7,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    },
+    {
+      "concept_id": "ir-fixture-c41",
+      "rubric_version": "GENERAL/v1",
+      "criterion_scores": {
+        "Novelty": 2.0,
+        "Impact": 3.0,
+        "Coherence": 4.0,
+        "Adaptability": 5.0,
+        "Readiness": 2.0
+      },
+      "composite": 3.1,
+      "evidence_status": "SIMULATED",
+      "reviewer_notes": "SIMULATED ordinal fixture scores assigned only after synthesis; no independent reviewer."
+    }
+  ],
+  "experiments": [
+    {
+      "experiment_id": "ir-fixture-c03-e1",
+      "concept_id": "ir-fixture-c03",
+      "hypothesis": "In a local synthetic rehearsal, 'Invert delivery order' reduces failed constraint checks versus an unchanged baseline.",
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified.",
+        "No private user data"
+      ],
+      "falsification_criteria": "Disconfirm if candidate failures are equal to or greater than baseline, or any hard safety check fails.",
+      "method": "Prepare 10 matched synthetic cases; compare baseline with this mechanism: Deliver a removable prototype before committing to its supporting infrastructure. Record both outcomes without external effects.",
+      "measurements": [
+        "failed_constraint_checks / evaluated_cases",
+        "hard_safety_failure_count",
+        "elapsed_seconds"
+      ],
+      "success_rule": "Candidate has fewer failed checks and zero hard safety failures; this tests rehearsal behavior only.",
+      "stop_conditions": [
+        "Stop at 10 cases or 60 seconds",
+        "Stop on unexpected external effect or private data"
+      ],
+      "required_integrations": [
+        "A separately reviewed local experiment executor (not implemented in this slice)"
+      ],
+      "execution_class": "RETRY_SAFE",
+      "execution_state": "NOT_RUN",
+      "approval_state": "NOT_REQUESTED",
+      "resource_budget": {
+        "max_cases": 10,
+        "max_seconds": 60,
+        "max_retries": 0,
+        "max_external_calls": 0
+      },
+      "evidence_refs": [],
+      "decision": null,
+      "learning": null,
+      "version": 1,
+      "content_hash": "14cbcb4d2f4de568fd5ca6e021723a70ebdcc43e631d38edd3981137102f49c0"
+    },
+    {
+      "experiment_id": "ir-fixture-c04-e2",
+      "concept_id": "ir-fixture-c04",
+      "hypothesis": "In a local synthetic rehearsal, 'Remove coordination tolls' reduces failed constraint checks versus an unchanged baseline.",
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified.",
+        "No private user data"
+      ],
+      "falsification_criteria": "Disconfirm if candidate failures are equal to or greater than baseline, or any hard safety check fails.",
+      "method": "Prepare 10 matched synthetic cases; compare baseline with this mechanism: Remove per-interaction negotiations by publishing fixed interface commitments. Record both outcomes without external effects.",
+      "measurements": [
+        "failed_constraint_checks / evaluated_cases",
+        "hard_safety_failure_count",
+        "elapsed_seconds"
+      ],
+      "success_rule": "Candidate has fewer failed checks and zero hard safety failures; this tests rehearsal behavior only.",
+      "stop_conditions": [
+        "Stop at 10 cases or 60 seconds",
+        "Stop on unexpected external effect or private data"
+      ],
+      "required_integrations": [
+        "A separately reviewed local experiment executor (not implemented in this slice)"
+      ],
+      "execution_class": "RETRY_SAFE",
+      "execution_state": "NOT_RUN",
+      "approval_state": "NOT_REQUESTED",
+      "resource_budget": {
+        "max_cases": 10,
+        "max_seconds": 60,
+        "max_retries": 0,
+        "max_external_calls": 0
+      },
+      "evidence_refs": [],
+      "decision": null,
+      "learning": null,
+      "version": 1,
+      "content_hash": "ae5cd44c2fcc20d1a04c18957fae5c49a70d445afe5c994901bcee00f2915aca"
+    },
+    {
+      "experiment_id": "ir-fixture-c07-e3",
+      "concept_id": "ir-fixture-c07",
+      "hypothesis": "In a local synthetic rehearsal, 'Separate conflicting modes' reduces failed constraint checks versus an unchanged baseline.",
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified.",
+        "No private user data"
+      ],
+      "falsification_criteria": "Disconfirm if candidate failures are equal to or greater than baseline, or any hard safety check fails.",
+      "method": "Prepare 10 matched synthetic cases; compare baseline with this mechanism: Resolve precision-versus-speed tension with separate exploration and confirmation paths. Record both outcomes without external effects.",
+      "measurements": [
+        "failed_constraint_checks / evaluated_cases",
+        "hard_safety_failure_count",
+        "elapsed_seconds"
+      ],
+      "success_rule": "Candidate has fewer failed checks and zero hard safety failures; this tests rehearsal behavior only.",
+      "stop_conditions": [
+        "Stop at 10 cases or 60 seconds",
+        "Stop on unexpected external effect or private data"
+      ],
+      "required_integrations": [
+        "A separately reviewed local experiment executor (not implemented in this slice)"
+      ],
+      "execution_class": "RETRY_SAFE",
+      "execution_state": "NOT_RUN",
+      "approval_state": "NOT_REQUESTED",
+      "resource_budget": {
+        "max_cases": 10,
+        "max_seconds": 60,
+        "max_retries": 0,
+        "max_external_calls": 0
+      },
+      "evidence_refs": [],
+      "decision": null,
+      "learning": null,
+      "version": 1,
+      "content_hash": "72a9149212db31fd0bff2de43ddf66e408496da71cc8ca87071e7a7ec9a59ad0"
+    },
+    {
+      "experiment_id": "ir-fixture-c08-e4",
+      "concept_id": "ir-fixture-c08",
+      "hypothesis": "In a local synthetic rehearsal, 'Localize complexity' reduces failed constraint checks versus an unchanged baseline.",
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified.",
+        "No private user data"
+      ],
+      "falsification_criteria": "Disconfirm if candidate failures are equal to or greater than baseline, or any hard safety check fails.",
+      "method": "Prepare 10 matched synthetic cases; compare baseline with this mechanism: Confine expensive customization to replaceable boundary modules. Record both outcomes without external effects.",
+      "measurements": [
+        "failed_constraint_checks / evaluated_cases",
+        "hard_safety_failure_count",
+        "elapsed_seconds"
+      ],
+      "success_rule": "Candidate has fewer failed checks and zero hard safety failures; this tests rehearsal behavior only.",
+      "stop_conditions": [
+        "Stop at 10 cases or 60 seconds",
+        "Stop on unexpected external effect or private data"
+      ],
+      "required_integrations": [
+        "A separately reviewed local experiment executor (not implemented in this slice)"
+      ],
+      "execution_class": "RETRY_SAFE",
+      "execution_state": "NOT_RUN",
+      "approval_state": "NOT_REQUESTED",
+      "resource_budget": {
+        "max_cases": 10,
+        "max_seconds": 60,
+        "max_retries": 0,
+        "max_external_calls": 0
+      },
+      "evidence_refs": [],
+      "decision": null,
+      "learning": null,
+      "version": 1,
+      "content_hash": "90d5cf7e077c0be1bc79c662364b48317b5527d67fe562e3abb769905f43b813"
+    },
+    {
+      "experiment_id": "ir-fixture-c27-e5",
+      "concept_id": "ir-fixture-c27",
+      "hypothesis": "In a local synthetic rehearsal, 'Deliberate subtraction' reduces failed constraint checks versus an unchanged baseline.",
+      "assumptions": [
+        "Fixture mechanism is applicable to the brief; this is unverified.",
+        "No private user data"
+      ],
+      "falsification_criteria": "Disconfirm if candidate failures are equal to or greater than baseline, or any hard safety check fails.",
+      "method": "Prepare 10 matched synthetic cases; compare baseline with this mechanism: Remove the most popular feature in a reversible sandbox to expose hidden dependencies. Record both outcomes without external effects.",
+      "measurements": [
+        "failed_constraint_checks / evaluated_cases",
+        "hard_safety_failure_count",
+        "elapsed_seconds"
+      ],
+      "success_rule": "Candidate has fewer failed checks and zero hard safety failures; this tests rehearsal behavior only.",
+      "stop_conditions": [
+        "Stop at 10 cases or 60 seconds",
+        "Stop on unexpected external effect or private data"
+      ],
+      "required_integrations": [
+        "A separately reviewed local experiment executor (not implemented in this slice)"
+      ],
+      "execution_class": "RETRY_SAFE",
+      "execution_state": "NOT_RUN",
+      "approval_state": "NOT_REQUESTED",
+      "resource_budget": {
+        "max_cases": 10,
+        "max_seconds": 60,
+        "max_retries": 0,
+        "max_external_calls": 0
+      },
+      "evidence_refs": [],
+      "decision": null,
+      "learning": null,
+      "version": 1,
+      "content_hash": "791bc6976830f0a2f364c3e6ef6eebc07162edd7a5db4fb6bb2e57db09b03abd"
+    }
+  ],
+  "evidence": [],
+  "limitations": [
+    "SIMULATED: authored offline fixtures, not live model generation or verified innovations.",
+    "No research was performed; claims remain unverified and originality is not established.",
+    "Scores are subjective simulated decision aids, not probabilities or measured market outcomes.",
+    "Experiments are unapproved drafts with NOT_RUN execution; no observations or learning are fabricated.",
+    "HYBRID uses GENERAL/v1; AUTO conservatively defaults to GENERAL without inferring commercial intent.",
+    "Semantic novelty, independent reviewer relevance and commercial demand require human validation.",
+    "External execution is disabled; real providers require a separately authorized integration."
+  ],
+  "usage": null
+}

@@ -3,10 +3,12 @@ from __future__ import annotations
 """Persistent artifact content storage.
 
 Content addressing: bytes are stored once per tenant under their sha256
-object_id; artifact_versions records point at immutable objects so a run's
+object_id; amc_artifact_versions records point at immutable objects so a run's
 artifact can be versioned and independently re-verified. Layout is compatible
 with the Supabase migration 20261104_amc_durable_execution_v1 (amc.artifact_objects
-/ amc.artifact_versions) and a SQLite mirror (migration 7).
+/ amc.amc_artifact_versions) and mirrored in SQLite (jobs in migration 22, artifact
+tables in migration 23). The version table is namespaced `amc_` because the Project OS
+already owns an incompatible `artifact_versions` table (migration 20261001).
 
 Backends:
 - local: filesystem directory (AMC_ARTIFACT_ROOT). Durable when the directory
@@ -63,7 +65,7 @@ def init_artifact_tables() -> None:
                 created_at TEXT NOT NULL,
                 UNIQUE (tenant_id, object_id)
             );
-            CREATE TABLE IF NOT EXISTS artifact_versions (
+            CREATE TABLE IF NOT EXISTS amc_artifact_versions (
                 artifact_id TEXT PRIMARY KEY,
                 tenant_id TEXT NOT NULL,
                 project_id TEXT NOT NULL,
@@ -208,7 +210,7 @@ def store_artifact(
 
     with transaction(write=True) as db:
         latest = db.execute(
-            f"SELECT COALESCE(MAX(version), 0) AS v FROM {table('artifact_versions')} WHERE tenant_id = ? AND project_id = ? AND kind = ?",
+            f"SELECT COALESCE(MAX(version), 0) AS v FROM {table('amc_artifact_versions')} WHERE tenant_id = ? AND project_id = ? AND kind = ?",
             (tenant_id, project_id, kind),
         ).fetchone()
         version = int(latest["v"]) + 1
@@ -223,7 +225,7 @@ def store_artifact(
             )
         artifact_id = f"art_{secrets.token_hex(16)}"
         db.execute(
-            f"INSERT INTO {table('artifact_versions')} (artifact_id, tenant_id, project_id, run_id, kind, version, object_id, content_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            f"INSERT INTO {table('amc_artifact_versions')} (artifact_id, tenant_id, project_id, run_id, kind, version, object_id, content_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (artifact_id, tenant_id, project_id, run_id, kind, version, content_hash, content_hash, _now_iso()),
         )
 
@@ -243,7 +245,7 @@ def get_artifact(artifact_id: str, tenant_id: str, include_content: bool = False
     init_artifact_tables()
     with transaction() as db:
         row = db.execute(
-            f"SELECT * FROM {table('artifact_versions')} WHERE artifact_id = ? AND tenant_id = ?",
+            f"SELECT * FROM {table('amc_artifact_versions')} WHERE artifact_id = ? AND tenant_id = ?",
             (artifact_id, tenant_id),
         ).fetchone()
     if row is None:
@@ -260,7 +262,7 @@ def get_artifact(artifact_id: str, tenant_id: str, include_content: bool = False
 
 def list_artifacts(tenant_id: str, project_id: str | None = None, run_id: str | None = None, limit: int = 200) -> list[dict]:
     init_artifact_tables()
-    query = f"SELECT * FROM {table('artifact_versions')} WHERE tenant_id = ?"
+    query = f"SELECT * FROM {table('amc_artifact_versions')} WHERE tenant_id = ?"
     params: list = [tenant_id]
     if project_id:
         query += " AND project_id = ?"
@@ -281,7 +283,7 @@ def soft_delete_artifact(artifact_id: str, tenant_id: str) -> bool:
 
     with transaction(write=True) as db:
         cursor = db.execute(
-            f"UPDATE {table('artifact_versions')} SET deleted = 1, deleted_at = ? WHERE artifact_id = ? AND tenant_id = ? AND deleted = 0",
+            f"UPDATE {table('amc_artifact_versions')} SET deleted = 1, deleted_at = ? WHERE artifact_id = ? AND tenant_id = ? AND deleted = 0",
             (_now_iso(), artifact_id, tenant_id),
         )
         return cursor.rowcount == 1

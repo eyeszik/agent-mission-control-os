@@ -1,0 +1,286 @@
+{
+  "baseline_revision": "d93c8b8b316bf84c25285baa49b75ef4f1797649",
+  "original_feature_revision": "6bfc3c9a83abc5b5c495a8d511d2a27c56c6c26b",
+  "sources": [
+    {
+      "source_id": "V3-S01",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/agency/innovation/generation.py",
+      "immutable_version": "sha256:ff85a2259eb5ec31611a702acbd1147fb8bd206e44400e7c6f2a165a209dfd1b",
+      "locator": "services/langgraph/agency/innovation/generation.py",
+      "observed_at": "2026-11-01T03:44:34.533670+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "ff85a2259eb5ec31611a702acbd1147fb8bd206e44400e7c6f2a165a209dfd1b",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S02",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/agency/innovation/generation_service.py",
+      "immutable_version": "sha256:019e972cc2e5c2902d6607188583167b7bcc447b606b8429347fc95323a1d180",
+      "locator": "services/langgraph/agency/innovation/generation_service.py",
+      "observed_at": "2026-11-01T03:44:34.533721+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "019e972cc2e5c2902d6607188583167b7bcc447b606b8429347fc95323a1d180",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S03",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/agency/innovation/local_experiment.py",
+      "immutable_version": "sha256:846010b6ff99b4f0e1c5d1d71139410b6aefe761a112fb99301954e9142e87fe",
+      "locator": "services/langgraph/agency/innovation/local_experiment.py",
+      "observed_at": "2026-11-01T03:44:34.533754+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "846010b6ff99b4f0e1c5d1d71139410b6aefe761a112fb99301954e9142e87fe",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S04",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/agency/model_router.py",
+      "immutable_version": "sha256:bfe2f143495d755ddb1df9c46ea8327c32d306530a7065ec9146552206ce9718",
+      "locator": "services/langgraph/agency/model_router.py",
+      "observed_at": "2026-11-01T03:44:34.533787+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "bfe2f143495d755ddb1df9c46ea8327c32d306530a7065ec9146552206ce9718",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S05",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/agency/execution_fabric/adapters/innovation.py",
+      "immutable_version": "sha256:15c3a387ed180ffa868d9e6023d4a92c76a502e4165e71c01b49d7c18167cb2d",
+      "locator": "services/langgraph/agency/execution_fabric/adapters/innovation.py",
+      "observed_at": "2026-11-01T03:44:34.533881+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "15c3a387ed180ffa868d9e6023d4a92c76a502e4165e71c01b49d7c18167cb2d",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S06",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/agency/execution_fabric/skills.py",
+      "immutable_version": "sha256:ae77ff3003917d6c53a17f746529bcfe1b3dbba2c1e41f47e99d8165ae7b8e6f",
+      "locator": "services/langgraph/agency/execution_fabric/skills.py",
+      "observed_at": "2026-11-01T03:44:34.533913+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "ae77ff3003917d6c53a17f746529bcfe1b3dbba2c1e41f47e99d8165ae7b8e6f",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S07",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/api/routes/innovation.py",
+      "immutable_version": "sha256:5dad000b898520646415a6f886cc804215fb31930fe1afce931aea728a496939",
+      "locator": "services/langgraph/api/routes/innovation.py",
+      "observed_at": "2026-11-01T03:44:34.533935+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "5dad000b898520646415a6f886cc804215fb31930fe1afce931aea728a496939",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S08",
+      "source_kind": "repository_file",
+      "canonical_ref": "packages/shared/src/schemas/innovationCapabilities.ts",
+      "immutable_version": "sha256:8ed4cef1df3143e97ba88092d99cf401e871f1bdba6e0486b38ceac4da636ab4",
+      "locator": "packages/shared/src/schemas/innovationCapabilities.ts",
+      "observed_at": "2026-11-01T03:44:34.533956+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "8ed4cef1df3143e97ba88092d99cf401e871f1bdba6e0486b38ceac4da636ab4",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S09",
+      "source_kind": "repository_file",
+      "canonical_ref": "apps/web/components/innovation/InnovationCapabilitiesPanel.tsx",
+      "immutable_version": "sha256:0621cbb801861a4216ced38aec19f94b19ff725946801f1e934de282c253ff7b",
+      "locator": "apps/web/components/innovation/InnovationCapabilitiesPanel.tsx",
+      "observed_at": "2026-11-01T03:44:34.533983+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "0621cbb801861a4216ced38aec19f94b19ff725946801f1e934de282c253ff7b",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S10",
+      "source_kind": "repository_file",
+      "canonical_ref": "apps/web/e2e/innovation-capabilities.spec.ts",
+      "immutable_version": "sha256:9dde4dc59119cc2b1127ccdf7707bfc0a1f51f4d3cbe016f855bb5f9f02ab5fb",
+      "locator": "apps/web/e2e/innovation-capabilities.spec.ts",
+      "observed_at": "2026-11-01T03:44:34.534004+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "9dde4dc59119cc2b1127ccdf7707bfc0a1f51f4d3cbe016f855bb5f9f02ab5fb",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S11",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/tests/test_innovation_generation.py",
+      "immutable_version": "sha256:7ca0b97d51389637db2f19b0cd6de08b99288d78dfca49d8ba51dc5391cf2660",
+      "locator": "services/langgraph/tests/test_innovation_generation.py",
+      "observed_at": "2026-11-01T03:44:34.534071+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "7ca0b97d51389637db2f19b0cd6de08b99288d78dfca49d8ba51dc5391cf2660",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S12",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/tests/test_innovation_generation_api.py",
+      "immutable_version": "sha256:faa02778a0a9907a895e9c884e48a032fcf6fe7f387c5ff8498718136a27bcb7",
+      "locator": "services/langgraph/tests/test_innovation_generation_api.py",
+      "observed_at": "2026-11-01T03:44:34.534098+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "faa02778a0a9907a895e9c884e48a032fcf6fe7f387c5ff8498718136a27bcb7",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S13",
+      "source_kind": "repository_file",
+      "canonical_ref": "services/langgraph/tests/test_innovation_experiment.py",
+      "immutable_version": "sha256:98154e70373020f9631f713657dd16ad54fd0c2b8b13b8cb8cdc9e697c2a34b6",
+      "locator": "services/langgraph/tests/test_innovation_experiment.py",
+      "observed_at": "2026-11-01T03:44:34.534120+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "98154e70373020f9631f713657dd16ad54fd0c2b8b13b8cb8cdc9e697c2a34b6",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    },
+    {
+      "source_id": "V3-S14",
+      "source_kind": "repository_file",
+      "canonical_ref": "packages/shared/tests/fixtures/innovation-local-computation.json",
+      "immutable_version": "sha256:f91917b12206008a9bdabe79d31965d2c75e1c2d6458a812542a4f158ba088f5",
+      "locator": "packages/shared/tests/fixtures/innovation-local-computation.json",
+      "observed_at": "2026-11-01T03:44:34.534143+00:00",
+      "content_hash_algorithm": "SHA-256 raw bytes",
+      "content_hash": "f91917b12206008a9bdabe79d31965d2c75e1c2d6458a812542a4f158ba088f5",
+      "authority": "repository implementation/test evidence, never permission",
+      "verification_status": "REVIEWED",
+      "verification_method": "Read actual bytes; tests separately recorded in v3-validation.md",
+      "tenant_id": null,
+      "project_id": null,
+      "limitations": [
+        "Finite local tests do not prove production readiness.",
+        "Model invocation tests use mock transport; no live-provider receipt claimed."
+      ],
+      "recheck": "Recompute when source bytes change"
+    }
+  ]
+}

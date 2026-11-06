@@ -1,0 +1,252 @@
+{
+  "$defs": {
+    "EvidenceRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "VERIFIED",
+            "REVIEWED",
+            "UNVERIFIED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "limitations": {
+          "title": "Limitations",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "claim",
+        "source",
+        "status",
+        "limitations"
+      ],
+      "title": "EvidenceRecord",
+      "type": "object"
+    },
+    "ExecutionReport": {
+      "additionalProperties": false,
+      "properties": {
+        "performed": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Performed",
+          "type": "array"
+        },
+        "proposed": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Proposed",
+          "type": "array"
+        },
+        "pending_approval": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Pending Approval",
+          "type": "array"
+        },
+        "checkpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checkpoint"
+        },
+        "remaining_budget": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Remaining Budget"
+        }
+      },
+      "title": "ExecutionReport",
+      "type": "object"
+    },
+    "ValidationReport": {
+      "additionalProperties": false,
+      "properties": {
+        "result": {
+          "enum": [
+            "PASS",
+            "PARTIAL",
+            "FAIL",
+            "NOT_APPLICABLE"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "checks": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "coverage": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Coverage"
+        },
+        "regressions": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Regressions"
+        },
+        "blockers": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "ValidationReport",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "enum": [
+        "COMPLETE",
+        "PARTIAL",
+        "BLOCKED",
+        "WAITING_APPROVAL"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "operation": {
+      "enum": [
+        "EXECUTE",
+        "PROMPT",
+        "AUDIT",
+        "PATCH"
+      ],
+      "title": "Operation",
+      "type": "string"
+    },
+    "artifact": {
+      "title": "Artifact",
+      "type": "string"
+    },
+    "changes": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Changes",
+      "type": "array"
+    },
+    "assumptions": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "evidence": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/EvidenceRecord"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "validation": {
+      "$ref": "#/$defs/ValidationReport"
+    },
+    "execution": {
+      "$ref": "#/$defs/ExecutionReport"
+    },
+    "human_review": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Human Review"
+    },
+    "next_action": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Next Action"
+    }
+  },
+  "required": [
+    "status",
+    "operation",
+    "artifact",
+    "validation",
+    "execution"
+  ],
+  "title": "InstructionDelivery",
+  "type": "object"
+}

@@ -6,7 +6,7 @@
     "human_review_required": true,
     "reasons": [
       "SEC dissent exists and escalates regardless of majority.",
-      "No repository was provided for implementation-specific validation.",
+      "HISTORICAL/SUPERSEDED: repository access was unavailable during this earlier architecture review; live repository validation now exists.",
       "Cloudflare bindings and deployment topology remain unverified.",
       "External observability and tool integration contracts remain unverified.",
       "Runtime schema validation was not executed."
@@ -14,7 +14,7 @@
     "blocking_issues": [
       {
         "id": "BLOCK-001",
-        "issue": "Repository context unavailable."
+        "issue": "SUPERSEDED historical repository-context blocker; see current remediation record."
       },
       {
         "id": "BLOCK-002",
@@ -31,7 +31,6 @@
     ],
     "safe_next_steps": [
       "Review the architecture bundle.",
-      "Provide repository access if implementation is desired.",
       "Run repo audit for package versions/scripts/paths.",
       "Verify Cloudflare bindings before edge deployment.",
       "Verify optional provider API contracts before adapter generation.",
@@ -50,6 +49,11 @@
       "perform external writes",
       "run irreversible actions",
       "claim production readiness"
-    ]
+    ],
+    "provenance": {
+      "record_status": "HISTORICAL_SUPERSEDED",
+      "superseded_by": "docs/audit-remediation-2026-09-26.md",
+      "note": "This record predates live repository verification. Preserve it as provenance; repository-availability statements are not current runtime facts."
+    }
   }
 }

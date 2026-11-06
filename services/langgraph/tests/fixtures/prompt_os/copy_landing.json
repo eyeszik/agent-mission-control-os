@@ -1,0 +1,92 @@
+{
+  "project_name": "northwind-landing",
+  "content": "",
+  "extract_content_claims": false,
+  "claims": [
+    {
+      "text": "Northwind beans are roasted within 48 hours of shipping.",
+      "claim_type": "METRIC"
+    }
+  ],
+  "evidence": [
+    {
+      "source_id": "src-roast-log",
+      "title": "Northwind roast and dispatch log (synthetic)",
+      "source_class": "PRIMARY",
+      "claim_ids": [
+        "clm_001_01f9486fd5"
+      ],
+      "supports": true,
+      "accessed_at": "2026-09-20",
+      "summary": "Synthetic fixture: brand, figures and sources are invented for regression testing. Dispatch records show roasting within 48 hours of shipment.",
+      "freshness_class": "SLOW_CHANGING"
+    }
+  ],
+  "brand_core": {
+    "brand_name": "Northwind Coffee",
+    "positioning_essence": "Coffee for people who take their mornings seriously.",
+    "voice": {
+      "tone_attributes": [
+        "confident",
+        "warm",
+        "direct"
+      ],
+      "writing_dos": [
+        "Use short, concrete sentences."
+      ],
+      "writing_donts": [
+        "Do not use hype."
+      ]
+    },
+    "color_story": [
+      {
+        "role": "primary",
+        "description": "Deep indigo used as the authority color.",
+        "reference_hex": "#1a2b4c"
+      },
+      {
+        "role": "accent",
+        "description": "Warm amber used for emphasis.",
+        "reference_hex": "#e08a2c"
+      }
+    ],
+    "typography_direction": "Humanist serif headlines with a neutral grotesk body.",
+    "imagery_style": "Natural light, tactile materials, documentary framing.",
+    "motion": {
+      "pace": "Brisk with confident deceleration.",
+      "emphasis_moments": [
+        "primary CTA activation"
+      ],
+      "reduced_motion_fallback": "Cross-fade only."
+    },
+    "logo_lockups": [
+      {
+        "lockup_id": "primary",
+        "lockup_type": "primary",
+        "usage_context": "Default digital and print mark.",
+        "minimum_size": "24px digital / 0.5in print",
+        "clear_space_rule": "One cap-height around the full mark.",
+        "placement_notes": "Prefer top-left on digital surfaces.",
+        "generation_reference": "Indigo wordmark with a compact compass-needle symbol."
+      }
+    ]
+  },
+  "asset_requirements": [
+    {
+      "asset_id": "landing-copy",
+      "family": "COPY",
+      "asset_type": "landing page copy",
+      "objective": "Write landing page copy for the subscription launch offer.",
+      "audience": "Busy professionals who value a deliberate morning ritual.",
+      "channel": "web",
+      "destination": "/subscribe",
+      "content_requirements": [
+        "Lead with the reader's morning, not the company."
+      ],
+      "exact_text": [
+        "Start your first box",
+        "Cancel anytime."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,386 @@
+{
+  "artifact_hashes": {
+    "runtime/abc/SYSTEM_GENOME.yaml": "ece722863dc2f3852be138f4098df6f9f1eeed6193efbb6e659fbdb014bca5fc",
+    "runtime/abc/build-dag.yaml": "abed79430efcb5b81d388b3e24d155e39bc0b65f7c170bee1740ff862fd334f0",
+    "runtime/abc/governance-matrix.yaml": "a546b967592ee4e74307111569c9288a261d20b5d41aa5a2bd7a97ba307cffc5",
+    "runtime/abc/run-fsm.yaml": "e49efe351c893cc7b4e23963db1c06b3b7f129a7fd7f1e08677f39b9c2e07538",
+    "runtime/abc/samples/mark.svg": "80721a48d3550f5d0935a4fd578884f2dc483e8ebfc5d43e691a39eccba4d87e",
+    "runtime/abc/samples/still.png": "acbf624008265ac5b00670547ea17e179ba3d9130183e9873f396f9a81c65b65",
+    "runtime/abc/samples/turntable.mp4": "9518595e84fb25f83407a48ba4f1906113bee6a386506678dee8649c684f4582"
+  },
+  "authorization_note": "No G3/G4 action was authorized or performed. Merge requires the repository owner.",
+  "authorization_refs": [],
+  "blockers": [
+    "R2_OFFLINE_DIFFUSION:BLOCKED_LOCAL_MODEL:MISSING_DEPENDENCY:torch; MISSING_DEPENDENCY:diffusers; NO_LOCAL_MODEL: AMC_LOCAL_DIFFUSION_MODEL_DIR is not set",
+    "R3_THREE_JS:MISSING_DEPENDENCIES:MISSING_DEPENDENCY:three (not a declared apps/web dependency); MISSING_DEPENDENCY:three (not installed)",
+    "OPENTELEMETRY:NOT_INSTALLED",
+    "PERSISTENT_WORKER:NOT_DEPLOYED (RuntimeActive requires an authorized deployment)",
+    "Q5_Q7:HUMAN_REQUIRED (visual constraints, realism/brand assessment and approval are human decisions)"
+  ],
+  "build_dag_hash": "12f1fccd34497fe7c4623c241fa49384dede2efb0fb31c2e35d3a733b46dfa6b",
+  "command_results": {
+    "cmd:abc_manifests_check": {
+      "duration_s": 0.88,
+      "environment": {
+        "cwd": "/home/user/agent-mission-control-os",
+        "database_backend": "sqlite",
+        "db_path_set": true,
+        "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+        "python": "3.11.15"
+      },
+      "exit_code": 0,
+      "id": "cmd:abc_manifests_check",
+      "started_at": "2026-10-09T20:59:09.344232+00:00",
+      "steps": [
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/compile_abc_manifests.py",
+            "--check"
+          ],
+          "duration_s": 0.88,
+          "exit_code": 0,
+          "output_sha256": "faaa1ef9b57617eaaac2540a2e1147e156dad8e2fe516a207692733009b60f45",
+          "output_tail": "ABC manifests match code: ['SYSTEM_GENOME.yaml', 'build-dag.yaml', 'governance-matrix.yaml', 'run-fsm.yaml']\n"
+        }
+      ],
+      "verdict": "PASSED"
+    },
+    "cmd:compileall": {
+      "duration_s": 0.06,
+      "environment": {
+        "cwd": "/home/user/agent-mission-control-os",
+        "database_backend": "sqlite",
+        "db_path_set": true,
+        "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+        "python": "3.11.15"
+      },
+      "exit_code": 0,
+      "id": "cmd:compileall",
+      "started_at": "2026-10-09T20:59:09.283822+00:00",
+      "steps": [
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "-m",
+            "compileall",
+            "-q",
+            "services/langgraph",
+            "scripts"
+          ],
+          "duration_s": 0.06,
+          "exit_code": 0,
+          "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "output_tail": ""
+        }
+      ],
+      "verdict": "PASSED"
+    },
+    "cmd:environment_snapshot": {
+      "duration_s": 0.85,
+      "environment": {
+        "cwd": "/home/user/agent-mission-control-os",
+        "database_backend": "sqlite",
+        "db_path_set": true,
+        "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+        "python": "3.11.15"
+      },
+      "exit_code": 0,
+      "id": "cmd:environment_snapshot",
+      "started_at": "2026-10-09T20:58:28.656765+00:00",
+      "steps": [
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "-c",
+            "import json; from services.langgraph.agency.visual.capabilities import probe_all; print(json.dumps({r.value: [c.status.value, c.version, list(c.blockers)] for r, c in probe_all().items()}))"
+          ],
+          "duration_s": 0.84,
+          "exit_code": 0,
+          "output_sha256": "b43d4227b1d2973bf6b761dcd4d2a6471319308e4ae938f9a4919c88cb695a8c",
+          "output_tail": "{\"R1_BLENDER_CYCLES\": [\"VERIFIED_AVAILABLE\", \"4.2.0\", []], \"R2_OFFLINE_DIFFUSION\": [\"BLOCKED_LOCAL_MODEL\", null, [\"MISSING_DEPENDENCY:torch\", \"MISSING_DEPENDENCY:diffusers\", \"NO_LOCAL_MODEL: AMC_LOCAL_DIFFUSION_MODEL_DIR is not set\"]], \"R3_THREE_JS\": [\"MISSING_DEPENDENCIES\", null, [\"MISSING_DEPENDENCY:three (not a declared apps/web dependency)\", \"MISSING_DEPENDENCY:three (not installed)\"]], \"R4_VECTOR\": [\"VERIFIED_AVAILABLE\", \"agency.assets\", []], \"R5_LOCAL_VIDEO\": [\"VERIFIED_AVAILABLE\", \"ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers\", []]}\n"
+        },
+        {
+          "command": [
+            "git",
+            "status",
+            "--short"
+          ],
+          "duration_s": 0.01,
+          "exit_code": 0,
+          "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "output_tail": ""
+        }
+      ],
+      "verdict": "PASSED"
+    },
+    "cmd:gates": {
+      "duration_s": 1.27,
+      "environment": {
+        "cwd": "/home/user/agent-mission-control-os",
+        "database_backend": "sqlite",
+        "db_path_set": true,
+        "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+        "python": "3.11.15"
+      },
+      "exit_code": 0,
+      "id": "cmd:gates",
+      "started_at": "2026-10-09T20:59:10.224042+00:00",
+      "steps": [
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/verify_repository_invariants.py"
+          ],
+          "duration_s": 0.08,
+          "exit_code": 0,
+          "output_sha256": "53d10a2fc6ac8d489ed3b6888b1270285a3d1a07a76d16396ef6e437011ac4fd",
+          "output_tail": "Repository invariants verified\n"
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/verify_production_readiness.py"
+          ],
+          "duration_s": 0.54,
+          "exit_code": 0,
+          "output_sha256": "624bd5bb3d7d17a9226a5a3baea2b47aa12222826fbb9d127872c882d2fa20c1",
+          "output_tail": "Production readiness invariants verified\n"
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/verify_auth_bindings.py"
+          ],
+          "duration_s": 0.04,
+          "exit_code": 0,
+          "output_sha256": "29c849bd93657ab59bc3dcfe21eb2784e9b11473639957e552869a2d1cafc793",
+          "output_tail": "auth-bind-check: Supabase and Vercel binding contracts verified (no live credentials required)\n"
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/verify_ontology_parity.py"
+          ],
+          "duration_s": 0.24,
+          "exit_code": 0,
+          "output_sha256": "10c2342bf4ec5be4537978e1224f83bfee4f6fa193a2f3312d0c1c8936b4fe00",
+          "output_tail": "ontology-parity: N1 department ontology, N2 lifecycle matrices and project OS vocabularies agree across Python and TypeScript\n"
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/verify_design_tokens.py"
+          ],
+          "duration_s": 0.07,
+          "exit_code": 0,
+          "output_sha256": "eda6a6c5b4e3e976f1b6e60ca366921b1ccfdd2c446676de0d66f07b4e40ba21",
+          "output_tail": "design-token gate: frontend source references tokens, no raw colors; DTCG source compiles and generated CSS is current\n"
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/verify_manifest.py"
+          ],
+          "duration_s": 0.05,
+          "exit_code": 0,
+          "output_sha256": "abf2ad32ab07b2b3009bfde0fa4d4f18c9b3b8442e1f0e5a20e4588f906bfcfe",
+          "output_tail": "Integrity manifest verified (156 critical files)\n"
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/verify_guidance_registry.py"
+          ],
+          "duration_s": 0.26,
+          "exit_code": 0,
+          "output_sha256": "72a095634e5d34c0e893099d0df87bd573e4c96c896aa2548f08177a36a15dee",
+          "output_tail": "Guidance registry verified (7 pack(s), registry_hash=52ac53a6b5656265)\n"
+        }
+      ],
+      "verdict": "PASSED"
+    },
+    "cmd:pytest_abc": {
+      "duration_s": 22.43,
+      "environment": {
+        "cwd": "/home/user/agent-mission-control-os",
+        "database_backend": "sqlite",
+        "db_path_set": true,
+        "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+        "python": "3.11.15"
+      },
+      "exit_code": 0,
+      "id": "cmd:pytest_abc",
+      "started_at": "2026-10-09T20:58:29.509155+00:00",
+      "steps": [
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "-m",
+            "pytest",
+            "/home/user/agent-mission-control-os/services/langgraph/tests/test_abc_v6.py",
+            "-q",
+            "-rs"
+          ],
+          "duration_s": 22.43,
+          "exit_code": 0,
+          "output_sha256": "21579dd095e29952b0153540ddd869fe18a512286996efb252bdf1c350bbd95f",
+          "output_tail": "...................................                                      [100%]\n=============================== warnings summary ===============================\n../../../usr/local/lib/python3.11/dist-packages/starlette/testclient.py:53\n  /usr/local/lib/python3.11/dist-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n35 passed, 1 warning in 20.83s\n"
+        }
+      ],
+      "verdict": "PASSED"
+    },
+    "cmd:pytest_full": {
+      "duration_s": 259.21,
+      "environment": {
+        "cwd": "/home/user/agent-mission-control-os",
+        "database_backend": "sqlite",
+        "db_path_set": true,
+        "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+        "python": "3.11.15"
+      },
+      "exit_code": 0,
+      "id": "cmd:pytest_full",
+      "started_at": "2026-10-09T20:59:11.498994+00:00",
+      "steps": [
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "-m",
+            "pytest",
+            "/home/user/agent-mission-control-os/services/langgraph/tests",
+            "-q",
+            "-p",
+            "no:cacheprovider"
+          ],
+          "duration_s": 259.21,
+          "exit_code": 0,
+          "output_sha256": "146dedd0b3d3ad03de178ec3bb54accc9009993dae479c84161b2ef9e03ce065",
+          "output_tail": "...................................................... [ 21%]\n........................................ss.............................. [ 28%]\n........................................................................ [ 35%]\n........................................................................ [ 42%]\n........................................................................ [ 50%]\n........................................................................ [ 57%]\n........................................................................ [ 64%]\n........................................................................ [ 71%]\n........................................................................ [ 78%]\n........................................................................ [ 85%]\n........................................................................ [ 93%]\n......................................................................   [100%]\n=============================== warnings summary ===============================\n../../../usr/local/lib/python3.11/dist-packages/starlette/testclient.py:53\n  /usr/local/lib/python3.11/dist-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n1004 passed, 2 skipped, 1 warning in 256.98s (0:04:16)\n"
+        }
+      ],
+      "verdict": "PASSED"
+    },
+    "cmd:pytest_intake": {
+      "duration_s": 17.33,
+      "environment": {
+        "cwd": "/home/user/agent-mission-control-os",
+        "database_backend": "sqlite",
+        "db_path_set": true,
+        "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+        "python": "3.11.15"
+      },
+      "exit_code": 0,
+      "id": "cmd:pytest_intake",
+      "started_at": "2026-10-09T20:58:51.939084+00:00",
+      "steps": [
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "-m",
+            "pytest",
+            "/home/user/agent-mission-control-os/services/langgraph/tests/test_intake_mission.py",
+            "-q"
+          ],
+          "duration_s": 17.33,
+          "exit_code": 0,
+          "output_sha256": "19b2bf187ead37acda18fd7b313c17a1f891c2d7b8c7f4195b49d3ebbcb55361",
+          "output_tail": "..............................                                           [100%]\n=============================== warnings summary ===============================\n../../../usr/local/lib/python3.11/dist-packages/starlette/testclient.py:53\n  /usr/local/lib/python3.11/dist-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n30 passed, 1 warning in 15.67s\n"
+        }
+      ],
+      "verdict": "PASSED"
+    },
+    "cmd:ruff": {
+      "duration_s": 0.02,
+      "environment": {
+        "cwd": "/home/user/agent-mission-control-os",
+        "database_backend": "sqlite",
+        "db_path_set": true,
+        "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+        "python": "3.11.15"
+      },
+      "exit_code": 0,
+      "id": "cmd:ruff",
+      "started_at": "2026-10-09T20:59:09.264602+00:00",
+      "steps": [
+        {
+          "command": [
+            "ruff",
+            "check",
+            "services/langgraph/agency/visual",
+            "services/langgraph/agency/durable",
+            "services/langgraph/agency/intake",
+            "services/langgraph/persistence/durable_runs.py",
+            "services/langgraph/tests/test_abc_v6.py",
+            "scripts/compile_abc_manifests.py",
+            "scripts/seal_abc_build.py"
+          ],
+          "duration_s": 0.02,
+          "exit_code": 0,
+          "output_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+          "output_tail": "All checks passed!\n"
+        }
+      ],
+      "verdict": "PASSED"
+    }
+  },
+  "commit": "43a8622ec8df6d263b5d3fde80e986221b79e817",
+  "evidence_refs": {
+    "cmd:abc_manifests_check": "PASSED",
+    "cmd:compileall": "PASSED",
+    "cmd:environment_snapshot": "PASSED",
+    "cmd:gates": "PASSED",
+    "cmd:pytest_abc": "PASSED",
+    "cmd:pytest_full": "PASSED",
+    "cmd:pytest_intake": "PASSED",
+    "cmd:ruff": "PASSED",
+    "file:docs/abc-v6-traceability.md": "PASSED",
+    "file:runtime/abc/samples/provenance.json": "PASSED",
+    "self:seal_composed": "PASSED"
+  },
+  "failed_predicates": [
+    "ReleaseEligible",
+    "RuntimeActive"
+  ],
+  "final_status": "IMPLEMENTED_PARTIALLY_VERIFIED",
+  "node_status": {
+    "A00_DISCOVER": "PASSED",
+    "A01_MAP": "PASSED",
+    "A02_SPECIFY": "PASSED",
+    "A03_INTEGRATE": "PASSED",
+    "A04_VISUAL": "PASSED",
+    "A05_PRODUCE": "PASSED",
+    "A06_VERIFY": "PASSED",
+    "A07_OPERATE": "PASSED",
+    "A08_OBSERVE": "PASSED",
+    "A09_TEST": "PASSED",
+    "A10_PACKAGE": "PASSED",
+    "A11_SEAL": "PASSED"
+  },
+  "passed_predicates": [
+    "BuildComplete"
+  ],
+  "predicate_notes": {
+    "ReleaseEligible": "false: no human visual/brand/realism review or current approval exists for the samples",
+    "RuntimeActive": "false: no persistent scheduler/worker is deployed or authorized; ticks are invoked explicitly"
+  },
+  "predicates": {
+    "BuildComplete": true,
+    "ReleaseEligible": false,
+    "RuntimeActive": false
+  },
+  "run_fsm_hash": "f3345aede33e995c6c3adf0ae8a12b9e4a61918b1a9f5d99fd7b44e35c197ed3",
+  "run_fsm_version": "amc-run-fsm/v1",
+  "schema_version": "amc-verification-seal/v1",
+  "schema_versions": {
+    "build_dag": "amc-build-dag/v1",
+    "governance": "amc-governance/v1",
+    "mission_genome": "amc-mission-genome/v1",
+    "run_fsm": "amc-run-fsm/v1",
+    "visual_engine": "amc-visual-engine/v1"
+  },
+  "sealed_at": "2026-10-09T21:03:32.188993+00:00",
+  "signature_note": "SHA-256 binds bytes to this record; it is not cryptographic authenticity.",
+  "signature_status": "UNSIGNED",
+  "working_tree_changes_other_than_seal": []
+}

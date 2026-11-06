@@ -1,6 +1,16 @@
 observability_hooks:
   version: "1.0.0"
-  status: "architecture_ready_requires_runtime_binding"
+  status: "internal_runtime_bound_external_backend_unverified"
+  runtime_evidence:
+    internal:
+      - "run_events with monotonic per-run sequence and replay cursor"
+      - "first-party analytics lifecycle events"
+      - "dispatch, execution, observation, failure, and completion proof receipts"
+      - "recovery cases, invalidation obligations, lineage remediation, and trust projection"
+    external_backend: "UNVERIFIED"
+    service_identity: "amc-api"
+    slo_baseline: "UNSET_UNTIL_MEASURED"
+    retention_policy: "UNKNOWN_UNTIL_DEPLOYMENT"
   signals:
     schema_validation_failure:
       maps_to: [FP5, FP6, HFM7]

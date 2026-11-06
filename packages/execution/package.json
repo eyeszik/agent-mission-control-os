@@ -1,0 +1,24 @@
+{
+  "name": "@amc/execution",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zod twins of the execution records in services/langgraph/agency/execution/models.py, hashed through @amc/canonical.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@amc/canonical": "workspace:*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

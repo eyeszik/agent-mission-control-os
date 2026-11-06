@@ -1,3 +1,4 @@
+import { getAppConfig } from '../config';
 import { clearSession, readSession, StoredSession, writeSession } from './session';
 
 interface SupabaseTokenResponse {
@@ -7,10 +8,9 @@ interface SupabaseTokenResponse {
 }
 
 function config() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) throw new Error('Supabase authentication is not configured');
-  return { url: url.replace(/\/$/, ''), key };
+  const supabase = getAppConfig().supabase;
+  if (!supabase) throw new Error('Supabase authentication is not configured');
+  return { url: supabase.url, key: supabase.publishableKey };
 }
 
 function store(payload: SupabaseTokenResponse, tenantId?: string): StoredSession {

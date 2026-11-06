@@ -87,6 +87,86 @@ paths:
         '404': { description: Run not found }
         '409': { description: Run state or approval does not permit delivery }
         '503': { description: Authentication provider or runtime configuration unavailable }
+  /runtime/runs/{run_id}/remediation/retry:
+    post:
+      summary: Retry a blocked run from an open recovery case
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recovery_id]
+              properties:
+                recovery_id: { type: string }
+      responses:
+        '200':
+          description: Canonical run remediation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunRemediationResponse'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Run or recovery case belongs to another authorization scope }
+        '404': { description: Run or recovery case not found }
+        '409': { description: Run is not retryable, recovery is not open, or idempotency conflict }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+  /runtime/runs/{run_id}/remediation/compensate:
+    post:
+      summary: Compensate an ambiguous external-result recovery case
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recovery_id]
+              properties:
+                recovery_id: { type: string }
+      responses:
+        '200':
+          description: Canonical run remediation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunRemediationResponse'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Run or recovery case belongs to another authorization scope }
+        '404': { description: Run or recovery case not found }
+        '409': { description: Recovery is not compensatable or idempotency conflict }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+  /runtime/runs/{run_id}/remediation/regenerate-approval:
+    post:
+      summary: Regenerate a stale approval chain for a protected run artifact
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approval_id: { type: string, format: uuid, nullable: true }
+      responses:
+        '200':
+          description: Canonical run remediation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunRemediationResponse'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Run or approval belongs to another authorization scope }
+        '404': { description: Run or approval not found }
+        '409': { description: Approval is not stale or idempotency conflict }
+        '503': { description: Authentication provider or runtime configuration unavailable }
   /approvals:
     get:
       summary: List pending approvals for the authenticated tenant
@@ -134,7 +214,7 @@ paths:
         '401': { description: Authentication required or token invalid }
         '403': { description: Approval belongs to another authorization scope }
         '404': { description: Approval not found }
-        '409': { description: Approval is terminal, run state changed, or idempotency conflict }
+        '409': { description: Approval is terminal, run state changed, idempotency conflict, or HIGH framing not acknowledged }
         '503': { description: Authentication provider or runtime configuration unavailable }
   /runs/{run_id}/events:
     get:
@@ -367,11 +447,22 @@ components:
       properties:
         brand_name: { type: string }
         industry: { type: string, nullable: true }
+        business_idea: { type: string, nullable: true }
+        offer_summary: { type: string, nullable: true }
+        product_type: { type: string, nullable: true }
         goals: { type: array, items: { type: string }, default: [] }
         target_audience: { type: string }
         tone: { type: string, nullable: true }
         channels: { type: array, items: { type: string }, default: [] }
         constraints: { type: array, items: { type: string }, default: [] }
+        business_model: { type: string, nullable: true }
+        affiliate_model: { type: boolean, nullable: true }
+        workflow_idea: { type: string, nullable: true }
+        differentiators: { type: array, items: { type: string }, default: [] }
+        brand_style_notes: { type: array, items: { type: string }, default: [] }
+        market: { type: string, nullable: true }
+        language: { type: string, nullable: true }
+        locale: { type: string, nullable: true }
     CreateAgencyRunRequest:
       type: object
       required: [project_id, brief]
@@ -439,6 +530,53 @@ components:
         tool_selection_accuracy: { type: string, enum: [NOT_MEASURED] }
         output_relevance: { type: string, enum: [NOT_MEASURED] }
         threshold_passed: { type: boolean }
+    BrandComplianceViolation:
+      type: object
+      required: [pattern_id, matched_text, description]
+      properties:
+        pattern_id: { type: string }
+        matched_text: { type: string }
+        description: { type: string }
+    BrandComplianceReadability:
+      type: object
+      required: [flesch_kincaid_grade, within_target_band, target_grade_min, target_grade_max]
+      properties:
+        flesch_kincaid_grade:
+          oneOf:
+            - { type: number }
+            - { type: string, enum: [NOT_MEASURED] }
+        within_target_band:
+          oneOf:
+            - { type: boolean }
+            - { type: string, enum: [NOT_MEASURED] }
+        target_grade_min: { type: number }
+        target_grade_max: { type: number }
+    BrandComplianceSentiment:
+      type: object
+      required: [compound, within_target_band, target_min, target_max]
+      properties:
+        compound:
+          oneOf:
+            - { type: number }
+            - { type: string, enum: [NOT_MEASURED] }
+        within_target_band:
+          oneOf:
+            - { type: boolean }
+            - { type: string, enum: [NOT_MEASURED] }
+        target_min: { type: number }
+        target_max: { type: number }
+    BrandCompliance:
+      type: object
+      required: [engine_version, passed, flagged_terms, violations, missing_disclaimers, readability, sentiment, advisories]
+      properties:
+        engine_version: { type: string }
+        passed: { type: boolean }
+        flagged_terms: { type: array, items: { type: string } }
+        violations: { type: array, items: { $ref: '#/components/schemas/BrandComplianceViolation' } }
+        missing_disclaimers: { type: array, items: { type: string } }
+        readability: { $ref: '#/components/schemas/BrandComplianceReadability' }
+        sentiment: { $ref: '#/components/schemas/BrandComplianceSentiment' }
+        advisories: { type: array, items: { type: string } }
     QAReport:
       type: object
       required: [brand_safety_passed, flagged_terms, quality_metrics, notes, release_blocked, degradation_reasons]
@@ -446,6 +584,7 @@ components:
         brand_safety_passed: { type: boolean }
         flagged_terms: { type: array, items: { type: string } }
         quality_metrics: { $ref: '#/components/schemas/QualityMetrics' }
+        brand_compliance: { $ref: '#/components/schemas/BrandCompliance' }
         notes: { type: string }
         release_blocked: { type: boolean }
         degradation_reasons: { type: array, items: { type: string } }
@@ -459,6 +598,114 @@ components:
         copy_variants: { type: array, items: { $ref: '#/components/schemas/CopyVariant' } }
         design_brief: { $ref: '#/components/schemas/DesignBrief' }
         qa_report: { $ref: '#/components/schemas/QAReport' }
+        agency_operations: { $ref: '#/components/schemas/AgencyOperationsPackage' }
+    ResearchCoverage:
+      type: object
+      required: [audience_brief, interview_guide, competitive_audit, stakeholder_map, perception_gaps, category_language, evidence_refs, unresolved]
+      properties:
+        audience_brief: { type: string }
+        interview_guide: { type: array, items: { type: string } }
+        competitive_audit: { type: array, items: { type: string } }
+        stakeholder_map: { type: array, items: { type: object, additionalProperties: { type: string } } }
+        perception_gaps: { type: array, items: { type: string } }
+        category_language: { type: array, items: { type: string } }
+        evidence_refs: { type: array, items: { type: string } }
+        unresolved: { type: array, items: { type: string } }
+    ClaimProofRecord:
+      type: object
+      required: [claim_id, text, status, release_note]
+      properties:
+        claim_id: { type: string }
+        text: { type: string }
+        status: { type: string, enum: [PROVED, UNPROVED, UNKNOWN] }
+        source_ref: { type: string, nullable: true }
+        release_note: { type: string }
+    RightsRecord:
+      type: object
+      required: [asset_ref, owner, license_status, portfolio_permission, territory, offboarding_status, contact]
+      properties:
+        asset_ref: { type: string }
+        owner: { type: string }
+        license_status: { type: string }
+        portfolio_permission: { type: string }
+        territory: { type: string }
+        expiry: { type: string, nullable: true }
+        access_expiry: { type: string, nullable: true }
+        offboarding_status: { type: string }
+        contact: { type: string }
+    AccessibilityEvidence:
+      type: object
+      required: [standard_ref, contrast, keyboard, semantics, assistive_technology, evidence_refs, status]
+      properties:
+        standard_ref: { type: string }
+        contrast: { type: string, enum: [MEASURED, NOT_MEASURED] }
+        keyboard: { type: string, enum: [MEASURED, NOT_MEASURED] }
+        semantics: { type: string, enum: [MEASURED, NOT_MEASURED] }
+        assistive_technology: { type: string, enum: [MEASURED, NOT_MEASURED] }
+        evidence_refs: { type: array, items: { type: string } }
+        status: { type: string, enum: [SOURCE_ATTACHED, GAP, COUNSEL_REQUIRED] }
+    MediaPlanningHandoff:
+      type: object
+      required: [audience, flight, market, budget, kpis, creative_specs, trafficking_sheet, execution_mode]
+      properties:
+        audience: { type: string }
+        flight: { type: string }
+        market: { type: string }
+        budget: { type: string }
+        kpis: { type: array, items: { type: string } }
+        creative_specs: { type: array, items: { type: string } }
+        trafficking_sheet: { type: array, items: { type: object, additionalProperties: { type: string } } }
+        execution_mode: { type: string, enum: [PLANNING_ONLY] }
+    ObservabilityContract:
+      type: object
+      required: [required_signals, service_identity, owner, retention_policy, alert_conditions, runtime_binding_status]
+      properties:
+        required_signals: { type: array, items: { type: string, enum: [logs, metrics, traces] } }
+        service_identity: { type: string }
+        owner: { type: string }
+        retention_policy: { type: string }
+        alert_conditions: { type: array, items: { type: string } }
+        runtime_binding_status: { type: string, enum: [UNVERIFIED_EXTERNAL_BINDING] }
+    SLORecord:
+      type: object
+      required: [name, target, status]
+      properties:
+        name: { type: string }
+        target: { type: string }
+        measurement_ref: { type: string, nullable: true }
+        status: { type: string, enum: [GAP_NO_BASELINE, SOURCE_ATTACHED] }
+    ModelCardRecord:
+      type: object
+      required: [task, mode, evaluation_status, limitations]
+      properties:
+        task: { type: string }
+        provider: { type: string, nullable: true }
+        model: { type: string, nullable: true }
+        mode: { type: string }
+        prompt_version: { type: string, nullable: true }
+        schema_version: { type: string, nullable: true }
+        evaluation_status: { type: string, enum: [NOT_MEASURED, SOURCE_ATTACHED] }
+        limitations: { type: array, items: { type: string } }
+    AgencyOperationsPackage:
+      type: object
+      required: [schema_version, market, language, locale, research, claims, rights_handoff, accessibility, media, observability, slos, model_cards, legal_readiness, required_reviewers, unresolved_gaps, external_release_blockers]
+      properties:
+        schema_version: { type: string, enum: [amc-agency-operations/v1] }
+        market: { type: string }
+        language: { type: string }
+        locale: { type: string }
+        research: { $ref: '#/components/schemas/ResearchCoverage' }
+        claims: { type: array, items: { $ref: '#/components/schemas/ClaimProofRecord' } }
+        rights_handoff: { type: array, items: { $ref: '#/components/schemas/RightsRecord' } }
+        accessibility: { $ref: '#/components/schemas/AccessibilityEvidence' }
+        media: { $ref: '#/components/schemas/MediaPlanningHandoff' }
+        observability: { $ref: '#/components/schemas/ObservabilityContract' }
+        slos: { type: array, items: { $ref: '#/components/schemas/SLORecord' } }
+        model_cards: { type: array, items: { $ref: '#/components/schemas/ModelCardRecord' } }
+        legal_readiness: { type: string, enum: [SOURCE_ATTACHED, GAP, COUNSEL_REQUIRED] }
+        required_reviewers: { type: array, items: { type: string } }
+        unresolved_gaps: { type: array, items: { type: string } }
+        external_release_blockers: { type: array, items: { type: string } }
     GenerationProvenance:
       type: object
       required: [task, mode, schema_version, prompt_version, prompt_hash, attempts, started_at, completed_at, fallback_used]
@@ -487,16 +734,27 @@ components:
         project_id: { type: string }
         reason: { type: string }
         confidence: { type: number, nullable: true }
-        status: { type: string, enum: [pending, resolved] }
+        status: { type: string, enum: [pending, resolved, stale] }
         reviewer: { type: string, nullable: true }
         decision: { type: string, enum: [approve, reject], nullable: true }
+        subject_type: { type: string, nullable: true }
+        subject_ref: { type: string, nullable: true }
+        subject_version_ref: { type: string, nullable: true }
+        subject_hash: { type: string, nullable: true }
+        authority_ref: { type: string, nullable: true }
+        policy_version: { type: string, nullable: true }
+        stale_reason: { type: string, nullable: true }
+        staled_at: { type: string, nullable: true }
         created_at: { type: string }
         decided_at: { type: string, nullable: true }
+        framing_level: { type: string, enum: [NONE, REVIEW, HIGH], nullable: true, description: 'Heuristic persuasion-pressure level of the summary (ASI09). Not a judgement of truth.' }
+        framing_codes: { type: array, items: { type: string }, description: 'Stable codes that produced framing_level.' }
     ApprovalDecision:
       type: object
       required: [decision]
       properties:
         decision: { type: string, enum: [approve, reject] }
+        framing_acknowledged: { type: boolean, description: 'Required true to approve a request whose framing_level is HIGH.' }
     ApprovalDecisionResponse:
       type: object
       required: [approval_id, status, decision, reviewer, decided_at]
@@ -554,7 +812,10 @@ components:
         project_id: { type: string }
         sequence: { type: integer, minimum: 0 }
         schema_version: { type: string, enum: [run-event-v2] }
-        event_type: { type: string, enum: [node_complete, node_error, artifact_generated, approval_requested] }
+        event_type:
+          type: string
+          enum:
+            [node_complete, node_error, artifact_generated, approval_requested, approval_decided, recovery_case_updated, outbox_updated, run_remediation_updated]
         node_id: { type: string, nullable: true }
         observed_at: { type: string, format: date-time }
         started_at: { type: string, format: date-time, nullable: true }
@@ -584,9 +845,55 @@ components:
         occurred_at: { type: string, format: date-time }
         properties: { type: object, additionalProperties: true }
         schema_version: { type: string, enum: [analytics-event-v1] }
+    RecoveryCaseSummary:
+      type: object
+      required: [recovery_id, tenant_id, project_id, operation_id, reason, status, created_at, evidence_refs]
+      properties:
+        recovery_id: { type: string }
+        tenant_id: { type: string }
+        project_id: { type: string }
+        operation_id: { type: string }
+        reason:
+          type: string
+          enum: [EXECUTION_WITHOUT_OBSERVATION, OBSERVATION_MISMATCH, AMBIGUOUS_EXTERNAL_RESULT, IDEMPOTENCY_CONFLICT]
+        execution_ref: { type: string, nullable: true }
+        observation_ref: { type: string, nullable: true }
+        idempotency_key: { type: string, nullable: true }
+        status: { type: string, enum: [OPEN, RECONCILED, COMPENSATED, ESCALATED] }
+        evidence_refs: { type: array, items: { type: string } }
+        created_at: { type: string, format: date-time }
+        resolved_at: { type: string, format: date-time, nullable: true }
+    RunRemediationResponse:
+      type: object
+      required: [action, run]
+      properties:
+        action:
+          type: string
+          enum: [retry_blocked_execution, compensate_ambiguous_result, regenerate_approval]
+        run: { $ref: '#/components/schemas/AgencyRun' }
+        recovery_case:
+          allOf: [{ $ref: '#/components/schemas/RecoveryCaseSummary' }]
+          nullable: true
+        pending_approval:
+          allOf: [{ $ref: '#/components/schemas/ApprovalRequest' }]
+          nullable: true
+    SkillRegistryEntry:
+      type: object
+      required: [skill_id, capability, description, available]
+      properties:
+        skill_id: { type: string }
+        capability: { type: string }
+        description: { type: string }
+        available: { type: boolean, nullable: true }
+    SkillRegistrySnapshot:
+      type: object
+      required: [skill_runtime_version, skills]
+      properties:
+        skill_runtime_version: { type: string }
+        skills: { type: array, items: { $ref: '#/components/schemas/SkillRegistryEntry' } }
     OperationsCapabilities:
       type: object
-      required: [tenant_id, publication, paid_media, analytics]
+      required: [tenant_id, publication, paid_media, analytics, skills]
       properties:
         tenant_id: { type: string }
         publication:
@@ -607,6 +914,7 @@ components:
           properties:
             source: { type: string, enum: [amc_first_party] }
             ingestion: { type: boolean, enum: [true] }
+        skills: { $ref: '#/components/schemas/SkillRegistrySnapshot' }
     PublicationPreviewRequest:
       type: object
       required: [run_id, provider, payload]

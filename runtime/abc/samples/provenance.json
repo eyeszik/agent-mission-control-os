@@ -1,0 +1,1074 @@
+{
+  "capabilities": {
+    "R1_BLENDER_CYCLES": {
+      "blockers": [],
+      "status": "VERIFIED_AVAILABLE",
+      "version": "4.2.0"
+    },
+    "R2_OFFLINE_DIFFUSION": {
+      "blockers": [
+        "MISSING_DEPENDENCY:torch",
+        "MISSING_DEPENDENCY:diffusers",
+        "NO_LOCAL_MODEL: AMC_LOCAL_DIFFUSION_MODEL_DIR is not set"
+      ],
+      "status": "BLOCKED_LOCAL_MODEL",
+      "version": null
+    },
+    "R3_THREE_JS": {
+      "blockers": [
+        "MISSING_DEPENDENCY:three (not a declared apps/web dependency)",
+        "MISSING_DEPENDENCY:three (not installed)"
+      ],
+      "status": "MISSING_DEPENDENCIES",
+      "version": null
+    },
+    "R4_VECTOR": {
+      "blockers": [],
+      "status": "VERIFIED_AVAILABLE",
+      "version": "agency.assets"
+    },
+    "R5_LOCAL_VIDEO": {
+      "blockers": [],
+      "status": "VERIFIED_AVAILABLE",
+      "version": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers"
+    }
+  },
+  "claims_not_made": [
+    "photorealism (a decodable, non-blank image is not a photograph)",
+    "approval (every sample is WAITING_APPROVAL)",
+    "bit-reproducibility of the Cycles renders"
+  ],
+  "generated_at": "2026-10-09T20:46:30.140784+00:00",
+  "genome_hash": "74cd03ef5d4bd6d0735704c9c299381ca9dce85d6b86985334030b6596f1d850",
+  "metrics": {
+    "approval_latency_ms": {
+      "count": 0,
+      "max": null,
+      "median": null
+    },
+    "cost_per_verified_artifact": "NOT_MEASURED",
+    "dispatch_failures": 0,
+    "exporters": {
+      "datadog": "NOT_CONFIGURED: no exporter in this module; requires explicit configuration and authorization",
+      "opentelemetry": "NOT_INSTALLED"
+    },
+    "gpu_memory": "NOT_MEASURED",
+    "intents": {
+      "committed": 3,
+      "open": 0
+    },
+    "percentile_comparison": "BASELINE_UNKNOWN",
+    "queue_lag_ms": {
+      "count": 3,
+      "max": 590889,
+      "median": 201804
+    },
+    "recoveries": 0,
+    "render_latency_ms": {
+      "count": 3,
+      "max": 388379,
+      "median": 200114
+    },
+    "retry_rate": 0.0,
+    "scheduler_availability": "NOT_MEASURED: no persistent worker is deployed; ticks are invoked explicitly",
+    "tick_latency_ms": {
+      "count": 3,
+      "max": 389061,
+      "median": 200757
+    },
+    "ticks": 3,
+    "verification": {
+      "failed_or_other": 0,
+      "passed": 3
+    },
+    "working_ticks": 3
+  },
+  "mission_genome": {
+    "acceptance_predicates": [
+      {
+        "depends_on": [],
+        "description": "persisted bytes reopen and pass Q0-Q4",
+        "predicate_id": "P_READBACK",
+        "severity": "critical",
+        "verifier": "media.readback"
+      },
+      {
+        "depends_on": [
+          "P_READBACK"
+        ],
+        "description": "human visual/brand/realism review (Q5-Q7)",
+        "predicate_id": "P_REVIEW",
+        "severity": "critical",
+        "verifier": "human.review"
+      }
+    ],
+    "assumptions": [],
+    "audience": "internal reviewers",
+    "blockers": [],
+    "budgets": {
+      "max_attempts": 3,
+      "render_timeout_s": 1800
+    },
+    "build_ref": null,
+    "capability_bindings": {
+      "mark": "VERIFIED_AVAILABLE",
+      "still": "VERIFIED_AVAILABLE",
+      "turntable": "VERIFIED_AVAILABLE"
+    },
+    "conflicts": [],
+    "constraints": [],
+    "deliverables": [
+      {
+        "capability": "R1",
+        "id": "still"
+      },
+      {
+        "capability": "R5",
+        "id": "turntable"
+      },
+      {
+        "capability": "R4",
+        "id": "mark"
+      }
+    ],
+    "dependency_graph": {
+      "P_READBACK": [],
+      "P_REVIEW": [
+        "P_READBACK"
+      ]
+    },
+    "execution_mode": "REAL_EXECUTION",
+    "governance_policy": {
+      "approve": "G2+human",
+      "publish": "G3:blocked",
+      "render": "G2",
+      "spend": "G4:blocked"
+    },
+    "mission_id": "abc-v6-samples",
+    "objective": "Local product still, turntable and vector mark for review",
+    "project_id": "prj-abc-samples",
+    "provenance": {
+      "compiled_at": "2026-10-09T20:36:36.790422+00:00",
+      "compiler": "amc-mission-genome/v1"
+    },
+    "review_policy": {
+      "BRAND": [
+        "human.review"
+      ],
+      "HUMAN": [
+        "human.review"
+      ],
+      "RIGHTS": [
+        "media.readback"
+      ],
+      "TECHNICAL": [
+        "media.readback"
+      ],
+      "VISUAL": [
+        "human.review"
+      ]
+    },
+    "runtime_ref": {
+      "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+      "python": "3.11.15"
+    },
+    "schema_version": "amc-mission-genome/v1",
+    "source_evidence": [],
+    "status": "READY",
+    "tenant_id": "tenant-abc-samples",
+    "unknowns": []
+  },
+  "realism_contract": {
+    "allowed_variance": "Cycles + OpenImageDenoise output is not bit-reproducible across runs",
+    "camera_model": "85 mm, f/2.8, focus target",
+    "color_pipeline": "sRGB palette -> linear -> Filmic -> sRGB PNG",
+    "image_dimensions": [
+      960,
+      1200
+    ],
+    "lighting_model": "Cycles path tracing: area key, fill and rim lights",
+    "material_fidelity": "procedural Principled BSDF with object-space wave/noise bump; no scanned textures",
+    "realism_criteria": [
+      "plausible light falloff and contact shadows",
+      "material scale",
+      "no visible fireflies or banding"
+    ],
+    "reference_rights": "procedural_owned",
+    "review_requirements": [
+      "human visual review",
+      "brand review",
+      "realism review"
+    ],
+    "scene_or_model": "procedural spool, thread, folded wool and needle on a plaster wall (blender_runner.py)",
+    "target_category": "product still / turntable",
+    "texture_resolution": "procedural (resolution-independent)"
+  },
+  "samples": [
+    {
+      "approval_id": "39315067-4975-4d43-984c-4582c2ffebab",
+      "artifact_id": "art-prj-abc-samples-still",
+      "artifact_version": 1,
+      "byte_size": 1048649,
+      "execution_mode": "REAL_EXECUTION",
+      "file": "still.png",
+      "idempotency_key": "9a1eee307e510ec4a29f016a4bfe2fbd4dc8d822e035d88eafd515fd6451b844",
+      "intent": {
+        "category": "product_still",
+        "exactness": "exact",
+        "fps": 24,
+        "frames": 1,
+        "height": 1200,
+        "interactivity": false,
+        "output": "image",
+        "palette": {
+          "primary": "#5b1a22",
+          "secondary": "#665d52",
+          "surface": "#ece6da",
+          "text": "#121212"
+        },
+        "realism": "photographic",
+        "samples": 160,
+        "seed": 7,
+        "source_assets": [],
+        "subject": "",
+        "width": 960
+      },
+      "mime_type": "image/png",
+      "recorded_content_hash": "acbf624008265ac5b00670547ea17e179ba3d9130183e9873f396f9a81c65b65",
+      "render_receipts": [
+        {
+          "command": [
+            "/usr/bin/unshare",
+            "-rn",
+            "/usr/local/bin/python",
+            "-I",
+            "/home/user/agent-mission-control-os/services/langgraph/agency/visual/blender_runner.py",
+            "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/47ca7772b0e5450e/frames/scene-spec.json",
+            "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/47ca7772b0e5450e/frames"
+          ],
+          "exit_code": 0,
+          "genome": {
+            "camera": {
+              "azimuth_deg": -62,
+              "distance": 3.4,
+              "focal_mm": 85,
+              "fstop": 2.8,
+              "height": 1.15
+            },
+            "color_management": {
+              "denoiser": "OPENIMAGEDENOISE",
+              "look": "Medium High Contrast",
+              "view_transform": "Filmic"
+            },
+            "geometry": "procedural spool, thread, needle, folded wool, plaster wall",
+            "hardware": {
+              "cpu_count": 4,
+              "gpu": null,
+              "memory_gb": 15.7
+            },
+            "lights": [
+              "area 'north window' key",
+              "world fill"
+            ],
+            "materials": [
+              "bone_plaster",
+              "bone_wool",
+              "charcoal_wool",
+              "needle_steel",
+              "oxblood_thread",
+              "spool_wood"
+            ],
+            "model_weights": null,
+            "renderer": "blender_cycles",
+            "renderer_version": "4.2.0",
+            "route": "R1_BLENDER_CYCLES",
+            "samples": 160,
+            "scene_spec_sha256": "4d8c0215c6982c8d3dd0061dfab606a36d279b2647055037f548420189d217b1",
+            "seed": 7,
+            "source_assets": []
+          },
+          "logical_tick": 1,
+          "network_isolated": true,
+          "observed_at": "2026-10-09T20:39:57.224017+00:00",
+          "outputs": [
+            {
+              "bytes": 1048649,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/47ca7772b0e5450e/frames/frame_0001.png",
+              "sha256": "acbf624008265ac5b00670547ea17e179ba3d9130183e9873f396f9a81c65b65"
+            }
+          ],
+          "reasons": [],
+          "route": "R1_BLENDER_CYCLES",
+          "status": "SUCCEEDED",
+          "wall_ms": 200114
+        }
+      ],
+      "review_state": "HUMAN_REQUIRED (Q5 visual constraints, Q6 realism/brand, Q7 approval)",
+      "route": "R1_BLENDER_CYCLES",
+      "sha256": "acbf624008265ac5b00670547ea17e179ba3d9130183e9873f396f9a81c65b65",
+      "transitions": [
+        [
+          "DORMANT",
+          "SCHEDULED"
+        ],
+        [
+          "SCHEDULED",
+          "LEASED"
+        ],
+        [
+          "LEASED",
+          "PRECHECK"
+        ],
+        [
+          "PRECHECK",
+          "READY"
+        ],
+        [
+          "READY",
+          "RUNNING"
+        ],
+        [
+          "RUNNING",
+          "OBSERVING"
+        ],
+        [
+          "OBSERVING",
+          "VERIFYING"
+        ],
+        [
+          "VERIFYING",
+          "COMMITTING"
+        ],
+        [
+          "COMMITTING",
+          "WAITING_APPROVAL"
+        ]
+      ],
+      "verification": {
+        "artifact_id": "art-prj-abc-samples-still",
+        "byte_size": 1048649,
+        "checks": [
+          {
+            "check": "sha256_matches_record",
+            "detail": "acbf624008265ac5b00670547ea17e179ba3d9130183e9873f396f9a81c65b65",
+            "level": "INTEGRITY",
+            "passed": true
+          },
+          {
+            "check": "png_magic",
+            "detail": "first 8 bytes",
+            "level": "Q0_VALID_FILE",
+            "passed": true
+          },
+          {
+            "check": "pillow_decode",
+            "detail": "PNG RGB",
+            "level": "Q1_DECODABLE",
+            "passed": true
+          },
+          {
+            "check": "dimensions_format",
+            "detail": "960x1200 PNG vs 960x1200 PNG",
+            "level": "Q2_DIMENSIONS_FORMAT",
+            "passed": true
+          },
+          {
+            "check": "tonal_variation",
+            "detail": "luma mean 184.6, stddev 46.8, unique colours (256px sample) 4858",
+            "level": "Q3_NONBLANK",
+            "passed": true
+          },
+          {
+            "check": "source_rights",
+            "detail": "procedural only",
+            "level": "Q4_RIGHTS",
+            "passed": true
+          }
+        ],
+        "content_hash": "acbf624008265ac5b00670547ea17e179ba3d9130183e9873f396f9a81c65b65",
+        "findings": [],
+        "highest_passed": "Q4_RIGHTS",
+        "human_required": [
+          "Q5_VISUAL_CONSTRAINTS",
+          "Q6_REALISM_BRAND",
+          "Q7_APPROVAL"
+        ],
+        "mime_type": "image/png",
+        "status": "PASSED",
+        "verified_at": "2026-10-09T20:39:57.497856+00:00",
+        "verifier": "visual.verify_media/v1 (independent byte reopen)",
+        "version": 1
+      }
+    },
+    {
+      "approval_id": "7b9ca035-c757-48ce-b5a9-da99c4a825ce",
+      "artifact_id": "art-prj-abc-samples-turntable",
+      "artifact_version": 1,
+      "byte_size": 83412,
+      "execution_mode": "REAL_EXECUTION",
+      "file": "turntable.mp4",
+      "idempotency_key": "18b656274ccdc19dc9ec769a196b8eb3cca4e5f6ae241e70cf0d71c7119fa757",
+      "intent": {
+        "category": "product_turntable",
+        "exactness": "exact",
+        "fps": 24,
+        "frames": 36,
+        "height": 600,
+        "interactivity": false,
+        "output": "video",
+        "palette": {
+          "primary": "#5b1a22",
+          "secondary": "#665d52",
+          "surface": "#ece6da",
+          "text": "#121212"
+        },
+        "realism": "photographic",
+        "samples": 24,
+        "seed": 7,
+        "source_assets": [],
+        "subject": "",
+        "width": 480
+      },
+      "mime_type": "video/mp4",
+      "recorded_content_hash": "9518595e84fb25f83407a48ba4f1906113bee6a386506678dee8649c684f4582",
+      "render_receipts": [
+        {
+          "command": [
+            "/usr/bin/unshare",
+            "-rn",
+            "/usr/local/bin/python",
+            "-I",
+            "/home/user/agent-mission-control-os/services/langgraph/agency/visual/blender_runner.py",
+            "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/scene-spec.json",
+            "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames"
+          ],
+          "exit_code": 0,
+          "genome": {
+            "camera": {
+              "azimuth_deg": -62,
+              "distance": 3.4,
+              "focal_mm": 85,
+              "fstop": 2.8,
+              "height": 1.15
+            },
+            "color_management": {
+              "denoiser": "OPENIMAGEDENOISE",
+              "look": "Medium High Contrast",
+              "view_transform": "Filmic"
+            },
+            "geometry": "procedural spool, thread, needle, folded wool, plaster wall",
+            "hardware": {
+              "cpu_count": 4,
+              "gpu": null,
+              "memory_gb": 15.7
+            },
+            "lights": [
+              "area 'north window' key",
+              "world fill"
+            ],
+            "materials": [
+              "bone_plaster",
+              "bone_wool",
+              "charcoal_wool",
+              "needle_steel",
+              "oxblood_thread",
+              "spool_wood"
+            ],
+            "model_weights": null,
+            "renderer": "blender_cycles",
+            "renderer_version": "4.2.0",
+            "route": "R1_BLENDER_CYCLES",
+            "samples": 24,
+            "scene_spec_sha256": "4bfca20bdb3791b587bfafe1d9c26ce3ad9126a5c5b8efec19f45647221c703a",
+            "seed": 7,
+            "source_assets": []
+          },
+          "logical_tick": 1,
+          "network_isolated": true,
+          "observed_at": "2026-10-09T20:46:25.656122+00:00",
+          "outputs": [
+            {
+              "bytes": 264423,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0001.png",
+              "sha256": "36f467483f4dfda9600ac3cb8d4098cdc85adef8aba9da6557102fa00e1a23e5"
+            },
+            {
+              "bytes": 264417,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0002.png",
+              "sha256": "2b7da339a0ed7ffd75db7d9512ca75287fa0d50a768aac8896de8c5d27332792"
+            },
+            {
+              "bytes": 264585,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0003.png",
+              "sha256": "9689e3e5a23a9a4d272a1515f16b575020727e02f6892d9e702c10cba89c9bc2"
+            },
+            {
+              "bytes": 265190,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0004.png",
+              "sha256": "1bb95662ef3512beacdecc8cdbcef3539332e1f9b2d88c83c84a4c0c528eb364"
+            },
+            {
+              "bytes": 265532,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0005.png",
+              "sha256": "e4b149d21a19a5bda4f7caa80c2e96f0fd55876e467bb96305c7c65b7d6950ad"
+            },
+            {
+              "bytes": 265998,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0006.png",
+              "sha256": "22d6f01ae460446b624716fb5a00557461af47941ed361086a17332ee4e3ad80"
+            },
+            {
+              "bytes": 266762,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0007.png",
+              "sha256": "10f9d4e3b8ccf73668bbab641ece62594f35be0ef656e2c056bd673ab1f79424"
+            },
+            {
+              "bytes": 266166,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0008.png",
+              "sha256": "ab2b4bb0f9061ee11559506d5dfb27f7b1f5720e8e81f176da049b76ae682003"
+            },
+            {
+              "bytes": 266644,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0009.png",
+              "sha256": "ac9f416a2c540b1bb0439acc1b6f92ac6d6bc63567a36f8668af97c95ffc0776"
+            },
+            {
+              "bytes": 267472,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0010.png",
+              "sha256": "299a1b375d49278c0215c901b7dad036fe57cd8d8214d5aa3db4559d5e48d598"
+            },
+            {
+              "bytes": 267698,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0011.png",
+              "sha256": "31ea7f58ac33b259fae31f79c3ec53c5104af8e5fb3a029c66a5a9d2847cc174"
+            },
+            {
+              "bytes": 268335,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0012.png",
+              "sha256": "8da9e4c6cfa879ba2e92cbdf658fb8e5f37d463d49dae8635b5d48798d5d02c4"
+            },
+            {
+              "bytes": 268688,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0013.png",
+              "sha256": "61d4e533936a62ddfe00d68bc56c21393ee5c1ef5f2b50810b5e7c3f59b2ef64"
+            },
+            {
+              "bytes": 269327,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0014.png",
+              "sha256": "2d4d80b8a3aa2b5fe20fa54a2939b68cb4d7d34c268461392ca8cca35f5a8fc9"
+            },
+            {
+              "bytes": 268877,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0015.png",
+              "sha256": "91bf4c13605876d5d030688fa65b2c5b56a4c86cd649d5759c3c04fea7b48fd9"
+            },
+            {
+              "bytes": 269539,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0016.png",
+              "sha256": "43038672dd001dd2de9bff96b01a19ccd324a37f00a9504dceb98d00ece1c80d"
+            },
+            {
+              "bytes": 269852,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0017.png",
+              "sha256": "9e767c546cdd3a0b146160165821e7419c1ec1eef0b994d1fc8cea0591bb994f"
+            },
+            {
+              "bytes": 269455,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0018.png",
+              "sha256": "4cc4ceb8eff31755b89225881b58221b27fb113c4d8d8d2b3084a84415cf5fbd"
+            },
+            {
+              "bytes": 270104,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0019.png",
+              "sha256": "565e88cc2ef4e18a9e85ac6ef225ff6b873f30360cdbfbd979da45d5440c3b35"
+            },
+            {
+              "bytes": 270224,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0020.png",
+              "sha256": "afe3d4eacd3acab0514f03d1fe3f5a43cbe12f5c1fc97806de91d4d0e661c11f"
+            },
+            {
+              "bytes": 270732,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0021.png",
+              "sha256": "b1e1cefed1b34c20b0f30bbecc099b4a458b3dc011c8dacc794fc03bdd15dca5"
+            },
+            {
+              "bytes": 270081,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0022.png",
+              "sha256": "51915d4046b5db13374a663e90df7cedb1a8a065246d624a5d79312a9ba5a48e"
+            },
+            {
+              "bytes": 270812,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0023.png",
+              "sha256": "ea82d6b465d276ce468f4f83e2b118db58f8764007a26e42dcd39b1497b20dd7"
+            },
+            {
+              "bytes": 271374,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0024.png",
+              "sha256": "0a131d816f0fac87d67ea8051ce6cbd53bbc630b3b703fb91d595e146f132c9c"
+            },
+            {
+              "bytes": 270750,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0025.png",
+              "sha256": "ecc577fda7f3f63e133c1c69ec228c5500f0f814bc3de69afb5813cf0283fc53"
+            },
+            {
+              "bytes": 270730,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0026.png",
+              "sha256": "4ebc1a143f7b5214386d98fa2a3f13ba828396afbcc3d5a0a575a5f2fb24b5a3"
+            },
+            {
+              "bytes": 270255,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0027.png",
+              "sha256": "6c42305da05cb2ff6fb63350617b98b30e83bafbb896e3c722852769d21a5185"
+            },
+            {
+              "bytes": 269761,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0028.png",
+              "sha256": "54d7b25d195d6cd221c0df91bfbd4cd9a9fd4d37b3545259eabb2734e0aa0e8e"
+            },
+            {
+              "bytes": 268911,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0029.png",
+              "sha256": "40c33b0010b8f7ab36711d274a918638f3d11a605489c79629b9e4c9f61f0bc2"
+            },
+            {
+              "bytes": 268962,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0030.png",
+              "sha256": "424c31a6c341934b0b17dea408f151f0db6e47895bbb1f047835f7a7aac94909"
+            },
+            {
+              "bytes": 268634,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0031.png",
+              "sha256": "aac91daa773e6dacd7f70663fa4f608afbe31089a756c41e30ee0bd1b0cb2d7d"
+            },
+            {
+              "bytes": 268563,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0032.png",
+              "sha256": "f6b4673014335b50bf3eac994a425be740fe368e657acfc1e43e28b46a815d52"
+            },
+            {
+              "bytes": 267623,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0033.png",
+              "sha256": "fbfbb1b6a9ae817d9ffb0efbcd703e5cf859f85fcaa8aac74071c39a31e2855b"
+            },
+            {
+              "bytes": 267406,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0034.png",
+              "sha256": "1ccd322e74c85b0682b96394fad6efd0e958b9d1d1c24c50012909518d5c9e85"
+            },
+            {
+              "bytes": 266931,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0035.png",
+              "sha256": "54416d2f9a071c9ad448acdbf368e86af381a0002213e0ca230a04fcbf93bd41"
+            },
+            {
+              "bytes": 266586,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_0036.png",
+              "sha256": "b869f23cfda23c65e58f2b8af97c352055deedad6ec17566b85a5c8758badfa3"
+            }
+          ],
+          "reasons": [],
+          "route": "R1_BLENDER_CYCLES",
+          "status": "SUCCEEDED",
+          "wall_ms": 387745
+        },
+        {
+          "command": [
+            "/usr/bin/unshare",
+            "-rn",
+            "/usr/bin/ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-framerate",
+            "24",
+            "-i",
+            "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/frames/frame_%04d.png",
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
+            "-crf",
+            "18",
+            "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/master.mp4"
+          ],
+          "exit_code": 0,
+          "genome": null,
+          "logical_tick": 1,
+          "network_isolated": true,
+          "observed_at": "2026-10-09T20:46:26.292115+00:00",
+          "outputs": [
+            {
+              "bytes": 83412,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/945569274d7213a4/master.mp4",
+              "sha256": "9518595e84fb25f83407a48ba4f1906113bee6a386506678dee8649c684f4582"
+            }
+          ],
+          "reasons": [],
+          "route": "R5_LOCAL_VIDEO",
+          "status": "SUCCEEDED",
+          "wall_ms": 634
+        }
+      ],
+      "review_state": "HUMAN_REQUIRED (Q5 visual constraints, Q6 realism/brand, Q7 approval)",
+      "route": "R5_LOCAL_VIDEO",
+      "sha256": "9518595e84fb25f83407a48ba4f1906113bee6a386506678dee8649c684f4582",
+      "transitions": [
+        [
+          "DORMANT",
+          "SCHEDULED"
+        ],
+        [
+          "SCHEDULED",
+          "LEASED"
+        ],
+        [
+          "LEASED",
+          "PRECHECK"
+        ],
+        [
+          "PRECHECK",
+          "READY"
+        ],
+        [
+          "READY",
+          "RUNNING"
+        ],
+        [
+          "RUNNING",
+          "OBSERVING"
+        ],
+        [
+          "OBSERVING",
+          "VERIFYING"
+        ],
+        [
+          "VERIFYING",
+          "COMMITTING"
+        ],
+        [
+          "COMMITTING",
+          "WAITING_APPROVAL"
+        ]
+      ],
+      "verification": {
+        "artifact_id": "art-prj-abc-samples-turntable",
+        "byte_size": 83412,
+        "checks": [
+          {
+            "check": "sha256_matches_record",
+            "detail": "9518595e84fb25f83407a48ba4f1906113bee6a386506678dee8649c684f4582",
+            "level": "INTEGRITY",
+            "passed": true
+          },
+          {
+            "check": "mp4_ftyp_box",
+            "detail": "bytes 4-8",
+            "level": "Q0_VALID_FILE",
+            "passed": true
+          },
+          {
+            "check": "ffprobe",
+            "detail": "h264 36 frames",
+            "level": "Q1_DECODABLE",
+            "passed": true
+          },
+          {
+            "check": "dims_fps_frames_codec",
+            "detail": "480x600 24.0fps 36f h264 vs 480x600 24fps 36f h264",
+            "level": "Q2_DIMENSIONS_FORMAT",
+            "passed": true
+          },
+          {
+            "check": "nonzero_duration",
+            "detail": "1.5s",
+            "level": "Q3_NONBLANK",
+            "passed": true
+          },
+          {
+            "check": "source_rights",
+            "detail": "procedural only",
+            "level": "Q4_RIGHTS",
+            "passed": true
+          }
+        ],
+        "content_hash": "9518595e84fb25f83407a48ba4f1906113bee6a386506678dee8649c684f4582",
+        "findings": [],
+        "highest_passed": "Q4_RIGHTS",
+        "human_required": [
+          "Q5_VISUAL_CONSTRAINTS",
+          "Q6_REALISM_BRAND",
+          "Q7_APPROVAL"
+        ],
+        "mime_type": "video/mp4",
+        "status": "PASSED",
+        "verified_at": "2026-10-09T20:46:26.598906+00:00",
+        "verifier": "visual.verify_media/v1 (independent byte reopen)",
+        "version": 1
+      }
+    },
+    {
+      "approval_id": "0539fd3d-96cd-4cb2-9527-0b2bd6fef468",
+      "artifact_id": "art-prj-abc-samples-mark",
+      "artifact_version": 1,
+      "byte_size": 706,
+      "execution_mode": "REAL_EXECUTION",
+      "file": "mark.svg",
+      "idempotency_key": "1eda3122ced2e525a3f1f50a2f0452e0aa1361f99c35646d5af5f2d6e7a86579",
+      "intent": {
+        "category": "brand_mark",
+        "exactness": "exact",
+        "fps": 24,
+        "frames": 1,
+        "height": 1500,
+        "interactivity": false,
+        "output": "svg",
+        "palette": {
+          "primary": "#5b1a22",
+          "secondary": "#665d52",
+          "surface": "#ece6da",
+          "text": "#121212"
+        },
+        "realism": "photographic",
+        "samples": 128,
+        "seed": 1,
+        "source_assets": [],
+        "subject": "Maison Velune",
+        "width": 1200
+      },
+      "mime_type": "image/svg+xml",
+      "recorded_content_hash": "80721a48d3550f5d0935a4fd578884f2dc483e8ebfc5d43e691a39eccba4d87e",
+      "render_receipts": [
+        {
+          "command": [],
+          "exit_code": null,
+          "genome": {
+            "camera": {},
+            "color_management": {},
+            "geometry": "rounded square, triangle, circle, initials",
+            "hardware": {},
+            "lights": [],
+            "materials": [],
+            "model_weights": null,
+            "renderer": "agency.assets.render_logo_svg",
+            "renderer_version": "deterministic",
+            "route": "R4_VECTOR",
+            "samples": null,
+            "scene_spec_sha256": "f8dd0b419a132cace56eacb43257b3d4d8931c05814374f45a633bb453ca83ea",
+            "seed": 0,
+            "source_assets": []
+          },
+          "logical_tick": 1,
+          "network_isolated": null,
+          "observed_at": "2026-10-09T20:46:26.861558+00:00",
+          "outputs": [
+            {
+              "bytes": 706,
+              "path": "/tmp/amc-abc-samples-w0u06h_z/exports/.render-work/09214b1e84c8ca2c/vector/mark.svg",
+              "sha256": "80721a48d3550f5d0935a4fd578884f2dc483e8ebfc5d43e691a39eccba4d87e"
+            }
+          ],
+          "reasons": [],
+          "route": "R4_VECTOR",
+          "status": "SUCCEEDED",
+          "wall_ms": 0
+        }
+      ],
+      "review_state": "HUMAN_REQUIRED (Q5 visual constraints, Q6 realism/brand, Q7 approval)",
+      "route": "R4_VECTOR",
+      "sha256": "80721a48d3550f5d0935a4fd578884f2dc483e8ebfc5d43e691a39eccba4d87e",
+      "transitions": [
+        [
+          "DORMANT",
+          "SCHEDULED"
+        ],
+        [
+          "SCHEDULED",
+          "LEASED"
+        ],
+        [
+          "LEASED",
+          "PRECHECK"
+        ],
+        [
+          "PRECHECK",
+          "READY"
+        ],
+        [
+          "READY",
+          "RUNNING"
+        ],
+        [
+          "RUNNING",
+          "OBSERVING"
+        ],
+        [
+          "OBSERVING",
+          "VERIFYING"
+        ],
+        [
+          "VERIFYING",
+          "COMMITTING"
+        ],
+        [
+          "COMMITTING",
+          "WAITING_APPROVAL"
+        ]
+      ],
+      "verification": {
+        "artifact_id": "art-prj-abc-samples-mark",
+        "byte_size": 706,
+        "checks": [
+          {
+            "check": "sha256_matches_record",
+            "detail": "80721a48d3550f5d0935a4fd578884f2dc483e8ebfc5d43e691a39eccba4d87e",
+            "level": "INTEGRITY",
+            "passed": true
+          },
+          {
+            "check": "svg_root",
+            "detail": "starts with <svg or <?xml",
+            "level": "Q0_VALID_FILE",
+            "passed": true
+          },
+          {
+            "check": "svg_safety",
+            "detail": "well-formed SVG without active content or external references",
+            "level": "Q1_DECODABLE",
+            "passed": true
+          },
+          {
+            "check": "viewbox",
+            "detail": "0 0 1200 1200",
+            "level": "Q2_DIMENSIONS_FORMAT",
+            "passed": true
+          },
+          {
+            "check": "geometry_present",
+            "detail": "6 geometry element(s)",
+            "level": "Q3_NONBLANK",
+            "passed": true
+          },
+          {
+            "check": "palette_conformance",
+            "detail": "3 colour(s) within dE76<=2.3 of the palette",
+            "level": "Q3_NONBLANK",
+            "passed": true
+          },
+          {
+            "check": "multi_size_render",
+            "detail": "chromium rendered [32, 128, 512]: decoded, non-blank",
+            "level": "Q3_NONBLANK",
+            "passed": true
+          },
+          {
+            "check": "source_rights",
+            "detail": "procedural only",
+            "level": "Q4_RIGHTS",
+            "passed": true
+          }
+        ],
+        "content_hash": "80721a48d3550f5d0935a4fd578884f2dc483e8ebfc5d43e691a39eccba4d87e",
+        "findings": [],
+        "highest_passed": "Q4_RIGHTS",
+        "human_required": [
+          "Q5_VISUAL_CONSTRAINTS",
+          "Q6_REALISM_BRAND",
+          "Q7_APPROVAL"
+        ],
+        "mime_type": "image/svg+xml",
+        "status": "PASSED",
+        "verified_at": "2026-10-09T20:46:30.058190+00:00",
+        "verifier": "visual.verify_media/v1 (independent byte reopen)",
+        "version": 1
+      }
+    }
+  ],
+  "schema_version": "amc-abc-samples/v1",
+  "telemetry": [
+    {
+      "artifact_hash": "acbf624008265ac5b00670547ea17e179ba3d9130183e9873f396f9a81c65b65",
+      "attempt": 1,
+      "capability": "R1_BLENDER_CYCLES",
+      "checkpoint_version": 9,
+      "execution_mode": "REAL_EXECUTION",
+      "failure_fingerprint": null,
+      "final_state": "WAITING_APPROVAL",
+      "job_id": "djob-b0bc984e00637e9501156c06068c",
+      "latency_ms": 200757,
+      "logical_tick": 1,
+      "mission_id": "abc-v6-samples",
+      "next_due_at": "2026-10-09T20:39:57.556084Z",
+      "node_id": "visual_render",
+      "observed_cost": "NOT_MEASURED",
+      "project_id": "prj-abc-samples",
+      "queue_lag_ms": 1012,
+      "resource_usage": {
+        "gpu_memory": "NOT_MEASURED",
+        "render_wall_ms": 200114
+      },
+      "tick_version": "amc-durable-tick/v1",
+      "trace_id": "5e8f51cb5a264fba94f90b2edad02667",
+      "verification_state": "PASSED",
+      "wall_finished_at": "2026-10-09T20:39:57.564014Z",
+      "wall_started_at": "2026-10-09T20:36:36.806530Z"
+    },
+    {
+      "artifact_hash": "9518595e84fb25f83407a48ba4f1906113bee6a386506678dee8649c684f4582",
+      "attempt": 1,
+      "capability": "R5_LOCAL_VIDEO",
+      "checkpoint_version": 9,
+      "execution_mode": "REAL_EXECUTION",
+      "failure_fingerprint": null,
+      "final_state": "WAITING_APPROVAL",
+      "job_id": "djob-bfd88e8955d708aeddcccce33901",
+      "latency_ms": 389061,
+      "logical_tick": 1,
+      "mission_id": "abc-v6-samples",
+      "next_due_at": "2026-10-09T20:46:26.649064Z",
+      "node_id": "visual_render",
+      "observed_cost": "NOT_MEASURED",
+      "project_id": "prj-abc-samples",
+      "queue_lag_ms": 201804,
+      "resource_usage": {
+        "gpu_memory": "NOT_MEASURED",
+        "render_wall_ms": 388379
+      },
+      "tick_version": "amc-durable-tick/v1",
+      "trace_id": "4e6f5077720a415ca8049f60acd4b3f0",
+      "verification_state": "PASSED",
+      "wall_finished_at": "2026-10-09T20:46:26.659516Z",
+      "wall_started_at": "2026-10-09T20:39:57.598417Z"
+    },
+    {
+      "artifact_hash": "80721a48d3550f5d0935a4fd578884f2dc483e8ebfc5d43e691a39eccba4d87e",
+      "attempt": 1,
+      "capability": "R4_VECTOR",
+      "checkpoint_version": 9,
+      "execution_mode": "REAL_EXECUTION",
+      "failure_fingerprint": null,
+      "final_state": "WAITING_APPROVAL",
+      "job_id": "djob-d3f1532dc892e7b41da7f148e2c6",
+      "latency_ms": 3427,
+      "logical_tick": 1,
+      "mission_id": "abc-v6-samples",
+      "next_due_at": "2026-10-09T20:46:30.103960Z",
+      "node_id": "visual_render",
+      "observed_cost": "NOT_MEASURED",
+      "project_id": "prj-abc-samples",
+      "queue_lag_ms": 590889,
+      "resource_usage": {
+        "gpu_memory": "NOT_MEASURED",
+        "render_wall_ms": 0
+      },
+      "tick_version": "amc-durable-tick/v1",
+      "trace_id": "aea258e839404af7b28a09d455381fcb",
+      "verification_state": "PASSED",
+      "wall_finished_at": "2026-10-09T20:46:30.111099Z",
+      "wall_started_at": "2026-10-09T20:46:26.683465Z"
+    }
+  ]
+}

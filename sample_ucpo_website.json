@@ -1,0 +1,70 @@
+{
+  "schema_version": "amc-ucpo-brief/v1",
+  "organization": "Halden Fen",
+  "tagline": "A fictional ceramics studio, used to exercise the website production line.",
+  "offering": "Small-batch stoneware made by hand",
+  "audience": "People who buy a few good things and keep them",
+  "locale": "en",
+  "cta_label": "Plan a studio visit",
+  "cta_target": "visit#hours",
+  "seed": 7,
+  "images": [
+    {"asset_id": "plate-kiln", "alt": "A red circle above thin grey horizon lines on a charcoal ground", "motif_seed": 1},
+    {"asset_id": "plate-clay", "alt": "Fine grey lines and a short paper-white bar on a charcoal ground", "motif_seed": 4}
+  ],
+  "required_phrases": ["made slowly", "used daily"],
+  "forbidden_phrases": ["world-class", "best in the world"],
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Halden Fen",
+      "description": "A fictional ceramics studio: stoneware made slowly and used daily.",
+      "sections": [
+        {"kind": "hero", "label": "PLATE 01", "heading": "Stoneware, made slowly and used daily.",
+         "body": "Halden Fen is a two-person studio. We throw, trim and glaze every piece by hand, in small firings.",
+         "image": "plate-kiln", "cta": true},
+        {"kind": "editorial", "label": "METHOD", "heading": "One clay body, three glazes",
+         "body": "We keep the palette short on purpose. Fewer materials means we can learn each one properly and repair what we sell."},
+        {"kind": "index", "label": "INDEX", "heading": "What we make",
+         "items": [
+           {"title": "Everyday bowls", "body": "Three sizes, stacked and dishwasher safe."},
+           {"title": "Pouring jugs", "body": "A short spout that does not drip."},
+           {"title": "Serving plates", "body": "Wide rims, flat footing."}
+         ]},
+        {"kind": "statement", "label": "NOTE", "heading": "Repairs are part of the price.",
+         "body": "If a piece chips in normal use, bring it back. We will mend it or make it again."}
+      ]
+    },
+    {
+      "slug": "works",
+      "title": "Works",
+      "description": "The current range from the fictional Halden Fen studio.",
+      "sections": [
+        {"kind": "gallery", "label": "PLATE 02", "heading": "The current range",
+         "body": "Each firing produces about forty pieces. We list what is left after the studio shelf is full.",
+         "image": "plate-clay"},
+        {"kind": "index", "label": "RANGE", "heading": "Glazes",
+         "items": [
+           {"title": "Ash white", "body": "A soft, matte white that shows the throwing lines."},
+           {"title": "Iron black", "body": "A satin black that breaks brown on the rims."},
+           {"title": "Fen green", "body": "A pale celadon that pools in the foot ring."}
+         ]}
+      ]
+    },
+    {
+      "slug": "visit",
+      "title": "Visit",
+      "description": "How to visit the fictional Halden Fen studio.",
+      "sections": [
+        {"kind": "contact", "label": "HOURS", "anchor": "hours", "heading": "Visiting the studio",
+         "body": "The studio is open on Saturdays from ten until four. Other days by appointment.",
+         "items": [
+           {"title": "Saturdays", "body": "10:00 to 16:00"},
+           {"title": "Weekdays", "body": "By appointment"}
+         ]},
+        {"kind": "editorial", "label": "NOTE", "heading": "Before you come",
+         "body": "The workshop floor is uneven and there are two steps at the door. Tell us if you need a hand and we will meet you outside."}
+      ]
+    }
+  ]
+}

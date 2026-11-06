@@ -1,0 +1,134 @@
+{
+  "project_name": "northwind-social-series",
+  "brand_core": {
+    "brand_name": "Northwind Coffee",
+    "positioning_essence": "Coffee for people who take their mornings seriously.",
+    "voice": {
+      "tone_attributes": [
+        "confident",
+        "warm",
+        "direct"
+      ],
+      "writing_dos": [
+        "Use short, concrete sentences."
+      ],
+      "writing_donts": [
+        "Do not use hype."
+      ]
+    },
+    "color_story": [
+      {
+        "role": "primary",
+        "description": "Deep indigo used as the authority color.",
+        "reference_hex": "#1a2b4c"
+      },
+      {
+        "role": "accent",
+        "description": "Warm amber used for emphasis.",
+        "reference_hex": "#e08a2c"
+      }
+    ],
+    "typography_direction": "Humanist serif headlines with a neutral grotesk body.",
+    "imagery_style": "Natural light, tactile materials, documentary framing.",
+    "motion": {
+      "pace": "Brisk with confident deceleration.",
+      "emphasis_moments": [
+        "primary CTA activation"
+      ],
+      "reduced_motion_fallback": "Cross-fade only."
+    },
+    "logo_lockups": [
+      {
+        "lockup_id": "primary",
+        "lockup_type": "primary",
+        "usage_context": "Default digital and print mark.",
+        "minimum_size": "24px digital / 0.5in print",
+        "clear_space_rule": "One cap-height around the full mark.",
+        "placement_notes": "Prefer top-left on digital surfaces.",
+        "generation_reference": "Indigo wordmark with a compact compass-needle symbol."
+      }
+    ]
+  },
+  "family": {
+    "family_id": "northwind.mornings.social",
+    "version": "1.0.0",
+    "niche": "specialty coffee subscription",
+    "business_objective": "Build recognition for the 'deliberate mornings' campaign on social.",
+    "audience": "Busy professionals who value a deliberate morning ritual.",
+    "surface_family": "IMAGE",
+    "asset_type": "social graphic",
+    "channel": "social",
+    "destination": "Instagram feed 4:5",
+    "campaign": {
+      "campaign_id": "cmp-deliberate-mornings",
+      "objective": "Recognition for deliberate mornings",
+      "audience": "Busy professionals",
+      "verbal_thesis": "A good morning is made, not found.",
+      "signature_device": "a single amber horizon line crossing the frame",
+      "cta": "Start your first box"
+    },
+    "invariants": {
+      "brand_voice": "confident, warm, direct",
+      "visual_thesis": "calm order emerging from morning light",
+      "palette_behavior": "deep indigo field with one amber accent",
+      "type_behavior": "humanist serif headline, neutral grotesk support",
+      "layout_grammar": "headline top-left, image lower two-thirds, series index bottom-right",
+      "signature_devices": [
+        "a single amber horizon line crossing the frame"
+      ],
+      "claim_limits": [
+        "no health or productivity claims"
+      ],
+      "accessibility": [
+        "composed text meets contrast against its zone"
+      ]
+    },
+    "variation_axes": {
+      "concept_metaphor": [
+        "first light as a starting line",
+        "the kettle as a metronome",
+        "steam as a slow exhale"
+      ],
+      "subject": [
+        "ceramic cup on a windowsill",
+        "hands pouring a kettle",
+        "an open notebook beside a cup"
+      ],
+      "composition": [
+        "low horizon, wide negative space",
+        "tight overhead",
+        "off-centre diagonal"
+      ],
+      "lighting": [
+        "blue-hour window light",
+        "first direct sun",
+        "soft overcast"
+      ]
+    },
+    "emotional_function": "calm resolve",
+    "exact_text": [
+      "Mornings, deliberately."
+    ],
+    "negative_constraints": [
+      "No rendered lettering inside the generated imagery."
+    ],
+    "production": {
+      "medium": "DIGITAL",
+      "export": {
+        "width": 1080,
+        "height": 1350,
+        "format": "png"
+      }
+    },
+    "instance_count": 3
+  },
+  "hooks": [
+    {
+      "hook_id": "hk-1",
+      "territory": "contradiction",
+      "text": "Slow down to start faster.",
+      "status": "CANDIDATE",
+      "creative_score": 0.7
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "rule": "Role seniority and source authority labels do not grant runtime permissions.",
+  "default_role_authority": {
+    "default_policy": "DENY_CONSEQUENTIAL_BY_DEFAULT",
+    "can_propose": true,
+    "can_generate": true,
+    "can_execute_pure": true,
+    "can_execute_draft": true,
+    "can_execute_reversible_external": false,
+    "can_execute_irreversible": false,
+    "can_approve": false,
+    "can_release": false,
+    "can_spend": false,
+    "can_change_security_scope": false,
+    "delegation_required_for": [
+      "REVERSIBLE_EXTERNAL_WRITE",
+      "IRREVERSIBLE_WRITE",
+      "APPROVAL",
+      "RELEASE",
+      "FINANCIAL_COMMITMENT",
+      "SECURITY_SCOPE_CHANGE",
+      "PERMISSION_ELEVATION",
+      "LEGAL_COMMITMENT"
+    ]
+  },
+  "grant_contract": {
+    "required": [
+      "grant_id",
+      "actor_role_id",
+      "operation",
+      "target",
+      "issued_by",
+      "expires_at"
+    ],
+    "high_consequence_requires_exact_approval_ref": true
+  }
+}

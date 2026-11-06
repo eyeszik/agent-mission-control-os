@@ -49,6 +49,11 @@ def reserve_idempotency(scope: str, key: str, request_hash: str, ttl_seconds: in
     lock_suffix = " FOR UPDATE" if is_postgres() else ""
 
     with transaction(write=True) as db:
+        if is_postgres():
+            # Serialize concurrent first reservations of the same (scope, key):
+            # SELECT ... FOR UPDATE locks nothing while the row does not exist
+            # yet, so two first requests would both INSERT and one would fail.
+            db.execute("SELECT pg_advisory_xact_lock(hashtextextended(?, 0))", (f"{scope}|{key}",))
         row = db.execute(
             f"SELECT * FROM {table('idempotency_records')} WHERE scope = ? AND key = ?{lock_suffix}",
             (scope, key),

@@ -3,11 +3,17 @@
 import { useApprovalStore } from '../../lib/stores/approvalStore';
 
 export function ApprovalInbox() {
-  // Select the stable record, not a freshly-allocated array — a selector that
-  // returns a new array reference on every call defeats useSyncExternalStore's
-  // equality check and causes an infinite render loop under React 19 + zustand v5.
-  const approvalsRecord = useApprovalStore((state) => state.approvals);
-  const pendingCount = Object.values(approvalsRecord).filter(a => a.status === 'pending').length;
+  // Optimization: Select and compute the primitive count directly.
+  // Returning a primitive avoids unnecessary re-renders when other approval properties change.
+  // ⚡ Bolt: Use a zero-allocation for...in loop instead of Object.values().filter()
+  // to avoid intermediate array allocation and garbage collection on state updates.
+  const pendingCount = useApprovalStore((state) => {
+    let count = 0;
+    for (const key in state.approvals) {
+      if (state.approvals[key].status === 'pending') count++;
+    }
+    return count;
+  });
 
   return (
     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md border transition-colors ${pendingCount > 0 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-zinc-900/60 border-zinc-800/60'}`}>

@@ -1,0 +1,28 @@
+{
+  "tenant_id": "tenant-local-golden",
+  "project_id": "golden-brand-system",
+  "mode": "LOCAL",
+  "as_of": "2026-10-06T00:00:00Z",
+  "brand": {
+    "brand_name": "Northwind Labs",
+    "palette": {"primary": "#1f4e79", "secondary": "#f2a900", "surface": "#ffffff", "text": "#1a1a1a"},
+    "heading_font": "Inter",
+    "body_font": "Inter"
+  },
+  "deliverables": [
+    {"id": "tokens", "requested_outcome": "Brand design tokens", "output_contract": "design_token_set", "acceptance_criteria": ["compiles as DTCG"], "domains": ["BRAND"]},
+    {"id": "system", "requested_outcome": "Design system spec", "output_contract": "design_system_spec", "acceptance_criteria": ["WCAG 2.2 AA colour pairs"], "domains": ["BRAND"]}
+  ],
+  "existing_artifacts": {
+    "brand_core": "b5a1c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2",
+    "brand_platform": "b5a1c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2",
+    "positioning_statement": "b5a1c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2",
+    "creative_concept": "b5a1c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2",
+    "identity_guidelines": "b5a1c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2",
+    "research_brief": "b5a1c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2",
+    "market_analysis": "b5a1c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2"
+  },
+  "volatile_constraints": [
+    {"key": "accessibility.standard", "source_ref": "https://www.w3.org/TR/WCAG22/", "retrieved_at": "2026-10-01T00:00:00Z", "value": "WCAG 2.2 AA", "verification_status": "VERIFIED", "expires_or_recheck_at": "2027-10-01T00:00:00Z"}
+  ]
+}

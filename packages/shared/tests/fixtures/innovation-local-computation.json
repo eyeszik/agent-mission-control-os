@@ -1,0 +1,115 @@
+{
+  "schema_version": "innovation.local-experiment/v1",
+  "status": "COMPLETED",
+  "execution_mode": "LOCAL_COMPUTATION",
+  "experiment_id": "lexical-cc5fd8c25c172c412c22007c",
+  "input_provenance": "SIMULATED_OFFLINE_FIXTURE",
+  "source_ref": "art-proj_1-ir-a72c4f7586e6b32d960abeae25ed259a:v2",
+  "source_hash": "43207064cd0c82ea1015ef7a1bad16e0de6247e8e4522d81925fbf1ac82d82d8",
+  "plan_ref": "art-proj_1-innovation-plan-cc5fd8c25c172c412c22007c:v1",
+  "plan_hash": "431d5b730bbcf745a1815373d8912b50d428bd3f06bfc1306ffb9029f04011e8",
+  "result_ref": "art-proj_1-mission-b2f2f744daf2dc7c35f8-work-research-brief:v1",
+  "result_hash": "0f2c82b37d6b4db5a8728bbe524fd3fc14e5e1454accd10c9c057bba562f759a",
+  "input_hash": "28e77bd1e4d3675a6e0d16b7ccc44769c4aad9e446bc98f1ed5105f27865c854",
+  "executor_version": "innovation.lexical-normalization/v1",
+  "measurements": {
+    "case_count": 39,
+    "baseline_retained_items": 39,
+    "candidate_retained_items": 35,
+    "baseline_redundant_items": 4,
+    "candidate_redundant_items": 0,
+    "unit": "items"
+  },
+  "fabric_run_id": "fabric-abfbc0cba6240d936a253389",
+  "learning": {
+    "decision": "SUPPORTED",
+    "rule": "candidate_redundant_items < baseline_redundant_items",
+    "interpretation": "Only the preregistered lexical fixture comparison was evaluated.",
+    "next_action": "Independent semantic relevance review remains required.",
+    "limitations": [
+      "Case/whitespace equivalence only; not semantic duplicate detection.",
+      "Disclosed synthetic variants; no market or originality inference."
+    ]
+  },
+  "release_authorized": false,
+  "proof": {
+    "dispatch_permits": [
+      {
+        "run_id": "fabric-abfbc0cba6240d936a253389",
+        "tenant_id": "tenant_1",
+        "project_id": "proj_1",
+        "payload": "{\"permit_id\": \"permit-78e64b6b1a602d24bd8fc703ca81d14a\", \"work_order_id\": \"wo-fef9e1f4f3c2a36746ed\", \"project_snapshot_hash\": \"a943ab9d7b9f8a0221b43cc71af9f36fc65923639f672a4ef0d3dc1e26218be2\", \"causal_epoch\": 0, \"dependency_version_refs\": [\"target:art-proj_1-mission-b2f2f744daf2dc7c35f8-work-research-brief@v0\"], \"authority_refs\": [], \"approval_refs\": [], \"tool_contract_refs\": [\"skill:innovation_lexical_measurement\"], \"eligibility_policy_version\": \"amc-execution-fabric/eligibility-v1\", \"issued_at\": \"2026-10-31T21:00:46.508346Z\"}",
+        "permit_id": "permit-78e64b6b1a602d24bd8fc703ca81d14a",
+        "work_order_id": "wo-fef9e1f4f3c2a36746ed",
+        "project_snapshot_hash": "a943ab9d7b9f8a0221b43cc71af9f36fc65923639f672a4ef0d3dc1e26218be2",
+        "causal_epoch": 0,
+        "dependency_version_refs": [
+          "target:art-proj_1-mission-b2f2f744daf2dc7c35f8-work-research-brief@v0"
+        ],
+        "authority_refs": [],
+        "approval_refs": [],
+        "tool_contract_refs": [
+          "skill:innovation_lexical_measurement"
+        ],
+        "eligibility_policy_version": "amc-execution-fabric/eligibility-v1",
+        "issued_at": "2026-10-31T21:00:46.508346Z"
+      }
+    ],
+    "execution_receipts": [
+      {
+        "run_id": "fabric-abfbc0cba6240d936a253389",
+        "tenant_id": "tenant_1",
+        "project_id": "proj_1",
+        "payload": "{\"operation_id\": \"op-78e64b6b1a602d24bd8fc703ca81d14aefd1f218\", \"work_order_id\": \"wo-fef9e1f4f3c2a36746ed\", \"actor_role_id\": \"market_researcher\", \"tool\": \"skill:innovation_lexical_measurement\", \"tool_contract_ref\": \"amc-agency-skills/v1:innovation_lexical_measurement\", \"args_hash\": \"9b76097624713f640c31e35b092c3c9939426d2e8414bafad5004dca0024dbb2\", \"target\": \"art-proj_1-mission-b2f2f744daf2dc7c35f8-work-research-brief\", \"idempotency_key\": \"78e64b6b1a602d24bd8fc703ca81d14aefd1f2186452bade105ec48abbd6458e\", \"attempt\": 1, \"started_at\": \"2026-10-31T21:00:46.509325Z\", \"ended_at\": \"2026-10-31T21:00:46.509653Z\", \"returned_state\": \"SUCCEEDED\", \"result_ref\": \"art-proj_1-mission-b2f2f744daf2dc7c35f8-work-research-brief:v1\"}",
+        "operation_id": "op-78e64b6b1a602d24bd8fc703ca81d14aefd1f218",
+        "work_order_id": "wo-fef9e1f4f3c2a36746ed",
+        "actor_role_id": "market_researcher",
+        "tool": "skill:innovation_lexical_measurement",
+        "tool_contract_ref": "amc-agency-skills/v1:innovation_lexical_measurement",
+        "args_hash": "9b76097624713f640c31e35b092c3c9939426d2e8414bafad5004dca0024dbb2",
+        "target": "art-proj_1-mission-b2f2f744daf2dc7c35f8-work-research-brief",
+        "idempotency_key": "78e64b6b1a602d24bd8fc703ca81d14aefd1f2186452bade105ec48abbd6458e",
+        "attempt": 1,
+        "started_at": "2026-10-31T21:00:46.509325Z",
+        "ended_at": "2026-10-31T21:00:46.509653Z",
+        "returned_state": "SUCCEEDED",
+        "result_ref": "art-proj_1-mission-b2f2f744daf2dc7c35f8-work-research-brief:v1"
+      }
+    ],
+    "observation_receipts": [
+      {
+        "run_id": "fabric-abfbc0cba6240d936a253389",
+        "tenant_id": "tenant_1",
+        "project_id": "proj_1",
+        "payload": "{\"operation_id\": \"op-78e64b6b1a602d24bd8fc703ca81d14aefd1f218\", \"target\": \"art-proj_1-mission-b2f2f744daf2dc7c35f8-work-research-brief\", \"expected_postcondition\": {\"content_hash\": \"0f2c82b37d6b4db5a8728bbe524fd3fc14e5e1454accd10c9c057bba562f759a\", \"version\": 1}, \"observed_postcondition\": {\"content_hash\": \"0f2c82b37d6b4db5a8728bbe524fd3fc14e5e1454accd10c9c057bba562f759a\"}, \"observation_method\": \"storage_readback_sha256\", \"evidence_refs\": [\"local://tenant_1/proj_1/0f2c82b37d6b4db5a8728bbe524fd3fc14e5e1454accd10c9c057bba562f759a\"], \"observed_at\": \"2026-10-31T21:00:46.516952Z\", \"matches\": true}",
+        "operation_id": "op-78e64b6b1a602d24bd8fc703ca81d14aefd1f218",
+        "target": "art-proj_1-mission-b2f2f744daf2dc7c35f8-work-research-brief",
+        "expected_postcondition": {
+          "content_hash": "0f2c82b37d6b4db5a8728bbe524fd3fc14e5e1454accd10c9c057bba562f759a",
+          "version": 1
+        },
+        "observed_postcondition": {
+          "content_hash": "0f2c82b37d6b4db5a8728bbe524fd3fc14e5e1454accd10c9c057bba562f759a"
+        },
+        "observation_method": "storage_readback_sha256",
+        "evidence_refs": [
+          "local://tenant_1/proj_1/0f2c82b37d6b4db5a8728bbe524fd3fc14e5e1454accd10c9c057bba562f759a"
+        ],
+        "observed_at": "2026-10-31T21:00:46.516952Z",
+        "matches": true
+      }
+    ],
+    "failure_fingerprints": [],
+    "completion_evaluation": null,
+    "summary": {
+      "dispatch_count": 1,
+      "execution_count": 1,
+      "observation_count": 1,
+      "matched_observation_count": 1,
+      "failure_count": 0,
+      "latest_terminal_candidate": null,
+      "latest_confidence": null
+    }
+  },
+  "replayed": true
+}

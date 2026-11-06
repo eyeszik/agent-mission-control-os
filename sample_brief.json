@@ -1,0 +1,26 @@
+{
+  "project_name": "Northwind Coffee Rebrand",
+  "target_artifacts": [
+    "positioning_statement",
+    "brand_core",
+    "creative_concept",
+    "copy_variant",
+    "campaign_package"
+  ],
+  "available_inputs": [
+    "research_brief",
+    "market_analysis",
+    "brand_platform",
+    "design_brief"
+  ],
+  "target_phase": "launched",
+  "evidence_count": 3,
+  "facts": {
+    "generation_mode": "PRIMARY",
+    "approval_exists": true,
+    "approval_resolved": true,
+    "approval_decision": "approve",
+    "brand_safety_passed": true,
+    "spend_authorized": false
+  }
+}

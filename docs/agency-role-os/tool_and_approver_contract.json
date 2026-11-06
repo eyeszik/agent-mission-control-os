@@ -1,0 +1,40 @@
+{
+  "schema": "amc-roleos-tool-approver-contract/v1",
+  "tools": [
+    {
+      "id": "langgraph.workflow",
+      "status": "ENABLED_CURRENT_RUNTIME",
+      "scope": "internal agency generation/delivery"
+    },
+    {
+      "id": "openai.generation",
+      "status": "CONFIGURED_BY_ENVIRONMENT",
+      "secret": "OPENAI_API_KEY",
+      "release_rule": "PROVIDER_SUCCESS required; FALLBACK_DEGRADED cannot deliver"
+    },
+    {
+      "id": "zo_ask",
+      "status": "DISABLED_BY_DEFAULT",
+      "enablement": "AMC_ZO_MODE=live + ZO_API_KEY + existing capability gate"
+    },
+    {
+      "id": "publication",
+      "status": "DISABLED_OR_DRY_RUN_ONLY",
+      "live_external_write": false
+    },
+    {
+      "id": "paid_media",
+      "status": "DISABLED",
+      "live_spend": false
+    }
+  ],
+  "approvers": {
+    "identity_source": "authenticated AMC Principal; production via Supabase Auth + tenant_memberships",
+    "reviewer_binding": "server derives reviewer from principal.user_id",
+    "prohibited": [
+      "agent self-approval",
+      "role-title-as-authority",
+      "hardcoded production user UUID"
+    ]
+  }
+}

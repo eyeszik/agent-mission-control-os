@@ -8,26 +8,34 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run tests",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "verify:ui": "node scripts/verify-ui-ast.mjs"
   },
   "dependencies": {
+    "@amc/config": "workspace:*",
+    "@amc/constants": "workspace:*",
+    "@amc/errors": "workspace:*",
+    "@amc/logger": "workspace:*",
     "@amc/shared": "workspace:*",
-    "framer-motion": "^11.0.0",
-    "lucide-react": "^0.300.0",
-    "next": "16.3.0",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "zustand": "^5.0.13"
+    "framer-motion": "^14.0.0",
+    "lucide-react": "^1.64.0",
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
-    "@playwright/test": "1.61.0",
-    "@types/node": "^20.0.0",
-    "@types/react": "19.0.0",
-    "@types/react-dom": "19.0.0",
-    "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.4",
-    "typescript": "^5.5.3",
-    "vitest": "^4.1.7"
+    "@amc/testing": "workspace:*",
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "postcss": "^8.5.31",
+    "tailwindcss": "^4.3.3",
+    "typescript": "7.0.2",
+    "typescript-api": "npm:typescript@5.9.3",
+    "vitest": "^5.0.5"
   }
 }

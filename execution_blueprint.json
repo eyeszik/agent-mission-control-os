@@ -44,7 +44,7 @@
       "observability_layer": "execution trace schema, claim registry, tool proof log, failure-mode signals"
     },
     "blocking_conditions": [
-      "No repository was provided for implementation-specific validation.",
+      "HISTORICAL/SUPERSEDED: repository context is now available; current release status comes from CI and the remediation record.",
       "Cloudflare bindings remain unverified.",
       "External observability adapters remain unverified.",
       "MCP/tool transports remain unverified.",
@@ -52,12 +52,16 @@
       "Manual schema validity was structured but not executed through a runtime validator."
     ],
     "safe_next_steps": [
-      "Provide repository access for implementation planning.",
       "Run package/version audit.",
       "Verify Cloudflare bindings and deployment topology.",
       "Verify optional external provider APIs before adapter generation.",
       "Run schema validation with code execution if a machine-readable bundle is exported.",
       "Request implementation bundle explicitly if production code generation is desired."
-    ]
+    ],
+    "provenance": {
+      "record_status": "HISTORICAL_SUPERSEDED",
+      "superseded_by": "docs/audit-remediation-2026-09-26.md",
+      "note": "This record predates live repository verification. Preserve it as provenance; repository-availability statements are not current runtime facts."
+    }
   }
 }

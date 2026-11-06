@@ -5,6 +5,11 @@ from typing import Optional
 from uuid import uuid4
 
 from services.langgraph.persistence.database import is_postgres, normalize_record, table, transaction
+from services.langgraph.security.approval_framing import HIGH, assess
+
+
+class FramingAcknowledgementRequired(PermissionError):
+    """An approve decision on a summary with high persuasive framing needs an explicit acknowledgement (ASI09)."""
 
 
 def _now() -> str:
@@ -40,17 +45,59 @@ init_approvals_table()
 
 
 def _row_to_dict(row) -> Optional[dict]:
-    return normalize_record(row) if row else None
+    record = normalize_record(row) if row else None
+    if record is not None:
+        # Framing codes are stored comma-joined (ASI09). The API contract is a list.
+        record["framing_codes"] = [c for c in (record.get("framing_codes") or "").split(",") if c]
+    return record
 
 
-def create_approval_request(run_id: str, tenant_id: str, project_id: str, reason: str, confidence: Optional[float]) -> dict:
+def create_approval_request(
+    run_id: str,
+    tenant_id: str,
+    project_id: str,
+    reason: str,
+    confidence: Optional[float],
+    *,
+    subject_type: str = "RUN_RESULT",
+    subject_ref: Optional[str] = None,
+    subject_version_ref: Optional[str] = None,
+    subject_hash: Optional[str] = None,
+    authority_ref: str = "human-review",
+    policy_version: str = "amc-approval/v1",
+    targets: tuple[str, ...] = (),
+) -> dict:
     approval_id = str(uuid4())
+    framing = assess(reason, targets=targets)  # ASI09: evidence stored with the request, not only logged
     with transaction(write=True) as db:
         db.execute(
-            f"INSERT INTO {table('approvals')} (approval_id, run_id, tenant_id, project_id, reason, confidence, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (approval_id, run_id, tenant_id, project_id, reason, confidence, _now()),
+            f"""
+            INSERT INTO {table('approvals')}
+            (approval_id, run_id, tenant_id, project_id, reason, confidence, status, subject_type, subject_ref, subject_version_ref, subject_hash, authority_ref, policy_version, created_at, framing_level, framing_codes)
+            VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                approval_id,
+                run_id,
+                tenant_id,
+                project_id,
+                reason,
+                confidence,
+                subject_type,
+                subject_ref or run_id,
+                subject_version_ref or run_id,
+                subject_hash,
+                authority_ref,
+                policy_version,
+                _now(),
+                framing.level,
+                framing.codes_text,
+            ),
         )
-    return {"approval_id": approval_id, "status": "pending"}
+    approval = get_approval(approval_id)
+    if approval is None:
+        raise RuntimeError("Approval insert succeeded but record could not be read back")
+    return approval
 
 
 def get_approval(approval_id: str) -> Optional[dict]:
@@ -68,11 +115,69 @@ def list_pending_approvals(tenant_id: str) -> list:
         return [normalize_record(row) for row in rows]
 
 
-def resolve_approval(approval_id: str, reviewer: str, decision: str) -> Optional[dict]:
+def bind_approval_subject(
+    approval_id: str,
+    *,
+    subject_hash: str,
+    subject_ref: Optional[str] = None,
+    subject_version_ref: Optional[str] = None,
+    authority_ref: Optional[str] = None,
+    policy_version: Optional[str] = None,
+) -> Optional[dict]:
+    with transaction(write=True) as db:
+        cursor = db.execute(
+            f"""
+            UPDATE {table('approvals')}
+            SET subject_hash = ?,
+                subject_ref = COALESCE(?, subject_ref),
+                subject_version_ref = COALESCE(?, subject_version_ref),
+                authority_ref = COALESCE(?, authority_ref),
+                policy_version = COALESCE(?, policy_version)
+            WHERE approval_id = ?
+            """,
+            (
+                subject_hash,
+                subject_ref,
+                subject_version_ref,
+                authority_ref,
+                policy_version,
+                approval_id,
+            ),
+        )
+        if cursor.rowcount != 1:
+            return None
+    return get_approval(approval_id)
+
+
+def mark_approval_stale(approval_id: str, reason: str) -> Optional[dict]:
+    with transaction(write=True) as db:
+        cursor = db.execute(
+            f"""
+            UPDATE {table('approvals')}
+            SET status = 'stale',
+                stale_reason = ?,
+                staled_at = ?
+            WHERE approval_id = ? AND status <> 'stale'
+            """,
+            (reason[:500], _now(), approval_id),
+        )
+        if cursor.rowcount != 1:
+            return get_approval(approval_id)
+    return get_approval(approval_id)
+
+
+def resolve_approval(approval_id: str, reviewer: str, decision: str, *,
+                      framing_acknowledged: bool = False) -> Optional[dict]:
     if decision not in ("approve", "reject"):
         raise ValueError("decision must be 'approve' or 'reject'")
     decided_at = _now()
     with transaction(write=True) as db:
+        if decision == "approve" and not framing_acknowledged:
+            row = db.execute(f"SELECT framing_level FROM {table('approvals')} WHERE approval_id = ?",
+                             (approval_id,)).fetchone()
+            if row is not None and row["framing_level"] == HIGH:
+                raise FramingAcknowledgementRequired(
+                    "this summary has high persuasive framing; the reviewer must acknowledge it before approving")
         cursor = db.execute(
             f"UPDATE {table('approvals')} SET status = 'resolved', reviewer = ?, decision = ?, decided_at = ? WHERE approval_id = ? AND status = 'pending'",
             (reviewer, decision, decided_at, approval_id),
@@ -90,3 +195,22 @@ def get_approvals_for_run(run_id: str) -> list:
             (run_id,),
         ).fetchall()
         return [normalize_record(row) for row in rows]
+
+
+def list_approvals_for_subject_refs(project_id: str, subject_refs: list[str]) -> list[dict]:
+    refs = [ref for ref in subject_refs if ref]
+    if not refs:
+        return []
+    placeholders = ", ".join("?" for _ in refs)
+    with transaction() as db:
+        rows = db.execute(
+            f"""
+            SELECT * FROM {table('approvals')}
+            WHERE project_id = ?
+              AND subject_ref IN ({placeholders})
+              AND status <> 'stale'
+            ORDER BY created_at DESC
+            """,
+            [project_id, *refs],
+        ).fetchall()
+    return [normalize_record(row) for row in rows]

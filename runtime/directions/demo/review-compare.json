@@ -1,0 +1,1730 @@
+{
+  "assessments": [
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "positioning_fit",
+      "finding_ids": [
+        "vdf-8af55932cdf5961e"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "01",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "audience_relevance",
+      "finding_ids": [
+        "vdf-8649467cdbd9e42c"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "01",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "category_relevance",
+      "finding_ids": [
+        "vdf-da945ff6904fd380"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "01",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "concept_coherence",
+      "finding_ids": [
+        "vdf-4b6e3b0b3d3753e9"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "02",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "differentiation",
+      "finding_ids": [
+        "vdf-ecae737a2e3627fd"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "02",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "silhouette",
+      "finding_ids": [
+        "vdf-c0f530b4cea77b89"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "03",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "symbolism",
+      "finding_ids": [
+        "vdf-9ae79589566b55ce"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "03",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "system_potential",
+      "finding_ids": [
+        "vdf-67711f1aa314da09"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "03",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "balance",
+      "finding_ids": [
+        "vdf-f37ee2a5740517e5"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "05",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "alignment",
+      "finding_ids": [
+        "vdf-f81a307424cddbb5"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "05",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "proportion",
+      "finding_ids": [
+        "vdf-cc5a8e83d7d16a60"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "05",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "palette_roles",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "06",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "reproduction",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "06",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "applicable_contrast",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "06",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "distinguishing_cues",
+      "finding_ids": [
+        "vdf-4e7e716c154e974b"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "10",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "category_overlap",
+      "finding_ids": [
+        "vdf-d70be974a1889654"
+      ],
+      "reason": "",
+      "score": 8,
+      "seat": "10",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "prohibited_content",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "13",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "privacy",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "13",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "provenance",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "13",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "substantiation",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "14",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "uncertainty",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "14",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "coverage",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "14",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "positioning_fit",
+      "finding_ids": [
+        "vdf-0d89f205742b1e4b"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "01",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "audience_relevance",
+      "finding_ids": [
+        "vdf-2fc9ee79506d839a"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "01",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "category_relevance",
+      "finding_ids": [
+        "vdf-52b1b15fb88447b8"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "01",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "concept_coherence",
+      "finding_ids": [
+        "vdf-da9f7775fb4027fa"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "02",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "differentiation",
+      "finding_ids": [
+        "vdf-3f607078bae69e01"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "02",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "silhouette",
+      "finding_ids": [
+        "vdf-146a4dd22dd740c2"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "03",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "symbolism",
+      "finding_ids": [
+        "vdf-2778f4b8f1e2d976"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "03",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "system_potential",
+      "finding_ids": [
+        "vdf-5d8ea29c7566dabb"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "03",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "balance",
+      "finding_ids": [
+        "vdf-d1af9412ff48e06a"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "05",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "alignment",
+      "finding_ids": [
+        "vdf-3d8db2a4c6791937"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "05",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "proportion",
+      "finding_ids": [
+        "vdf-b43eb1dd5ce75859"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "05",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "palette_roles",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "06",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "reproduction",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "06",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "applicable_contrast",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "06",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "distinguishing_cues",
+      "finding_ids": [
+        "vdf-935a5a3b02bbaae0"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "10",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [
+        {
+          "id": "alice",
+          "kind": "HUMAN",
+          "version": null
+        }
+      ],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "category_overlap",
+      "finding_ids": [
+        "vdf-4c972c6ad0f90c2a"
+      ],
+      "reason": "",
+      "score": 6,
+      "seat": "10",
+      "status": "ASSESSED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "prohibited_content",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "13",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "privacy",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "13",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "provenance",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "13",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "substantiation",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "14",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "uncertainty",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "14",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "coverage",
+      "finding_ids": [],
+      "reason": "measured facts only; scores are rubric judgments by a reviewer",
+      "score": null,
+      "seat": "14",
+      "status": "NOT_REVIEWED"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "spelling",
+      "finding_ids": [],
+      "reason": "no identity text in this brief",
+      "score": null,
+      "seat": "04",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "hierarchy",
+      "finding_ids": [],
+      "reason": "no identity text in this brief",
+      "score": null,
+      "seat": "04",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "spacing_lettering",
+      "finding_ids": [],
+      "reason": "no identity text in this brief",
+      "score": null,
+      "seat": "04",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "spelling",
+      "finding_ids": [],
+      "reason": "no identity text in this brief",
+      "score": null,
+      "seat": "04",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "hierarchy",
+      "finding_ids": [],
+      "reason": "no identity text in this brief",
+      "score": null,
+      "seat": "04",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "assessors": [],
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "spacing_lettering",
+      "finding_ids": [],
+      "reason": "no identity text in this brief",
+      "score": null,
+      "seat": "04",
+      "status": "NOT_APPLICABLE"
+    }
+  ],
+  "base_session_id": null,
+  "blinded": true,
+  "brand_id": "brand-1ff3001f",
+  "brand_memory": {
+    "entries": [
+      {
+        "candidate": "B",
+        "category_overlap": [
+          "category_overlap: fictional reviewer judgment"
+        ],
+        "observed_cues": {
+          "aspect": 1.0,
+          "dominant_colours": [
+            "#f7f4ee",
+            "#14161a"
+          ],
+          "figure_share": 0.2499
+        },
+        "predicted_label": "PREDICTION by a reviewer, not measured recall",
+        "predicted_memorability": [
+          "distinguishing_cues: fictional reviewer judgment"
+        ]
+      },
+      {
+        "candidate": "A",
+        "category_overlap": [
+          "category_overlap: fictional reviewer judgment"
+        ],
+        "observed_cues": {
+          "aspect": 1.0,
+          "dominant_colours": [
+            "#f7f4ee",
+            "#c2410c"
+          ],
+          "figure_share": 0.1982
+        },
+        "predicted_label": "PREDICTION by a reviewer, not measured recall",
+        "predicted_memorability": [
+          "distinguishing_cues: fictional reviewer judgment"
+        ]
+      }
+    ],
+    "measured_recall": "HUMAN_RECALL_NOT_TESTED",
+    "recall_protocol": "a recall test needs participants, an exposure/delay protocol and recorded results; none exist",
+    "trademark_clearance": "NOT_ASSESSED: no clearance search was performed and none is claimed"
+  },
+  "candidates": {
+    "vdc-2837894ec5185c12": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+    "vdc-5c17f2802bf99e47": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b"
+  },
+  "correlation_note": "seats sharing one assessor are correlated perspectives, not independent corroboration; local measurements are not creative judgments",
+  "created_at": "2026-10-28T18:49:58.200802Z",
+  "created_by": "alice",
+  "effects": {
+    "approved": false,
+    "mutated_master": false,
+    "published": false,
+    "regenerated": false,
+    "spent": false
+  },
+  "emotional_map": {
+    "entries": [
+      {
+        "candidate": "B",
+        "finding_id": "vdf-43d75c68b1962593",
+        "possible_mismatch": false,
+        "reviewer_interpretation": "reads calm and plain",
+        "target_trait": "plain",
+        "visible_cue": "single closed form, no ornament"
+      },
+      {
+        "candidate": "A",
+        "finding_id": "vdf-909e7f1a85323f6b",
+        "possible_mismatch": false,
+        "reviewer_interpretation": "reads calm and plain",
+        "target_trait": "plain",
+        "visible_cue": "single closed form, no ornament"
+      }
+    ],
+    "note": "reviewer interpretation of visible cues; not a measurement of audience emotion",
+    "status": "ASSESSED",
+    "targets": [
+      "plain",
+      "warm"
+    ],
+    "targets_source": "genome verbal.voice.tone"
+  },
+  "findings": [
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "safety_privacy_rights",
+      "evidence_class": "OBSERVED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-1d9af5e5e607359e",
+      "measurement": null,
+      "observation": "no third-party marks, likeness or personal data visible",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "13",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "intended_vs_apparent",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-43d75c68b1962593",
+      "measurement": null,
+      "observation": "reads calm and plain",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "09",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "positioning_fit",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-8af55932cdf5961e",
+      "measurement": null,
+      "observation": "positioning_fit: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "01",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "audience_relevance",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-8649467cdbd9e42c",
+      "measurement": null,
+      "observation": "audience_relevance: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "01",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "category_relevance",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-da945ff6904fd380",
+      "measurement": null,
+      "observation": "category_relevance: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "01",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "concept_coherence",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-4b6e3b0b3d3753e9",
+      "measurement": null,
+      "observation": "concept_coherence: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "02",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "differentiation",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-ecae737a2e3627fd",
+      "measurement": null,
+      "observation": "differentiation: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "02",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "silhouette",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-c0f530b4cea77b89",
+      "measurement": null,
+      "observation": "silhouette: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "03",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "symbolism",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-9ae79589566b55ce",
+      "measurement": null,
+      "observation": "symbolism: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "03",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "system_potential",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-67711f1aa314da09",
+      "measurement": null,
+      "observation": "system_potential: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "03",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "balance",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-f37ee2a5740517e5",
+      "measurement": null,
+      "observation": "balance: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "05",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "alignment",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-f81a307424cddbb5",
+      "measurement": null,
+      "observation": "alignment: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "05",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "proportion",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-cc5a8e83d7d16a60",
+      "measurement": null,
+      "observation": "proportion: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "05",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "distinguishing_cues",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-4e7e716c154e974b",
+      "measurement": null,
+      "observation": "distinguishing_cues: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "10",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "criterion": "category_overlap",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-d70be974a1889654",
+      "measurement": null,
+      "observation": "category_overlap: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "10",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "safety_privacy_rights",
+      "evidence_class": "OBSERVED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-70e201fe4ed11bae",
+      "measurement": null,
+      "observation": "no third-party marks, likeness or personal data visible",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "13",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "intended_vs_apparent",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-909e7f1a85323f6b",
+      "measurement": null,
+      "observation": "reads calm and plain",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "09",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "positioning_fit",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-0d89f205742b1e4b",
+      "measurement": null,
+      "observation": "positioning_fit: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "01",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "audience_relevance",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-2fc9ee79506d839a",
+      "measurement": null,
+      "observation": "audience_relevance: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "01",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "category_relevance",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-52b1b15fb88447b8",
+      "measurement": null,
+      "observation": "category_relevance: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "01",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "concept_coherence",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-da9f7775fb4027fa",
+      "measurement": null,
+      "observation": "concept_coherence: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "02",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "differentiation",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-3f607078bae69e01",
+      "measurement": null,
+      "observation": "differentiation: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "02",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "silhouette",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-146a4dd22dd740c2",
+      "measurement": null,
+      "observation": "silhouette: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "03",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "symbolism",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-2778f4b8f1e2d976",
+      "measurement": null,
+      "observation": "symbolism: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "03",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "system_potential",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-5d8ea29c7566dabb",
+      "measurement": null,
+      "observation": "system_potential: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "03",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "balance",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-d1af9412ff48e06a",
+      "measurement": null,
+      "observation": "balance: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "05",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "alignment",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-3d8db2a4c6791937",
+      "measurement": null,
+      "observation": "alignment: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "05",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "proportion",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-b43eb1dd5ce75859",
+      "measurement": null,
+      "observation": "proportion: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "05",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "distinguishing_cues",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-935a5a3b02bbaae0",
+      "measurement": null,
+      "observation": "distinguishing_cues: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "10",
+      "severity": "NOTE",
+      "uncertainty": ""
+    },
+    {
+      "acceptance_check": null,
+      "actionable": false,
+      "assessor": {
+        "id": "alice",
+        "kind": "HUMAN",
+        "version": null
+      },
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "criterion": "category_overlap",
+      "evidence_class": "INFERRED",
+      "evidence_source": "PIXELS",
+      "finding_id": "vdf-4c972c6ad0f90c2a",
+      "measurement": null,
+      "observation": "category_overlap: fictional reviewer judgment",
+      "proposed_change": null,
+      "rationale": "",
+      "region_or_element": "whole asset",
+      "seat": "10",
+      "severity": "NOTE",
+      "uncertainty": ""
+    }
+  ],
+  "gates": [
+    {
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "evidence": "stored bytes re-hash to c1ee9a023e00dd86; USER_REPORTED import: bytes bound by hash; provider/model/seed unverified",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [],
+      "gate": "OUTPUT_PROVENANCE",
+      "status": "PASS"
+    },
+    {
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "evidence": "identity text decided NONE",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [],
+      "gate": "EXACT_IDENTITY_TEXT",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "evidence": "logotypes are exempt from WCAG 1.4.3 and this role carries no required information-bearing graphics",
+      "evidence_class": "INFERRED",
+      "finding_ids": [],
+      "gate": "ACCESSIBILITY",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "evidence": "human inspection (vdf-1d9af5e5e607359e); was UNKNOWN: rights basis is the importer's statement; third-party marks and likeness need a human inspection (seat 13)",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [
+        "vdf-1d9af5e5e607359e"
+      ],
+      "gate": "SAFETY_PRIVACY_RIGHTS",
+      "status": "PASS"
+    },
+    {
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "evidence": "bound to the current approved genome",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [],
+      "gate": "CANONICAL_INTEGRITY",
+      "status": "PASS"
+    },
+    {
+      "candidate_id": "vdc-2837894ec5185c12",
+      "evidence": "stored bytes re-hash to c03b4d9b420a028b; USER_REPORTED import: bytes bound by hash; provider/model/seed unverified",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [],
+      "gate": "OUTPUT_PROVENANCE",
+      "status": "PASS"
+    },
+    {
+      "candidate_id": "vdc-2837894ec5185c12",
+      "evidence": "identity text decided NONE",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [],
+      "gate": "EXACT_IDENTITY_TEXT",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "candidate_id": "vdc-2837894ec5185c12",
+      "evidence": "logotypes are exempt from WCAG 1.4.3 and this role carries no required information-bearing graphics",
+      "evidence_class": "INFERRED",
+      "finding_ids": [],
+      "gate": "ACCESSIBILITY",
+      "status": "NOT_APPLICABLE"
+    },
+    {
+      "candidate_id": "vdc-2837894ec5185c12",
+      "evidence": "human inspection (vdf-70e201fe4ed11bae); was UNKNOWN: rights basis is the importer's statement; third-party marks and likeness need a human inspection (seat 13)",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [
+        "vdf-70e201fe4ed11bae"
+      ],
+      "gate": "SAFETY_PRIVACY_RIGHTS",
+      "status": "PASS"
+    },
+    {
+      "candidate_id": "vdc-2837894ec5185c12",
+      "evidence": "bound to the current approved genome",
+      "evidence_class": "OBSERVED",
+      "finding_ids": [],
+      "gate": "CANONICAL_INTEGRITY",
+      "status": "PASS"
+    }
+  ],
+  "genome_ref": "gv-229463a9817b43b6adadc1182b8b0eab",
+  "intent_id": "vdi-a8201b1dd60f9ccb",
+  "labels": {
+    "A": "vdc-2837894ec5185c12",
+    "B": "vdc-5c17f2802bf99e47"
+  },
+  "lenses_active": [
+    "01",
+    "02",
+    "03",
+    "05",
+    "06",
+    "10",
+    "13",
+    "14"
+  ],
+  "lenses_required_missing": [],
+  "measurements": {
+    "vdc-2837894ec5185c12": {
+      "mime": "image/png",
+      "pixel_source": "decoded stored PNG bytes",
+      "pixels": {
+        "aspect": 1.0,
+        "dhash": "0000706060607000",
+        "dominant": [
+          {
+            "delta_e76": 0.0,
+            "hex": "#f7f4ee",
+            "nearest_role": "paper",
+            "share": 0.8018
+          },
+          {
+            "delta_e76": 0.0,
+            "hex": "#c2410c",
+            "nearest_role": "accent",
+            "share": 0.1939
+          }
+        ],
+        "dominant_coverage": 0.9957,
+        "dominant_pair_contrast": 4.72,
+        "figure_share": 0.1982,
+        "height": 192,
+        "nonblank": true,
+        "off_palette_share": 0,
+        "retention_16": 0.984,
+        "retention_32": 0.993,
+        "unclassified_share": 0.0043,
+        "unique_colour_buckets": 5,
+        "width": 192
+      },
+      "sha256": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c"
+    },
+    "vdc-5c17f2802bf99e47": {
+      "mime": "image/png",
+      "pixel_source": "decoded stored PNG bytes",
+      "pixels": {
+        "aspect": 1.0,
+        "dhash": "003068f0e0f06830",
+        "dominant": [
+          {
+            "delta_e76": 0.0,
+            "hex": "#f7f4ee",
+            "nearest_role": "paper",
+            "share": 0.7501
+          },
+          {
+            "delta_e76": 0.0,
+            "hex": "#14161a",
+            "nearest_role": "ink",
+            "share": 0.2338
+          }
+        ],
+        "dominant_coverage": 0.9839,
+        "dominant_pair_contrast": 16.5,
+        "figure_share": 0.2499,
+        "height": 192,
+        "nonblank": true,
+        "off_palette_share": 0,
+        "retention_16": 0.954,
+        "retention_32": 0.979,
+        "unclassified_share": 0.0161,
+        "unique_colour_buckets": 5,
+        "width": 192
+      },
+      "sha256": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b"
+    }
+  },
+  "mode": "COMPARE",
+  "outcomes": [
+    {
+      "asset_hash": "c1ee9a023e00dd862418e4b4ca4fe71a0f8c214c7ab08e588a92c5596710857b",
+      "candidate_id": "vdc-5c17f2802bf99e47",
+      "label": "B",
+      "reasons": [
+        "eligible for comparison"
+      ],
+      "verdict": "INCONCLUSIVE"
+    },
+    {
+      "asset_hash": "c03b4d9b420a028b0a73d70e966f69ec611cf8ca2047107e9b048b19b30bf76c",
+      "candidate_id": "vdc-2837894ec5185c12",
+      "label": "A",
+      "reasons": [
+        "eligible for comparison"
+      ],
+      "verdict": "INCONCLUSIVE"
+    }
+  ],
+  "project_id": "prj-vnx-5f094d97",
+  "recommendation": {
+    "aggregate": {
+      "coverage": 1.0,
+      "criteria_used": [
+        "01:positioning_fit",
+        "01:audience_relevance",
+        "01:category_relevance",
+        "02:concept_coherence",
+        "02:differentiation",
+        "03:silhouette",
+        "03:symbolism",
+        "03:system_potential",
+        "05:balance",
+        "05:alignment",
+        "05:proportion",
+        "10:distinguishing_cues",
+        "10:category_overlap"
+      ],
+      "means": {
+        "A": 6.0,
+        "B": 8.0
+      },
+      "missing_criteria": [],
+      "note": "rubric judgments, not probabilities; a mean is not proof of quality",
+      "weights": "equal across the common criteria"
+    },
+    "candidate_id": "vdc-5c17f2802bf99e47",
+    "label": "B",
+    "note": "a recommendation is not an approval; human selection uses the existing approval route",
+    "reasons": [
+      "passes every gate and leads on 13 commonly assessed criteria"
+    ],
+    "verdict": "RECOMMENDED_DIRECTION"
+  },
+  "regressions": [],
+  "routes": {
+    "gemini.image_critique": "DISABLED",
+    "local.measure": "AVAILABLE"
+  },
+  "rubric_version": "amc-vnexus-review-rubric/1.0.0",
+  "schema_version": "amc-vnexus-directions/v1",
+  "session_id": "vdr-a7bf07ab64a71f97",
+  "tenant_id": "tenant-vnx-841bf382",
+  "work_orders": []
+}

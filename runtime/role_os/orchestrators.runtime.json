@@ -1,0 +1,170 @@
+[
+  {
+    "orchestrator_id": "agency-orchestrator",
+    "skill_path": "orchestrators/agency-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "approval-governance-orchestrator",
+    "skill_path": "orchestrators/approval-governance-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "brand-orchestrator",
+    "skill_path": "orchestrators/brand-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "client-delivery-orchestrator",
+    "skill_path": "orchestrators/client-delivery-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "creative-orchestrator",
+    "skill_path": "orchestrators/creative-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "experience-product-orchestrator",
+    "skill_path": "orchestrators/experience-product-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "growth-media-orchestrator",
+    "skill_path": "orchestrators/growth-media-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "launch-orchestrator",
+    "skill_path": "orchestrators/launch-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "measurement-orchestrator",
+    "skill_path": "orchestrators/measurement-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "memory-version-orchestrator",
+    "skill_path": "orchestrators/memory-version-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "production-orchestrator",
+    "skill_path": "orchestrators/production-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "revenue-orchestrator",
+    "skill_path": "orchestrators/revenue-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "strategy-orchestrator",
+    "skill_path": "orchestrators/strategy-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  },
+  {
+    "orchestrator_id": "technology-orchestrator",
+    "skill_path": "orchestrators/technology-orchestrator/SKILL.md",
+    "runtime_authority": {
+      "can_route": true,
+      "can_assign": true,
+      "can_grant_own_authority": false,
+      "can_self_approve_high_consequence": false,
+      "can_execute_external_side_effect": false,
+      "can_release": false
+    }
+  }
+]

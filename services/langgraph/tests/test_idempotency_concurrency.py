@@ -47,8 +47,12 @@ def test_idempotency_key_reuse_with_different_input_is_conflict():
 
 
 def test_concurrent_approval_decisions_produce_one_immutable_winner():
+    from services.langgraph.persistence.runs import create_run_record
+
+    run_id = f"run-{uuid4()}"
+    create_run_record(run_id, "tenant-events-test", "proj-security", "branding_marketing_agency", "needs_approval", {})
     approval = create_approval_request(
-        f"run-{uuid4()}",
+        run_id,
         "tenant-events-test",
         "proj-security",
         "review",

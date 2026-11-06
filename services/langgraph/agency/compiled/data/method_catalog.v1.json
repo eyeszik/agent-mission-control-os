@@ -1,0 +1,4142 @@
+{
+ "schema_version": "amc-method-catalog/v1",
+ "notice": "Curated and extensible, not exhaustive. Descriptions are general method summaries; provenance is DESCRIPTION_UNVERIFIED until a source is cited. Executable AMC policy (slots, needs, predicates, effort) is separate from the factual description.",
+ "families": [
+  {
+   "family_id": "PRIORITIZATION",
+   "name": "Prioritization",
+   "capability_terms": [
+    "product-manager"
+   ],
+   "phase_id": "P5",
+   "needs": {
+    "decision:priority_order": "DECIDE"
+   },
+   "signals": [
+    "items_to_rank"
+   ],
+   "lexical_cues": [
+    "prioritize",
+    "prioritise",
+    "rank",
+    "triage",
+    "backlog",
+    "order"
+   ]
+  },
+  {
+   "family_id": "DECISION",
+   "name": "Decision analysis",
+   "capability_terms": [
+    "business-analyst"
+   ],
+   "phase_id": "P5",
+   "needs": {
+    "decision:criteria_defined": "DECIDE",
+    "decision:option_selected": "DECIDE"
+   },
+   "signals": [
+    "options"
+   ],
+   "lexical_cues": [
+    "decide",
+    "choose",
+    "select",
+    "option",
+    "alternative",
+    "trade-off"
+   ]
+  },
+  {
+   "family_id": "PROCESS_IMPROVEMENT",
+   "name": "Process improvement",
+   "capability_terms": [
+    "strategy-and-operations-manager"
+   ],
+   "phase_id": "P14",
+   "needs": {
+    "output:improvement_plan": "DECIDE",
+    "execute:improvement_implemented": "EXECUTE"
+   },
+   "signals": [
+    "process_gap_defined"
+   ],
+   "lexical_cues": [
+    "improve",
+    "process",
+    "efficiency",
+    "optimi"
+   ]
+  },
+  {
+   "family_id": "ROOT_CAUSE",
+   "name": "Root cause analysis",
+   "capability_terms": [
+    "business-analyst"
+   ],
+   "phase_id": "P2",
+   "needs": {
+    "output:root_cause_identified": "DIAGNOSE",
+    "decision:option_selected": "DECIDE",
+    "execute:corrective_action_implemented": "EXECUTE",
+    "control:sustain_fix": "CONTROL"
+   },
+   "signals": [
+    "problem_recurs_cause_unknown"
+   ],
+   "lexical_cues": [
+    "defect",
+    "root cause",
+    "why",
+    "recurring",
+    "failure",
+    "bug",
+    "error"
+   ]
+  },
+  {
+   "family_id": "WORKFLOW_WASTE",
+   "name": "Workflow waste",
+   "capability_terms": [
+    "strategy-and-operations-manager"
+   ],
+   "phase_id": "P14",
+   "needs": {
+    "output:waste_identified": "DIAGNOSE",
+    "execute:waste_removed": "EXECUTE"
+   },
+   "signals": [
+    "waste_observed"
+   ],
+   "lexical_cues": [
+    "waste",
+    "rework",
+    "handoff",
+    "idle",
+    "lean"
+   ]
+  },
+  {
+   "family_id": "FLOW_BOTTLENECK",
+   "name": "Flow and bottlenecks",
+   "capability_terms": [
+    "strategy-and-operations-manager"
+   ],
+   "phase_id": "P14",
+   "needs": {
+    "output:constraint_identified": "DIAGNOSE",
+    "execute:flow_improved": "EXECUTE",
+    "measurement:flow_measured": "CONTROL"
+   },
+   "signals": [
+    "throughput_constrained"
+   ],
+   "lexical_cues": [
+    "bottleneck",
+    "throughput",
+    "queue",
+    "backlog",
+    "lead time",
+    "capacity"
+   ]
+  },
+  {
+   "family_id": "PROCESS_VARIATION",
+   "name": "Process variation",
+   "capability_terms": [
+    "data-scientist"
+   ],
+   "phase_id": "P13",
+   "needs": {
+    "measurement:variation_quantified": "DIAGNOSE",
+    "control:process_in_control": "CONTROL"
+   },
+   "signals": [
+    "variation_observed"
+   ],
+   "lexical_cues": [
+    "variation",
+    "inconsistent",
+    "variance",
+    "spread",
+    "stability"
+   ]
+  },
+  {
+   "family_id": "RISK_FAILURE",
+   "name": "Risk and failure",
+   "capability_terms": [
+    "compliance-manager"
+   ],
+   "phase_id": "P10",
+   "needs": {
+    "output:failure_modes_assessed": "DIAGNOSE",
+    "risk:controls_defined": "CONTROL"
+   },
+   "signals": [
+    "high_consequence_or_irreversible"
+   ],
+   "lexical_cues": [
+    "risk",
+    "hazard",
+    "failure mode",
+    "safety",
+    "compliance"
+   ]
+  },
+  {
+   "family_id": "CUSTOMER_REQUIREMENTS",
+   "name": "Customer requirements",
+   "capability_terms": [
+    "customer-insights-analyst"
+   ],
+   "phase_id": "P2",
+   "needs": {
+    "output:customer_needs_captured": "DIAGNOSE",
+    "output:requirements_prioritized": "DECIDE"
+   },
+   "signals": [
+    "customer_needs_unknown"
+   ],
+   "lexical_cues": [
+    "customer",
+    "user need",
+    "requirement",
+    "persona",
+    "journey"
+   ]
+  },
+  {
+   "family_id": "PROJECT_DELIVERY",
+   "name": "Project delivery",
+   "capability_terms": [
+    "program-manager"
+   ],
+   "phase_id": "P9",
+   "needs": {
+    "output:work_breakdown": "EXECUTE",
+    "output:schedule": "EXECUTE",
+    "control:delivery_tracked": "CONTROL"
+   },
+   "signals": [
+    "scoped_known_solution"
+   ],
+   "lexical_cues": [
+    "deliver",
+    "deadline",
+    "milestone",
+    "schedule",
+    "plan the project",
+    "launch"
+   ]
+  },
+  {
+   "family_id": "UNCERTAIN_PRODUCT",
+   "name": "Uncertain product discovery",
+   "capability_terms": [
+    "product-owner"
+   ],
+   "phase_id": "P8",
+   "needs": {
+    "output:hypotheses_defined": "DIAGNOSE",
+    "validation:hypothesis_tested": "DECIDE"
+   },
+   "signals": [
+    "unknown_solution_high_uncertainty"
+   ],
+   "lexical_cues": [
+    "mvp",
+    "experiment",
+    "validate",
+    "discovery",
+    "prototype",
+    "product idea"
+   ]
+  },
+  {
+   "family_id": "STRATEGY",
+   "name": "Strategy",
+   "capability_terms": [
+    "strategic-planning-manager"
+   ],
+   "phase_id": "P5",
+   "needs": {
+    "output:strategic_position_assessed": "DIAGNOSE",
+    "decision:strategic_direction": "DECIDE"
+   },
+   "signals": [
+    "strategic_question"
+   ],
+   "lexical_cues": [
+    "strategy",
+    "market",
+    "competitive",
+    "position",
+    "growth"
+   ]
+  },
+  {
+   "family_id": "STRATEGY_EXECUTION",
+   "name": "Strategy execution",
+   "capability_terms": [
+    "strategy-and-operations-director"
+   ],
+   "phase_id": "P5",
+   "needs": {
+    "output:objectives_cascaded": "EXECUTE",
+    "control:strategy_tracked": "CONTROL"
+   },
+   "signals": [
+    "strategy_needs_alignment"
+   ],
+   "lexical_cues": [
+    "okr",
+    "objectives",
+    "alignment",
+    "cascade",
+    "scorecard"
+   ]
+  },
+  {
+   "family_id": "ACCOUNTABILITY",
+   "name": "Accountability",
+   "capability_terms": [
+    "pmo-director"
+   ],
+   "phase_id": "P3",
+   "needs": {
+    "output:decision_rights_assigned": "DECIDE"
+   },
+   "signals": [
+    "decision_rights_unclear"
+   ],
+   "lexical_cues": [
+    "who decides",
+    "owner",
+    "accountable",
+    "responsibility",
+    "raci"
+   ]
+  },
+  {
+   "family_id": "CHANGE_ADOPTION",
+   "name": "Change adoption",
+   "capability_terms": [
+    "transformation-strategist"
+   ],
+   "phase_id": "P14",
+   "needs": {
+    "output:stakeholders_mapped": "DIAGNOSE",
+    "execute:adoption_plan": "EXECUTE"
+   },
+   "signals": [
+    "change_adoption_required"
+   ],
+   "lexical_cues": [
+    "adoption",
+    "change management",
+    "rollout",
+    "resistance",
+    "transition"
+   ]
+  },
+  {
+   "family_id": "SYSTEM_COMPLEXITY",
+   "name": "System complexity",
+   "capability_terms": [
+    "strategic-planning-director"
+   ],
+   "phase_id": "P2",
+   "needs": {
+    "output:system_structure_mapped": "DIAGNOSE"
+   },
+   "signals": [
+    "coupled_feedback_system"
+   ],
+   "lexical_cues": [
+    "feedback loop",
+    "systemic",
+    "complex",
+    "interdependent",
+    "unintended"
+   ]
+  },
+  {
+   "family_id": "RELIABILITY_DIGITAL_OPS",
+   "name": "Reliability and digital operations",
+   "capability_terms": [
+    "site-reliability-engineer"
+   ],
+   "phase_id": "P13",
+   "needs": {
+    "measurement:service_levels_defined": "CONTROL",
+    "control:incident_response": "EXECUTE"
+   },
+   "signals": [
+    "live_service_incidents"
+   ],
+   "lexical_cues": [
+    "outage",
+    "incident",
+    "uptime",
+    "latency",
+    "reliability",
+    "slo"
+   ]
+  },
+  {
+   "family_id": "LEARNING",
+   "name": "Learning",
+   "capability_terms": [
+    "learning-and-development-manager"
+   ],
+   "phase_id": "P13",
+   "needs": {
+    "learn:lessons_captured": "LEARN"
+   },
+   "signals": [
+    "lessons_or_recurrence"
+   ],
+   "lexical_cues": [
+    "lesson",
+    "retrospective",
+    "postmortem",
+    "learn",
+    "review"
+   ]
+  }
+ ],
+ "methods": [
+  {
+   "method_id": "a3",
+   "name": "A3 Problem Solving",
+   "family": "PROCESS_IMPROVEMENT",
+   "secondary_families": [
+    "ROOT_CAUSE"
+   ],
+   "slot": "MACRO",
+   "aliases": [
+    "A3 report"
+   ],
+   "purpose": "Work a problem end to end on a single structured page.",
+   "applicability_predicates": [
+    "not_observed:problem_recurs"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "problem statement"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle",
+    "output:improvement_plan"
+   ],
+   "evidence_needs": [
+    "current-state facts"
+   ],
+   "composable_with": [],
+   "conflicts_with": [
+    "dmaic",
+    "eight_d"
+   ],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "adkar",
+   "name": "ADKAR",
+   "family": "CHANGE_ADOPTION",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [],
+   "purpose": "Move individuals through awareness, desire, knowledge, ability and reinforcement.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "change",
+    "affected people"
+   ],
+   "expected_outputs": [
+    "execute:adoption_plan"
+   ],
+   "evidence_needs": [
+    "awareness to reinforcement assessments"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "after_action_review",
+   "name": "After Action Review",
+   "family": "LEARNING",
+   "secondary_families": [],
+   "slot": "LEARN",
+   "aliases": [
+    "AAR"
+   ],
+   "purpose": "Compare what was intended with what happened and why.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "completed activity"
+   ],
+   "expected_outputs": [
+    "learn:lessons_captured"
+   ],
+   "evidence_needs": [
+    "intended versus actual results"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "ahp",
+   "name": "Analytic Hierarchy Process",
+   "family": "DECISION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "AHP"
+   ],
+   "purpose": "Derive criterion weights from pairwise comparisons.",
+   "applicability_predicates": [
+    "consequence==critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "options",
+    "criteria hierarchy"
+   ],
+   "expected_outputs": [
+    "decision:criteria_defined",
+    "decision:option_selected"
+   ],
+   "evidence_needs": [
+    "pairwise comparisons"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "ansoff_matrix",
+   "name": "Ansoff Matrix",
+   "family": "STRATEGY",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "product-market grid"
+   ],
+   "purpose": "Choose growth through market or product penetration, development or diversification.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "products",
+    "markets"
+   ],
+   "expected_outputs": [
+    "decision:strategic_direction"
+   ],
+   "evidence_needs": [
+    "growth options"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "balanced_scorecard",
+   "name": "Balanced Scorecard",
+   "family": "STRATEGY_EXECUTION",
+   "secondary_families": [],
+   "slot": "CONTROL",
+   "aliases": [],
+   "purpose": "Track strategy across financial, customer, process and learning perspectives.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "strategy"
+   ],
+   "expected_outputs": [
+    "control:strategy_tracked"
+   ],
+   "evidence_needs": [
+    "metrics across perspectives"
+   ],
+   "composable_with": [
+    "okr"
+   ],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "barrier_analysis",
+   "name": "Barrier Analysis",
+   "family": "ROOT_CAUSE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Identify which barriers failed or were missing.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "incident description"
+   ],
+   "expected_outputs": [
+    "output:root_cause_identified",
+    "risk:controls_defined"
+   ],
+   "evidence_needs": [
+    "intended controls and their performance"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "bcg_matrix",
+   "name": "BCG Matrix",
+   "family": "STRATEGY",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "growth-share matrix"
+   ],
+   "purpose": "Allocate investment across a portfolio by share and growth.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "portfolio"
+   ],
+   "expected_outputs": [
+    "decision:strategic_direction"
+   ],
+   "evidence_needs": [
+    "share and growth data"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "blameless_postmortem",
+   "name": "Blameless Postmortem",
+   "family": "RELIABILITY_DIGITAL_OPS",
+   "secondary_families": [
+    "LEARNING"
+   ],
+   "slot": "LEARN",
+   "aliases": [
+    "postmortem"
+   ],
+   "purpose": "Review an incident to learn without assigning blame.",
+   "applicability_predicates": [
+    "observed:incidents_recurring"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "incident record"
+   ],
+   "expected_outputs": [
+    "learn:lessons_captured"
+   ],
+   "evidence_needs": [
+    "incident timeline"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "blue_ocean",
+   "name": "Blue Ocean Strategy",
+   "family": "STRATEGY",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "ERRC grid"
+   ],
+   "purpose": "Create uncontested market space by reconstructing value.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "industry"
+   ],
+   "expected_outputs": [
+    "decision:strategic_direction"
+   ],
+   "evidence_needs": [
+    "value curve"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "bottleneck_analysis",
+   "name": "Bottleneck Analysis",
+   "family": "FLOW_BOTTLENECK",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Locate the step that limits throughput.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "process steps"
+   ],
+   "expected_outputs": [
+    "output:constraint_identified"
+   ],
+   "evidence_needs": [
+    "throughput per step"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "bow_tie",
+   "name": "Bow-Tie Analysis",
+   "family": "RISK_FAILURE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Show threats, a top event, consequences and the barriers between them.",
+   "applicability_predicates": [
+    "consequence==critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "hazard"
+   ],
+   "expected_outputs": [
+    "output:failure_modes_assessed",
+    "risk:controls_defined"
+   ],
+   "evidence_needs": [
+    "threats, consequences and barriers"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "bridges_transition",
+   "name": "Bridges Transition Model",
+   "family": "CHANGE_ADOPTION",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [],
+   "purpose": "Manage the human transition: ending, neutral zone, new beginning.",
+   "applicability_predicates": [
+    "uncertainty==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "change"
+   ],
+   "expected_outputs": [
+    "execute:adoption_plan"
+   ],
+   "evidence_needs": [
+    "transition-stage observations"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "build_measure_learn",
+   "name": "Build-Measure-Learn",
+   "family": "UNCERTAIN_PRODUCT",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [
+    "BML loop"
+   ],
+   "purpose": "Build the smallest test, measure the result and learn.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "hypothesis"
+   ],
+   "expected_outputs": [
+    "validation:hypothesis_tested"
+   ],
+   "evidence_needs": [
+    "experiment results"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "capacity_analysis",
+   "name": "Capacity Analysis",
+   "family": "FLOW_BOTTLENECK",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "capacity planning"
+   ],
+   "purpose": "Compare demand with available capacity per resource.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "demand",
+    "resources"
+   ],
+   "expected_outputs": [
+    "output:constraint_identified"
+   ],
+   "evidence_needs": [
+    "demand and capacity figures"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "causal_loop_diagram",
+   "name": "Causal Loop Diagram",
+   "family": "SYSTEM_COMPLEXITY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "CLD"
+   ],
+   "purpose": "Map reinforcing and balancing feedback loops.",
+   "applicability_predicates": [
+    "observed:feedback_loops_suspected"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "variables"
+   ],
+   "expected_outputs": [
+    "output:system_structure_mapped",
+    "output:feedback_loops_identified"
+   ],
+   "evidence_needs": [
+    "causal links and polarities"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "change_analysis",
+   "name": "Change Analysis",
+   "family": "ROOT_CAUSE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Find the cause in what changed between a good and a bad state.",
+   "applicability_predicates": [
+    "current_state_known==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "known-good baseline",
+    "current state"
+   ],
+   "expected_outputs": [
+    "output:root_cause_identified"
+   ],
+   "evidence_needs": [
+    "differences between states"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "check_sheet",
+   "name": "Check Sheet",
+   "family": "PROCESS_VARIATION",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "tally sheet"
+   ],
+   "purpose": "Collect occurrence data in a structured tally.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "event categories"
+   ],
+   "expected_outputs": [
+    "measurement:data_collected"
+   ],
+   "evidence_needs": [
+    "tallies by category"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "cobit",
+   "name": "COBIT",
+   "family": "RELIABILITY_DIGITAL_OPS",
+   "secondary_families": [],
+   "slot": "MACRO",
+   "aliases": [],
+   "purpose": "Govern enterprise IT against control objectives.",
+   "applicability_predicates": [
+    "data_sensitivity==regulated"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "IT governance scope"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "control objectives evidence"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 5,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "control_chart",
+   "name": "Control Chart",
+   "family": "PROCESS_VARIATION",
+   "secondary_families": [],
+   "slot": "CONTROL",
+   "aliases": [
+    "Shewhart chart"
+   ],
+   "purpose": "Plot a process measure against statistical control limits.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "time-ordered measurements"
+   ],
+   "expected_outputs": [
+    "control:process_in_control",
+    "control:sustain_fix"
+   ],
+   "evidence_needs": [
+    "subgroup data"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "cost_benefit_analysis",
+   "name": "Cost-Benefit Analysis",
+   "family": "DECISION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "CBA"
+   ],
+   "purpose": "Compare options by quantified costs and benefits.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "options"
+   ],
+   "expected_outputs": [
+    "decision:option_selected"
+   ],
+   "evidence_needs": [
+    "monetised costs and benefits"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "cost_of_delay",
+   "name": "Cost of Delay",
+   "family": "PRIORITIZATION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "CoD"
+   ],
+   "purpose": "Quantify the economic impact of delaying each item.",
+   "applicability_predicates": [
+    "measurement_available==true",
+    "time_pressure==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "item list"
+   ],
+   "expected_outputs": [
+    "decision:priority_order"
+   ],
+   "evidence_needs": [
+    "economic value over time"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "critical_chain",
+   "name": "Critical Chain Project Management",
+   "family": "PROJECT_DELIVERY",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [
+    "CCPM"
+   ],
+   "purpose": "Schedule around resource constraints with shared buffers.",
+   "applicability_predicates": [
+    "time_pressure==high",
+    "system_coupling==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "work packages",
+    "resources"
+   ],
+   "expected_outputs": [
+    "output:schedule"
+   ],
+   "evidence_needs": [
+    "resource-constrained estimates"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "critical_path_method",
+   "name": "Critical Path Method",
+   "family": "PROJECT_DELIVERY",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [
+    "CPM"
+   ],
+   "purpose": "Find the longest dependent chain that sets the finish date.",
+   "applicability_predicates": [
+    "system_coupling==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "work packages",
+    "dependencies"
+   ],
+   "expected_outputs": [
+    "output:schedule",
+    "output:critical_path"
+   ],
+   "evidence_needs": [
+    "durations"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "customer_journey_mapping",
+   "name": "Customer Journey Mapping",
+   "family": "CUSTOMER_REQUIREMENTS",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "journey map"
+   ],
+   "purpose": "Map the customer's experience across touchpoints.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "customer segment"
+   ],
+   "expected_outputs": [
+    "output:customer_needs_captured",
+    "output:experience_gaps"
+   ],
+   "evidence_needs": [
+    "touchpoint observations"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "cycle_time_analysis",
+   "name": "Cycle Time Analysis",
+   "family": "FLOW_BOTTLENECK",
+   "secondary_families": [],
+   "slot": "CONTROL",
+   "aliases": [
+    "lead time analysis"
+   ],
+   "purpose": "Track how long work takes from start to finish.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "work item timestamps"
+   ],
+   "expected_outputs": [
+    "measurement:flow_measured"
+   ],
+   "evidence_needs": [
+    "start and finish times"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "cynefin",
+   "name": "Cynefin",
+   "family": "SYSTEM_COMPLEXITY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "Cynefin framework"
+   ],
+   "purpose": "Classify the situation as clear, complicated, complex or chaotic to pick an approach.",
+   "applicability_predicates": [
+    "uncertainty==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "situation"
+   ],
+   "expected_outputs": [
+    "output:domain_classified"
+   ],
+   "evidence_needs": [
+    "cause-effect knowability"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "daci",
+   "name": "DACI",
+   "family": "ACCOUNTABILITY",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [],
+   "purpose": "Assign driver, approver, contributors and informed for a decision.",
+   "applicability_predicates": [
+    "family:DECISION"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "decision"
+   ],
+   "expected_outputs": [
+    "output:decision_rights_assigned"
+   ],
+   "evidence_needs": [
+    "decision roles"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "decision_matrix",
+   "name": "Decision Matrix",
+   "family": "DECISION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "Pugh matrix",
+    "grid analysis"
+   ],
+   "purpose": "Compare options against explicit criteria.",
+   "applicability_predicates": [],
+   "contraindications": [
+    "consequence in high|critical"
+   ],
+   "expected_inputs": [
+    "options",
+    "criteria"
+   ],
+   "expected_outputs": [
+    "decision:criteria_defined",
+    "decision:option_selected"
+   ],
+   "evidence_needs": [
+    "option scores per criterion"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "decision_tree",
+   "name": "Decision Tree",
+   "family": "DECISION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [],
+   "purpose": "Map sequential choices and uncertain outcomes.",
+   "applicability_predicates": [
+    "uncertainty in medium|high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "options",
+    "chance events"
+   ],
+   "expected_outputs": [
+    "decision:option_selected"
+   ],
+   "evidence_needs": [
+    "outcome probabilities"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "design_of_experiments",
+   "name": "Design of Experiments",
+   "family": "PROCESS_VARIATION",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "DOE"
+   ],
+   "purpose": "Vary factors systematically to learn their effects.",
+   "applicability_predicates": [
+    "measurement_available==true",
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "controllable factors"
+   ],
+   "expected_outputs": [
+    "measurement:variation_quantified",
+    "output:root_cause_identified"
+   ],
+   "evidence_needs": [
+    "experimental runs"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 5,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "design_thinking",
+   "name": "Design Thinking",
+   "family": "UNCERTAIN_PRODUCT",
+   "secondary_families": [
+    "CUSTOMER_REQUIREMENTS"
+   ],
+   "slot": "MACRO",
+   "aliases": [],
+   "purpose": "Empathise, define, ideate, prototype and test with users.",
+   "applicability_predicates": [
+    "observed:customer_needs_unknown"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "design challenge"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "user research"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "dmaic",
+   "name": "DMAIC",
+   "family": "PROCESS_IMPROVEMENT",
+   "secondary_families": [
+    "ROOT_CAUSE",
+    "PROCESS_VARIATION"
+   ],
+   "slot": "MACRO",
+   "aliases": [
+    "Six Sigma DMAIC"
+   ],
+   "purpose": "Define, Measure, Analyze, Improve, Control a recurring process problem.",
+   "applicability_predicates": [
+    "observed:problem_recurs"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "problem statement",
+    "baseline data"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "process measurements"
+   ],
+   "composable_with": [
+    "fishbone_diagram",
+    "five_whys",
+    "statistical_process_control"
+   ],
+   "conflicts_with": [
+    "a3",
+    "eight_d"
+   ],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "double_diamond",
+   "name": "Double Diamond",
+   "family": "UNCERTAIN_PRODUCT",
+   "secondary_families": [],
+   "slot": "MACRO",
+   "aliases": [],
+   "purpose": "Diverge and converge on the problem, then on the solution.",
+   "applicability_predicates": [
+    "target_state_known!=true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "design challenge"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "discovery findings"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "drum_buffer_rope",
+   "name": "Drum-Buffer-Rope",
+   "family": "FLOW_BOTTLENECK",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [
+    "DBR"
+   ],
+   "purpose": "Pace the system to its constraint with protective buffers.",
+   "applicability_predicates": [
+    "observed:throughput_constrained",
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "identified constraint"
+   ],
+   "expected_outputs": [
+    "execute:flow_improved"
+   ],
+   "evidence_needs": [
+    "constraint throughput"
+   ],
+   "composable_with": [
+    "theory_of_constraints"
+   ],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "dual_track_discovery",
+   "name": "Discovery/Delivery Dual Track",
+   "family": "UNCERTAIN_PRODUCT",
+   "secondary_families": [],
+   "slot": "MACRO",
+   "aliases": [
+    "dual-track agile"
+   ],
+   "purpose": "Run discovery and delivery as parallel tracks.",
+   "applicability_predicates": [
+    "observed:deliverable_scope_defined"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "product backlog"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "discovery results"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "earned_value_management",
+   "name": "Earned Value Management",
+   "family": "PROJECT_DELIVERY",
+   "secondary_families": [],
+   "slot": "CONTROL",
+   "aliases": [
+    "EVM"
+   ],
+   "purpose": "Track schedule and cost performance against a baseline.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "baseline plan"
+   ],
+   "expected_outputs": [
+    "control:delivery_tracked"
+   ],
+   "evidence_needs": [
+    "planned, earned and actual cost"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "eight_d",
+   "name": "8D Problem Solving",
+   "family": "PROCESS_IMPROVEMENT",
+   "secondary_families": [
+    "ROOT_CAUSE"
+   ],
+   "slot": "MACRO",
+   "aliases": [
+    "8D"
+   ],
+   "purpose": "Eight disciplines for customer-facing defects with containment.",
+   "applicability_predicates": [
+    "observed:problem_recurs",
+    "consequence in high|critical",
+    "externality==external"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "defect report"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "containment and verification evidence"
+   ],
+   "composable_with": [],
+   "conflicts_with": [
+    "a3",
+    "dmaic"
+   ],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "eisenhower_matrix",
+   "name": "Eisenhower Matrix",
+   "family": "PRIORITIZATION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "urgent-important matrix"
+   ],
+   "purpose": "Sort items by urgency and importance.",
+   "applicability_predicates": [
+    "time_pressure in medium|high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "task list"
+   ],
+   "expected_outputs": [
+    "decision:priority_order"
+   ],
+   "evidence_needs": [
+    "urgency and importance per item"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "expected_value",
+   "name": "Expected Value Analysis",
+   "family": "DECISION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "EV"
+   ],
+   "purpose": "Weigh outcomes by their probabilities.",
+   "applicability_predicates": [
+    "measurement_available==true",
+    "uncertainty==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "options",
+    "outcome distribution"
+   ],
+   "expected_outputs": [
+    "decision:option_selected"
+   ],
+   "evidence_needs": [
+    "probabilities and payoffs"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "fault_tree_analysis",
+   "name": "Fault Tree Analysis",
+   "family": "ROOT_CAUSE",
+   "secondary_families": [
+    "RISK_FAILURE"
+   ],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "FTA"
+   ],
+   "purpose": "Decompose an undesired event into its logical contributing failures.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "top event"
+   ],
+   "expected_outputs": [
+    "output:root_cause_identified",
+    "output:failure_modes_assessed"
+   ],
+   "evidence_needs": [
+    "failure logic and component data"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "fishbone_diagram",
+   "name": "Fishbone Diagram",
+   "family": "ROOT_CAUSE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "Ishikawa diagram",
+    "cause-and-effect diagram"
+   ],
+   "purpose": "Organise candidate causes by category to find likely root causes.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "problem statement"
+   ],
+   "expected_outputs": [
+    "output:root_cause_identified"
+   ],
+   "evidence_needs": [
+    "candidate causes by category"
+   ],
+   "composable_with": [
+    "dmaic"
+   ],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "five_s",
+   "name": "5S",
+   "family": "WORKFLOW_WASTE",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [],
+   "purpose": "Sort, set in order, shine, standardise and sustain a workspace.",
+   "applicability_predicates": [
+    "domain:physical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "workspace"
+   ],
+   "expected_outputs": [
+    "execute:waste_removed"
+   ],
+   "evidence_needs": [
+    "workspace audit"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "five_whys",
+   "name": "5 Whys",
+   "family": "ROOT_CAUSE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "5 Whys"
+   ],
+   "purpose": "Ask why repeatedly until a causal chain reaches an actionable cause.",
+   "applicability_predicates": [],
+   "contraindications": [
+    "system_coupling==high"
+   ],
+   "expected_inputs": [
+    "problem statement"
+   ],
+   "expected_outputs": [
+    "output:root_cause_identified"
+   ],
+   "evidence_needs": [
+    "observed facts for each answer"
+   ],
+   "composable_with": [
+    "dmaic"
+   ],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "fmea",
+   "name": "Failure Modes and Effects Analysis",
+   "family": "RISK_FAILURE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "FMEA"
+   ],
+   "purpose": "Rate failure modes by severity, occurrence and detection and plan controls.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "process or design"
+   ],
+   "expected_outputs": [
+    "output:failure_modes_assessed",
+    "risk:controls_defined"
+   ],
+   "evidence_needs": [
+    "failure modes, effects and causes"
+   ],
+   "composable_with": [
+    "risk_register"
+   ],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "force_field_analysis",
+   "name": "Force-Field Analysis",
+   "family": "CHANGE_ADOPTION",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Weigh forces driving and resisting a change.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "proposed change"
+   ],
+   "expected_outputs": [
+    "output:change_forces_assessed"
+   ],
+   "evidence_needs": [
+    "driving and restraining forces"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "gantt_chart",
+   "name": "Gantt Chart",
+   "family": "PROJECT_DELIVERY",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [],
+   "purpose": "Lay work packages out on a timeline.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "work packages"
+   ],
+   "expected_outputs": [
+    "output:schedule"
+   ],
+   "evidence_needs": [
+    "durations and dependencies"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "gemba_walk",
+   "name": "Gemba Walk",
+   "family": "WORKFLOW_WASTE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "genba"
+   ],
+   "purpose": "Observe the work where it happens.",
+   "applicability_predicates": [
+    "domain:physical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "work location"
+   ],
+   "expected_outputs": [
+    "output:waste_identified"
+   ],
+   "evidence_needs": [
+    "direct observation"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "governance_model",
+   "name": "Governance Model",
+   "family": "ACCOUNTABILITY",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [],
+   "purpose": "Define decision forums, rights and escalation.",
+   "applicability_predicates": [
+    "consequence==critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "organisation"
+   ],
+   "expected_outputs": [
+    "output:decision_rights_assigned",
+    "output:governance_defined"
+   ],
+   "evidence_needs": [
+    "decision forums and escalation paths"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "hazop",
+   "name": "HAZOP",
+   "family": "RISK_FAILURE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "hazard and operability study"
+   ],
+   "purpose": "Systematically examine deviations from design intent.",
+   "applicability_predicates": [
+    "domain:physical",
+    "consequence==critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "process design"
+   ],
+   "expected_outputs": [
+    "output:failure_modes_assessed"
+   ],
+   "evidence_needs": [
+    "design intent and guide words"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 5,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "histogram",
+   "name": "Histogram",
+   "family": "PROCESS_VARIATION",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Show the distribution of a measured characteristic.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "measurements"
+   ],
+   "expected_outputs": [
+    "measurement:variation_quantified"
+   ],
+   "evidence_needs": [
+    "measurement sample"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "hoshin_kanri",
+   "name": "Hoshin Kanri",
+   "family": "STRATEGY_EXECUTION",
+   "secondary_families": [],
+   "slot": "MACRO",
+   "aliases": [
+    "policy deployment"
+   ],
+   "purpose": "Deploy a few breakthrough objectives through the organisation.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "breakthrough objectives"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "catchball reviews"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "hypothesis_driven_development",
+   "name": "Hypothesis-Driven Development",
+   "family": "UNCERTAIN_PRODUCT",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "HDD"
+   ],
+   "purpose": "State falsifiable hypotheses and test them before scaling.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "product idea"
+   ],
+   "expected_outputs": [
+    "output:hypotheses_defined",
+    "validation:hypothesis_tested"
+   ],
+   "evidence_needs": [
+    "falsifiable hypotheses and results"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "impact_effort_matrix",
+   "name": "Impact-Effort Matrix",
+   "family": "PRIORITIZATION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "2x2 prioritization",
+    "value-effort matrix"
+   ],
+   "purpose": "Rank items by expected impact against effort.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "item list"
+   ],
+   "expected_outputs": [
+    "decision:priority_order"
+   ],
+   "evidence_needs": [
+    "relative impact and effort estimates"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "incident_management",
+   "name": "Incident Management",
+   "family": "RELIABILITY_DIGITAL_OPS",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [],
+   "purpose": "Detect, respond to and resolve service incidents.",
+   "applicability_predicates": [
+    "observed:live_service"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "service"
+   ],
+   "expected_outputs": [
+    "control:incident_response"
+   ],
+   "evidence_needs": [
+    "incident timelines"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "itil",
+   "name": "ITIL Service Management",
+   "family": "RELIABILITY_DIGITAL_OPS",
+   "secondary_families": [],
+   "slot": "MACRO",
+   "aliases": [
+    "ITIL"
+   ],
+   "purpose": "Manage IT services through defined practices.",
+   "applicability_predicates": [
+    "observed:live_service",
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "service portfolio"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "service management records"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "jobs_to_be_done",
+   "name": "Jobs To Be Done",
+   "family": "CUSTOMER_REQUIREMENTS",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "JTBD"
+   ],
+   "purpose": "Frame needs as the progress customers are trying to make.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "customer segment"
+   ],
+   "expected_outputs": [
+    "output:customer_needs_captured"
+   ],
+   "evidence_needs": [
+    "customer job statements"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "kaizen",
+   "name": "Kaizen",
+   "family": "PROCESS_IMPROVEMENT",
+   "secondary_families": [
+    "WORKFLOW_WASTE",
+    "LEARNING"
+   ],
+   "slot": "EXECUTE",
+   "aliases": [
+    "kaizen event",
+    "continuous improvement"
+   ],
+   "purpose": "Run focused, incremental improvement events.",
+   "applicability_predicates": [
+    "process_exists==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "improvement opportunities"
+   ],
+   "expected_outputs": [
+    "execute:improvement_implemented",
+    "execute:waste_removed"
+   ],
+   "evidence_needs": [
+    "team observations"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "kanban",
+   "name": "Kanban",
+   "family": "WORKFLOW_WASTE",
+   "secondary_families": [
+    "FLOW_BOTTLENECK",
+    "UNCERTAIN_PRODUCT",
+    "PROJECT_DELIVERY"
+   ],
+   "slot": "EXECUTE",
+   "aliases": [
+    "kanban board"
+   ],
+   "purpose": "Visualise work, limit work in progress and manage flow.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "work items"
+   ],
+   "expected_outputs": [
+    "execute:flow_improved",
+    "control:delivery_tracked"
+   ],
+   "evidence_needs": [
+    "work item states"
+   ],
+   "composable_with": [
+    "scrum"
+   ],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "kano_model",
+   "name": "Kano Model",
+   "family": "CUSTOMER_REQUIREMENTS",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "Kano analysis"
+   ],
+   "purpose": "Classify features by how they affect satisfaction.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "candidate features"
+   ],
+   "expected_outputs": [
+    "output:customer_needs_captured",
+    "output:requirements_prioritized"
+   ],
+   "evidence_needs": [
+    "functional and dysfunctional survey answers"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "kepner_tregoe",
+   "name": "Kepner-Tregoe Problem Analysis",
+   "family": "ROOT_CAUSE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "KT analysis"
+   ],
+   "purpose": "Specify the deviation precisely and test candidate causes against it.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "deviation statement"
+   ],
+   "expected_outputs": [
+    "output:root_cause_identified",
+    "decision:option_selected"
+   ],
+   "evidence_needs": [
+    "is/is-not specification"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "knowledge_management",
+   "name": "Knowledge Management",
+   "family": "LEARNING",
+   "secondary_families": [],
+   "slot": "LEARN",
+   "aliases": [
+    "KM"
+   ],
+   "purpose": "Capture and share knowledge so it is reused.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "lessons"
+   ],
+   "expected_outputs": [
+    "learn:lessons_captured",
+    "learn:knowledge_shared"
+   ],
+   "evidence_needs": [
+    "curated knowledge"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "kotter_8_step",
+   "name": "Kotter's 8-Step Model",
+   "family": "CHANGE_ADOPTION",
+   "secondary_families": [],
+   "slot": "MACRO",
+   "aliases": [
+    "Kotter"
+   ],
+   "purpose": "Lead organisation-wide change through eight steps.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "organisational change"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "coalition and adoption evidence"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "lean",
+   "name": "Lean",
+   "family": "WORKFLOW_WASTE",
+   "secondary_families": [
+    "FLOW_BOTTLENECK"
+   ],
+   "slot": "MACRO",
+   "aliases": [
+    "lean thinking"
+   ],
+   "purpose": "Organise improvement around customer value and the elimination of waste.",
+   "applicability_predicates": [
+    "process_exists==true",
+    "observed:waste_observed"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "process scope"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "value and waste observations"
+   ],
+   "composable_with": [
+    "value_stream_mapping"
+   ],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "lean_startup",
+   "name": "Lean Startup",
+   "family": "UNCERTAIN_PRODUCT",
+   "secondary_families": [],
+   "slot": "MACRO",
+   "aliases": [],
+   "purpose": "Validate a business model through minimum viable experiments.",
+   "applicability_predicates": [
+    "solution_known==false",
+    "uncertainty==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "business hypothesis"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "validated learning"
+   ],
+   "composable_with": [],
+   "conflicts_with": [
+    "stage_gate"
+   ],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "lessons_learned",
+   "name": "Lessons Learned",
+   "family": "LEARNING",
+   "secondary_families": [],
+   "slot": "LEARN",
+   "aliases": [],
+   "purpose": "Record what to repeat and avoid next time.",
+   "applicability_predicates": [
+    "observed:lessons_to_capture"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "project record"
+   ],
+   "expected_outputs": [
+    "learn:lessons_captured"
+   ],
+   "evidence_needs": [
+    "project outcomes"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "lewin_change_model",
+   "name": "Lewin's Change Model",
+   "family": "CHANGE_ADOPTION",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [
+    "unfreeze-change-refreeze"
+   ],
+   "purpose": "Unfreeze, change and refreeze.",
+   "applicability_predicates": [
+    "reversibility==irreversible"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "change"
+   ],
+   "expected_outputs": [
+    "execute:adoption_plan"
+   ],
+   "evidence_needs": [
+    "readiness observations"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "littles_law",
+   "name": "Little's Law",
+   "family": "FLOW_BOTTLENECK",
+   "secondary_families": [],
+   "slot": "CONTROL",
+   "aliases": [],
+   "purpose": "Relate work in progress, throughput and lead time.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "WIP and throughput"
+   ],
+   "expected_outputs": [
+    "measurement:flow_measured"
+   ],
+   "evidence_needs": [
+    "WIP, throughput and lead time"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "mcda",
+   "name": "Multi-Criteria Decision Analysis",
+   "family": "DECISION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "MCDA",
+    "MCDM"
+   ],
+   "purpose": "Structure a complex choice across conflicting criteria.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "options",
+    "criteria",
+    "stakeholder preferences"
+   ],
+   "expected_outputs": [
+    "decision:criteria_defined",
+    "decision:option_selected"
+   ],
+   "evidence_needs": [
+    "structured preference data"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "mckinsey_7s",
+   "name": "McKinsey 7S",
+   "family": "CHANGE_ADOPTION",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "7S framework"
+   ],
+   "purpose": "Check alignment of strategy, structure, systems, values, style, staff and skills.",
+   "applicability_predicates": [
+    "system_coupling==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "organisation"
+   ],
+   "expected_outputs": [
+    "output:organizational_alignment_assessed"
+   ],
+   "evidence_needs": [
+    "assessment of the seven elements"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "model_for_improvement",
+   "name": "Model for Improvement",
+   "family": "PROCESS_IMPROVEMENT",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "MFI"
+   ],
+   "purpose": "Ask what to accomplish, how to know it is better, and what change to test.",
+   "applicability_predicates": [
+    "target_state_known==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "aim",
+    "measures"
+   ],
+   "expected_outputs": [
+    "output:improvement_plan"
+   ],
+   "evidence_needs": [
+    "defined improvement measures"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "monte_carlo_simulation",
+   "name": "Monte Carlo Simulation",
+   "family": "RISK_FAILURE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Estimate outcome distributions by repeated random sampling.",
+   "applicability_predicates": [
+    "measurement_available==true",
+    "uncertainty==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "model inputs"
+   ],
+   "expected_outputs": [
+    "output:risk_quantified"
+   ],
+   "evidence_needs": [
+    "input distributions"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "moscow",
+   "name": "MoSCoW",
+   "family": "PRIORITIZATION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [],
+   "purpose": "Classify scope as must, should, could and won't have.",
+   "applicability_predicates": [
+    "observed:deliverable_scope_defined"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "requirement list"
+   ],
+   "expected_outputs": [
+    "decision:priority_order"
+   ],
+   "evidence_needs": [
+    "release scope"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "nist_rmf",
+   "name": "NIST Risk Management Framework",
+   "family": "RELIABILITY_DIGITAL_OPS",
+   "secondary_families": [
+    "RISK_FAILURE"
+   ],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "RMF"
+   ],
+   "purpose": "Categorise a system, select and assess controls, authorise and monitor.",
+   "applicability_predicates": [
+    "data_sensitivity in confidential|regulated"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "information system"
+   ],
+   "expected_outputs": [
+    "risk:controls_defined"
+   ],
+   "evidence_needs": [
+    "security control assessments"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 5,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "observability",
+   "name": "Observability",
+   "family": "RELIABILITY_DIGITAL_OPS",
+   "secondary_families": [],
+   "slot": "CONTROL",
+   "aliases": [],
+   "purpose": "Instrument a service so its internal state can be inferred from outputs.",
+   "applicability_predicates": [
+    "observed:live_service"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "service"
+   ],
+   "expected_outputs": [
+    "measurement:service_levels_defined",
+    "measurement:telemetry_available"
+   ],
+   "evidence_needs": [
+    "logs, metrics and traces"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "ogsm",
+   "name": "OGSM",
+   "family": "STRATEGY_EXECUTION",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [],
+   "purpose": "Cascade objective, goals, strategies and measures.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "objective"
+   ],
+   "expected_outputs": [
+    "output:objectives_cascaded"
+   ],
+   "evidence_needs": [
+    "goals and measures"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "okr",
+   "name": "OKRs",
+   "family": "STRATEGY_EXECUTION",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [
+    "objectives and key results"
+   ],
+   "purpose": "Set objectives with measurable key results and track them.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "strategic direction"
+   ],
+   "expected_outputs": [
+    "output:objectives_cascaded",
+    "control:strategy_tracked"
+   ],
+   "evidence_needs": [
+    "measurable key results"
+   ],
+   "composable_with": [
+    "balanced_scorecard"
+   ],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "pareto_analysis",
+   "name": "Pareto Analysis",
+   "family": "ROOT_CAUSE",
+   "secondary_families": [
+    "PRIORITIZATION"
+   ],
+   "slot": "DECIDE",
+   "aliases": [
+    "80/20 rule",
+    "Pareto chart"
+   ],
+   "purpose": "Focus on the vital few causes or items behind most of the effect.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "categorised occurrence data"
+   ],
+   "expected_outputs": [
+    "decision:option_selected",
+    "decision:priority_order"
+   ],
+   "evidence_needs": [
+    "frequency or impact counts"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "pdca",
+   "name": "PDCA / PDSA",
+   "family": "LEARNING",
+   "secondary_families": [
+    "PROCESS_IMPROVEMENT"
+   ],
+   "slot": "LEARN",
+   "aliases": [
+    "Deming cycle",
+    "PDSA",
+    "Shewhart cycle"
+   ],
+   "purpose": "Plan, do, check (study) and act on a change, then iterate.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "change trial results"
+   ],
+   "expected_outputs": [
+    "learn:lessons_captured"
+   ],
+   "evidence_needs": [
+    "before and after observations"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "pert",
+   "name": "PERT",
+   "family": "PROJECT_DELIVERY",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [
+    "three-point estimating"
+   ],
+   "purpose": "Schedule with optimistic, likely and pessimistic estimates.",
+   "applicability_predicates": [
+    "uncertainty==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "work packages"
+   ],
+   "expected_outputs": [
+    "output:schedule"
+   ],
+   "evidence_needs": [
+    "three-point estimates"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "pestle",
+   "name": "PESTLE",
+   "family": "STRATEGY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "PEST",
+    "PESTEL"
+   ],
+   "purpose": "Scan the external macro-environment.",
+   "applicability_predicates": [
+    "externality==external"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "market"
+   ],
+   "expected_outputs": [
+    "output:macro_environment_scanned"
+   ],
+   "evidence_needs": [
+    "political, economic, social, technological, legal, environmental factors"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "poka_yoke",
+   "name": "Poka-Yoke",
+   "family": "RISK_FAILURE",
+   "secondary_families": [
+    "ROOT_CAUSE"
+   ],
+   "slot": "EXECUTE",
+   "aliases": [
+    "mistake-proofing"
+   ],
+   "purpose": "Design the process so the error cannot occur or is caught immediately.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "failure mode"
+   ],
+   "expected_outputs": [
+    "risk:controls_defined",
+    "execute:corrective_action_implemented"
+   ],
+   "evidence_needs": [
+    "error mechanism"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "porter_five_forces",
+   "name": "Porter's Five Forces",
+   "family": "STRATEGY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Assess industry attractiveness through five competitive forces.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "industry"
+   ],
+   "expected_outputs": [
+    "output:industry_structure_assessed"
+   ],
+   "evidence_needs": [
+    "competitive force evidence"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "process_capability",
+   "name": "Process Capability (Cp/Cpk)",
+   "family": "PROCESS_VARIATION",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "Cp/Cpk",
+    "capability analysis"
+   ],
+   "purpose": "Compare process spread with specification limits.",
+   "applicability_predicates": [
+    "measurement_available==true",
+    "target_state_known==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "measurements",
+    "specification limits"
+   ],
+   "expected_outputs": [
+    "measurement:variation_quantified"
+   ],
+   "evidence_needs": [
+    "stable process data"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "process_mapping",
+   "name": "Process Mapping",
+   "family": "WORKFLOW_WASTE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "flowcharting",
+    "swimlane diagram"
+   ],
+   "purpose": "Document the steps of a process to expose waste and handoffs.",
+   "applicability_predicates": [
+    "process_exists==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "process scope"
+   ],
+   "expected_outputs": [
+    "output:waste_identified",
+    "output:process_mapped"
+   ],
+   "evidence_needs": [
+    "step-by-step observations"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "qfd",
+   "name": "Quality Function Deployment",
+   "family": "CUSTOMER_REQUIREMENTS",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "House of Quality",
+    "QFD"
+   ],
+   "purpose": "Translate customer needs into design characteristics (House of Quality).",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "customer needs"
+   ],
+   "expected_outputs": [
+    "output:requirements_prioritized",
+    "output:requirements_translated"
+   ],
+   "evidence_needs": [
+    "need-to-characteristic relationships"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "queueing_analysis",
+   "name": "Queueing Analysis",
+   "family": "FLOW_BOTTLENECK",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "queueing theory"
+   ],
+   "purpose": "Model waiting lines to predict delay and utilisation.",
+   "applicability_predicates": [
+    "measurement_available==true",
+    "system_coupling==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "arrival and service data"
+   ],
+   "expected_outputs": [
+    "output:constraint_identified"
+   ],
+   "evidence_needs": [
+    "arrival and service distributions"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "raci",
+   "name": "RACI",
+   "family": "ACCOUNTABILITY",
+   "secondary_families": [
+    "PROJECT_DELIVERY"
+   ],
+   "slot": "DECIDE",
+   "aliases": [
+    "responsibility assignment matrix",
+    "RAM"
+   ],
+   "purpose": "Assign who is responsible, accountable, consulted and informed.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "activities",
+    "people"
+   ],
+   "expected_outputs": [
+    "output:decision_rights_assigned"
+   ],
+   "evidence_needs": [
+    "role assignments"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "rapid",
+   "name": "RAPID",
+   "family": "ACCOUNTABILITY",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [],
+   "purpose": "Assign recommend, agree, perform, input and decide roles.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "key decisions"
+   ],
+   "expected_outputs": [
+    "output:decision_rights_assigned"
+   ],
+   "evidence_needs": [
+    "decision roles"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "retrospective",
+   "name": "Retrospective",
+   "family": "LEARNING",
+   "secondary_families": [],
+   "slot": "LEARN",
+   "aliases": [
+    "retro"
+   ],
+   "purpose": "Reflect on an iteration and agree improvements.",
+   "applicability_predicates": [
+    "observed:deliverable_scope_defined"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "iteration"
+   ],
+   "expected_outputs": [
+    "learn:lessons_captured"
+   ],
+   "evidence_needs": [
+    "team observations"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "rice",
+   "name": "RICE Scoring",
+   "family": "PRIORITIZATION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [],
+   "purpose": "Score items by reach, impact, confidence and effort.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "item list"
+   ],
+   "expected_outputs": [
+    "decision:priority_order"
+   ],
+   "evidence_needs": [
+    "reach, impact, confidence and effort data"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "risk_matrix",
+   "name": "Risk Matrix",
+   "family": "RISK_FAILURE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "probability-impact matrix"
+   ],
+   "purpose": "Rate risks by likelihood and impact.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "risk list"
+   ],
+   "expected_outputs": [
+    "output:failure_modes_assessed"
+   ],
+   "evidence_needs": [
+    "likelihood and impact ratings"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "risk_register",
+   "name": "Risk Register",
+   "family": "RISK_FAILURE",
+   "secondary_families": [
+    "PROJECT_DELIVERY"
+   ],
+   "slot": "CONTROL",
+   "aliases": [],
+   "purpose": "Record risks, owners, responses and status.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "identified risks"
+   ],
+   "expected_outputs": [
+    "risk:controls_defined",
+    "control:risks_tracked"
+   ],
+   "evidence_needs": [
+    "owners and mitigations"
+   ],
+   "composable_with": [
+    "fmea"
+   ],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "root_cause_analysis",
+   "name": "Root Cause Analysis (general)",
+   "family": "ROOT_CAUSE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "RCA"
+   ],
+   "purpose": "Structured investigation when evidence is incomplete or conflicting.",
+   "applicability_predicates": [
+    "evidence_status in partial|unverified|conflicting"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "problem statement"
+   ],
+   "expected_outputs": [
+    "output:root_cause_identified"
+   ],
+   "evidence_needs": [
+    "incident evidence"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "run_chart",
+   "name": "Run Chart",
+   "family": "PROCESS_VARIATION",
+   "secondary_families": [],
+   "slot": "CONTROL",
+   "aliases": [],
+   "purpose": "Plot a measure over time to see trends and shifts.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "time-ordered measurements"
+   ],
+   "expected_outputs": [
+    "control:sustain_fix"
+   ],
+   "evidence_needs": [
+    "measurements over time"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "scatter_plot",
+   "name": "Scatter Plot",
+   "family": "PROCESS_VARIATION",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "scatter diagram"
+   ],
+   "purpose": "Show the relationship between two variables.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "paired measurements"
+   ],
+   "expected_outputs": [
+    "output:correlation_explored"
+   ],
+   "evidence_needs": [
+    "paired observations"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "scenario_analysis",
+   "name": "Scenario Analysis",
+   "family": "DECISION",
+   "secondary_families": [
+    "RISK_FAILURE"
+   ],
+   "slot": "DECIDE",
+   "aliases": [
+    "what-if analysis"
+   ],
+   "purpose": "Evaluate options across plausible future scenarios.",
+   "applicability_predicates": [
+    "uncertainty in medium|high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "decision model",
+    "drivers"
+   ],
+   "expected_outputs": [
+    "validation:decision_robustness",
+    "output:scenarios_explored"
+   ],
+   "evidence_needs": [
+    "plausible scenario definitions"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "scenario_planning",
+   "name": "Scenario Planning",
+   "family": "STRATEGY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Develop distinct plausible futures to stress-test strategy.",
+   "applicability_predicates": [
+    "uncertainty==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "strategic question"
+   ],
+   "expected_outputs": [
+    "output:scenarios_explored"
+   ],
+   "evidence_needs": [
+    "key uncertainties"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "scrum",
+   "name": "Scrum",
+   "family": "UNCERTAIN_PRODUCT",
+   "secondary_families": [],
+   "slot": "MACRO",
+   "aliases": [],
+   "purpose": "Iterate in fixed-length sprints with inspect-and-adapt events.",
+   "applicability_predicates": [
+    "solution_known!=true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "product goal"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "sprint reviews"
+   ],
+   "composable_with": [
+    "kanban"
+   ],
+   "conflicts_with": [
+    "stage_gate"
+   ],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "sensitivity_analysis",
+   "name": "Sensitivity Analysis",
+   "family": "DECISION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [],
+   "purpose": "Test how the decision changes as key inputs vary.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "decision model"
+   ],
+   "expected_outputs": [
+    "validation:decision_robustness"
+   ],
+   "evidence_needs": [
+    "input ranges"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "service_blueprinting",
+   "name": "Service Blueprinting",
+   "family": "CUSTOMER_REQUIREMENTS",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "service blueprint"
+   ],
+   "purpose": "Map a service's customer actions with supporting processes.",
+   "applicability_predicates": [
+    "process_exists==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "service scope"
+   ],
+   "expected_outputs": [
+    "output:experience_gaps",
+    "output:process_mapped"
+   ],
+   "evidence_needs": [
+    "frontstage and backstage steps"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "sipoc",
+   "name": "SIPOC",
+   "family": "WORKFLOW_WASTE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Scope a process by suppliers, inputs, process, outputs and customers.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "process name"
+   ],
+   "expected_outputs": [
+    "output:process_scoped"
+   ],
+   "evidence_needs": [
+    "suppliers, inputs, outputs and customers"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "site_reliability_engineering",
+   "name": "Site Reliability Engineering",
+   "family": "RELIABILITY_DIGITAL_OPS",
+   "secondary_families": [],
+   "slot": "MACRO",
+   "aliases": [
+    "SRE"
+   ],
+   "purpose": "Run operations as an engineering discipline with explicit reliability targets.",
+   "applicability_predicates": [
+    "observed:live_service"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "service"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "service telemetry"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "sli_slo_error_budget",
+   "name": "SLI/SLO/Error Budget",
+   "family": "RELIABILITY_DIGITAL_OPS",
+   "secondary_families": [],
+   "slot": "CONTROL",
+   "aliases": [
+    "SLOs",
+    "error budget"
+   ],
+   "purpose": "Define indicators, objectives and an error budget for a service.",
+   "applicability_predicates": [
+    "observed:live_service"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "service"
+   ],
+   "expected_outputs": [
+    "measurement:service_levels_defined"
+   ],
+   "evidence_needs": [
+    "service-level indicators"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "smart_goals",
+   "name": "SMART Goals",
+   "family": "STRATEGY_EXECUTION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "SMART"
+   ],
+   "purpose": "Make goals specific, measurable, achievable, relevant and time-bound.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "intent"
+   ],
+   "expected_outputs": [
+    "output:goals_specified"
+   ],
+   "evidence_needs": [
+    "specific measurable targets"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "soft_systems_methodology",
+   "name": "Soft Systems Methodology",
+   "family": "SYSTEM_COMPLEXITY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "SSM"
+   ],
+   "purpose": "Structure messy problems where stakeholders see them differently.",
+   "applicability_predicates": [
+    "evidence_status==conflicting"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "problem situation"
+   ],
+   "expected_outputs": [
+    "output:system_structure_mapped",
+    "output:stakeholder_worldviews"
+   ],
+   "evidence_needs": [
+    "stakeholder worldviews"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 4,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "spaghetti_diagram",
+   "name": "Spaghetti Diagram",
+   "family": "WORKFLOW_WASTE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Trace physical movement to expose transport and motion waste.",
+   "applicability_predicates": [
+    "domain:physical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "physical layout"
+   ],
+   "expected_outputs": [
+    "output:waste_identified"
+   ],
+   "evidence_needs": [
+    "movement traces"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "stage_gate",
+   "name": "Stage-Gate",
+   "family": "PROJECT_DELIVERY",
+   "secondary_families": [
+    "UNCERTAIN_PRODUCT"
+   ],
+   "slot": "MACRO",
+   "aliases": [
+    "phase-gate"
+   ],
+   "purpose": "Run the project as stages separated by go/kill decision gates.",
+   "applicability_predicates": [
+    "observed:deliverable_scope_defined",
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "project charter"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "gate criteria"
+   ],
+   "composable_with": [],
+   "conflicts_with": [
+    "lean_startup",
+    "scrum"
+   ],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "stakeholder_analysis",
+   "name": "Stakeholder Analysis",
+   "family": "CHANGE_ADOPTION",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "power-interest grid"
+   ],
+   "purpose": "Map stakeholders by interest and influence.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "change"
+   ],
+   "expected_outputs": [
+    "output:stakeholders_mapped"
+   ],
+   "evidence_needs": [
+    "stakeholder interest and influence"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "standard_work",
+   "name": "Standard Work",
+   "family": "WORKFLOW_WASTE",
+   "secondary_families": [
+    "ROOT_CAUSE"
+   ],
+   "slot": "EXECUTE",
+   "aliases": [],
+   "purpose": "Define and document the current best way to perform the work.",
+   "applicability_predicates": [
+    "process_exists==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "current best method"
+   ],
+   "expected_outputs": [
+    "execute:waste_removed",
+    "execute:corrective_action_implemented"
+   ],
+   "evidence_needs": [
+    "observed best practice"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "statistical_process_control",
+   "name": "Statistical Process Control",
+   "family": "PROCESS_VARIATION",
+   "secondary_families": [],
+   "slot": "CONTROL",
+   "aliases": [
+    "SPC"
+   ],
+   "purpose": "Monitor a process statistically to separate common from special cause variation.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "process measurements"
+   ],
+   "expected_outputs": [
+    "control:process_in_control",
+    "control:sustain_fix",
+    "measurement:variation_quantified"
+   ],
+   "evidence_needs": [
+    "time-ordered measurements"
+   ],
+   "composable_with": [
+    "dmaic"
+   ],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "stock_and_flow",
+   "name": "Stock-and-Flow Model",
+   "family": "SYSTEM_COMPLEXITY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Model accumulations and the rates that change them.",
+   "applicability_predicates": [
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "system variables"
+   ],
+   "expected_outputs": [
+    "output:system_structure_mapped"
+   ],
+   "evidence_needs": [
+    "stock and flow quantities"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "strategy_map",
+   "name": "Strategy Map",
+   "family": "STRATEGY_EXECUTION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [],
+   "purpose": "Show cause-and-effect links between strategic objectives.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "strategy"
+   ],
+   "expected_outputs": [
+    "output:objectives_cascaded"
+   ],
+   "evidence_needs": [
+    "cause-effect objectives"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "swot_tows",
+   "name": "SWOT / TOWS",
+   "family": "STRATEGY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "SWOT",
+    "TOWS matrix"
+   ],
+   "purpose": "Assess strengths, weaknesses, opportunities and threats, then derive strategies.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "organisation",
+    "environment"
+   ],
+   "expected_outputs": [
+    "output:strategic_position_assessed",
+    "decision:strategic_direction"
+   ],
+   "evidence_needs": [
+    "internal and external factors"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "system_dynamics",
+   "name": "System Dynamics Simulation",
+   "family": "SYSTEM_COMPLEXITY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Simulate system behaviour over time.",
+   "applicability_predicates": [
+    "measurement_available==true",
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "stock-and-flow model"
+   ],
+   "expected_outputs": [
+    "output:system_behavior_simulated"
+   ],
+   "evidence_needs": [
+    "calibration data"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 5,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "systems_thinking",
+   "name": "Systems Thinking",
+   "family": "SYSTEM_COMPLEXITY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Reason about the whole system and its interactions.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "problem situation"
+   ],
+   "expected_outputs": [
+    "output:system_structure_mapped"
+   ],
+   "evidence_needs": [
+    "relationships between parts"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "takt_time",
+   "name": "Takt Time",
+   "family": "FLOW_BOTTLENECK",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [],
+   "purpose": "Pace production to the rate of customer demand.",
+   "applicability_predicates": [
+    "domain:physical",
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "customer demand"
+   ],
+   "expected_outputs": [
+    "execute:flow_improved"
+   ],
+   "evidence_needs": [
+    "demand rate"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "theory_of_constraints",
+   "name": "Theory of Constraints",
+   "family": "FLOW_BOTTLENECK",
+   "secondary_families": [],
+   "slot": "MACRO",
+   "aliases": [
+    "TOC"
+   ],
+   "purpose": "Find, exploit and elevate the system's constraint.",
+   "applicability_predicates": [
+    "observed:throughput_constrained"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "system goal"
+   ],
+   "expected_outputs": [
+    "macro:structured_cycle"
+   ],
+   "evidence_needs": [
+    "throughput data"
+   ],
+   "composable_with": [
+    "drum_buffer_rope"
+   ],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "value_chain_analysis",
+   "name": "Value Chain Analysis",
+   "family": "STRATEGY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Locate where activities create cost and value.",
+   "applicability_predicates": [
+    "process_exists==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "organisation"
+   ],
+   "expected_outputs": [
+    "output:strategic_position_assessed"
+   ],
+   "evidence_needs": [
+    "activity costs and value"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "value_stream_mapping",
+   "name": "Value Stream Mapping",
+   "family": "WORKFLOW_WASTE",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "VSM"
+   ],
+   "purpose": "Map material and information flow to expose waste.",
+   "applicability_predicates": [
+    "process_exists==true",
+    "measurement_available==true"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "process scope"
+   ],
+   "expected_outputs": [
+    "output:waste_identified",
+    "output:process_mapped"
+   ],
+   "evidence_needs": [
+    "step times and inventories"
+   ],
+   "composable_with": [
+    "lean"
+   ],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "voice_of_customer",
+   "name": "Voice of the Customer",
+   "family": "CUSTOMER_REQUIREMENTS",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [
+    "VOC"
+   ],
+   "purpose": "Capture what customers say they need, in their words.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "customer segment"
+   ],
+   "expected_outputs": [
+    "output:customer_needs_captured"
+   ],
+   "evidence_needs": [
+    "customer statements"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "vrio",
+   "name": "VRIO",
+   "family": "STRATEGY",
+   "secondary_families": [],
+   "slot": "DIAGNOSE",
+   "aliases": [],
+   "purpose": "Test resources for value, rarity, inimitability and organisation.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "resources"
+   ],
+   "expected_outputs": [
+    "output:capabilities_assessed"
+   ],
+   "evidence_needs": [
+    "resource assessments"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "wbs",
+   "name": "Work Breakdown Structure",
+   "family": "PROJECT_DELIVERY",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [
+    "WBS"
+   ],
+   "purpose": "Decompose the deliverable into manageable work packages.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "deliverable scope"
+   ],
+   "expected_outputs": [
+    "output:work_breakdown"
+   ],
+   "evidence_needs": [
+    "deliverable decomposition"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "weighted_decision_matrix",
+   "name": "Weighted Decision Matrix",
+   "family": "DECISION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [],
+   "purpose": "Compare options against weighted criteria.",
+   "applicability_predicates": [],
+   "contraindications": [
+    "consequence==critical"
+   ],
+   "expected_inputs": [
+    "options",
+    "weighted criteria"
+   ],
+   "expected_outputs": [
+    "decision:criteria_defined",
+    "decision:option_selected"
+   ],
+   "evidence_needs": [
+    "criterion weights and scores"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "weighted_scoring",
+   "name": "Weighted Scoring",
+   "family": "PRIORITIZATION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "scoring model"
+   ],
+   "purpose": "Rank items against weighted criteria.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "item list",
+    "criteria"
+   ],
+   "expected_outputs": [
+    "decision:priority_order"
+   ],
+   "evidence_needs": [
+    "criterion weights"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 2,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "wip_limits",
+   "name": "WIP Limits",
+   "family": "FLOW_BOTTLENECK",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [
+    "work-in-progress limits"
+   ],
+   "purpose": "Cap work in progress to expose and relieve bottlenecks.",
+   "applicability_predicates": [],
+   "contraindications": [],
+   "expected_inputs": [
+    "workflow states"
+   ],
+   "expected_outputs": [
+    "execute:flow_improved"
+   ],
+   "evidence_needs": [
+    "current WIP per state"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 1,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "wsjf",
+   "name": "Weighted Shortest Job First",
+   "family": "PRIORITIZATION",
+   "secondary_families": [],
+   "slot": "DECIDE",
+   "aliases": [
+    "WSJF"
+   ],
+   "purpose": "Sequence work by cost of delay divided by job size.",
+   "applicability_predicates": [
+    "measurement_available==true",
+    "time_pressure==high"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "item list"
+   ],
+   "expected_outputs": [
+    "decision:priority_order"
+   ],
+   "evidence_needs": [
+    "cost of delay and job size"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  },
+  {
+   "method_id": "x_matrix",
+   "name": "X-Matrix",
+   "family": "STRATEGY_EXECUTION",
+   "secondary_families": [],
+   "slot": "EXECUTE",
+   "aliases": [],
+   "purpose": "Link long-term goals, annual objectives, initiatives and metrics on one page.",
+   "applicability_predicates": [
+    "consequence in high|critical"
+   ],
+   "contraindications": [],
+   "expected_inputs": [
+    "objectives",
+    "initiatives"
+   ],
+   "expected_outputs": [
+    "output:objectives_cascaded"
+   ],
+   "evidence_needs": [
+    "correlations"
+   ],
+   "composable_with": [],
+   "conflicts_with": [],
+   "effort": 3,
+   "source_refs": [],
+   "provenance_status": "DESCRIPTION_UNVERIFIED"
+  }
+ ]
+}

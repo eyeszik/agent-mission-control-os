@@ -4,7 +4,7 @@
     "status": "pass_with_escalations",
     "validation_mode": "manual_structural_validation",
     "runtime_schema_validation_executed": false,
-    "runtime_schema_validation_reason": "No repository or executable schema validation harness was provided for this staged architecture run.",
+    "runtime_schema_validation_reason": "HISTORICAL: this staged architecture validation occurred before live repository verification; see superseding remediation record.",
     "overall_confidence": 0.79,
     "checks": {
       "completeness_check": {
@@ -39,8 +39,9 @@
     "blocking_issues": [
       {
         "id": "BLOCK-001",
-        "summary": "No repository was provided.",
-        "effect": "Implementation/package versions/file diffs/bundle verification are blocked."
+        "summary": "SUPERSEDED: live repository context is available; current validation status is determined by repository CI.",
+        "effect": "Historical blocker only; see superseding remediation record.",
+        "historical_summary": "No repository was provided."
       },
       {
         "id": "BLOCK-002",
@@ -58,6 +59,11 @@
         "effect": "Production release and unverified tool execution require human review."
       }
     ],
-    "final_validation_decision": "valid_architecture_bundle_requires_human_review_before_implementation_or_release"
+    "final_validation_decision": "valid_architecture_bundle_requires_human_review_before_implementation_or_release",
+    "provenance": {
+      "record_status": "HISTORICAL_SUPERSEDED",
+      "superseded_by": "docs/audit-remediation-2026-09-26.md",
+      "note": "This record predates live repository verification. Preserve it as provenance; repository-availability statements are not current runtime facts."
+    }
   }
 }

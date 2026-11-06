@@ -4,23 +4,27 @@ import json
 import os
 import sqlite3
 from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import datetime
 from typing import Any, Iterator
+from uuid import UUID
 
-from services.langgraph.persistence.sqlite_db import DB_PATH, init_db
+from services.langgraph.core.constants import AMC_DATABASE_BACKENDS, DB_BACKEND_POSTGRES, DB_BACKEND_SQLITE
+from services.langgraph.persistence import sqlite_db
 
-_VALID_BACKENDS = {"sqlite", "postgres"}
+_VALID_BACKENDS = frozenset(AMC_DATABASE_BACKENDS)
+_JOINED_SESSION: ContextVar[Any] = ContextVar("amc_explicit_atomic_session", default=None)
 
 
 def database_backend() -> str:
-    value = (os.environ.get("AMC_DATABASE_BACKEND") or "sqlite").strip().lower()
+    value = (os.environ.get("AMC_DATABASE_BACKEND") or DB_BACKEND_SQLITE).strip().lower()
     if value not in _VALID_BACKENDS:
         raise RuntimeError(f"Unsupported AMC_DATABASE_BACKEND={value!r}")
     return value
 
 
 def is_postgres() -> bool:
-    return database_backend() == "postgres"
+    return database_backend() == DB_BACKEND_POSTGRES
 
 
 def require_database_url() -> str:
@@ -49,7 +53,10 @@ def json_param(value: Any) -> Any:
 def decode_json(value: Any, default: Any = None) -> Any:
     if value is None:
         return default
-    if isinstance(value, str):
+    # SQLite stores JSON as text. psycopg already decodes json/jsonb columns,
+    # so on PostgreSQL a str is a JSON string value (e.g. jsonb '"Option A"')
+    # and must not be parsed a second time.
+    if isinstance(value, str) and not is_postgres():
         return json.loads(value)
     return value
 
@@ -59,6 +66,10 @@ def normalize_record(row: Any) -> dict:
     for key, value in list(record.items()):
         if isinstance(value, datetime):
             record[key] = value.isoformat()
+        elif isinstance(value, UUID):
+            # PostgreSQL uuid columns decode to uuid.UUID; SQLite stores text.
+            # Normalize so records serialize identically on both backends.
+            record[key] = str(value)
     return record
 
 
@@ -134,10 +145,16 @@ def _pooled_session() -> Iterator[DBSession]:
 
 @contextmanager
 def transaction(*, write: bool = False) -> Iterator[DBSession]:
+    joined = _JOINED_SESSION.get()
+    if joined is not None:
+        yield joined
+        return
     postgres = is_postgres()
     if not postgres:
-        init_db()
-        conn = sqlite3.connect(DB_PATH, isolation_level=None)
+        # Resolve the path at call time so init_db() and this connection always
+        # target the same file, even if sqlite_db.DB_PATH was repointed.
+        sqlite_db.init_db()
+        conn = sqlite3.connect(sqlite_db.DB_PATH, isolation_level=None)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
         conn.execute("PRAGMA busy_timeout = 5000")
@@ -182,3 +199,19 @@ def ping_database() -> bool:
     with transaction() as db:
         row = db.execute("SELECT 1 AS ok").fetchone()
         return bool(row and row["ok"] == 1)
+
+
+@contextmanager
+def atomic_transaction() -> Iterator[DBSession]:
+    """Explicitly compose existing persistence APIs into one transaction.
+
+    Ordinary callers keep their previous behavior. Only code inside this
+    scope joins a session; escaping exceptions roll the entire scope back.
+    Never enter this scope across an await or around untrusted worker code.
+    """
+    with transaction(write=True) as db:
+        token = _JOINED_SESSION.set(db)
+        try:
+            yield db
+        finally:
+            _JOINED_SESSION.reset(token)

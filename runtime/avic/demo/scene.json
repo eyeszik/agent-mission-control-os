@@ -1,0 +1,619 @@
+{
+  "compilation": {
+    "brand_hash": "b8b7fcb3831bcecbf6d5e442c5fc520e1dd61e0796e449397fe40a69b5841664",
+    "compiler_version": "amc-avic-compiler/0.1.0",
+    "max_objects": 400,
+    "max_svg_bytes": 512000,
+    "reference_manifest_hash": "2becfed2b7ba81936abc4313b32c8192eb31bdb36617a36e887fadd3132598e4",
+    "schema_version": "amc-avic/1",
+    "seed": 7
+  },
+  "composition": {
+    "focal_object": "motif-ring-outer",
+    "grid_columns": 12,
+    "margin": 84.0,
+    "negative_space_target": 0.55,
+    "style_profile": "post-surrealist-editorial"
+  },
+  "constraints": [
+    {
+      "constraint_id": "exact.headline",
+      "kind": "exact_text",
+      "requirement_refs": [
+        "text.0"
+      ],
+      "severity": "CRITICAL",
+      "target": [
+        "headline"
+      ],
+      "tolerance": null,
+      "verification": "SVG text == brief"
+    },
+    {
+      "constraint_id": "exact.annotation",
+      "kind": "exact_text",
+      "requirement_refs": [
+        "text.1"
+      ],
+      "severity": "CRITICAL",
+      "target": [
+        "annotation"
+      ],
+      "tolerance": null,
+      "verification": "SVG text == brief"
+    },
+    {
+      "constraint_id": "protected.motif",
+      "kind": "protected_geometry",
+      "requirement_refs": [],
+      "severity": "CRITICAL",
+      "target": [
+        "motif-ring-outer",
+        "motif-ring-inner",
+        "motif-axis"
+      ],
+      "tolerance": null,
+      "verification": "geometry attributes unchanged by any edit or repair"
+    },
+    {
+      "constraint_id": "palette",
+      "kind": "palette",
+      "requirement_refs": [],
+      "severity": "CRITICAL",
+      "target": [],
+      "tolerance": 2.3,
+      "verification": "every literal colour within dE76 2.3 of the brand palette"
+    },
+    {
+      "constraint_id": "contrast.headline",
+      "kind": "contrast",
+      "requirement_refs": [],
+      "severity": "CRITICAL",
+      "target": [
+        "headline",
+        "background"
+      ],
+      "tolerance": 4.5,
+      "verification": "WCAG 2.2 ratio of headline fill on ground"
+    },
+    {
+      "constraint_id": "contrast.annotation",
+      "kind": "contrast",
+      "requirement_refs": [],
+      "severity": "CRITICAL",
+      "target": [
+        "annotation",
+        "background"
+      ],
+      "tolerance": 4.5,
+      "verification": "WCAG 2.2 ratio of annotation fill on ground"
+    },
+    {
+      "constraint_id": "contrast.motif",
+      "kind": "contrast",
+      "requirement_refs": [],
+      "severity": "CRITICAL",
+      "target": [
+        "motif-ring-outer",
+        "background"
+      ],
+      "tolerance": 3.0,
+      "verification": "WCAG 2.2 graphic contrast of the accent motif on ground"
+    },
+    {
+      "constraint_id": "accent.single",
+      "kind": "single_accent",
+      "requirement_refs": [],
+      "severity": "CRITICAL",
+      "target": [],
+      "tolerance": 1.0,
+      "verification": "at most N accent colours used"
+    },
+    {
+      "constraint_id": "profile",
+      "kind": "profile",
+      "requirement_refs": [],
+      "severity": "CRITICAL",
+      "target": [],
+      "tolerance": null,
+      "verification": "no raster in a native profile"
+    }
+  ],
+  "document": {
+    "color_space": "sRGB",
+    "height": 1500,
+    "output_profile": "NATIVE_EDITABLE_VECTOR",
+    "source_digest": "0b22ddf758cc4783065fa81762eabe3512331e1cd7c45b0bb3891d16010649cd",
+    "title": "MADE SLOWLY",
+    "width": 1200
+  },
+  "evidence": [
+    {
+      "confidence": 1.0,
+      "interpretation": "COLOR reference: colour candidates only, no shapes copied",
+      "observation": "quantised palette ['#446633', '#888888', '#778888', '#556699', '#335599']",
+      "provenance": "OBSERVED",
+      "source": "ref-local"
+    },
+    {
+      "confidence": 0.6,
+      "interpretation": "selects brand accent 'signal_red' (nearest by dE76); adds no colour",
+      "observation": "most saturated observed colour #335599",
+      "provenance": "INFERRED",
+      "source": "ref-local"
+    },
+    {
+      "confidence": 1.0,
+      "interpretation": "below 3:1 for graphics: ink becomes the ground",
+      "observation": "accent #ff4c2f on ground #f0eee9 is 2.86:1",
+      "provenance": "INFERRED",
+      "source": "brand:foundry.psem.PALETTE"
+    },
+    {
+      "confidence": 1.0,
+      "interpretation": "layout and motif chosen by the selected profile",
+      "observation": "one signal accent; monumental negative space; optical asymmetry; matte, fine grain; technical annotation; neo-grotesk type",
+      "provenance": "ARTIST_DEFINED",
+      "source": "profile:post-surrealist-editorial"
+    },
+    {
+      "confidence": 0.7,
+      "interpretation": "estimated width 737px (advance 0.62em, an estimate)",
+      "observation": "headline 11 chars at 108.0px",
+      "provenance": "APPROXIMATED",
+      "source": "compiler"
+    }
+  ],
+  "gradients": [
+    {
+      "coords": {
+        "cx": 0.5,
+        "cy": 0.5,
+        "fx": 0.302,
+        "fy": 0.302,
+        "r": 0.5
+      },
+      "gradient_id": "material-object-body",
+      "kind": "radial",
+      "provenance": "APPROXIMATED",
+      "stops": [
+        {
+          "color": "#f0eee9",
+          "offset": 0.0,
+          "opacity": 0.6499999999999999
+        },
+        {
+          "color": "#323234",
+          "offset": 0.4075,
+          "opacity": 1.0
+        },
+        {
+          "color": "#171719",
+          "offset": 1.0,
+          "opacity": 1.0
+        }
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "appearance": {
+        "blur": null,
+        "fill": "#171719",
+        "font_size": null,
+        "font_weight": null,
+        "letter_spacing": null,
+        "opacity": 1.0,
+        "stroke": null,
+        "stroke_width": 0.0,
+        "text_anchor": null
+      },
+      "dependencies": [],
+      "geometry": {
+        "clip_to": null,
+        "params": {
+          "height": 1500.0,
+          "width": 1200.0,
+          "x": 0.0,
+          "y": 0.0
+        },
+        "path": [],
+        "points": [],
+        "primitive": "rect",
+        "rotate": 0.0
+      },
+      "material_ref": null,
+      "object_id": "background",
+      "parent_id": null,
+      "protected": false,
+      "representation": "native_vector",
+      "requirement_refs": [],
+      "semantic_role": "background",
+      "text": null
+    },
+    {
+      "appearance": {
+        "blur": "grain",
+        "fill": "#f0eee9",
+        "font_size": null,
+        "font_weight": null,
+        "letter_spacing": null,
+        "opacity": 0.07,
+        "stroke": null,
+        "stroke_width": 0.0,
+        "text_anchor": null
+      },
+      "dependencies": [
+        "background"
+      ],
+      "geometry": {
+        "clip_to": null,
+        "params": {
+          "height": 1500.0,
+          "width": 1200.0,
+          "x": 0.0,
+          "y": 0.0
+        },
+        "path": [],
+        "points": [],
+        "primitive": "rect",
+        "rotate": 0.0
+      },
+      "material_ref": null,
+      "object_id": "grain",
+      "parent_id": null,
+      "protected": false,
+      "representation": "native_vector",
+      "requirement_refs": [],
+      "semantic_role": "texture",
+      "text": null
+    },
+    {
+      "appearance": {
+        "blur": null,
+        "fill": "none",
+        "font_size": null,
+        "font_weight": null,
+        "letter_spacing": null,
+        "opacity": 1.0,
+        "stroke": "#ff4c2f",
+        "stroke_width": 7.2,
+        "text_anchor": null
+      },
+      "dependencies": [],
+      "geometry": {
+        "clip_to": null,
+        "params": {
+          "cx": 792.0,
+          "cy": 630.0,
+          "r": 288.0
+        },
+        "path": [],
+        "points": [],
+        "primitive": "circle",
+        "rotate": 0.0
+      },
+      "material_ref": null,
+      "object_id": "motif-ring-outer",
+      "parent_id": null,
+      "protected": true,
+      "representation": "native_vector",
+      "requirement_refs": [
+        "req.content.0"
+      ],
+      "semantic_role": "motif",
+      "text": null
+    },
+    {
+      "appearance": {
+        "blur": null,
+        "fill": "none",
+        "font_size": null,
+        "font_weight": null,
+        "letter_spacing": null,
+        "opacity": 1.0,
+        "stroke": "#f0eee9",
+        "stroke_width": 3.6,
+        "text_anchor": null
+      },
+      "dependencies": [],
+      "geometry": {
+        "clip_to": null,
+        "params": {
+          "cx": 792.0,
+          "cy": 630.0,
+          "r": 172.79999999999998
+        },
+        "path": [],
+        "points": [],
+        "primitive": "circle",
+        "rotate": 0.0
+      },
+      "material_ref": null,
+      "object_id": "motif-ring-inner",
+      "parent_id": null,
+      "protected": true,
+      "representation": "native_vector",
+      "requirement_refs": [
+        "req.content.0"
+      ],
+      "semantic_role": "motif",
+      "text": null
+    },
+    {
+      "appearance": {
+        "blur": null,
+        "fill": "none",
+        "font_size": null,
+        "font_weight": null,
+        "letter_spacing": null,
+        "opacity": 1.0,
+        "stroke": "#f0eee9",
+        "stroke_width": 2.52,
+        "text_anchor": null
+      },
+      "dependencies": [],
+      "geometry": {
+        "clip_to": null,
+        "params": {},
+        "path": [
+          {
+            "coords": [
+              84.0,
+              630.0
+            ],
+            "op": "M"
+          },
+          {
+            "coords": [
+              1116.0,
+              630.0
+            ],
+            "op": "L"
+          }
+        ],
+        "points": [],
+        "primitive": "path",
+        "rotate": 0.0
+      },
+      "material_ref": null,
+      "object_id": "motif-axis",
+      "parent_id": null,
+      "protected": true,
+      "representation": "native_vector",
+      "requirement_refs": [
+        "req.content.0"
+      ],
+      "semantic_role": "motif",
+      "text": null
+    },
+    {
+      "appearance": {
+        "blur": null,
+        "fill": "url(#material-object-body)",
+        "font_size": null,
+        "font_weight": null,
+        "letter_spacing": null,
+        "opacity": 1.0,
+        "stroke": null,
+        "stroke_width": 0.0,
+        "text_anchor": null
+      },
+      "dependencies": [],
+      "geometry": {
+        "clip_to": null,
+        "params": {
+          "cx": 324.0,
+          "cy": 1110.0,
+          "r": 156.0
+        },
+        "path": [],
+        "points": [],
+        "primitive": "circle",
+        "rotate": 0.0
+      },
+      "material_ref": "mat-ceramic",
+      "object_id": "material-object",
+      "parent_id": null,
+      "protected": false,
+      "representation": "native_vector",
+      "requirement_refs": [
+        "req.content.1"
+      ],
+      "semantic_role": "material_object",
+      "text": null
+    },
+    {
+      "appearance": {
+        "blur": "soft",
+        "fill": "#f0eee9",
+        "font_size": null,
+        "font_weight": null,
+        "letter_spacing": null,
+        "opacity": 0.367,
+        "stroke": null,
+        "stroke_width": 0.0,
+        "text_anchor": null
+      },
+      "dependencies": [
+        "material-object"
+      ],
+      "geometry": {
+        "clip_to": "material-object",
+        "params": {
+          "cx": 274.3611039607044,
+          "cy": 1060.3611039607044,
+          "rx": 74.256,
+          "ry": 37.128
+        },
+        "path": [],
+        "points": [],
+        "primitive": "ellipse",
+        "rotate": 45.0
+      },
+      "material_ref": "mat-ceramic",
+      "object_id": "material-object-highlight",
+      "parent_id": null,
+      "protected": false,
+      "representation": "native_vector",
+      "requirement_refs": [],
+      "semantic_role": "highlight",
+      "text": null
+    },
+    {
+      "appearance": {
+        "blur": "soft",
+        "fill": "#f0eee9",
+        "font_size": null,
+        "font_weight": null,
+        "letter_spacing": null,
+        "opacity": 0.06,
+        "stroke": null,
+        "stroke_width": 0.0,
+        "text_anchor": null
+      },
+      "dependencies": [],
+      "geometry": {
+        "clip_to": null,
+        "params": {
+          "cx": 240.0,
+          "cy": 330.0,
+          "rx": 360.0,
+          "ry": 180.0
+        },
+        "path": [],
+        "points": [],
+        "primitive": "ellipse",
+        "rotate": -20.0
+      },
+      "material_ref": null,
+      "object_id": "lighting-key",
+      "parent_id": null,
+      "protected": false,
+      "representation": "native_vector",
+      "requirement_refs": [],
+      "semantic_role": "lighting",
+      "text": null
+    },
+    {
+      "appearance": {
+        "blur": null,
+        "fill": "#f0eee9",
+        "font_size": 108.0,
+        "font_weight": 700,
+        "letter_spacing": -2.16,
+        "opacity": 1.0,
+        "stroke": null,
+        "stroke_width": 0.0,
+        "text_anchor": null
+      },
+      "dependencies": [],
+      "geometry": {
+        "clip_to": null,
+        "params": {
+          "x": 84.0,
+          "y": 192.0
+        },
+        "path": [],
+        "points": [],
+        "primitive": "text",
+        "rotate": 0.0
+      },
+      "material_ref": null,
+      "object_id": "headline",
+      "parent_id": null,
+      "protected": true,
+      "representation": "native_vector",
+      "requirement_refs": [
+        "text.0"
+      ],
+      "semantic_role": "headline",
+      "text": "MADE SLOWLY"
+    },
+    {
+      "appearance": {
+        "blur": null,
+        "fill": "none",
+        "font_size": null,
+        "font_weight": null,
+        "letter_spacing": null,
+        "opacity": 1.0,
+        "stroke": "#838185",
+        "stroke_width": 1.0,
+        "text_anchor": null
+      },
+      "dependencies": [],
+      "geometry": {
+        "clip_to": null,
+        "params": {},
+        "path": [
+          {
+            "coords": [
+              84.0,
+              1379.04
+            ],
+            "op": "M"
+          },
+          {
+            "coords": [
+              348.0,
+              1379.04
+            ],
+            "op": "L"
+          }
+        ],
+        "points": [],
+        "primitive": "path",
+        "rotate": 0.0
+      },
+      "material_ref": null,
+      "object_id": "annotation-rule",
+      "parent_id": null,
+      "protected": false,
+      "representation": "native_vector",
+      "requirement_refs": [
+        "text.1",
+        "req.content.2"
+      ],
+      "semantic_role": "rule",
+      "text": null
+    },
+    {
+      "appearance": {
+        "blur": null,
+        "fill": "#838185",
+        "font_size": 16.8,
+        "font_weight": 400,
+        "letter_spacing": 1.34,
+        "opacity": 1.0,
+        "stroke": null,
+        "stroke_width": 0.0,
+        "text_anchor": null
+      },
+      "dependencies": [],
+      "geometry": {
+        "clip_to": null,
+        "params": {
+          "x": 84.0,
+          "y": 1416.0
+        },
+        "path": [],
+        "points": [],
+        "primitive": "text",
+        "rotate": 0.0
+      },
+      "material_ref": null,
+      "object_id": "annotation",
+      "parent_id": null,
+      "protected": true,
+      "representation": "native_vector",
+      "requirement_refs": [
+        "text.1",
+        "req.content.2"
+      ],
+      "semantic_role": "annotation",
+      "text": "FIG. 07 / KILN OPENING 2027"
+    }
+  ],
+  "schema_version": "amc-avic/1"
+}

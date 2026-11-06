@@ -7,6 +7,7 @@ from typing import FrozenSet
 import httpx
 from fastapi import HTTPException, Request, status
 
+from services.langgraph.core.constants import AUTH_MODE_DISABLED, AUTH_MODE_LOCAL, AUTH_MODE_SUPABASE
 from services.langgraph.persistence.memberships import list_active_memberships
 
 
@@ -97,10 +98,10 @@ def _supabase_principal(request: Request) -> Principal:
 
 
 def get_principal(request: Request) -> Principal:
-    mode = os.environ.get("AMC_AUTH_MODE", "disabled").strip().lower()
-    if mode == "local":
+    mode = os.environ.get("AMC_AUTH_MODE", AUTH_MODE_DISABLED).strip().lower()
+    if mode == AUTH_MODE_LOCAL:
         return _local_principal(request)
-    if mode == "supabase":
+    if mode == AUTH_MODE_SUPABASE:
         return _supabase_principal(request)
     raise HTTPException(status_code=503, detail="Authentication provider is not configured")
 

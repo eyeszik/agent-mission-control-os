@@ -1,3 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "services/*"
+
+overrides:
+  sharp: ">=0.35.5 <0.36.0"

@@ -1,0 +1,159 @@
+{
+  "base_commit": "7f7db50850c0b4175e6be1c9b894b847a1004d8d",
+  "branch": "claude/ai-agency-pipeline-oae65z",
+  "modules": {
+    "M2 Brand Genome": [
+      "agency/vnexus/genome.py",
+      "agency/vnexus/service.py",
+      "persistence/vnexus.py",
+      "migration 15"
+    ],
+    "M3 Temporal knowledge graph": [
+      "agency/vnexus/graph.py",
+      "agency/vnexus/creative_service.py"
+    ],
+    "M4 Creative multiverse": [
+      "agency/vnexus/multiverse.py",
+      "agency/vnexus/creative_service.py"
+    ],
+    "M5 Experience compiler": [
+      "agency/vnexus/experience.py",
+      "agency/vnexus/bridge.py"
+    ],
+    "M6 Art director": [
+      "agency/vnexus/art_director.py"
+    ],
+    "M7 Identity production": [
+      "agency/vnexus/identity.py",
+      "agency/vnexus/production.py"
+    ],
+    "M8 Video and motion": [
+      "agency/vnexus/video.py",
+      "agency/vnexus/production.py"
+    ],
+    "M9 Marketing intelligence": [
+      "agency/vnexus/marketing.py",
+      "agency/vnexus/intelligence_service.py"
+    ],
+    "M10 Prompt genome + media fabric": [
+      "agency/vnexus/prompt_genome.py",
+      "agency/vnexus/media_fabric.py",
+      "agency/vnexus/fabric_service.py"
+    ],
+    "M11 Immune system + digital twin": [
+      "agency/vnexus/immune.py",
+      "agency/vnexus/twin.py",
+      "agency/vnexus/intelligence_service.py"
+    ],
+    "M12 VNEXUS Studio UI": [
+      "apps/web/components/mission-control/vnexus/*",
+      "packages/shared/src/schemas/vnexus.ts"
+    ],
+    "M13 Security sweep": [
+      "services/langgraph/tests/test_vnexus_security.py"
+    ]
+  },
+  "status": {
+    "implemented_and_verified": [
+      "M2",
+      "M3",
+      "M4",
+      "M5 (renderable targets)",
+      "M6",
+      "M7",
+      "M8 Path A",
+      "M9",
+      "M10 (compiler path, media fabric local + mock)",
+      "M11",
+      "M12",
+      "M13"
+    ],
+    "implemented_but_unverified": [
+      "behaviour on Postgres under concurrent load beyond the advisory-lock tests"
+    ],
+    "planned": [
+      "SAAS_DASHBOARD / WEB_APPLICATION implementations (spec only)",
+      "async job worker"
+    ],
+    "blocked": [
+      "M8 Path B AI video and hosted text-to-image: no adapter, no credentials, paid calls not authorized",
+      "import of the 14 original prompts: sources not supplied"
+    ],
+    "requires_human_authorization": [
+      "merge",
+      "deploy / apply migration 15 in production",
+      "paid provider calls",
+      "every approval decision"
+    ]
+  },
+  "migrations": [
+    "15: supabase/migrations/20261011_amc_vnexus_v1.sql (additive; eleven amc.vnexus_* tables; no data rewritten)"
+  ],
+  "changed_files": [
+    ".github/workflows/vnexus-brand-genome.yml",
+    "CLAUDE.md",
+    "README.md",
+    "apps/web/app/mission-control/page.tsx",
+    "apps/web/components/mission-control/vnexus/GenomeAreas.tsx",
+    "apps/web/components/mission-control/vnexus/GraphAreas.tsx",
+    "apps/web/components/mission-control/vnexus/IntelligenceAreas.tsx",
+    "apps/web/components/mission-control/vnexus/ProductionAreas.tsx",
+    "apps/web/components/mission-control/vnexus/VnexusStudio.tsx",
+    "apps/web/components/mission-control/vnexus/ui.tsx",
+    "apps/web/e2e/vnexus-studio.spec.ts",
+    "apps/web/lib/api/vnexus.ts",
+    "apps/web/lib/design/brand-genome.ts",
+    "apps/web/lib/design/vnexus-editor.ts",
+    "apps/web/lib/stores/vnexusStore.ts",
+    "apps/web/tests/brand-genome.test.ts",
+    "apps/web/tests/fixtures/vnexus-genome-parity.json",
+    "apps/web/tests/vnexus-editor.test.ts",
+    "docs/vnexus-ace-v9-integration.md",
+    "docs/vnexus-ace.md",
+    "manifest.json",
+    "packages/shared/src/index.ts",
+    "packages/shared/src/schemas/vnexus.ts",
+    "packages/shared/tests/fixtures/vnexus.json",
+    "packages/shared/tests/vnexus.test.ts",
+    "services/langgraph/agency/foundry/experience.py",
+    "services/langgraph/agency/visual/browser.py",
+    "services/langgraph/agency/visual/browser_runner.cjs",
+    "services/langgraph/agency/vnexus/__init__.py",
+    "services/langgraph/agency/vnexus/art_director.py",
+    "services/langgraph/agency/vnexus/bridge.py",
+    "services/langgraph/agency/vnexus/creative_service.py",
+    "services/langgraph/agency/vnexus/experience.py",
+    "services/langgraph/agency/vnexus/fabric_service.py",
+    "services/langgraph/agency/vnexus/genome.py",
+    "services/langgraph/agency/vnexus/graph.py",
+    "services/langgraph/agency/vnexus/identity.py",
+    "services/langgraph/agency/vnexus/immune.py",
+    "services/langgraph/agency/vnexus/intelligence_service.py",
+    "services/langgraph/agency/vnexus/marketing.py",
+    "services/langgraph/agency/vnexus/media_fabric.py",
+    "services/langgraph/agency/vnexus/multiverse.py",
+    "services/langgraph/agency/vnexus/production.py",
+    "services/langgraph/agency/vnexus/prompt_genome.py",
+    "services/langgraph/agency/vnexus/service.py",
+    "services/langgraph/agency/vnexus/twin.py",
+    "services/langgraph/agency/vnexus/video.py",
+    "services/langgraph/api/routes/foundry.py",
+    "services/langgraph/api/routes/vnexus.py",
+    "services/langgraph/app/main.py",
+    "services/langgraph/persistence/sqlite_db.py",
+    "services/langgraph/persistence/vnexus.py",
+    "services/langgraph/tests/_vnexus_support.py",
+    "services/langgraph/tests/test_brand_production_foundation.py",
+    "services/langgraph/tests/test_vnexus_contracts.py",
+    "services/langgraph/tests/test_vnexus_genome.py",
+    "services/langgraph/tests/test_vnexus_graph_multiverse.py",
+    "services/langgraph/tests/test_vnexus_intelligence.py",
+    "services/langgraph/tests/test_vnexus_production.py",
+    "services/langgraph/tests/test_vnexus_security.py",
+    "supabase/migrations/20261011_amc_vnexus_v1.sql",
+    "workspace/capability_matrix.json",
+    "workspace/repository_audit.json",
+    "workspace/state_checkpoint.json",
+    "workspace/task_graph.json"
+  ]
+}

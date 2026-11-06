@@ -1,0 +1,80 @@
+.PHONY: help check-env tokens-build tokens-check ui-ux-compile prompt-family compiled-plan compiled-twin fabric-run creative-run brand-plan brand-roles prompt-compile guidance-validate brand-validate setup-agent gates
+
+help:
+	@echo "Available commands:"
+	@echo "  make check-env                  - Environment pre-flight check"
+	@echo "  make tokens-build               - Compile apps/web/tokens/amc.tokens.json (DTCG) into apps/web/app/tokens.css"
+	@echo "  make tokens-check               - Dry run: fail if the generated token CSS is stale (writes nothing)"
+	@echo "  make ui-ux-compile [REQUEST=f]  - Compile a governed UI/UX spec (prints only; generates no UI)"
+	@echo "  make compiled-plan [REQUEST=f]  - Compile a Compiled Agency plan (plans only; executes nothing)"
+	@echo "  make compiled-twin              - Run the digital-twin shadow scenarios S1-S13"
+	@echo "  make fabric-run [REQUEST=f]     - Execute a mission through the execution fabric (LOCAL; writes ProjectOS artifacts)"
+	@echo "  make creative-run [REQUEST=f]   - Run the creative search runtime to the human selection gate (no model/publish/spend)"
+	@echo "  make brand-plan [BRIEF=f.json]  - Plan a brief against the agency kernel"
+	@echo "  make brand-roles [DEPT=brand]   - List N3 role contracts"
+	@echo "  make prompt-compile [REQUEST=f]  - Compile validated prompt packages only"
+	@echo "  make prompt-family [REQUEST=f]   - Compile a reusable prompt family (no media, ads, products, publication or spend)"
+	@echo "  make guidance-validate          - Validate repository guidance packs"
+	@echo "  make brand-validate             - Run the kernel's structural self-checks"
+	@echo "  make setup-agent                - Run workspace setup script"
+	@echo "  make gates                      - Run every CI verifier gate"
+
+# === Added by Brand Orchestration System ===
+check-env:
+	@python3 check_env.py
+
+tokens-build:
+	@python3 compile_tokens.py
+
+tokens-check:
+	@python3 compile_tokens.py --check
+
+# Prints a spec summary; pass OUTPUT=path to write the full spec JSON.
+ui-ux-compile:
+	@python3 orchestrate_brand_pipeline.py ui-ux --input $(if $(REQUEST),$(REQUEST),sample_ui_ux_request.json) $(if $(OUTPUT),--output $(OUTPUT),)
+
+# Plans only; exits non-zero when a structural blocker (not a human gate) exists.
+compiled-plan:
+	@python3 orchestrate_brand_pipeline.py compiled-plan --input $(if $(REQUEST),$(REQUEST),sample_compiled_request.json)
+
+compiled-twin:
+	@python3 orchestrate_brand_pipeline.py compiled-twin
+
+# Executes eligible cells locally and stops at the human approval boundary.
+fabric-run:
+	@python3 orchestrate_brand_pipeline.py fabric-run --input $(if $(REQUEST),$(REQUEST),sample_fabric_mission.json)
+
+# Deterministic; stops at the human selection gate. Writes nothing unless OUTPUT=dir is given.
+creative-run:
+	@python3 orchestrate_brand_pipeline.py creative-run --input $(if $(REQUEST),$(REQUEST),sample_creative_mission.json) $(if $(OUTPUT),--output $(OUTPUT),) --compare
+
+# Plans only; generates nothing. Exits non-zero when the kernel blocks the run.
+brand-plan:
+	@python3 orchestrate_brand_pipeline.py plan --input $(if $(BRIEF),$(BRIEF),sample_brief.json)
+
+brand-roles:
+	@python3 orchestrate_brand_pipeline.py roles $(if $(DEPT),--department $(DEPT),)
+
+prompt-compile:
+	@python3 orchestrate_brand_pipeline.py compile-prompts --input $(if $(REQUEST),$(REQUEST),sample_prompt_request.json) --json
+
+prompt-family:
+	@python3 orchestrate_brand_pipeline.py prompt-family --input $(if $(REQUEST),$(REQUEST),sample_prompt_family_request.json) --output /dev/null
+
+guidance-validate:
+	@python3 scripts/verify_guidance_registry.py
+
+brand-validate:
+	@python3 orchestrate_brand_pipeline.py validate
+
+setup-agent:
+	@bash ./setup-workspace-v5.sh
+
+gates:
+	@python3 scripts/verify_repository_invariants.py
+	@python3 scripts/verify_production_readiness.py
+	@python3 scripts/verify_auth_bindings.py
+	@python3 scripts/verify_ontology_parity.py
+	@python3 scripts/verify_design_tokens.py
+	@python3 scripts/verify_manifest.py
+	@python3 scripts/verify_guidance_registry.py

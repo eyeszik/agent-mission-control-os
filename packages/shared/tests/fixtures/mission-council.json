@@ -1,0 +1,2374 @@
+{
+  "blueprint": {
+    "blueprint_id": "bp_37d1c9ea09a148fd89f6",
+    "content": {
+      "idea": {
+        "idea_id": "idea_db2b7bad8cc74d219276",
+        "title": "Agent metrics widget"
+      },
+      "scaffold": {
+        "components": [
+          {
+            "name": "AgentMetricsWidgetPage",
+            "props": [],
+            "purpose": "Route-level layout for Agent metrics widget"
+          },
+          {
+            "name": "RealTimeMetricsPanel",
+            "props": [
+              "title"
+            ],
+            "purpose": "Real-time metrics for council activity"
+          },
+          {
+            "name": "ShowDashboardTimelinePanel",
+            "props": [
+              "title"
+            ],
+            "purpose": "Show a dashboard timeline"
+          }
+        ],
+        "design_tokens": [
+          "semantic.color.surface",
+          "semantic.color.foreground",
+          "semantic.color.accent",
+          "semantic.font.size.h2",
+          "semantic.space.section",
+          "semantic.motion.duration.reveal"
+        ],
+        "files": [
+          {
+            "path": "README.md",
+            "sha256": "df2b872518228f5c1111ff009d68c47aeb769e53112b6164778d5e08056c3827"
+          },
+          {
+            "path": "components/AgentMetricsWidgetPage.tsx",
+            "sha256": "7bcfcd918edab8a61b42c1e2b679485922f77ffcfdbe4b6e88a1d5295178555f"
+          },
+          {
+            "path": "components/RealTimeMetricsPanel.tsx",
+            "sha256": "0ad7875a650acb7cf4ab70c4733d19304dc49a80fb9e571cecc1d46f88d4d47c"
+          },
+          {
+            "path": "components/ShowDashboardTimelinePanel.tsx",
+            "sha256": "28c89002b7dd31e91e4d4c9f353b36ca01f737636a90d1608e4f5401dfad2926"
+          }
+        ],
+        "source_engine": "langgraph",
+        "summary": "Scaffold for 'Agent metrics widget': 3 component(s) on the shared tokens."
+      },
+      "security": {
+        "approvals": [
+          {
+            "decision": "approve",
+            "engine": "langgraph",
+            "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21"
+          }
+        ],
+        "findings": [
+          {
+            "code": "WRITE_ACTION_REQUESTED",
+            "detail": "workspace.write_scaffold -> council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+            "seen_in": [
+              "msn_5d2793bced95440d990ef16c2fa7da21",
+              "msn_f651c5d851fd4bc589eb1b942feb0406"
+            ],
+            "severity": "MEDIUM",
+            "source": "POLICY"
+          }
+        ],
+        "level": "MEDIUM"
+      },
+      "strategy": {
+        "architecture": [
+          "Next.js route in apps/web using the design tokens and motion primitives",
+          "Orchestration through the mission council engines with checkpointed state"
+        ],
+        "goals": [
+          "Real-time metrics for council activity",
+          "Show a dashboard timeline"
+        ],
+        "source_engine": "langgraph",
+        "summary": "Decomposed 'Agent metrics widget' into 2 goal(s) and a 7-task dependency graph spanning 2 architecture area(s).",
+        "tasks": [
+          {
+            "acceptance": "Acceptance criteria written and agreed before build starts",
+            "depends_on": [],
+            "id": "clarify",
+            "seat": "george",
+            "title": "Confirm scope and success criteria for Agent metrics widget"
+          },
+          {
+            "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+            "depends_on": [
+              "clarify"
+            ],
+            "id": "design-1",
+            "seat": "arty",
+            "title": "Design: Real-time metrics for council activity"
+          },
+          {
+            "acceptance": "Implemented behind the existing API with typed contracts and tests",
+            "depends_on": [
+              "design-1"
+            ],
+            "id": "build-1",
+            "seat": "arty",
+            "title": "Build: Real-time metrics for council activity"
+          },
+          {
+            "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+            "depends_on": [
+              "clarify"
+            ],
+            "id": "design-2",
+            "seat": "arty",
+            "title": "Design: Show a dashboard timeline"
+          },
+          {
+            "acceptance": "Implemented behind the existing API with typed contracts and tests",
+            "depends_on": [
+              "design-2"
+            ],
+            "id": "build-2",
+            "seat": "arty",
+            "title": "Build: Show a dashboard timeline"
+          },
+          {
+            "acceptance": "No unapproved side effects; secrets never logged or rendered",
+            "depends_on": [
+              "build-1",
+              "build-2"
+            ],
+            "id": "security-review",
+            "seat": "fable",
+            "title": "Security, permission and secret-handling review"
+          },
+          {
+            "acceptance": "WCAG 2.2 AA checks pass and acceptance criteria are met",
+            "depends_on": [
+              "security-review"
+            ],
+            "id": "verify",
+            "seat": "george",
+            "title": "Verify accessibility, performance and acceptance criteria"
+          }
+        ]
+      }
+    },
+    "content_hash": "e5c8c1de444ad640cf4bbf8c14af7ebccd8106966a3dcef7e5e7c0d392b0ad8e",
+    "created_at": "2026-10-22T03:48:40.351615+00:00",
+    "created_by": "council-author",
+    "idea_id": "idea_db2b7bad8cc74d219276",
+    "project_id": "proj-council-d836dc257a",
+    "promoted_at": "2026-10-22T03:48:40.381538+00:00",
+    "promoted_by": "council-author",
+    "sources": [
+      {
+        "engine": "langgraph",
+        "excluded_reason": null,
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "status": "completed",
+        "used_for": [
+          "strategy",
+          "scaffold",
+          "security"
+        ]
+      },
+      {
+        "engine": "langgraph",
+        "excluded_reason": "mission needs_approval",
+        "mission_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+        "status": "needs_approval",
+        "used_for": [
+          "security"
+        ]
+      }
+    ],
+    "status": "PROMOTED",
+    "tenant_id": "tenant-events-test",
+    "verification": {
+      "content_hash_ok": true,
+      "missions": [
+        {
+          "checkpoints": "6 checkpoint(s) verified",
+          "events": 19,
+          "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+          "problems": [],
+          "verified": true
+        }
+      ],
+      "verified": true
+    }
+  },
+  "checkpoints": {
+    "chain_detail": "6 checkpoint(s) verified",
+    "chain_verified": true,
+    "checkpoints": [
+      {
+        "checkpoint_id": "cp_1e743c10b93c4ac88da8",
+        "created_at": "2026-10-22T03:48:39.015746+00:00",
+        "engine": "langgraph",
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "native_checkpoint_id": null,
+        "phase": "STRATEGY",
+        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "seq": 0,
+        "state_hash": "24bc26879a1845afa60524eb23220d4f9d853da5d2986bd974b13827727f04a1"
+      },
+      {
+        "checkpoint_id": "cp_f2eb62996868441ebf33",
+        "created_at": "2026-10-22T03:48:39.057891+00:00",
+        "engine": "langgraph",
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "native_checkpoint_id": null,
+        "phase": "STRATEGY",
+        "prev_hash": "311bf664b4f4cb596545c81e8665123f28c4bdd5fb137156e9db3fa9d93a174c",
+        "seq": 1,
+        "state_hash": "5972523058571308407d3cf5b6b9d1e21ba5bfd9cffd8f7b94d517f53aeaff5c"
+      },
+      {
+        "checkpoint_id": "cp_b7637702c65343338469",
+        "created_at": "2026-10-22T03:48:39.074653+00:00",
+        "engine": "langgraph",
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "native_checkpoint_id": null,
+        "phase": "AUDIT",
+        "prev_hash": "ddf4aa4866df22cd7721101ca472533e27198af9d0fddbf5b2aaed1998693b3c",
+        "seq": 2,
+        "state_hash": "c00a4a9903b01dd51d9856f630aa08dce5646526962471ffd3fe36645a88ca37"
+      },
+      {
+        "checkpoint_id": "cp_02156f4f0c81407791c8",
+        "created_at": "2026-10-22T03:48:39.084716+00:00",
+        "engine": "langgraph",
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "native_checkpoint_id": "1f1cdcb7-76b8-6e3a-8002-6ef908b2dd2a",
+        "phase": "GATE",
+        "prev_hash": "b139d7bd722ded5ebb6d261152eea1381df6fabd183aa159b9de3abccb03e38b",
+        "seq": 3,
+        "state_hash": "12ec3c5b4f1a26020bedf448e3072c56320d8a41920c932b022892a8694c96f1"
+      },
+      {
+        "checkpoint_id": "cp_511ea3f19a504262ad0d",
+        "created_at": "2026-10-22T03:48:40.081499+00:00",
+        "engine": "langgraph",
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "native_checkpoint_id": null,
+        "phase": "PROTOTYPE",
+        "prev_hash": "2929ef03461b92d90350c162e1aef0c40a1613542a015357ecbbe179bc7fe197",
+        "seq": 4,
+        "state_hash": "61e0155e1c3bcc681baeaaa9f63a902330ecab6f6259f42828b8650c1ad61fa0"
+      },
+      {
+        "checkpoint_id": "cp_e092cbad1fdd413db19b",
+        "created_at": "2026-10-22T03:48:40.094331+00:00",
+        "engine": "langgraph",
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "native_checkpoint_id": null,
+        "phase": "DONE",
+        "prev_hash": "6a75ecb222d74848ace1eaeb0f3f9b0df9bf312485a4269d17035045607220d7",
+        "seq": 5,
+        "state_hash": "1b1f0e6784d17c1897416f6f1684d0d384a6aa947ec7c8d88f5289ddfa7637e5"
+      }
+    ],
+    "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+    "native": [
+      {
+        "checkpoint_id": "1f1cdcb7-8056-6add-8005-2b0c2a3f9523",
+        "created_at": "2026-10-22T03:48:40.087200+00:00",
+        "has_risk": true,
+        "has_scaffold": true,
+        "has_strategy": true,
+        "interrupted": false,
+        "next": [],
+        "step": 5,
+        "terminal": "COMPLETED"
+      },
+      {
+        "checkpoint_id": "1f1cdcb7-8054-6756-8004-32a2cded834f",
+        "created_at": "2026-10-22T03:48:40.086292+00:00",
+        "has_risk": true,
+        "has_scaffold": true,
+        "has_strategy": true,
+        "interrupted": false,
+        "next": [
+          "complete"
+        ],
+        "step": 4,
+        "terminal": null
+      },
+      {
+        "checkpoint_id": "1f1cdcb7-8027-6d42-8003-a637a16c8abc",
+        "created_at": "2026-10-22T03:48:40.068010+00:00",
+        "has_risk": true,
+        "has_scaffold": false,
+        "has_strategy": true,
+        "interrupted": false,
+        "next": [
+          "arty"
+        ],
+        "step": 3,
+        "terminal": null
+      },
+      {
+        "checkpoint_id": "1f1cdcb7-76b8-6e3a-8002-6ef908b2dd2a",
+        "created_at": "2026-10-22T03:48:39.078850+00:00",
+        "has_risk": true,
+        "has_scaffold": false,
+        "has_strategy": true,
+        "interrupted": true,
+        "next": [
+          "sentinel_gate"
+        ],
+        "step": 2,
+        "terminal": null
+      },
+      {
+        "checkpoint_id": "1f1cdcb7-7692-61f4-8001-8d777c43090a",
+        "created_at": "2026-10-22T03:48:39.062972+00:00",
+        "has_risk": false,
+        "has_scaffold": false,
+        "has_strategy": true,
+        "interrupted": false,
+        "next": [
+          "fable"
+        ],
+        "step": 1,
+        "terminal": null
+      },
+      {
+        "checkpoint_id": "1f1cdcb7-7665-67cb-8000-2c35ea04eb11",
+        "created_at": "2026-10-22T03:48:39.044690+00:00",
+        "has_risk": false,
+        "has_scaffold": false,
+        "has_strategy": false,
+        "interrupted": false,
+        "next": [
+          "george"
+        ],
+        "step": 0,
+        "terminal": null
+      },
+      {
+        "checkpoint_id": "1f1cdcb7-7661-6b90-bfff-377a792a76db",
+        "created_at": "2026-10-22T03:48:39.043154+00:00",
+        "has_risk": false,
+        "has_scaffold": false,
+        "has_strategy": false,
+        "interrupted": false,
+        "next": [
+          "__start__"
+        ],
+        "step": -1,
+        "terminal": null
+      }
+    ]
+  },
+  "engines": {
+    "default_provider": "mock",
+    "engines": [
+      {
+        "available": true,
+        "detail": "langgraph with the shared checkpointer (SQLite locally, PostgreSQL in production)",
+        "engine": "langgraph"
+      },
+      {
+        "available": false,
+        "detail": "NOT_INSTALLED: pip install -e './services/langgraph[council]'",
+        "engine": "crewai"
+      },
+      {
+        "available": false,
+        "detail": "NOT_INSTALLED: pip install -e './services/langgraph[council]'",
+        "engine": "autogen"
+      }
+    ],
+    "model_mode": "MOCK_DETERMINISTIC",
+    "real_models_enabled": false
+  },
+  "idea": {
+    "created_at": "2026-10-22T03:48:38.973817+00:00",
+    "created_by": "council-author",
+    "description": "Real-time metrics for council activity. Show a dashboard timeline.",
+    "idea_id": "idea_db2b7bad8cc74d219276",
+    "project_id": "proj-council-d836dc257a",
+    "status": "OPEN",
+    "tenant_id": "tenant-events-test",
+    "title": "Agent metrics widget",
+    "updated_at": "2026-10-22T03:48:38.973817+00:00"
+  },
+  "idea_detail": {
+    "blueprints": [
+      {
+        "blueprint_id": "bp_37d1c9ea09a148fd89f6",
+        "content": {
+          "idea": {
+            "idea_id": "idea_db2b7bad8cc74d219276",
+            "title": "Agent metrics widget"
+          },
+          "scaffold": {
+            "components": [
+              {
+                "name": "AgentMetricsWidgetPage",
+                "props": [],
+                "purpose": "Route-level layout for Agent metrics widget"
+              },
+              {
+                "name": "RealTimeMetricsPanel",
+                "props": [
+                  "title"
+                ],
+                "purpose": "Real-time metrics for council activity"
+              },
+              {
+                "name": "ShowDashboardTimelinePanel",
+                "props": [
+                  "title"
+                ],
+                "purpose": "Show a dashboard timeline"
+              }
+            ],
+            "design_tokens": [
+              "semantic.color.surface",
+              "semantic.color.foreground",
+              "semantic.color.accent",
+              "semantic.font.size.h2",
+              "semantic.space.section",
+              "semantic.motion.duration.reveal"
+            ],
+            "files": [
+              {
+                "path": "README.md",
+                "sha256": "df2b872518228f5c1111ff009d68c47aeb769e53112b6164778d5e08056c3827"
+              },
+              {
+                "path": "components/AgentMetricsWidgetPage.tsx",
+                "sha256": "7bcfcd918edab8a61b42c1e2b679485922f77ffcfdbe4b6e88a1d5295178555f"
+              },
+              {
+                "path": "components/RealTimeMetricsPanel.tsx",
+                "sha256": "0ad7875a650acb7cf4ab70c4733d19304dc49a80fb9e571cecc1d46f88d4d47c"
+              },
+              {
+                "path": "components/ShowDashboardTimelinePanel.tsx",
+                "sha256": "28c89002b7dd31e91e4d4c9f353b36ca01f737636a90d1608e4f5401dfad2926"
+              }
+            ],
+            "source_engine": "langgraph",
+            "summary": "Scaffold for 'Agent metrics widget': 3 component(s) on the shared tokens."
+          },
+          "security": {
+            "approvals": [
+              {
+                "decision": "approve",
+                "engine": "langgraph",
+                "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21"
+              }
+            ],
+            "findings": [
+              {
+                "code": "WRITE_ACTION_REQUESTED",
+                "detail": "workspace.write_scaffold -> council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+                "seen_in": [
+                  "msn_5d2793bced95440d990ef16c2fa7da21",
+                  "msn_f651c5d851fd4bc589eb1b942feb0406"
+                ],
+                "severity": "MEDIUM",
+                "source": "POLICY"
+              }
+            ],
+            "level": "MEDIUM"
+          },
+          "strategy": {
+            "architecture": [
+              "Next.js route in apps/web using the design tokens and motion primitives",
+              "Orchestration through the mission council engines with checkpointed state"
+            ],
+            "goals": [
+              "Real-time metrics for council activity",
+              "Show a dashboard timeline"
+            ],
+            "source_engine": "langgraph",
+            "summary": "Decomposed 'Agent metrics widget' into 2 goal(s) and a 7-task dependency graph spanning 2 architecture area(s).",
+            "tasks": [
+              {
+                "acceptance": "Acceptance criteria written and agreed before build starts",
+                "depends_on": [],
+                "id": "clarify",
+                "seat": "george",
+                "title": "Confirm scope and success criteria for Agent metrics widget"
+              },
+              {
+                "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+                "depends_on": [
+                  "clarify"
+                ],
+                "id": "design-1",
+                "seat": "arty",
+                "title": "Design: Real-time metrics for council activity"
+              },
+              {
+                "acceptance": "Implemented behind the existing API with typed contracts and tests",
+                "depends_on": [
+                  "design-1"
+                ],
+                "id": "build-1",
+                "seat": "arty",
+                "title": "Build: Real-time metrics for council activity"
+              },
+              {
+                "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+                "depends_on": [
+                  "clarify"
+                ],
+                "id": "design-2",
+                "seat": "arty",
+                "title": "Design: Show a dashboard timeline"
+              },
+              {
+                "acceptance": "Implemented behind the existing API with typed contracts and tests",
+                "depends_on": [
+                  "design-2"
+                ],
+                "id": "build-2",
+                "seat": "arty",
+                "title": "Build: Show a dashboard timeline"
+              },
+              {
+                "acceptance": "No unapproved side effects; secrets never logged or rendered",
+                "depends_on": [
+                  "build-1",
+                  "build-2"
+                ],
+                "id": "security-review",
+                "seat": "fable",
+                "title": "Security, permission and secret-handling review"
+              },
+              {
+                "acceptance": "WCAG 2.2 AA checks pass and acceptance criteria are met",
+                "depends_on": [
+                  "security-review"
+                ],
+                "id": "verify",
+                "seat": "george",
+                "title": "Verify accessibility, performance and acceptance criteria"
+              }
+            ]
+          }
+        },
+        "content_hash": "e5c8c1de444ad640cf4bbf8c14af7ebccd8106966a3dcef7e5e7c0d392b0ad8e",
+        "created_at": "2026-10-22T03:48:40.351615+00:00",
+        "created_by": "council-author",
+        "idea_id": "idea_db2b7bad8cc74d219276",
+        "project_id": "proj-council-d836dc257a",
+        "promoted_at": "2026-10-22T03:48:40.381538+00:00",
+        "promoted_by": "council-author",
+        "sources": [
+          {
+            "engine": "langgraph",
+            "excluded_reason": null,
+            "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+            "status": "completed",
+            "used_for": [
+              "strategy",
+              "scaffold",
+              "security"
+            ]
+          },
+          {
+            "engine": "langgraph",
+            "excluded_reason": "mission needs_approval",
+            "mission_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+            "status": "needs_approval",
+            "used_for": [
+              "security"
+            ]
+          }
+        ],
+        "status": "PROMOTED",
+        "tenant_id": "tenant-events-test",
+        "verification": {
+          "content_hash_ok": true,
+          "missions": [
+            {
+              "checkpoints": "6 checkpoint(s) verified",
+              "events": 19,
+              "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+              "problems": [],
+              "verified": true
+            }
+          ],
+          "verified": true
+        }
+      }
+    ],
+    "created_at": "2026-10-22T03:48:38.973817+00:00",
+    "created_by": "council-author",
+    "description": "Real-time metrics for council activity. Show a dashboard timeline.",
+    "idea_id": "idea_db2b7bad8cc74d219276",
+    "missions": [
+      {
+        "approval": {
+          "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+          "created_at": "2026-10-22T03:48:39.091862+00:00",
+          "decided_at": "2026-10-22T03:48:39.640225+00:00",
+          "decision": "approve",
+          "policy_version": "amc-council-policy/v1",
+          "reviewer": "council-reviewer",
+          "status": "resolved",
+          "subject_hash": "8be088d5bffb64ace787b3dc193d4598519fb9190171f5caa47a3c41004f8090"
+        },
+        "attempts": 0,
+        "cancel_requested": false,
+        "created_at": "2026-10-22T03:48:39.008334+00:00",
+        "decision": {
+          "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+          "decided_by": "council-reviewer",
+          "decision": "approve",
+          "reason": "APPROVED",
+          "subject_hash": "8be088d5bffb64ace787b3dc193d4598519fb9190171f5caa47a3c41004f8090"
+        },
+        "engine": "langgraph",
+        "gate": {
+          "findings": [
+            "WRITE_ACTION_REQUESTED"
+          ],
+          "requested_actions": [
+            {
+              "sensitivity": "WRITE",
+              "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+              "tool_id": "workspace.write_scaffold"
+            }
+          ],
+          "risk_level": "MEDIUM",
+          "subject": {
+            "action": "council.prototype",
+            "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+            "policy_version": "amc-council-policy/v1",
+            "requested_actions": [
+              {
+                "sensitivity": "WRITE",
+                "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+                "tool_id": "workspace.write_scaffold"
+              }
+            ],
+            "risk_hash": "2a883c2900caa5399085b0ded1bb93377d681b1c7fbb5add92d4be60437347c2",
+            "strategy_hash": "3dacb231b0cd5d9e8e25e527e32cb37ec23ba15b8929988c2b945cb8721c9fb4",
+            "thread_id": "msn_5d2793bced95440d990ef16c2fa7da21"
+          },
+          "subject_hash": "8be088d5bffb64ace787b3dc193d4598519fb9190171f5caa47a3c41004f8090"
+        },
+        "idea_id": "idea_db2b7bad8cc74d219276",
+        "initiated_by": "council-author",
+        "last_error": null,
+        "lease_expires_at": null,
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "model_mode": "MOCK_DETERMINISTIC",
+        "phase": "DONE",
+        "project_id": "proj-council-d836dc257a",
+        "requested_actions": [
+          {
+            "sensitivity": "WRITE",
+            "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+            "tool_id": "workspace.write_scaffold"
+          }
+        ],
+        "results": {
+          "arty": {
+            "attempts": 1,
+            "completed_at": "2026-10-22T03:48:40.075419+00:00",
+            "engine": "langgraph",
+            "model_mode": "MOCK_DETERMINISTIC",
+            "seat": "arty",
+            "started_at": "2026-10-22T03:48:40.074483+00:00"
+          },
+          "fable": {
+            "attempts": 1,
+            "completed_at": "2026-10-22T03:48:39.069500+00:00",
+            "engine": "langgraph",
+            "model_mode": "MOCK_DETERMINISTIC",
+            "seat": "fable",
+            "started_at": "2026-10-22T03:48:39.068870+00:00"
+          },
+          "george": {
+            "attempts": 1,
+            "completed_at": "2026-10-22T03:48:39.052631+00:00",
+            "engine": "langgraph",
+            "model_mode": "MOCK_DETERMINISTIC",
+            "seat": "george",
+            "started_at": "2026-10-22T03:48:39.051634+00:00"
+          }
+        },
+        "risk": {
+          "blocked": false,
+          "findings": [
+            {
+              "code": "WRITE_ACTION_REQUESTED",
+              "detail": "workspace.write_scaffold -> council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+              "severity": "MEDIUM",
+              "source": "POLICY"
+            }
+          ],
+          "level": "MEDIUM",
+          "narrative": "Policy scan level MEDIUM; findings: WRITE_ACTION_REQUESTED. Human approval required before any side effect.",
+          "policy_version": "amc-council-policy/v1",
+          "requested_actions": [
+            {
+              "sensitivity": "WRITE",
+              "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+              "tool_id": "workspace.write_scaffold"
+            }
+          ],
+          "requires_approval": true
+        },
+        "scaffold": {
+          "components": [
+            {
+              "name": "AgentMetricsWidgetPage",
+              "props": [],
+              "purpose": "Route-level layout for Agent metrics widget"
+            },
+            {
+              "name": "RealTimeMetricsPanel",
+              "props": [
+                "title"
+              ],
+              "purpose": "Real-time metrics for council activity"
+            },
+            {
+              "name": "ShowDashboardTimelinePanel",
+              "props": [
+                "title"
+              ],
+              "purpose": "Show a dashboard timeline"
+            }
+          ],
+          "design_tokens": [
+            "semantic.color.surface",
+            "semantic.color.foreground",
+            "semantic.color.accent",
+            "semantic.font.size.h2",
+            "semantic.space.section",
+            "semantic.motion.duration.reveal"
+          ],
+          "files": [
+            {
+              "bytes": 487,
+              "path": "README.md"
+            },
+            {
+              "bytes": 379,
+              "path": "components/AgentMetricsWidgetPage.tsx"
+            },
+            {
+              "bytes": 368,
+              "path": "components/RealTimeMetricsPanel.tsx"
+            },
+            {
+              "bytes": 373,
+              "path": "components/ShowDashboardTimelinePanel.tsx"
+            }
+          ],
+          "summary": "Scaffold for 'Agent metrics widget': 3 component(s) on the shared tokens."
+        },
+        "status": "completed",
+        "strategy": {
+          "architecture": [
+            "Next.js route in apps/web using the design tokens and motion primitives",
+            "Orchestration through the mission council engines with checkpointed state"
+          ],
+          "goals": [
+            "Real-time metrics for council activity",
+            "Show a dashboard timeline"
+          ],
+          "summary": "Decomposed 'Agent metrics widget' into 2 goal(s) and a 7-task dependency graph spanning 2 architecture area(s).",
+          "tasks": [
+            {
+              "acceptance": "Acceptance criteria written and agreed before build starts",
+              "depends_on": [],
+              "id": "clarify",
+              "seat": "george",
+              "title": "Confirm scope and success criteria for Agent metrics widget"
+            },
+            {
+              "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+              "depends_on": [
+                "clarify"
+              ],
+              "id": "design-1",
+              "seat": "arty",
+              "title": "Design: Real-time metrics for council activity"
+            },
+            {
+              "acceptance": "Implemented behind the existing API with typed contracts and tests",
+              "depends_on": [
+                "design-1"
+              ],
+              "id": "build-1",
+              "seat": "arty",
+              "title": "Build: Real-time metrics for council activity"
+            },
+            {
+              "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+              "depends_on": [
+                "clarify"
+              ],
+              "id": "design-2",
+              "seat": "arty",
+              "title": "Design: Show a dashboard timeline"
+            },
+            {
+              "acceptance": "Implemented behind the existing API with typed contracts and tests",
+              "depends_on": [
+                "design-2"
+              ],
+              "id": "build-2",
+              "seat": "arty",
+              "title": "Build: Show a dashboard timeline"
+            },
+            {
+              "acceptance": "No unapproved side effects; secrets never logged or rendered",
+              "depends_on": [
+                "build-1",
+                "build-2"
+              ],
+              "id": "security-review",
+              "seat": "fable",
+              "title": "Security, permission and secret-handling review"
+            },
+            {
+              "acceptance": "WCAG 2.2 AA checks pass and acceptance criteria are met",
+              "depends_on": [
+                "security-review"
+              ],
+              "id": "verify",
+              "seat": "george",
+              "title": "Verify accessibility, performance and acceptance criteria"
+            }
+          ]
+        },
+        "tenant_id": "tenant-events-test",
+        "thread_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "updated_at": "2026-10-22T03:48:40.132241+00:00"
+      },
+      {
+        "approval": {
+          "approval_id": "1f1c4960-b747-4363-a84f-d4a0d8871612",
+          "created_at": "2026-10-22T03:48:40.273585+00:00",
+          "decided_at": null,
+          "decision": null,
+          "policy_version": "amc-council-policy/v1",
+          "reviewer": null,
+          "status": "pending",
+          "subject_hash": "0e3bc333368a5bcc812b51c752f2d854c12ace186044452680322bc8d5f27445"
+        },
+        "attempts": 0,
+        "cancel_requested": false,
+        "created_at": "2026-10-22T03:48:40.187375+00:00",
+        "decision": null,
+        "engine": "langgraph",
+        "gate": {
+          "findings": [
+            "WRITE_ACTION_REQUESTED"
+          ],
+          "requested_actions": [
+            {
+              "sensitivity": "WRITE",
+              "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+              "tool_id": "workspace.write_scaffold"
+            }
+          ],
+          "risk_level": "MEDIUM",
+          "subject": {
+            "action": "council.prototype",
+            "mission_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+            "policy_version": "amc-council-policy/v1",
+            "requested_actions": [
+              {
+                "sensitivity": "WRITE",
+                "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+                "tool_id": "workspace.write_scaffold"
+              }
+            ],
+            "risk_hash": "a868368cbcf5ac7b3a620faf1f97156ca60034a83a255aef910a5646c5616138",
+            "strategy_hash": "3dacb231b0cd5d9e8e25e527e32cb37ec23ba15b8929988c2b945cb8721c9fb4",
+            "thread_id": "msn_f651c5d851fd4bc589eb1b942feb0406"
+          },
+          "subject_hash": "0e3bc333368a5bcc812b51c752f2d854c12ace186044452680322bc8d5f27445"
+        },
+        "idea_id": "idea_db2b7bad8cc74d219276",
+        "initiated_by": "council-author",
+        "last_error": null,
+        "lease_expires_at": null,
+        "mission_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+        "model_mode": "MOCK_DETERMINISTIC",
+        "phase": "GATE",
+        "project_id": "proj-council-d836dc257a",
+        "requested_actions": [
+          {
+            "sensitivity": "WRITE",
+            "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+            "tool_id": "workspace.write_scaffold"
+          }
+        ],
+        "results": {
+          "fable": {
+            "attempts": 1,
+            "completed_at": "2026-10-22T03:48:40.248817+00:00",
+            "engine": "langgraph",
+            "model_mode": "MOCK_DETERMINISTIC",
+            "seat": "fable",
+            "started_at": "2026-10-22T03:48:40.248206+00:00"
+          },
+          "george": {
+            "attempts": 1,
+            "completed_at": "2026-10-22T03:48:40.229604+00:00",
+            "engine": "langgraph",
+            "model_mode": "MOCK_DETERMINISTIC",
+            "seat": "george",
+            "started_at": "2026-10-22T03:48:40.228923+00:00"
+          }
+        },
+        "risk": {
+          "blocked": false,
+          "findings": [
+            {
+              "code": "WRITE_ACTION_REQUESTED",
+              "detail": "workspace.write_scaffold -> council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+              "severity": "MEDIUM",
+              "source": "POLICY"
+            }
+          ],
+          "level": "MEDIUM",
+          "narrative": "Policy scan level MEDIUM; findings: WRITE_ACTION_REQUESTED. Human approval required before any side effect.",
+          "policy_version": "amc-council-policy/v1",
+          "requested_actions": [
+            {
+              "sensitivity": "WRITE",
+              "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+              "tool_id": "workspace.write_scaffold"
+            }
+          ],
+          "requires_approval": true
+        },
+        "scaffold": null,
+        "status": "needs_approval",
+        "strategy": {
+          "architecture": [
+            "Next.js route in apps/web using the design tokens and motion primitives",
+            "Orchestration through the mission council engines with checkpointed state"
+          ],
+          "goals": [
+            "Real-time metrics for council activity",
+            "Show a dashboard timeline"
+          ],
+          "summary": "Decomposed 'Agent metrics widget' into 2 goal(s) and a 7-task dependency graph spanning 2 architecture area(s).",
+          "tasks": [
+            {
+              "acceptance": "Acceptance criteria written and agreed before build starts",
+              "depends_on": [],
+              "id": "clarify",
+              "seat": "george",
+              "title": "Confirm scope and success criteria for Agent metrics widget"
+            },
+            {
+              "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+              "depends_on": [
+                "clarify"
+              ],
+              "id": "design-1",
+              "seat": "arty",
+              "title": "Design: Real-time metrics for council activity"
+            },
+            {
+              "acceptance": "Implemented behind the existing API with typed contracts and tests",
+              "depends_on": [
+                "design-1"
+              ],
+              "id": "build-1",
+              "seat": "arty",
+              "title": "Build: Real-time metrics for council activity"
+            },
+            {
+              "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+              "depends_on": [
+                "clarify"
+              ],
+              "id": "design-2",
+              "seat": "arty",
+              "title": "Design: Show a dashboard timeline"
+            },
+            {
+              "acceptance": "Implemented behind the existing API with typed contracts and tests",
+              "depends_on": [
+                "design-2"
+              ],
+              "id": "build-2",
+              "seat": "arty",
+              "title": "Build: Show a dashboard timeline"
+            },
+            {
+              "acceptance": "No unapproved side effects; secrets never logged or rendered",
+              "depends_on": [
+                "build-1",
+                "build-2"
+              ],
+              "id": "security-review",
+              "seat": "fable",
+              "title": "Security, permission and secret-handling review"
+            },
+            {
+              "acceptance": "WCAG 2.2 AA checks pass and acceptance criteria are met",
+              "depends_on": [
+                "security-review"
+              ],
+              "id": "verify",
+              "seat": "george",
+              "title": "Verify accessibility, performance and acceptance criteria"
+            }
+          ]
+        },
+        "tenant_id": "tenant-events-test",
+        "thread_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+        "updated_at": "2026-10-22T03:48:40.294353+00:00"
+      }
+    ],
+    "project_id": "proj-council-d836dc257a",
+    "status": "PROMOTED",
+    "tenant_id": "tenant-events-test",
+    "title": "Agent metrics widget",
+    "updated_at": "2026-10-22T03:48:40.387540+00:00"
+  },
+  "idea_page": {
+    "items": [
+      {
+        "created_at": "2026-10-22T03:48:38.973817+00:00",
+        "created_by": "council-author",
+        "description": "Real-time metrics for council activity. Show a dashboard timeline.",
+        "idea_id": "idea_db2b7bad8cc74d219276",
+        "project_id": "proj-council-d836dc257a",
+        "status": "PROMOTED",
+        "tenant_id": "tenant-events-test",
+        "title": "Agent metrics widget",
+        "updated_at": "2026-10-22T03:48:40.387540+00:00"
+      }
+    ],
+    "next_cursor": null
+  },
+  "mission_completed": {
+    "approval": {
+      "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+      "created_at": "2026-10-22T03:48:39.091862+00:00",
+      "decided_at": "2026-10-22T03:48:39.640225+00:00",
+      "decision": "approve",
+      "policy_version": "amc-council-policy/v1",
+      "reviewer": "council-reviewer",
+      "status": "resolved",
+      "subject_hash": "8be088d5bffb64ace787b3dc193d4598519fb9190171f5caa47a3c41004f8090"
+    },
+    "attempts": 0,
+    "cancel_requested": false,
+    "created_at": "2026-10-22T03:48:39.008334+00:00",
+    "decision": {
+      "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+      "decided_by": "council-reviewer",
+      "decision": "approve",
+      "reason": "APPROVED",
+      "subject_hash": "8be088d5bffb64ace787b3dc193d4598519fb9190171f5caa47a3c41004f8090"
+    },
+    "engine": "langgraph",
+    "gate": {
+      "findings": [
+        "WRITE_ACTION_REQUESTED"
+      ],
+      "requested_actions": [
+        {
+          "sensitivity": "WRITE",
+          "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+          "tool_id": "workspace.write_scaffold"
+        }
+      ],
+      "risk_level": "MEDIUM",
+      "subject": {
+        "action": "council.prototype",
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "policy_version": "amc-council-policy/v1",
+        "requested_actions": [
+          {
+            "sensitivity": "WRITE",
+            "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+            "tool_id": "workspace.write_scaffold"
+          }
+        ],
+        "risk_hash": "2a883c2900caa5399085b0ded1bb93377d681b1c7fbb5add92d4be60437347c2",
+        "strategy_hash": "3dacb231b0cd5d9e8e25e527e32cb37ec23ba15b8929988c2b945cb8721c9fb4",
+        "thread_id": "msn_5d2793bced95440d990ef16c2fa7da21"
+      },
+      "subject_hash": "8be088d5bffb64ace787b3dc193d4598519fb9190171f5caa47a3c41004f8090"
+    },
+    "idea_id": "idea_db2b7bad8cc74d219276",
+    "initiated_by": "council-author",
+    "last_error": null,
+    "lease_expires_at": null,
+    "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+    "model_mode": "MOCK_DETERMINISTIC",
+    "phase": "DONE",
+    "project_id": "proj-council-d836dc257a",
+    "requested_actions": [
+      {
+        "sensitivity": "WRITE",
+        "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+        "tool_id": "workspace.write_scaffold"
+      }
+    ],
+    "results": {
+      "arty": {
+        "attempts": 1,
+        "completed_at": "2026-10-22T03:48:40.075419+00:00",
+        "engine": "langgraph",
+        "model_mode": "MOCK_DETERMINISTIC",
+        "seat": "arty",
+        "started_at": "2026-10-22T03:48:40.074483+00:00"
+      },
+      "fable": {
+        "attempts": 1,
+        "completed_at": "2026-10-22T03:48:39.069500+00:00",
+        "engine": "langgraph",
+        "model_mode": "MOCK_DETERMINISTIC",
+        "seat": "fable",
+        "started_at": "2026-10-22T03:48:39.068870+00:00"
+      },
+      "george": {
+        "attempts": 1,
+        "completed_at": "2026-10-22T03:48:39.052631+00:00",
+        "engine": "langgraph",
+        "model_mode": "MOCK_DETERMINISTIC",
+        "seat": "george",
+        "started_at": "2026-10-22T03:48:39.051634+00:00"
+      }
+    },
+    "risk": {
+      "blocked": false,
+      "findings": [
+        {
+          "code": "WRITE_ACTION_REQUESTED",
+          "detail": "workspace.write_scaffold -> council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+          "severity": "MEDIUM",
+          "source": "POLICY"
+        }
+      ],
+      "level": "MEDIUM",
+      "narrative": "Policy scan level MEDIUM; findings: WRITE_ACTION_REQUESTED. Human approval required before any side effect.",
+      "policy_version": "amc-council-policy/v1",
+      "requested_actions": [
+        {
+          "sensitivity": "WRITE",
+          "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+          "tool_id": "workspace.write_scaffold"
+        }
+      ],
+      "requires_approval": true
+    },
+    "scaffold": {
+      "components": [
+        {
+          "name": "AgentMetricsWidgetPage",
+          "props": [],
+          "purpose": "Route-level layout for Agent metrics widget"
+        },
+        {
+          "name": "RealTimeMetricsPanel",
+          "props": [
+            "title"
+          ],
+          "purpose": "Real-time metrics for council activity"
+        },
+        {
+          "name": "ShowDashboardTimelinePanel",
+          "props": [
+            "title"
+          ],
+          "purpose": "Show a dashboard timeline"
+        }
+      ],
+      "design_tokens": [
+        "semantic.color.surface",
+        "semantic.color.foreground",
+        "semantic.color.accent",
+        "semantic.font.size.h2",
+        "semantic.space.section",
+        "semantic.motion.duration.reveal"
+      ],
+      "files": [
+        {
+          "bytes": 487,
+          "path": "README.md"
+        },
+        {
+          "bytes": 379,
+          "path": "components/AgentMetricsWidgetPage.tsx"
+        },
+        {
+          "bytes": 368,
+          "path": "components/RealTimeMetricsPanel.tsx"
+        },
+        {
+          "bytes": 373,
+          "path": "components/ShowDashboardTimelinePanel.tsx"
+        }
+      ],
+      "summary": "Scaffold for 'Agent metrics widget': 3 component(s) on the shared tokens."
+    },
+    "status": "completed",
+    "strategy": {
+      "architecture": [
+        "Next.js route in apps/web using the design tokens and motion primitives",
+        "Orchestration through the mission council engines with checkpointed state"
+      ],
+      "goals": [
+        "Real-time metrics for council activity",
+        "Show a dashboard timeline"
+      ],
+      "summary": "Decomposed 'Agent metrics widget' into 2 goal(s) and a 7-task dependency graph spanning 2 architecture area(s).",
+      "tasks": [
+        {
+          "acceptance": "Acceptance criteria written and agreed before build starts",
+          "depends_on": [],
+          "id": "clarify",
+          "seat": "george",
+          "title": "Confirm scope and success criteria for Agent metrics widget"
+        },
+        {
+          "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+          "depends_on": [
+            "clarify"
+          ],
+          "id": "design-1",
+          "seat": "arty",
+          "title": "Design: Real-time metrics for council activity"
+        },
+        {
+          "acceptance": "Implemented behind the existing API with typed contracts and tests",
+          "depends_on": [
+            "design-1"
+          ],
+          "id": "build-1",
+          "seat": "arty",
+          "title": "Build: Real-time metrics for council activity"
+        },
+        {
+          "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+          "depends_on": [
+            "clarify"
+          ],
+          "id": "design-2",
+          "seat": "arty",
+          "title": "Design: Show a dashboard timeline"
+        },
+        {
+          "acceptance": "Implemented behind the existing API with typed contracts and tests",
+          "depends_on": [
+            "design-2"
+          ],
+          "id": "build-2",
+          "seat": "arty",
+          "title": "Build: Show a dashboard timeline"
+        },
+        {
+          "acceptance": "No unapproved side effects; secrets never logged or rendered",
+          "depends_on": [
+            "build-1",
+            "build-2"
+          ],
+          "id": "security-review",
+          "seat": "fable",
+          "title": "Security, permission and secret-handling review"
+        },
+        {
+          "acceptance": "WCAG 2.2 AA checks pass and acceptance criteria are met",
+          "depends_on": [
+            "security-review"
+          ],
+          "id": "verify",
+          "seat": "george",
+          "title": "Verify accessibility, performance and acceptance criteria"
+        }
+      ]
+    },
+    "tenant_id": "tenant-events-test",
+    "thread_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+    "updated_at": "2026-10-22T03:48:40.132241+00:00"
+  },
+  "mission_page": {
+    "items": [
+      {
+        "approval": {
+          "approval_id": "1f1c4960-b747-4363-a84f-d4a0d8871612",
+          "created_at": "2026-10-22T03:48:40.273585+00:00",
+          "decided_at": null,
+          "decision": null,
+          "policy_version": "amc-council-policy/v1",
+          "reviewer": null,
+          "status": "pending",
+          "subject_hash": "0e3bc333368a5bcc812b51c752f2d854c12ace186044452680322bc8d5f27445"
+        },
+        "attempts": 0,
+        "cancel_requested": false,
+        "created_at": "2026-10-22T03:48:40.187375+00:00",
+        "decision": null,
+        "engine": "langgraph",
+        "gate": {
+          "findings": [
+            "WRITE_ACTION_REQUESTED"
+          ],
+          "requested_actions": [
+            {
+              "sensitivity": "WRITE",
+              "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+              "tool_id": "workspace.write_scaffold"
+            }
+          ],
+          "risk_level": "MEDIUM",
+          "subject": {
+            "action": "council.prototype",
+            "mission_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+            "policy_version": "amc-council-policy/v1",
+            "requested_actions": [
+              {
+                "sensitivity": "WRITE",
+                "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+                "tool_id": "workspace.write_scaffold"
+              }
+            ],
+            "risk_hash": "a868368cbcf5ac7b3a620faf1f97156ca60034a83a255aef910a5646c5616138",
+            "strategy_hash": "3dacb231b0cd5d9e8e25e527e32cb37ec23ba15b8929988c2b945cb8721c9fb4",
+            "thread_id": "msn_f651c5d851fd4bc589eb1b942feb0406"
+          },
+          "subject_hash": "0e3bc333368a5bcc812b51c752f2d854c12ace186044452680322bc8d5f27445"
+        },
+        "idea_id": "idea_db2b7bad8cc74d219276",
+        "initiated_by": "council-author",
+        "last_error": null,
+        "lease_expires_at": null,
+        "mission_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+        "model_mode": "MOCK_DETERMINISTIC",
+        "phase": "GATE",
+        "project_id": "proj-council-d836dc257a",
+        "requested_actions": [
+          {
+            "sensitivity": "WRITE",
+            "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+            "tool_id": "workspace.write_scaffold"
+          }
+        ],
+        "results": {
+          "fable": {
+            "attempts": 1,
+            "completed_at": "2026-10-22T03:48:40.248817+00:00",
+            "engine": "langgraph",
+            "model_mode": "MOCK_DETERMINISTIC",
+            "seat": "fable",
+            "started_at": "2026-10-22T03:48:40.248206+00:00"
+          },
+          "george": {
+            "attempts": 1,
+            "completed_at": "2026-10-22T03:48:40.229604+00:00",
+            "engine": "langgraph",
+            "model_mode": "MOCK_DETERMINISTIC",
+            "seat": "george",
+            "started_at": "2026-10-22T03:48:40.228923+00:00"
+          }
+        },
+        "risk": {
+          "blocked": false,
+          "findings": [
+            {
+              "code": "WRITE_ACTION_REQUESTED",
+              "detail": "workspace.write_scaffold -> council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+              "severity": "MEDIUM",
+              "source": "POLICY"
+            }
+          ],
+          "level": "MEDIUM",
+          "narrative": "Policy scan level MEDIUM; findings: WRITE_ACTION_REQUESTED. Human approval required before any side effect.",
+          "policy_version": "amc-council-policy/v1",
+          "requested_actions": [
+            {
+              "sensitivity": "WRITE",
+              "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+              "tool_id": "workspace.write_scaffold"
+            }
+          ],
+          "requires_approval": true
+        },
+        "scaffold": null,
+        "status": "needs_approval",
+        "strategy": {
+          "architecture": [
+            "Next.js route in apps/web using the design tokens and motion primitives",
+            "Orchestration through the mission council engines with checkpointed state"
+          ],
+          "goals": [
+            "Real-time metrics for council activity",
+            "Show a dashboard timeline"
+          ],
+          "summary": "Decomposed 'Agent metrics widget' into 2 goal(s) and a 7-task dependency graph spanning 2 architecture area(s).",
+          "tasks": [
+            {
+              "acceptance": "Acceptance criteria written and agreed before build starts",
+              "depends_on": [],
+              "id": "clarify",
+              "seat": "george",
+              "title": "Confirm scope and success criteria for Agent metrics widget"
+            },
+            {
+              "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+              "depends_on": [
+                "clarify"
+              ],
+              "id": "design-1",
+              "seat": "arty",
+              "title": "Design: Real-time metrics for council activity"
+            },
+            {
+              "acceptance": "Implemented behind the existing API with typed contracts and tests",
+              "depends_on": [
+                "design-1"
+              ],
+              "id": "build-1",
+              "seat": "arty",
+              "title": "Build: Real-time metrics for council activity"
+            },
+            {
+              "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+              "depends_on": [
+                "clarify"
+              ],
+              "id": "design-2",
+              "seat": "arty",
+              "title": "Design: Show a dashboard timeline"
+            },
+            {
+              "acceptance": "Implemented behind the existing API with typed contracts and tests",
+              "depends_on": [
+                "design-2"
+              ],
+              "id": "build-2",
+              "seat": "arty",
+              "title": "Build: Show a dashboard timeline"
+            },
+            {
+              "acceptance": "No unapproved side effects; secrets never logged or rendered",
+              "depends_on": [
+                "build-1",
+                "build-2"
+              ],
+              "id": "security-review",
+              "seat": "fable",
+              "title": "Security, permission and secret-handling review"
+            },
+            {
+              "acceptance": "WCAG 2.2 AA checks pass and acceptance criteria are met",
+              "depends_on": [
+                "security-review"
+              ],
+              "id": "verify",
+              "seat": "george",
+              "title": "Verify accessibility, performance and acceptance criteria"
+            }
+          ]
+        },
+        "tenant_id": "tenant-events-test",
+        "thread_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+        "updated_at": "2026-10-22T03:48:40.294353+00:00"
+      },
+      {
+        "approval": {
+          "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+          "created_at": "2026-10-22T03:48:39.091862+00:00",
+          "decided_at": "2026-10-22T03:48:39.640225+00:00",
+          "decision": "approve",
+          "policy_version": "amc-council-policy/v1",
+          "reviewer": "council-reviewer",
+          "status": "resolved",
+          "subject_hash": "8be088d5bffb64ace787b3dc193d4598519fb9190171f5caa47a3c41004f8090"
+        },
+        "attempts": 0,
+        "cancel_requested": false,
+        "created_at": "2026-10-22T03:48:39.008334+00:00",
+        "decision": {
+          "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+          "decided_by": "council-reviewer",
+          "decision": "approve",
+          "reason": "APPROVED",
+          "subject_hash": "8be088d5bffb64ace787b3dc193d4598519fb9190171f5caa47a3c41004f8090"
+        },
+        "engine": "langgraph",
+        "gate": {
+          "findings": [
+            "WRITE_ACTION_REQUESTED"
+          ],
+          "requested_actions": [
+            {
+              "sensitivity": "WRITE",
+              "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+              "tool_id": "workspace.write_scaffold"
+            }
+          ],
+          "risk_level": "MEDIUM",
+          "subject": {
+            "action": "council.prototype",
+            "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+            "policy_version": "amc-council-policy/v1",
+            "requested_actions": [
+              {
+                "sensitivity": "WRITE",
+                "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+                "tool_id": "workspace.write_scaffold"
+              }
+            ],
+            "risk_hash": "2a883c2900caa5399085b0ded1bb93377d681b1c7fbb5add92d4be60437347c2",
+            "strategy_hash": "3dacb231b0cd5d9e8e25e527e32cb37ec23ba15b8929988c2b945cb8721c9fb4",
+            "thread_id": "msn_5d2793bced95440d990ef16c2fa7da21"
+          },
+          "subject_hash": "8be088d5bffb64ace787b3dc193d4598519fb9190171f5caa47a3c41004f8090"
+        },
+        "idea_id": "idea_db2b7bad8cc74d219276",
+        "initiated_by": "council-author",
+        "last_error": null,
+        "lease_expires_at": null,
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "model_mode": "MOCK_DETERMINISTIC",
+        "phase": "DONE",
+        "project_id": "proj-council-d836dc257a",
+        "requested_actions": [
+          {
+            "sensitivity": "WRITE",
+            "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+            "tool_id": "workspace.write_scaffold"
+          }
+        ],
+        "results": {
+          "arty": {
+            "attempts": 1,
+            "completed_at": "2026-10-22T03:48:40.075419+00:00",
+            "engine": "langgraph",
+            "model_mode": "MOCK_DETERMINISTIC",
+            "seat": "arty",
+            "started_at": "2026-10-22T03:48:40.074483+00:00"
+          },
+          "fable": {
+            "attempts": 1,
+            "completed_at": "2026-10-22T03:48:39.069500+00:00",
+            "engine": "langgraph",
+            "model_mode": "MOCK_DETERMINISTIC",
+            "seat": "fable",
+            "started_at": "2026-10-22T03:48:39.068870+00:00"
+          },
+          "george": {
+            "attempts": 1,
+            "completed_at": "2026-10-22T03:48:39.052631+00:00",
+            "engine": "langgraph",
+            "model_mode": "MOCK_DETERMINISTIC",
+            "seat": "george",
+            "started_at": "2026-10-22T03:48:39.051634+00:00"
+          }
+        },
+        "risk": {
+          "blocked": false,
+          "findings": [
+            {
+              "code": "WRITE_ACTION_REQUESTED",
+              "detail": "workspace.write_scaffold -> council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+              "severity": "MEDIUM",
+              "source": "POLICY"
+            }
+          ],
+          "level": "MEDIUM",
+          "narrative": "Policy scan level MEDIUM; findings: WRITE_ACTION_REQUESTED. Human approval required before any side effect.",
+          "policy_version": "amc-council-policy/v1",
+          "requested_actions": [
+            {
+              "sensitivity": "WRITE",
+              "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+              "tool_id": "workspace.write_scaffold"
+            }
+          ],
+          "requires_approval": true
+        },
+        "scaffold": {
+          "components": [
+            {
+              "name": "AgentMetricsWidgetPage",
+              "props": [],
+              "purpose": "Route-level layout for Agent metrics widget"
+            },
+            {
+              "name": "RealTimeMetricsPanel",
+              "props": [
+                "title"
+              ],
+              "purpose": "Real-time metrics for council activity"
+            },
+            {
+              "name": "ShowDashboardTimelinePanel",
+              "props": [
+                "title"
+              ],
+              "purpose": "Show a dashboard timeline"
+            }
+          ],
+          "design_tokens": [
+            "semantic.color.surface",
+            "semantic.color.foreground",
+            "semantic.color.accent",
+            "semantic.font.size.h2",
+            "semantic.space.section",
+            "semantic.motion.duration.reveal"
+          ],
+          "files": [
+            {
+              "bytes": 487,
+              "path": "README.md"
+            },
+            {
+              "bytes": 379,
+              "path": "components/AgentMetricsWidgetPage.tsx"
+            },
+            {
+              "bytes": 368,
+              "path": "components/RealTimeMetricsPanel.tsx"
+            },
+            {
+              "bytes": 373,
+              "path": "components/ShowDashboardTimelinePanel.tsx"
+            }
+          ],
+          "summary": "Scaffold for 'Agent metrics widget': 3 component(s) on the shared tokens."
+        },
+        "status": "completed",
+        "strategy": {
+          "architecture": [
+            "Next.js route in apps/web using the design tokens and motion primitives",
+            "Orchestration through the mission council engines with checkpointed state"
+          ],
+          "goals": [
+            "Real-time metrics for council activity",
+            "Show a dashboard timeline"
+          ],
+          "summary": "Decomposed 'Agent metrics widget' into 2 goal(s) and a 7-task dependency graph spanning 2 architecture area(s).",
+          "tasks": [
+            {
+              "acceptance": "Acceptance criteria written and agreed before build starts",
+              "depends_on": [],
+              "id": "clarify",
+              "seat": "george",
+              "title": "Confirm scope and success criteria for Agent metrics widget"
+            },
+            {
+              "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+              "depends_on": [
+                "clarify"
+              ],
+              "id": "design-1",
+              "seat": "arty",
+              "title": "Design: Real-time metrics for council activity"
+            },
+            {
+              "acceptance": "Implemented behind the existing API with typed contracts and tests",
+              "depends_on": [
+                "design-1"
+              ],
+              "id": "build-1",
+              "seat": "arty",
+              "title": "Build: Real-time metrics for council activity"
+            },
+            {
+              "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+              "depends_on": [
+                "clarify"
+              ],
+              "id": "design-2",
+              "seat": "arty",
+              "title": "Design: Show a dashboard timeline"
+            },
+            {
+              "acceptance": "Implemented behind the existing API with typed contracts and tests",
+              "depends_on": [
+                "design-2"
+              ],
+              "id": "build-2",
+              "seat": "arty",
+              "title": "Build: Show a dashboard timeline"
+            },
+            {
+              "acceptance": "No unapproved side effects; secrets never logged or rendered",
+              "depends_on": [
+                "build-1",
+                "build-2"
+              ],
+              "id": "security-review",
+              "seat": "fable",
+              "title": "Security, permission and secret-handling review"
+            },
+            {
+              "acceptance": "WCAG 2.2 AA checks pass and acceptance criteria are met",
+              "depends_on": [
+                "security-review"
+              ],
+              "id": "verify",
+              "seat": "george",
+              "title": "Verify accessibility, performance and acceptance criteria"
+            }
+          ]
+        },
+        "tenant_id": "tenant-events-test",
+        "thread_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "updated_at": "2026-10-22T03:48:40.132241+00:00"
+      }
+    ],
+    "next_cursor": null
+  },
+  "mission_paused": {
+    "approval": {
+      "approval_id": "1f1c4960-b747-4363-a84f-d4a0d8871612",
+      "created_at": "2026-10-22T03:48:40.273585+00:00",
+      "decided_at": null,
+      "decision": null,
+      "policy_version": "amc-council-policy/v1",
+      "reviewer": null,
+      "status": "pending",
+      "subject_hash": "0e3bc333368a5bcc812b51c752f2d854c12ace186044452680322bc8d5f27445"
+    },
+    "attempts": 0,
+    "cancel_requested": false,
+    "created_at": "2026-10-22T03:48:40.187375+00:00",
+    "decision": null,
+    "engine": "langgraph",
+    "gate": {
+      "findings": [
+        "WRITE_ACTION_REQUESTED"
+      ],
+      "requested_actions": [
+        {
+          "sensitivity": "WRITE",
+          "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+          "tool_id": "workspace.write_scaffold"
+        }
+      ],
+      "risk_level": "MEDIUM",
+      "subject": {
+        "action": "council.prototype",
+        "mission_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+        "policy_version": "amc-council-policy/v1",
+        "requested_actions": [
+          {
+            "sensitivity": "WRITE",
+            "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+            "tool_id": "workspace.write_scaffold"
+          }
+        ],
+        "risk_hash": "a868368cbcf5ac7b3a620faf1f97156ca60034a83a255aef910a5646c5616138",
+        "strategy_hash": "3dacb231b0cd5d9e8e25e527e32cb37ec23ba15b8929988c2b945cb8721c9fb4",
+        "thread_id": "msn_f651c5d851fd4bc589eb1b942feb0406"
+      },
+      "subject_hash": "0e3bc333368a5bcc812b51c752f2d854c12ace186044452680322bc8d5f27445"
+    },
+    "idea_id": "idea_db2b7bad8cc74d219276",
+    "initiated_by": "council-author",
+    "last_error": null,
+    "lease_expires_at": null,
+    "mission_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+    "model_mode": "MOCK_DETERMINISTIC",
+    "phase": "GATE",
+    "project_id": "proj-council-d836dc257a",
+    "requested_actions": [
+      {
+        "sensitivity": "WRITE",
+        "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+        "tool_id": "workspace.write_scaffold"
+      }
+    ],
+    "results": {
+      "fable": {
+        "attempts": 1,
+        "completed_at": "2026-10-22T03:48:40.248817+00:00",
+        "engine": "langgraph",
+        "model_mode": "MOCK_DETERMINISTIC",
+        "seat": "fable",
+        "started_at": "2026-10-22T03:48:40.248206+00:00"
+      },
+      "george": {
+        "attempts": 1,
+        "completed_at": "2026-10-22T03:48:40.229604+00:00",
+        "engine": "langgraph",
+        "model_mode": "MOCK_DETERMINISTIC",
+        "seat": "george",
+        "started_at": "2026-10-22T03:48:40.228923+00:00"
+      }
+    },
+    "risk": {
+      "blocked": false,
+      "findings": [
+        {
+          "code": "WRITE_ACTION_REQUESTED",
+          "detail": "workspace.write_scaffold -> council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+          "severity": "MEDIUM",
+          "source": "POLICY"
+        }
+      ],
+      "level": "MEDIUM",
+      "narrative": "Policy scan level MEDIUM; findings: WRITE_ACTION_REQUESTED. Human approval required before any side effect.",
+      "policy_version": "amc-council-policy/v1",
+      "requested_actions": [
+        {
+          "sensitivity": "WRITE",
+          "target": "council/msn_f651c5d851fd4bc589eb1b942feb0406/scaffold/",
+          "tool_id": "workspace.write_scaffold"
+        }
+      ],
+      "requires_approval": true
+    },
+    "scaffold": null,
+    "status": "needs_approval",
+    "strategy": {
+      "architecture": [
+        "Next.js route in apps/web using the design tokens and motion primitives",
+        "Orchestration through the mission council engines with checkpointed state"
+      ],
+      "goals": [
+        "Real-time metrics for council activity",
+        "Show a dashboard timeline"
+      ],
+      "summary": "Decomposed 'Agent metrics widget' into 2 goal(s) and a 7-task dependency graph spanning 2 architecture area(s).",
+      "tasks": [
+        {
+          "acceptance": "Acceptance criteria written and agreed before build starts",
+          "depends_on": [],
+          "id": "clarify",
+          "seat": "george",
+          "title": "Confirm scope and success criteria for Agent metrics widget"
+        },
+        {
+          "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+          "depends_on": [
+            "clarify"
+          ],
+          "id": "design-1",
+          "seat": "arty",
+          "title": "Design: Real-time metrics for council activity"
+        },
+        {
+          "acceptance": "Implemented behind the existing API with typed contracts and tests",
+          "depends_on": [
+            "design-1"
+          ],
+          "id": "build-1",
+          "seat": "arty",
+          "title": "Build: Real-time metrics for council activity"
+        },
+        {
+          "acceptance": "Component spec uses design tokens and covers empty, loading and error states",
+          "depends_on": [
+            "clarify"
+          ],
+          "id": "design-2",
+          "seat": "arty",
+          "title": "Design: Show a dashboard timeline"
+        },
+        {
+          "acceptance": "Implemented behind the existing API with typed contracts and tests",
+          "depends_on": [
+            "design-2"
+          ],
+          "id": "build-2",
+          "seat": "arty",
+          "title": "Build: Show a dashboard timeline"
+        },
+        {
+          "acceptance": "No unapproved side effects; secrets never logged or rendered",
+          "depends_on": [
+            "build-1",
+            "build-2"
+          ],
+          "id": "security-review",
+          "seat": "fable",
+          "title": "Security, permission and secret-handling review"
+        },
+        {
+          "acceptance": "WCAG 2.2 AA checks pass and acceptance criteria are met",
+          "depends_on": [
+            "security-review"
+          ],
+          "id": "verify",
+          "seat": "george",
+          "title": "Verify accessibility, performance and acceptance criteria"
+        }
+      ]
+    },
+    "tenant_id": "tenant-events-test",
+    "thread_id": "msn_f651c5d851fd4bc589eb1b942feb0406",
+    "updated_at": "2026-10-22T03:48:40.294353+00:00"
+  },
+  "timeline": {
+    "events": [
+      {
+        "event_type": "MISSION_QUEUED",
+        "node_id": null,
+        "observed_at": "2026-10-22T03:48:39.016643+00:00",
+        "payload": {
+          "engine": "langgraph",
+          "idea_id": "idea_db2b7bad8cc74d219276",
+          "model_mode": "MOCK_DETERMINISTIC",
+          "requested_actions": [
+            {
+              "sensitivity": "WRITE",
+              "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+              "tool_id": "workspace.write_scaffold"
+            }
+          ]
+        },
+        "sequence": 0
+      },
+      {
+        "event_type": "MISSION_STARTED",
+        "node_id": null,
+        "observed_at": "2026-10-22T03:48:39.028134+00:00",
+        "payload": {
+          "engine": "langgraph",
+          "worker": "vm:14119"
+        },
+        "sequence": 1
+      },
+      {
+        "event_type": "SEAT_STARTED",
+        "node_id": "george",
+        "observed_at": "2026-10-22T03:48:39.048357+00:00",
+        "payload": {
+          "engine": "langgraph",
+          "role": "George - Mission Commander",
+          "seat": "george"
+        },
+        "sequence": 2
+      },
+      {
+        "event_type": "SEAT_COMPLETED",
+        "node_id": "george",
+        "observed_at": "2026-10-22T03:48:39.052710+00:00",
+        "payload": {
+          "attempts": 1,
+          "goals": 2,
+          "seat": "george",
+          "summary": "Decomposed 'Agent metrics widget' into 2 goal(s) and a 7-task dependency graph spanning 2 architecture area(s).",
+          "tasks": 7
+        },
+        "sequence": 3
+      },
+      {
+        "event_type": "CHECKPOINT_SAVED",
+        "node_id": null,
+        "observed_at": "2026-10-22T03:48:39.058680+00:00",
+        "payload": {
+          "native_checkpoint_id": null,
+          "phase": "STRATEGY",
+          "seq": 1,
+          "state_hash": "5972523058571308407d3cf5b6b9d1e21ba5bfd9cffd8f7b94d517f53aeaff5c"
+        },
+        "sequence": 4
+      },
+      {
+        "event_type": "SEAT_STARTED",
+        "node_id": "fable",
+        "observed_at": "2026-10-22T03:48:39.065889+00:00",
+        "payload": {
+          "engine": "langgraph",
+          "role": "Fable/Cipher - Sentinel Guard",
+          "seat": "fable"
+        },
+        "sequence": 5
+      },
+      {
+        "event_type": "RISK_ASSESSED",
+        "node_id": "fable",
+        "observed_at": "2026-10-22T03:48:39.069570+00:00",
+        "payload": {
+          "attempts": 1,
+          "blocked": false,
+          "findings": [
+            {
+              "code": "WRITE_ACTION_REQUESTED",
+              "severity": "MEDIUM",
+              "source": "POLICY"
+            }
+          ],
+          "level": "MEDIUM",
+          "requires_approval": true,
+          "seat": "fable"
+        },
+        "sequence": 6
+      },
+      {
+        "event_type": "CHECKPOINT_SAVED",
+        "node_id": null,
+        "observed_at": "2026-10-22T03:48:39.075497+00:00",
+        "payload": {
+          "native_checkpoint_id": null,
+          "phase": "AUDIT",
+          "seq": 2,
+          "state_hash": "c00a4a9903b01dd51d9856f630aa08dce5646526962471ffd3fe36645a88ca37"
+        },
+        "sequence": 7
+      },
+      {
+        "event_type": "CHECKPOINT_SAVED",
+        "node_id": null,
+        "observed_at": "2026-10-22T03:48:39.085791+00:00",
+        "payload": {
+          "native_checkpoint_id": "1f1cdcb7-76b8-6e3a-8002-6ef908b2dd2a",
+          "phase": "GATE",
+          "seq": 3,
+          "state_hash": "12ec3c5b4f1a26020bedf448e3072c56320d8a41920c932b022892a8694c96f1"
+        },
+        "sequence": 8
+      },
+      {
+        "event_type": "APPROVAL_REQUIRED",
+        "node_id": "sentinel_gate",
+        "observed_at": "2026-10-22T03:48:39.106760+00:00",
+        "payload": {
+          "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+          "findings": [
+            "WRITE_ACTION_REQUESTED"
+          ],
+          "requested_actions": [
+            {
+              "sensitivity": "WRITE",
+              "target": "council/msn_5d2793bced95440d990ef16c2fa7da21/scaffold/",
+              "tool_id": "workspace.write_scaffold"
+            }
+          ],
+          "risk_level": "MEDIUM",
+          "subject_hash": "8be088d5bffb64ace787b3dc193d4598519fb9190171f5caa47a3c41004f8090"
+        },
+        "sequence": 9
+      },
+      {
+        "event_type": "approval_decided",
+        "node_id": "hitl_gate",
+        "observed_at": "2026-10-22T03:48:39.955333+00:00",
+        "payload": {
+          "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+          "decision": "approve",
+          "reviewer": "council-reviewer",
+          "status": "resolved"
+        },
+        "sequence": 10
+      },
+      {
+        "event_type": "MISSION_RESUMING",
+        "node_id": "sentinel_gate",
+        "observed_at": "2026-10-22T03:48:40.044844+00:00",
+        "payload": {
+          "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+          "decided_by": "council-reviewer",
+          "decision": "approve",
+          "resumed_by": "council-author"
+        },
+        "sequence": 11
+      },
+      {
+        "event_type": "APPROVAL_APPLIED",
+        "node_id": "sentinel_gate",
+        "observed_at": "2026-10-22T03:48:40.064272+00:00",
+        "payload": {
+          "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+          "decision": "approve",
+          "reason": "APPROVED"
+        },
+        "sequence": 12
+      },
+      {
+        "event_type": "SEAT_STARTED",
+        "node_id": "arty",
+        "observed_at": "2026-10-22T03:48:40.071264+00:00",
+        "payload": {
+          "engine": "langgraph",
+          "role": "Arty - Product Maker",
+          "seat": "arty"
+        },
+        "sequence": 13
+      },
+      {
+        "event_type": "SEAT_COMPLETED",
+        "node_id": "arty",
+        "observed_at": "2026-10-22T03:48:40.075521+00:00",
+        "payload": {
+          "attempts": 1,
+          "components": [
+            "AgentMetricsWidgetPage",
+            "RealTimeMetricsPanel",
+            "ShowDashboardTimelinePanel"
+          ],
+          "files": 4,
+          "seat": "arty",
+          "summary": "Scaffold for 'Agent metrics widget': 3 component(s) on the shared tokens."
+        },
+        "sequence": 14
+      },
+      {
+        "event_type": "CHECKPOINT_SAVED",
+        "node_id": null,
+        "observed_at": "2026-10-22T03:48:40.083193+00:00",
+        "payload": {
+          "native_checkpoint_id": null,
+          "phase": "PROTOTYPE",
+          "seq": 4,
+          "state_hash": "61e0155e1c3bcc681baeaaa9f63a902330ecab6f6259f42828b8650c1ad61fa0"
+        },
+        "sequence": 15
+      },
+      {
+        "event_type": "CHECKPOINT_SAVED",
+        "node_id": null,
+        "observed_at": "2026-10-22T03:48:40.095448+00:00",
+        "payload": {
+          "native_checkpoint_id": null,
+          "phase": "DONE",
+          "seq": 5,
+          "state_hash": "1b1f0e6784d17c1897416f6f1684d0d384a6aa947ec7c8d88f5289ddfa7637e5"
+        },
+        "sequence": 16
+      },
+      {
+        "event_type": "TOOL_INVOKED",
+        "node_id": "arty",
+        "observed_at": "2026-10-22T03:48:40.111102+00:00",
+        "payload": {
+          "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+          "tool_id": "workspace.write_scaffold",
+          "written": [
+            {
+              "path": "scaffold/README.md",
+              "sha256": "96943e53c325d649198f009759d42b2b97e31ccd25e011dc21d344879ad53e49"
+            },
+            {
+              "path": "scaffold/components/AgentMetricsWidgetPage.tsx",
+              "sha256": "7d677859518bd5960bf7a0e46946e134659caaca4884cca40f3b5eb0e87d2214"
+            },
+            {
+              "path": "scaffold/components/RealTimeMetricsPanel.tsx",
+              "sha256": "03a3f862ab0223758fe7251599dad01d4207b66fe50b2c1425809bd72f226469"
+            },
+            {
+              "path": "scaffold/components/ShowDashboardTimelinePanel.tsx",
+              "sha256": "62b6f814fa2f0a67063aa3c6b4a32c45e553765d47cff62c307ec61fc37589af"
+            }
+          ]
+        },
+        "sequence": 17
+      },
+      {
+        "event_type": "MISSION_COMPLETED",
+        "node_id": null,
+        "observed_at": "2026-10-22T03:48:40.128517+00:00",
+        "payload": {
+          "components": [
+            "AgentMetricsWidgetPage",
+            "RealTimeMetricsPanel",
+            "ShowDashboardTimelinePanel"
+          ],
+          "files": 4
+        },
+        "sequence": 18
+      }
+    ],
+    "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+    "next_cursor": 18
+  },
+  "tool_audits": {
+    "items": [
+      {
+        "action_hash": "cef16d744d4fe3b3ddfed89fc63c0066b981c7e5fbfa9a5931e54f66bf052c39",
+        "approval_id": "4dc78531-7e6b-4c10-a95d-d45b0511ce1f",
+        "args_hash": "f38bfced085ce027fdf9413712c1c9b5d33a9e8d6e62c6a1bf0f0924eff3d56c",
+        "args_redacted": {
+          "files": [
+            {
+              "content_bytes": 487,
+              "content_sha256": "96943e53c325d649198f009759d42b2b97e31ccd25e011dc21d344879ad53e49",
+              "path": "README.md"
+            },
+            {
+              "content_bytes": 379,
+              "content_sha256": "7d677859518bd5960bf7a0e46946e134659caaca4884cca40f3b5eb0e87d2214",
+              "path": "components/AgentMetricsWidgetPage.tsx"
+            },
+            {
+              "content_bytes": 368,
+              "content_sha256": "03a3f862ab0223758fe7251599dad01d4207b66fe50b2c1425809bd72f226469",
+              "path": "components/RealTimeMetricsPanel.tsx"
+            },
+            {
+              "content_bytes": 373,
+              "content_sha256": "62b6f814fa2f0a67063aa3c6b4a32c45e553765d47cff62c307ec61fc37589af",
+              "path": "components/ShowDashboardTimelinePanel.tsx"
+            }
+          ]
+        },
+        "audit_id": "ta_332c3724feb34ad0a809",
+        "created_at": "2026-10-22T03:48:40.109022+00:00",
+        "decision": "ALLOWED",
+        "duration_ms": 7,
+        "mission_id": "msn_5d2793bced95440d990ef16c2fa7da21",
+        "project_id": "proj-council-d836dc257a",
+        "reason_code": "OK",
+        "result_summary": "{\"written\": [{\"path\": \"scaffold/README.md\", \"sha256\": \"96943e53c325d649198f009759d42b2b97e31ccd25e011dc21d344879ad53e49\"}, {\"path\": \"scaffold/components/AgentMetricsWidgetPage.tsx\", \"sha256\": \"7d677859518bd5960bf7a0e46946e134659caaca4884cca40f3b5eb0e87d2214\"}, {\"path\": \"scaffold/components/RealTimeMetricsPanel.tsx\", \"sha256\": \"03a3f862ab0223758fe7251599dad01d4207b66fe50b2c1425809bd72f226469\"}, {\"path\": \"scaffold/components/ShowDashboardTimelinePanel.tsx\", \"sha256\": \"62b6f814fa2f0a67063aa3c6b4a32",
+        "seat": "arty",
+        "sensitivity": "WRITE",
+        "tenant_id": "tenant-events-test",
+        "tool_id": "workspace.write_scaffold"
+      }
+    ]
+  },
+  "tools": {
+    "mcp_config_errors": [],
+    "mcp_installed": false,
+    "tools": [
+      {
+        "description": "List files in this mission's workspace.",
+        "enabled": true,
+        "input_schema": {
+          "additionalProperties": false,
+          "properties": {},
+          "title": "_ListArgs",
+          "type": "object"
+        },
+        "provider": "local",
+        "requires_approval": false,
+        "scopes": [
+          "workspace:read"
+        ],
+        "sensitivity": "READ",
+        "server": null,
+        "timeout_s": 10.0,
+        "tool_id": "workspace.list_files"
+      },
+      {
+        "description": "Read a text file from this mission's workspace.",
+        "enabled": true,
+        "input_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_\\-./]*$",
+              "title": "Path",
+              "type": "string"
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "title": "_ReadArgs",
+          "type": "object"
+        },
+        "provider": "local",
+        "requires_approval": false,
+        "scopes": [
+          "workspace:read"
+        ],
+        "sensitivity": "READ",
+        "server": null,
+        "timeout_s": 10.0,
+        "tool_id": "workspace.read_file"
+      },
+      {
+        "description": "Write Arty's validated scaffold files into this mission's workspace.",
+        "enabled": true,
+        "input_schema": {
+          "$defs": {
+            "ScaffoldFile": {
+              "additionalProperties": false,
+              "properties": {
+                "content": {
+                  "maxLength": 16000,
+                  "title": "Content",
+                  "type": "string"
+                },
+                "path": {
+                  "maxLength": 160,
+                  "minLength": 3,
+                  "title": "Path",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ],
+              "title": "ScaffoldFile",
+              "type": "object"
+            }
+          },
+          "additionalProperties": false,
+          "properties": {
+            "files": {
+              "items": {
+                "$ref": "#/$defs/ScaffoldFile"
+              },
+              "maxItems": 16,
+              "minItems": 1,
+              "title": "Files",
+              "type": "array"
+            }
+          },
+          "required": [
+            "files"
+          ],
+          "title": "_WriteArgs",
+          "type": "object"
+        },
+        "provider": "local",
+        "requires_approval": true,
+        "scopes": [
+          "workspace:write"
+        ],
+        "sensitivity": "WRITE",
+        "server": null,
+        "timeout_s": 10.0,
+        "tool_id": "workspace.write_scaffold"
+      },
+      {
+        "description": "Run the deterministic Sentinel policy scan on text.",
+        "enabled": true,
+        "input_schema": {
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "maxLength": 8000,
+              "minLength": 1,
+              "title": "Text",
+              "type": "string"
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "title": "_ScanArgs",
+          "type": "object"
+        },
+        "provider": "local",
+        "requires_approval": false,
+        "scopes": [
+          "policy:scan"
+        ],
+        "sensitivity": "READ",
+        "server": null,
+        "timeout_s": 10.0,
+        "tool_id": "policy.scan_text"
+      }
+    ]
+  }
+}

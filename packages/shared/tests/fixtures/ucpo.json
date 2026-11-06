@@ -1,0 +1,2520 @@
+{
+  "brief": {
+    "audience": "People who buy a few good things and keep them",
+    "cta_label": "Plan a studio visit",
+    "cta_target": "visit#hours",
+    "existing_project_id": null,
+    "forbidden_phrases": [
+      "world-class",
+      "best in the world"
+    ],
+    "images": [
+      {
+        "alt": "A red circle above thin grey horizon lines on a charcoal ground",
+        "asset_id": "plate-kiln",
+        "license_ref": null,
+        "motif_seed": 1,
+        "rights": "procedural_owned",
+        "source": "procedural:psem"
+      },
+      {
+        "alt": "Fine grey lines and a short paper-white bar on a charcoal ground",
+        "asset_id": "plate-clay",
+        "license_ref": null,
+        "motif_seed": 4,
+        "rights": "procedural_owned",
+        "source": "procedural:psem"
+      }
+    ],
+    "locale": "en",
+    "offering": "Small-batch stoneware made by hand",
+    "organization": "Halden Fen",
+    "pages": [
+      {
+        "description": "A fictional ceramics studio: stoneware made slowly and used daily.",
+        "sections": [
+          {
+            "anchor": null,
+            "body": "Halden Fen is a two-person studio. We throw, trim and glaze every piece by hand, in small firings.",
+            "cta": true,
+            "heading": "Stoneware, made slowly and used daily.",
+            "image": "plate-kiln",
+            "items": [],
+            "kind": "hero",
+            "label": "PLATE 01"
+          },
+          {
+            "anchor": null,
+            "body": "We keep the palette short on purpose. Fewer materials means we can learn each one properly and repair what we sell.",
+            "cta": false,
+            "heading": "One clay body, three glazes",
+            "image": null,
+            "items": [],
+            "kind": "editorial",
+            "label": "METHOD"
+          },
+          {
+            "anchor": null,
+            "body": "",
+            "cta": false,
+            "heading": "What we make",
+            "image": null,
+            "items": [
+              {
+                "body": "Three sizes, stacked and dishwasher safe.",
+                "title": "Everyday bowls"
+              },
+              {
+                "body": "A short spout that does not drip.",
+                "title": "Pouring jugs"
+              },
+              {
+                "body": "Wide rims, flat footing.",
+                "title": "Serving plates"
+              }
+            ],
+            "kind": "index",
+            "label": "INDEX"
+          },
+          {
+            "anchor": null,
+            "body": "If a piece chips in normal use, bring it back. We will mend it or make it again.",
+            "cta": false,
+            "heading": "Repairs are part of the price.",
+            "image": null,
+            "items": [],
+            "kind": "statement",
+            "label": "NOTE"
+          }
+        ],
+        "slug": "index",
+        "title": "Halden Fen"
+      },
+      {
+        "description": "The current range from the fictional Halden Fen studio.",
+        "sections": [
+          {
+            "anchor": null,
+            "body": "Each firing produces about forty pieces. We list what is left after the studio shelf is full.",
+            "cta": false,
+            "heading": "The current range",
+            "image": "plate-clay",
+            "items": [],
+            "kind": "gallery",
+            "label": "PLATE 02"
+          },
+          {
+            "anchor": null,
+            "body": "",
+            "cta": false,
+            "heading": "Glazes",
+            "image": null,
+            "items": [
+              {
+                "body": "A soft, matte white that shows the throwing lines.",
+                "title": "Ash white"
+              },
+              {
+                "body": "A satin black that breaks brown on the rims.",
+                "title": "Iron black"
+              },
+              {
+                "body": "A pale celadon that pools in the foot ring.",
+                "title": "Fen green"
+              }
+            ],
+            "kind": "index",
+            "label": "RANGE"
+          }
+        ],
+        "slug": "works",
+        "title": "Works"
+      },
+      {
+        "description": "How to visit the fictional Halden Fen studio.",
+        "sections": [
+          {
+            "anchor": "hours",
+            "body": "The studio is open on Saturdays from ten until four. Other days by appointment.",
+            "cta": false,
+            "heading": "Visiting the studio",
+            "image": null,
+            "items": [
+              {
+                "body": "10:00 to 16:00",
+                "title": "Saturdays"
+              },
+              {
+                "body": "By appointment",
+                "title": "Weekdays"
+              }
+            ],
+            "kind": "contact",
+            "label": "HOURS"
+          },
+          {
+            "anchor": null,
+            "body": "The workshop floor is uneven and there are two steps at the door. Tell us if you need a hand and we will meet you outside.",
+            "cta": false,
+            "heading": "Before you come",
+            "image": null,
+            "items": [],
+            "kind": "editorial",
+            "label": "NOTE"
+          }
+        ],
+        "slug": "visit",
+        "title": "Visit"
+      }
+    ],
+    "required_phrases": [
+      "made slowly",
+      "used daily"
+    ],
+    "schema_version": "amc-ucpo-brief/v1",
+    "seed": 7,
+    "tagline": "A fictional ceramics studio, used to exercise the website production line."
+  },
+  "browser_verification": {
+    "blocked_requests": [],
+    "browser": {
+      "name": "fixture"
+    },
+    "build_output_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "checks": [
+      {
+        "check": "axe",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.a11y.automated"
+        ],
+        "result": "PASS",
+        "route": "/",
+        "viewport": null
+      },
+      {
+        "check": "reflow",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.responsive.reflow"
+        ],
+        "result": "PASS",
+        "route": "/",
+        "viewport": null
+      },
+      {
+        "check": "text_zoom_200",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.text.zoom"
+        ],
+        "result": "PASS",
+        "route": "/",
+        "viewport": null
+      },
+      {
+        "check": "reduced_motion",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.motion.reduced"
+        ],
+        "result": "PASS",
+        "route": "/",
+        "viewport": null
+      },
+      {
+        "check": "keyboard_focus",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.keyboard.focus"
+        ],
+        "result": "PASS",
+        "route": "/",
+        "viewport": null
+      },
+      {
+        "check": "console_clean",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.console.clean"
+        ],
+        "result": "PASS",
+        "route": "/",
+        "viewport": null
+      },
+      {
+        "check": "no_external_requests",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.network.none"
+        ],
+        "result": "PASS",
+        "route": "/",
+        "viewport": null
+      },
+      {
+        "check": "psem_colours",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.psem.colour"
+        ],
+        "result": "PASS",
+        "route": "/",
+        "viewport": null
+      },
+      {
+        "check": "axe",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.a11y.automated"
+        ],
+        "result": "PASS",
+        "route": "/works/",
+        "viewport": null
+      },
+      {
+        "check": "reflow",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.responsive.reflow"
+        ],
+        "result": "PASS",
+        "route": "/works/",
+        "viewport": null
+      },
+      {
+        "check": "text_zoom_200",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.text.zoom"
+        ],
+        "result": "PASS",
+        "route": "/works/",
+        "viewport": null
+      },
+      {
+        "check": "reduced_motion",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.motion.reduced"
+        ],
+        "result": "PASS",
+        "route": "/works/",
+        "viewport": null
+      },
+      {
+        "check": "keyboard_focus",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.keyboard.focus"
+        ],
+        "result": "PASS",
+        "route": "/works/",
+        "viewport": null
+      },
+      {
+        "check": "console_clean",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.console.clean"
+        ],
+        "result": "PASS",
+        "route": "/works/",
+        "viewport": null
+      },
+      {
+        "check": "no_external_requests",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.network.none"
+        ],
+        "result": "PASS",
+        "route": "/works/",
+        "viewport": null
+      },
+      {
+        "check": "psem_colours",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.psem.colour"
+        ],
+        "result": "PASS",
+        "route": "/works/",
+        "viewport": null
+      },
+      {
+        "check": "axe",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.a11y.automated"
+        ],
+        "result": "PASS",
+        "route": "/visit/",
+        "viewport": null
+      },
+      {
+        "check": "reflow",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.responsive.reflow"
+        ],
+        "result": "PASS",
+        "route": "/visit/",
+        "viewport": null
+      },
+      {
+        "check": "text_zoom_200",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.text.zoom"
+        ],
+        "result": "PASS",
+        "route": "/visit/",
+        "viewport": null
+      },
+      {
+        "check": "reduced_motion",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.motion.reduced"
+        ],
+        "result": "PASS",
+        "route": "/visit/",
+        "viewport": null
+      },
+      {
+        "check": "keyboard_focus",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.keyboard.focus"
+        ],
+        "result": "PASS",
+        "route": "/visit/",
+        "viewport": null
+      },
+      {
+        "check": "console_clean",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.console.clean"
+        ],
+        "result": "PASS",
+        "route": "/visit/",
+        "viewport": null
+      },
+      {
+        "check": "no_external_requests",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.network.none"
+        ],
+        "result": "PASS",
+        "route": "/visit/",
+        "viewport": null
+      },
+      {
+        "check": "psem_colours",
+        "detail": "",
+        "evidence_ref": null,
+        "req_refs": [
+          "req.psem.colour"
+        ],
+        "result": "PASS",
+        "route": "/visit/",
+        "viewport": null
+      }
+    ],
+    "dom_evidence": {
+      "/": {
+        "__lang__": [
+          "en"
+        ],
+        "__text__": [
+          "Halden Fen Stoneware, made slowly and used daily. Halden Fen is a two-person studio. We throw, trim and glaze every piece by hand, in small firings. PLATE 01 Plan a studio visit -> /visit/#hours A red circle above thin grey horizon lines on a charcoal ground One clay body, three glazes We keep the palette short on purpose. Fewer materials means we can learn each one properly and repair what we sell. METHOD What we make INDEX Everyday bowls | Three sizes, stacked and dishwasher safe. Pouring jugs | A short spout that does not drip. Serving plates | Wide rims, flat footing. Repairs are part of the price. If a piece chips in normal use, bring it back. We will mend it or make it again. NOTE"
+        ],
+        "__title__": [
+          "Halden Fen"
+        ],
+        "req.brand": [
+          "Halden Fen -> /"
+        ],
+        "req.image.plate-kiln.alt": [
+          "A red circle above thin grey horizon lines on a charcoal ground"
+        ],
+        "req.index.s1.body": [
+          "Halden Fen is a two-person studio. We throw, trim and glaze every piece by hand, in small firings."
+        ],
+        "req.index.s1.cta": [
+          "Plan a studio visit -> /visit/#hours"
+        ],
+        "req.index.s1.heading": [
+          "Stoneware, made slowly and used daily."
+        ],
+        "req.index.s1.label": [
+          "PLATE 01"
+        ],
+        "req.index.s2.body": [
+          "We keep the palette short on purpose. Fewer materials means we can learn each one properly and repair what we sell."
+        ],
+        "req.index.s2.heading": [
+          "One clay body, three glazes"
+        ],
+        "req.index.s2.label": [
+          "METHOD"
+        ],
+        "req.index.s3.heading": [
+          "What we make"
+        ],
+        "req.index.s3.item0": [
+          "Everyday bowls | Three sizes, stacked and dishwasher safe."
+        ],
+        "req.index.s3.item1": [
+          "Pouring jugs | A short spout that does not drip."
+        ],
+        "req.index.s3.item2": [
+          "Serving plates | Wide rims, flat footing."
+        ],
+        "req.index.s3.label": [
+          "INDEX"
+        ],
+        "req.index.s4.body": [
+          "If a piece chips in normal use, bring it back. We will mend it or make it again."
+        ],
+        "req.index.s4.heading": [
+          "Repairs are part of the price."
+        ],
+        "req.index.s4.label": [
+          "NOTE"
+        ],
+        "req.lang": [
+          "en"
+        ],
+        "req.nav.index": [
+          "Halden Fen -> /"
+        ],
+        "req.nav.visit": [
+          "Visit -> /visit/"
+        ],
+        "req.nav.works": [
+          "Works -> /works/"
+        ],
+        "req.page.index": [
+          "Halden Fen"
+        ]
+      },
+      "/visit/": {
+        "__lang__": [
+          "en"
+        ],
+        "__text__": [
+          "Halden Fen Visiting the studio The studio is open on Saturdays from ten until four. Other days by appointment. HOURS Saturdays | 10:00 to 16:00 Weekdays | By appointment Before you come The workshop floor is uneven and there are two steps at the door. Tell us if you need a hand and we will meet you outside. NOTE"
+        ],
+        "__title__": [
+          "Visit \u00b7 Halden Fen"
+        ],
+        "req.brand": [
+          "Halden Fen -> /"
+        ],
+        "req.lang": [
+          "en"
+        ],
+        "req.nav.index": [
+          "Halden Fen -> /"
+        ],
+        "req.nav.visit": [
+          "Visit -> /visit/"
+        ],
+        "req.nav.works": [
+          "Works -> /works/"
+        ],
+        "req.page.visit": [
+          "Visit \u00b7 Halden Fen"
+        ],
+        "req.visit.s1.body": [
+          "The studio is open on Saturdays from ten until four. Other days by appointment."
+        ],
+        "req.visit.s1.heading": [
+          "Visiting the studio"
+        ],
+        "req.visit.s1.item0": [
+          "Saturdays | 10:00 to 16:00"
+        ],
+        "req.visit.s1.item1": [
+          "Weekdays | By appointment"
+        ],
+        "req.visit.s1.label": [
+          "HOURS"
+        ],
+        "req.visit.s2.body": [
+          "The workshop floor is uneven and there are two steps at the door. Tell us if you need a hand and we will meet you outside."
+        ],
+        "req.visit.s2.heading": [
+          "Before you come"
+        ],
+        "req.visit.s2.label": [
+          "NOTE"
+        ]
+      },
+      "/works/": {
+        "__lang__": [
+          "en"
+        ],
+        "__text__": [
+          "Halden Fen The current range Each firing produces about forty pieces. We list what is left after the studio shelf is full. PLATE 02 Fine grey lines and a short paper-white bar on a charcoal ground Glazes RANGE Ash white | A soft, matte white that shows the throwing lines. Iron black | A satin black that breaks brown on the rims. Fen green | A pale celadon that pools in the foot ring."
+        ],
+        "__title__": [
+          "Works \u00b7 Halden Fen"
+        ],
+        "req.brand": [
+          "Halden Fen -> /"
+        ],
+        "req.image.plate-clay.alt": [
+          "Fine grey lines and a short paper-white bar on a charcoal ground"
+        ],
+        "req.lang": [
+          "en"
+        ],
+        "req.nav.index": [
+          "Halden Fen -> /"
+        ],
+        "req.nav.visit": [
+          "Visit -> /visit/"
+        ],
+        "req.nav.works": [
+          "Works -> /works/"
+        ],
+        "req.page.works": [
+          "Works \u00b7 Halden Fen"
+        ],
+        "req.works.s1.body": [
+          "Each firing produces about forty pieces. We list what is left after the studio shelf is full."
+        ],
+        "req.works.s1.heading": [
+          "The current range"
+        ],
+        "req.works.s1.label": [
+          "PLATE 02"
+        ],
+        "req.works.s2.heading": [
+          "Glazes"
+        ],
+        "req.works.s2.item0": [
+          "Ash white | A soft, matte white that shows the throwing lines."
+        ],
+        "req.works.s2.item1": [
+          "Iron black | A satin black that breaks brown on the rims."
+        ],
+        "req.works.s2.item2": [
+          "Fen green | A pale celadon that pools in the foot ring."
+        ],
+        "req.works.s2.label": [
+          "RANGE"
+        ]
+      }
+    },
+    "note": "automated checks only; they do not certify WCAG conformance",
+    "schema_version": "amc-ucpo-browser-verification/v1",
+    "screenshots": {},
+    "status": "PASSED"
+  },
+  "compile_response": {
+    "compile_coverage": {
+      "coverage": 0.0364,
+      "mandatory_applicable": 55,
+      "mandatory_resolved": 2,
+      "unresolved_until_rendered": 53
+    },
+    "external_effects": "none",
+    "job_id": "ucpo-69bd187bca4768b9ae368526b1798b4d72272e20",
+    "job_state": "SCHEDULED",
+    "requirements": 55,
+    "site_id": "halden",
+    "source_files": 18,
+    "source_tree": "b8cbd3f7e560d339b8f1fb8850ac39d4f218c882ab89d0d34614d988e565ffc0",
+    "stages": {
+      "brief": {
+        "action": "created",
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-brief",
+        "artifact_type": "product_spec",
+        "invalidated": [],
+        "role": "product_manager",
+        "version": 1
+      },
+      "genome": {
+        "action": "created",
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-genome",
+        "artifact_type": "design_system_spec",
+        "invalidated": [],
+        "role": "design_lead",
+        "version": 1
+      },
+      "image-plate-clay": {
+        "action": "created",
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-image-plate-clay",
+        "artifact_type": "media_asset",
+        "invalidated": [],
+        "role": "creative_director",
+        "version": 1
+      },
+      "image-plate-kiln": {
+        "action": "created",
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-image-plate-kiln",
+        "artifact_type": "media_asset",
+        "invalidated": [],
+        "role": "creative_director",
+        "version": 1
+      },
+      "requirements": {
+        "action": "created",
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-requirements",
+        "artifact_type": "product_spec",
+        "invalidated": [],
+        "role": "product_manager",
+        "version": 1
+      },
+      "site_ir": {
+        "action": "created",
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-site-ir",
+        "artifact_type": "website_lockup_spec",
+        "invalidated": [],
+        "role": "design_lead",
+        "version": 1
+      },
+      "source": {
+        "action": "created",
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-source",
+        "artifact_type": "app_build_spec",
+        "invalidated": [],
+        "role": "implementation_lead",
+        "version": 1
+      },
+      "tokens": {
+        "action": "created",
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-tokens",
+        "artifact_type": "design_token_set",
+        "invalidated": [],
+        "role": "design_lead",
+        "version": 1
+      }
+    }
+  },
+  "coverage": {
+    "coverage": 1.0,
+    "debt": [],
+    "entries": [
+      {
+        "detail": "",
+        "kind": "LANG",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.lang",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "BRAND_ON_PAGE",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.brand",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "PAGE_EXISTS",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.page.index",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "NAV_LINK",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.nav.index",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_HEADING",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s1.heading",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_BODY",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s1.body",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "LABEL_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s1.label",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "CTA",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s1.cta",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_HEADING",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s2.heading",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_BODY",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s2.body",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "LABEL_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s2.label",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_HEADING",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s3.heading",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "LABEL_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s3.label",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "ITEM_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s3.item0",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "ITEM_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s3.item1",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "ITEM_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s3.item2",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_HEADING",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s4.heading",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_BODY",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s4.body",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "LABEL_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.index.s4.label",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "PAGE_EXISTS",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.page.works",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "NAV_LINK",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.nav.works",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_HEADING",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.works.s1.heading",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_BODY",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.works.s1.body",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "LABEL_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.works.s1.label",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_HEADING",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.works.s2.heading",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "LABEL_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.works.s2.label",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "ITEM_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.works.s2.item0",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "ITEM_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.works.s2.item1",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "ITEM_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.works.s2.item2",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "PAGE_EXISTS",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.page.visit",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "NAV_LINK",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.nav.visit",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_HEADING",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.visit.s1.heading",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_BODY",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.visit.s1.body",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "LABEL_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.visit.s1.label",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "ITEM_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.visit.s1.item0",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "ITEM_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.visit.s1.item1",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_HEADING",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.visit.s2.heading",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "SECTION_BODY",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.visit.s2.body",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "LABEL_TEXT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.visit.s2.label",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "IMAGE_ALT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.image.plate-kiln.alt",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "IMAGE_RIGHTS",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.image.plate-kiln.rights",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "N/A",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "IMAGE_ALT",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.image.plate-clay.alt",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "IMAGE_RIGHTS",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.image.plate-clay.rights",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "N/A",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "REQUIRED_PHRASE",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.phrase.0",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "REQUIRED_PHRASE",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.phrase.1",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "FORBIDDEN_PHRASE",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.forbid.0",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "FORBIDDEN_PHRASE",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.forbid.1",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "PASS"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "PSEM_COLOUR",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.psem.colour",
+        "stages": {
+          "ir": "PASS",
+          "rendered": "PASS",
+          "source": "N/A"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "A11Y_AUTOMATED",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.a11y.automated",
+        "stages": {
+          "ir": "N/A",
+          "rendered": "PASS",
+          "source": "N/A"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "RESPONSIVE_REFLOW",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.responsive.reflow",
+        "stages": {
+          "ir": "N/A",
+          "rendered": "PASS",
+          "source": "N/A"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "TEXT_ZOOM",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.text.zoom",
+        "stages": {
+          "ir": "N/A",
+          "rendered": "PASS",
+          "source": "N/A"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "REDUCED_MOTION",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.motion.reduced",
+        "stages": {
+          "ir": "N/A",
+          "rendered": "PASS",
+          "source": "N/A"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "KEYBOARD_FOCUS",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.keyboard.focus",
+        "stages": {
+          "ir": "N/A",
+          "rendered": "PASS",
+          "source": "N/A"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "NO_CONSOLE_ERRORS",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.console.clean",
+        "stages": {
+          "ir": "N/A",
+          "rendered": "PASS",
+          "source": "N/A"
+        },
+        "status": "PRESERVED"
+      },
+      {
+        "detail": "",
+        "kind": "NO_EXTERNAL_REQUESTS",
+        "loss_stage": null,
+        "mandatory": true,
+        "req_id": "req.network.none",
+        "stages": {
+          "ir": "N/A",
+          "rendered": "PASS",
+          "source": "N/A"
+        },
+        "status": "PRESERVED"
+      }
+    ],
+    "mandatory_applicable": 55,
+    "mandatory_resolved": 55,
+    "release_blocked": false,
+    "requirements_ref": "366b6070493451e218a1053019507894a55babf06100f2b15fc6093140575037",
+    "schema_version": "amc-ucpo-coverage/v1"
+  },
+  "release_proof": {
+    "artifact_refs": {
+      "source": "artifact:prj-fixture:foundry-ucpo-halden-source@v1"
+    },
+    "deployment": "NOT_AUTHORIZED",
+    "eligible_for_approval": true,
+    "gates": {
+      "browser_qa": "PASS",
+      "build": "PASS",
+      "coverage": "PASS",
+      "deployment_authority": "NOT_REQUESTED",
+      "isolation": "PASS"
+    },
+    "project_ref": "prj-fixture",
+    "reasons": [],
+    "revisions": {
+      "source": "80aa73e72606ff5ae408f2133d67c28c587804dc74a35f14f31e72b41ccf12aa"
+    },
+    "schema_version": "amc-ucpo-release-proof/v1",
+    "site_id": "halden"
+  },
+  "requirements": {
+    "brief_hash": "1bf38757b27ed0eb7f033ddbdc6fe03d7b09c56f8c0d89eac33c117f4c706b4b",
+    "capability_gaps": [],
+    "project_ref": "prj-fixture",
+    "requirements": [
+      {
+        "kind": "LANG",
+        "mandatory": true,
+        "req_id": "req.lang",
+        "source_ref": "brief.locale",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "Every page declares lang=en",
+        "subject": {
+          "routes": "*",
+          "text": "en"
+        }
+      },
+      {
+        "kind": "BRAND_ON_PAGE",
+        "mandatory": true,
+        "req_id": "req.brand",
+        "source_ref": "brief.organization",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "Every page names Halden Fen",
+        "subject": {
+          "routes": "*",
+          "text": "Halden Fen"
+        }
+      },
+      {
+        "kind": "PAGE_EXISTS",
+        "mandatory": true,
+        "req_id": "req.page.index",
+        "source_ref": "brief.pages[0].title",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "Page / exists with title 'Halden Fen'",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "text": "Halden Fen"
+        }
+      },
+      {
+        "kind": "NAV_LINK",
+        "mandatory": true,
+        "req_id": "req.nav.index",
+        "source_ref": "brief.pages[0]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "Every page links to / as 'Halden Fen'",
+        "subject": {
+          "href": "/",
+          "page": "index",
+          "routes": "*",
+          "text": "Halden Fen"
+        }
+      },
+      {
+        "kind": "SECTION_HEADING",
+        "mandatory": true,
+        "req_id": "req.index.s1.heading",
+        "source_ref": "brief.pages[0].sections[0].heading",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the heading 'Stoneware, made slowly and used daily.'",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 0,
+          "text": "Stoneware, made slowly and used daily."
+        }
+      },
+      {
+        "kind": "SECTION_BODY",
+        "mandatory": true,
+        "req_id": "req.index.s1.body",
+        "source_ref": "brief.pages[0].sections[0].body",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows section 1 body copy verbatim",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 0,
+          "text": "Halden Fen is a two-person studio. We throw, trim and glaze every piece by hand, in small firings."
+        }
+      },
+      {
+        "kind": "LABEL_TEXT",
+        "mandatory": true,
+        "req_id": "req.index.s1.label",
+        "source_ref": "brief.pages[0].sections[0].label",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the label 'PLATE 01'",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 0,
+          "text": "PLATE 01"
+        }
+      },
+      {
+        "kind": "CTA",
+        "mandatory": true,
+        "req_id": "req.index.s1.cta",
+        "source_ref": "brief.pages[0].sections[0].cta",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ offers 'Plan a studio visit' linking to visit#hours",
+        "subject": {
+          "href": "/visit/#hours",
+          "page": "index",
+          "route": "/",
+          "section": 0,
+          "text": "Plan a studio visit"
+        }
+      },
+      {
+        "kind": "SECTION_HEADING",
+        "mandatory": true,
+        "req_id": "req.index.s2.heading",
+        "source_ref": "brief.pages[0].sections[1].heading",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the heading 'One clay body, three glazes'",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 1,
+          "text": "One clay body, three glazes"
+        }
+      },
+      {
+        "kind": "SECTION_BODY",
+        "mandatory": true,
+        "req_id": "req.index.s2.body",
+        "source_ref": "brief.pages[0].sections[1].body",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows section 2 body copy verbatim",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 1,
+          "text": "We keep the palette short on purpose. Fewer materials means we can learn each one properly and repair what we sell."
+        }
+      },
+      {
+        "kind": "LABEL_TEXT",
+        "mandatory": true,
+        "req_id": "req.index.s2.label",
+        "source_ref": "brief.pages[0].sections[1].label",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the label 'METHOD'",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 1,
+          "text": "METHOD"
+        }
+      },
+      {
+        "kind": "SECTION_HEADING",
+        "mandatory": true,
+        "req_id": "req.index.s3.heading",
+        "source_ref": "brief.pages[0].sections[2].heading",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the heading 'What we make'",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 2,
+          "text": "What we make"
+        }
+      },
+      {
+        "kind": "LABEL_TEXT",
+        "mandatory": true,
+        "req_id": "req.index.s3.label",
+        "source_ref": "brief.pages[0].sections[2].label",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the label 'INDEX'",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 2,
+          "text": "INDEX"
+        }
+      },
+      {
+        "kind": "ITEM_TEXT",
+        "mandatory": true,
+        "req_id": "req.index.s3.item0",
+        "source_ref": "brief.pages[0].sections[2].items[0]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the item 'Everyday bowls'",
+        "subject": {
+          "body": "Three sizes, stacked and dishwasher safe.",
+          "item": 0,
+          "page": "index",
+          "route": "/",
+          "section": 2,
+          "text": "Everyday bowls"
+        }
+      },
+      {
+        "kind": "ITEM_TEXT",
+        "mandatory": true,
+        "req_id": "req.index.s3.item1",
+        "source_ref": "brief.pages[0].sections[2].items[1]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the item 'Pouring jugs'",
+        "subject": {
+          "body": "A short spout that does not drip.",
+          "item": 1,
+          "page": "index",
+          "route": "/",
+          "section": 2,
+          "text": "Pouring jugs"
+        }
+      },
+      {
+        "kind": "ITEM_TEXT",
+        "mandatory": true,
+        "req_id": "req.index.s3.item2",
+        "source_ref": "brief.pages[0].sections[2].items[2]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the item 'Serving plates'",
+        "subject": {
+          "body": "Wide rims, flat footing.",
+          "item": 2,
+          "page": "index",
+          "route": "/",
+          "section": 2,
+          "text": "Serving plates"
+        }
+      },
+      {
+        "kind": "SECTION_HEADING",
+        "mandatory": true,
+        "req_id": "req.index.s4.heading",
+        "source_ref": "brief.pages[0].sections[3].heading",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the heading 'Repairs are part of the price.'",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 3,
+          "text": "Repairs are part of the price."
+        }
+      },
+      {
+        "kind": "SECTION_BODY",
+        "mandatory": true,
+        "req_id": "req.index.s4.body",
+        "source_ref": "brief.pages[0].sections[3].body",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows section 4 body copy verbatim",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 3,
+          "text": "If a piece chips in normal use, bring it back. We will mend it or make it again."
+        }
+      },
+      {
+        "kind": "LABEL_TEXT",
+        "mandatory": true,
+        "req_id": "req.index.s4.label",
+        "source_ref": "brief.pages[0].sections[3].label",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/ shows the label 'NOTE'",
+        "subject": {
+          "page": "index",
+          "route": "/",
+          "section": 3,
+          "text": "NOTE"
+        }
+      },
+      {
+        "kind": "PAGE_EXISTS",
+        "mandatory": true,
+        "req_id": "req.page.works",
+        "source_ref": "brief.pages[1].title",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "Page /works/ exists with title 'Works'",
+        "subject": {
+          "page": "works",
+          "route": "/works/",
+          "text": "Works"
+        }
+      },
+      {
+        "kind": "NAV_LINK",
+        "mandatory": true,
+        "req_id": "req.nav.works",
+        "source_ref": "brief.pages[1]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "Every page links to /works/ as 'Works'",
+        "subject": {
+          "href": "/works/",
+          "page": "works",
+          "routes": "*",
+          "text": "Works"
+        }
+      },
+      {
+        "kind": "SECTION_HEADING",
+        "mandatory": true,
+        "req_id": "req.works.s1.heading",
+        "source_ref": "brief.pages[1].sections[0].heading",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/works/ shows the heading 'The current range'",
+        "subject": {
+          "page": "works",
+          "route": "/works/",
+          "section": 0,
+          "text": "The current range"
+        }
+      },
+      {
+        "kind": "SECTION_BODY",
+        "mandatory": true,
+        "req_id": "req.works.s1.body",
+        "source_ref": "brief.pages[1].sections[0].body",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/works/ shows section 1 body copy verbatim",
+        "subject": {
+          "page": "works",
+          "route": "/works/",
+          "section": 0,
+          "text": "Each firing produces about forty pieces. We list what is left after the studio shelf is full."
+        }
+      },
+      {
+        "kind": "LABEL_TEXT",
+        "mandatory": true,
+        "req_id": "req.works.s1.label",
+        "source_ref": "brief.pages[1].sections[0].label",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/works/ shows the label 'PLATE 02'",
+        "subject": {
+          "page": "works",
+          "route": "/works/",
+          "section": 0,
+          "text": "PLATE 02"
+        }
+      },
+      {
+        "kind": "SECTION_HEADING",
+        "mandatory": true,
+        "req_id": "req.works.s2.heading",
+        "source_ref": "brief.pages[1].sections[1].heading",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/works/ shows the heading 'Glazes'",
+        "subject": {
+          "page": "works",
+          "route": "/works/",
+          "section": 1,
+          "text": "Glazes"
+        }
+      },
+      {
+        "kind": "LABEL_TEXT",
+        "mandatory": true,
+        "req_id": "req.works.s2.label",
+        "source_ref": "brief.pages[1].sections[1].label",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/works/ shows the label 'RANGE'",
+        "subject": {
+          "page": "works",
+          "route": "/works/",
+          "section": 1,
+          "text": "RANGE"
+        }
+      },
+      {
+        "kind": "ITEM_TEXT",
+        "mandatory": true,
+        "req_id": "req.works.s2.item0",
+        "source_ref": "brief.pages[1].sections[1].items[0]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/works/ shows the item 'Ash white'",
+        "subject": {
+          "body": "A soft, matte white that shows the throwing lines.",
+          "item": 0,
+          "page": "works",
+          "route": "/works/",
+          "section": 1,
+          "text": "Ash white"
+        }
+      },
+      {
+        "kind": "ITEM_TEXT",
+        "mandatory": true,
+        "req_id": "req.works.s2.item1",
+        "source_ref": "brief.pages[1].sections[1].items[1]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/works/ shows the item 'Iron black'",
+        "subject": {
+          "body": "A satin black that breaks brown on the rims.",
+          "item": 1,
+          "page": "works",
+          "route": "/works/",
+          "section": 1,
+          "text": "Iron black"
+        }
+      },
+      {
+        "kind": "ITEM_TEXT",
+        "mandatory": true,
+        "req_id": "req.works.s2.item2",
+        "source_ref": "brief.pages[1].sections[1].items[2]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/works/ shows the item 'Fen green'",
+        "subject": {
+          "body": "A pale celadon that pools in the foot ring.",
+          "item": 2,
+          "page": "works",
+          "route": "/works/",
+          "section": 1,
+          "text": "Fen green"
+        }
+      },
+      {
+        "kind": "PAGE_EXISTS",
+        "mandatory": true,
+        "req_id": "req.page.visit",
+        "source_ref": "brief.pages[2].title",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "Page /visit/ exists with title 'Visit'",
+        "subject": {
+          "page": "visit",
+          "route": "/visit/",
+          "text": "Visit"
+        }
+      },
+      {
+        "kind": "NAV_LINK",
+        "mandatory": true,
+        "req_id": "req.nav.visit",
+        "source_ref": "brief.pages[2]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "Every page links to /visit/ as 'Visit'",
+        "subject": {
+          "href": "/visit/",
+          "page": "visit",
+          "routes": "*",
+          "text": "Visit"
+        }
+      },
+      {
+        "kind": "SECTION_HEADING",
+        "mandatory": true,
+        "req_id": "req.visit.s1.heading",
+        "source_ref": "brief.pages[2].sections[0].heading",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/visit/ shows the heading 'Visiting the studio'",
+        "subject": {
+          "page": "visit",
+          "route": "/visit/",
+          "section": 0,
+          "text": "Visiting the studio"
+        }
+      },
+      {
+        "kind": "SECTION_BODY",
+        "mandatory": true,
+        "req_id": "req.visit.s1.body",
+        "source_ref": "brief.pages[2].sections[0].body",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/visit/ shows section 1 body copy verbatim",
+        "subject": {
+          "page": "visit",
+          "route": "/visit/",
+          "section": 0,
+          "text": "The studio is open on Saturdays from ten until four. Other days by appointment."
+        }
+      },
+      {
+        "kind": "LABEL_TEXT",
+        "mandatory": true,
+        "req_id": "req.visit.s1.label",
+        "source_ref": "brief.pages[2].sections[0].label",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/visit/ shows the label 'HOURS'",
+        "subject": {
+          "page": "visit",
+          "route": "/visit/",
+          "section": 0,
+          "text": "HOURS"
+        }
+      },
+      {
+        "kind": "ITEM_TEXT",
+        "mandatory": true,
+        "req_id": "req.visit.s1.item0",
+        "source_ref": "brief.pages[2].sections[0].items[0]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/visit/ shows the item 'Saturdays'",
+        "subject": {
+          "body": "10:00 to 16:00",
+          "item": 0,
+          "page": "visit",
+          "route": "/visit/",
+          "section": 0,
+          "text": "Saturdays"
+        }
+      },
+      {
+        "kind": "ITEM_TEXT",
+        "mandatory": true,
+        "req_id": "req.visit.s1.item1",
+        "source_ref": "brief.pages[2].sections[0].items[1]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/visit/ shows the item 'Weekdays'",
+        "subject": {
+          "body": "By appointment",
+          "item": 1,
+          "page": "visit",
+          "route": "/visit/",
+          "section": 0,
+          "text": "Weekdays"
+        }
+      },
+      {
+        "kind": "SECTION_HEADING",
+        "mandatory": true,
+        "req_id": "req.visit.s2.heading",
+        "source_ref": "brief.pages[2].sections[1].heading",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/visit/ shows the heading 'Before you come'",
+        "subject": {
+          "page": "visit",
+          "route": "/visit/",
+          "section": 1,
+          "text": "Before you come"
+        }
+      },
+      {
+        "kind": "SECTION_BODY",
+        "mandatory": true,
+        "req_id": "req.visit.s2.body",
+        "source_ref": "brief.pages[2].sections[1].body",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/visit/ shows section 2 body copy verbatim",
+        "subject": {
+          "page": "visit",
+          "route": "/visit/",
+          "section": 1,
+          "text": "The workshop floor is uneven and there are two steps at the door. Tell us if you need a hand and we will meet you outside."
+        }
+      },
+      {
+        "kind": "LABEL_TEXT",
+        "mandatory": true,
+        "req_id": "req.visit.s2.label",
+        "source_ref": "brief.pages[2].sections[1].label",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "/visit/ shows the label 'NOTE'",
+        "subject": {
+          "page": "visit",
+          "route": "/visit/",
+          "section": 1,
+          "text": "NOTE"
+        }
+      },
+      {
+        "kind": "IMAGE_ALT",
+        "mandatory": true,
+        "req_id": "req.image.plate-kiln.alt",
+        "source_ref": "brief.images[0].alt",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "Image plate-kiln has its approved alt text",
+        "subject": {
+          "asset_id": "plate-kiln",
+          "text": "A red circle above thin grey horizon lines on a charcoal ground"
+        }
+      },
+      {
+        "kind": "IMAGE_RIGHTS",
+        "mandatory": true,
+        "req_id": "req.image.plate-kiln.rights",
+        "source_ref": "brief.images[0].rights",
+        "stages": [
+          "ir",
+          "source"
+        ],
+        "statement": "Image plate-kiln ships only with recorded rights (procedural_owned)",
+        "subject": {
+          "asset_id": "plate-kiln",
+          "license_ref": "",
+          "rights": "procedural_owned"
+        }
+      },
+      {
+        "kind": "IMAGE_ALT",
+        "mandatory": true,
+        "req_id": "req.image.plate-clay.alt",
+        "source_ref": "brief.images[1].alt",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "Image plate-clay has its approved alt text",
+        "subject": {
+          "asset_id": "plate-clay",
+          "text": "Fine grey lines and a short paper-white bar on a charcoal ground"
+        }
+      },
+      {
+        "kind": "IMAGE_RIGHTS",
+        "mandatory": true,
+        "req_id": "req.image.plate-clay.rights",
+        "source_ref": "brief.images[1].rights",
+        "stages": [
+          "ir",
+          "source"
+        ],
+        "statement": "Image plate-clay ships only with recorded rights (procedural_owned)",
+        "subject": {
+          "asset_id": "plate-clay",
+          "license_ref": "",
+          "rights": "procedural_owned"
+        }
+      },
+      {
+        "kind": "REQUIRED_PHRASE",
+        "mandatory": true,
+        "req_id": "req.phrase.0",
+        "source_ref": "brief.required_phrases[0]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "The site says 'made slowly'",
+        "subject": {
+          "text": "made slowly"
+        }
+      },
+      {
+        "kind": "REQUIRED_PHRASE",
+        "mandatory": true,
+        "req_id": "req.phrase.1",
+        "source_ref": "brief.required_phrases[1]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "The site says 'used daily'",
+        "subject": {
+          "text": "used daily"
+        }
+      },
+      {
+        "kind": "FORBIDDEN_PHRASE",
+        "mandatory": true,
+        "req_id": "req.forbid.0",
+        "source_ref": "brief.forbidden_phrases[0]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "The site never says 'world-class'",
+        "subject": {
+          "text": "world-class"
+        }
+      },
+      {
+        "kind": "FORBIDDEN_PHRASE",
+        "mandatory": true,
+        "req_id": "req.forbid.1",
+        "source_ref": "brief.forbidden_phrases[1]",
+        "stages": [
+          "ir",
+          "source",
+          "rendered"
+        ],
+        "statement": "The site never says 'best in the world'",
+        "subject": {
+          "text": "best in the world"
+        }
+      },
+      {
+        "kind": "PSEM_COLOUR",
+        "mandatory": true,
+        "req_id": "req.psem.colour",
+        "source_ref": "profile:psem_editorial",
+        "stages": [
+          "ir",
+          "rendered"
+        ],
+        "statement": "Only PSEM colours, only legal pairings, one accent per page",
+        "subject": {
+          "grammar": "psem_editorial"
+        }
+      },
+      {
+        "kind": "A11Y_AUTOMATED",
+        "mandatory": true,
+        "req_id": "req.a11y.automated",
+        "source_ref": "contract:amc-ucpo-release/v1",
+        "stages": [
+          "rendered"
+        ],
+        "statement": "No automated accessibility violations (axe-core, WCAG 2.2 A/AA rules)",
+        "subject": {}
+      },
+      {
+        "kind": "RESPONSIVE_REFLOW",
+        "mandatory": true,
+        "req_id": "req.responsive.reflow",
+        "source_ref": "contract:amc-ucpo-release/v1",
+        "stages": [
+          "rendered"
+        ],
+        "statement": "No horizontal scrolling at 320, 768 and 1280 CSS px",
+        "subject": {}
+      },
+      {
+        "kind": "TEXT_ZOOM",
+        "mandatory": true,
+        "req_id": "req.text.zoom",
+        "source_ref": "contract:amc-ucpo-release/v1",
+        "stages": [
+          "rendered"
+        ],
+        "statement": "Content reflows without horizontal scrolling with text at 200%",
+        "subject": {}
+      },
+      {
+        "kind": "REDUCED_MOTION",
+        "mandatory": true,
+        "req_id": "req.motion.reduced",
+        "source_ref": "contract:amc-ucpo-release/v1",
+        "stages": [
+          "rendered"
+        ],
+        "statement": "With prefers-reduced-motion: reduce, nothing animates",
+        "subject": {}
+      },
+      {
+        "kind": "KEYBOARD_FOCUS",
+        "mandatory": true,
+        "req_id": "req.keyboard.focus",
+        "source_ref": "contract:amc-ucpo-release/v1",
+        "stages": [
+          "rendered"
+        ],
+        "statement": "A skip link is the first focus stop and every focus stop shows a visible indicator",
+        "subject": {}
+      },
+      {
+        "kind": "NO_CONSOLE_ERRORS",
+        "mandatory": true,
+        "req_id": "req.console.clean",
+        "source_ref": "contract:amc-ucpo-release/v1",
+        "stages": [
+          "rendered"
+        ],
+        "statement": "No console errors or uncaught page errors",
+        "subject": {}
+      },
+      {
+        "kind": "NO_EXTERNAL_REQUESTS",
+        "mandatory": true,
+        "req_id": "req.network.none",
+        "source_ref": "contract:amc-ucpo-release/v1",
+        "stages": [
+          "rendered"
+        ],
+        "statement": "The page requests nothing outside its own origin",
+        "subject": {}
+      }
+    ],
+    "schema_version": "amc-ucpo-requirements/v1"
+  },
+  "site_list": {
+    "sites": [
+      {
+        "brief_artifact": "art-prj-test-5344663d03ba-foundry-ucpo-halden-brief",
+        "site_id": "halden",
+        "version": 1
+      }
+    ]
+  },
+  "site_view": {
+    "approval": null,
+    "browser_qa": null,
+    "build": null,
+    "build_steps": [],
+    "coverage": null,
+    "external_effects": "none",
+    "job": {
+      "job_id": "ucpo-69bd187bca4768b9ae368526b1798b4d72272e20",
+      "reasons": [],
+      "state": "SCHEDULED"
+    },
+    "project_id": "prj-test-5344663d03ba",
+    "proof": null,
+    "release": {
+      "allowed": false,
+      "deployment": "NOT_AUTHORIZED",
+      "reasons": [
+        "VERIFICATION_NOT_PASSED",
+        "NO_APPROVAL"
+      ]
+    },
+    "site_id": "halden",
+    "stages": {
+      "brief": {
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-brief",
+        "content_hash": "db198ee97b074d37a809d682f1aa2040406bccbeb5495f14adc86243342b8e97",
+        "status": "draft",
+        "version": 1
+      },
+      "genome": {
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-genome",
+        "content_hash": "968d4d1ec54b9420c8333d9b57da6a43c41cb13f9abd9f251345b120e5672b68",
+        "status": "draft",
+        "version": 1
+      },
+      "requirements": {
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-requirements",
+        "content_hash": "eb414d550b2cd6eca232eeffc3269138575d8739a0b268ebfeb73c5156a23b54",
+        "status": "draft",
+        "version": 1
+      },
+      "site_ir": {
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-site-ir",
+        "content_hash": "0d51b7ed84a49ccf19f7197b5005ee6eb879e7ec5b5be787e1dff00f66efc7f8",
+        "status": "draft",
+        "version": 1
+      },
+      "source": {
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-source",
+        "content_hash": "71528e2bf411013b255b4eaf08ebbaa215d1f697f56ba1a803d1959096106899",
+        "status": "draft",
+        "version": 1
+      },
+      "tokens": {
+        "artifact_id": "art-prj-test-5344663d03ba-foundry-ucpo-halden-tokens",
+        "content_hash": "4e4c6107114ca604e987d3af3b9cd3a0aee22670b0318c74b77973dc22ae586f",
+        "status": "draft",
+        "version": 1
+      }
+    }
+  },
+  "trace": {
+    "checks": [],
+    "ir": [
+      "section:index-s1.cta"
+    ],
+    "rendered": {},
+    "requirement": {
+      "kind": "CTA",
+      "mandatory": true,
+      "req_id": "req.index.s1.cta",
+      "source_ref": "brief.pages[0].sections[0].cta",
+      "stages": [
+        "ir",
+        "source",
+        "rendered"
+      ],
+      "statement": "/ offers 'Plan a studio visit' linking to visit#hours",
+      "subject": {
+        "href": "/visit/#hours",
+        "page": "index",
+        "route": "/",
+        "section": 0,
+        "text": "Plan a studio visit"
+      }
+    },
+    "source": [
+      "app/page.tsx",
+      "content/site.json"
+    ],
+    "status": {
+      "detail": "rendered: no browser verification",
+      "kind": "CTA",
+      "loss_stage": null,
+      "mandatory": true,
+      "req_id": "req.index.s1.cta",
+      "stages": {
+        "ir": "PASS",
+        "rendered": "NOT_RUN",
+        "source": "PASS"
+      },
+      "status": "UNRESOLVED"
+    }
+  }
+}

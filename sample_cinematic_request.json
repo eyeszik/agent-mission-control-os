@@ -1,0 +1,41 @@
+{
+  "text": "Storyboard and shot list for a restrained luxury brand film: a watchmaker inspects a finished movement, then sets it down.",
+  "mode": "STORYBOARD",
+  "project": {
+    "meta": { "title": "Atelier — Movement", "brand_tier": "restrained_luxury" },
+    "story": {
+      "logline": "A watchmaker's final, unhurried inspection.",
+      "scenes": [
+        {
+          "id": "sc1",
+          "location_id": "atelier_bench",
+          "beats": [
+            { "id": "b1", "summary": "the watchmaker lifts the finished movement to the loupe", "dramatic_change": "anticipation", "characters": ["watchmaker"] },
+            { "id": "b2", "summary": "the watchmaker studies the balance wheel", "dramatic_change": "quiet approval", "characters": ["watchmaker"] },
+            { "id": "b3", "summary": "the watchmaker sets the movement on the bench cloth", "dramatic_change": "resolution", "characters": ["watchmaker"] }
+          ]
+        }
+      ]
+    },
+    "characters": [
+      {
+        "id": "watchmaker",
+        "name": "The Watchmaker",
+        "speaking": false,
+        "recurring": true,
+        "identity_sensitive": true,
+        "immutable_identity": { "age": "60s", "hands": "steady, weathered" },
+        "wardrobe": { "top": "grey atelier smock" },
+        "movement_signature": "deliberate, economical"
+      }
+    ],
+    "brand": {
+      "identity": "restrained luxury",
+      "restraint": "minimal, unhurried movement",
+      "holds": ["on the finished movement"],
+      "amplitude": "low",
+      "timing": "slow, even",
+      "allow_spring_bounce": false
+    }
+  }
+}

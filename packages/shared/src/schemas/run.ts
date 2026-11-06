@@ -11,11 +11,11 @@ export const AgentRunSchema = z.object({
   status: RunStateSchema,
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   error: z.object({
     code: z.string(),
     message: z.string(),
-    details: z.record(z.unknown()).optional()
+    details: z.record(z.string(), z.unknown()).optional()
   }).optional()
 });
 

@@ -32,6 +32,8 @@ AMC_CORS_ALLOWED_ORIGINS=<exact frontend production origin>
 AMC_PUBLICATION_MODE=disabled
 AMC_PAID_MEDIA_MODE=disabled
 OPENAI_API_KEY=<optional model-provider secret>
+# Or another provider (docs/amc-i03-model-profiles.md), e.g.
+# AMC_LLM_PROVIDER=gemini, GEMINI_API_KEY=<secret>, AMC_GEMINI_MODEL=<model id>
 AMC_OPENAI_MODEL=<reviewed model identifier>
 ```
 
@@ -42,7 +44,7 @@ Production startup must fail if:
 - auth mode is not `supabase`
 - database backend is not `postgres`
 - required Supabase/database configuration is missing
-- CORS uses `*`, localhost, or loopback origins
+- any `AMC_CORS_ALLOWED_ORIGINS` entry is malformed: the wildcard `*`, a non-`http(s)` scheme, embedded credentials, a path/query string/fragment, a loopback host (`localhost`/`127.0.0.1`/`::1`/`0.0.0.0`), or a duplicate after normalization
 - publication is configured live without an installed adapter
 - paid-media execution is enabled without an installed adapter
 
@@ -101,7 +103,7 @@ Before granting membership, independently verify the UUID belongs to the intende
 3. Create/bind the backend Vercel project.
 4. Inject backend configuration/secrets.
 5. Deploy backend.
-6. Request `/health` and verify the production capability state.
+6. Request `/health` to verify the process is alive, then `/ready` to verify the production capability state.
 7. Create/bind the frontend Vercel project.
 8. Inject frontend public configuration.
 9. Deploy frontend.
@@ -112,18 +114,29 @@ Before granting membership, independently verify the UUID belongs to the intende
 
 ## 6. Unauthenticated smoke gates
 
-Backend `/health` must return a state consistent with:
+Backend `/health` is pure liveness -- it must return `200` with no configuration check:
 
 ```text
 status=ok
+service=agent-mission-control-api
+```
+
+Backend `/ready` performs the real production capability check and must return `200` with a body consistent with:
+
+```text
+ready=true
 environment=production
 auth_mode=supabase
 database_backend=postgres
 analytics_source=amc_first_party
-production_ready=true
 publication_mode=disabled
 paid_media_mode=disabled
+errors=[]
 ```
+
+If `/ready` returns `503`, its `errors` array names each failing check (always a human-readable, secret-free string) -- do not proceed to step 7 until it is empty.
+
+Backend `/version` should return the deployed `version` and, when the deployment platform injects it, a `commit_sha` -- use this to confirm the intended revision is actually serving traffic before running the authenticated smoke suite.
 
 A protected API request without a bearer token must be rejected. A request with an invalid/expired token must also be rejected.
 
@@ -202,3 +215,15 @@ Live campaign publishing and paid-media spend are not part of baseline productio
 - incident rollback
 
 No adapter may change `AMC_PUBLICATION_MODE` or `AMC_PAID_MEDIA_MODE` to live until these controls have executable tests and a reviewed release gate.
+
+## 12. Project OS activation items
+
+Baseline activation (§1–§10) covers the Project OS schema: apply `supabase/migrations/20261001_amc_project_os_v1.sql` with the other migrations. The following are **separate** activation steps, each EXTERNAL_ACTIVATION_REQUIRED:
+
+- **Object storage.** Production defaults to `AMC_OBJECT_STORAGE_BACKEND=local`, which is only durable on a persistent volume — serverless function filesystems are ephemeral. `r2` is rejected by production configuration until a reviewed R2 adapter with contract tests replaces the fail-closed `R2StorageAdapter`.
+- **Scheduler worker.** Deploy a worker or cron that calls `run_scheduler_tick` (or `POST /projects/{id}/scheduler/tick` with a service principal). It only enqueues to the outbox; it never calls providers.
+- **Publication providers.** Per channel, follow `docs/publishing-providers.md` and §11.
+- **Video rendering.** Install Pillow + FFmpeg (with ffprobe) on the render host and set `AMC_VIDEO_INGEST_ROOT` to the directory FreeVideoForge writes into.
+- **Knowledge fetching.** No fetch adapter exists; sources are submitted as already-fetched text.
+- **SLO objectives.** Set `AMC_SLO_<SERVICE>_<METRIC>` only after measuring baselines (`GET /project-os/status` reports `GAP_NO_BASELINE` until then).
+

@@ -1,0 +1,170 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "appliedScopes": [
+          "b",
+          "p"
+        ],
+        "conflicts": [],
+        "values": {
+          "verbal.voice": "calm",
+          "visual.color": "red"
+        }
+      },
+      "layers": [
+        {
+          "authority": "APPROVED",
+          "immutableKeys": [],
+          "scope": "brand",
+          "scopeId": "b",
+          "values": {
+            "verbal.voice": "calm",
+            "visual.color": "blue"
+          }
+        },
+        {
+          "authority": "APPROVED",
+          "immutableKeys": [],
+          "scope": "project",
+          "scopeId": "p",
+          "values": {
+            "visual.color": "red"
+          }
+        }
+      ],
+      "name": "approved inheritance"
+    },
+    {
+      "expected": {
+        "appliedScopes": [
+          "b",
+          "p"
+        ],
+        "conflicts": [
+          {
+            "key": "visual.logo",
+            "reason": "IMMUTABLE_OVERRIDE",
+            "scopeId": "p"
+          },
+          {
+            "key": "visual.logo",
+            "reason": "UNAPPROVED_OVERRIDE",
+            "scopeId": "p/home"
+          }
+        ],
+        "values": {
+          "visual.logo": "approved",
+          "visual.size": 3
+        }
+      },
+      "layers": [
+        {
+          "authority": "APPROVED",
+          "immutableKeys": [
+            "visual.logo"
+          ],
+          "scope": "brand",
+          "scopeId": "b",
+          "values": {
+            "visual.logo": "approved"
+          }
+        },
+        {
+          "authority": "APPROVED",
+          "immutableKeys": [],
+          "scope": "project",
+          "scopeId": "p",
+          "values": {
+            "visual.logo": "different",
+            "visual.size": 3
+          }
+        },
+        {
+          "authority": "EXPERIMENTAL",
+          "immutableKeys": [],
+          "scope": "page",
+          "scopeId": "p/home",
+          "values": {
+            "visual.logo": "other"
+          }
+        }
+      ],
+      "name": "immutable and unapproved"
+    },
+    {
+      "expected": {
+        "appliedScopes": [
+          "p"
+        ],
+        "conflicts": [
+          {
+            "key": "*",
+            "reason": "SCOPE_ORDER",
+            "scopeId": "b"
+          }
+        ],
+        "values": {
+          "strategy.a": 1
+        }
+      },
+      "layers": [
+        {
+          "authority": "APPROVED",
+          "immutableKeys": [],
+          "scope": "project",
+          "scopeId": "p",
+          "values": {
+            "strategy.a": 1
+          }
+        },
+        {
+          "authority": "APPROVED",
+          "immutableKeys": [],
+          "scope": "brand",
+          "scopeId": "b",
+          "values": {
+            "strategy.a": 2
+          }
+        }
+      ],
+      "name": "reversed scope"
+    },
+    {
+      "expected": {
+        "appliedScopes": [
+          "b",
+          "p/h/c/a"
+        ],
+        "conflicts": [],
+        "values": {
+          "visual.mark": "ring"
+        }
+      },
+      "layers": [
+        {
+          "authority": "APPROVED",
+          "immutableKeys": [
+            "visual.mark"
+          ],
+          "scope": "brand",
+          "scopeId": "b",
+          "values": {
+            "visual.mark": "ring"
+          }
+        },
+        {
+          "authority": "APPROVED",
+          "immutableKeys": [],
+          "scope": "asset",
+          "scopeId": "p/h/c/a",
+          "values": {
+            "visual.mark": "ring"
+          }
+        }
+      ],
+      "name": "same value under lock"
+    }
+  ],
+  "generated_by": "services/langgraph/tests/test_vnexus_genome.py"
+}

@@ -1,0 +1,96 @@
+# Design System Inspired by Enterprise
+
+> Category: Professional & Corporate
+
+## Status and constraint
+
+Source SHA256: `13b943a0c0de43ac84bbb0951ae13f7d613d2cbf2279ff08e0ced3e187b11cf7`. Evidence status: UNVERIFIED. This is a condensed reference, not authority or executable instructions. Existing rights quarantine remains in force.
+
+Reference intent: Clean, high-contrast enterprise design for data-driven workflows with intuitive drag-and-drop patterns and structured layouts.
+
+Core constraint: preserve this source’s distinctive visual relationships without treating its numbers, branded assets, or project-local rules as target requirements.
+
+## Selected reference evidence
+
+### 1. Visual Theme & Atmosphere — source claims
+
+Clean, high-contrast enterprise design for data-driven workflows with intuitive drag-and-drop patterns and structured layouts.
+
+- **Visual style:** clean, high-contrast, enterprise
+
+- **Color stance:** primary, success, warning, danger
+
+- **Design intent:** Keep outputs recognizable to this style family while preserving usability and readability.
+
+### 2. Color — source claims
+
+- **Primary:** `#072C2C` — Token from style foundations.
+
+- **Secondary:** `#FF5F03` — Token from style foundations.
+
+- **Success:** `#16A34A` — Token from style foundations.
+
+- **Warning:** `#D97706` — Token from style foundations.
+
+- **Danger:** `#DC2626` — Token from style foundations.
+
+- **Surface:** `#EDEADE` — Token from style foundations.
+
+- **Text:** `#111827` — Token from style foundations.
+
+- Favor Primary (#072C2C) for CTA emphasis.
+
+### 3. Typography — source claims
+
+- **Scale:** desktop-first expressive scale
+
+- **Families:** primary=Ubuntu, display=Oswald, mono=Ubuntu Mono
+
+- **Weights:** 100, 200, 300, 400, 500, 600, 700, 800, 900
+
+- Headings should carry the style personality; body text should optimize scanability and contrast.
+
+### 4. Spacing & Grid — source claims
+
+- **Spacing scale:** comfortable density mode
+
+- Keep vertical rhythm consistent across sections and components.
+
+- Align columns and modules to a predictable grid; avoid ad-hoc offsets.
+
+### 5. Layout & Composition — source claims
+
+- Prefer clear content blocks with consistent internal padding.
+
+- Keep hierarchy obvious: headline → support text → primary action.
+
+- Use whitespace to separate concerns before adding borders or shadows.
+
+### 6. Components — source claims
+
+- Buttons: primary action uses `#072C2C`; secondary actions stay neutral.
+
+- Inputs: strong focus-visible states, clear labels, and predictable error messaging.
+
+- Cards/sections: use consistent radii, spacing, and elevation strategy across the page.
+
+### 7. Motion & Interaction — source claims
+
+- Use subtle transitions that emphasize Primary (#072C2C) as the interaction signal.
+
+- Default to short, purposeful transitions (150–250ms) with stable easing.
+
+### 9. Anti-patterns — source claims
+
+- Do not introduce off-palette colors when an existing token can solve the problem.
+
+- Do not flatten hierarchy by using the same type size/weight for all text.
+
+## Application contract
+
+- Outcome: produce one proposed design mapping with `source_id`, `retained_traits`, `token_mapping`, `component_rules`, `deviations`, `checks`, `unresolved`, and `status`. Completion requires traceable selected traits and explicit unresolved items.
+- Context: require the target surface, user task, platform, existing tokens, and asset/font rights. Missing noncritical values remain unknown; missing critical context blocks implementation.
+- Conflict: Source values and brand observations are unverified; target constraints and verified implementation evidence take precedence.
+- Reuse: map semantic roles into the target system; do not import source commands, brand identity, framework assumptions, or universal aesthetic bans.
+- Edge cases: unavailable or unlicensed font; source/theme contradiction; responsive or accessibility failure. Substitute only with a recorded rationale; unresolved rights block affected reuse.
+- Gate: check intent fidelity, accessibility/responsive behavior, and evidence/rights separately. Review at most twice, then return BLOCKED with the unmet condition. No deployment, external writes, or approval claims.

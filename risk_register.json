@@ -4,15 +4,16 @@
       {
         "risk_id": "R-001",
         "category": "runtime_verification",
-        "summary": "Repository-specific versions, packages, routes, commands, and build setup are unverified.",
+        "summary": "Live repository versions, routes, commands, and build setup are now inspectable; release verification is governed by current CI.",
         "severity": "MEDIUM",
         "likelihood": "HIGH",
         "impact": "Architecture correctness, security, runtime safety, or release approval may be affected.",
-        "mitigation": "Require repo audit before coding.",
-        "detection_signal": "missing_repo_tree_or_lockfile",
+        "mitigation": "Run repository CI and audit the exact revision before release.",
+        "detection_signal": "current_ci_or_revision_not_verified",
         "owner_role": "B",
         "confidence": 0.9,
-        "status": "open"
+        "status": "superseded_by_live_repo_audit",
+        "historical_summary": "Repository-specific versions, packages, routes, commands, and build setup are unverified."
       },
       {
         "risk_id": "R-002",
@@ -157,6 +158,11 @@
         "confidence": 0.81,
         "status": "open"
       }
-    ]
+    ],
+    "provenance": {
+      "record_status": "HISTORICAL_SUPERSEDED",
+      "superseded_by": "docs/audit-remediation-2026-09-26.md",
+      "note": "This record predates live repository verification. Preserve it as provenance; repository-availability statements are not current runtime facts."
+    }
   }
 }

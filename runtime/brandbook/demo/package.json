@@ -1,0 +1,2402 @@
+{
+ "brand_id": "demo",
+ "brand_name": "Halden & Fen (fictional)",
+ "compiler_version": "amc-brandbook-compiler/1.0.0",
+ "context_hash": "7d0418838a9826f735d3e6144da9bb78308e69eb62314ef5dd811b1b97f3728c",
+ "gaps": [],
+ "genome_ref": "demo-v1",
+ "locale": "en",
+ "manifest_hash": "6355b797e60a741201c41ad23463fdd361fe2832116a2429532de35f3961e67b",
+ "mark": {
+  "approved": true,
+  "kind": "VECTOR",
+  "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+  "source": "deterministic composition of visual.logo.mark=ring_dot"
+ },
+ "mode": "PREVIEW",
+ "package_hash": "cde72697a6183dd4cc917d4bb1ac93425fb14f888dfca61588cc61379cf39265",
+ "pages": [
+  {
+   "assets": [
+    {
+     "approved": true,
+     "asset": "mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "source": "deterministic composition of visual.logo.mark=ring_dot"
+    }
+   ],
+   "blocks": [
+    {
+     "copy_id": "p01-c01",
+     "proposed": false,
+     "role": "title",
+     "t": "copy",
+     "text": "Halden & Fen (fictional)"
+    },
+    {
+     "copy_id": "p01-c02",
+     "proposed": false,
+     "role": "subtitle",
+     "t": "copy",
+     "text": "Brand guidelines"
+    },
+    {
+     "copy_id": "p01-c03",
+     "proposed": false,
+     "role": "meta",
+     "t": "copy",
+     "text": "Template amc-brandbook/default 1.0.0"
+    },
+    {
+     "copy_id": "p01-c04",
+     "proposed": false,
+     "role": "meta",
+     "t": "copy",
+     "text": "Draft for review: not approved for release"
+    },
+    {
+     "asset": "mark",
+     "caption": "",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 200,
+     "t": "asset",
+     "variant": "master"
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p01-c01",
+     "proposed": false,
+     "source": "brand.display_name",
+     "text": "Halden & Fen (fictional)"
+    },
+    {
+     "copy_id": "p01-c02",
+     "proposed": false,
+     "source": "template",
+     "text": "Brand guidelines"
+    },
+    {
+     "copy_id": "p01-c03",
+     "proposed": false,
+     "source": "template",
+     "text": "Template amc-brandbook/default 1.0.0"
+    },
+    {
+     "copy_id": "p01-c04",
+     "proposed": false,
+     "source": "template",
+     "text": "Draft for review: not approved for release"
+    }
+   ],
+   "dependency_hash": "bf3cfca2ee3b8faceb87f6a2114244988ec3eb1503ff6ab8a3987e8cdeec037b",
+   "fields": [
+    {
+     "approved": true,
+     "path": "visual.logo.mark",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "ring_dot"
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.master_artifact",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.wordmark",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p01 · Cover (1 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Exact brand identity, document title, template version and approval status.\nExact copy (verbatim, in this order):\n  - [p01-c01] \"Halden & Fen (fictional)\"\n  - [p01-c02] \"Brand guidelines\"\n  - [p01-c03] \"Template amc-brandbook/default 1.0.0\"\n  - [p01-c04] \"Draft for review: not approved for release\"\nAssets: canonical master mark VECTOR sha256:5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11 (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nProhibitions: no invented slogan; no invented date; no endorsement\nLayout: cover. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 1,
+   "package_hash": "0687d4154225a746c953b91487b1d5afb5687be542f2e640242dc71c0d0f9a91",
+   "page_id": "p01",
+   "status": "READY",
+   "title": "Cover"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "columns": [
+      "Page",
+      "Section",
+      "Status"
+     ],
+     "rows": [
+      [
+       "01",
+       "Cover",
+       "READY"
+      ],
+      [
+       "02",
+       "Contents and status",
+       "ASSEMBLED"
+      ],
+      [
+       "03",
+       "Premise",
+       "READY"
+      ],
+      [
+       "04",
+       "Voice",
+       "READY"
+      ],
+      [
+       "05",
+       "References and evidence",
+       "READY"
+      ],
+      [
+       "06",
+       "Identity overview",
+       "READY"
+      ],
+      [
+       "07",
+       "Primary logo",
+       "READY"
+      ],
+      [
+       "08",
+       "Construction",
+       "READY"
+      ],
+      [
+       "09",
+       "Wordmark",
+       "READY"
+      ],
+      [
+       "10",
+       "Lockups",
+       "READY"
+      ],
+      [
+       "11",
+       "Clear space",
+       "READY"
+      ],
+      [
+       "12",
+       "Scale",
+       "READY"
+      ],
+      [
+       "13",
+       "One colour and reverse",
+       "READY"
+      ],
+      [
+       "14",
+       "Misuse",
+       "READY"
+      ],
+      [
+       "15",
+       "Colour",
+       "READY"
+      ],
+      [
+       "16",
+       "Typography",
+       "READY"
+      ],
+      [
+       "17",
+       "Layout",
+       "NOT_APPLICABLE"
+      ],
+      [
+       "18",
+       "Graphics",
+       "NOT_APPLICABLE"
+      ],
+      [
+       "19",
+       "Imagery",
+       "READY"
+      ],
+      [
+       "20",
+       "Editorial and print",
+       "NOT_APPLICABLE"
+      ],
+      [
+       "21",
+       "Digital",
+       "NOT_APPLICABLE"
+      ],
+      [
+       "22",
+       "Motion",
+       "READY"
+      ],
+      [
+       "23",
+       "Handoff",
+       "ASSEMBLED"
+      ],
+      [
+       "24",
+       "Release",
+       "ASSEMBLED"
+      ]
+     ],
+     "t": "table"
+    },
+    {
+     "items": [
+      [
+       "READY",
+       "all required values approved"
+      ],
+      [
+       "DRAFT",
+       "labelled gaps or proposals"
+      ],
+      [
+       "BLOCKED",
+       "a required value is missing"
+      ],
+      [
+       "NOT_APPLICABLE",
+       "approved decision"
+      ]
+     ],
+     "t": "legend"
+    },
+    {
+     "copy_id": "p02-c01",
+     "proposed": false,
+     "role": "meta",
+     "t": "copy",
+     "text": "Scope: genome demo-v1"
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p02-c01",
+     "proposed": false,
+     "source": "build.genome_ref",
+     "text": "Scope: genome demo-v1"
+    }
+   ],
+   "dependency_hash": "91800c59d584d8ead337ecda0f82120b20a92e3f4dc42ca26ab7febff2045e20",
+   "fields": [],
+   "gaps": [],
+   "instructions": "PAGE p02 · Contents and status (2 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Actual navigation from this manifest, scope, evidence and approval legend.\nExact copy (verbatim, in this order):\n  - [p02-c01] \"Scope: genome demo-v1\"\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 2,
+   "package_hash": "6254aa848a13d088c942ad086e78510ca4051bc75d50da4c1b13d49ebf2dd690",
+   "page_id": "p02",
+   "status": "READY",
+   "title": "Contents and status"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "path": "strategy.positioning.statement",
+     "t": "label",
+     "text": "Positioning statement"
+    },
+    {
+     "copy_id": "p03-c01",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "Small-batch stoneware (fictional brand)"
+    },
+    {
+     "path": "strategy.audience.primary",
+     "t": "label",
+     "text": "Audience primary"
+    },
+    {
+     "copy_id": "p03-c02",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "people furnishing a first home (fictional persona)"
+    },
+    {
+     "path": "strategy.positioning.promise",
+     "t": "label",
+     "text": "Positioning promise"
+    },
+    {
+     "copy_id": "p03-c03",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "Made slowly, used daily"
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p03-c01",
+     "proposed": false,
+     "source": "strategy.positioning.statement",
+     "text": "Small-batch stoneware (fictional brand)"
+    },
+    {
+     "copy_id": "p03-c02",
+     "proposed": false,
+     "source": "strategy.audience.primary",
+     "text": "people furnishing a first home (fictional persona)"
+    },
+    {
+     "copy_id": "p03-c03",
+     "proposed": false,
+     "source": "strategy.positioning.promise",
+     "text": "Made slowly, used daily"
+    }
+   ],
+   "dependency_hash": "4cb10ecd81ec408a9ea546663884a1be69b3c234293c3d26d80afea5f13ec830",
+   "fields": [
+    {
+     "approved": false,
+     "path": "strategy.audience.needs",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": true,
+     "path": "strategy.audience.primary",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "people furnishing a first home (fictional persona)"
+    },
+    {
+     "approved": false,
+     "path": "strategy.competitive_territory.summary",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "strategy.differentiation.statement",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": true,
+     "path": "strategy.positioning.promise",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "Made slowly, used daily"
+    },
+    {
+     "approved": true,
+     "path": "strategy.positioning.statement",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "Small-batch stoneware (fictional brand)"
+    },
+    {
+     "approved": false,
+     "path": "strategy.values.list",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p03 · Premise (3 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Offering, audience, positioning, differentiation and values behind the design.\nExact copy (verbatim, in this order):\n  - [p03-c01] \"Small-batch stoneware (fictional brand)\"\n  - [p03-c02] \"people furnishing a first home (fictional persona)\"\n  - [p03-c03] \"Made slowly, used daily\"\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 3,
+   "package_hash": "beb2748820c0f3df95a5288f7e30ec3bbfcdabeab00b6d5d26a013f68b23c6dd",
+   "page_id": "p03",
+   "status": "READY",
+   "title": "Premise"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "path": "verbal.voice.tone",
+     "t": "label",
+     "text": "Voice tone"
+    },
+    {
+     "copy_id": "p04-c01",
+     "proposed": false,
+     "role": "item",
+     "t": "copy",
+     "text": "plain"
+    },
+    {
+     "copy_id": "p04-c02",
+     "proposed": false,
+     "role": "item",
+     "t": "copy",
+     "text": "warm"
+    },
+    {
+     "path": "verbal.voice.register",
+     "t": "label",
+     "text": "Voice register"
+    },
+    {
+     "copy_id": "p04-c03",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "plain"
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p04-c01",
+     "proposed": false,
+     "source": "verbal.voice.tone",
+     "text": "plain"
+    },
+    {
+     "copy_id": "p04-c02",
+     "proposed": false,
+     "source": "verbal.voice.tone",
+     "text": "warm"
+    },
+    {
+     "copy_id": "p04-c03",
+     "proposed": false,
+     "source": "verbal.voice.register",
+     "text": "plain"
+    }
+   ],
+   "dependency_hash": "76e513a23bbd5e7538176db2f1fa47da321cc63db8e6023bda0aa5def6d1783e",
+   "fields": [
+    {
+     "approved": false,
+     "path": "verbal.content_rules.claims",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "verbal.messaging.avoid",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "verbal.messaging.write",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "verbal.tone.channels",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "verbal.vocabulary.avoid",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "verbal.vocabulary.prefer",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": true,
+     "path": "verbal.voice.register",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "plain"
+    },
+    {
+     "approved": true,
+     "path": "verbal.voice.tone",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": [
+      "plain",
+      "warm"
+     ]
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p04 · Voice (4 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Operational voice traits, channel tone, vocabulary and claims, with write/avoid samples.\nExact copy (verbatim, in this order):\n  - [p04-c01] \"plain\"\n  - [p04-c02] \"warm\"\n  - [p04-c03] \"plain\"\nProhibitions: no claim that is not in verbal.content_rules.claims\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 4,
+   "package_hash": "9d77172ee1ee15ac377f73fe25a3211564fe4df521b5cff4ee37dd78c00deae0",
+   "page_id": "p04",
+   "status": "READY",
+   "title": "Voice"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "columns": [
+      "Source",
+      "Locator",
+      "Class",
+      "Observations",
+      "Inferences",
+      "Unknowns",
+      "Reuse",
+      "Privacy"
+     ],
+     "rows": [
+      [
+       "studio-visit",
+       "studio visit notes (fictional)",
+       "USER_REPORTED",
+       "matte glazes; founder [PII] fires the kiln weekly",
+       "-",
+       "-",
+       "evidence_only",
+       "contains_pii_redacted"
+      ]
+     ],
+     "t": "table"
+    },
+    {
+     "optional": false,
+     "t": "note",
+     "text": "User-reported statements are not independent inspection. [PII] stays redacted; source compositions are evidence only."
+    }
+   ],
+   "copy_blocks": [],
+   "dependency_hash": "3e3fdd8dc33e5026a81c6e7b15c54b854ddeca976f81de8cb9580a3a5c9bf6d0",
+   "fields": [],
+   "gaps": [],
+   "instructions": "PAGE p05 · References and evidence (5 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Per-source observations, inferences, unknowns, reuse and privacy limits.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: never reconstruct [PII]; source compositions stay evidence\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 5,
+   "package_hash": "acaaf69a6cb1f775e4bdf973afd770990649b21454ea3d0947083a85853f8842",
+   "page_id": "p05",
+   "status": "READY",
+   "title": "References and evidence"
+  },
+  {
+   "assets": [
+    {
+     "approved": true,
+     "asset": "mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "source": "deterministic composition of visual.logo.mark=ring_dot"
+    }
+   ],
+   "blocks": [
+    {
+     "asset": "mark",
+     "caption": "",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 180,
+     "t": "asset",
+     "variant": "master"
+    },
+    {
+     "copy_id": "p06-c01",
+     "proposed": false,
+     "role": "wordmark",
+     "t": "copy",
+     "text": "Halden & Fen (fictional)"
+    },
+    {
+     "copy_id": "p06-c01",
+     "t": "wordmark"
+    },
+    {
+     "optional": true,
+     "t": "note",
+     "text": "Wordmark text is the brand's registered display name; no separate wordmark is approved."
+    },
+    {
+     "approved": true,
+     "role": "ink",
+     "t": "swatch",
+     "value": "#14161a"
+    },
+    {
+     "approved": true,
+     "role": "paper",
+     "t": "swatch",
+     "value": "#f7f4ee"
+    },
+    {
+     "approved": true,
+     "role": "accent",
+     "t": "swatch",
+     "value": "#c2410c"
+    },
+    {
+     "approved": true,
+     "role": "accent_2",
+     "t": "swatch",
+     "value": "#93c5fd"
+    },
+    {
+     "approved": true,
+     "role": "muted",
+     "t": "swatch",
+     "value": "#4b4540"
+    },
+    {
+     "path": "visual.typography.display",
+     "t": "label",
+     "text": "Typography display"
+    },
+    {
+     "copy_id": "p06-c02",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "Schibsted Grotesk"
+    },
+    {
+     "path": "visual.typography.body",
+     "t": "label",
+     "text": "Typography body"
+    },
+    {
+     "copy_id": "p06-c03",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "Inter"
+    },
+    {
+     "optional": true,
+     "t": "note",
+     "text": "Calibration page: approve this page first; later pages reuse its assets and layout."
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p06-c01",
+     "proposed": false,
+     "source": "brand.display_name",
+     "text": "Halden & Fen (fictional)"
+    },
+    {
+     "copy_id": "p06-c02",
+     "proposed": false,
+     "source": "visual.typography.display",
+     "text": "Schibsted Grotesk"
+    },
+    {
+     "copy_id": "p06-c03",
+     "proposed": false,
+     "source": "visual.typography.body",
+     "text": "Inter"
+    }
+   ],
+   "dependency_hash": "f8c82575fb5b0e379034e6115ff9797cdcc5fa22f555c989176dd4d6f3baa4b2",
+   "fields": [
+    {
+     "approved": true,
+     "path": "visual.logo.mark",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "ring_dot"
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.master_artifact",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.wordmark",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p06 · Identity overview (6 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Canonical identity, palette and type on one calibration page.\nExact copy (verbatim, in this order):\n  - [p06-c01] \"Halden & Fen (fictional)\"\n  - [p06-c02] \"Schibsted Grotesk\"\n  - [p06-c03] \"Inter\"\nAssets: canonical master mark VECTOR sha256:5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11 (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 6,
+   "package_hash": "547b3fc2f58269aae33695501a82a7ce4cab122ec27d7e4ad59ec79d82504de8",
+   "page_id": "p06",
+   "status": "READY",
+   "title": "Identity overview"
+  },
+  {
+   "assets": [
+    {
+     "approved": true,
+     "asset": "mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "source": "deterministic composition of visual.logo.mark=ring_dot"
+    }
+   ],
+   "blocks": [
+    {
+     "asset": "mark",
+     "caption": "Master mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 320,
+     "t": "asset",
+     "variant": "master"
+    },
+    {
+     "t": "asset_meta",
+     "text": "VECTOR · deterministic composition of visual.logo.mark=ring_dot · sha256 5f465d136445e039"
+    },
+    {
+     "copy_id": "p07-c01",
+     "proposed": false,
+     "role": "wordmark",
+     "t": "copy",
+     "text": "Halden & Fen (fictional)"
+    },
+    {
+     "copy_id": "p07-c01",
+     "t": "wordmark"
+    },
+    {
+     "optional": true,
+     "t": "note",
+     "text": "Wordmark text is the brand's registered display name; no separate wordmark is approved."
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p07-c01",
+     "proposed": false,
+     "source": "brand.display_name",
+     "text": "Halden & Fen (fictional)"
+    }
+   ],
+   "dependency_hash": "87fb2e5ed2e382611461ecf52b12bb2636ceb941eeb129e78dc6782703e48a3c",
+   "fields": [
+    {
+     "approved": true,
+     "path": "visual.logo.mark",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "ring_dot"
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.master_artifact",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.placement",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.wordmark",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p07 · Primary logo (7 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: The approved master, its exact text, contexts and placement.\nExact copy (verbatim, in this order):\n  - [p07-c01] \"Halden & Fen (fictional)\"\nAssets: canonical master mark VECTOR sha256:5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11 (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 7,
+   "package_hash": "7e5197202dffa2be0ad861fff30adaba267c799fe2d52cbff4e801e8dee9e10f",
+   "page_id": "p07",
+   "status": "READY",
+   "title": "Primary logo"
+  },
+  {
+   "assets": [
+    {
+     "approved": true,
+     "asset": "mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "source": "deterministic composition of visual.logo.mark=ring_dot"
+    }
+   ],
+   "blocks": [
+    {
+     "asset": "mark",
+     "caption": "",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 320,
+     "t": "asset",
+     "variant": "construction"
+    },
+    {
+     "optional": false,
+     "t": "note",
+     "text": "Shown: the master's canvas boundary and centre axes. Optical construction is not recorded in the approved genome."
+    }
+   ],
+   "copy_blocks": [],
+   "dependency_hash": "9f7d8eb3b30f2945d58329f3932b15e45cf999ed64a1673ae4b9a85409abe450",
+   "fields": [
+    {
+     "approved": false,
+     "path": "visual.logo.construction",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": true,
+     "path": "visual.logo.mark",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "ring_dot"
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.master_artifact",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p08 · Construction (8 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Real axes, boundaries and negative space of the master.\nExact copy (verbatim, in this order):\n  (none)\nAssets: canonical master mark VECTOR sha256:5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11 (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 8,
+   "package_hash": "97526a182321bc050882e89f22cca5994cb2fa5c93792b9f113725e4013f8bb7",
+   "page_id": "p08",
+   "status": "READY",
+   "title": "Construction"
+  },
+  {
+   "assets": [
+    {
+     "approved": true,
+     "asset": "mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "source": "deterministic composition of visual.logo.mark=ring_dot"
+    }
+   ],
+   "blocks": [
+    {
+     "copy_id": "p09-c01",
+     "proposed": false,
+     "role": "wordmark",
+     "t": "copy",
+     "text": "Halden & Fen (fictional)"
+    },
+    {
+     "copy_id": "p09-c01",
+     "t": "wordmark"
+    },
+    {
+     "optional": true,
+     "t": "note",
+     "text": "Wordmark text is the brand's registered display name; no separate wordmark is approved."
+    },
+    {
+     "optional": true,
+     "t": "note",
+     "text": "Set in the approved display face as live text; custom lettering only if recorded above."
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p09-c01",
+     "proposed": false,
+     "source": "brand.display_name",
+     "text": "Halden & Fen (fictional)"
+    }
+   ],
+   "dependency_hash": "ef94859943d9d6fab9bd9c3ebc49373b4eb2fd44d12aa7f5d976a6b2be480b99",
+   "fields": [
+    {
+     "approved": false,
+     "path": "visual.logo.custom_lettering",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.wordmark",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.wordmark_case",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p09 · Wordmark (9 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Spelling, case, baseline and spacing of the wordmark.\nExact copy (verbatim, in this order):\n  - [p09-c01] \"Halden & Fen (fictional)\"\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 9,
+   "package_hash": "502ef8362978f3b0e731d4699db1f376eb67c10c5b9cc9924783501947e82c28",
+   "page_id": "p09",
+   "status": "READY",
+   "title": "Wordmark"
+  },
+  {
+   "assets": [
+    {
+     "approved": true,
+     "asset": "mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "source": "deterministic composition of visual.logo.mark=ring_dot"
+    }
+   ],
+   "blocks": [
+    {
+     "arrangement": "horizontal",
+     "t": "lockup"
+    },
+    {
+     "arrangement": "stacked",
+     "t": "lockup"
+    },
+    {
+     "copy_id": "p10-c01",
+     "proposed": false,
+     "role": "wordmark",
+     "t": "copy",
+     "text": "Halden & Fen (fictional)"
+    },
+    {
+     "copy_id": "p10-c01",
+     "t": "wordmark"
+    },
+    {
+     "optional": true,
+     "t": "note",
+     "text": "Wordmark text is the brand's registered display name; no separate wordmark is approved."
+    },
+    {
+     "asset": "mark",
+     "caption": "Symbol only",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 120,
+     "t": "asset",
+     "variant": "master"
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p10-c01",
+     "proposed": false,
+     "source": "brand.display_name",
+     "text": "Halden & Fen (fictional)"
+    }
+   ],
+   "dependency_hash": "a3cbf210228accd8274ef8cdf6c5b1a7ef6b9c8afade1940fad3e72197da6349",
+   "fields": [
+    {
+     "approved": false,
+     "path": "visual.logo.lockups",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": true,
+     "path": "visual.logo.mark",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "ring_dot"
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.master_artifact",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.wordmark",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p10 · Lockups (10 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Applicable primary, horizontal, stacked, wordmark-only and symbol-only lockups.\nExact copy (verbatim, in this order):\n  - [p10-c01] \"Halden & Fen (fictional)\"\nAssets: canonical master mark VECTOR sha256:5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11 (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 10,
+   "package_hash": "10b5ba8d36ec83a1e10b02a0b24cf7c15010540f0047c184eab8d6919f0fd3d1",
+   "page_id": "p10",
+   "status": "READY",
+   "title": "Lockups"
+  },
+  {
+   "assets": [
+    {
+     "approved": true,
+     "asset": "mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "source": "deterministic composition of visual.logo.mark=ring_dot"
+    }
+   ],
+   "blocks": [
+    {
+     "path": "visual.logo.clear_space",
+     "t": "label",
+     "text": "Logo clear space"
+    },
+    {
+     "copy_id": "p11-c01",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "a quarter of the mark height"
+    },
+    {
+     "asset": "mark",
+     "caption": "",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 220,
+     "t": "asset",
+     "variant": "clearspace"
+    },
+    {
+     "kind": "crowded",
+     "t": "example",
+     "text": "Incorrect: text crowding the mark"
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p11-c01",
+     "proposed": false,
+     "source": "visual.logo.clear_space",
+     "text": "a quarter of the mark height"
+    }
+   ],
+   "dependency_hash": "aa8fbe41ba84c7e2a2e22da0c9bfa029b5c5412ae3aaae530e5ded620ac35ba9",
+   "fields": [
+    {
+     "approved": true,
+     "path": "visual.logo.clear_space",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "a quarter of the mark height"
+    },
+    {
+     "approved": true,
+     "path": "visual.logo.mark",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "ring_dot"
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.master_artifact",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p11 · Clear space (11 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Approved clear space with correct and crowded examples.\nExact copy (verbatim, in this order):\n  - [p11-c01] \"a quarter of the mark height\"\nAssets: canonical master mark VECTOR sha256:5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11 (deterministic composition of visual.logo.mark=ring_dot); 1 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 11,
+   "package_hash": "508a9619ba2f4bbad5ee4a51de9e302d5bb9c122a000d6e55413e3d02bebed01",
+   "page_id": "p11",
+   "status": "READY",
+   "title": "Clear space"
+  },
+  {
+   "assets": [
+    {
+     "approved": true,
+     "asset": "mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "source": "deterministic composition of visual.logo.mark=ring_dot"
+    }
+   ],
+   "blocks": [
+    {
+     "path": "visual.logo.min_size",
+     "t": "label",
+     "text": "Logo min size"
+    },
+    {
+     "copy_id": "p12-c01",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "24px"
+    },
+    {
+     "asset": "mark",
+     "caption": "16 px",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 16,
+     "t": "asset",
+     "variant": "scale"
+    },
+    {
+     "asset": "mark",
+     "caption": "32 px",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 32,
+     "t": "asset",
+     "variant": "scale"
+    },
+    {
+     "asset": "mark",
+     "caption": "64 px",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 64,
+     "t": "asset",
+     "variant": "scale"
+    },
+    {
+     "asset": "mark",
+     "caption": "128 px",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 128,
+     "t": "asset",
+     "variant": "scale"
+    },
+    {
+     "optional": false,
+     "t": "note",
+     "text": "Screen renders at CSS px. Physical-size print tests: NOT_RUN."
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p12-c01",
+     "proposed": false,
+     "source": "visual.logo.min_size",
+     "text": "24px"
+    }
+   ],
+   "dependency_hash": "7cc11a238e725bfce17cb07acb2f02ebe6e8aadafe99fbc1604ef6dc57aae3da",
+   "fields": [
+    {
+     "approved": true,
+     "path": "visual.logo.mark",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "ring_dot"
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.master_artifact",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": true,
+     "path": "visual.logo.min_size",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "24px"
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.small_size_variant",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p12 · Scale (12 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Approved minimum size and the mark at 16, 32, 64 and 128 px.\nExact copy (verbatim, in this order):\n  - [p12-c01] \"24px\"\nAssets: canonical master mark VECTOR sha256:5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11 (deterministic composition of visual.logo.mark=ring_dot); 4 placement(s). Place it; do not redraw it.\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 12,
+   "package_hash": "25d8a1e01fe2021efe548585e7bcfd6c314003e10bd77223c53686fe5e19c888",
+   "page_id": "p12",
+   "status": "READY",
+   "title": "Scale"
+  },
+  {
+   "assets": [
+    {
+     "approved": true,
+     "asset": "mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "source": "deterministic composition of visual.logo.mark=ring_dot"
+    }
+   ],
+   "blocks": [
+    {
+     "asset": "mark",
+     "caption": "One colour",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 160,
+     "t": "asset",
+     "variant": "silhouette"
+    },
+    {
+     "asset": "mark",
+     "caption": "Reverse",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "size": 160,
+     "t": "asset",
+     "variant": "reverse"
+    },
+    {
+     "optional": false,
+     "t": "note",
+     "text": "Silhouettes are rendered from the master by a colour filter; no separate one-colour master is approved."
+    }
+   ],
+   "copy_blocks": [],
+   "dependency_hash": "74c0ba75474f7522f1479540e2e984ac834588c3a29d6c1abb41a78a884a31e8",
+   "fields": [
+    {
+     "approved": true,
+     "path": "visual.logo.mark",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "ring_dot"
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.master_artifact",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p13 · One colour and reverse (13 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Canonical silhouette in one colour and reversed, with pairings.\nExact copy (verbatim, in this order):\n  (none)\nAssets: canonical master mark VECTOR sha256:5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11 (deterministic composition of visual.logo.mark=ring_dot); 2 placement(s). Place it; do not redraw it.\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 13,
+   "package_hash": "02f045c87e7f77a3b98623640bcbc4acba30e3f49dec4ac5557c1fad8d945263",
+   "page_id": "p13",
+   "status": "READY",
+   "title": "One colour and reverse"
+  },
+  {
+   "assets": [
+    {
+     "approved": true,
+     "asset": "mark",
+     "kind": "VECTOR",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "source": "deterministic composition of visual.logo.mark=ring_dot"
+    }
+   ],
+   "blocks": [
+    {
+     "copy_id": "p14-c01",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "t": "misuse",
+     "text": "Incorrect: Do not stretch or squash",
+     "transform": "stretch"
+    },
+    {
+     "copy_id": "p14-c02",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "t": "misuse",
+     "text": "Incorrect: Do not rotate",
+     "transform": "rotate"
+    },
+    {
+     "copy_id": "p14-c03",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "t": "misuse",
+     "text": "Incorrect: Do not recolour outside the palette",
+     "transform": "recolor"
+    },
+    {
+     "copy_id": "p14-c04",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "t": "misuse",
+     "text": "Incorrect: Do not add effects",
+     "transform": "effect"
+    },
+    {
+     "copy_id": "p14-c05",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "t": "misuse",
+     "text": "Incorrect: Do not place on busy backgrounds",
+     "transform": "busy"
+    },
+    {
+     "copy_id": "p14-c06",
+     "sha256": "5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11",
+     "t": "misuse",
+     "text": "Incorrect: Do not crowd or rearrange",
+     "transform": "crowd"
+    },
+    {
+     "optional": false,
+     "t": "note",
+     "text": "Misuse specimens are derived views for teaching; they are never stored or used as masters."
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p14-c01",
+     "proposed": false,
+     "source": "template",
+     "text": "Incorrect: Do not stretch or squash"
+    },
+    {
+     "copy_id": "p14-c02",
+     "proposed": false,
+     "source": "template",
+     "text": "Incorrect: Do not rotate"
+    },
+    {
+     "copy_id": "p14-c03",
+     "proposed": false,
+     "source": "template",
+     "text": "Incorrect: Do not recolour outside the palette"
+    },
+    {
+     "copy_id": "p14-c04",
+     "proposed": false,
+     "source": "template",
+     "text": "Incorrect: Do not add effects"
+    },
+    {
+     "copy_id": "p14-c05",
+     "proposed": false,
+     "source": "template",
+     "text": "Incorrect: Do not place on busy backgrounds"
+    },
+    {
+     "copy_id": "p14-c06",
+     "proposed": false,
+     "source": "template",
+     "text": "Incorrect: Do not crowd or rearrange"
+    }
+   ],
+   "dependency_hash": "ffb6642e02c842db108b4d569181ce9db1f0cf9f873c98f3ad59bff03e5bb537",
+   "fields": [
+    {
+     "approved": true,
+     "path": "visual.logo.mark",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "ring_dot"
+    },
+    {
+     "approved": false,
+     "path": "visual.logo.master_artifact",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p14 · Misuse (14 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Labelled misuse specimens, isolated from the masters.\nExact copy (verbatim, in this order):\n  - [p14-c01] \"Incorrect: Do not stretch or squash\"\n  - [p14-c02] \"Incorrect: Do not rotate\"\n  - [p14-c03] \"Incorrect: Do not recolour outside the palette\"\n  - [p14-c04] \"Incorrect: Do not add effects\"\n  - [p14-c05] \"Incorrect: Do not place on busy backgrounds\"\n  - [p14-c06] \"Incorrect: Do not crowd or rearrange\"\nAssets: canonical master mark VECTOR sha256:5f465d136445e0392847a391936f46a1ab3206dafed008fcd08c4086c8a51f11 (deterministic composition of visual.logo.mark=ring_dot); 6 placement(s). Place it; do not redraw it.\nProhibitions: misuse specimens are never masters\nLayout: grid. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 14,
+   "package_hash": "a832f87bcebe5369e8c0fabd3a1a7732a2f1ef9eb430e2a44faa62f352fb90af",
+   "page_id": "p14",
+   "status": "READY",
+   "title": "Misuse"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "approved": true,
+     "path": "visual.color.ink",
+     "role": "ink",
+     "t": "swatch",
+     "value": "#14161a"
+    },
+    {
+     "approved": true,
+     "path": "visual.color.paper",
+     "role": "paper",
+     "t": "swatch",
+     "value": "#f7f4ee"
+    },
+    {
+     "approved": true,
+     "path": "visual.color.accent",
+     "role": "accent",
+     "t": "swatch",
+     "value": "#c2410c"
+    },
+    {
+     "approved": true,
+     "path": "visual.color.accent_2",
+     "role": "accent_2",
+     "t": "swatch",
+     "value": "#93c5fd"
+    },
+    {
+     "approved": true,
+     "path": "visual.color.muted",
+     "role": "muted",
+     "t": "swatch",
+     "value": "#4b4540"
+    },
+    {
+     "columns": [
+      "Foreground",
+      "Background",
+      "Contrast (WCAG 2.2)",
+      "Use"
+     ],
+     "rows": [
+      [
+       "ink",
+       "paper",
+       "16.5:1",
+       "AA text"
+      ],
+      [
+       "ink",
+       "accent",
+       "3.5:1",
+       "AA large text only"
+      ],
+      [
+       "ink",
+       "accent_2",
+       "10.04:1",
+       "AA text"
+      ],
+      [
+       "ink",
+       "muted",
+       "1.92:1",
+       "Fails AA: decoration only"
+      ],
+      [
+       "paper",
+       "ink",
+       "16.5:1",
+       "AA text"
+      ],
+      [
+       "paper",
+       "accent",
+       "4.72:1",
+       "AA text"
+      ],
+      [
+       "paper",
+       "accent_2",
+       "1.64:1",
+       "Fails AA: decoration only"
+      ],
+      [
+       "paper",
+       "muted",
+       "8.6:1",
+       "AA text"
+      ],
+      [
+       "accent",
+       "ink",
+       "3.5:1",
+       "AA large text only"
+      ],
+      [
+       "accent",
+       "paper",
+       "4.72:1",
+       "AA text"
+      ],
+      [
+       "accent",
+       "accent_2",
+       "2.87:1",
+       "Fails AA: decoration only"
+      ],
+      [
+       "accent",
+       "muted",
+       "1.82:1",
+       "Fails AA: decoration only"
+      ],
+      [
+       "accent_2",
+       "ink",
+       "10.04:1",
+       "AA text"
+      ],
+      [
+       "accent_2",
+       "paper",
+       "1.64:1",
+       "Fails AA: decoration only"
+      ],
+      [
+       "accent_2",
+       "accent",
+       "2.87:1",
+       "Fails AA: decoration only"
+      ],
+      [
+       "accent_2",
+       "muted",
+       "5.24:1",
+       "AA text"
+      ],
+      [
+       "muted",
+       "ink",
+       "1.92:1",
+       "Fails AA: decoration only"
+      ],
+      [
+       "muted",
+       "paper",
+       "8.6:1",
+       "AA text"
+      ],
+      [
+       "muted",
+       "accent",
+       "1.82:1",
+       "Fails AA: decoration only"
+      ],
+      [
+       "muted",
+       "accent_2",
+       "5.24:1",
+       "AA text"
+      ]
+     ],
+     "t": "table"
+    }
+   ],
+   "copy_blocks": [],
+   "dependency_hash": "7bef139098631a0fd1bc22d9aa343831596ad4428cf616ee47a4dcdae9bfe32f",
+   "fields": [
+    {
+     "approved": true,
+     "path": "visual.color.ink",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "#14161a"
+    },
+    {
+     "approved": false,
+     "path": "visual.color.names",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": true,
+     "path": "visual.color.paper",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "#f7f4ee"
+    },
+    {
+     "approved": false,
+     "path": "visual.color.usage",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p15 · Colour (15 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Colour roles, approved values, allowed pairings and measured contrast.\nExact copy (verbatim, in this order):\n  (none)\nLayout: matrix. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 15,
+   "package_hash": "e6852591a8cef815f4bb174dc5b73b4781bb970666426ee98df56fa4116ef4a3",
+   "page_id": "p15",
+   "status": "READY",
+   "title": "Colour"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "approved": true,
+     "family": "Schibsted Grotesk",
+     "role": "display",
+     "t": "specimen"
+    },
+    {
+     "path": "visual.typography.display",
+     "t": "label",
+     "text": "Typography display"
+    },
+    {
+     "copy_id": "p16-c01",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "Schibsted Grotesk"
+    },
+    {
+     "approved": true,
+     "family": "Inter",
+     "role": "body",
+     "t": "specimen"
+    },
+    {
+     "path": "visual.typography.body",
+     "t": "label",
+     "text": "Typography body"
+    },
+    {
+     "copy_id": "p16-c02",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "Inter"
+    },
+    {
+     "path": "visual.typography.license",
+     "t": "label",
+     "text": "Typography license"
+    },
+    {
+     "path": "visual.typography.license",
+     "t": "gap",
+     "text": "Gap: visual.typography.license is unknown"
+    },
+    {
+     "optional": false,
+     "t": "note",
+     "text": "Font files are not embedded; previews use the installed face or a fallback, and say so in the release checks."
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p16-c01",
+     "proposed": false,
+     "source": "visual.typography.display",
+     "text": "Schibsted Grotesk"
+    },
+    {
+     "copy_id": "p16-c02",
+     "proposed": false,
+     "source": "visual.typography.body",
+     "text": "Inter"
+    }
+   ],
+   "dependency_hash": "e4a22d18fe046114d003521d76e704978e464db06c33f63a0d3fc39b6e61c550",
+   "fields": [
+    {
+     "approved": true,
+     "path": "visual.typography.display",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "Schibsted Grotesk"
+    },
+    {
+     "approved": false,
+     "path": "visual.typography.fallback",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.typography.languages",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.typography.license",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.typography.scale",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p16 · Typography (16 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Type roles, specimens, hierarchy, licence and fallback status.\nExact copy (verbatim, in this order):\n  - [p16-c01] \"Schibsted Grotesk\"\n  - [p16-c02] \"Inter\"\nLayout: specimen. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 16,
+   "package_hash": "9f8e51ec6094bf502c05c7737ef4bf053bde295d0b74871cbd5b1cbaae3e07fb",
+   "page_id": "p16",
+   "status": "READY",
+   "title": "Typography"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "status": "NOT_APPLICABLE",
+     "t": "status",
+     "text": "Not applicable: not part of this fictional brand's scope"
+    }
+   ],
+   "copy_blocks": [],
+   "dependency_hash": "287b6e3a4694565bb7cddbdc1eb616cb8951f3f4c13ddfb5bb352f1ac349a268",
+   "fields": [
+    {
+     "approved": true,
+     "path": "production.brandbook.applicability.p17",
+     "reason": "not part of this fictional brand's scope",
+     "source_scope": "demo",
+     "status": "NOT_APPLICABLE",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.grid.columns",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.grid.margin",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.grid.responsive",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.grid.rhythm",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p17 · Layout (17 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Grids, margins, rhythm and responsive rules.\nExact copy (verbatim, in this order):\n  (none)\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 17,
+   "package_hash": "d8dbe8601ae754a3f4e9c0cb8d656b0c41b695c72818c9def09ab08abb8e6799",
+   "page_id": "p17",
+   "status": "NOT_APPLICABLE",
+   "title": "Layout"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "status": "NOT_APPLICABLE",
+     "t": "status",
+     "text": "Not applicable: not part of this fictional brand's scope"
+    }
+   ],
+   "copy_blocks": [],
+   "dependency_hash": "fdae2b9db5e4e1ef19b37e579ab7047df0fa8d1dcf826dd3d80732c5a3dbe7c6",
+   "fields": [
+    {
+     "approved": true,
+     "path": "production.brandbook.applicability.p18",
+     "reason": "not part of this fictional brand's scope",
+     "source_scope": "demo",
+     "status": "NOT_APPLICABLE",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.shape_grammar.density",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.shape_grammar.icons",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.shape_grammar.summary",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p18 · Graphics (18 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Original primitives, icons, patterns and density.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: no copied compositions; no competing marks\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 18,
+   "package_hash": "e0f1266d7eee52cd1b014d2062454d8f48386c1b859686d8e657fc33f52ff297",
+   "page_id": "p18",
+   "status": "NOT_APPLICABLE",
+   "title": "Graphics"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "path": "visual.imagery.style",
+     "t": "label",
+     "text": "Imagery style"
+    },
+    {
+     "copy_id": "p19-c01",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "Natural light on matte surfaces"
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p19-c01",
+     "proposed": false,
+     "source": "visual.imagery.style",
+     "text": "Natural light on matte surfaces"
+    }
+   ],
+   "dependency_hash": "90c3d338ce53f51bb94eec57cf66be2e7f3411583330a06002b15efab64ab638",
+   "fields": [
+    {
+     "approved": false,
+     "path": "production.brandbook.applicability.p19",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.imagery.rights",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": true,
+     "path": "visual.imagery.style",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "Natural light on matte surfaces"
+    },
+    {
+     "approved": false,
+     "path": "visual.imagery.subjects",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "visual.imagery.treatment",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p19 · Imagery (19 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Subjects, framing, light, treatment, rights and privacy.\nExact copy (verbatim, in this order):\n  - [p19-c01] \"Natural light on matte surfaces\"\nProhibitions: appearance is not a manufacturing specification\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 19,
+   "package_hash": "24230732b1c69e5f80ce92f68e79a39443576f79ea866ebf08250c0eb9d0b6a3",
+   "page_id": "p19",
+   "status": "READY",
+   "title": "Imagery"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "status": "NOT_APPLICABLE",
+     "t": "status",
+     "text": "Not applicable: not part of this fictional brand's scope"
+    }
+   ],
+   "copy_blocks": [],
+   "dependency_hash": "c41f9b61863f7ff3253b66455f2a9c1bc352b51cbeb7e596a852b66bf77a7127",
+   "fields": [
+    {
+     "approved": true,
+     "path": "production.brandbook.applicability.p20",
+     "reason": "not part of this fictional brand's scope",
+     "source_scope": "demo",
+     "status": "NOT_APPLICABLE",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "production.media.print_formats",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "production.output.print",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p20 · Editorial and print (20 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Relevant cover, spread, imprint and collateral rules.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: no fictional client, contact or testimonial\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 20,
+   "package_hash": "c087de7e344ca8e2a79a0394d2a3c0c6ccf0f5f9f090d4463f7ab2e9d4fb25b3",
+   "page_id": "p20",
+   "status": "NOT_APPLICABLE",
+   "title": "Editorial and print"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "status": "NOT_APPLICABLE",
+     "t": "status",
+     "text": "Not applicable: not part of this fictional brand's scope"
+    }
+   ],
+   "copy_blocks": [],
+   "dependency_hash": "2b69e37c167366eb7c0cf5e8ed928da6eb1b4a03c12cc17f5ee499b334e00739",
+   "fields": [
+    {
+     "approved": false,
+     "path": "experience.responsive.rules",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": true,
+     "path": "production.brandbook.applicability.p21",
+     "reason": "not part of this fictional brand's scope",
+     "source_scope": "demo",
+     "status": "NOT_APPLICABLE",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "production.platform.avatar",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "production.platform.channels",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p21 · Digital (21 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Header, avatar, social and interface crops and responsiveness.\nExact copy (verbatim, in this order):\n  (none)\nProhibitions: a static preview is not a working interface\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 21,
+   "package_hash": "877ad42a09b4c08353c652b18e3957d96e400e7d4d6038d6da74d5f840386b99",
+   "page_id": "p21",
+   "status": "NOT_APPLICABLE",
+   "title": "Digital"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "path": "visual.motion.pace",
+     "t": "label",
+     "text": "Motion pace"
+    },
+    {
+     "copy_id": "p22-c01",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "unhurried"
+    },
+    {
+     "path": "visual.motion.emphasis",
+     "t": "label",
+     "text": "Motion emphasis"
+    },
+    {
+     "copy_id": "p22-c02",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "logo reveal"
+    },
+    {
+     "path": "visual.motion.reduced_motion",
+     "t": "label",
+     "text": "Motion reduced motion"
+    },
+    {
+     "copy_id": "p22-c03",
+     "proposed": false,
+     "role": "text",
+     "t": "copy",
+     "text": "static final frame"
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p22-c01",
+     "proposed": false,
+     "source": "visual.motion.pace",
+     "text": "unhurried"
+    },
+    {
+     "copy_id": "p22-c02",
+     "proposed": false,
+     "source": "visual.motion.emphasis",
+     "text": "logo reveal"
+    },
+    {
+     "copy_id": "p22-c03",
+     "proposed": false,
+     "source": "visual.motion.reduced_motion",
+     "text": "static final frame"
+    }
+   ],
+   "dependency_hash": "dac7d6610f7b60a4c48109013e30f66ddd601f9da95931b419c2c3c185b6c6a4",
+   "fields": [
+    {
+     "approved": false,
+     "path": "production.brandbook.applicability.p22",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": true,
+     "path": "visual.motion.emphasis",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": [
+      "logo reveal"
+     ]
+    },
+    {
+     "approved": true,
+     "path": "visual.motion.pace",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "unhurried"
+    },
+    {
+     "approved": true,
+     "path": "visual.motion.reduced_motion",
+     "reason": "",
+     "source_scope": "demo",
+     "status": "VALUE",
+     "value": "static final frame"
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p22 · Motion (22 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Storyboard, transitions, continuity and the reduced-motion rule.\nExact copy (verbatim, in this order):\n  - [p22-c01] \"unhurried\"\n  - [p22-c02] \"logo reveal\"\n  - [p22-c03] \"static final frame\"\nProhibitions: no claim of a rendered video\nLayout: list. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 22,
+   "package_hash": "cdee3c39cf6c8918b6bb28902bc40b227104f24e6fd3bbb74a78815c4621f29e",
+   "page_id": "p22",
+   "status": "READY",
+   "title": "Motion"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "optional": false,
+     "t": "note",
+     "text": "Files below are the artifacts of this build; formats and licences come from the approved genome."
+    },
+    {
+     "path": "production.licensing.fonts",
+     "t": "label",
+     "text": "Licensing fonts"
+    },
+    {
+     "path": "production.licensing.fonts",
+     "t": "gap",
+     "text": "Gap: production.licensing.fonts is unknown"
+    },
+    {
+     "path": "production.delivery.formats",
+     "t": "label",
+     "text": "Delivery formats"
+    },
+    {
+     "path": "production.delivery.formats",
+     "t": "gap",
+     "text": "Gap: production.delivery.formats is unknown"
+    },
+    {
+     "columns": [
+      "Item",
+      "Kind",
+      "Reference",
+      "Status"
+     ],
+     "rows": [
+      [
+       "Master mark",
+       "VECTOR",
+       "5f465d136445e039",
+       "deterministic composition of visual.logo.mark=ring_dot"
+      ],
+      [
+       "Colour ink",
+       "token",
+       "#14161a",
+       "approved"
+      ],
+      [
+       "Colour paper",
+       "token",
+       "#f7f4ee",
+       "approved"
+      ],
+      [
+       "Colour accent",
+       "token",
+       "#c2410c",
+       "approved"
+      ],
+      [
+       "Colour accent_2",
+       "token",
+       "#93c5fd",
+       "approved"
+      ],
+      [
+       "Colour muted",
+       "token",
+       "#4b4540",
+       "approved"
+      ]
+     ],
+     "t": "table"
+    },
+    {
+     "t": "handoff",
+     "text": "Page artifacts and their hashes are listed in the build record."
+    }
+   ],
+   "copy_blocks": [],
+   "dependency_hash": "939c472d76f3988c1d6768fcff09877ebf5284c0e9f991397f35de059147b4b8",
+   "fields": [
+    {
+     "approved": false,
+     "path": "production.delivery.formats",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    },
+    {
+     "approved": false,
+     "path": "production.licensing.fonts",
+     "reason": "",
+     "source_scope": "",
+     "status": "UNKNOWN",
+     "value": null
+    }
+   ],
+   "gaps": [],
+   "instructions": "PAGE p23 · Handoff (23 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Actual files, formats, licences, tokens and version references.\nExact copy (verbatim, in this order):\n  (none)\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 23,
+   "package_hash": "209cd5e16d187c682cfbda85f1aed443856f3e47b973ee453a3506656216246a",
+   "page_id": "p23",
+   "status": "READY",
+   "title": "Handoff"
+  },
+  {
+   "assets": [],
+   "blocks": [
+    {
+     "columns": [
+      "Page",
+      "Key",
+      "Severity",
+      "Next action"
+     ],
+     "rows": [
+      [
+       "-",
+       "-",
+       "-",
+       "No open gaps"
+      ]
+     ],
+     "t": "table"
+    },
+    {
+     "columns": [
+      "Page",
+      "Check",
+      "Status",
+      "Detail"
+     ],
+     "rows": [
+      [
+       "all",
+       "216 checks",
+       "PASSED",
+       "no failing or unrun checks"
+      ]
+     ],
+     "t": "table"
+    },
+    {
+     "optional": false,
+     "t": "note",
+     "text": "216 checks, 0 failed."
+    },
+    {
+     "copy_id": "p24-c01",
+     "proposed": false,
+     "role": "meta",
+     "t": "copy",
+     "text": "Genome demo-v1"
+    },
+    {
+     "copy_id": "p24-c02",
+     "proposed": false,
+     "role": "meta",
+     "t": "copy",
+     "text": "Resolution 29d746494404440e"
+    },
+    {
+     "optional": false,
+     "t": "note",
+     "text": "Approval and release are recorded on the build, not printed here: a printed page is not an approval."
+    }
+   ],
+   "copy_blocks": [
+    {
+     "copy_id": "p24-c01",
+     "proposed": false,
+     "source": "build.genome_ref",
+     "text": "Genome demo-v1"
+    },
+    {
+     "copy_id": "p24-c02",
+     "proposed": false,
+     "source": "build.resolution_hash",
+     "text": "Resolution 29d746494404440e"
+    }
+   ],
+   "dependency_hash": "1a507429f51b78a2f3ddc9220341d9cce61f67531ee13a46face40783d9be0e6",
+   "fields": [],
+   "gaps": [],
+   "instructions": "PAGE p24 · Release (24 of 24) — brand book for Halden & Fen (fictional)\nTemplate amc-brandbook/default 1.0.0; mode PREVIEW; genome demo-v1\nObjective: Actual checks, unresolved decisions, approval and version records.\nExact copy (verbatim, in this order):\n  - [p24-c01] \"Genome demo-v1\"\n  - [p24-c02] \"Resolution 29d746494404440e\"\nLayout: table. Checks: no_overflow, exact_copy, no_unresolved_tokens.",
+   "order": 24,
+   "package_hash": "11a6220846aca49028031a1ea2be323a04d7cec90849596e74d4f63a523b4788",
+   "page_id": "p24",
+   "status": "READY",
+   "title": "Release"
+  }
+ ],
+ "resolution_hash": "29d746494404440ed710a8b7c47486a6e3fbd4b0897aaa8d6343b52264ae4bae",
+ "schema_version": "amc-vnexus-brandbook-package/v1",
+ "shared_rules_hash": "31d9843847f0b0648373cf521571971d1f4fd92116e9e0dbfc4c183a264c8af6",
+ "status": "DRAFT",
+ "template_id": "amc-brandbook/default",
+ "template_version": "1.0.0"
+}
