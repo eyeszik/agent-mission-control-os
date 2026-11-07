@@ -47,7 +47,7 @@ council = [
 ]
 
 [tool.hatch.build]
-include = ["agency/guidance/packs/*.yaml", "agency/compiled/data/*.json", "agency/operating_framework/data/*.json"]
+include = ["agency/guidance/packs/*.yaml", "agency/compiled/data/*.json", "agency/operating_framework/data/*.json", "agency/engineering/*.json"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["app", "api", "agency", "core", "graph", "persistence", "quality", "security", "integrations"]

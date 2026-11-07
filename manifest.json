@@ -463,6 +463,14 @@
       "git_blob_sha": "4bb16194b5d564a9bd7a8b96fe3d44a8a523a95e"
     },
     {
+      "path": "services/langgraph/agency/design/guardrails/__init__.py",
+      "git_blob_sha": "ba362997fb9baeae3538d3a0ea943f168f5f2ebe"
+    },
+    {
+      "path": "services/langgraph/agency/design/guardrails/filters.py",
+      "git_blob_sha": "f5097b30da8d05d46234ac4f1a7a4cd1279203cc"
+    },
+    {
       "path": "services/langgraph/agency/durable/fsm.py",
       "git_blob_sha": "6d7ec71b8635f849394388e9d33b3079329e7c57"
     },
@@ -481,6 +489,30 @@
     {
       "path": "services/langgraph/agency/durable/visual_job.py",
       "git_blob_sha": "02cf3f196b528a693655e458b866f70345007a6d"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/__init__.py",
+      "git_blob_sha": "776d23e55d5c2e3c712c028ae65ad875432e9547"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/context.py",
+      "git_blob_sha": "0644c3f926002b0dbf9592c821289b1c8612acbc"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/contracts.py",
+      "git_blob_sha": "2b4fd9cdac9b19615ae0d5827b9470dbc9e9e109"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/intake.py",
+      "git_blob_sha": "8697b2524b1bcbbd9588725758904de08ba7b7eb"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/sandbox.py",
+      "git_blob_sha": "b3d5aba1b181da0f2a5e0d164e82df47579f2f8b"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/schema.json",
+      "git_blob_sha": "8a54358b6adf41c55f47c9987fcc77b06030b986"
     },
     {
       "path": "services/langgraph/agency/execution_fabric/adapters/code_sandbox.py",
@@ -1096,7 +1128,7 @@
     },
     {
       "path": "services/langgraph/pyproject.toml",
-      "git_blob_sha": "01f94030b004d45202ad7d0ccaeb47485831cf37"
+      "git_blob_sha": "683e6950daf9480a4e410a052c19881b9dd3631f"
     },
     {
       "path": "services/langgraph/quality/brand_safety.py",
