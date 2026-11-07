@@ -1,0 +1,42 @@
+{
+  "record_type": "HandoffRequest",
+  "schema_version": "amc-engineering-handoff/v1",
+  "campaign_id": "fixture-campaign-only",
+  "source_refs": [
+    {
+      "artifact_id": "synthetic-brief-001",
+      "version": 1,
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_kind": "approved_brief"
+    }
+  ],
+  "repository_id": "example-repository",
+  "objective": "Prepare one small, reviewed patch against a synthetic local fixture.",
+  "deliverable": {
+    "kind": "REPOSITORY_PATCH",
+    "title": "Synthetic fixture change",
+    "audience": "Local reviewer",
+    "approved_brief": "Synthetic example only. It is not authority to run a provider, publish, or write to GitHub.",
+    "copy_refs": [],
+    "assets": [],
+    "routes": [],
+    "features": [],
+    "integrations": [],
+    "acceptance": [
+      {
+        "criterion_id": "TEST_PASS",
+        "description": "The unchanged declared fixture test passes against the exact patched tree.",
+        "evidence_required": ["check_record", "tree_hash"]
+      }
+    ]
+  },
+  "requested_actions": ["LOCAL_PATCH", "RUN_CHECKS"],
+  "output_destinations": ["LOCAL_REVIEW"],
+  "budget_ceiling": {
+    "max_provider_cost_microusd": 0,
+    "max_compute_seconds": 30,
+    "max_storage_bytes": 1000000,
+    "price_version": null
+  },
+  "retry_of_task_id": null
+}
