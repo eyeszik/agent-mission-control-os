@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AMC Engineering Handoff Final Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "repository",
+    "revisions",
+    "achieved_levels",
+    "requirements",
+    "changes",
+    "checks",
+    "activation_matrix",
+    "artifacts",
+    "operations",
+    "risks",
+    "baseline_failures",
+    "introduced_failures",
+    "pending_approvals",
+    "deferred_scope",
+    "next_safe_action"
+  ],
+  "properties": {
+    "contract_version": {"const": "amc-engineering-handoff/v1"},
+    "repository": {"$ref": "#/$defs/repository"},
+    "revisions": {"$ref": "#/$defs/revisions"},
+    "achieved_levels": {
+      "type": "array",
+      "items": {"enum": ["L0", "L1", "L2", "L3", "L4"]},
+      "uniqueItems": true
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/requirement"}, {"properties": {"id": {"const": "T01"}, "depends_on": {"const": []}}}]},
+        {"allOf": [{"$ref": "#/$defs/requirement"}, {"properties": {"id": {"const": "T02"}, "depends_on": {"const": ["T01"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/requirement"}, {"properties": {"id": {"const": "T03"}, "depends_on": {"const": ["T02"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/requirement"}, {"properties": {"id": {"const": "T04"}, "depends_on": {"const": ["T03"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/requirement"}, {"properties": {"id": {"const": "T05"}, "depends_on": {"const": ["T04"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/requirement"}, {"properties": {"id": {"const": "T06"}, "depends_on": {"const": ["T05"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/requirement"}, {"properties": {"id": {"const": "T07"}, "depends_on": {"const": ["T06"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/requirement"}, {"properties": {"id": {"const": "T08"}, "depends_on": {"const": ["T07"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/requirement"}, {"properties": {"id": {"const": "T09"}, "depends_on": {"const": ["T08"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/requirement"}, {"properties": {"id": {"const": "DS-01"}, "depends_on": {"const": []}}}]}
+      ],
+      "items": false
+    },
+    "changes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/change"}
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/check"}
+    },
+    "activation_matrix": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/activation"}
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/artifact"}
+    },
+    "operations": {"$ref": "#/$defs/operations"},
+    "risks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/risk"}
+    },
+    "baseline_failures": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/failure"}
+    },
+    "introduced_failures": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/failure"}
+    },
+    "pending_approvals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/approval"}
+    },
+    "deferred_scope": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/deferred"}
+    },
+    "next_safe_action": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slug", "branch", "branch_status", "scope"],
+      "properties": {
+        "slug": {"const": "eyeszik/agent-mission-control-os"},
+        "branch": {"const": "arena/70e8b59b-agent-mission-control-os"},
+        "branch_status": {"const": "active"},
+        "scope": {"const": "local_branch_no_remote_write"}
+      }
+    },
+    "revisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_commit", "head_commit", "worktree_dirty", "changed_paths", "source_snapshot_sha256", "source_snapshot_scope"],
+      "properties": {
+        "base_commit": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+        "head_commit": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+        "worktree_dirty": {"type": "boolean"},
+        "changed_paths": {"$ref": "#/$defs/stringList"},
+        "source_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+        "source_snapshot_scope": {"type": "string", "minLength": 1}
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "depends_on", "status", "summary", "evidence", "blockers"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^(?:T0[1-9]|DS-01)$"},
+        "depends_on": {"$ref": "#/$defs/stringList"},
+        "status": {"enum": ["PASS", "PASS_LOCAL", "PARTIAL", "PARTIAL_SYNTHETIC_FIXTURE_ONLY", "PARTIAL_CONTRACT_ONLY", "BLOCKED"]},
+        "summary": {"type": "string", "minLength": 1},
+        "evidence": {"$ref": "#/$defs/stringList"},
+        "blockers": {"$ref": "#/$defs/stringList"}
+      }
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "action", "summary", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "action": {"enum": ["ADDED", "MODIFIED", "GENERATED"]},
+        "summary": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "command", "result", "scope", "limitations"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["PASS", "PASS_WITH_SKIPS", "PASS_LOCAL_ONLY", "BLOCKED", "NOT_RUN"]},
+        "command": {"type": "string"},
+        "result": {"type": "string", "minLength": 1},
+        "scope": {"type": "string", "minLength": 1},
+        "limitations": {"$ref": "#/$defs/stringList"}
+      }
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "status", "enabled", "evidence", "blockers"],
+      "properties": {
+        "capability": {"type": "string", "minLength": 1},
+        "status": {"enum": ["IMPLEMENTED_NOT_ROUTED", "AVAILABLE_LOCAL_ONLY", "CONTRACT_ONLY", "BLOCKED", "DISABLED"]},
+        "enabled": {"type": "boolean"},
+        "evidence": {"$ref": "#/$defs/stringList"},
+        "blockers": {"$ref": "#/$defs/stringList"}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind", "sha256", "note"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "minLength": 1},
+        "sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "note": {"type": "string"}
+      }
+    },
+    "operations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["external_actions_performed", "state_owner_reused", "new_scheduler_added", "new_state_writer_added", "engineering_handler_registered", "local_commit_created", "remote_write_performed", "deployment_performed", "retry_limit", "retry_policy"],
+      "properties": {
+        "external_actions_performed": {"$ref": "#/$defs/stringList"},
+        "state_owner_reused": {"type": "string", "minLength": 1},
+        "new_scheduler_added": {"type": "boolean"},
+        "new_state_writer_added": {"type": "boolean"},
+        "engineering_handler_registered": {"type": "boolean"},
+        "local_commit_created": {"type": "boolean"},
+        "remote_write_performed": {"type": "boolean"},
+        "deployment_performed": {"type": "boolean"},
+        "retry_limit": {"const": 3},
+        "retry_policy": {"type": "string", "minLength": 1}
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "severity", "status", "description"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "severity": {"enum": ["HIGH", "MEDIUM", "LOW"]},
+        "status": {"enum": ["OPEN", "MITIGATED"]},
+        "description": {"type": "string", "minLength": 1}
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1}
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "status", "reason"],
+      "properties": {
+        "action": {"type": "string", "minLength": 1},
+        "status": {"enum": ["NOT_REQUESTED", "PENDING", "APPROVED", "REJECTED"]},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "deferred": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item", "reason"],
+      "properties": {
+        "item": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

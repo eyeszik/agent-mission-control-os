@@ -1,0 +1,2090 @@
+{
+  "$defs": {
+    "AcceptanceCriterion": {
+      "additionalProperties": false,
+      "properties": {
+        "criterion_id": {
+          "pattern": "^[A-Z][A-Z0-9_-]{1,63}$",
+          "title": "Criterion Id",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 600,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "evidence_required": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "title": "Evidence Required",
+          "type": "array"
+        }
+      },
+      "required": [
+        "criterion_id",
+        "description",
+        "evidence_required"
+      ],
+      "title": "AcceptanceCriterion",
+      "type": "object"
+    },
+    "ApprovalRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/RequestedAction"
+        },
+        "artifact_ref": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Artifact Ref",
+          "type": "string"
+        },
+        "context_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Context Hash",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "PENDING",
+            "APPROVED",
+            "REJECTED",
+            "STALE",
+            "REVOKED"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "expires_at": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Expires At",
+          "type": "string"
+        },
+        "patch_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Patch Hash",
+          "type": "string"
+        },
+        "plan_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Plan Hash",
+          "type": "string"
+        },
+        "plan_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "policy_version": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "Approval",
+          "default": "Approval",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer"
+        },
+        "revoked_at": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revoked At"
+        },
+        "target": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        },
+        "tree_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Tree Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "target",
+        "plan_id",
+        "plan_hash",
+        "context_hash",
+        "tree_hash",
+        "patch_hash",
+        "artifact_ref",
+        "policy_version",
+        "expires_at",
+        "decision"
+      ],
+      "title": "ApprovalRecord",
+      "type": "object"
+    },
+    "ArtifactRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Artifact Type",
+          "type": "string"
+        },
+        "byte_size": {
+          "maximum": 50000000,
+          "minimum": 0,
+          "title": "Byte Size",
+          "type": "integer"
+        },
+        "content_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "media_type": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "provenance": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Provenance",
+          "type": "array"
+        },
+        "record_type": {
+          "const": "Artifact",
+          "default": "Artifact",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "retention_policy": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Retention Policy",
+          "type": "string"
+        },
+        "storage_ref": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Storage Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_type",
+        "content_hash",
+        "byte_size",
+        "media_type",
+        "storage_ref",
+        "retention_policy"
+      ],
+      "title": "ArtifactRecord",
+      "type": "object"
+    },
+    "AssetRef": {
+      "additionalProperties": false,
+      "properties": {
+        "permitted_use": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Permitted Use",
+          "type": "string"
+        },
+        "rights": {
+          "$ref": "#/$defs/RightsStatus"
+        },
+        "rights_ref": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rights Ref"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceRef"
+        }
+      },
+      "required": [
+        "source",
+        "rights",
+        "permitted_use"
+      ],
+      "title": "AssetRef",
+      "type": "object"
+    },
+    "AuthorityReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "approval_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Approval Refs",
+          "type": "array"
+        },
+        "authorized_actions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RequestedAction"
+          },
+          "title": "Authorized Actions",
+          "type": "array"
+        },
+        "blocked_reasons": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Blocked Reasons",
+          "type": "array"
+        },
+        "checked_at": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Checked At",
+          "type": "string"
+        },
+        "evidence_state": {
+          "$ref": "#/$defs/EvidenceState"
+        },
+        "policy_version": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Policy Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy_version",
+        "evidence_state",
+        "checked_at"
+      ],
+      "title": "AuthorityReceipt",
+      "type": "object"
+    },
+    "BudgetCeiling": {
+      "additionalProperties": false,
+      "properties": {
+        "max_compute_seconds": {
+          "maximum": 86400,
+          "minimum": 0,
+          "title": "Max Compute Seconds",
+          "type": "integer"
+        },
+        "max_provider_cost_microusd": {
+          "maximum": 1000000000000,
+          "minimum": 0,
+          "title": "Max Provider Cost Microusd",
+          "type": "integer"
+        },
+        "max_storage_bytes": {
+          "maximum": 10000000000,
+          "minimum": 0,
+          "title": "Max Storage Bytes",
+          "type": "integer"
+        },
+        "price_version": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Price Version"
+        }
+      },
+      "required": [
+        "max_provider_cost_microusd",
+        "max_compute_seconds",
+        "max_storage_bytes"
+      ],
+      "title": "BudgetCeiling",
+      "type": "object"
+    },
+    "BudgetRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "ceiling": {
+          "maximum": 1000000000000000,
+          "minimum": 0,
+          "title": "Ceiling",
+          "type": "integer"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "const": "USD",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "price_version": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Price Version"
+        },
+        "record_type": {
+          "const": "Budget",
+          "default": "Budget",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "reserved": {
+          "maximum": 1000000000000000,
+          "minimum": 0,
+          "title": "Reserved",
+          "type": "integer"
+        },
+        "settled": {
+          "maximum": 1000000000000000,
+          "minimum": 0,
+          "title": "Settled",
+          "type": "integer"
+        },
+        "unit": {
+          "$ref": "#/$defs/BudgetUnit"
+        },
+        "unknown": {
+          "maximum": 1000000000000000,
+          "minimum": 0,
+          "title": "Unknown",
+          "type": "integer"
+        },
+        "window_end": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Window End",
+          "type": "string"
+        },
+        "window_start": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Window Start",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window_start",
+        "window_end",
+        "unit",
+        "ceiling",
+        "reserved",
+        "settled",
+        "unknown"
+      ],
+      "title": "BudgetRecord",
+      "type": "object"
+    },
+    "BudgetUnit": {
+      "enum": [
+        "MICRO_USD",
+        "INPUT_TOKEN",
+        "OUTPUT_TOKEN",
+        "CPU_MILLISECOND",
+        "STORAGE_BYTE"
+      ],
+      "title": "BudgetUnit",
+      "type": "string"
+    },
+    "CheckRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "argv": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Argv",
+          "type": "array"
+        },
+        "cwd": {
+          "default": "",
+          "title": "Cwd",
+          "type": "string"
+        },
+        "environment_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Environment Hash",
+          "type": "string"
+        },
+        "exit_code": {
+          "anyOf": [
+            {
+              "maximum": 255,
+              "minimum": -255,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exit Code"
+        },
+        "finished_at": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Finished At",
+          "type": "string"
+        },
+        "output_bytes": {
+          "maximum": 262144,
+          "minimum": 0,
+          "title": "Output Bytes",
+          "type": "integer"
+        },
+        "output_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Sha256"
+        },
+        "plan_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Plan Hash",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "Check",
+          "default": "Check",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "requirement_id": {
+          "pattern": "^[A-Z][A-Z0-9_-]{1,63}$",
+          "title": "Requirement Id",
+          "type": "string"
+        },
+        "started_at": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Started At",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CheckStatus"
+        },
+        "summary": {
+          "maxLength": 300,
+          "title": "Summary",
+          "type": "string"
+        },
+        "tree_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Tree Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requirement_id",
+        "plan_hash",
+        "argv",
+        "tree_hash",
+        "environment_hash",
+        "status",
+        "output_bytes",
+        "summary",
+        "started_at",
+        "finished_at"
+      ],
+      "title": "CheckRecord",
+      "type": "object"
+    },
+    "CheckSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "argv": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 40,
+          "minItems": 6,
+          "title": "Argv",
+          "type": "array"
+        },
+        "cwd": {
+          "default": "",
+          "title": "Cwd",
+          "type": "string"
+        },
+        "requirement_id": {
+          "pattern": "^[A-Z][A-Z0-9_-]{1,63}$",
+          "title": "Requirement Id",
+          "type": "string"
+        },
+        "timeout_seconds": {
+          "maximum": 600,
+          "minimum": 1,
+          "title": "Timeout Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "requirement_id",
+        "argv",
+        "timeout_seconds"
+      ],
+      "title": "CheckSpec",
+      "type": "object"
+    },
+    "CheckStatus": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED",
+        "NOT_RUN",
+        "NOT_APPLICABLE"
+      ],
+      "title": "CheckStatus",
+      "type": "string"
+    },
+    "ContextFile": {
+      "additionalProperties": false,
+      "properties": {
+        "blob_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Blob Hash",
+          "type": "string"
+        },
+        "byte_size": {
+          "maximum": 2000000,
+          "minimum": 0,
+          "title": "Byte Size",
+          "type": "integer"
+        },
+        "path": {
+          "maxLength": 240,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "spans": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SourceSpan"
+          },
+          "maxItems": 100,
+          "title": "Spans",
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "blob_hash",
+        "byte_size"
+      ],
+      "title": "ContextFile",
+      "type": "object"
+    },
+    "ContextRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_size": {
+          "maximum": 20000000,
+          "minimum": 0,
+          "title": "Byte Size",
+          "type": "integer"
+        },
+        "context_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Context Hash",
+          "type": "string"
+        },
+        "files": {
+          "items": {
+            "$ref": "#/$defs/ContextFile"
+          },
+          "maxItems": 500,
+          "title": "Files",
+          "type": "array"
+        },
+        "method": {
+          "enum": [
+            "SCOPED_RIPGREP",
+            "SYMBOL",
+            "AST",
+            "EXPLICIT_FILE"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "omissions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 300,
+          "title": "Omissions",
+          "type": "array"
+        },
+        "record_type": {
+          "const": "Context",
+          "default": "Context",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$",
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "files",
+        "method",
+        "byte_size",
+        "context_hash"
+      ],
+      "title": "ContextRecord",
+      "type": "object"
+    },
+    "DeliverableKind": {
+      "enum": [
+        "REPOSITORY_PATCH",
+        "WEBSITE",
+        "LANDING_PAGE",
+        "TEST_REPORT"
+      ],
+      "title": "DeliverableKind",
+      "type": "string"
+    },
+    "DeliverableSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance": {
+          "items": {
+            "$ref": "#/$defs/AcceptanceCriterion"
+          },
+          "maxItems": 80,
+          "minItems": 1,
+          "title": "Acceptance",
+          "type": "array"
+        },
+        "approved_brief": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Approved Brief",
+          "type": "string"
+        },
+        "assets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AssetRef"
+          },
+          "maxItems": 40,
+          "title": "Assets",
+          "type": "array"
+        },
+        "audience": {
+          "maxLength": 800,
+          "minLength": 1,
+          "title": "Audience",
+          "type": "string"
+        },
+        "brief_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "copy_refs": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "maxItems": 40,
+          "title": "Copy Refs",
+          "type": "array"
+        },
+        "features": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FeatureSpec"
+          },
+          "maxItems": 80,
+          "title": "Features",
+          "type": "array"
+        },
+        "integrations": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 40,
+          "title": "Integrations",
+          "type": "array"
+        },
+        "kind": {
+          "$ref": "#/$defs/DeliverableKind"
+        },
+        "routes": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RouteSpec"
+          },
+          "maxItems": 40,
+          "title": "Routes",
+          "type": "array"
+        },
+        "title": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "tokens_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind",
+        "title",
+        "audience",
+        "approved_brief",
+        "acceptance"
+      ],
+      "title": "DeliverableSpec",
+      "type": "object"
+    },
+    "EffectOutcome": {
+      "enum": [
+        "NO_EFFECT",
+        "APPLIED",
+        "UNKNOWN",
+        "FAILED",
+        "RECONCILED"
+      ],
+      "title": "EffectOutcome",
+      "type": "string"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "content_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        },
+        "description": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "evidence_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "path_or_uri": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path Or Uri"
+        },
+        "state": {
+          "$ref": "#/$defs/EvidenceState"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "state",
+        "description"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "EvidenceState": {
+      "enum": [
+        "OBSERVED",
+        "ASSUMPTION",
+        "PROPOSED",
+        "UNVERIFIED",
+        "BLOCKED"
+      ],
+      "title": "EvidenceState",
+      "type": "string"
+    },
+    "ExecutionLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "max_cpu_seconds": {
+          "maximum": 300,
+          "minimum": 1,
+          "title": "Max Cpu Seconds",
+          "type": "integer"
+        },
+        "max_file_bytes": {
+          "maximum": 200000,
+          "minimum": 1,
+          "title": "Max File Bytes",
+          "type": "integer"
+        },
+        "max_files": {
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Max Files",
+          "type": "integer"
+        },
+        "max_memory_bytes": {
+          "maximum": 1073741824,
+          "minimum": 16000000,
+          "title": "Max Memory Bytes",
+          "type": "integer"
+        },
+        "max_output_bytes": {
+          "maximum": 262144,
+          "minimum": 1,
+          "title": "Max Output Bytes",
+          "type": "integer"
+        },
+        "max_processes": {
+          "maximum": 32,
+          "minimum": 1,
+          "title": "Max Processes",
+          "type": "integer"
+        },
+        "max_wall_seconds": {
+          "maximum": 600,
+          "minimum": 1,
+          "title": "Max Wall Seconds",
+          "type": "integer"
+        },
+        "max_workspace_bytes": {
+          "maximum": 16000000,
+          "minimum": 1,
+          "title": "Max Workspace Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_wall_seconds",
+        "max_cpu_seconds",
+        "max_memory_bytes",
+        "max_processes",
+        "max_files",
+        "max_file_bytes",
+        "max_workspace_bytes",
+        "max_output_bytes"
+      ],
+      "title": "ExecutionLimits",
+      "type": "object"
+    },
+    "ExecutionResultRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "base_revision": {
+          "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$",
+          "title": "Base Revision",
+          "type": "string"
+        },
+        "base_tree_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Base Tree Hash",
+          "type": "string"
+        },
+        "changed_paths": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200,
+          "minItems": 1,
+          "title": "Changed Paths",
+          "type": "array"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/CheckRecord"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        },
+        "context_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Context Hash",
+          "type": "string"
+        },
+        "execution_tier": {
+          "const": "SYNTHETIC_FIXTURE",
+          "title": "Execution Tier",
+          "type": "string"
+        },
+        "isolation": {
+          "$ref": "#/$defs/IsolationReceipt"
+        },
+        "patch_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Patch Hash",
+          "type": "string"
+        },
+        "plan_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Plan Hash",
+          "type": "string"
+        },
+        "plan_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ExecutionResult",
+          "default": "ExecutionResult",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "result_tree_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Result Tree Hash",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ReviewStatus"
+        }
+      },
+      "required": [
+        "status",
+        "execution_tier",
+        "plan_id",
+        "plan_hash",
+        "base_revision",
+        "context_hash",
+        "base_tree_hash",
+        "patch_hash",
+        "result_tree_hash",
+        "changed_paths",
+        "checks",
+        "isolation"
+      ],
+      "title": "ExecutionResultRecord",
+      "type": "object"
+    },
+    "FeatureSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "feature_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Feature Id",
+          "type": "string"
+        },
+        "integration_ref": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Integration Ref"
+        }
+      },
+      "required": [
+        "feature_id",
+        "description"
+      ],
+      "title": "FeatureSpec",
+      "type": "object"
+    },
+    "HandoffRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "budget_ceiling": {
+          "$ref": "#/$defs/BudgetCeiling"
+        },
+        "campaign_id": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Campaign Id"
+        },
+        "deliverable": {
+          "$ref": "#/$defs/DeliverableSpec"
+        },
+        "objective": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Objective",
+          "type": "string"
+        },
+        "output_destinations": {
+          "items": {
+            "$ref": "#/$defs/OutputDestination"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Output Destinations",
+          "type": "array"
+        },
+        "record_type": {
+          "const": "HandoffRequest",
+          "default": "HandoffRequest",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "repository_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Repository Id",
+          "type": "string"
+        },
+        "requested_actions": {
+          "items": {
+            "$ref": "#/$defs/RequestedAction"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Requested Actions",
+          "type": "array"
+        },
+        "retry_of_task_id": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retry Of Task Id"
+        },
+        "schema_version": {
+          "const": "amc-engineering-handoff/v1",
+          "default": "amc-engineering-handoff/v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_refs": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "maxItems": 80,
+          "minItems": 1,
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_refs",
+        "repository_id",
+        "objective",
+        "deliverable",
+        "requested_actions",
+        "output_destinations",
+        "budget_ceiling"
+      ],
+      "title": "HandoffRequest",
+      "type": "object"
+    },
+    "IntentReceiptRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "authority_ref": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority Ref"
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "maxItems": 80,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "observed_at": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Observed At",
+          "type": "string"
+        },
+        "operation": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Operation",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/EffectOutcome"
+        },
+        "preimage_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Preimage Hash",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "IntentReceipt",
+          "default": "IntentReceipt",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation",
+        "target",
+        "preimage_hash",
+        "outcome",
+        "observed_at"
+      ],
+      "title": "IntentReceiptRecord",
+      "type": "object"
+    },
+    "IsolationReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "blockers": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        },
+        "cpu_limit": {
+          "title": "Cpu Limit",
+          "type": "string"
+        },
+        "disk_limit": {
+          "title": "Disk Limit",
+          "type": "string"
+        },
+        "environment_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Environment Hash"
+        },
+        "filesystem": {
+          "const": "READ_ONLY_WORKSPACE_EPHEMERAL_TMPFS",
+          "title": "Filesystem",
+          "type": "string"
+        },
+        "memory_limit": {
+          "title": "Memory Limit",
+          "type": "string"
+        },
+        "mode": {
+          "const": "USER_MOUNT_NET_PID_NAMESPACE_CHROOT",
+          "title": "Mode",
+          "type": "string"
+        },
+        "network": {
+          "const": "ISOLATED_NO_EGRESS",
+          "title": "Network",
+          "type": "string"
+        },
+        "output_limit": {
+          "title": "Output Limit",
+          "type": "string"
+        },
+        "process_limit": {
+          "title": "Process Limit",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "IsolationReceipt",
+          "default": "IsolationReceipt",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "seccomp": {
+          "const": "NOT_CONFIGURED",
+          "default": "NOT_CONFIGURED",
+          "title": "Seccomp",
+          "type": "string"
+        },
+        "shared_kernel": {
+          "const": true,
+          "default": true,
+          "title": "Shared Kernel",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "available",
+        "mode",
+        "filesystem",
+        "network",
+        "memory_limit",
+        "cpu_limit",
+        "process_limit",
+        "disk_limit",
+        "output_limit"
+      ],
+      "title": "IsolationReceipt",
+      "type": "object"
+    },
+    "LeaseRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "expiry": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Expiry",
+          "type": "string"
+        },
+        "fence": {
+          "maximum": 9223372036854775807,
+          "minimum": 0,
+          "title": "Fence",
+          "type": "integer"
+        },
+        "heartbeat": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Heartbeat"
+        },
+        "owner": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Owner",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "Lease",
+          "default": "Lease",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "version": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "owner",
+        "fence",
+        "expiry",
+        "version"
+      ],
+      "title": "LeaseRecord",
+      "type": "object"
+    },
+    "OutputDestination": {
+      "enum": [
+        "PROJECT_ARTIFACT",
+        "LOCAL_REVIEW",
+        "DRAFT_PR"
+      ],
+      "title": "OutputDestination",
+      "type": "string"
+    },
+    "PlanRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_argv": {
+          "items": {
+            "const": "PYTHON_UNITTEST",
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Allowed Argv",
+          "type": "array"
+        },
+        "allowed_paths": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Allowed Paths",
+          "type": "array"
+        },
+        "base_revision": {
+          "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$",
+          "title": "Base Revision",
+          "type": "string"
+        },
+        "base_tree_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Base Tree Hash",
+          "type": "string"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/CheckSpec"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        },
+        "context_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Context Hash",
+          "type": "string"
+        },
+        "limits": {
+          "$ref": "#/$defs/ExecutionLimits"
+        },
+        "plan_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plan Hash"
+        },
+        "plan_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "Plan",
+          "default": "Plan",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/PlanStep"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Steps",
+          "type": "array"
+        },
+        "stop_conditions": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Stop Conditions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "plan_id",
+        "base_revision",
+        "base_tree_hash",
+        "context_hash",
+        "steps",
+        "allowed_paths",
+        "allowed_argv",
+        "checks",
+        "limits",
+        "stop_conditions"
+      ],
+      "title": "PlanRecord",
+      "type": "object"
+    },
+    "PlanStep": {
+      "additionalProperties": false,
+      "properties": {
+        "depends_on": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 40,
+          "title": "Depends On",
+          "type": "array"
+        },
+        "objective": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Objective",
+          "type": "string"
+        },
+        "step_id": {
+          "pattern": "^[A-Z][A-Z0-9_-]{1,63}$",
+          "title": "Step Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step_id",
+        "objective"
+      ],
+      "title": "PlanStep",
+      "type": "object"
+    },
+    "RequestedAction": {
+      "enum": [
+        "LOCAL_PATCH",
+        "RUN_CHECKS",
+        "REQUEST_REVIEW",
+        "CREATE_DRAFT_PR"
+      ],
+      "title": "RequestedAction",
+      "type": "string"
+    },
+    "RetryClass": {
+      "enum": [
+        "RETRY_SAFE",
+        "COMPENSATABLE",
+        "RECONCILE_BEFORE_RETRY"
+      ],
+      "title": "RetryClass",
+      "type": "string"
+    },
+    "ReviewRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "base_revision": {
+          "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$",
+          "title": "Base Revision",
+          "type": "string"
+        },
+        "base_tree_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Base Tree Hash",
+          "type": "string"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/CheckRecord"
+          },
+          "maxItems": 80,
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        },
+        "context_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Context Hash",
+          "type": "string"
+        },
+        "findings": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Findings",
+          "type": "array"
+        },
+        "head_revision": {
+          "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$",
+          "title": "Head Revision",
+          "type": "string"
+        },
+        "head_tree_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Head Tree Hash",
+          "type": "string"
+        },
+        "limits": {
+          "$ref": "#/$defs/ExecutionLimits"
+        },
+        "patch_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Patch Hash",
+          "type": "string"
+        },
+        "plan_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Plan Hash",
+          "type": "string"
+        },
+        "plan_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "Review",
+          "default": "Review",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "source_refs": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "maxItems": 80,
+          "minItems": 1,
+          "title": "Source Refs",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/ReviewStatus"
+        }
+      },
+      "required": [
+        "plan_id",
+        "plan_hash",
+        "context_hash",
+        "base_revision",
+        "head_revision",
+        "base_tree_hash",
+        "head_tree_hash",
+        "patch_hash",
+        "checks",
+        "limits",
+        "source_refs",
+        "status"
+      ],
+      "title": "ReviewRecord",
+      "type": "object"
+    },
+    "ReviewStatus": {
+      "enum": [
+        "PASSED",
+        "FAILED",
+        "BLOCKED",
+        "STALE",
+        "NOT_RUN"
+      ],
+      "title": "ReviewStatus",
+      "type": "string"
+    },
+    "RightsStatus": {
+      "enum": [
+        "OWNED",
+        "LICENSED",
+        "PUBLIC_DOMAIN",
+        "UNKNOWN"
+      ],
+      "title": "RightsStatus",
+      "type": "string"
+    },
+    "RiskLevel": {
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "title": "RiskLevel",
+      "type": "string"
+    },
+    "RouteSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "purpose": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "purpose"
+      ],
+      "title": "RouteSpec",
+      "type": "object"
+    },
+    "RunState": {
+      "enum": [
+        "DORMANT",
+        "SCHEDULED",
+        "LEASED",
+        "PRECHECK",
+        "READY",
+        "RUNNING",
+        "OBSERVING",
+        "VERIFYING",
+        "COMMITTING",
+        "RECONCILING",
+        "WAITING_APPROVAL",
+        "RETRY_PENDING",
+        "DEGRADED",
+        "BLOCKED_PROVIDER",
+        "BLOCKED_AUTHORITY",
+        "BLOCKED_ENVIRONMENT",
+        "INCONCLUSIVE",
+        "DEAD_LETTER",
+        "PAUSED",
+        "STOPPED"
+      ],
+      "title": "RunState",
+      "type": "string"
+    },
+    "SourceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "content_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "source_kind": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "version": {
+          "maximum": 2147483647,
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "version",
+        "content_hash",
+        "source_kind"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "SourceSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "end_column": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "End Column",
+          "type": "integer"
+        },
+        "end_line": {
+          "maximum": 100000000,
+          "minimum": 1,
+          "title": "End Line",
+          "type": "integer"
+        },
+        "start_column": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Start Column",
+          "type": "integer"
+        },
+        "start_line": {
+          "maximum": 100000000,
+          "minimum": 1,
+          "title": "Start Line",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start_line",
+        "end_line",
+        "start_column",
+        "end_column"
+      ],
+      "title": "SourceSpan",
+      "type": "object"
+    },
+    "TaskRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance": {
+          "items": {
+            "$ref": "#/$defs/AcceptanceCriterion"
+          },
+          "maxItems": 80,
+          "minItems": 1,
+          "title": "Acceptance",
+          "type": "array"
+        },
+        "authority": {
+          "$ref": "#/$defs/AuthorityReceipt"
+        },
+        "budget": {
+          "$ref": "#/$defs/BudgetCeiling"
+        },
+        "checks": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 40,
+          "title": "Checks",
+          "type": "array"
+        },
+        "created_at": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Created At",
+          "type": "string"
+        },
+        "deps": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Deps",
+          "type": "array"
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "maxItems": 100,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "input_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Input Hash",
+          "type": "string"
+        },
+        "inputs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Inputs",
+          "type": "array"
+        },
+        "objective": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Objective",
+          "type": "string"
+        },
+        "outputs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Outputs",
+          "type": "array"
+        },
+        "owner": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Owner",
+          "type": "string"
+        },
+        "policy_version": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "project_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "Task",
+          "default": "Task",
+          "title": "Record Type",
+          "type": "string"
+        },
+        "repository_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+          "title": "Repository Id",
+          "type": "string"
+        },
+        "retry_class": {
+          "$ref": "#/$defs/RetryClass"
+        },
+        "risk": {
+          "$ref": "#/$defs/RiskLevel"
+        },
+        "schema_version": {
+          "const": "amc-engineering-task/v1",
+          "default": "amc-engineering-task/v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "scope": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Scope",
+          "type": "array"
+        },
+        "source_refs": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "maxItems": 80,
+          "minItems": 1,
+          "title": "Source Refs",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/RunState"
+        },
+        "stop_conditions": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Stop Conditions",
+          "type": "array"
+        },
+        "task_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "owner",
+        "tenant_id",
+        "project_id",
+        "source_refs",
+        "repository_id",
+        "objective",
+        "scope",
+        "inputs",
+        "deps",
+        "outputs",
+        "acceptance",
+        "checks",
+        "risk",
+        "authority",
+        "budget",
+        "retry_class",
+        "stop_conditions",
+        "status",
+        "input_hash",
+        "policy_version",
+        "created_at"
+      ],
+      "title": "TaskRecord",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "items": {
+    "discriminator": {
+      "mapping": {
+        "Approval": "#/$defs/ApprovalRecord",
+        "Artifact": "#/$defs/ArtifactRecord",
+        "Budget": "#/$defs/BudgetRecord",
+        "Check": "#/$defs/CheckRecord",
+        "Context": "#/$defs/ContextRecord",
+        "ExecutionResult": "#/$defs/ExecutionResultRecord",
+        "HandoffRequest": "#/$defs/HandoffRequest",
+        "IntentReceipt": "#/$defs/IntentReceiptRecord",
+        "IsolationReceipt": "#/$defs/IsolationReceipt",
+        "Lease": "#/$defs/LeaseRecord",
+        "Plan": "#/$defs/PlanRecord",
+        "Review": "#/$defs/ReviewRecord",
+        "Task": "#/$defs/TaskRecord"
+      },
+      "propertyName": "record_type"
+    },
+    "oneOf": [
+      {
+        "$ref": "#/$defs/HandoffRequest"
+      },
+      {
+        "$ref": "#/$defs/TaskRecord"
+      },
+      {
+        "$ref": "#/$defs/LeaseRecord"
+      },
+      {
+        "$ref": "#/$defs/ContextRecord"
+      },
+      {
+        "$ref": "#/$defs/PlanRecord"
+      },
+      {
+        "$ref": "#/$defs/IntentReceiptRecord"
+      },
+      {
+        "$ref": "#/$defs/CheckRecord"
+      },
+      {
+        "$ref": "#/$defs/BudgetRecord"
+      },
+      {
+        "$ref": "#/$defs/ArtifactRecord"
+      },
+      {
+        "$ref": "#/$defs/ApprovalRecord"
+      },
+      {
+        "$ref": "#/$defs/ReviewRecord"
+      },
+      {
+        "$ref": "#/$defs/IsolationReceipt"
+      },
+      {
+        "$ref": "#/$defs/ExecutionResultRecord"
+      }
+    ]
+  },
+  "type": "array"
+}
