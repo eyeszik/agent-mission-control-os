@@ -123,11 +123,12 @@ export function TaskInspector({ planId, taskId, onClose }: { planId: string; tas
       <div className="flex flex-col gap-2">
         <h4 className="text-sm font-semibold text-fg-strong">Work</h4>
         <div className="flex flex-wrap gap-2">
-          {moves.filter((m) => m !== 'BLOCKED').map((m) => (
+          {/* ⚡ Bolt: Replaced .filter().map() with .map() returning null for zero-allocation conditional rendering */}
+          {moves.map((m) => m !== 'BLOCKED' ? (
             <Button key={m} disabled={runner.busy} onClick={() => act(MOVE_LABEL[m] ?? m, () => transitionTask(planId, d.task_id, m, t.version))}>
               {MOVE_LABEL[m] ?? m}
             </Button>
-          ))}
+          ) : null)}
           {moves.includes('BLOCKED') && (
             <Button variant="danger" disabled={runner.busy || reason.trim().length < 3}
               title="Enter a reason above first"
