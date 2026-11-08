@@ -153,13 +153,48 @@ def test_seat_retries_invalid_output_within_its_bound(monkeypatch):
 
 
 def test_seat_times_out_and_retries_then_fails(monkeypatch):
+    """Deterministic: the timeout path is driven by a fake, not by wall-clock sleeps."""
+    from concurrent.futures import TimeoutError as FutureTimeout
+
+    from services.langgraph.agency.council import seats
+
     monkeypatch.setenv("COUNCIL_SEAT_TIMEOUT_SECONDS", "1")
     monkeypatch.setenv("COUNCIL_SEAT_MAX_ATTEMPTS", "2")
-    started = time.monotonic()
+    timeouts: list[int] = []
+
+    def fake_call(model, prompt, timeout):
+        timeouts.append(timeout)
+        raise FutureTimeout()
+
+    monkeypatch.setattr(seats, "_call_with_timeout", fake_call)
     with pytest.raises(SeatFailed) as failed:
-        run_seat(_Scripted(GOOD, delay=3), "george", {"idea": {}})
+        run_seat(_Scripted(GOOD), "george", {"idea": {}})
     assert failed.value.code == "SEAT_TIMEOUT" and failed.value.attempts == 2
-    assert time.monotonic() - started < 5, "a hung model call must not block past the timeout"
+    assert timeouts == [1, 1]
+
+
+def test_seat_real_timeout_abandons_a_hung_call(monkeypatch):
+    """Smoke test on the real thread-pool path. Generous bound: it only proves the call is abandoned."""
+    import threading
+
+    monkeypatch.setenv("COUNCIL_SEAT_TIMEOUT_SECONDS", "1")
+    monkeypatch.setenv("COUNCIL_SEAT_MAX_ATTEMPTS", "1")
+    release = threading.Event()
+
+    class _Hung(_Scripted):
+        def complete(self, prompt: str) -> str:
+            self.calls += 1
+            release.wait(timeout=60)
+            return GOOD
+
+    started = time.monotonic()
+    try:
+        with pytest.raises(SeatFailed) as failed:
+            run_seat(_Hung(), "george", {"idea": {}})
+    finally:
+        release.set()
+    assert failed.value.code == "SEAT_TIMEOUT" and failed.value.attempts == 1
+    assert time.monotonic() - started < 30, "a hung model call must not block the seat indefinitely"
 
 
 def test_an_unavailable_model_is_not_retried():
