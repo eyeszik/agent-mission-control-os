@@ -425,6 +425,8 @@ def to_jsonable(value: Any) -> Any:
 
 def dump_json(value: Any, path: Path) -> Path:
     """Write ``value`` as pretty, deterministic JSON and return the path."""
+    if ".." in str(path):
+        raise ConfigError("Invalid file path")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(to_jsonable(value), indent=2, sort_keys=False, ensure_ascii=False) + "\n",
