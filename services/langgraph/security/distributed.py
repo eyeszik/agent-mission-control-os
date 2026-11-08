@@ -56,7 +56,7 @@ def set_halt(*, scope: str, scope_key: str, reason: str, issuer: str, expires_at
     now = datetime.now(timezone.utc).isoformat()
     with transaction(write=True) as db:
         db.execute(
-            f"INSERT OR REPLACE INTO {table('asi10_halts')} (halt_id, scope, scope_key, reason, issuer, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            f"INSERT INTO {table('asi10_halts')} (halt_id, scope, scope_key, reason, issuer, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (halt_id) DO UPDATE SET scope = EXCLUDED.scope, scope_key = EXCLUDED.scope_key, reason = EXCLUDED.reason, issuer = EXCLUDED.issuer, created_at = EXCLUDED.created_at, expires_at = EXCLUDED.expires_at",
             (halt_id, scope, scope_key, reason, issuer, now, expires_at),
         )
     return {"halt_id": halt_id, "scope": scope, "scope_key": scope_key, "reason": reason, "issuer": issuer, "created_at": now}

@@ -33,6 +33,7 @@ from services.langgraph.persistence.database import (
     table,
     transaction,
 )
+from services.langgraph.persistence.tenancy import ensure_tenant_project
 
 _ARTIFACT_TABLES_INITIALIZED = False
 
@@ -209,6 +210,7 @@ def store_artifact(
     content_hash = hashlib.sha256(content).hexdigest()
 
     with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
         latest = db.execute(
             f"SELECT COALESCE(MAX(version), 0) AS v FROM {table('amc_artifact_versions')} WHERE tenant_id = ? AND project_id = ? AND kind = ?",
             (tenant_id, project_id, kind),
@@ -283,7 +285,7 @@ def soft_delete_artifact(artifact_id: str, tenant_id: str) -> bool:
 
     with transaction(write=True) as db:
         cursor = db.execute(
-            f"UPDATE {table('amc_artifact_versions')} SET deleted = 1, deleted_at = ? WHERE artifact_id = ? AND tenant_id = ? AND deleted = 0",
+            f"UPDATE {table('amc_artifact_versions')} SET deleted = TRUE, deleted_at = ? WHERE artifact_id = ? AND tenant_id = ? AND deleted = FALSE",
             (_now_iso(), artifact_id, tenant_id),
         )
         return cursor.rowcount == 1
