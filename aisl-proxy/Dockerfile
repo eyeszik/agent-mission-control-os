@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------
 # Stage 1: dependencies (cached independently of source changes)
 # ---------------------------------------------------------------------------
-FROM node:22-alpine AS deps
+FROM node:25-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 # The optional `proxy_ca` build secret lets the image build behind a
@@ -17,7 +17,7 @@ RUN --mount=type=secret,id=proxy_ca,target=/tmp/proxy-ca.crt \
 # ---------------------------------------------------------------------------
 # Stage 2: build — compile TypeScript, then prune to production dependencies
 # ---------------------------------------------------------------------------
-FROM node:22-alpine AS build
+FROM node:25-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json tsconfig.json tsconfig.build.json ./
@@ -28,7 +28,7 @@ RUN npm run build && npm prune --omit=dev
 # ---------------------------------------------------------------------------
 # Stage 3: runtime — no compiler, no dev dependencies, unprivileged user
 # ---------------------------------------------------------------------------
-FROM node:22-alpine AS runner
+FROM node:25-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production \
