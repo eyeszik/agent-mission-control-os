@@ -1024,7 +1024,7 @@
     },
     {
       "path": "packages/creative-renderer/build.mjs",
-      "git_blob_sha": "6aee6dfff93764095f5ce2483fe9ce756fd85751"
+      "git_blob_sha": "ea3b612befb2bb99db11e8b1d4f98f98e76a7600"
     },
     {
       "path": "packages/creative-renderer/worker.test.mjs",
@@ -1184,7 +1184,7 @@
     },
     {
       "path": "packages/creative-renderer/licenses/sources.json",
-      "git_blob_sha": "4bac99a2e48754fede68ae384d9ec3d972617ee9"
+      "git_blob_sha": "71194b5079e5497283b0da8d45b22fcc4a31a8ba"
     },
     {
       "path": "packages/creative-renderer/adapters/common.mjs",
