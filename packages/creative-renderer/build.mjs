@@ -41,7 +41,7 @@ for(const [name] of Object.entries(JSON.parse(readFileSync(new URL('./package.js
     writeFileSync(new URL(`./dist/browser/${filename}`,import.meta.url),readFileSync(license ? new URL(license,directory) : fallback));
     manifest.packages[name]={version:meta.version,license:meta.license,license_file:filename};break;
    }
-  }catch(error){if(error.message.startsWith('LICENSE_NOT_FOUND:'))throw error;}
+  }catch(error){if(error.message.startsWith('LICENSE_NOT_FOUND:')||error.message.startsWith('LICENSE_VERSION_MISMATCH:'))throw error;}
   const parent=new URL('../',directory);if(parent.href===directory.href)throw new Error(`PACKAGE_NOT_FOUND:${name}`);directory=parent;
  }
 }
