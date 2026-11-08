@@ -163,8 +163,8 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
       remotion:
-        specifier: 4.0.539
-        version: 4.0.539(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 4.0.541
+        version: 4.0.541(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       roughjs:
         specifier: ^4.6.6
         version: 4.6.6
@@ -1572,6 +1572,12 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
 
+  remotion@4.0.541:
+    resolution: {integrity: sha512-qpXfkMwKk3NJmlUzl6gJYebnMjbweXomna7KRu0EEBFPjxG94x8T0nAbXJmTUT3bHR8XA/edxsa9/HEr0ytA0g==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
   rolldown@1.0.2:
     resolution: {integrity: sha512-oZx5zVDtVB44AW3eaifgDml1gWRDZGvjcfdxonE4swNPG98PrrXjaO/KrnUjzlMnztCCRVlUueA1kCXhARGk6g==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -2766,6 +2772,11 @@ snapshots:
   react@19.3.1: {}
 
   remotion@4.0.539(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+    dependencies:
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+
+  remotion@4.0.541(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
     dependencies:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
