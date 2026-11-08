@@ -38,33 +38,57 @@ def test_two_workers_observe_same_halt(isolated_db):
 
 
 def test_halt_survives_process_restart(tmp_path):
-    """Halt is durable in DB, not just in-memory."""
-    from services.langgraph.persistence import sqlite_db
-    import subprocess, sys, os, json
+    """Halt is durable in the configured DB, not just in-memory."""
+    import os
+    import subprocess
+    import sys
     from pathlib import Path as P
+
     repo_root = P(__file__).resolve().parents[3]
     db_path = tmp_path / "halt_restart.db"
+    scope_key = f"restart-{uuid.uuid4().hex}"
+    child_env = os.environ.copy()
+    if child_env.get("AMC_DATABASE_BACKEND", "sqlite").strip().lower() != "postgres":
+        # This test owns a temporary SQLite file unless the suite explicitly
+        # selected PostgreSQL, in which case use its configured shared database.
+        child_env["AMC_DATABASE_BACKEND"] = "sqlite"
+        child_env.pop("DATABASE_URL", None)
 
-    # Write halt via subprocess 1
+    # Write halt via subprocess 1.
     code_set = (
         "import sys; from services.langgraph.persistence import sqlite_db; "
         "sqlite_db.DB_PATH = sys.argv[1]; "
         "from services.langgraph.security.distributed import set_halt; "
-        "set_halt(scope='global', scope_key='global', reason='halt-test', issuer='admin'); "
+        "set_halt(scope='global', scope_key=sys.argv[2], reason='halt-test', issuer='admin'); "
         "print('SET')"
     )
-    proc = subprocess.run([sys.executable, "-c", code_set, str(db_path)], cwd=str(repo_root), capture_output=True, text=True, timeout=10)
+    proc = subprocess.run(
+        [sys.executable, "-c", code_set, str(db_path), scope_key],
+        cwd=str(repo_root),
+        capture_output=True,
+        text=True,
+        timeout=10,
+        env=child_env,
+    )
     assert proc.returncode == 0, proc.stderr
 
-    # Check via subprocess 2 (simulates restart)
+    # Check via subprocess 2 (simulates restart), then remove this unique row.
     code_check = (
         "import sys; from services.langgraph.persistence import sqlite_db; "
         "sqlite_db.DB_PATH = sys.argv[1]; "
-        "from services.langgraph.security.distributed import check_halt; "
-        "hit = check_halt(scope='global', scope_key='global'); "
-        "print('HIT' if hit else 'MISS')"
+        "from services.langgraph.security.distributed import check_halt, clear_halt_shared; "
+        "hit = check_halt(scope='global', scope_key=sys.argv[2]); "
+        "print('HIT' if hit else 'MISS'); "
+        "clear_halt_shared(scope='global', scope_key=sys.argv[2])"
     )
-    proc2 = subprocess.run([sys.executable, "-c", code_check, str(db_path)], cwd=str(repo_root), capture_output=True, text=True, timeout=10)
+    proc2 = subprocess.run(
+        [sys.executable, "-c", code_check, str(db_path), scope_key],
+        cwd=str(repo_root),
+        capture_output=True,
+        text=True,
+        timeout=10,
+        env=child_env,
+    )
     assert proc2.returncode == 0, proc2.stderr
     assert "HIT" in proc2.stdout
 
