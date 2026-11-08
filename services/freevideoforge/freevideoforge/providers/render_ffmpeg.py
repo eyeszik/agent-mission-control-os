@@ -33,7 +33,6 @@ from ..errors import DependencyError, RenderError
 from ..ffmpeg import FFTools
 from ..models import Project, Scene
 from ..visuals.fonts import FontBook
-from ..visuals.frames import CaptionCue, SceneFrameRenderer, render_thumbnail
 from ..visuals.palette import Palette
 from .base import Capability, MediaResult
 
@@ -123,6 +122,8 @@ class FFmpegMotionRenderProvider:
         timeout: float = 900.0,
     ) -> MediaResult:
         """Render one scene to a silent MP4 clip."""
+        from ..visuals.frames import CaptionCue, SceneFrameRenderer
+
         self.tools.require_ffmpeg()
         render = project.render
         cues = [
@@ -213,6 +214,8 @@ class FFmpegMotionRenderProvider:
 
     def render_thumbnail(self, project: Project, output: Path, title: str) -> Path:
         """A purpose-built title card rather than a frame grab."""
+        from ..visuals.frames import render_thumbnail
+
         if not project.scenes:
             raise RenderError("Cannot build a thumbnail without scenes")
         scene = project.scenes[0]

@@ -12,6 +12,7 @@ from services.langgraph.persistence.database import (
     table,
     transaction,
 )
+from services.langgraph.persistence.tenancy import ensure_tenant_project
 
 _VALID_JOB_KINDS = {"agency.create", "agency.resume"}
 _TERMINAL_JOB_STATUSES = {"completed", "failed", "dead_letter", "cancelled"}
@@ -62,6 +63,7 @@ def enqueue_job(
     lease = (max_attempts or default_max_attempts()) if max_attempts else default_max_attempts()
     now = _now_iso()
     with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant_id, project_id)
         db.execute(
             f"INSERT INTO {table('amc_jobs')} (job_id, kind, tenant_id, project_id, run_id, status, attempt_count, max_attempts, payload, queued_at, updated_at) VALUES (?, ?, ?, ?, ?, 'queued', 0, ?, ?, ?, ?)",
             (job_id, kind, tenant_id, project_id, run_id, lease, json_param(payload), now, now),

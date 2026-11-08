@@ -12,9 +12,22 @@ import os
 import sys
 from functools import lru_cache
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import TYPE_CHECKING, Iterable, Optional
 
-from PIL import ImageFont
+if TYPE_CHECKING:
+    from PIL import ImageFont
+
+
+def _image_font_module():
+    """Import Pillow only when a caller actually requests a loaded font."""
+    try:
+        from PIL import ImageFont
+    except ImportError as exc:
+        raise RuntimeError(
+            "Pillow is required to render text; install the amc-langgraph rendering extra."
+        ) from exc
+    return ImageFont
+
 
 #: Preferred faces per role, best first. All are libre fonts.
 FACE_CANDIDATES: dict[str, tuple[str, ...]] = {
@@ -115,6 +128,7 @@ class FontBook:
         if key in self._cache:
             return self._cache[key]
         path = self.path(role)
+        ImageFont = _image_font_module()
         font: ImageFont.ImageFont
         if path:
             try:
@@ -130,6 +144,7 @@ class FontBook:
 
     @staticmethod
     def _default(size: int) -> ImageFont.ImageFont:
+        ImageFont = _image_font_module()
         try:
             return ImageFont.load_default(size=size)  # Pillow >= 10.1
         except TypeError:  # pragma: no cover - very old Pillow
