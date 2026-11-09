@@ -1,11 +1,11 @@
 {
-  "run_id": "run-20261109-122818-4225db",
+  "run_id": "run-20261109-222039-37a408",
   "version": "1.0.0",
-  "created_at": 1794227298.52214,
-  "completed_at": 1794227376.166849,
+  "created_at": 1794262839.152751,
+  "completed_at": 1794262956.254607,
   "config_hash": "a1dd4fe0ab0d356d9a0cbdcf1bc27c72d27b059c06def9fb716a48e24c37d0f5",
   "project": {
-    "run_id": "run-20261109-122818-4225db",
+    "run_id": "run-20261109-222039-37a408",
     "topic": "Agent Mission Control OS",
     "brief": "Agent Mission Control OS is the execution and governance layer for an autonomous branding, marketing, product and digital delivery agency. Human approval is required before anything is delivered. Every run executes inside a durable project scoped to a tenant and a project. Publication is dry-run only and paid media is planning-only. This film was rendered locally with no paid API and no network.",
     "intent": "educate",
@@ -67,11 +67,11 @@
         "seed": 20261109000,
         "clip_path": "<run work dir>/clips/s01.mp4",
         "audio_path": "<run work dir>/audio/s01.wav",
-        "audio_duration": 2.859093,
+        "audio_duration": 2.739955,
         "state": "DONE",
         "attempts": 1,
         "error": null,
-        "input_hash": "573ba2648230da36c3bacb0b0a3502aa1d7f2c952db4892eeaf48e4775a0c2f7"
+        "input_hash": "28fff03d3f42942bb6fabcfc06c479501624d5957396a96d35791898c3f39472"
       },
       {
         "id": "s02",
@@ -122,11 +122,11 @@
         "seed": 20261109001,
         "clip_path": "<run work dir>/clips/s02.mp4",
         "audio_path": "<run work dir>/audio/s02.wav",
-        "audio_duration": 1.564853,
+        "audio_duration": 1.567347,
         "state": "DONE",
         "attempts": 1,
         "error": null,
-        "input_hash": "44f33f15cea606889271d1778620fb79876fa64224cc643896bda53d497c7e68"
+        "input_hash": "3ea45c3e24c735f746d77457eb77e171507ec4cf404440171db12d6cc708ad72"
       },
       {
         "id": "s03",
@@ -177,11 +177,11 @@
         "seed": 20261109002,
         "clip_path": "<run work dir>/clips/s03.mp4",
         "audio_path": "<run work dir>/audio/s03.wav",
-        "audio_duration": 3.991247,
+        "audio_duration": 3.970612,
         "state": "DONE",
         "attempts": 1,
         "error": null,
-        "input_hash": "0c24848b5383d83a301c0f61e5b77060a36ac2eb49bd2ccda6e11325c35f2825"
+        "input_hash": "f55b315ce2a8c4532d11aa6f2523f7e9bc7cdc0d6ee4e928ce11393a088dbcff"
       },
       {
         "id": "s04",
@@ -232,11 +232,11 @@
         "seed": 20261109003,
         "clip_path": "<run work dir>/clips/s04.mp4",
         "audio_path": "<run work dir>/audio/s04.wav",
-        "audio_duration": 3.030522,
+        "audio_duration": 3.099864,
         "state": "DONE",
         "attempts": 1,
         "error": null,
-        "input_hash": "3025d8759605f658269d32fc56d1525d08347fc9212953d140500647f0191951"
+        "input_hash": "1842d84ce86becd4ab7bef5f7158bb97a7690e58322ef8e51a0e0181a71e8369"
       },
       {
         "id": "s05",
@@ -287,11 +287,11 @@
         "seed": 20261109004,
         "clip_path": "<run work dir>/clips/s05.mp4",
         "audio_path": "<run work dir>/audio/s05.wav",
-        "audio_duration": 3.931927,
+        "audio_duration": 3.332063,
         "state": "DONE",
         "attempts": 1,
         "error": null,
-        "input_hash": "bdb66007646a3d24afd56cb67bd79032bb0c37fd00aa633276784b974a4a0d3f"
+        "input_hash": "9396998f842f1830d58b64e586a8cfe0140d2851327d8e5023c797f1e93c6118"
       },
       {
         "id": "s06",
@@ -342,11 +342,11 @@
         "seed": 20261109005,
         "clip_path": "<run work dir>/clips/s06.mp4",
         "audio_path": "<run work dir>/audio/s06.wav",
-        "audio_duration": 3.47619,
+        "audio_duration": 3.390113,
         "state": "DONE",
         "attempts": 1,
         "error": null,
-        "input_hash": "ee43fafa4f3b3a3ce10ccbd2927b09dd50418b9702996b53f4854bb98c01d0d5"
+        "input_hash": "c63d2f6e995f7835423bab05cd50509df47c4aa10fa611c40d5c76d82ee8953d"
       }
     ],
     "render": {
@@ -365,7 +365,7 @@
     "providers": {
       "script": "template",
       "storyboard": "deterministic",
-      "speech": "espeak",
+      "speech": "piper",
       "captions": "script_derived",
       "render": "ffmpeg_motion",
       "visual_tier": "ffmpeg_motion"
@@ -375,7 +375,7 @@
     "resolved": {
       "script": "template",
       "storyboard": "deterministic",
-      "speech": "espeak",
+      "speech": "piper",
       "captions": "script_derived",
       "render": "ffmpeg_motion",
       "visual_tier": "ffmpeg_motion"
@@ -418,7 +418,7 @@
         "requires_large_download": false,
         "version": "n9.0.2-17-g2a571b6068-20260930",
         "metadata": {
-          "ffmpeg": "<repo>/.venv/lib/python3.11/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v9.0.2",
+          "ffmpeg": "/tmp/fvf-venv/lib/python3.11/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v9.0.2",
           "ffprobe": "/tmp/ffprobe-scratch/node_modules/ffprobe-static/bin/linux/x64/ffprobe",
           "technique": "procedural_ffmpeg",
           "display_font": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
@@ -440,17 +440,18 @@
         }
       },
       {
-        "name": "espeak",
+        "name": "piper",
         "kind": "speech",
         "available": true,
-        "detail": "Local formant-synthesis TTS. Offline, free, no model download.",
+        "detail": "Local neural TTS with an installed voice. Offline and free.",
         "remediation": "",
         "requires_payment": false,
         "requires_large_download": false,
-        "version": "eSpeak NG text-to-speech: libespeak-ng via espeakng-loader (local, offline)",
+        "version": null,
         "metadata": {
-          "binary": "/tmp/fvf-bin/espeak-ng",
-          "voice_quality": "formant_synthesis"
+          "binary": "/tmp/fvf-venv/bin/piper",
+          "voice_model": "/tmp/fvf-venv/lib/python3.11/site-packages/joe_us_piper_voice/data/en_US-joe-medium.onnx",
+          "voice_quality": "neural"
         }
       },
       {
@@ -518,13 +519,13 @@
         }
       },
       {
-        "name": "piper",
+        "name": "espeak",
         "kind": "speech",
         "available": false,
-        "detail": "The `piper` executable is not on PATH.",
-        "remediation": "Piper is free and offline (MIT licensed). To enable it:\n  1. pip install piper-tts\n  2. Download one voice (~20-120 MB) from the Piper voices release\n     and point FVF_PIPER_MODEL at the .onnx file.\nFreeVideoForge will not download a voice model for you.",
+        "detail": "espeak-ng is not on PATH.",
+        "remediation": "Install it (free, offline, no account):\n  Debian/Ubuntu : sudo apt-get install -y espeak-ng\n  macOS         : brew install espeak-ng\n  Windows       : winget install eSpeak-NG.eSpeak-NG",
         "requires_payment": false,
-        "requires_large_download": true,
+        "requires_large_download": false,
         "version": null,
         "metadata": {}
       },
@@ -559,45 +560,45 @@
       "kind": "scene_clip",
       "scene_id": "s01",
       "path": "<run work dir>/clips/s01.mp4",
-      "sha256": "c212663674c4a33ca1c2b5503d3ca65ca15b8ce724d692783154625c3a9ca6f0",
-      "bytes": 1342654,
+      "sha256": "ba9b17644ccb08471a627e9d3cc55aa5828d4730eb742baeef261741c183f0a1",
+      "bytes": 1340360,
       "provider": "ffmpeg_motion",
       "duration": 5.656,
       "seed": 20261109000,
-      "input_hash": "573ba2648230da36c3bacb0b0a3502aa1d7f2c952db4892eeaf48e4775a0c2f7"
+      "input_hash": "28fff03d3f42942bb6fabcfc06c479501624d5957396a96d35791898c3f39472"
     },
     {
       "kind": "scene_audio",
       "scene_id": "s01",
       "path": "<run work dir>/audio/s01.wav",
-      "sha256": "957e0e3eee606c94ecf14e069f15024f6aae18f0e4bf61954ba9efbac7c25faa",
-      "bytes": 126130,
-      "provider": "espeak",
-      "duration": 2.859093,
+      "sha256": "74461e5c129e2debc53fe8f8cbfb70f3c608d4ad23e2368e75344154b7f600ec",
+      "bytes": 120876,
+      "provider": "piper",
+      "duration": 2.739955,
       "seed": 20261109000,
-      "input_hash": "573ba2648230da36c3bacb0b0a3502aa1d7f2c952db4892eeaf48e4775a0c2f7"
+      "input_hash": "28fff03d3f42942bb6fabcfc06c479501624d5957396a96d35791898c3f39472"
     },
     {
       "kind": "scene_clip",
       "scene_id": "s02",
       "path": "<run work dir>/clips/s02.mp4",
-      "sha256": "4465b92c3cb34f53959fbd0141a667626145c0782d8362c9cc041a709538611a",
-      "bytes": 1256314,
+      "sha256": "629577d4ba0fbee9546f19e61300a29ffff4b2a4b342f46198267a2b4d50176a",
+      "bytes": 1256038,
       "provider": "ffmpeg_motion",
       "duration": 4.672,
       "seed": 20261109001,
-      "input_hash": "44f33f15cea606889271d1778620fb79876fa64224cc643896bda53d497c7e68"
+      "input_hash": "3ea45c3e24c735f746d77457eb77e171507ec4cf404440171db12d6cc708ad72"
     },
     {
       "kind": "scene_audio",
       "scene_id": "s02",
       "path": "<run work dir>/audio/s02.wav",
-      "sha256": "c052135c4d5f4fd2cfe31a1e865cf56695484be0c28e39fef788b4c9dbc6b763",
-      "bytes": 69054,
-      "provider": "espeak",
-      "duration": 1.564853,
+      "sha256": "decd4237f3fcef1c779f034221d07c53db3085a51b6f3756a5595310762b30ae",
+      "bytes": 69164,
+      "provider": "piper",
+      "duration": 1.567347,
       "seed": 20261109001,
-      "input_hash": "44f33f15cea606889271d1778620fb79876fa64224cc643896bda53d497c7e68"
+      "input_hash": "3ea45c3e24c735f746d77457eb77e171507ec4cf404440171db12d6cc708ad72"
     },
     {
       "kind": "scene_clip",
@@ -608,84 +609,84 @@
       "provider": "ffmpeg_motion",
       "duration": 4.918,
       "seed": 20261109002,
-      "input_hash": "0c24848b5383d83a301c0f61e5b77060a36ac2eb49bd2ccda6e11325c35f2825"
+      "input_hash": "f55b315ce2a8c4532d11aa6f2523f7e9bc7cdc0d6ee4e928ce11393a088dbcff"
     },
     {
       "kind": "scene_audio",
       "scene_id": "s03",
       "path": "<run work dir>/audio/s03.wav",
-      "sha256": "b2a27bbb7b544ec1c5236c434dd4e439c3208ce4f15bd2af6da0626aeaa80980",
-      "bytes": 176058,
-      "provider": "espeak",
-      "duration": 3.991247,
+      "sha256": "0ffed99607b180100668cc01a67dc011fe200bb823987642083aefb51f5d568e",
+      "bytes": 175148,
+      "provider": "piper",
+      "duration": 3.970612,
       "seed": 20261109002,
-      "input_hash": "0c24848b5383d83a301c0f61e5b77060a36ac2eb49bd2ccda6e11325c35f2825"
+      "input_hash": "f55b315ce2a8c4532d11aa6f2523f7e9bc7cdc0d6ee4e928ce11393a088dbcff"
     },
     {
       "kind": "scene_clip",
       "scene_id": "s04",
       "path": "<run work dir>/clips/s04.mp4",
-      "sha256": "81934ab359d102dc52263c202d4fe4202885d7135e39c0c84562701cd9926479",
-      "bytes": 1321584,
+      "sha256": "4881beae120ee41dbfd82b3b806e6976fc3c11e435d4fae74f927685ffb39bbe",
+      "bytes": 1319140,
       "provider": "ffmpeg_motion",
       "duration": 4.918,
       "seed": 20261109003,
-      "input_hash": "3025d8759605f658269d32fc56d1525d08347fc9212953d140500647f0191951"
+      "input_hash": "1842d84ce86becd4ab7bef5f7158bb97a7690e58322ef8e51a0e0181a71e8369"
     },
     {
       "kind": "scene_audio",
       "scene_id": "s04",
       "path": "<run work dir>/audio/s04.wav",
-      "sha256": "d5c8f38c09d509f6ce972327854eb52c458f45a2bf1dcaded2a9fa65237eb2c9",
-      "bytes": 133690,
-      "provider": "espeak",
-      "duration": 3.030522,
+      "sha256": "09c2027342a2d3120a560699259efbe0189cfd03306f95977fd8fda7bedb7f53",
+      "bytes": 136748,
+      "provider": "piper",
+      "duration": 3.099864,
       "seed": 20261109003,
-      "input_hash": "3025d8759605f658269d32fc56d1525d08347fc9212953d140500647f0191951"
+      "input_hash": "1842d84ce86becd4ab7bef5f7158bb97a7690e58322ef8e51a0e0181a71e8369"
     },
     {
       "kind": "scene_clip",
       "scene_id": "s05",
       "path": "<run work dir>/clips/s05.mp4",
-      "sha256": "d59013d7f9d310529be0c7b08baf52735ca0465c76456d29deb6cef020bc4cc3",
-      "bytes": 1300546,
+      "sha256": "4b5f47ec9ad09c33909f6c3c679c1f5878ce99ce2794e15cd6d7cb885ba12d93",
+      "bytes": 1301614,
       "provider": "ffmpeg_motion",
       "duration": 4.632,
       "seed": 20261109004,
-      "input_hash": "bdb66007646a3d24afd56cb67bd79032bb0c37fd00aa633276784b974a4a0d3f"
+      "input_hash": "9396998f842f1830d58b64e586a8cfe0140d2851327d8e5023c797f1e93c6118"
     },
     {
       "kind": "scene_audio",
       "scene_id": "s05",
       "path": "<run work dir>/audio/s05.wav",
-      "sha256": "2f61f4b38fcb57afb3143d0943044a8aa72ab90c0f5f7bbe8e05ce63741e5395",
-      "bytes": 173442,
-      "provider": "espeak",
-      "duration": 3.931927,
+      "sha256": "63a1a1ad282dd81477b3d58823a61fb1a508affdca28669b818f9b21225e3b4e",
+      "bytes": 146988,
+      "provider": "piper",
+      "duration": 3.332063,
       "seed": 20261109004,
-      "input_hash": "bdb66007646a3d24afd56cb67bd79032bb0c37fd00aa633276784b974a4a0d3f"
+      "input_hash": "9396998f842f1830d58b64e586a8cfe0140d2851327d8e5023c797f1e93c6118"
     },
     {
       "kind": "scene_clip",
       "scene_id": "s06",
       "path": "<run work dir>/clips/s06.mp4",
-      "sha256": "04641d03c0d36b1bdfe5e95e16cd4fd10e406dcbc468cb753ec40bb5c2b7651c",
-      "bytes": 1192056,
+      "sha256": "16e4d086ea44172c468e0cf63c9b024bf79b92558b138a0960e1ec1f8f723c82",
+      "bytes": 1186314,
       "provider": "ffmpeg_motion",
       "duration": 5.41,
       "seed": 20261109005,
-      "input_hash": "ee43fafa4f3b3a3ce10ccbd2927b09dd50418b9702996b53f4854bb98c01d0d5"
+      "input_hash": "c63d2f6e995f7835423bab05cd50509df47c4aa10fa611c40d5c76d82ee8953d"
     },
     {
       "kind": "scene_audio",
       "scene_id": "s06",
       "path": "<run work dir>/audio/s06.wav",
-      "sha256": "630717f4d3a690f187f91bb1892acae4edef6c860da8bd97d3daae938bfa00fd",
-      "bytes": 153344,
-      "provider": "espeak",
-      "duration": 3.47619,
+      "sha256": "f14487d5ba0f0835c805d70e4439d5bddb448a5f244f0384eddc014c0b7ce859",
+      "bytes": 149548,
+      "provider": "piper",
+      "duration": 3.390113,
       "seed": 20261109005,
-      "input_hash": "ee43fafa4f3b3a3ce10ccbd2927b09dd50418b9702996b53f4854bb98c01d0d5"
+      "input_hash": "c63d2f6e995f7835423bab05cd50509df47c4aa10fa611c40d5c76d82ee8953d"
     }
   ],
   "outputs": {

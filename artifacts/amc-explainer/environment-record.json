@@ -1,10 +1,11 @@
 {
-  "record_version": "1.0",
+  "record_version": "1.1",
   "date_utc": "2026-11-09",
   "repository": "eyeszik/agent-mission-control-os",
-  "branch": "arena/25c9c639-agent-mission-control-os",
-  "source_revision": "6144f03d907949d6b701e8eb93bcc87de1e90cf9",
+  "branch": "arena/734654d8-agent-mission-control-os",
+  "source_revision": "f947863a85dfb31f56f06b37b0dfeafaf9de0149",
   "freevideoforge_version": "1.0.0",
+  "supersedes": "espeak-ng build merged in PR #244 (run run-20261109-122818-4225db, commit 6144f03d907949d6b701e8eb93bcc87de1e90cf9). This package is a full Piper re-render rebuilt after the staging area was lost to a sandbox reset; every file is fresh from the 2026-11-09 rebuild except those byte-identical to the seeded plan (script.json, thumbnail.jpg).",
   "host": {
     "os": "Linux-6.1.158+-x86_64-with-glibc2.36",
     "kernel": "6.1.158+",
@@ -14,10 +15,11 @@
     "python": "3.11.2"
   },
   "toolchain": {
-    "ffmpeg": "n9.0.2-17-g2a571b6068-20260930 (imageio-ffmpeg wheel, not system ffmpeg)",
-    "ffprobe": "4.0.2-static (npm ffprobe-static@3.1.0, johnvansickle static build) \u2014 tool mismatch documented",
+    "ffmpeg": "n9.0.2-17-g2a571b6068-20260930 (imageio-ffmpeg wheel 9.0.2, binary ffmpeg-linux-x86_64-v9.0.2)",
+    "ffprobe": "4.0.2-static (npm ffprobe-static@3.1.0, johnvansickle static build) — tool mismatch documented",
     "pillow": "13.0.0",
-    "espeakng_loader": "0.2.4 (bundles libespeak-ng; CLI absent, shim used)",
+    "piper_tts": "1.8.0 (MIT)",
+    "joe_us_piper_voice": "1.0.0 (third-party repackaging of rhasspy piper-voices v1.0.0; packaging MIT; voice CC0)",
     "node": "v22.22.3",
     "npm": "10.9.8",
     "display_fonts": [
@@ -27,6 +29,19 @@
       "DejaVuSerif.ttf",
       "DejaVuSerif-Bold.ttf"
     ]
+  },
+  "voice_models": {
+    "note": "Voice files are NOT committed to this repository. They are installed at build time with `pip install joe-us-piper-voice` (see REPRODUCTION.md). Sizes and SHA-256s recorded here for bit-level provenance.",
+    "en_US-joe-medium.onnx": {
+      "bytes": 63201294,
+      "sha256": "58afce0321b8d9c46d7cdf9c16500cc55a793b4220212dba6b70fb788b3baf06",
+      "license": "CC0 (upstream rhasspy piper-voices v1.0.0; lessac-family finetune)",
+      "packaging": "joe-us-piper-voice 1.0.0 (MIT metadata) — third-party repackaging, not an official rhasspy artifact"
+    },
+    "en_US-joe-medium.onnx.json": {
+      "bytes": 4794,
+      "sha256": "3d6d5410b3795cb1950595247ef8f06190719e6fdbfa3a2356d8ec368e1aad33"
+    }
   },
   "render_parameters": {
     "preset": "ffmpeg_motion",
@@ -40,102 +55,101 @@
     "fps": 30,
     "video": "h264/crf17/slow",
     "audio": "aac/44100Hz/160k",
-    "measured_wall_clock_s": 79.24,
-    "measured_peak_rss_mb": 654
+    "measured_wall_clock_s": "not precisely instrumented for this rebuild; the identical recipe measured 104.55 s wall / ~0.66 GB peak RSS on the first Piper render (run-20261109-204859-d28513, discarded). The end-to-end command for this rebuild (npm ffprobe bootstrap + generate) returned in ~127 s on 2 vCPU."
   },
-  "note": "Absolute paths in script/storyboard/manifest/quality-report were replaced with <repo>/<run work dir>/<run output dir> placeholders after the run; hashes below are of the sanitized copies. final.mp4 and thumbnail.jpg are byte-identical to the pipeline output (hashes of the run output match). environment-record regenerated after packaging docs were finalised.",
+  "note": "Absolute paths in storyboard/manifest/quality-report were replaced with <run work dir>/<run output dir> placeholders after the run; hashes below are of the sanitized copies. final.mp4 and thumbnail.jpg are byte-identical to the pipeline output (verified with cmp). environment-record regenerated after packaging docs were finalised; this record does not hash itself. The ephemeral build-time toolchain lived under /tmp (wiped between sessions) and is intentionally not vendored. The #244 espeak package was fully replaced by this re-render; its documentation of the espeak route is retained as the documented fallback in REPRODUCTION.md.",
   "files": {
     "BRIEF.md": {
-      "bytes": 7778,
-      "sha256": "a27cca86fee1b2096915c360e4012716b6d6813447ee0f1810fe5880a85a904e"
+      "bytes": 8298,
+      "sha256": "fcd004e4fd14ec9de3e2ff6181085358828bbfb2aa7a2b0774a72a9e81a1d9a4"
     },
     "CREDITS.md": {
-      "bytes": 1825,
-      "sha256": "70758fca015d59e4c66dc549d2525aa4ee95c6ec2122690fb181b03d36eb1403"
+      "bytes": 2833,
+      "sha256": "23d7c5df891fc90b37d409a14d8589cbc2e12a94f97105a7d8e5a7b63f4916d7"
     },
     "DESIGN.md": {
-      "bytes": 5891,
-      "sha256": "72da9a968ba37db93cc33b026c66d2cdbd2c50d1245c8bd68271f0e18fe25cbd"
+      "bytes": 6255,
+      "sha256": "7f5af09aa09f23463e6bc87c73477d7ef660aa0c8e23e33f9a37b7a96abb6391"
     },
     "README.md": {
-      "bytes": 4424,
-      "sha256": "c0990e6457ee1380e8136068bb7834a36b9d218b3928e2f015a3fdfeea8b273c"
+      "bytes": 5287,
+      "sha256": "e5803513659b39fa794d530da9fbbb3c0940868918331c7e6e1f93ed25e94ef1"
     },
     "REPRODUCTION.md": {
-      "bytes": 4686,
-      "sha256": "79d3ec8e8c4e23e096c28890b95d43acd0c7125f69bdd955a4a7079e74ea65ce"
+      "bytes": 6399,
+      "sha256": "4b8ba7f43deb3c5419d9ec623db292c4e9d29133a16702233c563bf65572ad22"
     },
     "captions.srt": {
       "bytes": 546,
-      "sha256": "7f80dffcf24b40f21865f45f59d68b1ce6ff7ab07c1426a5b3eab249116b1308"
+      "sha256": "576f2b395cb4736d98f0d4cd465376e934847414cbdcdca2826b72cff89957be"
     },
     "final.mp4": {
-      "bytes": 8377437,
-      "sha256": "2eb4ee2ee76576eefab342d740e99215dea1c117f89744bccfac75cc0a19a353"
+      "bytes": 8365719,
+      "sha256": "61f7ee0214ce4912d2088531cbe8ecf8d180d0ad75f9e88ff28227422eaf48e7"
     },
     "manifest.json": {
-      "bytes": 28023,
-      "sha256": "4d810193c140946914bedb6f9b8deb0cead30f9e534388e98ee22a4b6e21597d"
+      "bytes": 27967,
+      "sha256": "d8f7337907facd1b60fdd991ba3aa33c2644727bd4bc0f1b984f834b86705638"
     },
     "qa/decode-check.log": {
-      "bytes": 4250,
-      "sha256": "11681d4acba168da44bcb87e6adfa2fabce6ded5a2453c85bd3769118cbf9ec7"
+      "bytes": 4669,
+      "sha256": "731fcd193178d3850208b7f8643789870d6ddaafe94d5213ec4d76571effba4c"
     },
     "qa/doctor-output.txt": {
-      "bytes": 3563,
-      "sha256": "bf5fcbd701fbbabf65850cc000ce6702706a749701e9b2070a92dfabc62bff3c"
+      "bytes": 3365,
+      "sha256": "00b0b6f8f9097f4a935afdb37f03d925bdc2643bc7628bb3f66db090ef11499a"
     },
     "qa/ffprobe-full.json": {
-      "bytes": 3663,
-      "sha256": "d4aed86fd2afaa7647e9ca1f00a1808fe334c74587f761af5409ab4a28194ae1"
+      "bytes": 3649,
+      "sha256": "fcd06610055ad0500d2dd6727e7ba94e14f3e33ecfdda9d8e151814d8b7ec0b5"
     },
     "qa/ffprobe-summary.txt": {
-      "bytes": 391,
-      "sha256": "6440f062b93056d9dd4d2baa2c97a475cc34be9ba4df95884573025eab03f785"
+      "bytes": 416,
+      "sha256": "55a633a48efdc11c94a378ac72ba2f2421b65c861cb1544f4d2800c705e04890"
     },
     "qa/frames/t123.jpg": {
-      "bytes": 60999,
-      "sha256": "90e775438e379d3a082abf76b2a11965f1a08ba4f5a5eeecef1989815fc62cca"
+      "bytes": 115758,
+      "sha256": "1f23e81c6995a4dce09b3f194c35241a4fcb49d87dc2c848c51e2122300a9c0e"
     },
     "qa/frames/t15.jpg": {
-      "bytes": 54962,
-      "sha256": "8395f0d124fd4267244910b78159c2b83b67b7051a0546284c04470259a7f55e"
+      "bytes": 103271,
+      "sha256": "83b262fd1bd9d6ceb75127df4dae261cd63de0b7890e51ed66cfedb3ee800c8d"
     },
     "qa/frames/t170.jpg": {
-      "bytes": 62034,
-      "sha256": "10a9881381b825c7c7ef42e47ac8517d6434e746abb47e1df5a81175673140c4"
+      "bytes": 110229,
+      "sha256": "b482407a35f225c985425bc338959cb49278e411bb7d96144b0e963bce1a4c97"
     },
     "qa/frames/t225.jpg": {
-      "bytes": 56849,
-      "sha256": "0184800eadbb4600fe579d6013bfe8d7617582b68dc78e513d520d16b982633b"
+      "bytes": 104459,
+      "sha256": "c89b9d33f854878376618a21e2bcf03e7e379f1ccfd0ca37934d9b59c2e0ea13"
     },
     "qa/frames/t276.jpg": {
-      "bytes": 36687,
-      "sha256": "b04824c5431692c7a6cc01909f3f4969cec176977c678d5220fc7a26dce84cf4"
+      "bytes": 66782,
+      "sha256": "2793098307176423ecdcd196d389bae7a3de7746989ff08bfe3d11fae4e57b26"
     },
     "qa/frames/t299.jpg": {
-      "bytes": 28464,
-      "sha256": "80a135c717a94422b666e7c31affbf49544f35b3fea06642494e2ce5a28991a1"
+      "bytes": 38917,
+      "sha256": "d8837200058f361f42db8e711c893489b3d1cd52c3d0fb9e51e3038b18494357"
     },
     "qa/frames/t45.jpg": {
-      "bytes": 44887,
-      "sha256": "edf78b092266c61df8ccb7aa76c010c3844b906a2e53a0658a2005c302ed578c"
+      "bytes": 84518,
+      "sha256": "f5b20a0b67e0d00caa6aa10129005216ca5f89d5cf7d110197d9e23a6f42a887"
     },
     "qa/frames/t68.jpg": {
-      "bytes": 52585,
-      "sha256": "733e43885e4ecab2a346a2011bcd234f43fc36b0fa2955a0d2e682ff09fb3110"
+      "bytes": 97395,
+      "sha256": "4fcf9e098c151fb029a7be5f18b69d91bbfb2fcae73b805de7e47dbbc761acdd"
     },
     "qa/loudness-ebur128.txt": {
-      "bytes": 742,
-      "sha256": "bb484217124ec4c47a2aeaaaaec4ad36c29a4d1aeec46b2dde3935e77b80c5ed"
+      "bytes": 1114,
+      "sha256": "3e54812f816f2afc33322b2c07dce684bfec6dd9874f7c86f16f476af1c71d50"
     },
     "qa/qa-report.md": {
-      "bytes": 7544,
-      "sha256": "cc56971423c888fea4e9f90d5ac8313d5381782ffcf9ea1d2149a1c424d44fdf"
+      "bytes": 9059,
+      "sha256": "2e5e0474e9634bc6febac6fe9b727c2ad70a252875660e9f80f4425d31a96bfa"
     },
     "quality-report.json": {
       "bytes": 5551,
-      "sha256": "cefbf5c26885bc439cee8884bf49e817c7a9bdee88fb9cc28e70592f6904b3a3"
+      "sha256": "0d993ddd7a8a4230d82a10c39967fc9faca56153c9d0785d9b62b785081f5646"
     },
     "script.json": {
       "bytes": 2850,
@@ -146,12 +160,12 @@
       "sha256": "7a57e222381f53c4d45c1a0db3d15d37fe77ad00ec9ff8d45c94aa6bfc83842a"
     },
     "source/generate.sh": {
-      "bytes": 645,
-      "sha256": "12985c26b1b9a2516c1da36a46dca0d87a9006ad708f68b17bbac9e62884e1df"
+      "bytes": 917,
+      "sha256": "4e4fa67ae12de84727eb1fa19afdccb312a773e7b0b7b8ba4cc1b6b8c329ff72"
     },
     "storyboard.json": {
-      "bytes": 11961,
-      "sha256": "75e662d21c9c230d2f32f202784415d840de026df9199f0be47edfc07c29be3d"
+      "bytes": 11962,
+      "sha256": "db61fcf4edf71ba8b738e7a33e769e7d9e0c88f4743c9e2ccba12d66fb8fcd05"
     },
     "thumbnail.jpg": {
       "bytes": 192417,
