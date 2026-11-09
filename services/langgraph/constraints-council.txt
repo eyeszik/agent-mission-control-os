@@ -114,7 +114,7 @@ psycopg-pool==3.3.3
 pyarrow==26.0.1
 pybase64==1.5.1
 pycparser==3.12
-pydantic==2.12.5
+pydantic==2.14.3
 pydantic-settings==2.16.2
 pydantic_core==2.50.4
 Pygments==2.21.0
