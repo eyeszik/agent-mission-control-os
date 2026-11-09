@@ -1,0 +1,55 @@
+FreeVideoForge 1.0.0 - doctor
+==============================================================
+Status              : OK
+Capability tier     : C (deterministic CPU renderer (procedural motion graphics))
+Fallback renderer   : ffmpeg_motion (always available)
+Paid APIs required  : none
+Credentials required: none
+
+Host
+  platform      Linux-6.1.158+-x86_64-with-glibc2.36
+  python        3.11.2
+  cpu / workers 2 / 1
+  disk free     18910 MB
+
+Toolchain
+  ffmpeg        /home/user/agent-mission-control-os/.venv/lib/python3.11/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v9.0.2
+  ffprobe       /tmp/ffprobe-scratch/node_modules/ffprobe-static/bin/linux/x64/ffprobe
+  pillow        13.0.0
+  display font  /usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf
+
+Providers - active
+  + captions   script_derived [1.0.0] Caption timing derived from narration text and measured scene audio durations.
+  + quality    structural     [4.0.2-static] Deterministic structural validation via ffprobe and a full decode pass.
+  + render     ffmpeg_motion  [n9.0.2-17-g2a571b6068-20260930] Procedural motion-graphics renderer. CPU only, no model, no network.
+  + script     template       [1.0.0] Deterministic narrative-structure compiler. No model, no network, no credentials.
+  + speech     espeak         [eSpeak NG text-to-speech: libespeak-ng via espeakng-loader (local, offline)] Local formant-synthesis TTS. Offline, free, no model download.
+  + speech     silence        [1.0.0] Timed silence. Always available; produces no narration. Install a local TTS engine for real voiceover.
+  + storyboard deterministic  [1.0.0] Seeded shot planner with explicit content/visual/motion separation.
+
+Providers - unavailable (each with the exact fix)
+  - image      local_image    No local image backend responded at http://127.0.0.1:8188.
+      Tier B (local image generation + animation) needs a running local image backend (e.g. ComfyUI on http://127.0.0.1:8188) with a checkpoint you have downloaded and licensed, plus FVF_LOCAL_IMAGE_WORKFLOW pointing at an exported workflow. FreeVideoForge downloads nothing on your behalf.
+  - script     ollama         No Ollama runtime responded at http://127.0.0.1:11434.
+      Optional. To enable local LLM scripting:
+        1. Install Ollama (free, runs locally): https://ollama.com
+        2. Pull a small model, e.g. `ollama pull llama3.2:3b` (a multi-GB download you choose to make).
+        3. Optionally set FVF_OLLAMA_MODEL.
+      Without it, the deterministic template engine is used.
+  - speech     piper          The `piper` executable is not on PATH.
+      Piper is free and offline (MIT licensed). To enable it:
+        1. pip install piper-tts
+        2. Download one voice (~20-120 MB) from the Piper voices release
+           and point FVF_PIPER_MODEL at the .onnx file.
+      FreeVideoForge will not download a voice model for you.
+  - video      local_video    No local video backend responded at http://127.0.0.1:8188.
+      Tier A (local generative video) needs all of:
+        1. A GPU with enough VRAM for the chosen model.
+        2. A running local backend, e.g. ComfyUI on http://127.0.0.1:8188.
+        3. A model checkpoint you have downloaded and whose licence you have read.
+      FreeVideoForge will not download checkpoints or start services for you. Once a backend is running, re-run `freevideoforge doctor`.
+
+Narration: Real local TTS is available.
+
+No blockers. You can render right now:
+  freevideoforge generate --topic "Why the moon changes shape" --duration 30 --aspect 9:16 --preset auto
