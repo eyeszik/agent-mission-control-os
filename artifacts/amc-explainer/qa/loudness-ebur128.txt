@@ -1,0 +1,20 @@
+  Stream #0:1(und): Video: wrapped_avframe, yuv420p(progressive), 1080x1920, q=2-31, 200 kb/s, 30 fps, 30 tbn (default)
+    Metadata:
+      encoder         : Lavc63.1.102 wrapped_avframe
+      handler_name    : VideoHandler
+[Parsed_ebur128_0 @ 0x7fcf20001c00] Summary:
+
+  Integrated loudness:
+    I:         -20.5 LUFS
+    Threshold: -32.1 LUFS
+
+  Loudness range:
+    LRA:         5.6 LU
+    Threshold: -42.2 LUFS
+    LRA low:   -25.8 LUFS
+    LRA high:  -20.1 LUFS
+
+  True peak:
+    Peak:       -2.4 dBFS
+[out#0/null @ 0x55e977262000] video:374KiB audio:5203KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+frame=  904 fps=584 q=-0.0 Lsize=N/A time=00:00:30.20 bitrate=N/A speed=19.5x elapsed=0:00:01.54    

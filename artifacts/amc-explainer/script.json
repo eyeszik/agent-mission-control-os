@@ -1,0 +1,88 @@
+{
+  "schema_version": "freevideoforge/script/v1",
+  "title": "Agent Mission Control OS",
+  "topic": "Agent Mission Control OS",
+  "shape": "explainer",
+  "intent": "educate",
+  "audience": "curious general audience",
+  "format": "short-form explainer",
+  "language": "en",
+  "narration_strategy": "single narrator, second person, plain language",
+  "content_source": "brief",
+  "content_source_note": "Body copy was taken from the supplied brief; structure, pacing and framing lines are generated.",
+  "provider": "template",
+  "model": null,
+  "seed": 20261109,
+  "target_duration": 30.0,
+  "planned_duration": 30.206,
+  "duration_note": "Copy needs 30.21s, which exceeds the requested 30.00s. Scenes were extended rather than the narration being cut.",
+  "words_per_second": 2.45,
+  "beats": [
+    {
+      "index": 0,
+      "role": "hook",
+      "voiceover": "Agent Mission Control, explained properly.",
+      "headline": "Agent Mission Control, Explained",
+      "kicker": "START HERE",
+      "allocated_duration": 5.656,
+      "target_duration": 5.656,
+      "word_count": 5
+    },
+    {
+      "index": 1,
+      "role": "context",
+      "voiceover": "It matters more than it looks.",
+      "headline": "Why It Matters",
+      "kicker": "THE STAKES",
+      "allocated_duration": 4.672,
+      "target_duration": 4.672,
+      "word_count": 6
+    },
+    {
+      "index": 2,
+      "role": "body",
+      "voiceover": "Agent Mission Control OS is the execution and governance layer.",
+      "headline": "Agent Mission Control OS",
+      "kicker": "THE DETAIL",
+      "allocated_duration": 4.918,
+      "target_duration": 4.918,
+      "word_count": 10
+    },
+    {
+      "index": 3,
+      "role": "body",
+      "voiceover": "Human approval is required before anything is delivered.",
+      "headline": "Human Approval is Required Before Anything",
+      "kicker": "THE CONDITION",
+      "allocated_duration": 4.918,
+      "target_duration": 4.918,
+      "word_count": 8
+    },
+    {
+      "index": 4,
+      "role": "turn",
+      "voiceover": "Change that one assumption and the whole picture reorders itself.",
+      "headline": "One Assumption, Reordered",
+      "kicker": "THE INSIGHT",
+      "allocated_duration": 4.426,
+      "target_duration": 4.632,
+      "word_count": 10
+    },
+    {
+      "index": 5,
+      "role": "payoff",
+      "voiceover": "That is the whole idea, end to end, without the noise.",
+      "headline": "End To End",
+      "kicker": "IN ONE LINE",
+      "allocated_duration": 5.41,
+      "target_duration": 5.41,
+      "word_count": 11
+    }
+  ],
+  "unused_brief_sentences": [
+    "Every run executes inside a durable project scoped to a tenant and a project.",
+    "Publication is dry-run only and paid media is planning-only.",
+    "This film was rendered locally with no paid API and no network."
+  ],
+  "total_words": 50
+}
