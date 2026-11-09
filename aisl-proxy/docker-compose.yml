@@ -56,7 +56,7 @@ services:
       retries: 20
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     restart: unless-stopped
     # appendonly keeps webhook dedupe keys across a restart; losing them would
     # let an in-flight Stripe retry reprocess an already-applied event.
