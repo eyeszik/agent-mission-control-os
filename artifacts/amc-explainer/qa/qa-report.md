@@ -121,8 +121,8 @@ Root cause: motif-under-text z-order in the stock renderer with a four-line head
 (8-word renderer-derived overlay). Role→motif selection is seed-invariant (verified
 across seeds during the #244 investigation), so no seed avoids it. Accepted rather than
 fixed by forking the renderer; a proper fix (draw motifs strictly below headline plates)
-belongs upstream in `services/freevideoforge/freevideoforge/visuals/` and is logged as
-follow-up work. Severity LOW: no information is lost; legibility gate (perceptual) is
+belongs upstream in `services/freevideoforge/freevideoforge/visuals/` and is recorded
+here (this §Defects) as follow-up work; no issue-tracker entry exists for it yet. Severity LOW: no information is lost; legibility gate (perceptual) is
 NOT_VERIFIED anyway. Reproduced in this build at the same scene (t170 extract).
 
 ## 8. Acceptance checks (BRIEF §7)
