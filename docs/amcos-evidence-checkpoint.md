@@ -58,7 +58,7 @@ Also PASS: `compileall -q services/langgraph scripts`; `pip check` ("No broken r
 ## Open / not claimed
 
 - **Full-suite result for this exact tree** is reported only when the run finishes; anything else is `IN PROGRESS`, not a pass.
-- **CI did not validate this branch.** The `CI` workflow has been `startup_failure` repo-wide since 2026-11-09 (22 consecutive runs), while other workflows still start and succeed — `aisl-proxy.yml` on 2026-11-09 and `vnexus-brand-genome.yml` on 2026-11-10 20:32Z. What was excluded, by test rather than assumption:
+- **CI did not validate this branch.** The `CI` workflow has been `startup_failure` since 2026-11-09; the run for head `5018d98` (run 42918515747, `pull_request`, 2026-11-10 22:52Z) also failed at startup with **0 jobs created**, while other workflows still start and succeed — `aisl-proxy.yml` on 2026-11-09 and `vnexus-brand-genome.yml` on 2026-11-10 20:32Z, and CodeQL "PR #263" passed on the same commit. What was excluded, by test rather than assumption:
   - *Syntax/schema:* `ci.yml` parses under strict YAML (`uniqueKeys`, `strict`), and a key-whitelist pass over all 8 jobs found no unknown job keys, no unknown step keys, no step with both `run` and `uses`, no `with:` on a `run` step, and no empty/ref-less `uses:`. No duplicate keys, tabs, CRLF or BOM.
   - *Action pins:* every pinned SHA resolves, including `pnpm/action-setup@73e46992` — the **commit** behind annotated tag `v6.1.1`, not a typo.
   - *Hypothesis "third-party actions are blocked":* **falsified.** `vnexus-brand-genome.yml` uses the same `pnpm/action-setup` SHA and succeeded on 2026-11-10.
