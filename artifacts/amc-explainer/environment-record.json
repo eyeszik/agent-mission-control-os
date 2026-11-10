@@ -1,0 +1,165 @@
+{
+  "record_version": "1.0",
+  "date_utc": "2026-11-09",
+  "repository": "eyeszik/agent-mission-control-os",
+  "branch": "arena/25c9c639-agent-mission-control-os",
+  "source_revision": "6144f03d907949d6b701e8eb93bcc87de1e90cf9",
+  "freevideoforge_version": "1.0.0",
+  "host": {
+    "os": "Linux-6.1.158+-x86_64-with-glibc2.36",
+    "kernel": "6.1.158+",
+    "arch": "x86_64",
+    "cpu_count": 2,
+    "gpu": null,
+    "python": "3.11.2"
+  },
+  "toolchain": {
+    "ffmpeg": "n9.0.2-17-g2a571b6068-20260930 (imageio-ffmpeg wheel, not system ffmpeg)",
+    "ffprobe": "4.0.2-static (npm ffprobe-static@3.1.0, johnvansickle static build) \u2014 tool mismatch documented",
+    "pillow": "13.0.0",
+    "espeakng_loader": "0.2.4 (bundles libespeak-ng; CLI absent, shim used)",
+    "node": "v22.22.3",
+    "npm": "10.9.8",
+    "display_fonts": [
+      "DejaVuSans.ttf",
+      "DejaVuSans-Bold.ttf",
+      "DejaVuSansMono.ttf",
+      "DejaVuSerif.ttf",
+      "DejaVuSerif-Bold.ttf"
+    ]
+  },
+  "render_parameters": {
+    "preset": "ffmpeg_motion",
+    "style": "slate",
+    "quality": "high",
+    "seed": 20261109,
+    "duration_target_s": 30.0,
+    "aspect": "9:16",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "video": "h264/crf17/slow",
+    "audio": "aac/44100Hz/160k",
+    "measured_wall_clock_s": 79.24,
+    "measured_peak_rss_mb": 654
+  },
+  "note": "Absolute paths in script/storyboard/manifest/quality-report were replaced with <repo>/<run work dir>/<run output dir> placeholders after the run; hashes below are of the sanitized copies. final.mp4 and thumbnail.jpg are byte-identical to the pipeline output (hashes of the run output match). environment-record regenerated after packaging docs were finalised.",
+  "files": {
+    "BRIEF.md": {
+      "bytes": 7778,
+      "sha256": "a27cca86fee1b2096915c360e4012716b6d6813447ee0f1810fe5880a85a904e"
+    },
+    "CREDITS.md": {
+      "bytes": 1825,
+      "sha256": "70758fca015d59e4c66dc549d2525aa4ee95c6ec2122690fb181b03d36eb1403"
+    },
+    "DESIGN.md": {
+      "bytes": 5891,
+      "sha256": "72da9a968ba37db93cc33b026c66d2cdbd2c50d1245c8bd68271f0e18fe25cbd"
+    },
+    "README.md": {
+      "bytes": 4424,
+      "sha256": "c0990e6457ee1380e8136068bb7834a36b9d218b3928e2f015a3fdfeea8b273c"
+    },
+    "REPRODUCTION.md": {
+      "bytes": 4686,
+      "sha256": "79d3ec8e8c4e23e096c28890b95d43acd0c7125f69bdd955a4a7079e74ea65ce"
+    },
+    "captions.srt": {
+      "bytes": 546,
+      "sha256": "7f80dffcf24b40f21865f45f59d68b1ce6ff7ab07c1426a5b3eab249116b1308"
+    },
+    "final.mp4": {
+      "bytes": 8377437,
+      "sha256": "2eb4ee2ee76576eefab342d740e99215dea1c117f89744bccfac75cc0a19a353"
+    },
+    "manifest.json": {
+      "bytes": 28023,
+      "sha256": "4d810193c140946914bedb6f9b8deb0cead30f9e534388e98ee22a4b6e21597d"
+    },
+    "qa/decode-check.log": {
+      "bytes": 4250,
+      "sha256": "11681d4acba168da44bcb87e6adfa2fabce6ded5a2453c85bd3769118cbf9ec7"
+    },
+    "qa/doctor-output.txt": {
+      "bytes": 3563,
+      "sha256": "bf5fcbd701fbbabf65850cc000ce6702706a749701e9b2070a92dfabc62bff3c"
+    },
+    "qa/ffprobe-full.json": {
+      "bytes": 3663,
+      "sha256": "d4aed86fd2afaa7647e9ca1f00a1808fe334c74587f761af5409ab4a28194ae1"
+    },
+    "qa/ffprobe-summary.txt": {
+      "bytes": 391,
+      "sha256": "6440f062b93056d9dd4d2baa2c97a475cc34be9ba4df95884573025eab03f785"
+    },
+    "qa/frames/t123.jpg": {
+      "bytes": 60999,
+      "sha256": "90e775438e379d3a082abf76b2a11965f1a08ba4f5a5eeecef1989815fc62cca"
+    },
+    "qa/frames/t15.jpg": {
+      "bytes": 54962,
+      "sha256": "8395f0d124fd4267244910b78159c2b83b67b7051a0546284c04470259a7f55e"
+    },
+    "qa/frames/t170.jpg": {
+      "bytes": 62034,
+      "sha256": "10a9881381b825c7c7ef42e47ac8517d6434e746abb47e1df5a81175673140c4"
+    },
+    "qa/frames/t225.jpg": {
+      "bytes": 56849,
+      "sha256": "0184800eadbb4600fe579d6013bfe8d7617582b68dc78e513d520d16b982633b"
+    },
+    "qa/frames/t276.jpg": {
+      "bytes": 36687,
+      "sha256": "b04824c5431692c7a6cc01909f3f4969cec176977c678d5220fc7a26dce84cf4"
+    },
+    "qa/frames/t299.jpg": {
+      "bytes": 28464,
+      "sha256": "80a135c717a94422b666e7c31affbf49544f35b3fea06642494e2ce5a28991a1"
+    },
+    "qa/frames/t45.jpg": {
+      "bytes": 44887,
+      "sha256": "edf78b092266c61df8ccb7aa76c010c3844b906a2e53a0658a2005c302ed578c"
+    },
+    "qa/frames/t68.jpg": {
+      "bytes": 52585,
+      "sha256": "733e43885e4ecab2a346a2011bcd234f43fc36b0fa2955a0d2e682ff09fb3110"
+    },
+    "qa/loudness-ebur128.txt": {
+      "bytes": 742,
+      "sha256": "bb484217124ec4c47a2aeaaaaec4ad36c29a4d1aeec46b2dde3935e77b80c5ed"
+    },
+    "qa/qa-report.md": {
+      "bytes": 7544,
+      "sha256": "cc56971423c888fea4e9f90d5ac8313d5381782ffcf9ea1d2149a1c424d44fdf"
+    },
+    "quality-report.json": {
+      "bytes": 5551,
+      "sha256": "cefbf5c26885bc439cee8884bf49e817c7a9bdee88fb9cc28e70592f6904b3a3"
+    },
+    "script.json": {
+      "bytes": 2850,
+      "sha256": "8a17ff8b5eca62eddefbda172c80d191ff114bf03c8b36500dbd84bfd9e4d882"
+    },
+    "source/brief.txt": {
+      "bytes": 399,
+      "sha256": "7a57e222381f53c4d45c1a0db3d15d37fe77ad00ec9ff8d45c94aa6bfc83842a"
+    },
+    "source/generate.sh": {
+      "bytes": 645,
+      "sha256": "12985c26b1b9a2516c1da36a46dca0d87a9006ad708f68b17bbac9e62884e1df"
+    },
+    "storyboard.json": {
+      "bytes": 11961,
+      "sha256": "75e662d21c9c230d2f32f202784415d840de026df9199f0be47edfc07c29be3d"
+    },
+    "thumbnail.jpg": {
+      "bytes": 192417,
+      "sha256": "ba66bfbba29a45791bc3b3d8eaa7fdf0d0275648b25789fb26d09cd73131e146"
+    },
+    "tools/espeak-ng-shim.py": {
+      "bytes": 3188,
+      "sha256": "ce9c4fbfabbc1321224642197f38db8240dece918aab5362ee4df0aa9517b9cb"
+    }
+  }
+}

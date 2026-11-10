@@ -4,15 +4,23 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "4e2def3e392d997ed4dc3828b97464b0d2a4441a"
+      "git_blob_sha": "3dd21f0d511372591b9f6ad472b159464beecf8a"
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "0f35144bb3790f87506063fadf8b86f4b620b5c9"
+      "git_blob_sha": "58ea1b66a46fa99c55700c2ed7efb0b435c112d6"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
       "git_blob_sha": "156bdc250f87a3a6a64816103da615770dd77281"
+    },
+    {
+      "path": "README.md",
+      "git_blob_sha": "6cd95d6c3056b9e1928f9916389bb938b559ecdd"
+    },
+    {
+      "path": "apps/web/app/creative/page.tsx",
+      "git_blob_sha": "d3b9db4f01706d6d8882090235b02f78295d1afb"
     },
     {
       "path": "apps/web/app/globals.css",
@@ -24,11 +32,19 @@
     },
     {
       "path": "apps/web/app/mission-control/page.tsx",
-      "git_blob_sha": "a76086fd7f7c51deb249cae503d35a071b44df20"
+      "git_blob_sha": "5e3732224fcbbe4ef0a8cde7b93b53a767a68da7"
     },
     {
       "path": "apps/web/components/mission-control/CommandInputPanel.tsx",
-      "git_blob_sha": "4f505d488b48232ebaa0c677125582bd400736aa"
+      "git_blob_sha": "95d6edafa01e032fe9d80ff58d9fceebb42be934"
+    },
+    {
+      "path": "apps/web/components/rendering/CreativeRendering.tsx",
+      "git_blob_sha": "94a581251942cda4fd7007f2a72ab57c474d1b8f"
+    },
+    {
+      "path": "apps/web/components/rendering/RenderPreview.tsx",
+      "git_blob_sha": "8795cf70812b05d13c65f9f8f8c3e18f6ec4e68f"
     },
     {
       "path": "apps/web/e2e/accessibility-smoke.spec.ts",
@@ -43,16 +59,28 @@
       "git_blob_sha": "4652a64f9e4f114532735cbdea41edd4c70fbf6c"
     },
     {
+      "path": "apps/web/e2e/creative-rendering.spec.ts",
+      "git_blob_sha": "29000bc3ed535dddb539f098fee62bca237c2e01"
+    },
+    {
       "path": "apps/web/lib/api/client.ts",
       "git_blob_sha": "6554e638e6b485c1d8f5deb9b4ca4728a2038eee"
     },
     {
+      "path": "apps/web/lib/api/rendering.ts",
+      "git_blob_sha": "2dc1524c4981ffa8a19443e8f37db295a6e48a3b"
+    },
+    {
+      "path": "apps/web/lib/api/ucpo.ts",
+      "git_blob_sha": "d7491b713a2d374437bf308a40f34e83f982a985"
+    },
+    {
       "path": "apps/web/lib/auth/session.ts",
-      "git_blob_sha": "028fd3ce33b6350e41e265d048d11cdfcc33d970"
+      "git_blob_sha": "c9aafce01dc967bfd1125a825cd2a16c287c8ff4"
     },
     {
       "path": "apps/web/lib/auth/supabase.ts",
-      "git_blob_sha": "7436fe0de9c5285b0e5347a5a9e4e5adc3438a95"
+      "git_blob_sha": "220e83eb72a3b1e229a8059df22730dcda302dc7"
     },
     {
       "path": "apps/web/package.json",
@@ -60,7 +88,7 @@
     },
     {
       "path": "apps/web/playwright.config.ts",
-      "git_blob_sha": "aa8bdc246f61c95ccfda1dc7e3d810ef657d074a"
+      "git_blob_sha": "a2f8a8409f0e857c273410ba37f8df8179ca8362"
     },
     {
       "path": "apps/web/postcss.config.js",
@@ -111,8 +139,60 @@
       "git_blob_sha": "6a246ef352b839bc464b126cf8923eb604fc3db7"
     },
     {
+      "path": "packages/creative-renderer/adapters/common.mjs",
+      "git_blob_sha": "a05400f50641151f8dc62c866847f89e22f02c40"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/motion_canvas.mjs",
+      "git_blob_sha": "77caf97bae2e043b57471ba6947e42a0e5b33e74"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/p5_js.mjs",
+      "git_blob_sha": "2b37a54d2035b50276c45694af4601027f29e836"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/pixi_js.mjs",
+      "git_blob_sha": "dbe230080bdac4529ea97661e3d2c03c0b8c7d62"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/react_three_fiber.mjs",
+      "git_blob_sha": "55b509130604e34d23cd48cc230da56504bdcb3b"
+    },
+    {
+      "path": "packages/creative-renderer/adapters/remotion.mjs",
+      "git_blob_sha": "352cf2b63069ab5bdba8507b4742f860f8b6de8c"
+    },
+    {
+      "path": "packages/creative-renderer/browser-runner.cjs",
+      "git_blob_sha": "fd304ef1d08cd629db4d5466bc9ebf61b2ac4c0b"
+    },
+    {
+      "path": "packages/creative-renderer/build.mjs",
+      "git_blob_sha": "5068b3852b5092b986fa374b71005d6b235543af"
+    },
+    {
+      "path": "packages/creative-renderer/licenses/react-three-fiber.txt",
+      "git_blob_sha": "493cfb3c8335c31bea327e0e27a8cb22004111d7"
+    },
+    {
+      "path": "packages/creative-renderer/licenses/sources.json",
+      "git_blob_sha": "d5566512ccedc066355bf57e0e51d122606ef5e3"
+    },
+    {
+      "path": "packages/creative-renderer/package.json",
+      "git_blob_sha": "7d437fe07d73d2d816721d2d7e113275b8cbe525"
+    },
+    {
+      "path": "packages/creative-renderer/worker.mjs",
+      "git_blob_sha": "182c75ddca799719188371698c81b640f5e69fd1"
+    },
+    {
+      "path": "packages/creative-renderer/worker.test.mjs",
+      "git_blob_sha": "b4900c73fbe6e3f64e632ce8cc750e605eb05a24"
+    },
+    {
       "path": "packages/shared/openapi/agent-mission-control.openapi.yaml",
-      "git_blob_sha": "e49ceeeebedf2ba4032d30a99c36227e44199da3"
+      "git_blob_sha": "e11eef17fec73467f9b3595bd6799ad5d65a8ef5"
     },
     {
       "path": "packages/shared/src/index.ts",
@@ -139,6 +219,14 @@
       "git_blob_sha": "b500516ff42b473bbde84ca427318d4b8b09f7d8"
     },
     {
+      "path": "packages/shared/src/schemas/innovation.ts",
+      "git_blob_sha": "15fc341b122aa42157a3e26ff7488179fc06417c"
+    },
+    {
+      "path": "packages/shared/src/schemas/innovationCapabilities.ts",
+      "git_blob_sha": "f1654295f41b417d5ed946a4c288622e0350fa0a"
+    },
+    {
       "path": "packages/shared/src/schemas/lifecycle.ts",
       "git_blob_sha": "66255ba88dd919c0070cf4d694918414b1ce1af0"
     },
@@ -147,8 +235,24 @@
       "git_blob_sha": "571815451b168a50e95f0406a1e6af9da2c2a78b"
     },
     {
+      "path": "packages/shared/src/schemas/rendering.ts",
+      "git_blob_sha": "2dbb02b4835ccfdab8daf2ca6fc36fa17336a93e"
+    },
+    {
+      "path": "packages/shared/src/schemas/ucpo.ts",
+      "git_blob_sha": "0a10c25d7ccc1eb2c13facb70e29fcf19b4e8149"
+    },
+    {
       "path": "packages/shared/tests/ace.test.ts",
       "git_blob_sha": "f759b498ff183a3586af2b8656aa1f6b5cf02aab"
+    },
+    {
+      "path": "packages/shared/tests/rendering.test.ts",
+      "git_blob_sha": "bbe143fb586100afcd39a5559825ed8e33a9dd47"
+    },
+    {
+      "path": "packages/shared/tests/ucpo.test.ts",
+      "git_blob_sha": "01ba3b85bb2f3a333c55482b702bcacedbf76388"
     },
     {
       "path": "packages/shared/tsconfig.json",
@@ -159,12 +263,12 @@
       "git_blob_sha": "222eb28a63da5ecaccf7d4632bb4f9ccdd2cf79b"
     },
     {
-      "path": "README.md",
-      "git_blob_sha": "6cd95d6c3056b9e1928f9916389bb938b559ecdd"
-    },
-    {
       "path": "runtime/abc/run-fsm.yaml",
       "git_blob_sha": "ea6112d54cd8cb80c868c87e94516a740fb01d3f"
+    },
+    {
+      "path": "scripts/collect_release_evidence.py",
+      "git_blob_sha": "be01d769eb134e42ec4a93ff834e9a71a5a9a8f5"
     },
     {
       "path": "scripts/compile_abc_manifests.py",
@@ -196,7 +300,7 @@
     },
     {
       "path": "scripts/verify_production_readiness.py",
-      "git_blob_sha": "b7ef5da4814b37606eac3b40bbc771c204af1dcf"
+      "git_blob_sha": "4ae0ca933a89c5b5cbf89a344f1176f578985ad6"
     },
     {
       "path": "scripts/verify_repository_invariants.py",
@@ -205,6 +309,10 @@
     {
       "path": "services/langgraph/agency/ace_controls.py",
       "git_blob_sha": "0987413c67c13f714fead112f692d20381a41d1a"
+    },
+    {
+      "path": "services/langgraph/agency/ace_evidence.py",
+      "git_blob_sha": "e98e98fe1891a9aefdc527c770dabdd209818a44"
     },
     {
       "path": "services/langgraph/agency/ace_release.py",
@@ -239,6 +347,30 @@
       "git_blob_sha": "002b37391beaa34174fcd46dc1a2003d92613700"
     },
     {
+      "path": "services/langgraph/agency/avic/evaluate.py",
+      "git_blob_sha": "4e24e531bd169e48209dcaed41d81326dd6f9258"
+    },
+    {
+      "path": "services/langgraph/agency/avic/intent.py",
+      "git_blob_sha": "b4be7b10e621652dc556e0474927b52e430e8e84"
+    },
+    {
+      "path": "services/langgraph/agency/avic/png.py",
+      "git_blob_sha": "ae0b01c462397a19fd044c49fcb78e88c3a4e73a"
+    },
+    {
+      "path": "services/langgraph/agency/avic/service.py",
+      "git_blob_sha": "634a67826b4349daac46296476ef448ac9c0d3af"
+    },
+    {
+      "path": "services/langgraph/agency/avic/svg.py",
+      "git_blob_sha": "ac1ef252312a2d047f4adb707f0ded798b5a992e"
+    },
+    {
+      "path": "services/langgraph/agency/cli.py",
+      "git_blob_sha": "d12148fbb75c43e1a6d159d2dfce01f22f740888"
+    },
+    {
       "path": "services/langgraph/agency/compiled/authority.py",
       "git_blob_sha": "016039e2b595bb7e28324979e0998ddf99c7227b"
     },
@@ -255,12 +387,44 @@
       "git_blob_sha": "a02b5e7b34a2a7715a706d3683100897b38aa8e3"
     },
     {
+      "path": "services/langgraph/agency/compiled/evidence.py",
+      "git_blob_sha": "43fcf7592d6560f081530dc21d576c42c72eb9a3"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/instruction_cli.py",
+      "git_blob_sha": "d3889e3cf8a527f060fcbf028c4d921faf2508b7"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/instruction_models.py",
+      "git_blob_sha": "c2b0e60a7aecd9b1bfaa68255b90167f1434e648"
+    },
+    {
+      "path": "services/langgraph/agency/compiled/instructions.py",
+      "git_blob_sha": "98f76e73716632e67ed81bf9b4212afc0fedffa4"
+    },
+    {
       "path": "services/langgraph/agency/compiled/method_mission.py",
       "git_blob_sha": "74dfad4adb4c6184b3842ef3a4be13e4e334286c"
     },
     {
       "path": "services/langgraph/agency/compiled/role_sources.py",
       "git_blob_sha": "244f07e952c35ab8982b743b4825b488df7d9cf9"
+    },
+    {
+      "path": "services/langgraph/agency/council/gateway.py",
+      "git_blob_sha": "18ae0cae076f53de25b31b34cc7a3ed84b5efa37"
+    },
+    {
+      "path": "services/langgraph/agency/council/mcp_client.py",
+      "git_blob_sha": "bea4635c116f54956b951d8ba7748e8f851c8137"
+    },
+    {
+      "path": "services/langgraph/agency/council/policy.py",
+      "git_blob_sha": "6a2a8dc8040d7d201e91ddff4092236b86ae6293"
+    },
+    {
+      "path": "services/langgraph/agency/council/service.py",
+      "git_blob_sha": "59de838604bb08b5a11ae3a65b1898197fd48a8a"
     },
     {
       "path": "services/langgraph/agency/creative/capabilities.py",
@@ -299,6 +463,14 @@
       "git_blob_sha": "4bb16194b5d564a9bd7a8b96fe3d44a8a523a95e"
     },
     {
+      "path": "services/langgraph/agency/design/guardrails/__init__.py",
+      "git_blob_sha": "ba362997fb9baeae3538d3a0ea943f168f5f2ebe"
+    },
+    {
+      "path": "services/langgraph/agency/design/guardrails/filters.py",
+      "git_blob_sha": "f5097b30da8d05d46234ac4f1a7a4cd1279203cc"
+    },
+    {
       "path": "services/langgraph/agency/durable/fsm.py",
       "git_blob_sha": "6d7ec71b8635f849394388e9d33b3079329e7c57"
     },
@@ -319,8 +491,36 @@
       "git_blob_sha": "02cf3f196b528a693655e458b866f70345007a6d"
     },
     {
+      "path": "services/langgraph/agency/engineering/__init__.py",
+      "git_blob_sha": "776d23e55d5c2e3c712c028ae65ad875432e9547"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/context.py",
+      "git_blob_sha": "0644c3f926002b0dbf9592c821289b1c8612acbc"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/contracts.py",
+      "git_blob_sha": "2b4fd9cdac9b19615ae0d5827b9470dbc9e9e109"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/intake.py",
+      "git_blob_sha": "8697b2524b1bcbbd9588725758904de08ba7b7eb"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/sandbox.py",
+      "git_blob_sha": "b3d5aba1b181da0f2a5e0d164e82df47579f2f8b"
+    },
+    {
+      "path": "services/langgraph/agency/engineering/schema.json",
+      "git_blob_sha": "8a54358b6adf41c55f47c9987fcc77b06030b986"
+    },
+    {
       "path": "services/langgraph/agency/execution_fabric/adapters/code_sandbox.py",
       "git_blob_sha": "a615861e2f57ff9c2ad4fe4d9ed71f190e4f2869"
+    },
+    {
+      "path": "services/langgraph/agency/execution_fabric/adapters/innovation.py",
+      "git_blob_sha": "8275cf580028e10e4846ff906d559837f5c95767"
     },
     {
       "path": "services/langgraph/agency/execution_fabric/consumer.py",
@@ -331,12 +531,16 @@
       "git_blob_sha": "608eab9fdaa6944696d3491f35c168d65ff14eca"
     },
     {
+      "path": "services/langgraph/agency/execution_fabric/instructions.py",
+      "git_blob_sha": "3cd58c6c8dd68d54d24fa237f8ead2b07cb19082"
+    },
+    {
       "path": "services/langgraph/agency/execution_fabric/skills.py",
       "git_blob_sha": "3f4092944e027da5b866174ec52e74b67264d0f9"
     },
     {
       "path": "services/langgraph/agency/exporter.py",
-      "git_blob_sha": "278b12e36bebb39ca6d36fdcef37a725f2d58773"
+      "git_blob_sha": "6a11baf8930f822a3b0aefe413fca873ff749672"
     },
     {
       "path": "services/langgraph/agency/foundry/capabilities.py",
@@ -407,6 +611,26 @@
       "git_blob_sha": "2cb8683e92d00bbbdf18089948b51463fb0643be"
     },
     {
+      "path": "services/langgraph/agency/innovation/contracts.py",
+      "git_blob_sha": "52c5c1bf525b4f2ba22ea9f984a8585959f17d51"
+    },
+    {
+      "path": "services/langgraph/agency/innovation/generation.py",
+      "git_blob_sha": "7a94d753291d4333b431a74e494beff7648798ab"
+    },
+    {
+      "path": "services/langgraph/agency/innovation/generation_service.py",
+      "git_blob_sha": "31c83208d29f596ff90b95b7ec59eb618ebdfcc4"
+    },
+    {
+      "path": "services/langgraph/agency/innovation/local_experiment.py",
+      "git_blob_sha": "7bcae0902c51e0ef1b7517a6401e1cc0fef8cc1c"
+    },
+    {
+      "path": "services/langgraph/agency/innovation/service.py",
+      "git_blob_sha": "68f9953d86228b8eaa6d7652f2772e18d9a35532"
+    },
+    {
       "path": "services/langgraph/agency/intake/context.py",
       "git_blob_sha": "305180da4993c199044c566746d756cf4df9cacc"
     },
@@ -451,8 +675,40 @@
       "git_blob_sha": "88d6744e93400a3ea4fa82268d16570defebeb94"
     },
     {
+      "path": "services/langgraph/agency/model_profiles.py",
+      "git_blob_sha": "19baac3b810642042869980a627b27ccf11fa8ca"
+    },
+    {
       "path": "services/langgraph/agency/model_router.py",
       "git_blob_sha": "5790bbf905d7824e232ad09721d55c748f92c935"
+    },
+    {
+      "path": "services/langgraph/agency/operating_framework/assurance.py",
+      "git_blob_sha": "fd58d6620db3de5199f3ca887b720928f40934d3"
+    },
+    {
+      "path": "services/langgraph/agency/operating_framework/candidates.py",
+      "git_blob_sha": "c7a28d82099fbab448e0035ad4b32ac95cf06d60"
+    },
+    {
+      "path": "services/langgraph/agency/operating_framework/catalog.py",
+      "git_blob_sha": "191270af81b95f378f0b132c486701bd9dbde0a8"
+    },
+    {
+      "path": "services/langgraph/agency/operating_framework/contracts.py",
+      "git_blob_sha": "b7e67c1057a15005a168ea0b13aa4e385c20df54"
+    },
+    {
+      "path": "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json",
+      "git_blob_sha": "5ae6266bc938f48066f37f6769c8a6ca30ec92ab"
+    },
+    {
+      "path": "services/langgraph/agency/operating_framework/refs.py",
+      "git_blob_sha": "174812cb28f403343fc2b2a0198b6e32fd3c7553"
+    },
+    {
+      "path": "services/langgraph/agency/operating_framework/service.py",
+      "git_blob_sha": "15848a1a1acf5e9a8c8294344627138fac1eb83f"
     },
     {
       "path": "services/langgraph/agency/project_os/publishing.py",
@@ -475,6 +731,42 @@
       "git_blob_sha": "00ccbac232e9cb46faf4a8d17467461c6e1cc672"
     },
     {
+      "path": "services/langgraph/agency/rendering/__init__.py",
+      "git_blob_sha": "298bbc03ae9e2e8b615e4ed29f10d3983b03364a"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/contracts.py",
+      "git_blob_sha": "bcf307353248094c71988da855f9130c1b736287"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/licenses.py",
+      "git_blob_sha": "7ac54777879eb350503b900ab2adec0f03104d43"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/media.py",
+      "git_blob_sha": "4d087388645c72dce160b9a02c036bbdabb7e753"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/remote.py",
+      "git_blob_sha": "6c63694dd0d0596877512af1a9e2eff4890b5cc3"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/remote_worker.py",
+      "git_blob_sha": "5d0bc76b34201b77a96e448829b8916f89523831"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/runtime.py",
+      "git_blob_sha": "4062e91b0eb5da89a0dffd204c61d1c96551f0c9"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/service.py",
+      "git_blob_sha": "6749e6a33047401980fb3f8f90483ff48e3e3c47"
+    },
+    {
+      "path": "services/langgraph/agency/rendering/worker.py",
+      "git_blob_sha": "03c91ad968ee05445d221a8a857eecf10f036a20"
+    },
+    {
       "path": "services/langgraph/agency/skills/dispatcher.py",
       "git_blob_sha": "f82a7fdadd956ba4cbc3928cde46728cb062eaa5"
     },
@@ -485,6 +777,10 @@
     {
       "path": "services/langgraph/agency/visual/browser.py",
       "git_blob_sha": "90778324903440d0a3ff493c67e54133b520fcfe"
+    },
+    {
+      "path": "services/langgraph/agency/visual/browser_runner.cjs",
+      "git_blob_sha": "a22a60bd34e58dca75522b8a4be29737bbb9b01a"
     },
     {
       "path": "services/langgraph/agency/visual/capabilities.py",
@@ -503,8 +799,24 @@
       "git_blob_sha": "d07893685f772330d9ce1fa46a7b91be38dc581e"
     },
     {
+      "path": "services/langgraph/agency/vnexus/brandbook/fields.py",
+      "git_blob_sha": "9eef00923a5a25927dabfd3eb6a63edb722d5182"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/brandbook/service.py",
+      "git_blob_sha": "84a4536c306ab86ef827179981d27a8451650327"
+    },
+    {
       "path": "services/langgraph/agency/vnexus/creative_service.py",
       "git_blob_sha": "355c19e576054d496ffbda09d28507c592fb2489"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/directions/providers.py",
+      "git_blob_sha": "85ab2178176a91f5358f2d86850e06005cd5455c"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/directions/service.py",
+      "git_blob_sha": "b169a3fbdcd196932c8c9c2cc2015ebc2158f1f4"
     },
     {
       "path": "services/langgraph/agency/vnexus/fabric_service.py",
@@ -535,12 +847,16 @@
       "git_blob_sha": "228187755960e5b46004752e72c96a7b8b0479de"
     },
     {
-      "path": "services/langgraph/api/routes/agency_os.py",
-      "git_blob_sha": "5697e64579b5f4e54c9a108ffcc20eda943603ab"
+      "path": "services/langgraph/api/routes/agency.py",
+      "git_blob_sha": "9e7553c86c1dd2a75e5ff4da5fe4e80ff7c1ca16"
     },
     {
-      "path": "services/langgraph/api/routes/agency.py",
-      "git_blob_sha": "ee43662cf6e53a30c7003d7b2d5f9be1e410a670"
+      "path": "services/langgraph/api/routes/agency_framework.py",
+      "git_blob_sha": "47252002528f598aecdb83051b4f84de6f316ed6"
+    },
+    {
+      "path": "services/langgraph/api/routes/agency_os.py",
+      "git_blob_sha": "5697e64579b5f4e54c9a108ffcc20eda943603ab"
     },
     {
       "path": "services/langgraph/api/routes/analytics.py",
@@ -549,6 +865,14 @@
     {
       "path": "services/langgraph/api/routes/approvals.py",
       "git_blob_sha": "b651e21c7d519aa5efd251cae4513eebc624a0b6"
+    },
+    {
+      "path": "services/langgraph/api/routes/artifacts.py",
+      "git_blob_sha": "a74d317574883b6ae1010d073e1a4c342bea621d"
+    },
+    {
+      "path": "services/langgraph/api/routes/avic.py",
+      "git_blob_sha": "d150691e60d64c017ae4868a15ef52e69998c304"
     },
     {
       "path": "services/langgraph/api/routes/compiled_agency.py",
@@ -567,6 +891,14 @@
       "git_blob_sha": "5bb9d787f2b994531de922728bf639ae5cc6eaf6"
     },
     {
+      "path": "services/langgraph/api/routes/innovation.py",
+      "git_blob_sha": "229e04e37d11d1d39cb4759c6e27332499e527d9"
+    },
+    {
+      "path": "services/langgraph/api/routes/missions.py",
+      "git_blob_sha": "5102789a9685ef81eedd9e4bbf007124694db2f4"
+    },
+    {
       "path": "services/langgraph/api/routes/operations.py",
       "git_blob_sha": "f8ef2252ee3a779157ac3ebb68229dfd30b0e23c"
     },
@@ -583,8 +915,16 @@
       "git_blob_sha": "4ad8826069fbf3cbb436877e0c4656ba9b9b59be"
     },
     {
+      "path": "services/langgraph/api/routes/rendering.py",
+      "git_blob_sha": "9445e3ba852b02c200c32dfd84cdf07b53248ced"
+    },
+    {
       "path": "services/langgraph/api/routes/runtime.py",
       "git_blob_sha": "32bba72330b0194f38391a135376a1be34e4a1d7"
+    },
+    {
+      "path": "services/langgraph/api/routes/ucpo.py",
+      "git_blob_sha": "d354df607c8a6db40e289e508236431e994061e7"
     },
     {
       "path": "services/langgraph/api/routes/vnexus.py",
@@ -592,11 +932,15 @@
     },
     {
       "path": "services/langgraph/app/config.py",
-      "git_blob_sha": "b2f07ab38ea8ee4e722ef24c41832904596bc170"
+      "git_blob_sha": "67549f5a496d6fddf107d7b52a4ba441edee5a46"
     },
     {
       "path": "services/langgraph/app/main.py",
-      "git_blob_sha": "f1b8606c32356a9155e0dae91ee4418cffc4e8f1"
+      "git_blob_sha": "f070b67c21d5457be05c3fcc4f1bf47f04f447e2"
+    },
+    {
+      "path": "services/langgraph/app/observability.py",
+      "git_blob_sha": "2512e538306297884f79014f761d06a0fcd5f88c"
     },
     {
       "path": "services/langgraph/core/config.py",
@@ -623,18 +967,6 @@
       "git_blob_sha": "a293fc9fa53ec4d1bdfc730a726e1b168eebb51e"
     },
     {
-      "path": "services/langgraph/integrations/paid_media.py",
-      "git_blob_sha": "df43f79b0fc4a242c385652362522be6a0f3d7ed"
-    },
-    {
-      "path": "services/langgraph/integrations/publication.py",
-      "git_blob_sha": "402bfd495b928ab13f5f7a3c223e2e7386bc5193"
-    },
-    {
-      "path": "services/langgraph/integrations/zo.py",
-      "git_blob_sha": "7ed252307021a1cfa8586960d27fb1a7885b4de7"
-    },
-    {
       "path": "services/langgraph/integrations/drive_export/_http.py",
       "git_blob_sha": "844eaf6eb366d6b4cd559a5f27093c948ff533d8"
     },
@@ -655,6 +987,18 @@
       "git_blob_sha": "e7bae71adf5f50bc5686e02c0e9598598bda7bf0"
     },
     {
+      "path": "services/langgraph/integrations/paid_media.py",
+      "git_blob_sha": "df43f79b0fc4a242c385652362522be6a0f3d7ed"
+    },
+    {
+      "path": "services/langgraph/integrations/publication.py",
+      "git_blob_sha": "402bfd495b928ab13f5f7a3c223e2e7386bc5193"
+    },
+    {
+      "path": "services/langgraph/integrations/zo.py",
+      "git_blob_sha": "7ed252307021a1cfa8586960d27fb1a7885b4de7"
+    },
+    {
       "path": "services/langgraph/persistence/ace_provenance.py",
       "git_blob_sha": "d683f7ae7b10549901ca4ccba6264ab746089edb"
     },
@@ -664,19 +1008,27 @@
     },
     {
       "path": "services/langgraph/persistence/agency_kernel.py",
-      "git_blob_sha": "a4714f3707df8b4bd1c147a7ec0beccc4b17b2db"
+      "git_blob_sha": "408423743bd1a7fe8e4b441174c4b2f5574ad7ac"
     },
     {
       "path": "services/langgraph/persistence/analytics.py",
       "git_blob_sha": "e2bbb70087f27121448f735d908a9ae00acc63a5"
     },
     {
+      "path": "services/langgraph/persistence/artifacts.py",
+      "git_blob_sha": "75481d05df5dc3d143f64776066db2daa7ebb35a"
+    },
+    {
       "path": "services/langgraph/persistence/checkpoints.py",
       "git_blob_sha": "722f870b8b432d6011f18ef1f6a88e1a22dd4602"
     },
     {
+      "path": "services/langgraph/persistence/council.py",
+      "git_blob_sha": "6baf24de80cb205e6875ea06ce0a9d91b7737cda"
+    },
+    {
       "path": "services/langgraph/persistence/database.py",
-      "git_blob_sha": "2b70398082c4a47f79a61fd39079e828c06eebf5"
+      "git_blob_sha": "a06dc4bfd72a406fdeeb825d8b3c6791d4575c3d"
     },
     {
       "path": "services/langgraph/persistence/delivery.py",
@@ -691,8 +1043,16 @@
       "git_blob_sha": "87d5ea2046caccdd6120b6c4c2f9638e5c4bdc8a"
     },
     {
+      "path": "services/langgraph/persistence/jobs.py",
+      "git_blob_sha": "fc3866a7082d62fc39c88d7a9bdd53e37debad44"
+    },
+    {
       "path": "services/langgraph/persistence/memberships.py",
       "git_blob_sha": "b35053982609a82da1ef2ed17b439036209e488f"
+    },
+    {
+      "path": "services/langgraph/persistence/operating_framework.py",
+      "git_blob_sha": "a3808c4445c6ab15597bc0ec4244ca7f81f4b683"
     },
     {
       "path": "services/langgraph/persistence/operations.py",
@@ -719,8 +1079,12 @@
       "git_blob_sha": "09107cc42ebf1f1a2d41a76bedf8057b181f4af1"
     },
     {
+      "path": "services/langgraph/persistence/runs.py",
+      "git_blob_sha": "f596b8f932d6944ac4bc1c7d7a0bb514c9309a61"
+    },
+    {
       "path": "services/langgraph/persistence/sqlite_db.py",
-      "git_blob_sha": "9d2714c2878715d19a2736cb25b4ff482927d455"
+      "git_blob_sha": "b467fb1bf5f0ef81f9fac066e13cc2847771504e"
     },
     {
       "path": "services/langgraph/persistence/tenancy.py",
@@ -736,7 +1100,7 @@
     },
     {
       "path": "services/langgraph/pyproject.toml",
-      "git_blob_sha": "6a71689f4fb56f862969e90ceb5c73b41c0a939a"
+      "git_blob_sha": "683e6950daf9480a4e410a052c19881b9dd3631f"
     },
     {
       "path": "services/langgraph/quality/brand_safety.py",
@@ -747,6 +1111,18 @@
       "git_blob_sha": "38d52c7e4c5e9dc3001302a8d66b15ae7bfd0878"
     },
     {
+      "path": "services/langgraph/runtime/__init__.py",
+      "git_blob_sha": "7fd38a96095084e3da91141364209ab1ae43b9af"
+    },
+    {
+      "path": "services/langgraph/runtime/execution.py",
+      "git_blob_sha": "c05ebb78a86f51dcb079601873ebf811faa63cc5"
+    },
+    {
+      "path": "services/langgraph/runtime/worker.py",
+      "git_blob_sha": "c452513402da24018541952015976339c582b686"
+    },
+    {
       "path": "services/langgraph/security/approval_authority.py",
       "git_blob_sha": "f39f1364e2a13b4071f3ce2c4f4ad18b33e38f81"
     },
@@ -755,12 +1131,28 @@
       "git_blob_sha": "f52da9e48f82e3e8b74951607602b6b4ce1afa69"
     },
     {
+      "path": "services/langgraph/security/local_generation_approval.py",
+      "git_blob_sha": "c4353d1e798161047572827e47cef7b01703529c"
+    },
+    {
       "path": "services/langgraph/security/pii.py",
       "git_blob_sha": "114b61ef614c6c1b239886b98416987ce4f3fc12"
     },
     {
       "path": "services/langgraph/tests/test_abc_v6.py",
       "git_blob_sha": "217e1930aacd029852e9ce1ae3625e38b2a3621f"
+    },
+    {
+      "path": "services/langgraph/tests/test_ace100_edge_cases.py",
+      "git_blob_sha": "d98e182a8525e9b819cd506afd0542dea665d89b"
+    },
+    {
+      "path": "services/langgraph/tests/test_ace100_evidence.py",
+      "git_blob_sha": "ab666ddbfd09860c1557e51643d79ba7a467da91"
+    },
+    {
+      "path": "services/langgraph/tests/test_ace100_uncertainty.py",
+      "git_blob_sha": "e76d044543c0f3e97892a715f26076599685aac3"
     },
     {
       "path": "services/langgraph/tests/test_ace_controls.py",
@@ -795,12 +1187,32 @@
       "git_blob_sha": "ea103f6e2002aebd9e70f971efd9fd701345ed88"
     },
     {
+      "path": "services/langgraph/tests/test_amc_i03_model_profiles.py",
+      "git_blob_sha": "3bbf98f589cc6c045a29be2b8857467788aa79e1"
+    },
+    {
+      "path": "services/langgraph/tests/test_artifact_storage.py",
+      "git_blob_sha": "5d93f8bdb2b8c4e0b9c2da60757c48ab1fb207e2"
+    },
+    {
+      "path": "services/langgraph/tests/test_avic.py",
+      "git_blob_sha": "45284ca242c3b9c1044d036ecba5b57535befa21"
+    },
+    {
+      "path": "services/langgraph/tests/test_compiled_agency.py",
+      "git_blob_sha": "1743722c1237f5eb81225aecb13d191df26bfc91"
+    },
+    {
       "path": "services/langgraph/tests/test_creative_runtime.py",
       "git_blob_sha": "d8dac424afa291f223a61f457c4b8ee56da102fd"
     },
     {
       "path": "services/langgraph/tests/test_delivery_gate.py",
       "git_blob_sha": "2f9614d4df4ee7d11a6b3d104b449f6e7ae3314f"
+    },
+    {
+      "path": "services/langgraph/tests/test_durable_execution.py",
+      "git_blob_sha": "b9a4e90f5b7f0d2219c1dec75065c531d096eaad"
     },
     {
       "path": "services/langgraph/tests/test_foundry.py",
@@ -827,8 +1239,28 @@
       "git_blob_sha": "a220e0eab09fdf49b0143e504455bf94d48f1366"
     },
     {
+      "path": "services/langgraph/tests/test_rendering.py",
+      "git_blob_sha": "b681dc0e5a7a14d286ffa4422d9a83d503debb00"
+    },
+    {
+      "path": "services/langgraph/tests/test_rendering_media_remote.py",
+      "git_blob_sha": "7d9c11644ccb955f117e70dc5169fcbe1ffc9afd"
+    },
+    {
       "path": "services/langgraph/tests/test_request_accut.py",
       "git_blob_sha": "e169e233ffecd39fe0f94f6fb34e8196e843ba75"
+    },
+    {
+      "path": "services/langgraph/tests/test_ucpo_api.py",
+      "git_blob_sha": "5cc8537230126b8fe9ede8766856fcd38bf70515"
+    },
+    {
+      "path": "services/langgraph/tests/test_ucpo_build.py",
+      "git_blob_sha": "a139f3c698bf51d90011b2cd54eef82c59e41014"
+    },
+    {
+      "path": "services/langgraph/tests/test_ucpo_qa_discovery.py",
+      "git_blob_sha": "6664475d36c35b33b4405057dc7c09304d8986d5"
     },
     {
       "path": "services/langgraph/vercel.json",
@@ -875,100 +1307,8 @@
       "git_blob_sha": "a169e33b351c668abbe70dac7ed77f9acfd9c6fb"
     },
     {
-      "path": "services/langgraph/agency/ace_evidence.py",
-      "git_blob_sha": "e98e98fe1891a9aefdc527c770dabdd209818a44"
-    },
-    {
-      "path": "scripts/collect_release_evidence.py",
-      "git_blob_sha": "be01d769eb134e42ec4a93ff834e9a71a5a9a8f5"
-    },
-    {
-      "path": "services/langgraph/tests/test_ace100_evidence.py",
-      "git_blob_sha": "ab666ddbfd09860c1557e51643d79ba7a467da91"
-    },
-    {
-      "path": "services/langgraph/tests/test_ace100_uncertainty.py",
-      "git_blob_sha": "e76d044543c0f3e97892a715f26076599685aac3"
-    },
-    {
-      "path": "services/langgraph/tests/test_ace100_edge_cases.py",
-      "git_blob_sha": "d98e182a8525e9b819cd506afd0542dea665d89b"
-    },
-    {
-      "path": "services/langgraph/agency/model_profiles.py",
-      "git_blob_sha": "19baac3b810642042869980a627b27ccf11fa8ca"
-    },
-    {
-      "path": "services/langgraph/tests/test_amc_i03_model_profiles.py",
-      "git_blob_sha": "3bbf98f589cc6c045a29be2b8857467788aa79e1"
-    },
-    {
-      "path": "services/langgraph/agency/compiled/evidence.py",
-      "git_blob_sha": "43fcf7592d6560f081530dc21d576c42c72eb9a3"
-    },
-    {
-      "path": "services/langgraph/tests/test_compiled_agency.py",
-      "git_blob_sha": "1743722c1237f5eb81225aecb13d191df26bfc91"
-    },
-    {
-      "path": "services/langgraph/agency/council/gateway.py",
-      "git_blob_sha": "18ae0cae076f53de25b31b34cc7a3ed84b5efa37"
-    },
-    {
-      "path": "services/langgraph/agency/council/policy.py",
-      "git_blob_sha": "6a2a8dc8040d7d201e91ddff4092236b86ae6293"
-    },
-    {
-      "path": "services/langgraph/agency/council/service.py",
-      "git_blob_sha": "59de838604bb08b5a11ae3a65b1898197fd48a8a"
-    },
-    {
-      "path": "services/langgraph/agency/council/mcp_client.py",
-      "git_blob_sha": "bea4635c116f54956b951d8ba7748e8f851c8137"
-    },
-    {
-      "path": "services/langgraph/api/routes/missions.py",
-      "git_blob_sha": "5102789a9685ef81eedd9e4bbf007124694db2f4"
-    },
-    {
-      "path": "services/langgraph/persistence/council.py",
-      "git_blob_sha": "6baf24de80cb205e6875ea06ce0a9d91b7737cda"
-    },
-    {
       "path": "supabase/migrations/20261022_amc_mission_council_v1.sql",
       "git_blob_sha": "4a8a9b206602924791c1058657f91a531500efe1"
-    },
-    {
-      "path": "services/langgraph/agency/operating_framework/catalog.py",
-      "git_blob_sha": "191270af81b95f378f0b132c486701bd9dbde0a8"
-    },
-    {
-      "path": "services/langgraph/agency/operating_framework/contracts.py",
-      "git_blob_sha": "b7e67c1057a15005a168ea0b13aa4e385c20df54"
-    },
-    {
-      "path": "services/langgraph/agency/operating_framework/refs.py",
-      "git_blob_sha": "174812cb28f403343fc2b2a0198b6e32fd3c7553"
-    },
-    {
-      "path": "services/langgraph/agency/operating_framework/service.py",
-      "git_blob_sha": "15848a1a1acf5e9a8c8294344627138fac1eb83f"
-    },
-    {
-      "path": "services/langgraph/agency/operating_framework/assurance.py",
-      "git_blob_sha": "fd58d6620db3de5199f3ca887b720928f40934d3"
-    },
-    {
-      "path": "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json",
-      "git_blob_sha": "5ae6266bc938f48066f37f6769c8a6ca30ec92ab"
-    },
-    {
-      "path": "services/langgraph/persistence/operating_framework.py",
-      "git_blob_sha": "a3808c4445c6ab15597bc0ec4244ca7f81f4b683"
-    },
-    {
-      "path": "services/langgraph/api/routes/agency_framework.py",
-      "git_blob_sha": "47252002528f598aecdb83051b4f84de6f316ed6"
     },
     {
       "path": "supabase/migrations/20261024_amc_agency_framework_v1.sql",

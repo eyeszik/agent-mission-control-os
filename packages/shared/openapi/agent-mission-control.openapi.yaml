@@ -25,8 +25,10 @@ paths:
     post:
       summary: Create one agency workflow run
       description: >-
-        Executes the agency workflow synchronously through hitl_gate and pauses before
-        delivery. Tenant identity is derived from server authentication context. The
+        Creates an agency workflow run. Execution follows AMC_EXECUTION_MODE: 'inline'
+        executes synchronously through hitl_gate and pauses before delivery; 'background'
+        (required in production) enqueues a durable job executed by the worker and returns
+        status 'queued'. Tenant identity is derived from server authentication context. The
         optional tenant_id request field exists only for backwards compatibility and
         must match the authenticated tenant when supplied.
       parameters:
@@ -330,6 +332,79 @@ paths:
         '404': { description: Referenced run not found }
         '409': { description: run_id and project_id do not match }
         '503': { description: Authentication provider or runtime configuration unavailable }
+  /agency/artifacts:
+    post:
+      summary: Store artifact bytes with content addressing
+      description: >-
+        Stores artifact content sha256-addressed per tenant and creates a new
+        immutable version record for the (project, kind) pair. Read-back
+        verification re-hashes stored bytes on download.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArtifactUploadRequest'
+      responses:
+        '201':
+          description: Artifact version stored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtifactRecord'
+        '400': { description: content_base64 is not valid base64 }
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Project outside authenticated scope }
+        '413': { description: Artifact exceeds maximum size }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+    get:
+      summary: List artifact versions for a project
+      parameters:
+        - { name: project_id, in: query, required: true, schema: { type: string } }
+        - { name: run_id, in: query, required: false, schema: { type: string } }
+      responses:
+        '200':
+          description: Artifact version list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtifactList'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Project outside authenticated scope }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+  /agency/artifacts/{artifact_id}:
+    get:
+      summary: Retrieve artifact metadata, optionally with verified content
+      parameters:
+        - { name: artifact_id, in: path, required: true, schema: { type: string } }
+        - { name: download, in: query, required: false, schema: { type: boolean, default: false } }
+      responses:
+        '200':
+          description: Artifact record; content_base64 present when download=true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtifactRecord'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Artifact outside authenticated scope }
+        '404': { description: Artifact not found }
+        '500': { description: Stored bytes failed read-back integrity verification }
+        '503': { description: Authentication provider or runtime configuration unavailable }
+    delete:
+      summary: Tombstone an artifact version (retention control)
+      parameters:
+        - { name: artifact_id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Artifact tombstoned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtifactRecord'
+        '401': { description: Authentication required or token invalid }
+        '403': { description: Artifact outside authenticated scope }
+        '404': { description: Artifact not found }
+        '503': { description: Authentication provider or runtime configuration unavailable }
 components:
   securitySchemes:
     BearerAuth:
@@ -350,7 +425,7 @@ components:
   schemas:
     HealthStatus:
       type: object
-      required: [status, langgraph, version, environment, auth_mode, database_backend, analytics_source, publication_mode, paid_media_mode, production_ready]
+      required: [status, langgraph, version, environment, auth_mode, database_backend, execution_mode, artifact_backend, analytics_source, publication_mode, paid_media_mode, production_ready]
       properties:
         status: { type: string, enum: [ok] }
         langgraph: { type: string, enum: [active] }
@@ -358,6 +433,10 @@ components:
         environment: { type: string, enum: [local, production] }
         auth_mode: { type: string, enum: [local, supabase, disabled] }
         database_backend: { type: string, enum: [sqlite, postgres] }
+        execution_mode: { type: string, enum: [inline, background] }
+        artifact_backend: { type: string, enum: [local, r2] }
+        deployed_revision: { type: string }
+        pool: { type: object }
         analytics_source: { type: string, enum: [amc_first_party] }
         publication_mode: { type: string, enum: [disabled, dry_run, live] }
         paid_media_mode: { type: string, enum: [disabled, live] }
@@ -889,3 +968,35 @@ components:
         created_at: { type: string, format: date-time }
         decided_at: { type: string, format: date-time, nullable: true }
         executed_at: { type: string, format: date-time, nullable: true }
+    ArtifactUploadRequest:
+      type: object
+      required: [project_id, kind, content_base64]
+      properties:
+        project_id: { type: string }
+        kind: { type: string, minLength: 1, maxLength: 120 }
+        content_base64: { type: string, minLength: 1 }
+        content_type: { type: string, maxLength: 120, default: application/octet-stream }
+        run_id: { type: string, nullable: true }
+    ArtifactRecord:
+      type: object
+      required: [artifact_id, version, kind, object_id, content_hash, created_at]
+      properties:
+        artifact_id: { type: string }
+        version: { type: integer, minimum: 1 }
+        kind: { type: string }
+        object_id: { type: string }
+        content_hash: { type: string }
+        content_type: { type: string }
+        run_id: { type: string, nullable: true }
+        deleted: { type: boolean }
+        content_base64: { type: string }
+        created_at: { type: string, format: date-time }
+    ArtifactList:
+      type: object
+      required: [project_id, artifacts]
+      properties:
+        project_id: { type: string }
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArtifactRecord'

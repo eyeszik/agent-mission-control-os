@@ -14,7 +14,7 @@ dependencies = [
     "langchain-openai>=0.1.0",
     "langgraph-checkpoint-sqlite>=1.0.0",
     "langgraph-checkpoint-postgres>=3.0.0",
-    "psycopg[binary]>=3.2.0",
+    "psycopg[binary,pool]>=3.2.0",
     "httpx>=0.28.0",
     "pydantic>=2.7.0",
     "jsonschema>=4.23.0",
@@ -47,7 +47,7 @@ council = [
 ]
 
 [tool.hatch.build]
-include = ["agency/guidance/packs/*.yaml", "agency/compiled/data/*.json", "agency/operating_framework/data/*.json"]
+include = ["agency/guidance/packs/*.yaml", "agency/compiled/data/*.json", "agency/operating_framework/data/*.json", "agency/engineering/*.json"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["app", "api", "agency", "core", "graph", "persistence", "quality", "security", "integrations"]

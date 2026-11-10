@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, os, subprocess, shutil
+import sys, os, subprocess, shutil, platform
 
 def check():
     print("=" * 65)
@@ -21,6 +21,35 @@ def check():
     print(f"✔ [OK]   Git Repository            {'.git folder detected' if is_git_repo else 'Not inside a git repo'}")
     hook = os.path.exists(".husky/pre-commit")
     print(f"✔ [OK]   Git Hooks (.husky)        {'.husky/pre-commit present' if hook else 'Will be configured by setup-workspace-v5.sh'}")
+
+    # Capability assurance fingerprint (CARS)
+    try:
+        from services.langgraph.agency.capability_assurance import environment_fingerprint, check_all  # noqa: E402
+        fp = environment_fingerprint()
+        caps = check_all()
+        print("-" * 65)
+        print("Capability Assurance (CARS)")
+        for name, cap in caps.items():
+            status = cap.get("health", "UNKNOWN")
+            icon = "✔" if cap.get("available") else "✘"
+            reason = cap.get("reason") or ""
+            print(f"  {icon} {name:20s} {status:25s} {reason[:60]}")
+        print(f"  fingerprint: {fp.get('operating_system')} | py {fp.get('runtime_versions', {}).get('python')} | db {fp.get('database_engine')}:{fp.get('database_version')}")
+        if fp.get("ffprobe_version"):
+            print(f"  ffprobe: {fp['ffprobe_version']}")
+        else:
+            print(f"  ffprobe: NOT FOUND — sudo apt-get install -y ffmpeg")
+        if fp.get("tts_engine"):
+            print(f"  tts: {fp['tts_engine']} ({fp.get('tts_model')})")
+        else:
+            print(f"  tts: NOT FOUND — sudo apt-get install -y espeak-ng")
+        if fp.get("browser_version"):
+            print(f"  browser: {fp['browser_version']}")
+        else:
+            print(f"  browser: NOT FOUND — pnpm --filter @amc/web exec playwright install chromium")
+    except Exception as exc:
+        print(f"  (capability fingerprint unavailable: {exc})")
+
     print("=" * 65)
     print("🎉 Environment pre-flight check complete!")
 

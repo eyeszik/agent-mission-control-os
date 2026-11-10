@@ -1,6 +1,26 @@
+import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { mkdirSync, readFileSync, writeFileSync, readdirSync, cpSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
+
 const require = createRequire(import.meta.url);
+
+function findPackageRoot(name) {
+  let directory = new URL('./', pathToFileURL(require.resolve(name)));
+  while (true) {
+    let metadata;
+    try {
+      metadata = JSON.parse(readFileSync(new URL('package.json', directory), 'utf8'));
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+    if (metadata?.name === name) return { directory, metadata };
+
+    const parent = new URL('../', directory);
+    if (parent.href === directory.href) throw new Error(`PACKAGE_NOT_FOUND:${name}`);
+    directory = parent;
+  }
+}
 mkdirSync(new URL('./dist/', import.meta.url), { recursive: true });
 const source = readFileSync(new URL('./worker.mjs', import.meta.url), 'utf8');
 writeFileSync(new URL('./dist/worker.mjs', import.meta.url), source

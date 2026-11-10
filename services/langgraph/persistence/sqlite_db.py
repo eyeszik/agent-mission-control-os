@@ -1488,6 +1488,63 @@ _MIGRATIONS = [
         );
         CREATE INDEX IF NOT EXISTS idx_hmac_replay_nonces_expiry ON hmac_replay_nonces(expires_at);
     """),
+    (22, """
+        -- Durable execution job queue: claim CAS, fencing token, lease/heartbeat, retry budget and
+        -- dead-letter. Mirrors the Postgres migration 20261104_amc_durable_execution_v1_jobs_artifacts.
+        CREATE TABLE IF NOT EXISTS amc_jobs (
+            job_id TEXT PRIMARY KEY,
+            kind TEXT NOT NULL,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            run_id TEXT,
+            status TEXT NOT NULL,
+            attempt_count INTEGER NOT NULL DEFAULT 0,
+            max_attempts INTEGER NOT NULL,
+            payload TEXT NOT NULL,
+            result TEXT,
+            error TEXT,
+            claim_token TEXT,
+            lease_expires_at TEXT,
+            queued_at TEXT NOT NULL,
+            claimed_at TEXT,
+            completed_at TEXT,
+            updated_at TEXT NOT NULL,
+            CHECK (status IN ('queued','running','completed','failed','dead_letter','cancelled'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_amc_jobs_claim ON amc_jobs (status, queued_at);
+        CREATE INDEX IF NOT EXISTS idx_amc_jobs_tenant ON amc_jobs (tenant_id, project_id, queued_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_amc_jobs_lease ON amc_jobs (status, lease_expires_at);
+    """),
+    (23, """
+        -- Content-addressed artifact object store. `amc_artifact_versions` is namespaced away from the
+        -- Project OS `artifact_versions` table (migration 20261001_amc_project_os_v1), which uses a
+        -- composite (artifact_id, version) primary key and different required columns.
+        CREATE TABLE IF NOT EXISTS artifact_objects (
+            object_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            content_type TEXT NOT NULL DEFAULT 'application/octet-stream',
+            size_bytes INTEGER NOT NULL CHECK (size_bytes >= 0),
+            created_by TEXT,
+            created_at TEXT NOT NULL,
+            UNIQUE (tenant_id, object_id)
+        );
+        CREATE TABLE IF NOT EXISTS amc_artifact_versions (
+            artifact_id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            run_id TEXT,
+            kind TEXT NOT NULL,
+            version INTEGER NOT NULL CHECK (version >= 1),
+            object_id TEXT NOT NULL REFERENCES artifact_objects(object_id),
+            content_hash TEXT NOT NULL,
+            deleted INTEGER NOT NULL DEFAULT 0,
+            deleted_at TEXT,
+            created_at TEXT NOT NULL,
+            UNIQUE (tenant_id, project_id, kind, version)
+        );
+        CREATE INDEX IF NOT EXISTS idx_amc_artifact_versions_tenant ON amc_artifact_versions (tenant_id, project_id, created_at DESC);
+    """),
 
 ]
 

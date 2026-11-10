@@ -1,0 +1,42 @@
+{
+  "record_type": "EngineeringExecutionPolicyExample",
+  "contract_version": "amc-engineering-contracts/v1",
+  "active": false,
+  "execution_mode": "fixture-only",
+  "model_generated_code": "BLOCKED",
+  "worker_registration": "DISABLED",
+  "live_github_writes": false,
+  "automatic_draft_pr": false,
+  "test_runner_allowlist": ["PYTHON_UNITTEST"],
+  "limits": {
+    "max_wall_seconds": 30,
+    "max_cpu_seconds_per_process": 10,
+    "max_address_space_bytes_per_process": 268435456,
+    "max_processes_rlimit_nproc": 4,
+    "max_workspace_files": 50,
+    "max_file_bytes": 200000,
+    "max_workspace_bytes": 1000000,
+    "max_combined_output_bytes": 65536,
+    "max_tmpfs_bytes": 1000000,
+    "max_tmpfs_inodes": 4096
+  },
+  "required_isolation": [
+    "user-namespace",
+    "mount-namespace",
+    "network-namespace",
+    "pid-namespace",
+    "chroot-minimal-root",
+    "read-only-workspace",
+    "read-only-runtime",
+    "bounded-tmpfs",
+    "capability-drop",
+    "no-new-privileges"
+  ],
+  "unavailable_controls": [
+    "seccomp-filter",
+    "writable-cgroup-memory-limit",
+    "writable-cgroup-cpu-limit",
+    "writable-cgroup-pid-limit"
+  ],
+  "failure_policy": "BLOCK; NEVER EXECUTE ON HOST"
+}

@@ -49,3 +49,10 @@ out/
 
 # Project export runner output (scripts/export_to_drive.py)
 .amc-export/
+
+# AMCS runtime outputs (created by tests / preview server, never committed)
+amc_artifacts/
+apps/web/test-results/
+
+# SQLite migration lock files (created by persistence/sqlite_db.py:_migration_lock)
+*.migrate.lock

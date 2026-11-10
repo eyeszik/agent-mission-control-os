@@ -1,16 +1,90 @@
+# AMCOS — Supply Chain Dependency Governance
+# Version updates are independently reviewable.
+# Security updates remain independently actionable.
+# Security updates are enabled separately in repository settings.
+
 version: 2
+
 updates:
+
+  # =========================================================
+  # 1. GITHUB ACTIONS
+  # =========================================================
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 5
+
+  # =========================================================
+  # 2. PYTHON — LANGGRAPH
+  # Existing pyproject.toml / pip configuration.
+  # Transition to uv ecosystem after uv.lock is adopted.
+  # =========================================================
   - package-ecosystem: "pip"
     directory: "/services/langgraph"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "09:30"
+      timezone: "America/Los_Angeles"
     open-pull-requests-limit: 5
+    cooldown:
+      default-days: 3
+
+  # =========================================================
+  # 3. PNPM — ROOT MONOREPO
+  # Covers root workspace and root lockfile.
+  # =========================================================
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 3
+
+  # =========================================================
+  # 4. AISL PROXY — STANDALONE NPM
+  # Outside root pnpm workspace patterns.
+  # =========================================================
+  - package-ecosystem: "npm"
+    directory: "/aisl-proxy"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:30"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 3
+
+  # =========================================================
+  # 5. DOCKER — AISL PROXY
+  # =========================================================
+  - package-ecosystem: "docker"
+    directory: "/aisl-proxy"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 5
+
+  # =========================================================
+  # 6. DOCKER COMPOSE — AISL PROXY
+  # =========================================================
+  - package-ecosystem: "docker-compose"
+    directory: "/aisl-proxy"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:30"
+      timezone: "America/Los_Angeles"
     open-pull-requests-limit: 5

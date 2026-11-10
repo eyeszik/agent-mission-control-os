@@ -1,0 +1,353 @@
+{
+  "schema_version": "freevideoforge/storyboard/v1",
+  "run_id": "run-20261109-122818-4225db",
+  "topic": "Agent Mission Control OS",
+  "style_system": "slate",
+  "aspect": "9:16",
+  "render": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "video_codec": "libx264",
+    "audio_codec": "aac",
+    "crf": 17,
+    "preset": "slow",
+    "pixel_format": "yuv420p",
+    "audio_sample_rate": 44100,
+    "audio_bitrate": "160k",
+    "burn_captions": true
+  },
+  "total_duration": 30.206,
+  "scenes": [
+    {
+      "id": "s01",
+      "index": 0,
+      "duration": 5.656,
+      "content": {
+        "narrative_function": "hook",
+        "voiceover": "Agent Mission Control, explained properly.",
+        "text_overlay": "Agent Mission Control, Explained",
+        "kicker": "START HERE",
+        "key_point": "Agent Mission Control, Explained"
+      },
+      "visual": {
+        "visual_subject": "opening title card for 'Agent Mission Control OS'",
+        "environment": "technical, precise, neutral; cool overcast key",
+        "composition": "centered, generous negative space above",
+        "shot_size": "wide establishing",
+        "lighting": "cool overcast key",
+        "palette": [
+          "#101418",
+          "#1C232B",
+          "#5FD3A6",
+          "#EDF2F6",
+          "#7C8B99"
+        ],
+        "motif": "orbit",
+        "continuity": "continues from: cold open, screen at rest",
+        "media_prompt": "wide establishing abstract orbit composition, opening title card for 'Agent Mission Control OS', technical, precise, neutral, cool overcast key, palette #101418 #1C232B #5FD3A6, centered, generous negative space above, no text",
+        "negative_constraints": [
+          "no text artifacts",
+          "no watermark",
+          "no photoreal human faces",
+          "no brand marks",
+          "no illegible small type"
+        ]
+      },
+      "motion": {
+        "camera": "drift right to left",
+        "motion": "pan_left",
+        "zoom_start": 1.06,
+        "zoom_end": 1.08,
+        "pan_x": 0.05,
+        "pan_y": 0.0,
+        "parallax": 0.43,
+        "transition": "fade",
+        "transition_seconds": 0.45
+      },
+      "seed": 20261109000,
+      "clip_path": null,
+      "audio_path": "<run work dir>/audio/s01.wav",
+      "audio_duration": 2.859093,
+      "state": "PENDING",
+      "attempts": 0,
+      "error": null,
+      "input_hash": null
+    },
+    {
+      "id": "s02",
+      "index": 1,
+      "duration": 4.672,
+      "content": {
+        "narrative_function": "context",
+        "voiceover": "It matters more than it looks.",
+        "text_overlay": "Why It Matters",
+        "kicker": "THE STAKES",
+        "key_point": "Why It Matters"
+      },
+      "visual": {
+        "visual_subject": "layered background establishing scale and stakes",
+        "environment": "technical, precise, neutral; cool overcast key",
+        "composition": "lower third weighted, horizon high",
+        "shot_size": "medium",
+        "lighting": "cool overcast key",
+        "palette": [
+          "#101418",
+          "#1C232B",
+          "#5FD3A6",
+          "#EDF2F6",
+          "#7C8B99"
+        ],
+        "motif": "contour",
+        "continuity": "continues from: orbit field settled at 1.08x zoom, accent colour holding left",
+        "media_prompt": "medium abstract contour composition, layered background establishing scale and stakes, technical, precise, neutral, cool overcast key, palette #101418 #1C232B #5FD3A6, lower third weighted, horizon high, no text",
+        "negative_constraints": [
+          "no text artifacts",
+          "no watermark",
+          "no photoreal human faces",
+          "no brand marks",
+          "no illegible small type"
+        ]
+      },
+      "motion": {
+        "camera": "rise",
+        "motion": "tilt_up",
+        "zoom_start": 1.05,
+        "zoom_end": 1.09,
+        "pan_x": 0.0,
+        "pan_y": 0.05,
+        "parallax": 0.404,
+        "transition": "dip_to_ink",
+        "transition_seconds": 0.45
+      },
+      "seed": 20261109001,
+      "clip_path": null,
+      "audio_path": "<run work dir>/audio/s02.wav",
+      "audio_duration": 1.564853,
+      "state": "PENDING",
+      "attempts": 0,
+      "error": null,
+      "input_hash": null
+    },
+    {
+      "id": "s03",
+      "index": 2,
+      "duration": 4.918,
+      "content": {
+        "narrative_function": "body",
+        "voiceover": "Agent Mission Control OS is the execution and governance layer.",
+        "text_overlay": "Agent Mission Control OS",
+        "kicker": "THE DETAIL",
+        "key_point": "Agent Mission Control OS"
+      },
+      "visual": {
+        "visual_subject": "supporting card for 'Agent Mission Control OS'",
+        "environment": "technical, precise, neutral; cool overcast key",
+        "composition": "left-weighted, subject offset on the thirds",
+        "shot_size": "medium close",
+        "lighting": "cool overcast key",
+        "palette": [
+          "#101418",
+          "#1C232B",
+          "#5FD3A6",
+          "#EDF2F6",
+          "#7C8B99"
+        ],
+        "motif": "contour",
+        "continuity": "continues from: contour field settled at 1.09x zoom, accent colour holding centre",
+        "media_prompt": "medium close abstract contour composition, supporting card for 'Agent Mission Control OS', technical, precise, neutral, cool overcast key, palette #101418 #1C232B #5FD3A6, left-weighted, subject offset on the thirds, no text",
+        "negative_constraints": [
+          "no text artifacts",
+          "no watermark",
+          "no photoreal human faces",
+          "no brand marks",
+          "no illegible small type"
+        ]
+      },
+      "motion": {
+        "camera": "settle down",
+        "motion": "tilt_down",
+        "zoom_start": 1.09,
+        "zoom_end": 1.04,
+        "pan_x": 0.0,
+        "pan_y": -0.04,
+        "parallax": 0.439,
+        "transition": "soft_cut",
+        "transition_seconds": 0.45
+      },
+      "seed": 20261109002,
+      "clip_path": null,
+      "audio_path": "<run work dir>/audio/s03.wav",
+      "audio_duration": 3.991247,
+      "state": "PENDING",
+      "attempts": 0,
+      "error": null,
+      "input_hash": null
+    },
+    {
+      "id": "s04",
+      "index": 3,
+      "duration": 4.918,
+      "content": {
+        "narrative_function": "body",
+        "voiceover": "Human approval is required before anything is delivered.",
+        "text_overlay": "Human Approval is Required Before Anything",
+        "kicker": "THE CONDITION",
+        "key_point": "Human Approval is Required Before Anything"
+      },
+      "visual": {
+        "visual_subject": "supporting card for 'Human Approval is Required Before Anything'",
+        "environment": "technical, precise, neutral; cool overcast key",
+        "composition": "left-weighted, subject offset on the thirds",
+        "shot_size": "medium close",
+        "lighting": "cool overcast key",
+        "palette": [
+          "#101418",
+          "#1C232B",
+          "#5FD3A6",
+          "#EDF2F6",
+          "#7C8B99"
+        ],
+        "motif": "strata",
+        "continuity": "continues from: contour field settled at 1.04x zoom, accent colour holding centre",
+        "media_prompt": "medium close abstract strata composition, supporting card for 'Human Approval is Required Before Anything', technical, precise, neutral, cool overcast key, palette #101418 #1C232B #5FD3A6, left-weighted, subject offset on the thirds, no text",
+        "negative_constraints": [
+          "no text artifacts",
+          "no watermark",
+          "no photoreal human faces",
+          "no brand marks",
+          "no illegible small type"
+        ]
+      },
+      "motion": {
+        "camera": "slow push in",
+        "motion": "push_in",
+        "zoom_start": 1.0,
+        "zoom_end": 1.1,
+        "pan_x": 0.0,
+        "pan_y": 0.0,
+        "parallax": 0.478,
+        "transition": "fade",
+        "transition_seconds": 0.45
+      },
+      "seed": 20261109003,
+      "clip_path": null,
+      "audio_path": "<run work dir>/audio/s04.wav",
+      "audio_duration": 3.030522,
+      "state": "PENDING",
+      "attempts": 0,
+      "error": null,
+      "input_hash": null
+    },
+    {
+      "id": "s05",
+      "index": 4,
+      "duration": 4.632,
+      "content": {
+        "narrative_function": "turn",
+        "voiceover": "Change that one assumption and the whole picture reorders itself.",
+        "text_overlay": "One Assumption, Reordered",
+        "kicker": "THE INSIGHT",
+        "key_point": "One Assumption, Reordered"
+      },
+      "visual": {
+        "visual_subject": "the accent element breaking the established symmetry",
+        "environment": "technical, precise, neutral; cool overcast key",
+        "composition": "centered, tight, symmetry broken by the accent",
+        "shot_size": "close",
+        "lighting": "cool overcast key",
+        "palette": [
+          "#101418",
+          "#1C232B",
+          "#5FD3A6",
+          "#EDF2F6",
+          "#7C8B99"
+        ],
+        "motif": "orbit",
+        "continuity": "continues from: strata field settled at 1.10x zoom, accent colour holding centre",
+        "media_prompt": "close abstract orbit composition, the accent element breaking the established symmetry, technical, precise, neutral, cool overcast key, palette #101418 #1C232B #5FD3A6, centered, tight, symmetry broken by the accent, no text",
+        "negative_constraints": [
+          "no text artifacts",
+          "no watermark",
+          "no photoreal human faces",
+          "no brand marks",
+          "no illegible small type"
+        ]
+      },
+      "motion": {
+        "camera": "slow pull back",
+        "motion": "pull_back",
+        "zoom_start": 1.1,
+        "zoom_end": 1.0,
+        "pan_x": 0.0,
+        "pan_y": 0.0,
+        "parallax": 0.482,
+        "transition": "dip_to_ink",
+        "transition_seconds": 0.45
+      },
+      "seed": 20261109004,
+      "clip_path": null,
+      "audio_path": "<run work dir>/audio/s05.wav",
+      "audio_duration": 3.931927,
+      "state": "PENDING",
+      "attempts": 0,
+      "error": null,
+      "input_hash": null
+    },
+    {
+      "id": "s06",
+      "index": 5,
+      "duration": 5.41,
+      "content": {
+        "narrative_function": "payoff",
+        "voiceover": "That is the whole idea, end to end, without the noise.",
+        "text_overlay": "End To End",
+        "kicker": "IN ONE LINE",
+        "key_point": "End To End"
+      },
+      "visual": {
+        "visual_subject": "closing statement card, composition at rest",
+        "environment": "technical, precise, neutral; cool overcast key",
+        "composition": "centered, calm, everything settled",
+        "shot_size": "wide resolve",
+        "lighting": "cool overcast key",
+        "palette": [
+          "#101418",
+          "#1C232B",
+          "#5FD3A6",
+          "#EDF2F6",
+          "#7C8B99"
+        ],
+        "motif": "beam",
+        "continuity": "continues from: orbit field settled at 1.00x zoom, accent colour holding centre",
+        "media_prompt": "wide resolve abstract beam composition, closing statement card, composition at rest, technical, precise, neutral, cool overcast key, palette #101418 #1C232B #5FD3A6, centered, calm, everything settled, no text",
+        "negative_constraints": [
+          "no text artifacts",
+          "no watermark",
+          "no photoreal human faces",
+          "no brand marks",
+          "no illegible small type"
+        ]
+      },
+      "motion": {
+        "camera": "drift left to right",
+        "motion": "pan_right",
+        "zoom_start": 1.06,
+        "zoom_end": 1.08,
+        "pan_x": -0.05,
+        "pan_y": 0.0,
+        "parallax": 0.343,
+        "transition": "soft_cut",
+        "transition_seconds": 0.45
+      },
+      "seed": 20261109005,
+      "clip_path": null,
+      "audio_path": "<run work dir>/audio/s06.wav",
+      "audio_duration": 3.47619,
+      "state": "PENDING",
+      "attempts": 0,
+      "error": null,
+      "input_hash": null
+    }
+  ]
+}
