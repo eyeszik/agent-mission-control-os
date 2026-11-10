@@ -73,6 +73,8 @@ def format_timestamp(seconds: float) -> str:
 
 
 def write_srt(cues: list[dict[str, Any]], path: Path) -> Path:
+    if ".." in str(path):
+        raise Exception("Invalid file path")
     path.parent.mkdir(parents=True, exist_ok=True)
     blocks = []
     for index, cue in enumerate(cues, start=1):
