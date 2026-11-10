@@ -50,12 +50,21 @@ Also PASS: `compileall -q services/langgraph scripts`; `pip check` ("No broken r
 | UCPO pipeline/QA/proof-origin + brand handoff + unified delivery + VNEXUS contracts + manifest regressions + Northline bundle | **134 passed, 3 skipped** | Re-run **after** a genuine `--frozen-lockfile` install, so `dependency_check` now sees 16.4.5. Skips are pinned-browser and media-tooling. |
 | `@amc/shared` | **266 passed** (21 files), build and typecheck PASS | Contracts including the brand-web bridge. |
 | `@amc/web` | **97 passed**, typecheck PASS | 17 files. |
+| `@amc/web` production build | **PASS** (`NEXT_TELEMETRY_DISABLED=1 pnpm --filter @amc/web build`) | Compiled in 7.4s, TypeScript 2.8s, 9/9 static pages. Run **after** the `next@16.4.5` install, so the build is verified on the version the pin repair moved to. Emits the known `next-env.d.ts` churn, reverted after the run. |
+| UI AST gate | **PASS** (`pnpm --filter @amc/web verify:ui`) | No inline visual styles, arbitrary class colours or duplicate AI provenance roots. |
+| `test_ucpo_build.py` | **3 passed, 2 skipped** | The two skips are the real sandboxed builds: `NOT_RUN`, Playwright Chromium absent. Playwright 1.65.0 requires Chromium r1254 and this sandbox has only the r1179-class 153 build; `playwright install` cannot reach its CDN. These stay NOT_RUN in CI terms, not passes. |
 | Full `services/langgraph/tests` (SQLite) | **see "Open" below** | Started on this exact tree; buffered stdout, recorded on completion. |
 
 ## Open / not claimed
 
 - **Full-suite result for this exact tree** is reported only when the run finishes; anything else is `IN PROGRESS`, not a pass.
-- **CI did not validate this branch.** The `CI` workflow has been `startup_failure` repo-wide since 2026-11-09 (16 consecutive runs), while other workflows, including `aisl-proxy.yml`, still start and succeed. `ci.yml` parses under strict YAML, has no duplicate keys, tabs, CRLF or BOM, and every pinned action SHA resolves (including `pnpm/action-setup@73e46992`, the commit behind annotated tag `v6.1.1`). The trigger is repository/platform-side, not a defect this branch introduced or can fix from source. **CI-verified** status is therefore unavailable, not green.
+- **CI did not validate this branch.** The `CI` workflow has been `startup_failure` repo-wide since 2026-11-09 (22 consecutive runs), while other workflows still start and succeed — `aisl-proxy.yml` on 2026-11-09 and `vnexus-brand-genome.yml` on 2026-11-10 20:32Z. What was excluded, by test rather than assumption:
+  - *Syntax/schema:* `ci.yml` parses under strict YAML (`uniqueKeys`, `strict`), and a key-whitelist pass over all 8 jobs found no unknown job keys, no unknown step keys, no step with both `run` and `uses`, no `with:` on a `run` step, and no empty/ref-less `uses:`. No duplicate keys, tabs, CRLF or BOM.
+  - *Action pins:* every pinned SHA resolves, including `pnpm/action-setup@73e46992` — the **commit** behind annotated tag `v6.1.1`, not a typo.
+  - *Hypothesis "third-party actions are blocked":* **falsified.** `vnexus-brand-genome.yml` uses the same `pnpm/action-setup` SHA and succeeded on 2026-11-10.
+  - *Feature usage:* `concurrency`, `services:` containers, `upload-artifact`, `setup-python` and job-level `permissions` are each used successfully by at least one other workflow in this repository.
+  - `ci.yml` was last modified 2026-11-08 17:37Z (`fa20ba7`); it **ran** (and failed on real tests) at 2026-11-08 22:54Z, then began `startup_failure` on 2026-11-09 20:47Z with no intervening change to the file. A source-clean file that ran before and fails now points at the platform/repository configuration, not at this branch.
+  Failed fix attempt, recorded so it is not repeated: installing `actionlint` (binaries unreachable; `actionlint-py` build failed) — no local equivalent validator was obtainable in this sandbox. **CI-verified** status is unavailable, not green; do not read the absent check as a pass.
 - **Canonical UCPO website QA remains BLOCKED** (pinned Playwright Chromium 156 unavailable locally; only noncanonical Chromium 153 diagnostics ran). Release state **NOT_AUTHORIZED**.
 - Rights/licensing, human creative and accessibility review, and owner approval are **NOT_EVALUATED**. The preview contact page has no form, destination or lead capture; an anchor is not a buyer journey.
 - Sandbox isolation lacks seccomp/cgroups and independent review; Blender is not equivalently hardened.
