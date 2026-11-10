@@ -7,7 +7,9 @@ climbs the quality ladder as far as a machine can honestly go:
     Q1 decodable       Pillow decodes the image / ffprobe reads the video / SVG parses safely
     Q2 dims/format     dimensions, frame rate, codec match the intent
     Q3 nonblank        real tonal variation, not a flat, black, white or corrupt frame
-    Q4 rights          every source asset has a licence (procedural = owned)
+    Q4 rights          licence fields exist for the *declared* sources; an empty
+                       list is the caller's procedural-only assumption, not an
+                       independently verified inventory or font clearance
 
 SVG reuses the fabric's ``svg_safety`` and ``palette_conformance`` and, when
 ``expect["render_sizes"]`` is set, renders the persisted bytes in a real local
@@ -84,21 +86,124 @@ def _image_checks(data: bytes, expect: dict) -> tuple[list[dict], Optional[Quali
     return checks, highest, findings
 
 
+class VideoProbeUnavailable(RuntimeError):
+    """A video check could not safely execute; it is not a passing check."""
+
+
 def _probe_video(path: Path) -> dict:
-    proc = subprocess.run(
-        [shutil.which("ffprobe") or "ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
-         "-show_entries", "stream=codec_name,width,height,avg_frame_rate,nb_read_frames:format=duration",
-         "-of", "json", str(path)],
-        capture_output=True, text=True, timeout=120, env={"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8"},
-    )
-    if proc.returncode != 0:
-        raise ValueError(proc.stderr[-300:])
-    data = json.loads(proc.stdout or "{}")
-    stream = (data.get("streams") or [{}])[0]
+    from services.langgraph.agency.ucpo.sandbox import probe_isolation, wrap
+    from services.langgraph.agency.visual.file_staging import UnsafeInput, copy_regular_bounded
+
+    executable = shutil.which("ffprobe")
+    if not executable:
+        raise VideoProbeUnavailable("ffprobe not installed")
+    isolation = probe_isolation()
+    if not isolation.available:
+        raise VideoProbeUnavailable("isolation unavailable: " + "; ".join(isolation.reasons))
+    executable = str(Path(executable).resolve())
+    with tempfile.TemporaryDirectory(prefix="amc-video-probe-input-") as inp, tempfile.TemporaryDirectory(prefix="amc-video-probe-") as tmp:
+        inputs, work = Path(inp), Path(tmp)
+        staged = inputs / "video.mp4"
+        try:
+            copy_regular_bounded(path, staged, max_bytes=256 * 1024 * 1024)
+        except (OSError, UnsafeInput) as exc:
+            raise ValueError("invalid or oversized video input") from exc
+        cmd = wrap(["/usr/bin/prlimit", "--as=2147483648", "--cpu=120", "--fsize=8388608", "--", executable, "-v", "error",
+                    "-protocol_whitelist", "file,pipe", "-count_frames", "-select_streams", "v:0", "-show_entries",
+                    "stream=codec_name,width,height,avg_frame_rate,nb_read_frames:format=duration", "-of", "json", str(staged)],
+                   cwd=work, home=work, node=isolation.node or "node", timeout_s=120,
+                   readonly_paths=(Path(executable), inputs))
+        result_file, error_file = work / "probe.json", work / "probe.err"
+        try:
+            with result_file.open("wb") as result, error_file.open("wb") as errors:
+                proc = subprocess.run(cmd, stdout=result, stderr=errors, timeout=150)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise VideoProbeUnavailable(type(exc).__name__) from exc
+        if proc.returncode != 0 or result_file.stat().st_size > 8 * 1024 * 1024:
+            raise ValueError("ffprobe failed or exceeded its output budget")
+        data = json.loads(result_file.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or not isinstance(data.get("streams"), list) or len(data["streams"]) != 1:
+        raise ValueError("ffprobe did not return exactly one video stream")
+    stream, fmt = data["streams"][0], data.get("format") or {}
+    if not isinstance(stream, dict) or not isinstance(fmt, dict):
+        raise ValueError("invalid ffprobe result")
     rate = stream.get("avg_frame_rate") or "0/1"
-    return {"codec": stream.get("codec_name"), "width": stream.get("width"), "height": stream.get("height"),
-            "fps": float(Fraction(rate)) if rate not in ("0/0",) else 0.0, "frames": int(stream.get("nb_read_frames") or 0),
-            "duration": float((data.get("format") or {}).get("duration") or 0.0)}
+    try:
+        return {"codec": stream.get("codec_name"), "width": stream.get("width"), "height": stream.get("height"),
+                "fps": float(Fraction(rate)) if rate not in ("0/0",) else 0.0, "frames": int(stream.get("nb_read_frames") or 0),
+                "duration": float(fmt.get("duration") or 0.0)}
+    except (TypeError, ValueError, ZeroDivisionError, OverflowError) as exc:
+        raise ValueError("invalid ffprobe numeric result") from exc
+
+
+def _sample_video_pixels(path: Path, frames: int) -> tuple[bool, str]:
+    """Decode bounded representative frames; duration alone is not nonblank proof."""
+    from services.langgraph.agency.ucpo.sandbox import probe_isolation, wrap
+    from services.langgraph.agency.visual.file_staging import UnsafeInput, copy_regular_bounded
+
+    try:
+        from PIL import Image, ImageStat
+    except ImportError as exc:
+        raise VideoProbeUnavailable("Pillow is unavailable") from exc
+    executable = shutil.which("ffmpeg")
+    isolation = probe_isolation()
+    if not executable or not isolation.available:
+        raise VideoProbeUnavailable("ffmpeg or isolation unavailable for pixel sampling")
+    if not 1 <= frames <= 900:
+        raise ValueError("video frame count exceeds pixel-verification budget")
+    executable = str(Path(executable).resolve())
+    centers = (min(frames - 1, frames // 10), frames // 2, min(frames - 1, frames * 9 // 10))
+    # A single frame may legitimately be in a fade. Sample two nearby frames
+    # in each region and require variation in every region, while explicitly
+    # reporting flat observations instead of claiming every frame is nonblank.
+    offset = max(1, min(12, frames // 20))
+    regions = [tuple(sorted({index, min(frames - 1, index + offset)})) for index in centers]
+    indexes = sorted({index for region in regions for index in region})
+    expression = "+".join(f"eq(n\\,{index})" for index in indexes)
+    with tempfile.TemporaryDirectory(prefix="amc-video-sample-input-") as inp, tempfile.TemporaryDirectory(prefix="amc-video-sample-") as tmp:
+        inputs, work = Path(inp), Path(tmp)
+        staged = inputs / "video.mp4"
+        try:
+            copy_regular_bounded(path, staged, max_bytes=256 * 1024 * 1024)
+        except (OSError, UnsafeInput) as exc:
+            raise ValueError("invalid or oversized video input") from exc
+        cmd = wrap(["/usr/bin/prlimit", "--as=2147483648", "--cpu=120", "--fsize=16777216", "--", executable,
+                    "-nostdin", "-v", "error", "-threads", "2", "-protocol_whitelist", "file,pipe", "-i", str(staged),
+                    "-vf", f"select={expression},scale=256:256:force_original_aspect_ratio=decrease", "-fps_mode", "passthrough",
+                    "-frames:v", str(len(indexes)), str(work / "sample_%02d.png")], cwd=work, home=work,
+                   node=isolation.node or "node", timeout_s=120, readonly_paths=(Path(executable), inputs))
+        try:
+            with (work / "sample.err").open("wb") as errors:
+                proc = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=errors, timeout=150)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise VideoProbeUnavailable(type(exc).__name__) from exc
+        samples = sorted(work.glob("sample_*.png"))
+        if proc.returncode != 0 or len(samples) != len(indexes):
+            raise ValueError("could not decode all requested video samples")
+        measured: dict[int, tuple[float, int]] = {}
+        for index, sample in zip(indexes, samples):
+            if sample.is_symlink() or not sample.is_file() or sample.stat().st_size > 16 * 1024 * 1024:
+                raise ValueError("invalid sampled frame")
+            try:
+                with Image.open(sample) as image:
+                    image.load()
+                    if image.width > 256 or image.height > 256:
+                        raise ValueError("sample dimensions exceed bound")
+                    gray = image.convert("L")
+                    stddev = float(ImageStat.Stat(gray).stddev[0])
+                    colors = gray.getcolors(256) or []
+                    measured[index] = (stddev, len(colors))
+            except (OSError, ValueError) as exc:
+                raise ValueError("sample image could not be decoded") from exc
+    def varied(index: int) -> bool:
+        stddev, colors = measured[index]
+        return stddev >= MIN_STDDEV and colors >= 2
+
+    passed = all(any(varied(index) for index in region) for region in regions)
+    flat = [index for index in indexes if not varied(index)]
+    return passed, (f"{len(measured)} sampled frames in 3 regions at indexes {indexes}; low-variation samples {flat}; "
+                    "luma standard deviations " + ", ".join(f"{measured[index][0]:.1f}" for index in indexes)
+                    + "; unsampled frames and creative quality still require review")
 
 
 def _video_checks(data: bytes, expect: dict) -> tuple[list[dict], Optional[QualityLevel], list[str]]:
@@ -115,22 +220,42 @@ def _video_checks(data: bytes, expect: dict) -> tuple[list[dict], Optional[Quali
 
     if not ok(QualityLevel.Q0_VALID_FILE, "mp4_ftyp_box", len(data) > 12 and data[4:8] == b"ftyp", "bytes 4-8"):
         return checks, highest, findings
+    if len(data) > 256 * 1024 * 1024:
+        ok(QualityLevel.Q1_DECODABLE, "video_size_limit", False, "video exceeds the 256 MiB verification budget")
+        return checks, highest, findings
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "master.mp4"
         path.write_bytes(data)
         try:
             probe = _probe_video(path)
+        except VideoProbeUnavailable as exc:
+            checks.append({"level": QualityLevel.Q1_DECODABLE.value, "check": "ffprobe", "passed": None,
+                           "detail": f"NOT_RUN: {str(exc)[:160]}"})
+            findings.append("FFPROBE_NOT_RUN")
+            return checks, highest, findings
         except (ValueError, OSError, subprocess.TimeoutExpired) as exc:
             ok(QualityLevel.Q1_DECODABLE, "ffprobe", False, str(exc)[:200])
             return checks, highest, findings
-    ok(QualityLevel.Q1_DECODABLE, "ffprobe", True, f"{probe['codec']} {probe['frames']} frames")
-    good = (probe["width"], probe["height"]) == (expect["width"], expect["height"]) and abs(probe["fps"] - expect["fps"]) < 0.01 \
-        and probe["frames"] == expect["frames"] and probe["codec"] == "h264"
-    if not ok(QualityLevel.Q2_DIMENSIONS_FORMAT, "dims_fps_frames_codec", good,
-              f"{probe['width']}x{probe['height']} {probe['fps']}fps {probe['frames']}f {probe['codec']} "
-              f"vs {expect['width']}x{expect['height']} {expect['fps']}fps {expect['frames']}f h264"):
-        return checks, highest, findings
-    ok(QualityLevel.Q3_NONBLANK, "nonzero_duration", probe["duration"] > 0, f"{probe['duration']}s")
+        ok(QualityLevel.Q1_DECODABLE, "ffprobe", True, f"{probe['codec']} {probe['frames']} frames")
+        good = (probe["width"], probe["height"]) == (expect["width"], expect["height"]) and abs(probe["fps"] - expect["fps"]) < 0.01 \
+            and probe["frames"] == expect["frames"] and probe["codec"] == "h264"
+        if not ok(QualityLevel.Q2_DIMENSIONS_FORMAT, "dims_fps_frames_codec", good,
+                  f"{probe['width']}x{probe['height']} {probe['fps']}fps {probe['frames']}f {probe['codec']} "
+                  f"vs {expect['width']}x{expect['height']} {expect['fps']}fps {expect['frames']}f h264"):
+            return checks, highest, findings
+        if not ok(QualityLevel.Q2_DIMENSIONS_FORMAT, "positive_duration", probe["duration"] > 0, f"{probe['duration']}s"):
+            return checks, highest, findings
+        try:
+            nonblank, detail = _sample_video_pixels(path, probe["frames"])
+        except VideoProbeUnavailable as exc:
+            checks.append({"level": QualityLevel.Q3_NONBLANK.value, "check": "sampled_pixel_variation", "passed": None,
+                           "detail": f"NOT_RUN: {str(exc)[:160]}"})
+            findings.append("VIDEO_PIXEL_SAMPLING_NOT_RUN")
+            return checks, highest, findings
+        except (ValueError, OSError) as exc:
+            ok(QualityLevel.Q3_NONBLANK, "sampled_pixel_variation", False, str(exc)[:200])
+            return checks, highest, findings
+        ok(QualityLevel.Q3_NONBLANK, "sampled_pixel_variation", nonblank, detail)
     return checks, highest, findings
 
 
@@ -231,7 +356,8 @@ def verify_media(data: bytes, *, mime_type: str, expect: dict, source_assets: tu
         unlicensed = [a.ref for a in source_assets if not a.license]
         rights_ok = not unlicensed
         checks.append({"level": QualityLevel.Q4_RIGHTS.value, "check": "source_rights", "passed": rights_ok,
-                       "detail": "procedural only" if not source_assets else f"{len(source_assets)} licensed asset(s)"})
+                       "detail": (f"{len(source_assets)} declared source(s) checked for a licence field; "
+                                  "inventory completeness, implicit resources and licence validity not verified")})
         if rights_ok:
             highest = QualityLevel.Q4_RIGHTS
         else:

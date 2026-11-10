@@ -144,6 +144,10 @@ def _check(req: ContractRequirement, text: str, now: datetime, resolve: Optional
 
     if req.kind == "HUMAN_REVIEW":
         return result("NOT_MEASURED", "HUMAN_REVIEW_PENDING")
+    if req.kind == "DELIVERABLE":
+        # Content supplied to the critic is not a verified artifact inventory.
+        # A declaration or a caller's claimed counts must never become PASS.
+        return result("NOT_MEASURED", "VERIFIED_DELIVERABLE_INVENTORY_UNAVAILABLE")
     if req.kind == "PATTERN":
         # Contracts with PATTERN are rejected at intake while no engine is
         # pinned; this branch only guards against a bypassed intake.

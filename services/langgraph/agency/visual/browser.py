@@ -6,27 +6,26 @@ TSL/node-material scenes need ``WebGPURenderer``; legacy ``ShaderMaterial``,
 scene mixing both is BLOCKED, because the WebGPU renderer's WebGL2 backend
 does not translate legacy GLSL shader hooks.
 
-``capture_webgl`` / ``capture_svg_sizes`` drive ``browser_runner.cjs`` in a
-network namespace (when ``unshare`` is available) with every non-``data:``
-request aborted, and return the browser's own observations: shader compile and
-link logs, pixel statistics read from the GL context, context loss/restore
-events, and PNG captures. The GPU in a headless container is usually
-SwiftShader (software); the result records the renderer string rather than
-claiming hardware acceleration.
+``capture_webgl`` / ``capture_svg_sizes`` drive ``browser_runner.cjs`` in
+the same fail-closed minimal chroot and network namespace used by UCPO. Every
+non-``data:`` request is also aborted. They return the browser's own observations:
+shader compile and link logs, pixel statistics, context loss/restore events and
+PNG captures. The boundary is not a substitute for seccomp/cgroup quotas or an
+independent hostile-multitenant review.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
+import tempfile
 import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Iterable, Optional
-
-from .renderers import _env, _isolated
 
 RUNNER = Path(__file__).with_name("browser_runner.cjs")
 DEFAULT_CHROMIUM = Path("/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
@@ -88,23 +87,126 @@ def probe_browser() -> dict:
     executable = chromium_path() or (None if blockers else _playwright_chromium())
     if executable is None:
         blockers.append("MISSING_DEPENDENCY:chromium (no Playwright-managed or system Chromium found)")
+    from services.langgraph.agency.ucpo.sandbox import probe_isolation
+
+    isolation = probe_isolation()
+    if not isolation.available:
+        blockers.append("BLOCKED_ISOLATION:" + "; ".join(isolation.reasons))
     return {"available": not blockers, "blockers": blockers, "chromium": str(executable or "")}
 
 
+def _browser_runtime_paths(executable: Path) -> tuple[tuple[Path, ...], dict[str, str]]:
+    """Mount browser runtime inputs only, never an arbitrary browser parent/home."""
+    executable = executable.absolute()
+    parent = executable.parent
+    paths = [executable]
+    for pattern in ("lib*.so", "lib*.so.*"):
+        paths.extend(p for p in parent.glob(pattern) if p.is_file())
+    for name in ("icudtl.dat", "resources.pak", "chrome_100_percent.pak", "chrome_200_percent.pak",
+                 "v8_context_snapshot.bin", "snapshot_blob.bin", "vk_swiftshader_icd.json", "locales", "resources", "swiftshader"):
+        candidate = parent / name
+        if candidate.exists():
+            paths.append(candidate)
+    lib = parent / "lib"
+    if lib.is_dir():
+        for pattern in ("lib*.so", "lib*.so.*", "lib*.chk"):
+            paths.extend(p for p in lib.glob(pattern) if p.is_file())
+    extra = {"LD_LIBRARY_PATH": str(lib)} if lib.is_dir() else {}
+    return tuple(dict.fromkeys(paths)), extra
+
+
+_OUTPUT_NAME = re.compile(r"^[A-Za-z0-9_-][A-Za-z0-9_.-]{0,159}\.(?:png|pdf)$")
+
+
+def _expected_outputs(spec: dict, result: dict) -> set[str]:
+    """Only copy declared, leaf-name outputs; browser content never selects a host path."""
+    mode = spec.get("mode")
+    if mode == "webgl":
+        names = {"webgl.png"}
+    elif mode == "raster":
+        names = {"raster.png"}
+    elif mode == "pdf":
+        names = {"document.pdf"}
+    elif mode == "svg":
+        names = {f"svg-{size}.png" for size in spec.get("sizes", [])}
+    elif mode == "frames":
+        names = {f"frame_{i + 1:04d}.png" for i in range(len(spec.get("frames", [])))}
+    elif mode == "layout":
+        names = set((result.get("captures") or {}).values()) if spec.get("capture") else set()
+    elif mode == "experience":
+        names = {f"{s['id']}.png" for s in spec.get("scenarios", []) if s.get("capture")}
+    else:
+        names = set()
+    return {name for name in names if isinstance(name, str) and _OUTPUT_NAME.fullmatch(name)}
+
+
 def _run(spec: dict, out_dir: Path, timeout_s: int) -> dict:
+    from services.langgraph.agency.ucpo.sandbox import probe_isolation, wrap
+
+    out_dir = out_dir.absolute()
     out_dir.mkdir(parents=True, exist_ok=True)
-    # Empty means "Playwright's own managed Chromium".
-    spec = {**spec, "executable_path": str(chromium_path() or "")}
-    spec_path = out_dir / "spec.json"
-    spec_path.write_text(json.dumps(spec))
-    cmd, isolated = _isolated(["node", str(RUNNER), str(spec_path), str(out_dir)])
+    isolation = probe_isolation()
+    executable = chromium_path() or _playwright_chromium()
+    if not isolation.available or not executable:
+        reasons = list(isolation.reasons) + ([] if executable else ["chromium not found"])
+        return {"exit_code": None, "wall_ms": 0, "network_isolated": False, "output_files": [],
+                "stderr_tail": "BLOCKED_ISOLATION_OR_BROWSER: " + "; ".join(reasons), "result": {}, "command": []}
+    executable = Path(executable).absolute()
+    spec = {**spec, "executable_path": str(executable)}
+    browser_paths, extra = _browser_runtime_paths(executable)
     start = time.monotonic()
-    extra = {k: os.environ[k] for k in ("PLAYWRIGHT_BROWSERS_PATH",) if k in os.environ}
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_s, env=_env(extra), cwd=str(REPO_ROOT))
-    result_path = out_dir / "result.json"
-    result = json.loads(result_path.read_text()) if result_path.is_file() else {}
-    return {"exit_code": proc.returncode, "wall_ms": int((time.monotonic() - start) * 1000), "network_isolated": isolated,
-            "stderr_tail": proc.stderr[-2000:], "result": result, "command": cmd}
+    # Never mount the caller's output directory: it can contain other client data.
+    # Reopen only declared regular outputs from a fresh scratch directory.
+    with tempfile.TemporaryDirectory(prefix="amc-visual-browser-") as tmp:
+        work = Path(tmp)
+        spec_path = work / "spec.json"
+        spec_path.write_text(json.dumps(spec), encoding="utf-8")
+        cmd = wrap([isolation.node or "node", str(RUNNER), str(spec_path), str(work)], cwd=work, home=work,
+                   node=isolation.node or "node", timeout_s=timeout_s, extra_env=extra,
+                   readonly_paths=(RUNNER, *browser_paths))
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_s + 30)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            return {"exit_code": None, "wall_ms": int((time.monotonic() - start) * 1000), "network_isolated": False,
+                    "stderr_tail": type(exc).__name__, "result": {}, "command": cmd, "output_files": []}
+        result_path = work / "result.json"
+        if proc.returncode != 0 and not result_path.is_file():
+            return {"exit_code": proc.returncode, "wall_ms": int((time.monotonic() - start) * 1000),
+                    "network_isolated": False, "stderr_tail": (proc.stderr or proc.stdout)[-2000:], "result": {},
+                    "command": cmd, "output_files": []}
+        try:
+            if result_path.is_symlink() or not result_path.is_file() or result_path.stat().st_size > 8_000_000:
+                raise ValueError("missing or invalid result.json")
+            result = json.loads(result_path.read_text(encoding="utf-8"))
+            if not isinstance(result, dict):
+                raise ValueError("result.json must contain an object")
+            copied: list[str] = []
+            if proc.returncode == 0:
+                for name in sorted(_expected_outputs(spec, result)):
+                    src = work / name
+                    if src.is_symlink() or not src.is_file() or src.stat().st_size > 256 * 1024 * 1024:
+                        continue
+                    # Atomic replacement does not follow a pre-existing output symlink.
+                    with tempfile.NamedTemporaryFile(dir=out_dir, prefix=".amc-copy-", delete=False) as dest:
+                        temporary = Path(dest.name)
+                        try:
+                            with src.open("rb") as stream:
+                                shutil.copyfileobj(stream, dest)
+                        except BaseException:
+                            temporary.unlink(missing_ok=True)
+                            raise
+                    try:
+                        os.replace(temporary, out_dir / name)
+                    finally:
+                        temporary.unlink(missing_ok=True)
+                    copied.append(name)
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            return {"exit_code": None, "wall_ms": int((time.monotonic() - start) * 1000), "network_isolated": False,
+                    "stderr_tail": f"BROWSER_RESULT_INVALID: {type(exc).__name__}: {exc}", "result": {},
+                    "command": cmd, "output_files": []}
+        return {"exit_code": proc.returncode, "wall_ms": int((time.monotonic() - start) * 1000),
+                "network_isolated": proc.returncode == 0, "stderr_tail": proc.stderr[-2000:], "result": result,
+                "command": cmd, "output_files": copied}
 
 
 def capture_webgl(*, vertex: str, fragment: str, width: int, height: int, uniforms: Optional[dict] = None,
@@ -118,38 +220,62 @@ def capture_webgl(*, vertex: str, fragment: str, width: int, height: int, unifor
     if w.get("error"):
         findings.append(w["error"])
     compile_ok = bool(w.get("compile", {}).get("vertex", {}).get("ok")) and bool(w.get("compile", {}).get("fragment", {}).get("ok"))
-    if w and not compile_ok:
+    if not compile_ok:
         findings.append("SHADER_COMPILE_FAILED")
     if compile_ok and not w.get("link", {}).get("ok"):
         findings.append("PROGRAM_LINK_FAILED")
     px = w.get("pixels") or {}
-    if compile_ok and px and (px.get("stddev", 0) < 1 or px.get("error")):
+    if compile_ok and (not px or px.get("stddev", 0) < 1 or px.get("error")):
         findings.append("BLANK_OR_GL_ERROR_OUTPUT")
-    if compile_ok and px and not (w.get("lost_flag") and w.get("restored_flag") and w.get("events") == ["lost", "restored"]):
+    if compile_ok and not (w.get("lost_flag") and w.get("restored_flag") and w.get("events") == ["lost", "restored"]):
         findings.append("CONTEXT_LOSS_NOT_HANDLED")
     if run["result"].get("blocked_requests"):
         findings.append("REMOTE_REQUEST_ATTEMPTED")
     capture = out_dir / "webgl.png"
-    return {**run, "status": "PASSED" if not findings and capture.is_file() else "FAILED", "findings": findings,
-            "capture": str(capture) if capture.is_file() else None, "renderer": w.get("renderer"),
+    if "webgl.png" not in run["output_files"]:
+        findings.append("MISSING_CAPTURE")
+    return {**run, "status": "PASSED" if not findings else "FAILED", "findings": findings,
+            "capture": str(capture) if not findings else None, "renderer": w.get("renderer"),
             "gl_version": w.get("version")}
 
 
 def capture_svg_sizes(svg: str, *, sizes: Iterable[int] = (32, 128, 512), out_dir: Path, timeout_s: int = 120) -> dict:
-    run = _run({"mode": "svg", "svg": svg, "sizes": list(sizes)}, out_dir, timeout_s)
+    requested = list(sizes)
+    run = _run({"mode": "svg", "svg": svg, "sizes": requested}, out_dir, timeout_s)
     findings = []
     if run["exit_code"] != 0:
         findings.append(f"BROWSER_EXIT:{run['exit_code']}")
-    for s in run["result"].get("sizes", []):
+    observations = run["result"].get("sizes", [])
+    for s in observations:
         if not s.get("complete") or s.get("error"):
-            findings.append(f"SVG_NOT_DECODED_AT:{s['size']}")
+            findings.append(f"SVG_NOT_DECODED_AT:{s.get('size')}")
     if run["result"].get("blocked_requests"):
         findings.append("REMOTE_REQUEST_ATTEMPTED")
-    captures = [str(out_dir / s["capture"]) for s in run["result"].get("sizes", []) if (out_dir / s["capture"]).is_file()]
-    if len(captures) != len(list(sizes)):
+    if not requested or [s.get("size") for s in observations] != requested:
+        findings.append("MISSING_SIZE_OBSERVATION")
+    captures = [str(out_dir / s["capture"]) for s in observations
+                if s.get("capture") == f"svg-{s.get('size')}.png" and s["capture"] in run["output_files"]]
+    if len(captures) != len(requested):
         findings.append("MISSING_CAPTURE")
     return {**run, "status": "PASSED" if not findings else "FAILED", "findings": findings, "captures": captures}
 
+
+
+def measure_svg_text(elements: list[dict], *, width: int, height: int, margin: float, out_dir: Path, timeout_s: int = 120) -> dict:
+    """Measure text node bounding boxes in isolated Chromium, without parsing markup."""
+    if not (1 <= width <= 4096 and 1 <= height <= 4096 and 0 <= margin < 0.5 and len(elements) <= 100):
+        return {"status": "NOT_RUN", "reason": "invalid text layout bounds"}
+    if any(not isinstance(e.get("text"), str) or len(e["text"]) > 200 for e in elements):
+        return {"status": "NOT_RUN", "reason": "invalid text layout content"}
+    run = _run({"mode": "text_layout", "width": width, "height": height, "margin": margin, "elements": elements},
+               out_dir, timeout_s)
+    measured = run["result"].get("text_layout") or {}
+    boxes, outside, overlaps = measured.get("boxes"), measured.get("outside"), measured.get("overlaps")
+    if (run["exit_code"] != 0 or run["result"].get("blocked_requests") or not isinstance(boxes, list)
+            or len(boxes) != len(elements) or not isinstance(outside, list) or not isinstance(overlaps, list)):
+        return {"status": "NOT_RUN", "reason": "isolated browser text measurement unavailable or invalid"}
+    return {"status": "MEASURED", "boxes": boxes, "outside": outside, "overlaps": overlaps,
+            "browser_version": run["result"].get("browser_version")}
 
 
 def rasterize_svg(svg: str, *, width: int, height: int, out_dir: Path, timeout_s: int = 120) -> dict:
@@ -164,15 +290,20 @@ def rasterize_svg(svg: str, *, width: int, height: int, out_dir: Path, timeout_s
         findings.append("SVG_NOT_DECODED")
     if run["result"].get("blocked_requests"):
         findings.append("REMOTE_REQUEST_ATTEMPTED")
-    ok = not findings and capture.is_file()
+    if "raster.png" not in run["output_files"]:
+        findings.append("MISSING_CAPTURE")
+    ok = not findings
     return {**run, "status": "PASSED" if ok else "FAILED", "findings": findings, "capture": str(capture) if ok else None}
 
 
 def render_svg_frames(frames: list[str], *, width: int, height: int, out_dir: Path, timeout_s: int = 600) -> dict:
     run = _run({"mode": "frames", "frames": frames, "width": width, "height": height}, out_dir, timeout_s)
     got = run["result"].get("frames") or []
-    files = [str(out_dir / f["file"]) for f in got if f.get("complete") and (out_dir / f["file"]).is_file()]
-    findings = [] if len(files) == len(frames) and run["exit_code"] == 0 else [f"FRAMES_RENDERED:{len(files)}/{len(frames)}"]
+    expected = [f"frame_{i + 1:04d}.png" for i in range(len(frames))]
+    files = [str(out_dir / f["file"]) for f, name in zip(got, expected)
+             if f.get("complete") and f.get("file") == name and name in run["output_files"]]
+    findings = [] if frames and len(got) == len(expected) and len(files) == len(expected) and run["exit_code"] == 0 \
+        else [f"FRAMES_RENDERED:{len(files)}/{len(frames)}"]
     if run["result"].get("blocked_requests"):
         findings.append("REMOTE_REQUEST_ATTEMPTED")
     return {**run, "status": "PASSED" if not findings else "FAILED", "findings": findings, "files": files}
@@ -187,7 +318,7 @@ def render_pdf(html: str, *, width_px: int, height_px: int, out_dir: Path, timeo
         findings.append(f"BROWSER_EXIT:{run['exit_code']}")
     if run["result"].get("blocked_requests"):
         findings.append("REMOTE_REQUEST_ATTEMPTED")
-    if not capture.is_file() or not capture.read_bytes().startswith(b"%PDF-"):
+    if "document.pdf" not in run["output_files"] or not capture.read_bytes().startswith(b"%PDF-"):
         findings.append("PDF_NOT_WRITTEN")
     ok = not findings
     return {**run, "status": "PASSED" if ok else "FAILED", "findings": findings, "capture": str(capture) if ok else None}
@@ -208,8 +339,11 @@ def measure_layout(html: str, *, width: int, height: int, out_dir: Path, capture
     pages = run["result"].get("layout")
     if pages is None:
         findings.append("LAYOUT_NOT_MEASURED")
+    captures = run["result"].get("captures") or {}
+    if capture and (len(captures) != len(pages or []) or any(name not in run["output_files"] for name in captures.values())):
+        findings.append("MISSING_CAPTURE")
     return {**run, "status": "PASSED" if not findings else "FAILED", "findings": findings, "pages": pages or [],
-            "captures": run["result"].get("captures") or {}}
+            "captures": captures}
 
 
 def run_experience(html: str, scenarios: list[dict], *, out_dir: Path, timeout_s: int = 300) -> dict:
@@ -219,9 +353,11 @@ def run_experience(html: str, scenarios: list[dict], *, out_dir: Path, timeout_s
     findings = []
     if run["exit_code"] != 0:
         findings.append(f"BROWSER_EXIT:{run['exit_code']}")
-    if len(results) != len(scenarios):
+    if len(results) != len(scenarios) or [r.get("id") for r in results] != [s.get("id") for s in scenarios]:
         findings.append(f"SCENARIOS_RUN:{len(results)}/{len(scenarios)}")
     findings += [f"SCENARIO_FAILED:{r['id']}" for r in results if not r["passed"]]
+    if any(f"{s['id']}.png" not in run["output_files"] for s in scenarios if s.get("capture")):
+        findings.append("MISSING_CAPTURE")
     if run["result"].get("blocked_requests"):
         findings.append("REMOTE_REQUEST_ATTEMPTED")
     return {**run, "status": "PASSED" if not findings else "FAILED", "findings": findings, "scenarios": results}

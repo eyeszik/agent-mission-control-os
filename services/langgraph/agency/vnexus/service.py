@@ -180,6 +180,10 @@ def layers_for(brand_id: str, scope: Scope, scope_ref: str, *, preview: Optional
 def resolve_scope(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str,
                   preview_version_id: Optional[str] = None) -> tuple[Resolution, list[GenomeLayer]]:
     brand = brand_for(principal, brand_id)
+    # Resolution includes the brand's approved owner-project layer even when
+    # the requested scope belongs to a different project. Both source and
+    # destination must be readable; sharing requires explicit authority.
+    authorize(principal, brand["owner_project_id"])
     authorize(principal, scope_project(brand, scope, scope_ref))
     preview = None
     if preview_version_id:
@@ -190,8 +194,11 @@ def resolve_scope(principal: Principal, brand_id: str, *, scope: Scope, scope_re
     return resolve(layers, preview_ref=scope_ref if preview else None), layers
 
 
-def readiness(row: dict) -> dict:
-    """What would block this version if it were approved now, judged against its approved ancestors."""
+def readiness(row: dict, *, principal: Principal) -> dict:
+    """What would block this version, subject to access to its approved ancestors."""
+    brand = brand_for(principal, row["brand_id"])
+    authorize(principal, brand["owner_project_id"])
+    authorize(principal, row["project_id"])
     doc = _document(row)
     scope = Scope(row["scope"])
     layers = layers_for(row["brand_id"], scope, row["scope_ref"], preview=row)
@@ -214,7 +221,7 @@ def submit_version(principal: Principal, version_id: str) -> dict:
     row = get_version(principal, version_id, settle=False)
     authorize(principal, row["project_id"], write=True)
     next_status(VersionStatus(row["status"]), "submit")
-    report = readiness(row)
+    report = readiness(row, principal=principal)
     if not report["ready"]:
         raise GenomeBlocked("version has blocking conflicts or findings against its approved ancestors", report)
     from services.langgraph.agency.intake.release import open_artifact_approval
@@ -276,7 +283,7 @@ def settle_version(principal: Principal, version_id: str) -> dict:
     action = "approve" if approval.get("decision") == "approve" else "reject"
     target = next_status(VersionStatus.IN_REVIEW, action)
     if action == "approve":
-        report = readiness(row)
+        report = readiness(row, principal=principal)
         if not report["ready"]:
             # An ancestor changed while this version was in review; it can no longer be approved as is.
             return db.transition_version(version_id, from_status="IN_REVIEW", to_status="DRAFT", actor="system", action="refuse",

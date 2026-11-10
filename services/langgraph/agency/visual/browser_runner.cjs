@@ -11,6 +11,13 @@
 const fs = require("fs");
 const path = require("path");
 
+function safeOutputId(value) {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{1,80}$/.test(value)) {
+    throw new Error("UNSAFE_OUTPUT_ID");
+  }
+  return value;
+}
+
 function loadPlaywright() {
   const candidates = [process.env.AMC_PLAYWRIGHT_CORE, "playwright-core", "@playwright/test"].filter(Boolean);
   const searchPaths = [process.cwd(), path.resolve(__dirname, "../../../../apps/web")];
@@ -252,6 +259,38 @@ async function main() {
       result.raster = await page.evaluate(() => window.__result);
       await page.screenshot({ path: path.join(outDir, "raster.png"), clip: { x: 0, y: 0, width: spec.width, height: spec.height }, omitBackground: true });
       result.raster.capture = "raster.png";
+    } else if (spec.mode === "text_layout") {
+      // Rebuild only the supplied text attributes as DOM text nodes; never
+      // insert untrusted SVG markup or treat the copy as HTML/script.
+      await page.setViewportSize({ width: spec.width, height: spec.height });
+      await page.setContent('<!doctype html><html><body style="margin:0"><svg id="text" xmlns="http://www.w3.org/2000/svg" style="display:block"></svg></body></html>');
+      result.text_layout = await page.evaluate(async ({width, height, margin, elements}) => {
+        const ns = "http://www.w3.org/2000/svg", svg = document.getElementById("text");
+        svg.setAttribute("width", String(width)); svg.setAttribute("height", String(height));
+        svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        const nodes = elements.map((item) => {
+          const el = document.createElementNS(ns, "text");
+          for (const [attr, value] of Object.entries({x:item.x, y:item.y, "font-size":item.size, "font-weight":item.weight,
+              "font-family":item.family, "text-anchor":item.anchor, "letter-spacing":item.tracking})) el.setAttribute(attr, String(value));
+          if (item.rotation) el.setAttribute("transform", `rotate(${item.rotation} ${item.x} ${item.y})`);
+          el.textContent = item.text;
+          svg.appendChild(el);
+          return el;
+        });
+        if (document.fonts) await document.fonts.ready;
+        const boxes = nodes.map((node, index) => {
+          const r = node.getBoundingClientRect();
+          return { index, role:elements[index].role, left:r.left, top:r.top, right:r.right, bottom:r.bottom };
+        });
+        const inset = Math.min(width, height) * margin;
+        const outside = boxes.filter((b) => b.left < inset - 1 || b.top < inset - 1 || b.right > width - inset + 1 || b.bottom > height - inset + 1).map((b) => b.index);
+        const overlaps = [];
+        for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+          const a = boxes[i], b = boxes[j];
+          if (Math.min(a.right,b.right) - Math.max(a.left,b.left) > 1 && Math.min(a.bottom,b.bottom) - Math.max(a.top,b.top) > 1) overlaps.push([i,j]);
+        }
+        return { boxes, outside, overlaps };
+      }, spec);
     } else if (spec.mode === "frames") {
       await page.setViewportSize({ width: spec.width, height: spec.height });
       result.frames = [];
@@ -312,9 +351,10 @@ async function main() {
       if (spec.capture) {
         result.captures = {};
         for (const p of result.layout) {
-          const file = `page-${p.id}.png`;
-          await page.locator(`section[data-page="${p.id}"]`).screenshot({ path: path.join(outDir, file) });
-          result.captures[p.id] = file;
+          const id = safeOutputId(p.id);
+          const file = `page-${id}.png`;
+          await page.locator(`section[data-page="${id}"]`).screenshot({ path: path.join(outDir, file) });
+          result.captures[id] = file;
         }
       }
     } else if (spec.mode === "experience") {
@@ -339,8 +379,9 @@ async function main() {
           catch (e) { steps.push({ ...step, ok: false, detail: String(e).slice(0, 200) }); }
         }
         const audit = await auditPage(sp);
-        if (scenario.capture) await sp.screenshot({ path: path.join(outDir, `${scenario.id}.png`), fullPage: true });
-        result.scenarios.push({ id: scenario.id, steps, audit, page_errors: errors, capture: scenario.capture ? `${scenario.id}.png` : null,
+        const captureName = scenario.capture ? `${safeOutputId(scenario.id)}.png` : null;
+        if (captureName) await sp.screenshot({ path: path.join(outDir, captureName), fullPage: true });
+        result.scenarios.push({ id: scenario.id, steps, audit, page_errors: errors, capture: captureName,
                                 passed: steps.every((s) => s.ok) && errors.length === 0 });
         await ctx.close();
       }

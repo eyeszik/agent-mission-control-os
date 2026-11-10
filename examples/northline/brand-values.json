@@ -1,0 +1,52 @@
+{
+  "synthetic": true,
+  "values": {
+    "strategy.audience.primary": "Small professional-service teams",
+    "strategy.positioning.statement": "Workflow diagnostic and implementation planning",
+    "verbal.content_rules.forbidden_phrases": [
+      "guaranteed results",
+      "certified expert"
+    ],
+    "verbal.messaging.about_body": "Northline is a synthetic reference brand created to demonstrate this production workflow; it is not a claim about a real business.",
+    "verbal.messaging.about_description": "About Northline Workflow Studio",
+    "verbal.messaging.about_heading": "Practical by design",
+    "verbal.messaging.about_title": "About",
+    "verbal.messaging.contact_body": "This demonstration has no live contact form or message destination. No message is sent from this page.",
+    "verbal.messaging.contact_description": "Start a conversation",
+    "verbal.messaging.contact_heading": "Discuss your workflow",
+    "verbal.messaging.contact_title": "Contact",
+    "verbal.messaging.cta": "Start a conversation",
+    "verbal.messaging.home_image_alt": "Abstract workflow paths and connected shapes.",
+    "verbal.messaging.implementation_planning_body": "A planning engagement can define responsibilities, dependencies, and decisions before implementation begins.",
+    "verbal.messaging.implementation_planning_description": "Plan a considered next step",
+    "verbal.messaging.implementation_planning_heading": "Turn priorities into a plan",
+    "verbal.messaging.implementation_planning_title": "Implementation Planning",
+    "verbal.messaging.index_body": "Northline Workflow Studio helps small professional-service teams describe their current workflows and consider practical next steps.",
+    "verbal.messaging.index_description": "Clearer work starts with a shared picture",
+    "verbal.messaging.index_heading": "See your workflow clearly",
+    "verbal.messaging.index_title": "Home",
+    "verbal.messaging.organization": "Northline Workflow Studio",
+    "verbal.messaging.process_body": "We begin with the people and steps involved, document what we learn, and review options with the team.",
+    "verbal.messaging.process_description": "A collaborative, reviewable process",
+    "verbal.messaging.process_heading": "Map, discuss, decide",
+    "verbal.messaging.process_title": "Process",
+    "verbal.messaging.services_body": "A workflow diagnostic maps the current process. Implementation planning turns agreed priorities into a practical plan.",
+    "verbal.messaging.services_description": "Workflow support for small teams",
+    "verbal.messaging.services_heading": "Start with the work itself",
+    "verbal.messaging.services_title": "Services",
+    "verbal.messaging.tagline": "Make work easier to see.",
+    "verbal.messaging.workflow_diagnostic_body": "A diagnostic can document handoffs, recurring tasks, and questions for the team to review together.",
+    "verbal.messaging.workflow_diagnostic_description": "Understand the current workflow",
+    "verbal.messaging.workflow_diagnostic_heading": "Make the invisible work visible",
+    "verbal.messaging.workflow_diagnostic_title": "Workflow Diagnostic",
+    "verbal.voice.tone": [
+      "clear",
+      "considered"
+    ],
+    "visual.color.accent": "#ff4c2f",
+    "visual.color.accent_2": "#ffaa3d",
+    "visual.color.ink": "#171719",
+    "visual.color.muted": "#838185",
+    "visual.color.paper": "#f0eee9"
+  }
+}

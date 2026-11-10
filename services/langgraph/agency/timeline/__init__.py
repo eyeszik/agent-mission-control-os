@@ -170,6 +170,8 @@ def validate_cutdown(master: Timeline, cutdown: Timeline, *, target_seconds: str
         source = by_ref.get(clip.shot_ref)
         if source is None:
             raise TimingError(f"cutdown references unknown master shot {clip.shot_ref}")
+        if clip.role != source.role:
+            raise TimingError(f"cutdown relabels {clip.shot_ref}; source shot role must be preserved")
         if clip.duration_frames > source.duration_frames:
             raise TimingError(f"cutdown extends {clip.shot_ref}; only trims are allowed")
     target = seconds_to_frames(target_seconds, master.timebase.fps)

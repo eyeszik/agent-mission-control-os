@@ -1,14 +1,17 @@
-"""Isolation for untrusted generated source. A temporary directory is not isolation.
+"""Fail-closed isolation for UCPO's untrusted generated source.
 
-``probe_isolation`` proves, by running them, the properties the build relies on:
+A read-only repository and ``env -i`` are not a confidentiality boundary: the
+old namespace left the host home and other projects readable. The build now
+runs inside a new user, mount, PID and network namespace *and* a minimal
+chroot. Only system runtime directories, the installed web dependencies and
+explicitly named scratch/input paths are mounted; the rest of the repository,
+home, host /tmp and host sockets are absent. Only the new PID namespace's /proc is mounted. Capabilities are dropped
+and no-new-privileges is set before executing the command.
 
-* a user + mount + network namespace (``unshare -rmn``) with no network interface but loopback;
-* the repository re-mounted read-only inside that namespace (so ``node_modules`` is usable but not writable);
-* a scrubbed environment (``env -i``) and ``prlimit`` resource caps;
-* a wall-clock ``timeout``.
-
-If any property cannot be demonstrated the result is ``available=False`` and callers must
-return ``BLOCKED_ISOLATION`` without executing generated code.
+``probe_isolation`` actually tests this boundary, including a synthetic host
+canary and a network connection. Any unsupported operation blocks execution.
+This is not a general-purpose hostile multi-tenant container (there is no
+seccomp/cgroup resource isolation); it is a restricted local build boundary.
 """
 
 from __future__ import annotations
@@ -23,8 +26,10 @@ from typing import Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 WEB_NODE_MODULES = REPO_ROOT / "apps" / "web" / "node_modules"
-# Resource caps applied to every sandboxed process. Address-space caps break V8, so memory is bounded by time instead.
-LIMITS = {"fsize_bytes": 256 * 1024 * 1024, "nofile": 4096, "core": 0}
+ROOT_NODE_MODULES = REPO_ROOT / "node_modules"
+LIMITS = {"fsize_bytes": 256 * 1024 * 1024, "nofile": 4096, "nproc": 128, "core": 0}
+_SYSTEM_DIRS = ("/usr", "/bin", "/lib", "/lib64", "/etc/fonts")
+_DEVICES = ("/dev/null", "/dev/zero", "/dev/urandom")
 
 
 @dataclass(frozen=True)
@@ -42,28 +47,58 @@ def _which(name: str) -> Optional[str]:
     return shutil.which(name)
 
 
+def _mount(path: Path, root: Path, *, readonly: bool) -> str:
+    """Bind one exact path at its original absolute name, never its parent."""
+    if not path.is_absolute() or not path.exists():
+        raise ValueError(f"sandbox mount path is missing or not absolute: {path}")
+    target = root / str(path).lstrip("/")
+    src, dst = shlex.quote(str(path)), shlex.quote(str(target))
+    prepare = f"mkdir -p {dst}" if path.is_dir() else f"mkdir -p {shlex.quote(str(target.parent))} && : > {dst}"
+    mount = f"mount --bind {src} {dst}"
+    remount = f" && mount -o remount,bind,ro,nosuid,nodev {dst}" if readonly else ""
+    return f"{prepare} && {mount}{remount}"
+
+
 def wrap(command: list[str], *, cwd: Path, home: Path, node: str, timeout_s: int, network: bool = False,
-         extra_env: Optional[dict[str, str]] = None) -> list[str]:
-    """The argv that runs ``command`` in the sandbox: new namespaces, read-only repo, scrubbed env, caps, timeout."""
-    env = {"PATH": f"{Path(node).parent}:/usr/bin:/bin", "HOME": str(home), "NEXT_TELEMETRY_DISABLED": "1",
-           "CI": "1", "LANG": "C.UTF-8", **(extra_env or {})}
-    inner = " ".join([
-        f"mount --bind {shlex.quote(str(REPO_ROOT))} {shlex.quote(str(REPO_ROOT))}",
-        f"&& mount -o remount,bind,ro {shlex.quote(str(REPO_ROOT))}",
-        f"&& cd {shlex.quote(str(cwd))}",
-        "&& exec env -i", *(shlex.quote(f"{k}={v}") for k, v in sorted(env.items())),
-        "prlimit", f"--fsize={LIMITS['fsize_bytes']}", f"--nofile={LIMITS['nofile']}", f"--core={LIMITS['core']}", "--",
-        "timeout", "--kill-after=5", str(timeout_s), *(shlex.quote(c) for c in command),
-    ])
-    return ["unshare", "-rm" + ("" if network else "n"), "sh", "-c", inner]
+         extra_env: Optional[dict[str, str]] = None, readonly_paths: tuple[Path, ...] = (),
+         writable_paths: tuple[Path, ...] = ()) -> list[str]:
+    """Build an argv for one isolated process. Paths are provided by trusted UCPO code only."""
+    if network:
+        raise ValueError("UCPO does not allow network-enabled execution")
+    cwd, home = Path(cwd).absolute(), Path(home).absolute()
+    root = home / ".amc-sandbox-root"
+    root.mkdir(parents=True, exist_ok=True)
+    env = {"PATH": "/usr/local/bin:/usr/bin:/bin", "HOME": str(home), "TMPDIR": str(home),
+           "NEXT_TELEMETRY_DISABLED": "1", "CI": "1", "LANG": "C.UTF-8", **(extra_env or {})}
+    readonly = [Path(p) for p in _SYSTEM_DIRS if Path(p).exists()]
+    readonly += [ROOT_NODE_MODULES, WEB_NODE_MODULES, *readonly_paths]
+    writable = list(dict.fromkeys((cwd, home, *writable_paths)))
+    steps = ["mount --make-rprivate /", f"mount -t tmpfs -o size=32m,nosuid,nodev tmpfs {shlex.quote(str(root))}"]
+    steps += [_mount(Path(p), root, readonly=True) for p in readonly]
+    # Only these explicit, caller-owned directories are writable. No host /tmp or home is mounted.
+    steps += [_mount(Path(p), root, readonly=False) for p in writable]
+    steps += [_mount(Path(p), root, readonly=False) for p in _DEVICES if Path(p).exists()]
+    steps.append(f"mkdir -p {shlex.quote(str(root / 'proc'))} && mount -t proc -o nosuid,nodev,noexec proc {shlex.quote(str(root / 'proc'))}")
+    env_args = " ".join(shlex.quote(f"{k}={v}") for k, v in sorted(env.items()))
+    cmd_args = " ".join(shlex.quote(str(c)) for c in command)
+    enter_cwd = shlex.quote('cd ' + shlex.quote(str(cwd)) + ' && exec "$@"')
+    child = (f"exec /usr/sbin/chroot {shlex.quote(str(root))} /usr/bin/setpriv --no-new-privs "
+             f"--bounding-set=-all --inh-caps=-all --ambient-caps=-all /usr/bin/env -i {env_args} "
+             f"/usr/bin/prlimit --fsize={LIMITS['fsize_bytes']} --nofile={LIMITS['nofile']} "
+             f"--nproc={LIMITS['nproc']} --core=0 -- /usr/bin/timeout --kill-after=5 {timeout_s} "
+             f"/bin/sh -c {enter_cwd} sandbox {cmd_args}")
+    steps.append(child)
+    return ["unshare", "-rmnpf", "sh", "-c", " && ".join(steps)]
 
 
 def probe_isolation() -> Isolation:
     reasons: list[str] = []
     facts: dict = {}
-    for tool in ("unshare", "mount", "prlimit", "timeout", "env", "sh"):
+    for tool in ("unshare", "mount", "prlimit", "timeout", "env", "sh", "setpriv"):
         if not _which(tool):
             reasons.append(f"{tool} not found")
+    if not Path("/usr/sbin/chroot").is_file():
+        reasons.append("/usr/sbin/chroot not found")
     node = _which("node") or ("/opt/node22/bin/node" if Path("/opt/node22/bin/node").exists() else None)
     if not node:
         reasons.append("node not found")
@@ -71,37 +106,38 @@ def probe_isolation() -> Isolation:
         reasons.append("apps/web/node_modules is not installed (run pnpm install --frozen-lockfile)")
     if reasons:
         return Isolation(False, tuple(reasons), facts, node)
-    with tempfile.TemporaryDirectory(prefix="amc-ucpo-probe-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="amc-ucpo-probe-") as tmp, tempfile.TemporaryDirectory(prefix="amc-ucpo-canary-") as outside:
         work = Path(tmp)
-        script = ("ip -o link 2>/dev/null | wc -l > links; "
-                  "(touch {repo}/.amc-ro-probe 2>/dev/null && echo writable || echo readonly) > repo; "
-                  "env | sort > env; echo ok > ok").format(repo=shlex.quote(str(REPO_ROOT)))
-        argv = wrap(["sh", "-c", script], cwd=work, home=work, node=node, timeout_s=20)
+        canary = Path(outside) / "host-canary"
+        canary.write_text("synthetic isolation canary", encoding="utf-8")
+        script = (f"test ! -e {shlex.quote(str(canary))} && test ! -e {shlex.quote(str(REPO_ROOT / 'README.md'))} "
+                  f"&& test -r {shlex.quote(str(WEB_NODE_MODULES / 'next' / 'package.json'))} "
+                  f"&& test ! -e /proc/1/root{shlex.quote(str(canary))} "
+                  "&& test -e /proc/self/exe && echo hidden > boundary && env | sort > env && echo ok > ok")
         try:
-            proc = subprocess.run(argv, capture_output=True, text=True, timeout=40)
-        except (OSError, subprocess.TimeoutExpired) as exc:
+            proc = subprocess.run(wrap(["sh", "-c", script], cwd=work, home=work, node=node, timeout_s=20),
+                                  capture_output=True, text=True, timeout=40)
+        except (OSError, subprocess.SubprocessError, ValueError) as exc:
             return Isolation(False, (f"sandbox probe failed to run: {exc}",), facts, node)
         if proc.returncode != 0 or not (work / "ok").exists():
-            return Isolation(False, (f"sandbox probe exited {proc.returncode}: {proc.stderr.strip()[-300:]}",), facts, node)
-        repo_state = (work / "repo").read_text().strip()
+            return Isolation(False, (f"sandbox boundary probe exited {proc.returncode}: {proc.stderr.strip()[-300:]}",), facts, node)
         env_keys = sorted(line.split("=", 1)[0] for line in (work / "env").read_text().splitlines() if "=" in line)
-        stray = REPO_ROOT / ".amc-ro-probe"
-        if stray.exists():
-            stray.unlink()
-        facts = {"network_namespace": True, "repo_mount": repo_state, "env_keys": env_keys,
-                 "limits": dict(LIMITS), "node": node}
-        if repo_state != "readonly":
-            reasons.append("repository is writable inside the sandbox")
-        allowed = {"PATH", "HOME", "NEXT_TELEMETRY_DISABLED", "CI", "LANG", "PWD", "SHLVL", "_", "OLDPWD"}
+        facts = {"network_namespace": True, "pid_namespace": True, "filesystem": "minimal chroot",
+                 "host_canary": "hidden", "repository_source": "hidden", "capabilities": "dropped",
+                 "env_keys": env_keys, "limits": dict(LIMITS), "node": node,
+                 "seccomp": False, "cgroup_quota": False}
+        allowed = {"PATH", "HOME", "TMPDIR", "NEXT_TELEMETRY_DISABLED", "CI", "LANG", "PWD", "SHLVL", "_", "OLDPWD"}
         if set(env_keys) - allowed:
             reasons.append(f"environment not scrubbed: {sorted(set(env_keys) - allowed)}")
-        # Network: a connection to a routable address must fail inside the namespace.
-        net = subprocess.run(wrap([node, "-e", "require('net').connect(443,'1.1.1.1').on('connect',()=>{console.log('NET');process.exit(0)})"
-                                   ".on('error',()=>process.exit(3))"], cwd=work, home=work, node=node, timeout_s=10),
-                             capture_output=True, text=True, timeout=30)
-        facts["network_probe_exit"] = net.returncode
-        if "NET" in net.stdout:
-            reasons.append("network reachable inside the sandbox")
+        try:
+            net = subprocess.run(wrap([node, "-e", "require('net').connect(443,'1.1.1.1').on('connect',()=>process.exit(0))"
+                                       ".on('error',()=>process.exit(3))"], cwd=work, home=work, node=node, timeout_s=10),
+                                 capture_output=True, text=True, timeout=30)
+            facts["network_probe_exit"] = net.returncode
+            if net.returncode != 3:
+                reasons.append(f"network isolation not demonstrated (probe exit {net.returncode})")
+        except (OSError, subprocess.SubprocessError, ValueError) as exc:
+            reasons.append(f"network isolation probe failed: {type(exc).__name__}")
     return Isolation(not reasons, tuple(reasons), facts, node)
 
 

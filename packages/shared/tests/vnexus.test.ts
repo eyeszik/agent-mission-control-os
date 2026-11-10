@@ -60,6 +60,11 @@ describe('VNEXUS Zod twins parse real backend responses', () => {
   it('records what the contract means, not only its shape', () => {
     expect(fixture.media_job.state).toBe('QC_PASSED');
     expect(fixture.media_job.claimable_as_generated).toBe(true);
+    // A technical pass is neither source-rights clearance nor release authority.
+    expect(fixture.media_job.qc.scope).toBe('TECHNICAL_FORMAT_CHECKS_ONLY');
+    expect(fixture.media_job.qc.rights_status).toBe('NOT_MEASURED');
+    expect(fixture.media_job.qc.release_decision).toBe('NOT_EVALUATED');
+    expect(fixture.media_job.qc.checks.some((c) => c.check === 'source_rights')).toBe(false);
     expect(fixture.prompt_inventory.expected_originals).toBe(14);
     expect(fixture.audit.verification.intact).toBe(true);
   });

@@ -335,12 +335,19 @@ class LocalMotion(MediaProvider):
         errors = []
         if not isinstance(frames, list) or not 2 <= len(frames) <= 900:
             errors.append("SPEC_MISSING: frames (2..900 SVG strings)")
-        elif any(svg_problems(f) for f in frames[:1] + frames[-1:]):
+        elif any(not isinstance(f, str) for f in frames):
+            errors.append("SVG_FRAME_INVALID: every frame must be text")
+        elif any(len(f.encode("utf-8")) > 128_000 for f in frames) or sum(len(f.encode("utf-8")) for f in frames) > 32_000_000:
+            errors.append("SVG_FRAME_BUDGET_EXCEEDED")
+        elif any(svg_problems(f) for f in frames):
+            # Intermediate frames are just as untrusted as the first and last.
             errors.append("SVG_FRAME_INVALID")
-        if not isinstance(request.spec.get("fps"), int) or not 1 <= request.spec["fps"] <= 60:
+        if not isinstance(request.spec.get("fps"), int) or isinstance(request.spec.get("fps"), bool) or not 1 <= request.spec["fps"] <= 60:
             errors.append("SPEC_MISSING: fps (1..60)")
         if not (request.width and request.height) or request.width % 2 or request.height % 2:
             errors.append("SPEC_INVALID: even width and height required for H.264")
+        elif isinstance(frames, list) and request.width * request.height * len(frames) > 400_000_000:
+            errors.append("FRAME_PIXEL_BUDGET_EXCEEDED")
         return errors
 
     def _render(self, request: MediaRequest, work_dir: Path) -> Path:

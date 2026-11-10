@@ -137,17 +137,20 @@ def produce_identity(principal: Principal, brand_id: str, *, scope: Scope, scope
     for spec in outputs:
         job = _run_spec(principal, project_id, spec, run_key=run_key)
         art = job.get("artifact") or {}
+        public_job = fabric_service.public(job)
+        qc = public_job["qc"]
+        technical_passed = qc.get("scope") == fabric_service.TECHNICAL_QC_SCOPE and qc.get("passed") is True
         entry = {"deliverable": spec.deliverable, "name": spec.name, "capability": spec.capability.value, "job_id": job["job_id"],
                  "state": job["state"], "error": job.get("error"), "artifact_id": art.get("artifact_id"), "sha256": art.get("sha256"),
-                 "claimable_as_generated": fabric_service.public(job)["claimable_as_generated"]}
-        if job["state"] == "QC_PASSED" and art.get("artifact_id"):
+                 "technical_qc_passed": technical_passed, "claimable_as_generated": public_job["claimable_as_generated"]}
+        if job["state"] == "QC_PASSED" and public_job["claimable_as_generated"] and art.get("artifact_id"):
             entry["graph_node"] = link_output(principal, brand_id, label=spec.name, kind=NodeKind.ASSET, ref=art["artifact_id"],
                                               attributes={"deliverable": spec.deliverable, "sha256": art["sha256"], "mime": art["mime"]},
                                               genome_version_id=p.genome_ref, job_id=job["job_id"])
         results.append(entry)
         if spec.capability is Capability.VECTOR_SVG:
             validations.append({"output": spec.name, **identity.palette_check(spec.source["svg"], genome)})
-        if spec.transparent and job["state"] == "QC_PASSED":
+        if spec.transparent and job["state"] == "QC_PASSED" and public_job["claimable_as_generated"]:
             from services.langgraph.agency.foundry.studio import observe
             from services.langgraph.api.routes._project_common import storage_adapter
 
@@ -158,6 +161,9 @@ def produce_identity(principal: Principal, brand_id: str, *, scope: Scope, scope
         if ir.kind == "poster":
             margin = next((s.safe_margin for s in outputs if s.deliverable == key.split(":")[0]), 0.06)
             validations.append({"output": key, **identity.safe_area(ir, margin)})
+            validations.append({"output": key, **identity.text_overlap(ir)})
+            with tempfile.TemporaryDirectory(prefix="amc-vnexus-text-layout-") as work:
+                validations.append({"output": key, **identity.rendered_text_layout(ir, genome, margin=margin, work=Path(work))})
             validations.append({"output": key, **identity.crop_behavior(ir, 1.0)})
     if "logo_mark" in deliverables:
         with tempfile.TemporaryDirectory(prefix="amc-vnexus-minrep-") as work:
@@ -168,12 +174,19 @@ def produce_identity(principal: Principal, brand_id: str, *, scope: Scope, scope
     if "icon_family" in deliverables:
         icons = [s.source["svg"] for s in outputs if s.deliverable == "icon_family"]
         validations.append({"output": "icon_family", **identity.stroke_consistency(icons)})
-    failed = [v for v in validations if v["status"] == "FAILED" and v["severity"] == "ERROR"]
-    report = {"kind": "identity", "genome_ref": p.genome_ref, "resolution_hash": p.resolution_hash, "creative_genome_hash": genome.content_hash,
+    # An unavailable required measurement is not evidence of a verified asset.
+    failed = [v for v in validations if v["status"] != "PASSED" and v["severity"] == "ERROR"]
+    report = {"kind": "identity", "qc_projection_version": fabric_service.QC_PROJECTION_VERSION,
+              "receipt_scope": "historical result; revalidate inputs and approvals before any release",
+              "genome_ref": p.genome_ref, "resolution_hash": p.resolution_hash, "creative_genome_hash": genome.content_hash,
               "outputs": results, "validations": validations, "genome_trace": p.trace(),
               "master_binding": {k: v for k, v in master_binding.items() if not k.startswith("_")},
-              "status": "VERIFIED" if all(r["state"] == "QC_PASSED" for r in results) and not failed else "INCOMPLETE",
-              "human_review_required": ["visual coherence", "distinctiveness", "fitness for the brief"]}
+              "status": "VERIFIED" if all(r["state"] == "QC_PASSED" and r["technical_qc_passed"]
+                                           and r["claimable_as_generated"] and r["artifact_id"] for r in results)
+                        and not failed else "INCOMPLETE",
+              "verification_scope": "technical and listed automated checks only; not release approval",
+              "rights_status": "NOT_MEASURED", "release_decision": "NOT_EVALUATED",
+              "human_review_required": ["visual coherence", "distinctiveness", "fitness for the brief", "rights and font clearance"]}
     report["report_hash"] = canonical_hash(report)
     return report
 
@@ -263,9 +276,12 @@ def produce_video(principal: Principal, brand_id: str, *, scope: Scope, scope_re
 
     adapter = storage_adapter()
     art = master.get("artifact") or {}
+    master_public = fabric_service.public(master)
+    master_qc = master_public["qc"]
+    master_technical = master["state"] == "QC_PASSED" and master_public["claimable_as_generated"]
     audio: dict[str, Any] = {"status": "SILENT", "reason": "no audio supplied; nothing generated"}
     deliverables: dict[str, Any] = {}
-    if master["state"] == "QC_PASSED" and art.get("artifact_id"):
+    if master_technical and art.get("artifact_id"):
         deliverables["master_silent"] = art["artifact_id"]
         if brief.audio_artifact_id:
             audio = _mux(principal, project_id, brief, art["artifact_id"], adapter, observe, store)
@@ -279,17 +295,34 @@ def produce_video(principal: Principal, brand_id: str, *, scope: Scope, scope_re
                                        request=MediaRequest(capability=Capability.RASTER_PNG, spec={"svg": frames[-1]}, width=brief.width,
                                                             height=brief.height, label="reduced-motion still"),
                                        idempotency_key=f"{run_key}:still", depends_on=(art["artifact_id"],))
-        if still["state"] == "QC_PASSED":
-            deliverables["reduced_motion_still"] = (still.get("artifact") or {}).get("artifact_id")
+        still_public = fabric_service.public(still)
+        still_id = (still.get("artifact") or {}).get("artifact_id")
+        if still["state"] == "QC_PASSED" and still_public["claimable_as_generated"] and still_id:
+            deliverables["reduced_motion_still"] = still_id
         link_output(principal, brand_id, label="video master", kind=NodeKind.ASSET, ref=art["artifact_id"],
                     attributes={"sha256": art["sha256"], "plan_hash": plan["plan_hash"]}, genome_version_id=p.genome_ref,
                     job_id=master["job_id"])
     stages["audio"] = audio
-    stages["quality_control"] = master.get("qc") or {}
-    ready = master["state"] == "QC_PASSED" and "captions" in deliverables and "reduced_motion_still" in deliverables
-    stages["master"] = {"status": "MASTER_READY" if ready else "INCOMPLETE", "deliverables": deliverables,
+    stages["quality_control"] = master_qc
+    preview_ready = master_technical and "captions" in deliverables and "reduced_motion_still" in deliverables
+    reasons = []
+    if not preview_ready:
+        reasons.append("PROCEDURAL_PREVIEW_INCOMPLETE")
+    if blocked:
+        reasons.append("REQUESTED_SHOTS_BLOCKED")
+    if plan["script"]["placeholders"]:
+        reasons.append("COPY_PLACEHOLDERS_PRESENT")
+    if brief.audio_artifact_id and audio.get("status") != "MUXED":
+        reasons.append("REQUESTED_AUDIO_UNAVAILABLE")
+    stages["master"] = {"status": "MASTER_READY" if not reasons else "INCOMPLETE", "deliverables": deliverables,
+                        "procedural_preview_available": preview_ready, "reasons": reasons,
+                        "readiness_scope": "requested local technical outputs only; not creative acceptance or release",
+                        "rights_status": "NOT_MEASURED", "release_decision": "NOT_EVALUATED",
+                        "human_review_required": ["creative and accessibility review", "rights and font clearance"],
                         "procedural_only": bool(blocked), "blocked_shots": [b["shot_id"] for b in blocked]}
-    return {"kind": "video", "plan_hash": plan["plan_hash"], "stages": stages, "genome_ref": p.genome_ref,
+    return {"kind": "video", "qc_projection_version": fabric_service.QC_PROJECTION_VERSION,
+            "receipt_scope": "historical result; revalidate inputs and approvals before any release",
+            "plan_hash": plan["plan_hash"], "stages": stages, "genome_ref": p.genome_ref,
             "status": stages["master"]["status"], "label": "synthetic procedural animation; not filmed footage"}
 
 

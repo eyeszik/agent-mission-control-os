@@ -211,6 +211,16 @@ def rendered_stage(pkg: RequirementsPackage, v: Optional[BrowserVerification]) -
         ("FAIL", "missing: no routes rendered") if not routes else next(
             ((verdict, f"{route}: {d}") for route in routes for verdict, d in [_match(_visible(ev[route].get(req_id, [])), expected)]
              if verdict != "PASS"), ("PASS", "")))
+    def interaction(check: str, route: str, req_id: str) -> Verdict:
+        related = [c for c in v.checks if c.check == check and c.route == route and req_id in c.req_refs]
+        if not related:
+            return "NOT_RUN", f"no {check} click evidence for {req_id} on {route}"
+        if any(c.result == "FAIL" for c in related):
+            return "FAIL", f"changed: {check} click failed for {req_id} on {route}"
+        if any(c.result != "PASS" for c in related):
+            return "NOT_RUN", f"{check} click did not pass for {req_id} on {route}"
+        return "PASS", ""
+
     out: dict[str, Verdict] = {}
     for r in pkg.requirements:
         if "rendered" not in r.stages:
@@ -222,7 +232,9 @@ def rendered_stage(pkg: RequirementsPackage, v: Optional[BrowserVerification]) -
         elif r.kind == "BRAND_ON_PAGE":
             out[r.req_id] = every("req.brand", subj["text"] + " -> /")
         elif r.kind == "NAV_LINK":
-            out[r.req_id] = every(r.req_id, f"{subj['text']} -> {subj['href']}")
+            link = every(r.req_id, f"{subj['text']} -> {subj['href']}")
+            # Markup alone is not proof that the navigation actually works.
+            out[r.req_id] = interaction("nav_navigation", "/", r.req_id) if link[0] == "PASS" else link
         elif r.kind == "PAGE_EXISTS":
             page = ev.get(subj["route"])
             if page is None:
@@ -233,7 +245,8 @@ def rendered_stage(pkg: RequirementsPackage, v: Optional[BrowserVerification]) -
         elif r.kind in {"SECTION_HEADING", "SECTION_BODY", "LABEL_TEXT", "CTA", "ITEM_TEXT"}:
             found = _visible(ev.get(subj["route"], {}).get(r.req_id, []))
             if r.kind == "CTA":
-                out[r.req_id] = _match(found, f"{subj['text']} -> {subj['href']}")
+                link = _match(found, f"{subj['text']} -> {subj['href']}")
+                out[r.req_id] = interaction("cta_navigation", subj["route"], r.req_id) if link[0] == "PASS" else link
             elif r.kind == "ITEM_TEXT":
                 want = norm(subj["text"]) + (f" | {norm(subj['body'])}" if subj["body"] else "")
                 out[r.req_id] = _match(found, want)

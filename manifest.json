@@ -116,7 +116,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "git_blob_sha": "f5eea33b43b2a82cd26c814728bbb43708b6f67f"
+      "git_blob_sha": "eadd52216ef706d8b6d539e4678ead4d29ebf348"
     },
     {
       "path": "packages/shared/src/schemas/ace-fixtures.json",
@@ -188,7 +188,7 @@
     },
     {
       "path": "scripts/verify_manifest.py",
-      "git_blob_sha": "8137386a76dc9bbf37f305781874556115226e1d"
+      "git_blob_sha": "ab8dc503a5e7fda4d61cc3a09b21f413a9a53a9d"
     },
     {
       "path": "scripts/verify_ontology_parity.py",
@@ -284,11 +284,11 @@
     },
     {
       "path": "services/langgraph/agency/delivery/contract.py",
-      "git_blob_sha": "f2a051914245c6a9f06d685aa1391df647559360"
+      "git_blob_sha": "2470529f988a8c488f18ca5912560b3eb311893b"
     },
     {
       "path": "services/langgraph/agency/delivery/critic.py",
-      "git_blob_sha": "85608fb23a823a146f99eb9446ff3a8903dc51e0"
+      "git_blob_sha": "4ea9cf02e55ca9b38ec06e0e98076da527d68715"
     },
     {
       "path": "services/langgraph/agency/delivery/release.py",
@@ -320,7 +320,7 @@
     },
     {
       "path": "services/langgraph/agency/execution_fabric/adapters/code_sandbox.py",
-      "git_blob_sha": "91662f5c9b5e03a2043c0666a7f029a6e4b5675f"
+      "git_blob_sha": "a615861e2f57ff9c2ad4fe4d9ed71f190e4f2869"
     },
     {
       "path": "services/langgraph/agency/execution_fabric/consumer.py",
@@ -416,7 +416,7 @@
     },
     {
       "path": "services/langgraph/agency/intake/release.py",
-      "git_blob_sha": "d9645098525969f428b6eca5a209663a0628c497"
+      "git_blob_sha": "0ade57a639abc856de74f2654f6c3d947e5b9f24"
     },
     {
       "path": "services/langgraph/agency/intake/resolver.py",
@@ -480,11 +480,11 @@
     },
     {
       "path": "services/langgraph/agency/visual/browser_runner.cjs",
-      "git_blob_sha": "a22a60bd34e58dca75522b8a4be29737bbb9b01a"
+      "git_blob_sha": "359cd077673e8c741439682ae0248b5d4847b524"
     },
     {
       "path": "services/langgraph/agency/visual/browser.py",
-      "git_blob_sha": "a54e1603273e998a9bb72469afecbfbfe1baf8ed"
+      "git_blob_sha": "90778324903440d0a3ff493c67e54133b520fcfe"
     },
     {
       "path": "services/langgraph/agency/visual/capabilities.py",
@@ -492,7 +492,7 @@
     },
     {
       "path": "services/langgraph/agency/visual/renderers.py",
-      "git_blob_sha": "f876dfdccd308c6d3c44a0b8e25195470c702ad8"
+      "git_blob_sha": "bab9b2b68ee9d4faee0b96e70f1fa78f55dac318"
     },
     {
       "path": "services/langgraph/agency/visual/router.py",
@@ -500,31 +500,31 @@
     },
     {
       "path": "services/langgraph/agency/visual/verify.py",
-      "git_blob_sha": "884f266a3e4794dc45e323d52d6f300925ea6512"
+      "git_blob_sha": "d07893685f772330d9ce1fa46a7b91be38dc581e"
     },
     {
       "path": "services/langgraph/agency/vnexus/creative_service.py",
-      "git_blob_sha": "bde7fa422399d770d5d0d5fcd0bcc2266329c339"
+      "git_blob_sha": "355c19e576054d496ffbda09d28507c592fb2489"
     },
     {
       "path": "services/langgraph/agency/vnexus/fabric_service.py",
-      "git_blob_sha": "5b13cd8aa030b9c7fbf9fdcae3cd77fc65e0f750"
+      "git_blob_sha": "140f658b4b444b1442761e1264b81c6737e21d56"
     },
     {
       "path": "services/langgraph/agency/vnexus/intelligence_service.py",
-      "git_blob_sha": "c8aff3fb449fa58f239d6dbae633ca9cbda38e89"
+      "git_blob_sha": "910f745fcb60eb579c0648cfebd49299d39fc089"
     },
     {
       "path": "services/langgraph/agency/vnexus/media_fabric.py",
-      "git_blob_sha": "a2b4cc37f38670fc18d20a78c8b76857b7364b2b"
+      "git_blob_sha": "9bf027231b380f02d23054f878f2e03888dffd2f"
     },
     {
       "path": "services/langgraph/agency/vnexus/production.py",
-      "git_blob_sha": "f8eecad6e9067267996877b533209d407215828a"
+      "git_blob_sha": "fb5e0874063fa89dc397c0aec27e0218b0b65d9c"
     },
     {
       "path": "services/langgraph/agency/vnexus/service.py",
-      "git_blob_sha": "165ab5c2da8a0f16139e261e96737e66c6af155e"
+      "git_blob_sha": "2919a3ceca3fc31ff4403acd4bcc291f59a46e2d"
     },
     {
       "path": "services/langgraph/api/routes/_project_common.py",
@@ -588,7 +588,7 @@
     },
     {
       "path": "services/langgraph/api/routes/vnexus.py",
-      "git_blob_sha": "533ed3f3177f3aa1786e34bcbaa839d9f71d18a5"
+      "git_blob_sha": "87306a27056b64a0b5e6c04e88b8eaad39966bd3"
     },
     {
       "path": "services/langgraph/app/config.py",
@@ -1048,19 +1048,19 @@
     },
     {
       "path": "services/langgraph/agency/ucpo/sandbox.py",
-      "git_blob_sha": "ae064fc23921108a6fc6318a79301671e61ec33f"
+      "git_blob_sha": "8107e746e12fad552668f1e53b4f3a54f2903a56"
     },
     {
       "path": "services/langgraph/agency/ucpo/build.py",
-      "git_blob_sha": "4a673b738ffa82cecee8194469147ca5746e090a"
+      "git_blob_sha": "a43527eff44ed63fa17b166eacb60bc0d298d9a6"
     },
     {
       "path": "services/langgraph/agency/ucpo/qa.py",
-      "git_blob_sha": "b56d8b8a8670849b7b4e7e8a0bdf067de1db5ec6"
+      "git_blob_sha": "52f2ddcf0761ed2c758181f7d207c1a04df6b252"
     },
     {
       "path": "services/langgraph/agency/ucpo/qa_runner.cjs",
-      "git_blob_sha": "f4c61c0352fbbbe84cb30c6de400c1c903cfc83b"
+      "git_blob_sha": "005b7f5d22bada55657df9020d077c07a876c3d4"
     },
     {
       "path": "services/langgraph/agency/ucpo/source.py",
@@ -1068,7 +1068,7 @@
     },
     {
       "path": "services/langgraph/agency/ucpo/service.py",
-      "git_blob_sha": "d8f006797bebf38c1f5310a8d1e8885257911b12"
+      "git_blob_sha": "712d75990b6594334b98d0d64e102ebeb9550f6d"
     },
     {
       "path": "services/langgraph/agency/ucpo/release.py",
@@ -1080,7 +1080,7 @@
     },
     {
       "path": "services/langgraph/api/routes/ucpo.py",
-      "git_blob_sha": "d354df607c8a6db40e289e508236431e994061e7"
+      "git_blob_sha": "f33ae29ce0f28be2c4a366c3a2db61931168a5d2"
     },
     {
       "path": "services/langgraph/tests/test_ucpo_build.py",
@@ -1108,7 +1108,7 @@
     },
     {
       "path": "services/langgraph/tests/test_ucpo_qa_discovery.py",
-      "git_blob_sha": "6664475d36c35b33b4405057dc7c09304d8986d5"
+      "git_blob_sha": "902dfefb3e6043e33d57fb1dc88bcc727b0ef46b"
     },
     {
       "path": "services/langgraph/agency/avic/svg.py",
@@ -1273,6 +1273,66 @@
     {
       "path": "services/langgraph/security/local_generation_approval.py",
       "git_blob_sha": "c4353d1e798161047572827e47cef7b01703529c"
+    },
+    {
+      "path": "services/langgraph/security/replay_store.py",
+      "git_blob_sha": "54a27fed9285fd66e9e3b6c02d2d6b1b765efff5"
+    },
+    {
+      "path": "services/langgraph/agency/delivery/crg.py",
+      "git_blob_sha": "71dda0de1e93cd6b92a72c5f19e618fefe03f8a4"
+    },
+    {
+      "path": "services/langgraph/agency/ucpo/brand_web.py",
+      "git_blob_sha": "cf912282f61384cfebf019a5d8068d7d8ed6c9a7"
+    },
+    {
+      "path": "services/langgraph/agency/ucpo/brand_web_contracts.py",
+      "git_blob_sha": "07cabcd7bed8a069f7fbd908fe1049c400ed8f50"
+    },
+    {
+      "path": "services/langgraph/agency/ucpo/contracts.py",
+      "git_blob_sha": "8e419df30dd075f1562f2a9ddb739f2d5cf5607b"
+    },
+    {
+      "path": "services/langgraph/agency/ucpo/requirements.py",
+      "git_blob_sha": "38d2d458c2c4ed94f4b056285ae4ebdce85fd31c"
+    },
+    {
+      "path": "services/langgraph/agency/ucpo/semantic.py",
+      "git_blob_sha": "46c68a73c5c539a5ad508261171822ee72d4e7d4"
+    },
+    {
+      "path": "services/langgraph/agency/visual/file_staging.py",
+      "git_blob_sha": "b514f1f2d4c61645b491a056d49893f6fe63df99"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/timeline_render.py",
+      "git_blob_sha": "6f14d746eb8e2afe77c101dbdd8c2c20d5215d2b"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/video.py",
+      "git_blob_sha": "2f8b3932561b20759415fba4387717f59150e15d"
+    },
+    {
+      "path": "scripts/verify_northline_bundle.py",
+      "git_blob_sha": "92c2e73ec32611d14fc6a168f2bf5f2f6370c1f2"
+    },
+    {
+      "path": "services/langgraph/agency/vnexus/twin.py",
+      "git_blob_sha": "756944434c8b143e2cec7bfe226bce797f662971"
+    },
+    {
+      "path": "services/langgraph/tests/test_vnexus_cross_project_replay.py",
+      "git_blob_sha": "1cfc8f577f0853a8c3fcc6f4771e22a68bfdcf4b"
+    },
+    {
+      "path": "services/langgraph/tests/test_vnexus_project_source_authorization.py",
+      "git_blob_sha": "66e8020ad28be91c5fd8069328ba42b8fc16d23f"
+    },
+    {
+      "path": "services/langgraph/tests/test_vnexus_replay_authorization.py",
+      "git_blob_sha": "acb37a6c761700e0885fdc14d3c6e0075ebce50b"
     }
   ]
 }
