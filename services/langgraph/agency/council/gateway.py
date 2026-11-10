@@ -136,8 +136,11 @@ def _write_scaffold(ctx: dict, args: _WriteArgs) -> dict:
         target = _inside(root, item.path)
         target.parent.mkdir(parents=True, exist_ok=True)
         tmp = target.with_suffix(target.suffix + ".tmp")
-        tmp.write_text(item.content, encoding="utf-8")
-        os.replace(tmp, target)  # atomic per file; rewriting identical bytes is idempotent
+        tmp_resolved = tmp.resolve()
+        if root.resolve() not in tmp_resolved.parents and tmp_resolved != root.resolve():
+            raise GatewayDenied("PATH_OUTSIDE_WORKSPACE", "path escapes the mission workspace")
+        tmp_resolved.write_text(item.content, encoding="utf-8")
+        os.replace(tmp_resolved, target)  # atomic per file; rewriting identical bytes is idempotent
         written.append({"path": f"scaffold/{item.path}", "sha256": hashlib.sha256(item.content.encode()).hexdigest()})
     return {"written": written}
 
