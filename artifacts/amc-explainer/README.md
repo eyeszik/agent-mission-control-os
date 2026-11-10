@@ -68,7 +68,7 @@ merged in #244 has been superseded by a locally installed neural voice
 
 ## Credits
 
-See `CREDITS.md`. Headlines: DejaVu (free license). Speech: Piper (`piper-tts`, MIT) with
+See `CREDITS.md`. Headlines: DejaVu (free license). Speech: Piper (`piper-tts`, GPL-3.0-or-later) with
 the `en_US-joe-medium` CC0 voice (third-party `joe-us-piper-voice` repackaging, MIT
 metadata). Render: FFmpeg + Pillow. Tool: FreeVideoForge (this repository; no top-level
 LICENSE file is present — nothing here grants rights beyond the repository's own terms).

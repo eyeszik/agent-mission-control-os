@@ -18,7 +18,7 @@
     "ffmpeg": "n9.0.2-17-g2a571b6068-20260930 (imageio-ffmpeg wheel 9.0.2, binary ffmpeg-linux-x86_64-v9.0.2)",
     "ffprobe": "4.0.2-static (npm ffprobe-static@3.1.0, johnvansickle static build) — tool mismatch documented",
     "pillow": "13.0.0",
-    "piper_tts": "1.8.0 (MIT)",
+    "piper_tts": "1.8.0 (GPL-3.0-or-later; OHF-voice/piper1-gpl distribution)",
     "joe_us_piper_voice": "1.0.0 (third-party repackaging of rhasspy piper-voices v1.0.0; packaging MIT; voice CC0)",
     "node": "v22.22.3",
     "npm": "10.9.8",
@@ -64,16 +64,16 @@
       "sha256": "fcd004e4fd14ec9de3e2ff6181085358828bbfb2aa7a2b0774a72a9e81a1d9a4"
     },
     "CREDITS.md": {
-      "bytes": 2833,
-      "sha256": "23d7c5df891fc90b37d409a14d8589cbc2e12a94f97105a7d8e5a7b63f4916d7"
+      "bytes": 3250,
+      "sha256": "1bb6b10d0f2bb50637e06aeb43a49149dd1be7f8a583705ccd8b79301f7c401b"
     },
     "DESIGN.md": {
       "bytes": 6255,
       "sha256": "7f5af09aa09f23463e6bc87c73477d7ef660aa0c8e23e33f9a37b7a96abb6391"
     },
     "README.md": {
-      "bytes": 5287,
-      "sha256": "e5803513659b39fa794d530da9fbbb3c0940868918331c7e6e1f93ed25e94ef1"
+      "bytes": 5300,
+      "sha256": "f1cd12496a8ff8eb7f19e9f187644b9bcc463945210d3ecec9b99e74f3549b9c"
     },
     "REPRODUCTION.md": {
       "bytes": 6399,
