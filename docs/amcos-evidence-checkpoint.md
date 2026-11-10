@@ -1,63 +1,66 @@
 # AMCOS unified production — evidence and progress checkpoint
 
-**Recorded:** 2026-11-09 UTC · **Branch:** `arena/13d8169f-agent-mission-control-os` · **Base:** `04258078f409269867dc25a50dffcdfe711717af` · **Overall:** PARTIAL / **NOT AUTHORIZED FOR PRODUCTION**.
+**Recorded:** 2026-11-10 UTC · **Branch:** `arena/13d8169f-agent-mission-control-os` · **Base:** `f947863` (current `master` tip) · **PR:** #263 · **Overall:** PARTIAL / **NOT AUTHORIZED FOR PRODUCTION**.
 
-This checkpoint distinguishes observed results from plans and historical claims. The working tree is uncommitted; a manifest snapshot is not a release revision, signature, independent security review or approval. The [execution roadmap](amcos-execution-roadmap.md) contains the priority, complexity, dependency, capacity, schedule, risk and contingency inventory; the [completion register](amcos-completion-plan.md) tracks Q01–Q38 and M01–M42. The older `amcos-unified-production-status.md` is previous-phase context, not evidence of current completion.
+This checkpoint distinguishes observed results from plans and historical claims. A manifest snapshot is not a release revision, signature, independent security review or approval. The [execution roadmap](amcos-execution-roadmap.md) holds the priority, complexity, dependency, capacity, schedule, risk and contingency inventory; the [completion register](amcos-completion-plan.md) tracks Q01–Q38 and M01–M42. `amcos-unified-production-status.md` is previous-phase context, not evidence of current completion.
 
-## Executive assessment
+## Change since the previous checkpoint
 
-The prior phase supplied a substantial but incomplete governance, UCPO website, brand, media and durable-runtime foundation. This increment strengthened the highest-risk local paths, assembled a fictional preview and ran meaningful checks. It did **not** finish the unified-production contract. In particular, release remains blocked on independent security and project-isolation review, trusted source/rights inventory, pinned-browser proof and a real contact journey, production recovery and worker evidence, and genuine creative/accessibility/rights and owner approvals. The proposed 2027-06-18 acceptance milestone is conditional, not a delivery commitment.
+The branch reached `master`'s tip and merge conflicts were resolved on the code, not papered over:
 
-No person has been assigned, no meeting or mentoring session was held, and no stakeholder or client approved these outputs. No deployment, publishing, external contact, paid provider call, connected Supabase operation or production activation was performed. A local test database, test approval and synthetic dispatch are not substitutes for those actions.
+| Item | State |
+|---|---|
+| Branch base | Rebased onto `f947863` (was `04258078`, 126 commits behind). PR #263 is now **MERGEABLE** with `master` as an ancestor; no conflict markers remain. |
+| Superseded commits | `ad69e5e` and `0425807` (creative-renderer license pin) were dropped: `master`'s `0a8ba74` supersedes them with a larger rewrite (`findPackageRoot`, SHA verification, `LICENSE_VERSION_MISMATCH`). Nothing unique was lost. |
+| `manifest.json` | Rebuilt as the **union** of `master` (336) and this branch (333) → **351** entries; every SHA recomputed against the merged tree using the documented procedure. Seven extra `master`-only paths (durable execution, engineering, artifacts) retained. |
+| `test_hmac_ingress_runtime.py` | Conflict resolved as a union: `master`'s stronger `monkeypatch.delenv("DATABASE_URL")` guard plus this branch's explanatory docstring. |
+| Duplicate fix found on `master` | `master`'s own manifest was **already stale** for `apps/web/package.json`, `packages/creative-renderer/package.json` and `pnpm-lock.yaml` before this branch touched them (`verify_manifest.py` fails on a pristine `master` worktree). Refreshed here. |
 
-## Implemented in this increment
+## Dependency-pin repair (root cause of a real CI failure)
 
-| Area | What is now present | Boundary / remaining acceptance |
+Dependabot bumped two audited pins on 2026-11-08 without updating the invariants that guard them. This is a genuine defect on `master`, reproduced on this branch **after** a real `pnpm install --frozen-lockfile`:
+
+- `apps/web/package.json` pins `next@16.4.5`; `node_modules` and `pnpm-lock.yaml` both resolve 16.4.5. UCPO's `dependency_check` compared the installed tree against a hardcoded `16.4.3` in `services/langgraph/agency/ucpo/source.py` and **failed closed** — so the `ucpo-sandbox` and `render-adapters` CI jobs would fail on any tree that installs from the lockfile. Before the reinstall, stale `node_modules` masked it.
+- `next@16.4.5` is a **security release** (GHSA-mfr8-8qww-v76h cross-tenant disclosure via `unstable_cache`, GHSA-vc7v-qv4w-wrv8 cache leak across root params, cache poisoning of shared fallback shells). Reverting to 16.4.3 to satisfy the stale gate would have reintroduced known vulnerabilities, so the **gate was corrected to the installed, audited version** instead.
+
+Four sites were aligned: `scripts/verify_repository_invariants.py` (two version checks and three lockfile tokens), `services/langgraph/agency/ucpo/source.py` (`DEPENDENCIES`), one assertion in `services/langgraph/tests/test_ucpo_pipeline.py`, and `docs/ucpo/repository-audit.md`. The assertion was **retargeted, not weakened** — the same fail-closed comparison now runs against the version actually installed.
+
+## Repository gates
+
+**PASS (7/7)** on the merged tree, `python 3.11` venv, after the pin repair:
+
+```
+verify_repository_invariants   PASS
+verify_production_readiness    PASS
+verify_auth_bindings           PASS
+verify_ontology_parity         PASS
+verify_design_tokens           PASS
+verify_manifest                PASS  (351 critical files)
+verify_guidance_registry       PASS
+```
+
+Also PASS: `compileall -q services/langgraph scripts`; `pip check` ("No broken requirements found"); `git diff --check`.
+
+## Test ledger
+
+| Suite | Result | Scope and caveats |
 |---|---|---|
-| Intake, scope and delivery | Finite deliverable declarations and a fail-closed `NOT_MEASURED`/`ESCALATE` path; legacy contract hash compatibility. | The artifact inventory, counts, rights, acceptance and delivery manifest are not yet bound to server-derived, verified project heads. |
-| Approved brand → web | Typed Python/Zod bridge, scope/tenant checks, transactional SQLite handoff, idempotency, selective dependency propagation and source/build/QA/proof freshness guards. | Local PostgreSQL races cover only specific lock paths. Positive proof-origin coverage uses synthetic dispatch; actual pinned-browser proof, approval changes during races, broader crash recovery and Supabase are open. |
-| Website QA | Seven synthetic routes build; CTA discovery, target anchors, navigation observations and missing observation states are reported rather than invented. | The pinned browser is unavailable here. The preview contact page has no real contact form, destination or lead capture; an anchor is not a completed buyer journey. |
-| Media and isolation | Bounded file staging and isolated local Chromium/FFmpeg/ffprobe paths; verification, poster wrapping/layout checks, frame-based timing and local technical readback. | The chroot/namespace boundary lacks a demonstrated hostile-host confidentiality guarantee, seccomp/cgroup completeness and independent review. Blender is not equivalently hardened. Sampled luminance and layout are not every-frame or creative review. |
-| Technical QC and historical data | New media-job QC is technical only, with rights `NOT_MEASURED` and release `NOT_EVALUATED`. Legacy, malformed or inconsistent persisted QC projects to `LEGACY_QC_REQUIRES_RECHECK` without rewriting audit data. Simulated outputs cannot be promoted into generated identity/video deliverables. Unversioned identity/video receipts return 409 and current receipts identify themselves as historical. | Other historical projections and receipt stores still need audit. Generic media `Q4` checks caller-declared license fields only; it cannot prove inventory completeness, valid permissions or implicit font rights. No QC label grants release authority. |
-| Replay and inherited-source authorization | Reproduced same-actor cached-response disclosure after access revocation. The VNEXUS helper now requires an explicit policy for all 18 current operations, denies unknown operations, rechecks persisted source/brand/scope/target access on replay, and does not settle or regenerate. Separate tests cover revoked project/brand/scope and read-only roles. Project-scoped resolution, readiness, branch comparisons and twin child-scope summaries now check inherited source access. | This is not a global authorization proof. The shared brand graph does not uniformly record/enforce a project binding; other receipt/effect implementations, graph/twin nodes, ownership changes and permission races remain P0 review items. Replays can conservatively deny access where a first project-only write was previously allowed; define and review the intended sharing policy. |
-| Editorial preview | A procedural 30-second master, two 15-second source-derived edits, estimated WebVTT cues, reduced-motion still and six social previews were rendered and mechanically checked. | These are silent 640×360 drafts, not a finished film, licensed footage, six distinct concepts, measured caption visibility or a human-approved campaign. A dissolve visibly overlaps text/graphics. |
-| Portability and integrity | An explicit fictional package contains source snapshots, exports, reports, checksums and a readback verifier. The repository manifest was deliberately reviewed and re-pinned, now covering 333 critical files. | The package depends on the matching repository for regeneration; hashes establish byte identity only. External delivery, an exact approved release manifest, OTIO/C2PA and rights attestations remain separate work. |
+| Replay / cross-project / source authorization (SQLite) | **27 passed** | Operation inventory, 11-family three-project revocation matrix, six cross-project replay cases, inherited-source and twin child-scope guards. |
+| HMAC ingress + replay + VNEXUS security/production + unified security | **59 passed, 10 skipped** | Includes the hand-resolved HMAC fixture. Skips are absent browser/FFmpeg and PostgreSQL-only paths. |
+| UCPO pipeline/QA/proof-origin + brand handoff + unified delivery + VNEXUS contracts + manifest regressions + Northline bundle | **134 passed, 3 skipped** | Re-run **after** a genuine `--frozen-lockfile` install, so `dependency_check` now sees 16.4.5. Skips are pinned-browser and media-tooling. |
+| `@amc/shared` | **266 passed** (21 files), build and typecheck PASS | Contracts including the brand-web bridge. |
+| `@amc/web` | **97 passed**, typecheck PASS | 17 files. |
+| Full `services/langgraph/tests` (SQLite) | **see "Open" below** | Started on this exact tree; buffered stdout, recorded on completion. |
 
-## Test and verification ledger
+## Open / not claimed
 
-The tests below use disposable local data and test principals. A passing test is evidence only for the stated path and tree state. `SKIPPED`/`NOT_RUN` are not passes.
+- **Full-suite result for this exact tree** is reported only when the run finishes; anything else is `IN PROGRESS`, not a pass.
+- **CI did not validate this branch.** The `CI` workflow has been `startup_failure` repo-wide since 2026-11-09 (16 consecutive runs), while other workflows, including `aisl-proxy.yml`, still start and succeed. `ci.yml` parses under strict YAML, has no duplicate keys, tabs, CRLF or BOM, and every pinned action SHA resolves (including `pnpm/action-setup@73e46992`, the commit behind annotated tag `v6.1.1`). The trigger is repository/platform-side, not a defect this branch introduced or can fix from source. **CI-verified** status is therefore unavailable, not green.
+- **Canonical UCPO website QA remains BLOCKED** (pinned Playwright Chromium 156 unavailable locally; only noncanonical Chromium 153 diagnostics ran). Release state **NOT_AUTHORIZED**.
+- Rights/licensing, human creative and accessibility review, and owner approval are **NOT_EVALUATED**. The preview contact page has no form, destination or lead capture; an anchor is not a buyer journey.
+- Sandbox isolation lacks seccomp/cgroups and independent review; Blender is not equivalently hardened.
+- No deployment, publication, spending, Supabase production operation, real collaboration or approval occurred. `master` is not self-merged.
 
-| Evidence | Observed result | Scope and caveats |
-|---|---|---|
-| Earlier broad SQLite backend (`pytest services/langgraph/tests -q -rs`) | **2,092 passed, 96 skipped** | Started before the latest historical-QC, replay and cross-project source-authorization edits; not a final-tree run. Skips include browser/FFmpeg, optional council/MCP/Blender, remote renderer, source archives and PostgreSQL-only races. An earlier refresh had a stale VNEXUS QC fixture failure; its fixture was corrected and focused tests passed. |
-| Current-tree broad SQLite backend | **IN PROGRESS at checkpoint creation** | Started afresh after the latest code and manifest changes. Record the actual final result and skips before treating it as completed evidence. |
-| Disposable PostgreSQL 16.15 broad backend | **IN PROGRESS at checkpoint creation** | CI schema shim plus 18 repository migrations; run started before later edits and is not exact-final-tree or Supabase evidence. An older full run was stopped after a test-fixture contamination failure; the SQLite middleware fixture was isolated and a separate real PostgreSQL nonce-lock race passed. |
-| PostgreSQL targeted security/replay suite, latest source checks | **30 passed** | Actual local socket-only PostgreSQL on the current code: replay matrix, owner/target/scope revocations, legacy identity/video receipt refusal and twin inherited/child-scope checks. Production callbacks in the project-operation matrix are synthetic. |
-| SQLite targeted replay/source tests | **29 passed**, then **12 passed** for latest source/twin and intelligence tests | The 29-result run predates the final twin aggregate guard; the 12-result run includes that guard. The current-tree full run is separate. |
-| VNEXUS SQLite regression before final twin/replay refinements | **104 passed, 7 skipped** | Covers genome, graph/multiverse, intelligence, directions, brandbook, production, security and contracts. Skips are missing browser/FFmpeg on that invocation; subsequent focused tests cover the changed source/replay guards. |
-| Local real-browser/media integration | **71 passed** | Local Chromium 153 and FFmpeg/ffprobe with SQLite; started before the final twin source-authorization edit, so not an exact-full-tree run. It is distinct from, and does not satisfy, pinned Chromium 156 UCPO website QA. |
-| Brand/UCPO PostgreSQL contention | **97 passed** targeted; **12 passed** in brand-handoff set; **3** races observed advisory-lock contention | Local PostgreSQL: same key, different-key revisions, and in-flight synthetic build versus revision. This is narrower than all crash, approval and concurrency combinations; positive proof dispatch is synthetic. A dedicated PostgreSQL HMAC nonce advisory-lock contention test also passed. |
-| Repository CI verifier gates, latest code | **7/7 passed** | Repository invariants, production-readiness text/contract invariants, auth bindings, ontology parity, design tokens, manifest (333 files), guidance registry. These checks do not activate production or prove the entire system secure. |
-| Toolchain hygiene, latest code | `pip check`, Python `compileall`, focused Ruff `E4,E7,E9,F`, manifest regression and `git diff --check` passed | Manifest regression checks altered and removed required boundary pins. Manifest is a drift detector, not an independent signature or approval. |
-| Frontend/shared | Earlier run: **266 shared tests**, **97 web tests**, both typechecks, UI AST check, shared build and Next.js production build passed. **Refresh IN PROGRESS at checkpoint creation.** | Re-run is against the working tree with telemetry disabled; browser end-to-end and accessibility acceptance remain separate. |
-| Northline mechanical package readback | **239 files** matched checksums; report/website/social/timeline/caption bindings passed; ffprobe checked **four silent H.264 streams** and their dimensions, rates, durations and frame counts. | Missing ffprobe returns `NOT_RUN`/exit 2; tampered bytes were rejected. Rights, fonts, unsampled frames, accessibility, creative review and approval remain `NOT_EVALUATED`. |
+## Compatibility note for reviewers
 
-## Fictional preview and reproducibility
-
-The portable package is `/home/user/northline-fictional-preview.zip` (2,677,691 bytes; SHA-256 `32365ec449fe96ec9a8ec4f36ee49c8d6368a6e0cbbb98d767c4dbaacf758299`). Its unpacked directory is `/home/user/northline-fictional-preview/`; `README.md` explains how to browse, verify and recreate it. It is a **fictional, non-release** preview. The temporary live-preview server serves the packaged v2 static export on port 4173; it is not a deployment.
-
-- Website report `northline-report.json`: SHA-256 `c1e4ac84e44d5906522fca1402eaa8c02c4a9fb6927b460e5ca5d68dc7902114`; v1/v2 builds passed, canonical QA blocked, release not authorized.
-- Noncanonical Chromium 153 diagnostic `diagnostic-report.json`: SHA-256 `c7a5bbfbb4cc45f9d480eab12bd4bff6baa488e8dc1591863bb2b7209943d339`; 106 passing check records across seven routes and 21 screenshots. Contact has zero CTAs and no click was performed. This is diagnostic, not pinned-browser or complete accessibility proof.
-- Social/short-motion `media-report.json`: SHA-256 `939da0ec9298f8a70919afaff622ea133b46f895c83b4ad4580db21cab876e21`; six 1080×1080 SVG/PNG variants and a silent 136-frame, 10-fps preview, not rights-cleared or authorized.
-- Timeline `timeline-report.json`: SHA-256 `a6ac0dc4488d33e4fe9c1dabb65f7b1b6d067908efc85a5efb33121122a7018a`; 900-frame master and two 450-frame edits at 30 fps, silent, 640×360. The six 160-frame shots have five 12-frame overlaps. Cue timing estimates on-screen text, not speech or measured visibility.
-- Local Chromium 153 executable SHA-256 `53a15d6c3a3d27dfb54c4ba60278b1683136f70cf1e67e989da7dfbd3d451ef0`; FFmpeg `0d709a0bed1a43f24cd2c420878c63afea4580671b6949ad19ed124572f3bc3d`; ffprobe `576c21674291ec1948d507ea8ab0d78eb6621a0be8c6f1a6db0f50c5fcb1e0f9`. Tool binaries and disposable databases are not part of the repository delivery.
-
-## Priority decisions and next review
-
-1. **P0 security and authority:** independently review brand-graph/project binding, cross-project sharing, the replay matrix and other stores, permission revocation races, sandbox boundaries, Blender and crash/recovery. No multi-client release while these are unresolved.
-2. **P0 proof and rights:** bind the server-owned deliverable/source inventory, licenses and fonts to exact bytes; obtain an approved host with pinned Chromium, define a real authorized contact destination and produce a genuine fresh proof and deny/stale evidence.
-3. **P0 operations:** finish SQLite/PostgreSQL fault injection and exact-revision gates, restoration/rollback and worker reconciliation. A local PostgreSQL test is not connected Supabase activation; authorization must precede any production operation.
-4. **P1 creative and product:** arrange actual brand/client, creative, accessibility and rights reviews; repair overlapping transitions, verify captions/audio and distinct concepts, then complete dashboard/event/provenance and portable final delivery.
-5. **Management cadence:** at each proposed weekly review, record named owners once assigned, actual effort, blockers, risks, tests/skips, evidence links, decisions and revised forecasts. Use peer review and pairing for security, concurrency and isolation changes; these are recommendations, not claims such sessions occurred.
-
-See the roadmap for the full W01–W19 allocation, estimated 274–424 person-days, tentative milestones and contingencies. Staffing, dates and external review windows are assumptions requiring owner confirmation.
+The brand-graph, twin and intelligence guards now require **tenant-wide** project access until per-node project binding exists. That is a deliberate restriction: bounded-project principals who legitimately hold one project's access are denied. **Do not grant wildcard access to work around it.** Per-node binding and independent review remain P0.

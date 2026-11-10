@@ -160,7 +160,7 @@ def test_source_is_deterministic_hashed_and_carries_requirement_ids():
     assert "data-req={s.req_refs.heading}" in files["components/Section.tsx"].decode()
     content = json.loads(files["content/site.json"])
     assert content["pages"]["index"]["sections"][0]["req_refs"]["heading"] == "req.index.s1.heading"
-    assert json.loads(files["package.json"])["dependencies"]["next"] == "16.4.3"
+    assert json.loads(files["package.json"])["dependencies"]["next"] == "16.4.5"
     assert set(files) >= {"app/page.tsx", "app/works/page.tsx", "app/visit/page.tsx", "public/assets/plate-kiln.svg"}
 
 

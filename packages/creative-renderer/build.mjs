@@ -46,24 +46,33 @@ const {build} = await import('esbuild');
 const engines=['p5_js','pixi_js','react_three_fiber','remotion','motion_canvas'];
 await build({entryPoints:Object.fromEntries(engines.map(name=>[name,new URL(`./adapters/${name}.mjs`,import.meta.url).pathname])),outdir:new URL('./dist/browser/',import.meta.url).pathname,bundle:true,format:'iife',globalName:'AMCAdapter',platform:'browser',target:'es2022',minify:true,legalComments:'inline',define:{'process.env.NODE_ENV':'"production"'}});
 const manifest={packages:{},files:[]};
-for(const [name] of Object.entries(JSON.parse(readFileSync(new URL('./package.json',import.meta.url))).dependencies)) {
- let directory=new URL('./',`file://${require.resolve(name)}`);
- while(true) {
-  const location=new URL('package.json',directory);
-  try {
-   const meta=JSON.parse(readFileSync(location));
-   if(meta.name===name) {
-    const license=readdirSync(directory).find(file=>/^licen[sc]e(?:\.|$)/i.test(file));
-    const fallback=name==='@react-three/fiber' ? new URL('./licenses/react-three-fiber.txt',import.meta.url) : null;
-    if(fallback){const source=JSON.parse(readFileSync(new URL('./licenses/sources.json',import.meta.url)))[name];if(source.version!==meta.version)throw new Error(`LICENSE_VERSION_MISMATCH:${name}`);}
-    if(!license && !fallback)throw new Error(`LICENSE_NOT_FOUND:${name}`);
-    const filename=`LICENSE.${name.replaceAll('/','_').replaceAll('@','')}`;
-    writeFileSync(new URL(`./dist/browser/${filename}`,import.meta.url),readFileSync(license ? new URL(license,directory) : fallback));
-    manifest.packages[name]={version:meta.version,license:meta.license,license_file:filename};break;
-   }
-  }catch(error){if(error.message.startsWith('LICENSE_NOT_FOUND:')||error.message.startsWith('LICENSE_VERSION_MISMATCH:'))throw error;}
-  const parent=new URL('../',directory);if(parent.href===directory.href)throw new Error(`PACKAGE_NOT_FOUND:${name}`);directory=parent;
- }
+const dependencies = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).dependencies;
+const licenseSources = JSON.parse(readFileSync(new URL('./licenses/sources.json', import.meta.url), 'utf8'));
+for (const name of Object.keys(dependencies)) {
+  const { directory, metadata } = findPackageRoot(name);
+  const license = readdirSync(directory).find(file => /^licen[sc]e(?:\.|$)/i.test(file));
+  const fallback = name === '@react-three/fiber'
+    ? new URL('./licenses/react-three-fiber.txt', import.meta.url)
+    : null;
+
+  if (fallback) {
+    const source = licenseSources[name];
+    if (!source) throw new Error(`LICENSE_SOURCE_NOT_FOUND:${name}`);
+    if (source.version !== metadata.version) {
+      throw new Error(`LICENSE_VERSION_MISMATCH:${name}: source=${source.version} package=${metadata.version}`);
+    }
+    const bytes = readFileSync(fallback);
+    const digest = createHash('sha256').update(bytes).digest('hex');
+    if (digest !== source.sha256) {
+      throw new Error(`LICENSE_HASH_MISMATCH:${name}: expected=${source.sha256} actual=${digest}`);
+    }
+  }
+
+  if (!license && !fallback) throw new Error(`LICENSE_NOT_FOUND:${name}`);
+  const filename = `LICENSE.${name.replaceAll('/', '_').replaceAll('@', '')}`;
+  const licensePath = license ? new URL(license, directory) : fallback;
+  writeFileSync(new URL(`./dist/browser/${filename}`, import.meta.url), readFileSync(licensePath));
+  manifest.packages[name] = { version: metadata.version, license: metadata.license, license_file: filename };
 }
 manifest.files=readdirSync(new URL('./dist/browser/',import.meta.url)).sort();
 writeFileSync(new URL('./dist/browser/manifest.json',import.meta.url),JSON.stringify(manifest,null,2));
