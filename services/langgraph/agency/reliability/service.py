@@ -113,7 +113,7 @@ class ProductionTrustKernel:
         )
         with self.store.transaction() as tx:
             self.store.put_policy(tx, record)
-            self.store.append_audit(tx, self._next_audit(tenant_id, project_id, "policy_decision", decision_id, record.decision_hash))
+            self._audit(tx, tenant_id, project_id, "policy_decision", decision_id, record.decision_hash)
         return record
 
     @staticmethod
@@ -210,7 +210,7 @@ class ProductionTrustKernel:
         )
         with self.store.transaction() as tx:
             self.store.put_outbox(tx, msg)
-            self.store.append_audit(tx, self._next_audit(tenant_id, project_id, "outbox_enqueued", message_id, payload_hash))
+            self._audit(tx, tenant_id, project_id, "outbox_enqueued", message_id, payload_hash)
         return msg
 
     def claim_outbox(self, *, message_id: str, worker_id: str) -> OutboxMessage:
@@ -241,7 +241,7 @@ class ProductionTrustKernel:
         })
         with self.store.transaction() as tx:
             self.store.put_outbox(tx, updated)
-            self.store.append_audit(tx, self._next_audit(current.tenant_id, current.project_id, "outbox_delivered", message_id, current.payload_hash))
+            self._audit(tx, current.tenant_id, current.project_id, "outbox_delivered", message_id, current.payload_hash)
         return updated
 
     def mark_outbox_failed(self, *, message_id: str, error: str) -> OutboxMessage:
@@ -288,7 +288,7 @@ class ProductionTrustKernel:
         )
         with self.store.transaction() as tx:
             self.store.put_recovery(tx, case)
-            self.store.append_audit(tx, self._next_audit(tenant_id, project_id, "recovery_opened", recovery_id, canonical_hash(case.model_dump(mode="json"))))
+            self._audit(tx, tenant_id, project_id, "recovery_opened", recovery_id, canonical_hash(case.model_dump(mode="json")))
         return case
 
     def reconcile_receipt_pairs(
@@ -348,14 +348,20 @@ class ProductionTrustKernel:
         })
         with self.store.transaction() as tx:
             self.store.put_recovery(tx, updated)
-            self.store.append_audit(tx, self._next_audit(current.tenant_id, current.project_id, "recovery_resolved", recovery_id, canonical_hash(updated.model_dump(mode="json"))))
+            self._audit(tx, current.tenant_id, current.project_id, "recovery_resolved", recovery_id, canonical_hash(updated.model_dump(mode="json")))
         return updated
 
     def verify_audit_chain(self) -> bool:
         previous = ZERO_HASH
-        for expected_seq, item in enumerate(self.store.state.audits, start=1):
+        # Walk the chain by its own seqs, not by position. Position+1 assumes a
+        # dense 1..N history, so one retained or pruned row would make every
+        # later checkpoint "invalid" while the store -- which validates against
+        # MAX(seq) -- still appends happily. The two must use one rule.
+        expected_seq = 1
+        for item in self.store.state.audits:
             if item.seq != expected_seq or item.previous_hash != previous:
                 return False
+            expected_seq += 1
             payload = {
                 "seq": item.seq,
                 "tenant_id": item.tenant_id,
@@ -384,9 +390,29 @@ class ProductionTrustKernel:
             idempotency_claims=sum(1 for i in state.idempotency.values() if i.tenant_id == tenant_id and i.project_id == project_id),
         )
 
+    def _audit(self, tx: Any, tenant_id: str, project_id: str, event_type: str,
+               object_ref: str, payload_hash: str) -> None:
+        """Append one audit checkpoint with the chain tip read under the lock.
+
+        ``_next_audit`` derives ``seq`` and ``previous_hash`` from store state.
+        Reading that state before taking the chain lock would hand two
+        PostgreSQL writers the same tip, so both would compute the same seq and
+        the second would be rejected. The lock therefore has to be taken here,
+        before the tip is read, not inside ``append_audit`` afterwards.
+        """
+        lock = getattr(self.store, "lock_audit_chain", None)
+        if lock is not None:
+            lock(tx)
+        self.store.append_audit(tx, self._next_audit(tenant_id, project_id, event_type, object_ref, payload_hash))
+
     def _next_audit(self, tenant_id: str, project_id: str, event_type: str, object_ref: str, payload_hash: str) -> AuditCheckpoint:
         state = self.store.state
-        seq = len(state.audits) + 1
+        # Derive from the tip's seq, never from the number of rows. A retained
+        # or pruned history can hold seqs 1..10 with only 9 rows, and len()+1
+        # then proposes a seq the store correctly rejects as discontinuous --
+        # a permanent wedge. The stores already read MAX(seq) to validate, so
+        # they agree with this; the two derivations must not disagree.
+        seq = (state.audits[-1].seq + 1) if state.audits else 1
         previous_hash = state.audits[-1].checkpoint_hash if state.audits else ZERO_HASH
         payload = {
             "seq": seq,

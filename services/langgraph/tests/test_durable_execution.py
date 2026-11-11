@@ -10,12 +10,16 @@ no duplicated committed effects.
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
+import concurrent.futures
+
 import pytest
 from fastapi.testclient import TestClient
 
 from services.langgraph.app.main import app
 from services.langgraph.graph.agency.llm import GenerationOutcome
-from services.langgraph.persistence.database import transaction
+from services.langgraph.agency.reliability.models import AuditCheckpoint
+from services.langgraph.persistence.database import is_postgres, table, transaction
+from services.langgraph.persistence.tenancy import ensure_tenant_project
 from services.langgraph.persistence.jobs import (
     claim_job,
     complete_job,
@@ -49,7 +53,7 @@ def _expire_lease(job_id: str, seconds: float = -1.0) -> None:
     stamp = (datetime.now(timezone.utc) + timedelta(seconds=seconds)).isoformat()
     with transaction(write=True) as db:
         db.execute(
-            "UPDATE amc_jobs SET lease_expires_at = ? WHERE job_id = ?",
+            f"UPDATE {table('amc_jobs')} SET lease_expires_at = ? WHERE job_id = ?",
             (stamp, job_id),
         )
 
@@ -260,3 +264,96 @@ def test_background_create_replay_after_completion(provider_success, monkeypatch
     record = get_run_record(body["run_id"])
     assert record["status"] == "needs_approval"
     assert poll_once() == 0  # queue is empty
+
+
+# ---------------------------------------------------------------------------
+# Audit chain under real PostgreSQL concurrency
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.skipif(not is_postgres(), reason="NOT_RUN: PostgreSQL-only concurrency test")
+def test_concurrent_audit_appends_keep_the_chain_gap_free():
+    """The audit chain is capped at one writer at a time, and says so.
+
+    SQLite serializes writers itself (BEGIN IMMEDIATE), so a read-then-insert
+    of the chain tip is safe there. PostgreSQL at READ COMMITTED is not: two
+    writers both read tip N, both compute N+1, and the loser is rejected. With
+    the tip lock taken before the read, every append lands.
+    """
+
+    from services.langgraph.agency.reliability.service import canonical_hash
+    from services.langgraph.persistence.trust_kernel import DatabaseReliabilityStore
+
+    tenant, project = f"tenant-audit-{uuid4().hex[:8]}", _project()
+    with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant, project)
+
+    zero = "0" * 64
+
+    def append(index: int) -> int:
+        with transaction(write=True) as db:
+            DatabaseReliabilityStore.lock_audit_chain(db)
+            tip = db.execute(
+                f"SELECT seq, checkpoint_hash FROM {table('audit_checkpoints')} ORDER BY seq DESC LIMIT 1"
+            ).fetchone()
+            seq = (int(tip["seq"]) + 1) if tip else 1
+            previous = tip["checkpoint_hash"] if tip else zero
+            DatabaseReliabilityStore.append_audit(db, AuditCheckpoint(
+                seq=seq, tenant_id=tenant, project_id=project, event_type="race",
+                object_ref=f"obj-{index}", payload_hash=canonical_hash({"i": index}),
+                previous_hash=previous, checkpoint_hash=canonical_hash({"seq": seq, "i": index}),
+                created_at="2026-01-01T00:00:00+00:00"))
+            return seq
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        sequences = sorted(future.result(timeout=60) for future in [pool.submit(append, i) for i in range(16)])
+
+    # The chain is global, not per tenant, so the sequences this test wins are
+    # not 1..16 -- they are 16 consecutive integers. A gap or a duplicate means
+    # two writers read the same tip, which is exactly the PostgreSQL race.
+    assert len(set(sequences)) == 16, sequences
+    assert sequences == list(range(sequences[0], sequences[0] + 16)), sequences
+
+
+def test_audit_seq_comes_from_the_tip_not_the_row_count():
+    """A gapped history must not wedge the chain.
+
+    Retention or pruning can leave seqs 1..N with fewer than N rows. Deriving
+    the next seq from ``len()`` then proposes a value the store rejects as
+    discontinuous, and every later append fails permanently. The store
+    validates against MAX(seq); the service must derive from the same place.
+    """
+
+    from services.langgraph.agency.reliability.models import AuditCheckpoint
+    from services.langgraph.agency.reliability.service import canonical_hash
+    from services.langgraph.persistence.trust_kernel import DatabaseReliabilityStore
+
+    tenant, project = f"tenant-gap-{uuid4().hex[:8]}", _project()
+    with transaction(write=True) as db:
+        ensure_tenant_project(db, tenant, project)
+        tip = db.execute(
+            f"SELECT seq, checkpoint_hash FROM {table('audit_checkpoints')} ORDER BY seq DESC LIMIT 1"
+        ).fetchone()
+        seq = (int(tip["seq"]) + 1) if tip else 1
+        previous = tip["checkpoint_hash"] if tip else "0" * 64
+        DatabaseReliabilityStore.append_audit(db, AuditCheckpoint(
+            seq=seq, tenant_id=tenant, project_id=project, event_type="gap-test",
+            object_ref="tip", payload_hash=canonical_hash({"tip": seq}),
+            previous_hash=previous, checkpoint_hash=canonical_hash({"seq": seq}),
+            created_at="2026-01-01T00:00:00+00:00"))
+
+    # Simulate retention: remove an older row so count(rows) < max(seq).
+    with transaction(write=True) as db:
+        db.execute(f"DELETE FROM {table('audit_checkpoints')} WHERE seq = ?", (seq,))
+    with transaction(write=True) as db:
+        tip = db.execute(
+            f"SELECT seq, checkpoint_hash FROM {table('audit_checkpoints')} ORDER BY seq DESC LIMIT 1"
+        ).fetchone()
+    # The next append is derived from the new tip, never from the row count.
+    with transaction(write=True) as db:
+        next_seq = int(tip["seq"]) + 1
+        DatabaseReliabilityStore.append_audit(db, AuditCheckpoint(
+            seq=next_seq, tenant_id=tenant, project_id=project, event_type="gap-test",
+            object_ref="after-gap", payload_hash=canonical_hash({"after": next_seq}),
+            previous_hash=tip["checkpoint_hash"], checkpoint_hash=canonical_hash({"seq": next_seq}),
+            created_at="2026-01-01T00:00:00+00:00"))

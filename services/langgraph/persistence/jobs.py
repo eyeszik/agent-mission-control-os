@@ -106,8 +106,13 @@ def expire_stale_leases() -> list[str]:
 
     now_str = _now_iso()
     with transaction(write=True) as db:
+        # Route through table(): on PostgreSQL the durable queue lives in the
+        # amc schema, so an unqualified amc_jobs is a different (absent) table.
+        # This reader was the one place that hardcoded the name, so lease
+        # recovery raised UndefinedTable there while working on SQLite.
         stale = db.execute(
-            "SELECT job_id FROM amc_jobs WHERE status = 'running' AND lease_expires_at IS NOT NULL AND lease_expires_at < ?",
+            f"SELECT job_id FROM {table('amc_jobs')} WHERE status = 'running' "
+            "AND lease_expires_at IS NOT NULL AND lease_expires_at < ?",
             (now_str,),
         ).fetchall()
         if not stale:
