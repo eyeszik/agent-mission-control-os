@@ -47,6 +47,36 @@ def _which(name: str) -> Optional[str]:
     return shutil.which(name)
 
 
+# The helpers the sandbox exec chain needs. Each is resolved on the host at run time
+# and required to exist inside the chroot; hardcoding one distribution's layout made
+# the whole sandbox report "not found" on a runner that keeps chroot elsewhere.
+_REQUIRED_TOOLS = ("chroot", "setpriv", "env", "prlimit", "timeout", "sh")
+
+
+_SBIN_DIRS = ("/usr/sbin", "/sbin", "/usr/local/sbin")
+
+
+def _resolve_tool(name: str) -> Optional[str]:
+    """Locate a helper on PATH or in the sbin directories.
+
+    chroot, prlimit and friends live in /usr/sbin on Debian-family hosts, which is not
+    on PATH for an unprivileged user. Searching only PATH reported them missing and
+    disabled the sandbox on a host that supports it.
+    """
+    found = _which(name)
+    if found:
+        return found
+    for directory in _SBIN_DIRS:
+        candidate = Path(directory) / name
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
+def _tool(name: str, fallback: str) -> str:
+    return _resolve_tool(name) or (fallback if Path(fallback).is_file() else fallback)
+
+
 def _mount(path: Path, root: Path, *, readonly: bool) -> str:
     """Bind one exact path at its original absolute name, never its parent."""
     if not path.is_absolute() or not path.exists():
@@ -92,11 +122,17 @@ def wrap(command: list[str], *, cwd: Path, home: Path, node: str, timeout_s: int
     env_args = " ".join(shlex.quote(f"{k}={v}") for k, v in sorted(env.items()))
     cmd_args = " ".join(shlex.quote(str(c)) for c in command)
     enter_cwd = shlex.quote('cd ' + shlex.quote(str(cwd)) + ' && exec "$@"')
-    child = (f"exec /usr/sbin/chroot {shlex.quote(str(root))} /usr/bin/setpriv --no-new-privs "
-             f"--bounding-set=-all --inh-caps=-all --ambient-caps=-all /usr/bin/env -i {env_args} "
-             f"/usr/bin/prlimit --fsize={LIMITS['fsize_bytes']} --nofile={LIMITS['nofile']} "
-             f"--nproc={LIMITS['nproc']} --core=0 -- /usr/bin/timeout --kill-after=5 {timeout_s} "
-             f"/bin/sh -c {enter_cwd} sandbox {cmd_args}")
+    chroot = _tool("chroot", "/usr/sbin/chroot")
+    setpriv = _tool("setpriv", "/usr/bin/setpriv")
+    env_bin = _tool("env", "/usr/bin/env")
+    prlimit = _tool("prlimit", "/usr/bin/prlimit")
+    timeout_bin = _tool("timeout", "/usr/bin/timeout")
+    sh_bin = _tool("sh", "/bin/sh")
+    child = (f"exec {shlex.quote(chroot)} {shlex.quote(str(root))} {shlex.quote(setpriv)} --no-new-privs "
+             f"--bounding-set=-all --inh-caps=-all --ambient-caps=-all {shlex.quote(env_bin)} -i {env_args} "
+             f"{shlex.quote(prlimit)} --fsize={LIMITS['fsize_bytes']} --nofile={LIMITS['nofile']} "
+             f"--nproc={LIMITS['nproc']} --core=0 -- {shlex.quote(timeout_bin)} --kill-after=5 {timeout_s} "
+             f"{shlex.quote(sh_bin)} -c {enter_cwd} sandbox {cmd_args}")
     steps.append(child)
     return ["unshare", "-rmnpf", "sh", "-c", " && ".join(steps)]
 
@@ -107,8 +143,9 @@ def probe_isolation() -> Isolation:
     for tool in ("unshare", "mount", "prlimit", "timeout", "env", "sh", "setpriv"):
         if not _which(tool):
             reasons.append(f"{tool} not found")
-    if not Path("/usr/sbin/chroot").is_file():
-        reasons.append("/usr/sbin/chroot not found")
+    for tool in _REQUIRED_TOOLS:
+        if not _resolve_tool(tool):
+            reasons.append(f"{tool} not found (the sandbox exec chain needs it)")
     node = _which("node") or ("/opt/node22/bin/node" if Path("/opt/node22/bin/node").exists() else None)
     if not node:
         reasons.append("node not found")
