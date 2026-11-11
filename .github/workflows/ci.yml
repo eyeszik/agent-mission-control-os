@@ -436,6 +436,21 @@ jobs:
               emit('warning', 'AVIC browser available', probe.get('available'))
               for blocker in probe.get('blockers', []):
                   emit('error', 'AVIC browser blocker', blocker)
+              # A probe only proves the executable exists. Actually render one tiny
+              # SVG through the same boundary so the browser's own exit code and
+              # stderr are reported, instead of a bare BROWSER_EXIT in a test.
+              from pathlib import Path as _Path
+              import tempfile
+              from services.langgraph.agency.visual.browser import rasterize_svg
+              with tempfile.TemporaryDirectory() as tmp:
+                  run = rasterize_svg(
+                      '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8">'
+                      '<rect width="8" height="8" fill="#0af"/></svg>',
+                      width=8, height=8, out_dir=_Path(tmp), timeout_s=90)
+              print('raster:', json.dumps(run, default=str)[:2000])
+              emit('warning' if run.get('status') == 'PASSED' else 'error',
+                   'AVIC isolated raster', f"status={run.get('status')} exit={run.get('exit_code')} "
+                   f"stderr={str(run.get('stderr_tail'))[:300]}")
           except Exception:
               emit('error', 'AVIC diagnostic failed', traceback.format_exc().strip().splitlines()[-1])
               traceback.print_exc()
