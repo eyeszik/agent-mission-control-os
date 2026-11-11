@@ -441,16 +441,32 @@ jobs:
               # stderr are reported, instead of a bare BROWSER_EXIT in a test.
               from pathlib import Path as _Path
               import tempfile
-              from services.langgraph.agency.visual.browser import rasterize_svg
+              from services.langgraph.agency.visual.browser import rasterize_svg, render_pdf, measure_layout
               with tempfile.TemporaryDirectory() as tmp:
                   run = rasterize_svg(
                       '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8">'
                       '<rect width="8" height="8" fill="#0af"/></svg>',
-                      width=8, height=8, out_dir=_Path(tmp), timeout_s=90)
-              print('raster:', json.dumps(run, default=str)[:2000])
-              emit('warning' if run.get('status') == 'PASSED' else 'error',
-                   'AVIC isolated raster', f"status={run.get('status')} exit={run.get('exit_code')} "
-                   f"stderr={str(run.get('stderr_tail'))[:300]}")
+                      width=8, height=8, out_dir=_Path(tmp) / 'raster', timeout_s=90)
+                  print('raster:', json.dumps(run, default=str)[:1200])
+                  emit('warning' if run.get('status') == 'PASSED' else 'error',
+                       'AVIC isolated raster', f"status={run.get('status')} exit={run.get('exit_code')} "
+                       f"stderr={str(run.get('stderr_tail'))[:300]}")
+                  # The brand book needs print-to-PDF and layout measurement, not
+                  # just SVG rasterization. Exercise both so a failure names which
+                  # capability is missing instead of showing an empty pdf field.
+                  page = ('<html><body style="margin:0"><div data-page="p1" '
+                          'style="width:200px;height:120px;font:12px sans-serif">'
+                          'printable</div></body></html>')
+                  pdf = render_pdf(page, width_px=200, height_px=120, out_dir=_Path(tmp) / 'pdf', timeout_s=90)
+                  print('pdf:', json.dumps(pdf, default=str)[:1200])
+                  emit('warning' if pdf.get('status') == 'PASSED' else 'error',
+                       'AVIC isolated pdf', f"status={pdf.get('status')} exit={pdf.get('exit_code')} "
+                       f"findings={pdf.get('findings')} stderr={str(pdf.get('stderr_tail'))[:300]}")
+                  lay = measure_layout(page, width=200, height=120, out_dir=_Path(tmp) / 'layout', timeout_s=90)
+                  print('layout:', json.dumps(lay, default=str)[:1200])
+                  emit('warning' if lay.get('status') == 'PASSED' else 'error',
+                       'AVIC isolated layout', f"status={lay.get('status')} exit={lay.get('exit_code')} "
+                       f"findings={lay.get('findings')} stderr={str(lay.get('stderr_tail'))[:300]}")
           except Exception:
               emit('error', 'AVIC diagnostic failed', traceback.format_exc().strip().splitlines()[-1])
               traceback.print_exc()
