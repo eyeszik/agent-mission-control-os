@@ -398,13 +398,48 @@ jobs:
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
           AMC_DATABASE_BACKEND: sqlite
+          # A private database per job: the default path is shared with the other
+          # pytest steps and SQLite's write lock turns that into collection errors.
+          AMC_DB_PATH: /tmp/amc-avic-${{ github.run_id }}.db
         run: |
           set -o pipefail
-          python -m pytest services/langgraph/tests/test_avic.py services/langgraph/tests/test_avic_api.py services/langgraph/tests/test_avic_contracts.py services/langgraph/tests/test_vnexus_brandbook.py services/langgraph/tests/test_vnexus_brandbook_contracts.py services/langgraph/tests/test_vnexus_directions.py services/langgraph/tests/test_vnexus_directions_contracts.py -q -rs | tee /tmp/avic.log
+          python -m pytest services/langgraph/tests/test_avic.py services/langgraph/tests/test_avic_api.py services/langgraph/tests/test_avic_contracts.py services/langgraph/tests/test_vnexus_brandbook.py services/langgraph/tests/test_vnexus_brandbook_contracts.py services/langgraph/tests/test_vnexus_directions.py services/langgraph/tests/test_vnexus_directions_contracts.py -q -rs --junitxml=/tmp/junit-avic.xml | tee /tmp/avic.log
           if grep -q "SKIPPED" /tmp/avic.log; then
             echo "::error::AVIC, brand book or creative-direction browser tests were skipped; Chromium is not available to the renderer on this runner"
             exit 1
           fi
+
+      # A failing test name is otherwise only in the blob-hosted log, which is not
+      # reachable from every reviewer, so publish it through the API as well.
+      - name: Publish failing AVIC tests as annotations
+        if: failure()
+        run: python .github/scripts/annotate-junit-failures.py /tmp/junit-avic.xml
+
+      # Which precondition broke, and the browser the renderer actually resolved,
+      # so a render failure can be told apart from a missing dependency.
+      - name: Report AVIC render preconditions on this runner
+        if: failure()
+        run: |
+          python - <<'PY'
+          import json
+          import traceback
+
+
+          def emit(level, title, message):
+              print(f'::{level} title={title}::{" ".join(str(message).split())[:400]}')
+
+
+          try:
+              from services.langgraph.agency.visual.browser import probe_browser
+              probe = probe_browser()
+              print('browser probe:', json.dumps(probe, default=str))
+              emit('warning', 'AVIC browser available', probe.get('available'))
+              for blocker in probe.get('blockers', []):
+                  emit('error', 'AVIC browser blocker', blocker)
+          except Exception:
+              emit('error', 'AVIC diagnostic failed', traceback.format_exc().strip().splitlines()[-1])
+              traceback.print_exc()
+          PY
 
   render-adapters:
     name: Rendering adapters + video + remote protocol
