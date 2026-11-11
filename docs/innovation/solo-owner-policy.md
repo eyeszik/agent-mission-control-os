@@ -69,3 +69,7 @@ The final gate run exposed pre-existing master drift from dependency PR #207: pa
 and lockfile require Next16.4.3 while verify_repository_invariants.py still pins16.4.2.
 The three old literals were aligned to16.4.3 after the current dependency build/tests
 passed; exact version checking is retained. No dependency version was changed by this PR.
+
+2026-11-10: the audited Next pin is now **16.4.5** (@playwright/test **1.65.0**, postcss
+8.5.32) after the November 2026 security releases; see `docs/ucpo/repository-audit.md`
+"Re-audit 2026-11-10". This document's 16.4.3 narrative above is historical.

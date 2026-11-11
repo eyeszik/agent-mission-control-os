@@ -582,9 +582,9 @@ jobs:
           python -m pip install --upgrade "setuptools>=83.0.0"
           python -m pip_audit
 
-      # The optional council extra (CrewAI, AutoGen, MCP). CrewAI 1.15.28, the latest
-      # release, pins chromadb~=1.5.9, mcp~=1.28.1 and (via crewai-cli) uv~=0.11.6, so
-      # these advisories cannot be upgraded away while CrewAI is installed. None is
+      # The optional council extra (CrewAI, AutoGen, MCP). CrewAI 1.15.37, the pinned
+      # release, requires chromadb~=1.5.9, mcp>=1.30.0 and (via crewai-cli) uv~=0.13.4+,
+      # so these advisories cannot be upgraded away while CrewAI is installed. None is
       # reachable from the council (docs/mission-council.md, "Dependency advisories"):
       #   PYSEC-2026-311/3813/3814/3815  chromadb server API/RBAC; no Chroma server runs
       #   CVE-2026-59951                 mcp Streamable HTTP server; council uses stdio client

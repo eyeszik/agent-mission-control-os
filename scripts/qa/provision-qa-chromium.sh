@@ -41,9 +41,9 @@ LIBDIR="$(dirname "$(find "$SCRATCH/al2023" -name 'libnspr4.so' | head -1)")"
 [ -d "$LIBDIR" ] || { echo "al2023 libraries not found" >&2; exit 1; }
 
 # 3. The exact Playwright-expected executable paths, from the repo's pinned playwright-core.
-PW_CORE="$(ls -d "$REPO"/node_modules/.pnpm/playwright-core@1.64.1/node_modules/playwright-core | head -1)"
+PW_CORE="$(ls -d "$REPO"/node_modules/.pnpm/playwright-core@1.65.0/node_modules/playwright-core | head -1)"
 EXE="$(node -e 'console.log(require(process.argv[1]).chromium.executablePath())' "$PW_CORE")"
-# Playwright 1.64 runs default headless with a separate headless-shell build, at a path derived from the same revision.
+# Playwright 1.65 runs default headless with a separate headless-shell build, at a path derived from the same revision.
 REV="$(basename "$(dirname "$(dirname "$EXE")")" | sed 's/^chromium-//')"
 SHELL_EXE="$CACHE/chromium_headless_shell-${REV}/chrome-headless-shell-linux64/chrome-headless-shell"
 

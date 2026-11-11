@@ -71,3 +71,7 @@ vectorization, HYBRID/RASTER output, any deployment or provider integration, and
 | Claims could drift from tests | `avic/capabilities.py` registry, docs table generated, test ties rows to tests | `test_capability_registry_names_real_tests_and_matches_the_docs` |
 
 `test_avic.py`: 65 tests, 0 skipped.
+
+2026-11-10 addendum: the pinned `@playwright/test` moved to **1.65.0** as part of the
+November 2026 security re-audit; this report's 1.64.1 references are historical. See
+`docs/ucpo/repository-audit.md` "Re-audit 2026-11-10".
