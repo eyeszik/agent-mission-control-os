@@ -89,6 +89,27 @@ def _mount(path: Path, root: Path, *, readonly: bool) -> str:
     return f"{prepare} && {mount}{remount}"
 
 
+def _dedupe_mounts(paths: list[Path]) -> list[Path]:
+    """Drop a mount whose target already sits inside an earlier one.
+
+    ``_mount`` creates the target with ``mkdir -p`` and then ``: > dst`` for a
+    file, so mounting ``/usr/bin/chromium`` after ``/usr`` has been bound
+    read-only writes into the read-only bind and fails with EACCES. That is not
+    hypothetical: on GitHub's runners Playwright's bundled browser is reachable
+    as ``/usr/bin/chromium``, and the redundant mount made every AVIC render
+    exit 2. The browser is already inside ``/usr`` by then, so the mount adds
+    nothing. Keep the first (widest) path; a narrower one that is genuinely
+    outside every other mount is still mounted.
+    """
+    kept: list[Path] = []
+    for path in paths:
+        resolved = Path(path)
+        if any(resolved == prior or resolved.is_relative_to(prior) for prior in kept):
+            continue
+        kept.append(resolved)
+    return kept
+
+
 def wrap(command: list[str], *, cwd: Path, home: Path, node: str, timeout_s: int, network: bool = False,
          extra_env: Optional[dict[str, str]] = None, readonly_paths: tuple[Path, ...] = (),
          writable_paths: tuple[Path, ...] = ()) -> list[str]:
@@ -112,6 +133,7 @@ def wrap(command: list[str], *, cwd: Path, home: Path, node: str, timeout_s: int
             node_path.is_relative_to(Path(system)) for system in _SYSTEM_DIRS):
         readonly.insert(0, node_path)
     readonly += [ROOT_NODE_MODULES, WEB_NODE_MODULES, *readonly_paths]
+    readonly = _dedupe_mounts(readonly)
     writable = list(dict.fromkeys((cwd, home, *writable_paths)))
     steps = ["mount --make-rprivate /", f"mount -t tmpfs -o size=32m,nosuid,nodev tmpfs {shlex.quote(str(root))}"]
     steps += [_mount(Path(p), root, readonly=True) for p in readonly]
