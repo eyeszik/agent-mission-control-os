@@ -58,12 +58,36 @@ def _expire_lease(job_id: str, seconds: float = -1.0) -> None:
         )
 
 
+@pytest.fixture
+def empty_queue():
+    """Start each queue test on a queue this test owns.
+
+    ``claim_job`` deliberately returns the oldest queued job across all
+    tenants -- that is the product behaviour, not a bug. On SQLite every test
+    run begins with a fresh file, so this was invisible; on PostgreSQL the
+    suite is one database, and a leftover queued job from an earlier test (or
+    an earlier crashed run) is claimed instead of the one just enqueued.
+
+    Rather than weaken the assertion to "some job", which would stop proving
+    the lease semantics, the queue is drained before the test starts. Rows are
+    marked failed, not deleted, so the queue's own audit trail survives.
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    with transaction(write=True) as db:
+        db.execute(
+            f"UPDATE {table('amc_jobs')} SET status = 'failed', updated_at = ? "
+            "WHERE status IN ('queued', 'running')",
+            (now,),
+        )
+    yield
+
+
 # ---------------------------------------------------------------------------
 # Queue primitives
 # ---------------------------------------------------------------------------
 
 
-def test_job_is_claimed_by_exactly_one_worker():
+def test_job_is_claimed_by_exactly_one_worker(empty_queue):
     job = _enqueue_create()
     with __import__("concurrent.futures", fromlist=["ThreadPoolExecutor"]).ThreadPoolExecutor(max_workers=4) as pool:
         claims = list(pool.map(lambda _: claim_job(), range(4)))
@@ -75,7 +99,7 @@ def test_job_is_claimed_by_exactly_one_worker():
     assert claimed[0]["claim_token"]
 
 
-def test_lease_expiry_recovery_requeues_without_charging_twice_per_crash():
+def test_lease_expiry_recovery_requeues_without_charging_twice_per_crash(empty_queue):
     job = _enqueue_create()
     lease = claim_job()
     assert lease["job_id"] == job["job_id"]
@@ -96,7 +120,7 @@ def test_lease_expiry_recovery_requeues_without_charging_twice_per_crash():
     assert reclaimed["attempt_count"] == 2
 
 
-def test_retry_budget_dead_letters_after_exhaustion():
+def test_retry_budget_dead_letters_after_exhaustion(empty_queue):
     job = _enqueue_create(max_attempts=2)
     max_attempts = int((get_job(job["job_id"]) or {}).get("max_attempts") or 2)
     while max_attempts > 0:
@@ -112,7 +136,7 @@ def test_retry_budget_dead_letters_after_exhaustion():
     assert claim_job() is None
 
 
-def test_complete_and_fail_are_fenced_by_claim_token():
+def test_complete_and_fail_are_fenced_by_claim_token(empty_queue):
     job = _enqueue_create()
     claimed = claim_job()
 
@@ -126,7 +150,7 @@ def test_complete_and_fail_are_fenced_by_claim_token():
     assert done["result"] == {"answer": 1}
 
 
-def test_cancellation_of_queued_job():
+def test_cancellation_of_queued_job(empty_queue):
     job = _enqueue_create()
     assert request_job_cancellation(job["job_id"]) is True
     assert get_job(job["job_id"])["status"] == "cancelled"
@@ -140,7 +164,7 @@ def test_cancellation_of_running_job_prevents_execution_fence():
     assert get_job(job["job_id"])["status"] == "cancelled"
 
 
-def test_expire_stale_leases_ignores_fresh_leases():
+def test_expire_stale_leases_ignores_fresh_leases(empty_queue):
     job = _enqueue_create()
     claimed = claim_job()
     assert expire_stale_leases() == []
