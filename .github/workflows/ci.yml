@@ -348,6 +348,34 @@ jobs:
         if: failure()
         run: python .github/scripts/annotate-junit-failures.py /tmp/junit-ucpo.xml
 
+      # The job fails when a UCPO test skips, because a skip means the sandbox or
+      # Chromium was unavailable and would hide a regression. Which of the two, and
+      # why, is only in the skip reason, so print the probe's own verdict here.
+      - name: Report sandbox and browser preconditions on this runner
+        if: failure()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from services.langgraph.agency.ucpo.sandbox import probe_isolation
+          from services.langgraph.agency.ucpo import qa
+
+          iso = probe_isolation()
+          print('### UCPO preconditions')
+          print('```')
+          print('sandbox available:', iso.available)
+          print('sandbox reasons  :', list(iso.reasons))
+          print('sandbox facts    :', json.dumps(iso.facts, default=str)[:600])
+          root, cache, module = qa._playwright_paths()
+          print('playwright root  :', root)
+          print('browser cache    :', cache)
+          print('playwright module:', module)
+          print('```')
+          for reason in iso.reasons:
+              print(f'::error title=UCPO sandbox::{reason[:200]}')
+          if not iso.available:
+              print('::error title=UCPO sandbox::probe reported the sandbox unavailable on this runner')
+          PY
+
       # AVIC renders through the same local Chromium; its browser tests must run here, not skip.
       - name: Run AVIC, brand book and creative-direction render, release and API tests
         env:

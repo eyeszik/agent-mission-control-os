@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "94936f261f5f79f794e658fd5a6875440773ed8f"
+      "git_blob_sha": "22c023f2b6e62f9a94a9d54284c17705e655adca"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -764,7 +764,7 @@
     },
     {
       "path": "services/langgraph/agency/rendering/runtime.py",
-      "git_blob_sha": "4062e91b0eb5da89a0dffd204c61d1c96551f0c9"
+      "git_blob_sha": "804faf5ff9df28c5028b304b90b9c11d675180cf"
     },
     {
       "path": "services/langgraph/agency/rendering/service.py",
