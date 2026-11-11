@@ -195,15 +195,38 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload JUnit results on failure
+      # Failing test names are emitted as annotations, not only inside the log or the
+      # artifact. Both of those are served from a blob host, so a reviewer without log
+      # access sees an unhelpful "Process completed with exit code 1" and cannot tell
+      # which test failed. Annotations come from the API and name the test.
+      - name: Publish failing council tests as annotations
         if: failure()
-        timeout-minutes: 3
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: backend-council-junit-${{ github.run_id }}-${{ github.run_attempt }}
-          path: /tmp/junit-council.xml
-          if-no-files-found: warn
-          retention-days: 7
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import glob, xml.etree.ElementTree as ET
+          paths = glob.glob('/tmp/junit-council.xml')
+          if not paths:
+              print('No JUnit file was written; pytest did not reach the report stage.')
+              raise SystemExit(0)
+          root = ET.parse(paths[0]).getroot()
+          bad = []
+          for case in root.iter('testcase'):
+              problem = case.find('failure')
+              if problem is None:
+                  problem = case.find('error')
+              if problem is None:
+                  continue
+              bad.append((case.get('classname') or '', case.get('name') or '',
+                          (problem.get('message') or '').strip().splitlines()[0][:200]
+                          if (problem.get('message') or '').strip() else 'no message'))
+          print(f'### {len(bad)} failing council test(s)')
+          print('```')
+          for cls, name, msg in bad:
+              print(f'{cls}::{name} :: {msg}')
+          print('```')
+          for cls, name, msg in bad:
+              print(f'::error title={cls}::{name}::{msg}')
+          PY
 
   frontend:
     name: Frontend (contracts + typecheck + test + build)
