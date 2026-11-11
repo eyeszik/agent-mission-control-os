@@ -201,32 +201,7 @@ jobs:
       # which test failed. Annotations come from the API and name the test.
       - name: Publish failing council tests as annotations
         if: failure()
-        run: |
-          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import glob, xml.etree.ElementTree as ET
-          paths = glob.glob('/tmp/junit-council.xml')
-          if not paths:
-              print('No JUnit file was written; pytest did not reach the report stage.')
-              raise SystemExit(0)
-          root = ET.parse(paths[0]).getroot()
-          bad = []
-          for case in root.iter('testcase'):
-              problem = case.find('failure')
-              if problem is None:
-                  problem = case.find('error')
-              if problem is None:
-                  continue
-              bad.append((case.get('classname') or '', case.get('name') or '',
-                          (problem.get('message') or '').strip().splitlines()[0][:200]
-                          if (problem.get('message') or '').strip() else 'no message'))
-          print(f'### {len(bad)} failing council test(s)')
-          print('```')
-          for cls, name, msg in bad:
-              print(f'{cls}::{name} :: {msg}')
-          print('```')
-          for cls, name, msg in bad:
-              print(f'::error title={cls}::{name}::{msg}')
-          PY
+        run: python .github/scripts/annotate-junit-failures.py /tmp/junit-council.xml
 
   frontend:
     name: Frontend (contracts + typecheck + test + build)
@@ -332,11 +307,15 @@ jobs:
           AMC_DATABASE_BACKEND: sqlite
         run: |
           set -o pipefail  # without it, tee hides a pytest failure
-          python -m pytest services/langgraph/tests/test_ucpo_build.py -q -rs | tee /tmp/ucpo-sandbox.log
+          python -m pytest services/langgraph/tests/test_ucpo_build.py -q -rs --junitxml=/tmp/junit-ucpo.xml | tee /tmp/ucpo-sandbox.log
           if grep -q "SKIPPED" /tmp/ucpo-sandbox.log; then
             echo "::error::UCPO sandbox tests were skipped; the sandbox is not available on this runner"
             exit 1
           fi
+
+      - name: Publish failing tests as annotations
+        if: failure()
+        run: python .github/scripts/annotate-junit-failures.py /tmp/junit-ucpo.xml
 
       # AVIC renders through the same local Chromium; its browser tests must run here, not skip.
       - name: Run AVIC, brand book and creative-direction render, release and API tests
@@ -386,11 +365,15 @@ jobs:
           AMC_DB_PATH: /tmp/amc-render-adapters.db
         run: |
           set -o pipefail
-          python -m pytest services/langgraph/tests/test_rendering.py services/langgraph/tests/test_rendering_media_remote.py -q -rs | tee /tmp/render-adapters.log
+          python -m pytest services/langgraph/tests/test_rendering.py services/langgraph/tests/test_rendering_media_remote.py -q -rs --junitxml=/tmp/junit-render-adapters.xml | tee /tmp/render-adapters.log
           if grep -q "SKIPPED" /tmp/render-adapters.log; then
             echo "::error::Renderer capability tests skipped; runtime verification is incomplete"
             exit 1
           fi
+
+      - name: Publish failing tests as annotations
+        if: failure()
+        run: python .github/scripts/annotate-junit-failures.py /tmp/junit-render-adapters.xml
 
   browser-e2e:
     name: Browser E2E (local degraded HITL)
@@ -504,6 +487,10 @@ jobs:
         if: failure()
         timeout-minutes: 1
         run: bash .github/scripts/dump-browser-e2e-logs.sh
+
+      - name: Publish failing tests as annotations
+        if: failure()
+        run: python .github/scripts/annotate-junit-failures.py apps/web/test-results/junit.xml
 
       - name: Upload Playwright JUnit results on failure
         if: failure()
