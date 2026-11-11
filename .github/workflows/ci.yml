@@ -195,6 +195,37 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # The MCP tests fail closed by refusing a server whose command or file
+      # arguments are not pinnable: not absolute, missing, group- or world-writable,
+      # or not matching their sha256. The tests report only "not on the tool
+      # allowlist", so report the runner's actual condition here, where it is a
+      # property of the machine rather than of the test.
+      - name: Report MCP pin preconditions on this runner
+        if: failure()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os, stat, sys
+          from pathlib import Path
+
+          root = Path.cwd()
+          server = (root / 'services/langgraph/tests/fixtures/council_mcp_server.py').resolve()
+          print('### MCP pin preconditions')
+          print('```')
+          for label, path in (('sys.executable', Path(sys.executable)), ('fixture server', server)):
+              print(f'{label}: {path}')
+              try:
+                  mode = os.stat(path).st_mode
+                  print(f'  exists: True  mode: {oct(mode & 0o777)}'
+                        f'  group-writable: {bool(mode & stat.S_IWGRP)}'
+                        f'  world-writable: {bool(mode & stat.S_IWOTH)}'
+                        f'  is-file: {path.is_file()}')
+              except OSError as exc:
+                  print(f'  stat failed: {exc}')
+          print(f'cwd: {root}')
+          print(f'cwd writable-by-others: {bool(os.stat(root).st_mode & stat.S_IWOTH)}')
+          print('```')
+          PY
+
       # Failing test names are emitted as annotations, not only inside the log or the
       # artifact. Both of those are served from a blob host, so a reviewer without log
       # access sees an unhelpful "Process completed with exit code 1" and cannot tell
