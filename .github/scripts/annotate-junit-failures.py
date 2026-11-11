@@ -28,6 +28,28 @@ def first_line(text: str) -> str:
     return stripped.splitlines()[0][:MAX_MESSAGE]
 
 
+def explain(case: ET.Element, problem: ET.Element) -> str:
+    """The message, plus pytest's own explanation of the assertion when there is one.
+
+    pytest puts the terse summary in the attribute and the useful part -- the diff
+    or the operator-facing reason -- in the element text, marked with ``E ``. Prefer
+    those lines; fall back to the last non-empty line, then to the attribute alone.
+    """
+    message = first_line(problem.get("message") or "")
+    lines = (problem.text or "").splitlines()
+    marked = [line[2:].strip() for line in lines if line.startswith("E ")]
+    candidates = marked or [line.strip() for line in lines if line.strip()]
+    if candidates:
+        # The last marked line is usually the concrete assertion; earlier ones may
+        # be the reason it failed. Keep both when they differ.
+        detail = first_line(candidates[-1])
+        if len(candidates) > 1 and candidates[-2].startswith(("AssertionError", "Error")):
+            detail = first_line(candidates[-2])
+        if detail and detail not in message:
+            return f"{message} | {detail}"
+    return message
+
+
 def cases(path: Path) -> list[tuple[str, str, str]]:
     found: list[tuple[str, str, str]] = []
     try:
@@ -45,7 +67,7 @@ def cases(path: Path) -> list[tuple[str, str, str]]:
         found.append((
             case.get("classname") or "(unknown class)",
             case.get("name") or "(unnamed test)",
-            first_line(problem.get("message") or ""),
+            explain(case, problem),
         ))
     return found
 

@@ -155,7 +155,10 @@ def mcp_server(monkeypatch, council):  # after ``council``, which clears AMC_MCP
 def test_mcp_tools_are_allowlisted_only(mcp_server, council):  # noqa: F811
     body = client.get("/missions/tools").json()
     ids = {t["tool_id"] for t in body["tools"]}
-    assert {"mcp.testsrv.echo", "mcp.testsrv.run_shell"} <= ids
+    # Surface the operator-facing refusal reason on failure. Without this the only
+    # signal is "testsrv is missing from the allowlist", which does not say why the
+    # configuration was rejected.
+    assert {"mcp.testsrv.echo", "mcp.testsrv.run_shell"} <= ids, body["mcp_config_errors"]
     assert "mcp.testsrv.hidden_admin" not in ids
     assert any("relative: command must be an absolute path" in e for e in body["mcp_config_errors"])
 
