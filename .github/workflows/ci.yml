@@ -351,29 +351,42 @@ jobs:
       # The job fails when a UCPO test skips, because a skip means the sandbox or
       # Chromium was unavailable and would hide a regression. Which of the two, and
       # why, is only in the skip reason, so print the probe's own verdict here.
+      # The job fails when a UCPO test skips, because a skip means the sandbox or
+      # Chromium was unavailable and would hide a regression. Which of the two, and
+      # why, is only in the skip reason, so print the probe's own verdict here. Every
+      # branch reports through an annotation, including an import failure, so the job
+      # never fails silently on the one step meant to explain it.
       - name: Report sandbox and browser preconditions on this runner
         if: failure()
         run: |
-          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          python - <<'PY'
           import json
-          from services.langgraph.agency.ucpo.sandbox import probe_isolation
-          from services.langgraph.agency.ucpo import qa
+          import traceback
 
-          iso = probe_isolation()
-          print('### UCPO preconditions')
-          print('```')
-          print('sandbox available:', iso.available)
-          print('sandbox reasons  :', list(iso.reasons))
-          print('sandbox facts    :', json.dumps(iso.facts, default=str)[:600])
-          root, cache, module = qa._playwright_paths()
-          print('playwright root  :', root)
-          print('browser cache    :', cache)
-          print('playwright module:', module)
-          print('```')
-          for reason in iso.reasons:
-              print(f'::error title=UCPO sandbox::{reason[:200]}')
-          if not iso.available:
-              print('::error title=UCPO sandbox::probe reported the sandbox unavailable on this runner')
+          def emit(level, title, message):
+              message = ' '.join(str(message).split())[:400]
+              print(f'::{level} title={title}::{message}')
+
+          try:
+              from services.langgraph.agency.ucpo.sandbox import probe_isolation
+              from services.langgraph.agency.ucpo import qa
+              import os
+              iso = probe_isolation()
+              print('sandbox available:', iso.available)
+              print('sandbox reasons  :', list(iso.reasons))
+              print('sandbox facts    :', json.dumps(iso.facts, default=str))
+              root, cache, module = qa._playwright_paths()
+              print('playwright root  :', root)
+              print('browser cache    :', cache, 'exists:', bool(cache and os.path.isdir(cache)))
+              print('playwright module:', module)
+              emit('warning', 'UCPO sandbox available', iso.available)
+              for reason in iso.reasons:
+                  emit('error', 'UCPO sandbox reason', reason)
+              if not iso.available and not iso.reasons:
+                  emit('error', 'UCPO sandbox', 'probe reported unavailable with no reason')
+          except Exception:
+              emit('error', 'UCPO diagnostic failed', traceback.format_exc().strip().splitlines()[-1])
+              traceback.print_exc()
           PY
 
       # AVIC renders through the same local Chromium; its browser tests must run here, not skip.

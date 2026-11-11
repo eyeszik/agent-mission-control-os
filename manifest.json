@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "22c023f2b6e62f9a94a9d54284c17705e655adca"
+      "git_blob_sha": "28806321c0e21b43528abe9b2e07d28a4f2f1f86"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -816,7 +816,7 @@
     },
     {
       "path": "services/langgraph/agency/ucpo/sandbox.py",
-      "git_blob_sha": "8107e746e12fad552668f1e53b4f3a54f2903a56"
+      "git_blob_sha": "3c7ab56d3f5a7b586f08f70693826c3c1486c93d"
     },
     {
       "path": "services/langgraph/agency/ucpo/semantic.py",

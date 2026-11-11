@@ -71,6 +71,16 @@ def wrap(command: list[str], *, cwd: Path, home: Path, node: str, timeout_s: int
     env = {"PATH": "/usr/local/bin:/usr/bin:/bin", "HOME": str(home), "TMPDIR": str(home),
            "NEXT_TELEMETRY_DISABLED": "1", "CI": "1", "LANG": "C.UTF-8", **(extra_env or {})}
     readonly = [Path(p) for p in _SYSTEM_DIRS if Path(p).exists()]
+    # The interpreter is often installed outside the system directories -- GitHub's
+    # runners put it under /opt/hostedtoolcache -- and the chroot only contains what is
+    # bind-mounted here. Without this the interpreter a caller names is simply absent
+    # inside the sandbox, every command exits 127, and the boundary probe reports
+    # "network isolation not demonstrated" for a host that is in fact fine.
+    # Mount it before the system directories so its parent is still writable.
+    node_path = Path(node)
+    if node_path.is_absolute() and node_path.is_file() and not any(
+            node_path.is_relative_to(Path(system)) for system in _SYSTEM_DIRS):
+        readonly.insert(0, node_path)
     readonly += [ROOT_NODE_MODULES, WEB_NODE_MODULES, *readonly_paths]
     writable = list(dict.fromkeys((cwd, home, *writable_paths)))
     steps = ["mount --make-rprivate /", f"mount -t tmpfs -o size=32m,nosuid,nodev tmpfs {shlex.quote(str(root))}"]
