@@ -1,6 +1,6 @@
 # Production brief — "Agent Mission Control OS, Explained" (30s vertical explainer)
 
-**Status:** frozen for the 2026-11-09 delivery · **Branch:** `arena/25c9c639-agent-mission-control-os` · **Pinned source revision:** `6144f03d907949d6b701e8eb93bcc87de1e90cf9` (master, `git rev-parse HEAD`) · **Date:** 2026-11-09
+**Status:** frozen for the 2026-11-09 delivery (Piper re-render supersedes the espeak-ng build merged in #244) · **Branch:** `arena/734654d8-agent-mission-control-os` · **Pinned source revision:** `f947863a85dfb31f56f06b37b0dfeafaf9de0149` (`git rev-parse HEAD`) · **Date:** 2026-11-09
 
 This brief defines the outcome, style, specification, assets, audio, budget and mandatory
 acceptance checks for one deliverable: a ~30-second, 9:16, 1080×1920 local render that
@@ -71,30 +71,34 @@ no Lottie/GL.** Specifically:
   `beam` (s06) — abstract rhythms; they make no depiction claim.
 - Continuity is explicit per scene (`storyboard.json → continuity` strings), each scene
   records the end state it hands to the next.
-- Audio is generated: formant speech + synthesized ambient pad. Nothing is sampled.
+- Audio is generated: Piper neural speech (`en_US-joe-medium`, CC0, local) + synthesized ambient pad. Nothing is sampled.
 
 ## 5. Audio needs
 
-- **Narration:** local, offline, zero-cost **espeak-ng formant synthesis** at 160 wpm,
-  pitch 42, word-gap 4. On this host the `espeak-ng` CLI is provided by `tools/espeak-ng-shim.py`,
-  a ~90-line shim that calls the real `libespeak-ng` engine bundled in the
-  `espeakng-loader` wheel (apt is not reachable from this sandbox). The manifest therefore
-  truthfully records `engine: "espeak-ng"`, `voice_quality: "formant_synthesis"`.
-  It is *not* a neural voice and is intentionally not passed off as one.
+- **Narration:** local, offline, zero-cost **Piper neural TTS** — voice
+  `en_US-joe-medium` (CC0; a lessac-family finetune from the rhasspy `piper-voices`
+  v1.0.0 collection), installed via the third-party `joe-us-piper-voice` PyPI package
+  (1.0.0; MIT packaging metadata — the voice files are the upstream CC0 artifacts,
+  bit-identical per the SHA-256s in `environment-record.json`). The manifest records
+  `speech: "piper"`, `voice_quality: "neural"`, and `voice_model` pointing at the local
+  `.onnx`. The voice model (~58 MB) is **not** committed to this repository. The
+  previous espeak-ng formant route is retained as a documented fallback
+  (`REPRODUCTION.md §Fallback: espeak-ng`, `tools/espeak-ng-shim.py`).
 - **Music:** synthesized ambient pad (`--music ambient`), no licensed track.
-- **Loudness:** measured, not certified — see `qa/qa-report.md` (ebur128 integrated
-  measurement). No claim of EBU R128 / ATSC A/85 compliance is made.
+- **Loudness:** measured, not certified — **−19.5 LUFS integrated / −1.9 dBTP / LRA 7.0 LU**
+  (ebur128, `qa/loudness-ebur128.txt`). No claim of EBU R128 / ATSC A/85 compliance is made.
 - **Captions:** 7 cues, max two lines, timed from measured per-scene speech durations;
   parallel `captions.srt` delivered.
-- If a natural neural voiceover is wanted later, re-render with Piper locally
-  (see `REPRODUCTION.md §Optional: Piper narration`) — never by quietly swapping the track.
+- The espeak-ng master was retired when this Piper build passed the same gate; if Piper
+  is ever unavailable, re-render via `REPRODUCTION.md §Fallback: espeak-ng` — never by
+  quietly swapping the track under the existing captions.
 
 ## 6. Budget
 
 | Item | Planned | Actual (measured) |
 | --- | --- | --- |
 | Paid APIs / credentials / network at render time | none | **none** (`manifest.json → zero_paid_api_spend: true`, `credentials_used: []`, `remote_fetching_enabled: false`) |
-| Compute | CPU-only, 2 vCPU sandbox | preflight 8 s draft: 2.49 s wall, 72.7 MB peak RSS · 30 s draft animatic: 7.74 s wall, 117 MB peak RSS · final render: see `qa/qa-report.md` |
+| Compute | CPU-only, 2 vCPU sandbox | preflight 8 s draft: 2.49 s wall, 72.7 MB peak RSS · 30 s draft animatic: 7.74 s wall, 117 MB peak RSS · final render: ~2 min wall on 2 vCPU; see `qa/qa-report.md` |
 | Money | $0.00 | $0.00 |
 | Wall clock from brief to packaged delivery | < 1 hour | within session, 2026-11-09 |
 
@@ -121,6 +125,7 @@ All must pass on the **delivered file**; results recorded in `qa/qa-report.md`.
   diffusion or generative video.
 - The 5 creative QC checks are `NOT_VERIFIED` (no perceptual evaluator installed). They are
   reported as such, never as "passed".
-- espeak-ng is formant synthesis; the voice is robotic by construction. Noted in delivery notes.
+- Piper narration here uses the third-party `joe-us-piper-voice` repackaging of the CC0
+  `en_US-joe-medium` voice — disclosed, hashes pinned, never passed off as a house voice.
 - No production-readiness, traffic, revenue or customer claims are made or implied.
 - "Local-first" and "human approval" are product facts from the repository README, not aspirations.

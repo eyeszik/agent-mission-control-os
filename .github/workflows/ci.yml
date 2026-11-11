@@ -4,6 +4,7 @@ on:
   push:
     branches: [master, "remediate/**"]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -205,6 +206,51 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+  freevideoforge:
+    name: FreeVideoForge (offline gates, real synthesis)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install FreeVideoForge with test + static-ffmpeg extras
+        run: python -m pip install -e "./services/freevideoforge[dev,static-ffmpeg]"
+
+      - name: Install ffmpeg and ffprobe (render-adapters precedent)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+
+      # The CC0 voice drives the end-to-end "good render" gate test with real
+      # speech. Pinned by hash; the job fails loudly if either drifts.
+      - name: Install pinned Piper engine and CC0 voice; verify hash
+        run: |
+          python -m pip install piper-tts==1.8.0 joe-us-piper-voice==1.0.0
+          python - <<'PY'
+          import hashlib
+          from joe_us_piper_voice import model_path
+          with open(model_path(), 'rb') as handle:
+              h = hashlib.sha256(handle.read()).hexdigest()
+          expected = "58afce0321b8d9c46d7cdf9c16500cc55a793b4220212dba6b70fb788b3baf06"
+          assert h == expected, f"voice hash drifted: {h}"
+          print("voice hash OK", h)
+          PY
+
+      - name: Run FreeVideoForge suite; forbid gate-skip greenwash
+        run: |
+          export FVF_PIPER_MODEL="$(python -c 'from joe_us_piper_voice import model_path; print(model_path())')"
+          set -o pipefail
+          python -m pytest services/freevideoforge/tests -q -rs | tee /tmp/freevideoforge.log
+          if grep -qE 'SKIPPED.*good_render' /tmp/freevideoforge.log; then
+            echo "::error::the good-render gate test skipped; toolchain preflight is broken"
+            exit 1
+          fi
+
   frontend:
     name: Frontend (contracts + typecheck + test + build)
     runs-on: ubuntu-latest
@@ -215,7 +261,11 @@ jobs:
         with:
           node-version: "22.12.0"
 
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Enable pnpm via corepack (pin-verified from package.json packageManager)
+        run: |
+          npm install --global corepack@latest --no-audit --no-fund
+          corepack enable
+          pnpm --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -271,7 +321,11 @@ jobs:
         with:
           node-version: "22.12.0"
 
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Enable pnpm via corepack (pin-verified from package.json packageManager)
+        run: |
+          npm install --global corepack@latest --no-audit --no-fund
+          corepack enable
+          pnpm --version
 
       - name: Install application dependencies
         run: |
@@ -332,7 +386,11 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22.12.0"
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Enable pnpm via corepack (pin-verified from package.json packageManager)
+        run: |
+          npm install --global corepack@latest --no-audit --no-fund
+          corepack enable
+          pnpm --version
       - name: Install exact dependencies and renderer bundles
         run: |
           pnpm install --frozen-lockfile
@@ -373,7 +431,11 @@ jobs:
         with:
           node-version: "22.12.0"
 
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Enable pnpm via corepack (pin-verified from package.json packageManager)
+        run: |
+          npm install --global corepack@latest --no-audit --no-fund
+          corepack enable
+          pnpm --version
 
       - name: Install application dependencies
         run: |
@@ -520,9 +582,9 @@ jobs:
           python -m pip install --upgrade "setuptools>=83.0.0"
           python -m pip_audit
 
-      # The optional council extra (CrewAI, AutoGen, MCP). CrewAI 1.15.28, the latest
-      # release, pins chromadb~=1.5.9, mcp~=1.28.1 and (via crewai-cli) uv~=0.11.6, so
-      # these advisories cannot be upgraded away while CrewAI is installed. None is
+      # The optional council extra (CrewAI, AutoGen, MCP). CrewAI 1.15.37, the pinned
+      # release, requires chromadb~=1.5.9, mcp>=1.30.0 and (via crewai-cli) uv~=0.13.4+,
+      # so these advisories cannot be upgraded away while CrewAI is installed. None is
       # reachable from the council (docs/mission-council.md, "Dependency advisories"):
       #   PYSEC-2026-311/3813/3814/3815  chromadb server API/RBAC; no Chroma server runs
       #   CVE-2026-59951                 mcp Streamable HTTP server; council uses stdio client
@@ -543,7 +605,11 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22.12.0"
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Enable pnpm via corepack (pin-verified from package.json packageManager)
+        run: |
+          npm install --global corepack@latest --no-audit --no-fund
+          corepack enable
+          pnpm --version
 
       - name: Audit production JavaScript dependencies
         run: |

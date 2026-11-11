@@ -309,3 +309,15 @@ No external activation was requested or performed. Decisions the owner should ma
    (M06/M21, Q05/Q17/Q08), followed by a deliverable contract (M05, Q03/Q16). These are dependency-ready and need no
    new providers. The timeline contract can then be attached to a shot list with rights and reference fields (Q26).
 4. Keep the blocked render, provider and GitHub steps behind the decisions in §7.
+
+## 2026-11-10 — Audited frontend baseline re-pinned to Next.js 16.4.5 / @playwright/test 1.65.0
+
+Dependabot #225/#239 merged the November 2026 security releases ahead of the audited baseline
+while `CI` could not start (Actions allow-list rejected `pnpm/action-setup`, every run failed at
+startup since 2026-11-08). Re-baselined instead of reverted — 16.4.3 is affected by seven
+published advisories fixed in 16.4.5 (incl. GHSA-mfr8-8qww-v76h, High). Council extra
+constraints re-pinned to a consistent set (aiofiles 24.1.0, aiosqlite 0.21.0, json_repair 0.60.1,
+pydantic 2.12.5, pydantic_core 2.41.5) because crewai hard-requires `pydantic<2.13`; see
+`docs/ucpo/repository-audit.md` "Re-audit 2026-11-10" for the full rationale and residual risk.
+Verification: `python scripts/verify_repository_invariants.py` exit 0; council engines 72/72
+locally; hosted CI re-run pending this change.
