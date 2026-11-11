@@ -140,6 +140,10 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Publish failing tests as annotations
+        if: failure()
+        run: python .github/scripts/annotate-junit-failures.py /tmp/junit-pg.xml
+
       - name: Upload JUnit results on failure
         if: failure()
         timeout-minutes: 3
