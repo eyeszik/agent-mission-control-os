@@ -392,8 +392,16 @@ export function ConsequentialLifecyclePanel() {
           rows={[
             { label: 'run status', value: run.status },
             { label: 'compile gate', value: trust.compile_blocked ? 'BLOCKED' : 'CLEAR', tone: trust.compile_blocked ? 'warn' : 'success' },
-            { label: 'open obligations', value: String(openObligationsCount), tone: openObligationsCount > 0 ? 'warn' : 'default' },
-            { label: 'hook gaps', value: String(hookGapObligationsCount), tone: hookGapObligationsCount > 0 ? 'danger' : 'default' },
+            { label: 'open obligations (this run)', value: String(openObligationsCount), tone: openObligationsCount > 0 ? 'warn' : 'default' },
+            { label: 'hook gaps (this run)', value: String(hookGapObligationsCount), tone: hookGapObligationsCount > 0 ? 'danger' : 'default' },
+            // The compile gate is decided project-wide over the obligations the snapshot
+            // carries, so show that same count beside it. Reporting only the run-scoped
+            // number made a blocked gate read "BLOCKED ... hook gaps 0", which is
+            // self-contradictory and hid why the gate was closed: a run started after the
+            // snapshot window has no obligations of its own while the project still has
+            // undischarged ones.
+            { label: 'hook gaps (project)', value: String(trust.hook_gap_count), tone: trust.hook_gap_count > 0 ? 'danger' : 'default' },
+            { label: 'open obligations (project)', value: String(trust.open_invalidation_obligations), tone: trust.open_invalidation_obligations > 0 ? 'warn' : 'default' },
             { label: 'open retry paths', value: String(retryableRecoveries.length), tone: retryableRecoveries.length > 0 ? 'warn' : 'default' },
             { label: 'ambiguous recoveries', value: String(compensatableRecoveries.length), tone: compensatableRecoveries.length > 0 ? 'warn' : 'default' },
             { label: 'stale approvals', value: String(staleApprovals.length), tone: staleApprovals.length > 0 ? 'warn' : 'default' },

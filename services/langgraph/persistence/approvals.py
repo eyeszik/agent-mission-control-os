@@ -112,7 +112,7 @@ def list_pending_approvals(tenant_id: str) -> list:
             f"SELECT * FROM {table('approvals')} WHERE status = 'pending' AND tenant_id = ? ORDER BY created_at ASC",
             (tenant_id,),
         ).fetchall()
-        return [normalize_record(row) for row in rows]
+        return [_row_to_dict(row) for row in rows]
 
 
 def bind_approval_subject(
@@ -194,7 +194,7 @@ def get_approvals_for_run(run_id: str) -> list:
             f"SELECT * FROM {table('approvals')} WHERE run_id = ? ORDER BY created_at DESC",
             (run_id,),
         ).fetchall()
-        return [normalize_record(row) for row in rows]
+        return [_row_to_dict(row) for row in rows]
 
 
 def list_approvals_for_subject_refs(project_id: str, subject_refs: list[str]) -> list[dict]:
@@ -213,4 +213,4 @@ def list_approvals_for_subject_refs(project_id: str, subject_refs: list[str]) ->
             """,
             [project_id, *refs],
         ).fetchall()
-    return [normalize_record(row) for row in rows]
+    return [_row_to_dict(row) for row in rows]
