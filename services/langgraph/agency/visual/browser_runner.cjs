@@ -222,7 +222,14 @@ async function main() {
   const browser = await pw.chromium.launch({
     headless: true,
     executablePath: spec.executable_path || undefined,
-    args: ["--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
+    // --disable-dev-shm-usage keeps the compositor's shared memory in TMPDIR
+    // instead of /dev/shm. Chromium's print pipeline is the most sensitive
+    // consumer: in a container with a small or freshly-mounted /dev/shm,
+    // Page.printToPDF fails with a bare "Printing failed" while rasterization
+    // and layout measurement succeed on the very same page. That asymmetry is
+    // what identified this, and the flag is the standard container remedy.
+    args: ["--no-sandbox", "--disable-dev-shm-usage", "--use-gl=angle", "--use-angle=swiftshader",
+           "--enable-unsafe-swiftshader"],
   });
   const result = { mode: spec.mode, blocked_requests: [], browser_version: browser.version() };
   try {
@@ -302,10 +309,28 @@ async function main() {
         result.frames.push({ file, complete: r.complete });
       }
     } else if (spec.mode === "pdf") {
-      await page.setContent(spec.html);
-      await page.emulateMedia({ media: "print" });
-      await page.pdf({ path: path.join(outDir, "document.pdf"), width: `${spec.width_px}px`, height: `${spec.height_px}px`,
-                       printBackground: true, margin: { top: "0", right: "0", bottom: "0", left: "0" } });
+      const printOnce = async (target) => {
+        await target.setContent(spec.html);
+        await target.emulateMedia({ media: "print" });
+        await target.pdf({ path: path.join(outDir, "document.pdf"), width: `${spec.width_px}px`,
+                           height: `${spec.height_px}px`, printBackground: true,
+                           margin: { top: "0", right: "0", bottom: "0", left: "0" } });
+      };
+      try {
+        await printOnce(page);
+      } catch (err) {
+        // A print compositor that died does not revive with the same page, but
+        // does with a fresh one. One bounded retry, and the error is preserved
+        // if it still fails so the caller can report it truthfully.
+        result.pdf_err = String(err && err.message ? err.message : err);
+        const retry = await context.newPage();
+        try {
+          await printOnce(retry);
+          result.pdf_retried = true;
+        } finally {
+          await retry.close().catch(() => {});
+        }
+      }
       result.pdf = { capture: "document.pdf", pages: await page.evaluate(() => document.querySelectorAll("[data-page]").length || 1) };
     } else if (spec.mode === "layout") {
       // Measure each [data-page] section: content outside its body box, clipped or too-small text, overlapping

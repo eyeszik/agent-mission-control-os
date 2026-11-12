@@ -836,7 +836,7 @@
     },
     {
       "path": "services/langgraph/agency/visual/browser_runner.cjs",
-      "git_blob_sha": "88552fa964928c2ab0e0515803b39e009514cfd5"
+      "git_blob_sha": "3000c06d9ed97e35a618ec7352b72ba235122db5"
     },
     {
       "path": "services/langgraph/agency/visual/capabilities.py",
