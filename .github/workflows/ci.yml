@@ -463,18 +463,25 @@ jobs:
                   print('browser exe  :', exe)
                   print('headless shell:', shell)
                   emit('warning', 'AVIC print binary', f"exe={exe} shell={shell}")
+                  import glob
                   import os
-                  root = os.environ.get('PLAYWRIGHT_BROWSERS_PATH')
-                  print('cache root:', root, 'exists:', bool(root and os.path.isdir(root)))
-                  if root and os.path.isdir(root):
-                      entries = sorted(os.listdir(root))
-                      print('cache entries:', entries)
-                      emit('warning', 'AVIC browser cache', ', '.join(entries)[:350])
-                      for e in entries:
-                          full = os.path.join(root, e)
-                          print('  ', e, '->', sorted(os.listdir(full))[:6] if os.path.isdir(full) else 'file')
                   import shutil
-                  print('which chromium:', shutil.which('chromium'), '| /usr/bin/chromium:', os.path.exists('/usr/bin/chromium'))
+                  roots = [os.environ.get('PLAYWRIGHT_BROWSERS_PATH'), '/home/runner/pw-browsers',
+                           os.path.expanduser('~/.cache/ms-playwright')]
+                  found = []
+                  for root in [r for r in roots if r]:
+                      exists = os.path.isdir(root)
+                      entries = sorted(os.listdir(root))[:12] if exists else []
+                      print('cache root:', root, 'exists:', exists, 'entries:', entries)
+                      if exists:
+                          found.append(f"{root}: {', '.join(entries)}")
+                  emit('warning', 'AVIC browser cache', ' | '.join(found)[:350] if found else 'no cache root found')
+                  # A shell anywhere on the machine is still useful evidence,
+                  # since the binary is what print actually needs.
+                  shells = glob.glob('/home/runner/**/chrome-headless-shell', recursive=True)[:5]
+                  print('headless shells found:', shells)
+                  emit('warning', 'AVIC headless shells', ', '.join(shells) or 'none found')
+                  print('which chromium:', shutil.which('chromium'))
                   emit('warning', 'AVIC chromium on PATH', f"which={shutil.which('chromium')} usr_bin={os.path.exists('/usr/bin/chromium')}")
 
                   pdf = render_pdf(page, width_px=200, height_px=120, out_dir=_Path(tmp) / 'pdf', timeout_s=90)

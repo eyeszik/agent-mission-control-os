@@ -190,16 +190,25 @@ def test_postgres_workers_serialize_replay_nonce_at_the_advisory_lock():
                 db.execute("SELECT pg_advisory_xact_lock(hashtext(?))", (replay_store._ADVISORY_KEY,))
                 pid = db.execute("SELECT pg_backend_pid() AS pid").fetchone()["pid"]
                 futures = [pool.submit(record) for _ in range(8)]
+                # Ask the lock itself who is queued behind this backend. Sampling
+                # pg_stat_activity.wait_event was flaky by construction: the
+                # workers wait for a few milliseconds each, and a point-in-time
+                # sample can miss every one of them on a fast machine while the
+                # behaviour is perfectly correct. pg_locks plus
+                # pg_blocking_pids reports the same contention without depending
+                # on when the observer happens to look.
                 deadline = time.monotonic() + 15
                 waiting = 0
                 while time.monotonic() < deadline:
-                    waiting = db.execute("SELECT count(*) AS n FROM pg_stat_activity "
-                                         "WHERE wait_event_type = 'Lock' AND wait_event = 'advisory' "
-                                         "AND ? = ANY(pg_blocking_pids(pid))", (pid,)).fetchone()["n"]
+                    waiting = db.execute(
+                        "SELECT count(*) AS n FROM pg_locks l "
+                        "WHERE l.locktype = 'advisory' AND NOT l.granted "
+                        "AND ? = ANY(pg_blocking_pids(l.pid))", (pid,)).fetchone()["n"]
                     if waiting >= 2:
                         break
-                    time.sleep(0.05)
-                assert waiting >= 2, "workers did not visibly contend on the replay advisory lock"
+                    time.sleep(0.02)
+                assert waiting >= 2, ("workers did not queue on the replay advisory lock "
+                                      f"(waiting={waiting})")
             outcomes = [future.result(timeout=30) for future in futures]
         assert outcomes.count("ACCEPTED") == 1, outcomes
         assert outcomes.count("REPLAY") == 7, outcomes
