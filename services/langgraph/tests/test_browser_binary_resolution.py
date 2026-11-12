@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from services.langgraph.agency.visual.browser import headless_shell_for
+from services.langgraph.agency.visual.browser import _playwright_cache_chromium, headless_shell_for
 
 
 def _install(root: Path, revision: str, *, with_shell: bool = True) -> Path:
@@ -33,14 +33,19 @@ def test_shell_is_found_for_the_same_revision(tmp_path):
     assert "chromium_headless_shell-1254" in str(shell)
 
 
-def test_a_shell_from_another_revision_is_never_used(tmp_path):
+def test_a_shell_from_another_revision_is_never_used(tmp_path, monkeypatch):
     """A different build is a different browser; mixing them is the old bug."""
+    monkeypatch.delenv("PLAYWRIGHT_BROWSERS_PATH", raising=False)
     executable = _install(tmp_path, "1254", with_shell=False)
     _install(tmp_path, "1248")
     assert headless_shell_for(executable) is None
 
 
-def test_a_chromium_only_install_reports_no_shell(tmp_path):
+def test_a_chromium_only_install_reports_no_shell(tmp_path, monkeypatch):
+    # Lookup also consults PLAYWRIGHT_BROWSERS_PATH, which on a CI runner holds
+    # the real installation. Unset it here, or this would assert about the
+    # runner's cache instead of the fixture.
+    monkeypatch.delenv("PLAYWRIGHT_BROWSERS_PATH", raising=False)
     executable = _install(tmp_path, "1254", with_shell=False)
     assert headless_shell_for(executable) is None
 
@@ -57,3 +62,28 @@ def test_a_shell_shipped_beside_the_browser_is_found(tmp_path):
 def test_no_browser_means_no_shell():
     assert headless_shell_for(None) is None
     assert headless_shell_for(Path("/nonexistent/chromium-9999/chrome-linux64/chrome")) is None
+
+
+def test_cache_prefers_the_newest_pair_and_skips_a_browser_without_a_shell(tmp_path, monkeypatch):
+    """A browser without its shell is the configuration that cannot print."""
+    for revision in ("1248", "1254"):
+        browser = tmp_path / f"chromium-{revision}" / "chrome-linux64"
+        browser.mkdir(parents=True)
+        (browser / "chrome").write_text("#!/bin/sh\n")
+        shell = tmp_path / f"chromium_headless_shell-{revision}" / "chrome-headless-shell-linux64"
+        shell.mkdir(parents=True)
+        (shell / "chrome-headless-shell").write_text("#!/bin/sh\n")
+    # Newer, but no shell: must be skipped, not preferred.
+    orphan = tmp_path / "chromium-1300" / "chrome-linux64"
+    orphan.mkdir(parents=True)
+    (orphan / "chrome").write_text("#!/bin/sh\n")
+
+    monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", str(tmp_path))
+    chosen = _playwright_cache_chromium()
+    assert chosen is not None and "chromium-1254" in str(chosen)
+    assert headless_shell_for(chosen) is not None
+
+
+def test_no_cache_variable_means_no_cache_answer(monkeypatch):
+    monkeypatch.delenv("PLAYWRIGHT_BROWSERS_PATH", raising=False)
+    assert _playwright_cache_chromium() is None

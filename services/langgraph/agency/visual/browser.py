@@ -85,8 +85,43 @@ def _repo_playwright_chromium() -> Optional[Path]:
     return Path(executable) if result.get("exists") and executable else None
 
 
+def _playwright_cache_chromium() -> Optional[Path]:
+    """Pick a browser from PLAYWRIGHT_BROWSERS_PATH that can actually print.
+
+    Spawning node to ask Playwright works on a developer machine but was not
+    reliable inside the CI job, where the probe returned nothing and resolution
+    fell through to /usr/bin/chromium -- the one binary that cannot print.
+    The cache directory is authoritative and needs no interpreter, so prefer
+    it. A revision is chosen only when *both* the browser and its
+    chrome-headless-shell are present, because a browser without its shell is
+    precisely the configuration that fails.
+    """
+    env = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
+    if not env:
+        return None
+    root = Path(env)
+    if not root.is_dir():
+        return None
+    candidates: list[tuple[int, Path]] = []
+    for shell_dir in sorted(root.glob("chromium_headless_shell-*")):
+        revision = shell_dir.name[len("chromium_headless_shell-"):]
+        if not revision.isdigit():
+            continue
+        browser_dir = root / f"chromium-{revision}"
+        if not browser_dir.is_dir():
+            continue
+        if not any(shell_dir.glob("*/headless_shell")) and not any(shell_dir.glob("*/chrome-headless-shell")):
+            continue
+        for executable in browser_dir.glob("*/chrome"):
+            if executable.is_file():
+                candidates.append((int(revision), executable))
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: item[0])[1]
+
+
 def chromium_path() -> Optional[Path]:
-    for candidate in (DEFAULT_CHROMIUM, _repo_playwright_chromium(),
+    for candidate in (DEFAULT_CHROMIUM, _playwright_cache_chromium(), _repo_playwright_chromium(),
                       *(Path(p) for p in (shutil.which("chromium"), shutil.which("chromium-browser")) if p)):
         if candidate is not None and Path(candidate).is_file():
             return Path(candidate)
