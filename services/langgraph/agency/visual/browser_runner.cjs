@@ -211,8 +211,15 @@ async function printDocument(pw, spec, outDir) {
     const b = await pw.chromium.launch({
       headless: true,
       executablePath: spec.executable_path || undefined,
-      args: ["--no-sandbox", "--disable-dev-shm-usage", "--use-gl=angle", "--use-angle=swiftshader",
-             "--enable-unsafe-swiftshader"],
+      // --no-zygote is the fix for the print path specifically. Chromium's
+      // zygote forks each renderer; inside this chroot the fork fails with
+      // "ZygoteCommunication::ForkRequest()" and takes the whole browser with
+      // it. Rasterization and layout never need a new zygote child, writing a
+      // PDF does. With --no-sandbox already set the zygote provides no
+      // isolation here, so it is pure overhead that can fail: renderers are
+      // launched directly instead.
+      args: ["--no-sandbox", "--no-zygote", "--disable-dev-shm-usage", "--use-gl=angle",
+             "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
     });
     try {
       const ctx = await b.newContext({ deviceScaleFactor: 1 });
