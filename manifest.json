@@ -12,7 +12,7 @@
     },
     {
       "path": ".github/scripts/annotate-playwright-junit.py",
-      "git_blob_sha": "5cf039f85ce970ba88201eee7e71915b5b052340"
+      "git_blob_sha": "6c75864ed812f0bb02bfa20dd40b6621a1893b52"
     },
     {
       "path": ".github/workflows/ci.yml",

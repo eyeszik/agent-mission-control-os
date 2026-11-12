@@ -85,15 +85,32 @@ def _context_snapshot() -> str:
             continue
         if "```yaml" in text:
             text = text.split("```yaml", 1)[1].split("```", 1)[0]
-        keep = ("button", "note", "heading", "textbox", "combobox", "alert", "status")
+        # Rank by how much a line can explain a disabled control. The page has
+        # dozens of nav buttons before it reaches the panel, so an untagged
+        # first-N cut showed only the sidebar -- which is exactly what happened.
+        # Disabled controls and their reasons come first, then inputs, then the
+        # panel headings that say which section was on screen.
+        ranked: list[tuple[int, str]] = []
         for line in text.splitlines():
             stripped = line.strip()
             if not stripped.startswith("- "):
                 continue
-            if any(f'"{kind}"' in stripped or f" {kind}" in stripped for kind in keep):
-                out.append(stripped[2:])
-        if out:
-            out = out[:24]
+            body = stripped[2:]
+            # The role is the leading token in an ARIA snapshot ("note \"...\""),
+            # never a quoted word in the middle -- matching it as a substring
+            # silently dropped the very lines this exists to surface.
+            role = body.split(" ", 1)[0].rstrip(":")
+            if "disabled" in body:
+                ranked.append((0, body))
+            elif role in ("note", "textbox", "combobox", "checkbox", "spinbutton"):
+                ranked.append((1, body))
+            elif role == "button" and "Compile" in body:
+                ranked.append((2, body))
+            elif role in ("alert", "status"):
+                ranked.append((3, body))
+            elif role == "heading":
+                ranked.append((4, body))
+        out = [body for _, body in sorted(ranked, key=lambda pair: pair[0])][:24]
     return " | ".join(out)[:MAX_MESSAGE]
 
 

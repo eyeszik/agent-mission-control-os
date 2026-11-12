@@ -77,8 +77,22 @@ test('Compile, refuse a stale edit, apply a current one, request approval', asyn
     // is that statement. Waiting for the click to time out hides the sentence
     // the page was already showing; read it and fail with it.
     if (!(await compile.isEnabled())) {
-      const blocked = await page.getByTestId('avic-compile-blocked').textContent().catch(() => null);
-      throw new Error(`Compile is disabled, so this host cannot render: ${blocked ?? 'no reason was shown'}`);
+      // Collect every channel the panel uses to say why, so the failure line
+      // carries the state rather than pointing at it: the described-by target,
+      // any note on screen, the runner's own status line, and the intake values
+      // the reason is derived from.
+      const describedBy = await compile.getAttribute('aria-describedby');
+      const note = describedBy
+        ? await page.locator(`#${describedBy}`).textContent().catch(() => null)
+        : await page.getByTestId('avic-compile-blocked').textContent().catch(() => null);
+      const notes = (await page.getByRole('note').allTextContents().catch(() => [])).join(' / ');
+      const status = (await page.getByRole('status').allTextContents().catch(() => [])).slice(0, 3).join(' / ');
+      const requirement = await page.getByLabel('AssetRequirement (JSON)').inputValue();
+      throw new Error(
+        `Compile is disabled. describedBy=${describedBy ?? 'none'}; note=${note ?? 'none'}; ` +
+        `notes on page=${notes || 'none'}; status=${status || 'none'}; ` +
+        `requirement filled=${requirement.length > 0}`,
+      );
     }
     await compile.click();
     await expect(page.getByRole('heading', { name: `Asset ${ASSET}` })).toBeVisible({ timeout: 120_000 });
