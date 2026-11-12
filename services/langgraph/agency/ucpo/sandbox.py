@@ -29,7 +29,11 @@ WEB_NODE_MODULES = REPO_ROOT / "apps" / "web" / "node_modules"
 ROOT_NODE_MODULES = REPO_ROOT / "node_modules"
 LIMITS = {"fsize_bytes": 256 * 1024 * 1024, "nofile": 4096, "nproc": 128, "core": 0}
 _SYSTEM_DIRS = ("/usr", "/bin", "/lib", "/lib64", "/etc/fonts")
-_DEVICES = ("/dev/null", "/dev/zero", "/dev/urandom")
+# /dev/shm is required, not optional: Chromium backs the print-to-PDF pipeline
+# with shared memory, and Page.printToPDF fails with a bare "Printing failed"
+# when there is none. The mount is a fresh tmpfs owned by this namespace, never
+# the host's, so no other process can observe or tamper with the pages.
+_DEVICES = ("/dev/null", "/dev/zero", "/dev/urandom", "/dev/shm")
 
 
 @dataclass(frozen=True)
@@ -148,7 +152,12 @@ def wrap(command: list[str], *, cwd: Path, home: Path, node: str, timeout_s: int
     steps += [_mount(Path(p), root, readonly=True) for p in readonly]
     # Only these explicit, caller-owned directories are writable. No host /tmp or home is mounted.
     steps += [_mount(Path(p), root, readonly=False) for p in writable]
-    steps += [_mount(Path(p), root, readonly=False) for p in _DEVICES if Path(p).exists()]
+    # /dev/shm may not exist on a minimal host; create the mount point so the
+    # tmpfs can be mounted at the canonical path the browser looks for.
+    if Path("/dev/shm").exists():
+        steps.append(f"mkdir -p {shlex.quote(str(root / 'dev/shm'))} && mount -t tmpfs -o nosuid,nodev,size=256m tmpfs {shlex.quote(str(root / 'dev/shm'))}")
+    steps += [_mount(Path(p), root, readonly=False) for p in _DEVICES
+              if p != "/dev/shm" and Path(p).exists()]
     steps.append(f"mkdir -p {shlex.quote(str(root / 'proc'))} && mount -t proc -o nosuid,nodev,noexec proc {shlex.quote(str(root / 'proc'))}")
     # Create the browser's cache/temp directories after the mounts (they live in
     # the writable home) so a renderer never has to discover they are missing.

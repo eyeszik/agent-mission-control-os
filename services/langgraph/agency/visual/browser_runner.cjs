@@ -389,12 +389,39 @@ async function main() {
       result.error = `UNKNOWN_MODE:${spec.mode}`;
     }
   } finally {
-    await browser.close();
+    // Persist observations before closing. A failed render can leave the
+    // browser wedged -- printToPDF in particular throws and then close() never
+    // returns -- and the runner is killed by its own timeout, so a result.json
+    // written after close() is never written at all. The caller then sees only
+    // an exit code and cannot tell which step failed. Writing first makes the
+    // failure name itself, and the close is best-effort and bounded.
+    try {
+      fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify(result, null, 2));
+    } finally {
+      await Promise.race([
+        browser.close().catch(() => {}),
+        new Promise((resolve) => setTimeout(resolve, 5000)),
+      ]);
+    }
   }
-  fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify(result, null, 2));
+  if (!fs.existsSync(path.join(outDir, "result.json"))) {
+    fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify(result, null, 2));
+  }
 }
 
 main().catch((err) => {
+  // Even a top-level throw should leave a machine-readable result behind.
+  try {
+    const outDir = process.argv[3];
+    if (outDir) {
+      fs.mkdirSync(outDir, { recursive: true });
+      fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify({
+        error: "RUNNER_FAILED", message: String(err && err.message ? err.message : err),
+      }, null, 2));
+    }
+  } catch (_ignored) {
+    // Reporting must never mask the original failure.
+  }
   process.stderr.write(String(err && err.stack ? err.stack : err));
   process.exit(1);
 });
