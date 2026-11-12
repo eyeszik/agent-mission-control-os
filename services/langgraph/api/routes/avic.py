@@ -86,7 +86,10 @@ def capabilities(principal: Principal = Depends(get_principal)) -> dict:
     state, blockers, _ = render.renderer_state()
     return {"capabilities": [c._asdict() for c in caps.CAPABILITIES], "style_profiles": profiles.catalogue(),
             "renderer": {"name": render.RENDERER, "state": state.value, "blockers": blockers,
-                         "concurrency": render.RENDER_SLOTS},
+                         # Live free slots, so a stuck compile is visible from
+                         # the capabilities endpoint rather than inferred from a
+                         # timeout. Reporting does not reserve a slot.
+                         "concurrency": render.RENDER_SLOTS, "slots_free": render.render_slots_free()},
             "brand": {"source": "foundry.psem.PALETTE", "palette": dict(profiles.psem_brand().palette)}}
 
 

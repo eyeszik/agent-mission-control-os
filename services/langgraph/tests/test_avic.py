@@ -836,3 +836,37 @@ def test_render_capacity_is_bounded_and_reported(monkeypatch, tmp_path):
     finally:
         slots.release()
     assert out["status"] == "BLOCKED" and out["png"] is None and out["findings"][0].startswith("RENDER_CAPACITY")
+
+
+def test_a_full_render_pool_refuses_immediately_instead_of_parking_a_thread(monkeypatch, tmp_path):
+    """A sync route must never block a threadpool worker waiting for a slot.
+
+    The server runs sync routes on a bounded anyio threadpool. Parking a worker
+    here for up to SLOT_WAIT_S lets a few concurrent compiles hold every slot,
+    and unrelated requests -- /health included -- stop being answered, which is
+    indistinguishable from a hang. Measure the wait: it must be near zero.
+    """
+    import threading
+    import time
+
+    from services.langgraph.agency.avic.contracts import CapabilityState
+
+    monkeypatch.setattr(render, "renderer_state", lambda: (CapabilityState.IMPLEMENTED_VERIFIED, [], "chromium"))
+    monkeypatch.setattr(render, "_slots", threading.BoundedSemaphore(1))
+    monkeypatch.setattr(render, "SLOT_WAIT_S", 30)
+    assert render._slots.acquire()
+    try:
+        started = time.perf_counter()
+        out = render.render("<svg/>", width=4, height=4, work_dir=tmp_path)
+        waited = time.perf_counter() - started
+    finally:
+        render._slots.release()
+    assert out["status"] == "BLOCKED"
+    assert waited < 1.0, f"render blocked for {waited:.2f}s waiting for a slot"
+
+
+def test_capacity_probe_does_not_consume_a_slot():
+    """Reporting capacity must not take it, or the probe becomes the outage."""
+    before = render.render_slots_free()
+    assert render.render_slots_free() == before
+    assert 0 <= before <= render.RENDER_SLOTS
