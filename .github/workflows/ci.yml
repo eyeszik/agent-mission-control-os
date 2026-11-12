@@ -592,6 +592,17 @@ jobs:
           printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99-ci-network >/dev/null
           pnpm --filter @amc/web exec playwright install --with-deps chromium
 
+      # The other two jobs that render -- UCPO and the rendering adapters -- both
+      # do this, and the sandbox depends on it. Ubuntu 24.04 restricts
+      # unprivileged user namespaces through AppArmor, and the AVIC render path
+      # probes that boundary before every render: without the relaxation the
+      # probe dies at "unshare: write failed /proc/self/uid_map: Operation not
+      # permitted", the API correctly reports the renderer BLOCKED, and the
+      # Compile button stays disabled for the whole journey. Omitting it here was
+      # the reason this job could never pass while the sandboxed jobs did.
+      - name: Allow unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
       - name: Start local stack
         env:
           AMC_ENV: local
