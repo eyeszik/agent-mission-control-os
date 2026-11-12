@@ -53,34 +53,82 @@ def three_renderer_for(features: Iterable[str]) -> dict:
             "reasons": ["standard materials only: WebGLRenderer is the widest-supported default"]}
 
 
+def _repo_playwright_chromium() -> Optional[Path]:
+    """This repository's own Playwright Chromium, if it is installed.
+
+    Preferred over a system browser on purpose. A distro package (for example
+    Debian's /usr/bin/chromium) is a single binary with no chrome-headless-shell
+    beside it, and printing through it fails or hangs inside the sandbox while
+    Playwright's own install ships both binaries from one version. Picking the
+    system browser therefore silently selected the one configuration that
+    cannot print. PLAYWRIGHT_BROWSERS_PATH, when set, is honoured by asking
+    Playwright rather than by guessing the cache layout.
+    """
+    import subprocess
+    import tempfile
+
+    if shutil.which("node") is None:
+        return None
+    web_app = REPO_ROOT / "apps" / "web"
+    if not (web_app / "node_modules" / "@playwright" / "test").exists():
+        return None
+    with tempfile.TemporaryDirectory() as tmp:
+        spec = Path(tmp) / "spec.json"
+        spec.write_text(json.dumps({"mode": "probe"}))
+        try:
+            subprocess.run(["node", str(RUNNER), str(spec), tmp], capture_output=True, text=True,
+                           timeout=90, cwd=str(REPO_ROOT))
+            result = json.loads((Path(tmp) / "result.json").read_text())
+        except (OSError, ValueError, subprocess.TimeoutExpired):
+            return None
+    executable = result.get("executable")
+    return Path(executable) if result.get("exists") and executable else None
+
+
 def chromium_path() -> Optional[Path]:
-    for candidate in (DEFAULT_CHROMIUM, *(Path(p) for p in (shutil.which("chromium"), shutil.which("chromium-browser")) if p)):
-        if candidate.is_file():
-            return candidate
+    for candidate in (DEFAULT_CHROMIUM, _repo_playwright_chromium(),
+                      *(Path(p) for p in (shutil.which("chromium"), shutil.which("chromium-browser")) if p)):
+        if candidate is not None and Path(candidate).is_file():
+            return Path(candidate)
     return None
 
 
 def headless_shell_for(executable: Optional[Path]) -> Optional[Path]:
-    """The chrome-headless-shell beside this browser, if the install shipped one.
+    """The chrome-headless-shell for the same Playwright revision, if installed.
 
     Playwright prefers it for headless work, and it is the only binary whose
     print path avoids the compositor that fails inside the sandbox. Resolved
-    from the executable's own directory so both come from one install, and
-    never assumed to exist: a chromium-only install simply returns None and
-    the caller keeps the full browser.
+    by revision rather than by directory: a full build is
+    ``.../chromium-<rev>/chrome-linux*/chrome`` and its shell is
+    ``.../chromium_headless_shell-<rev>/chrome-headless-shell-linux*/chrome-headless-shell``.
+    Matching the *same* revision matters -- a shell from a different build is a
+    different browser, and mixing them would reintroduce the bug this fixes.
+    Never assumed to exist: a chromium-only install returns None and the caller
+    keeps the full browser.
     """
     if not executable:
         return None
-    directory = Path(executable).parent
+    executable = Path(executable)
+    directory = executable.parent
+    # Same directory, for layouts that ship the pair together.
     for name in ("headless_shell", "chrome-headless-shell", "headless-shell"):
         candidate = directory / name
         if candidate.is_file():
             return candidate
-    # Playwright lays the shell out as a sibling install: .../chromium-N/chrome-linux64
-    # additionally ships .../chromium_headless_shell-N/chrome-headless-shell-linux64.
-    for parent in (directory.parent, directory.parent.parent):
-        for shell_dir in sorted(parent.glob("chromium_headless_shell-*")):
-            for inner in sorted(shell_dir.iterdir()) if shell_dir.is_dir() else []:
+    # Revision-matched sibling install.
+    revision = None
+    for part in reversed(executable.parts):
+        if part.startswith("chromium-") and part[len("chromium-"):].isdigit():
+            revision = part[len("chromium-"):]
+            break
+    cache_roots = [directory.parent, directory.parent.parent]
+    env = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
+    if env and Path(env).is_dir():
+        cache_roots.insert(0, Path(env))
+    for root in cache_roots:
+        pattern = f"chromium_headless_shell-{revision}" if revision else "chromium_headless_shell-*"
+        for shell_dir in sorted(root.glob(pattern)):
+            for inner in sorted(p for p in shell_dir.iterdir() if p.is_dir()):
                 for name in ("headless_shell", "chrome-headless-shell"):
                     candidate = inner / name
                     if candidate.is_file():

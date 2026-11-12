@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "9bb0960c909b01a26ddd55c8a4dff278d5bc45a9"
+      "git_blob_sha": "0f4d8956d350c885f377573add886b69361ff25d"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -832,7 +832,7 @@
     },
     {
       "path": "services/langgraph/agency/visual/browser.py",
-      "git_blob_sha": "7bdd596daf274a0ec16e01be5220a04d3cdd913c"
+      "git_blob_sha": "a25e1a146b0e53a3eb143262c1b764496dc21f1d"
     },
     {
       "path": "services/langgraph/agency/visual/browser_runner.cjs",
