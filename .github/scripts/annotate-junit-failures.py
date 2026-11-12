@@ -72,6 +72,24 @@ def cases(path: Path) -> list[tuple[str, str, str]]:
     return found
 
 
+def tail_of(path: Path, lines: int = 40) -> str:
+    """The end of a log, as an annotation.
+
+    A step that times out writes no junit at all: the process is killed before
+    pytest can finish, so "no report" is the only thing the report can say. The
+    pytest output that does exist is on stdout, and stdout is unreachable from a
+    reviewer without blob access -- so the last lines of it are raised here,
+    where they are readable. This is deliberately a warning, not an error: the
+    failure itself already has one.
+    """
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return ""
+    tail = [line for line in text if line.strip()][-lines:]
+    return " | ".join(tail)[:MAX_MESSAGE]
+
+
 def main(argv: list[str]) -> int:
     paths = [Path(a) for a in argv[1:]]
     if not paths:
@@ -89,6 +107,11 @@ def main(argv: list[str]) -> int:
 
     if not read_any:
         print("No JUnit report was written, so the failing tests are unknown from here.")
+        # A timed-out step writes no report and leaves its only evidence on
+        # stdout, which a reviewer here cannot open. AMC_FAILURE_LOG names it.
+        log = Path(__import__("os").environ.get("AMC_FAILURE_LOG") or "")
+        if str(log) not in ("", ".") and log.is_file():
+            print(f"::warning title=JUnit absent; log tail::{tail_of(log)}")
         return 0
 
     summary = Path(__import__("os").environ.get("GITHUB_STEP_SUMMARY") or "/dev/null")

@@ -122,11 +122,11 @@ jobs:
           done
 
       - name: Run backend tests against PostgreSQL
-        # Unbounded, this step is the one that can hold the whole job open: the
-        # suite finishes in minutes on SQLite and a wedged connection pool or a
-        # lock wait shows as "in_progress" for as long as the runner lives. The
-        # cap turns that into a failure with the pytest output above it.
-        timeout-minutes: 20
+        # Bounded, but sized from measurement: the same suite takes ~17 minutes
+        # on SQLite in CI and 27 minutes locally, so 20 was a cap on ordinary
+        # work and turned a slow suite into "timed out, no report". This cap
+        # exists only to stop an unbounded lock wait from holding the job open.
+        timeout-minutes: 45
         env:
           AMC_DATABASE_BACKEND: postgres
           DATABASE_URL: postgresql://amc:amc@127.0.0.1:5432/amc_test
@@ -147,6 +147,11 @@ jobs:
 
       - name: Publish failing tests as annotations
         if: failure()
+        env:
+          # When the step above is killed by its own timeout it writes no junit
+          # at all; the pytest output is the only evidence and it is raised from
+          # here instead of being left in an unreachable log.
+          AMC_FAILURE_LOG: /tmp/pytest-pg.log
         run: python .github/scripts/annotate-junit-failures.py /tmp/junit-pg.xml
 
       - name: Upload JUnit results on failure

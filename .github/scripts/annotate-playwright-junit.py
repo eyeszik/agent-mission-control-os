@@ -105,7 +105,7 @@ def _from_json() -> int:
                     where = ""
                     if location:
                         where = f"pending at line {location.get('line')}:{location.get('column')}. "
-                    emit("failure", f"playwright | {spec.get('title')}", where + error)
+                    emit("error", f"playwright | {spec.get('title')}", where + error)
                     emitted += 1
             for child in suite.get("suites", []) or []:
                 walk(child)
@@ -138,7 +138,7 @@ def _from_log() -> int:
             continue
         title = stripped.split(")", 1)[1].strip()
         window = " ".join(part.strip() for part in lines[index:index + 25])
-        emit("failure", f"playwright | {title}"[:120], window[:MAX_MESSAGE])
+        emit("error", f"playwright | {title}"[:120], window[:MAX_MESSAGE])
         emitted += 1
         if emitted >= 5:
             break
@@ -197,7 +197,7 @@ def main(argv: list[str]) -> int:
         if where:
             line, col = where[0]
             payload = f"pending at spec line {line}:{col}. " + body
-        emit("failure", f"playwright | {name}", payload[:MAX_MESSAGE])
+        emit("error", f"playwright | {name}", payload[:MAX_MESSAGE])
 
     # Always say what the report contained. A run that fails while the report
     # holds no failing case is itself the finding -- it means Playwright exited

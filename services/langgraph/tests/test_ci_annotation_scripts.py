@@ -9,6 +9,7 @@ way CI does and assert on what they print.
 
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -44,11 +45,26 @@ def _run(script: Path, report: Path, cwd: Path | None = None) -> str:
     return proc.stdout
 
 
+def test_annotations_use_a_level_the_runner_actually_accepts(tmp_path):
+    """"::failure" is not a workflow command.
+
+    It is printed, and then ignored: the case is reported failed with no reason
+    at all. Only error, warning and notice become annotations, so every level
+    this script emits is asserted here.
+    """
+    report = tmp_path / "junit.xml"
+    report.write_text(JUNIT, encoding="utf-8")
+    out = _run(PLAYWRIGHT, report)
+    levels = set(re.findall(r"^::(\w+) ", out, re.M))
+    assert levels <= {"error", "warning", "notice"}, levels
+    assert "error" in levels
+
+
 def test_playwright_annotation_names_the_pending_locator_and_line(tmp_path):
     report = tmp_path / "junit.xml"
     report.write_text(JUNIT, encoding="utf-8")
     out = _run(PLAYWRIGHT, report)
-    assert "::failure title=playwright | Compile, refuse a stale edit::" in out
+    assert "::error title=playwright | Compile, refuse a stale edit::" in out
     assert "line 88:5" in out
     assert "Palette colour" in out
     # A passing case must not be annotated as a failure.
@@ -135,7 +151,7 @@ def test_an_empty_failure_still_names_the_case_and_its_location(tmp_path):
     report = tmp_path / "junit.xml"
     report.write_text(EMPTY_FAILURE, encoding="utf-8")
     out = _run(PLAYWRIGHT, report, cwd=tmp_path)
-    assert "::failure title=playwright | Compile, refuse a stale edit" in out
+    assert "::error title=playwright | Compile, refuse a stale edit" in out
     assert "line 96:47" in out, f"empty failure lost its location:\n{out}"
     assert "no JSON record" not in out, f"the JSON report was not consulted:\n{out}"
     # The step durations say which phase ate the budget.

@@ -8,15 +8,15 @@
     },
     {
       "path": ".github/scripts/annotate-junit-failures.py",
-      "git_blob_sha": "c46ccf7149e3e23295ad474cd17a85b4b70f612a"
+      "git_blob_sha": "7374410a5de166d903d450f76c081dc381e433d5"
     },
     {
       "path": ".github/scripts/annotate-playwright-junit.py",
-      "git_blob_sha": "329aad8cad113ee18f92f3327ad0fbb929dd61c6"
+      "git_blob_sha": "690342d0c907e24047952f63a6973447bc210b65"
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "90fa7093c17968477298e15a3336960d40a785c6"
+      "git_blob_sha": "d93884c2ba9dafc42da0e747c468f0e0890c640a"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
