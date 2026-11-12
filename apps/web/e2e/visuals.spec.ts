@@ -49,51 +49,68 @@ test('Compile intake explains disabled actions and passes axe', async ({ page })
 });
 
 test('Compile, refuse a stale edit, apply a current one, request approval', async ({ page, request }) => {
-  // Four real Chromium renders plus a two-step stale-edit sequence; measured at
-  // roughly 100s on a fast machine and over 240s on a loaded shared runner, so the
-  // budget is explicit rather than accidentally at the default.
+  // Four real Chromium renders plus a two-step stale-edit sequence. Each phase
+  // runs inside test.step and every wait is bounded well below the test budget:
+  // a phase that stalls then names itself in the report instead of consuming
+  // the whole timeout and leaving "which step?" to be guessed from a duration.
   test.setTimeout(420_000);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
-  await openVisuals(page);
-  await page.getByLabel('AssetRequirement (JSON)').fill(JSON.stringify(SAMPLE.requirement));
+
+  await test.step('open the visual compiler', async () => {
+    await openVisuals(page);
+    await page.getByLabel('AssetRequirement (JSON)').fill(JSON.stringify(SAMPLE.requirement));
+  });
+
   const unavailable = page.getByText(/Renderer unavailable on the API host/);
   const compile = page.getByRole('button', { name: 'Compile', exact: true });
-  await expect(compile.or(unavailable).first()).toBeVisible();
-  if (await unavailable.isVisible()) {
-    await expect(compile).toBeDisabled();
-    return;
-  }
-  await compile.click();
-  await expect(page.getByRole('heading', { name: `Asset ${ASSET}` })).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByRole('img', { name: new RegExp(`Rendered preview of ${ASSET}`) })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByRole('heading', { name: 'Independent evaluation' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Recompile from scene' })).toBeDisabled();
-  await expectNoAxeViolations(page, 'compiled asset');
-
-  // Someone else changes the asset after this page loaded it.
-  const base = `${API}/avic/projects/${PROJECT}/assets/${ASSET}`;
-  const view = await (await request.get(base)).json();
-  const other = await request.post(`${base}/edits`, {
-    headers: { 'Idempotency-Key': `avic-e2e-other-${Date.now()}` },
-    data: { op: 'recolor', args: { object_id: 'motif-ring-inner', palette_key: 'fog', field: 'stroke' }, base_svg_sha256: view.svg_sha256 },
+  await test.step('compile, or state honestly that the renderer is unavailable', async () => {
+    await expect(compile.or(unavailable).first()).toBeVisible({ timeout: 30_000 });
+    if (await unavailable.isVisible()) {
+      // A host without the renderer must say so rather than pretend; that is a
+      // success for this branch, not an early exit that hides a failure.
+      await expect(compile).toBeDisabled();
+      test.skip(true, 'renderer unavailable on this host: the honest-refusal branch is asserted');
+      return;
+    }
+    await compile.click();
+    await expect(page.getByRole('heading', { name: `Asset ${ASSET}` })).toBeVisible({ timeout: 120_000 });
   });
-  expect(other.status()).toBe(200);
 
-  await page.getByLabel('Object').selectOption('motif-ring-inner');
-  await page.getByLabel('Palette colour').selectOption('paper');
-  await page.getByLabel('Paint').selectOption('stroke');
-  await page.getByRole('button', { name: 'Apply edit' }).click();
-  await expect(page.getByText(/changed after you opened it/)).toBeVisible({ timeout: 30_000 });
+  await test.step('the compiled asset renders and evaluates', async () => {
+    await expect(page.getByRole('img', { name: new RegExp(`Rendered preview of ${ASSET}`) })).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole('heading', { name: 'Independent evaluation' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Recompile from scene' })).toBeDisabled();
+    await expectNoAxeViolations(page, 'compiled asset');
+  });
 
-  await page.getByRole('button', { name: 'Apply edit' }).click();
-  await expect(page.getByText(/Applied: 1 change/)).toBeVisible({ timeout: 60_000 });
+  await test.step('a stale edit is refused, then a current one applies', async () => {
+    // Someone else changes the asset after this page loaded it.
+    const base = `${API}/avic/projects/${PROJECT}/assets/${ASSET}`;
+    const view = await (await request.get(base)).json();
+    const other = await request.post(`${base}/edits`, {
+      headers: { 'Idempotency-Key': `avic-e2e-other-${Date.now()}` },
+      data: { op: 'recolor', args: { object_id: 'motif-ring-inner', palette_key: 'fog', field: 'stroke' }, base_svg_sha256: view.svg_sha256 },
+    });
+    expect(other.status()).toBe(200);
 
-  await page.getByRole('button', { name: 'Request approval' }).click();
-  await expect(page.getByText(/Approval requested/)).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByRole('button', { name: 'Release locally' })).toBeDisabled();
-  await expectNoAxeViolations(page, 'after edit and approval request');
-  expect(errors).toEqual([]);
+    await page.getByLabel('Object').selectOption('motif-ring-inner');
+    await page.getByLabel('Palette colour').selectOption('paper');
+    await page.getByLabel('Paint').selectOption('stroke');
+    await page.getByRole('button', { name: 'Apply edit' }).click();
+    await expect(page.getByText(/changed after you opened it/)).toBeVisible({ timeout: 60_000 });
+
+    await page.getByRole('button', { name: 'Apply edit' }).click();
+    await expect(page.getByText(/Applied: 1 change/)).toBeVisible({ timeout: 120_000 });
+  });
+
+  await test.step('approval is requested and release stays blocked', async () => {
+    await page.getByRole('button', { name: 'Request approval' }).click();
+    await expect(page.getByText(/Approval requested/)).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole('button', { name: 'Release locally' })).toBeDisabled();
+    await expectNoAxeViolations(page, 'after edit and approval request');
+    expect(errors).toEqual([]);
+  });
 });
 
 test('Holds its layout at phone width', async ({ page }) => {
