@@ -463,6 +463,20 @@ jobs:
                   print('browser exe  :', exe)
                   print('headless shell:', shell)
                   emit('warning', 'AVIC print binary', f"exe={exe} shell={shell}")
+                  import os
+                  root = os.environ.get('PLAYWRIGHT_BROWSERS_PATH')
+                  print('cache root:', root, 'exists:', bool(root and os.path.isdir(root)))
+                  if root and os.path.isdir(root):
+                      entries = sorted(os.listdir(root))
+                      print('cache entries:', entries)
+                      emit('warning', 'AVIC browser cache', ', '.join(entries)[:350])
+                      for e in entries:
+                          full = os.path.join(root, e)
+                          print('  ', e, '->', sorted(os.listdir(full))[:6] if os.path.isdir(full) else 'file')
+                  import shutil
+                  print('which chromium:', shutil.which('chromium'), '| /usr/bin/chromium:', os.path.exists('/usr/bin/chromium'))
+                  emit('warning', 'AVIC chromium on PATH', f"which={shutil.which('chromium')} usr_bin={os.path.exists('/usr/bin/chromium')}")
+
                   pdf = render_pdf(page, width_px=200, height_px=120, out_dir=_Path(tmp) / 'pdf', timeout_s=90)
                   print('pdf:', json.dumps(pdf, default=str)[:1200])
                   emit('warning' if pdf.get('status') == 'PASSED' else 'error',
