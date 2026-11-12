@@ -17,7 +17,11 @@ export default defineConfig({
     ? [
         ['line'],
         ['html', { outputFolder: 'playwright-report', open: 'never' }],
-        ['junit', { outputFile: 'test-results/junit.xml' }],
+        // Relative to outputDir, which is test-results by default, so this lands at
+        // apps/web/test-results/junit.xml. Naming the directory again here wrote it
+        // to test-results/test-results/junit.xml, where the failure-annotation step
+        // and the artifact upload both looked and found nothing.
+        ['junit', { outputFile: 'junit.xml' }],
       ]
     : 'list',
   use: {

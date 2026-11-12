@@ -88,7 +88,7 @@
     },
     {
       "path": "apps/web/playwright.config.ts",
-      "git_blob_sha": "31e26c9589c15fb453fa6a1c656da4436763b48b"
+      "git_blob_sha": "13efd2cd54d858b5bd0d59d5d024db0008185dcf"
     },
     {
       "path": "apps/web/postcss.config.js",
