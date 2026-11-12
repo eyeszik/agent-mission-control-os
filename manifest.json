@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "eeaec75ed9dfc4f389570645b7e6178e7165a7b7"
+      "git_blob_sha": "89b54d27f3fd3d8ddcc8d851829a292baeca2e2d"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",

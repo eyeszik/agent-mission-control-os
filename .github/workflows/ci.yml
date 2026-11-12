@@ -661,6 +661,12 @@ jobs:
         if: failure()
         run: python .github/scripts/annotate-junit-failures.py apps/web/test-results/junit.xml
 
+      # The artifact is unreachable from a reviewer without blob access, so lift
+      # the pending locator line out of the JUnit body and into the check run.
+      - name: Publish the pending Playwright step as an annotation
+        if: failure()
+        run: python .github/scripts/annotate-playwright-junit.py apps/web/test-results/junit.xml
+
       - name: Upload Playwright JUnit results on failure
         if: failure()
         timeout-minutes: 3
