@@ -61,3 +61,41 @@ def test_playwright_annotation_reports_absence_instead_of_silence(tmp_path):
 def test_pytest_annotation_survives_a_missing_report(tmp_path):
     out = _run(PYTEST_ANNOTATOR, tmp_path / "nope.xml")
     assert out.strip(), "an absent report must be reported, never silent"
+
+
+def test_playwright_annotation_always_reports_a_summary(tmp_path):
+    """A failing run whose report holds no failing case is itself the finding.
+
+    The run exits non-zero for a reason outside any test -- a fatal reporter
+    error, a browser launch failure, a killed process -- and reporting nothing
+    is what made that indistinguishable from a clean run.
+    """
+    report = tmp_path / "junit.xml"
+    report.write_text(
+        '<testsuites><testsuite name="s">'
+        '<testcase name="fast one" time="2.5"/>'
+        '<testcase name="slow one" time="88.2"/>'
+        '<testcase name="skipped one"><skipped/></testcase>'
+        "</testsuite></testsuites>", encoding="utf-8")
+    out = _run(PLAYWRIGHT, report)
+    assert "::notice title=playwright summary::3 case(s): 2 passed, 0 failed, 1 skipped" in out
+    assert "non-zero exit came from outside a test" in out
+    # The slowest case is reported, because "which journey is slow" is the
+    # question a duration-driven failure asks.
+    assert "::notice title=playwright slowest::slow one 88.2s" in out
+
+
+def test_playwright_annotation_falls_back_to_the_runner_log(tmp_path, monkeypatch):
+    """The call log with the pending locator exists only on stdout."""
+    log = Path("/tmp/playwright-e2e.log")
+    log.write_text(
+        "  1) visuals.spec.ts:51:5 > Compile, refuse a stale edit\n\n"
+        "Error: Test timeout of 420000ms exceeded.\n"
+        "  - waiting for locator('label')\n    at visuals.spec.ts:88:5\n",
+        encoding="utf-8")
+    try:
+        out = _run(PLAYWRIGHT, tmp_path / "absent.xml")
+        assert "Compile, refuse a stale edit" in out
+        assert "waiting for locator" in out
+    finally:
+        log.unlink(missing_ok=True)

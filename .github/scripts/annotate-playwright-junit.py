@@ -134,7 +134,9 @@ def main(argv: list[str]) -> int:
     if root.tag != "testsuites" and root.tag != "testsuite":
         # XML reporter can emit a bare <testcase> root; handle it the same way.
         pass
-    for case in root.iter("testcase"):
+    cases = list(root.iter("testcase"))
+    emit("notice", "playwright report", f"parsed {report} with {len(cases)} case(s)")
+    for case in cases:
         failures = list(case.iter("failure")) + list(case.iter("error"))
         if not failures:
             continue
@@ -149,10 +151,31 @@ def main(argv: list[str]) -> int:
             payload = f"pending at spec line {line}:{col}. " + body
         emit("failure", f"playwright | {name}", payload[:MAX_MESSAGE])
 
-    skipped = sum(1 for case in root.iter("testcase") if list(case.iter("skipped")))
-    total = sum(1 for _ in root.iter("testcase"))
-    if not skipped:
-        emit("notice", "playwright coverage", f"no test was skipped ({total} cases)")
+    # Always say what the report contained. A run that fails while the report
+    # holds no failing case is itself the finding -- it means Playwright exited
+    # non-zero for a reason outside any test (a fatal reporter error, a browser
+    # launch failure, a killed process), and silence there is what turned this
+    # into several wasted cycles.
+    cases = list(root.iter("testcase"))
+    skipped = sum(1 for case in cases if list(case.iter("skipped")))
+    failed = sum(1 for case in cases if list(case.iter("failure")) or list(case.iter("error")))
+    passed = len(cases) - skipped - failed
+    emit("notice", "playwright summary",
+         f"{len(cases)} case(s): {passed} passed, {failed} failed, {skipped} skipped"
+         + ("" if failed else " -- no failing case, so the non-zero exit came from outside a test"))
+    durations = []
+    for suite in root.iter("testsuite"):
+        for case in suite.iter("testcase"):
+            try:
+                durations.append((float(case.get("time") or 0), case.get("name") or "?"))
+            except ValueError:
+                continue
+    if durations:
+        slowest = sorted(durations, reverse=True)[:3]
+        emit("notice", "playwright slowest",
+             "; ".join(f"{name} {seconds:.1f}s" for seconds, name in slowest))
+    if not failed:
+        _from_log()
     return 0
 
 
