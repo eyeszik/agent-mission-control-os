@@ -84,6 +84,26 @@ def test_cache_prefers_the_newest_pair_and_skips_a_browser_without_a_shell(tmp_p
     assert headless_shell_for(chosen) is not None
 
 
-def test_no_cache_variable_means_no_cache_answer(monkeypatch):
+def test_the_environment_variable_is_not_required(tmp_path, monkeypatch):
+    """The CI step that renders has no PLAYWRIGHT_BROWSERS_PATH set.
+
+    A resolver that returned early without the variable always fell through to
+    /usr/bin/chromium there, so this pins that the standard locations are
+    checked too.
+    """
+    # Mirror Playwright's own layout: the browser and its shell are siblings
+    # under the cache root, which is what DEFAULT_CHROMIUM's parents describe.
+    root = tmp_path / "ms-playwright"
+    browser = root / "chromium-1254" / "chrome-linux64"
+    browser.mkdir(parents=True)
+    (browser / "chrome").write_text("#!/bin/sh\n")
+    shell = root / "chromium_headless_shell-1254" / "chrome-headless-shell-linux64"
+    shell.mkdir(parents=True)
+    (shell / "chrome-headless-shell").write_text("#!/bin/sh\n")
+
+    import services.langgraph.agency.visual.browser as browser_mod
+
     monkeypatch.delenv("PLAYWRIGHT_BROWSERS_PATH", raising=False)
-    assert _playwright_cache_chromium() is None
+    monkeypatch.setattr(browser_mod, "DEFAULT_CHROMIUM", browser / "chrome")
+    chosen = browser_mod._playwright_cache_chromium()
+    assert chosen is not None and "chromium-1254" in str(chosen)

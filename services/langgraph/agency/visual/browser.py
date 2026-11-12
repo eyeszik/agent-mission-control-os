@@ -96,25 +96,36 @@ def _playwright_cache_chromium() -> Optional[Path]:
     chrome-headless-shell are present, because a browser without its shell is
     precisely the configuration that fails.
     """
-    env = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
-    if not env:
-        return None
-    root = Path(env)
-    if not root.is_dir():
-        return None
+    # The environment variable is honoured but must not be required: the CI
+    # step that renders has no PLAYWRIGHT_BROWSERS_PATH set, so a resolver that
+    # began with "if not env: return None" always returned None there and
+    # silently fell through to /usr/bin/chromium. Check every location the
+    # browser is actually installed in, in order of specificity.
+    roots: list[Path] = []
+    for candidate in (os.environ.get("PLAYWRIGHT_BROWSERS_PATH"), "/home/runner/pw-browsers",
+                      # chrome lives at <cache>/chromium-<rev>/<inner>/chrome, so the
+                      # cache root is three levels up. Two levels up is the
+                      # per-revision directory and globbing it finds nothing.
+                      str(DEFAULT_CHROMIUM.parent.parent.parent),
+                      str(Path.home() / ".cache" / "ms-playwright")):
+        if candidate:
+            path = Path(candidate)
+            if path.is_dir() and path not in roots:
+                roots.append(path)
     candidates: list[tuple[int, Path]] = []
-    for shell_dir in sorted(root.glob("chromium_headless_shell-*")):
-        revision = shell_dir.name[len("chromium_headless_shell-"):]
-        if not revision.isdigit():
-            continue
-        browser_dir = root / f"chromium-{revision}"
-        if not browser_dir.is_dir():
-            continue
-        if not any(shell_dir.glob("*/headless_shell")) and not any(shell_dir.glob("*/chrome-headless-shell")):
-            continue
-        for executable in browser_dir.glob("*/chrome"):
-            if executable.is_file():
-                candidates.append((int(revision), executable))
+    for root in roots:
+        for shell_dir in sorted(root.glob("chromium_headless_shell-*")):
+            revision = shell_dir.name[len("chromium_headless_shell-"):]
+            if not revision.isdigit():
+                continue
+            browser_dir = root / f"chromium-{revision}"
+            if not browser_dir.is_dir():
+                continue
+            if not any(shell_dir.glob("*/headless_shell")) and not any(shell_dir.glob("*/chrome-headless-shell")):
+                continue
+            for executable in browser_dir.glob("*/chrome"):
+                if executable.is_file():
+                    candidates.append((int(revision), executable))
     if not candidates:
         return None
     return max(candidates, key=lambda item: item[0])[1]

@@ -832,7 +832,7 @@
     },
     {
       "path": "services/langgraph/agency/visual/browser.py",
-      "git_blob_sha": "ee8a0accfe0f49e44bb4f8ab3b1b0b08177a16fc"
+      "git_blob_sha": "8aa24ee22b93d8a124d89d0b131a1e49dd042b95"
     },
     {
       "path": "services/langgraph/agency/visual/browser_runner.cjs",
