@@ -864,7 +864,7 @@
     },
     {
       "path": "services/langgraph/agency/vnexus/brandbook/service.py",
-      "git_blob_sha": "ae2098c81d3707f583c27c3c6b00066484935163"
+      "git_blob_sha": "a02924e39fa2b5fde2f643cd0d5471fd422627f8"
     },
     {
       "path": "services/langgraph/agency/vnexus/creative_service.py",

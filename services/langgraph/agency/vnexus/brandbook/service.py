@@ -482,11 +482,17 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
                    "blocking": blocking_checks[:50]},
         "book": {"artifact_id": book_entry["artifact_id"], "version": book_entry["version"], "sha256": book_entry["sha256"]},
         "package": {"artifact_id": package_entry["artifact_id"], "sha256": package_entry["sha256"], "package_hash": book.package_hash},
-        "pdf": pdf, "pdf_failure": pdf_failure, "status": status,
+        "pdf": pdf, "status": status,
         "states": {"prompt": "READY", "rendered": "PASSED" if sections else "NOT_RUN",
                    "validated": ("NOT_RUN" if not can_measure else ("FAILED" if blocking_checks else "PASSED")),
                    "released": "NOT_RELEASED"},
     }
+    if pdf_failure:
+        # Only present when printing actually failed. Adding it unconditionally
+        # would change the response shape of every successful build and break
+        # the recorded contract fixture, which is exactly what a stale fixture
+        # is supposed to catch.
+        record["pdf_failure"] = pdf_failure
     record["build_hash"] = canonical_hash(record)
     build_entry = _put(principal, project_id, f"{base}-build", (json.dumps(record, sort_keys=True, indent=2) + "\n").encode(),
                        "build", depends_on=(book_entry["artifact_id"],))
