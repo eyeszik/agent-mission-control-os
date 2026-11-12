@@ -132,8 +132,19 @@ def _playwright_cache_chromium() -> Optional[Path]:
 
 
 def chromium_path() -> Optional[Path]:
-    for candidate in (DEFAULT_CHROMIUM, _playwright_cache_chromium(), _repo_playwright_chromium(),
-                      *(Path(p) for p in (shutil.which("chromium"), shutil.which("chromium-browser")) if p)):
+    """The browser for rasterizing, measuring and framing.
+
+    The system browser is tried first and Playwright's cache after it, because
+    that is what the evidence on the runner supports: the distro build
+    rasterizes and measures reliably inside the sandbox, while Playwright's own
+    build aborts there on start-up. Printing does not use this function's
+    answer at all -- it needs chrome-headless-shell (see
+    ``headless_shell_for``), which is a different binary with a different print
+    pipeline.
+    """
+    for candidate in (DEFAULT_CHROMIUM,
+                      *(Path(p) for p in (shutil.which("chromium"), shutil.which("chromium-browser")) if p),
+                      _playwright_cache_chromium(), _repo_playwright_chromium()):
         if candidate is not None and Path(candidate).is_file():
             return Path(candidate)
     return None
@@ -180,6 +191,38 @@ def headless_shell_for(executable: Optional[Path]) -> Optional[Path]:
                     if candidate.is_file():
                         return candidate
     return None
+
+
+def any_headless_shell() -> Optional[Path]:
+    """The newest chrome-headless-shell in any standard browser cache.
+
+    A distro browser has no revision of its own, so ``headless_shell_for``
+    cannot match one, yet the shell is exactly what printing needs: it is a
+    standalone binary that Playwright launches directly through executablePath.
+    Choosing the newest available is safe because the shell's version does not
+    have to match the browser that renders -- only the page bytes cross
+    between them.
+    """
+    roots: list[Path] = []
+    for candidate in (os.environ.get("PLAYWRIGHT_BROWSERS_PATH"), "/home/runner/pw-browsers",
+                      str(DEFAULT_CHROMIUM.parent.parent.parent),
+                      str(Path.home() / ".cache" / "ms-playwright")):
+        if candidate:
+            path = Path(candidate)
+            if path.is_dir() and path not in roots:
+                roots.append(path)
+    found: list[tuple[int, Path]] = []
+    for root in roots:
+        for shell_dir in sorted(root.glob("chromium_headless_shell-*")):
+            revision = shell_dir.name[len("chromium_headless_shell-"):]
+            if not revision.isdigit():
+                continue
+            for inner in sorted(p for p in shell_dir.iterdir() if p.is_dir()):
+                for name in ("headless_shell", "chrome-headless-shell"):
+                    binary = inner / name
+                    if binary.is_file():
+                        found.append((int(revision), binary))
+    return max(found, key=lambda item: item[0])[1] if found else None
 
 
 @lru_cache(maxsize=1)
@@ -274,7 +317,7 @@ def _run(spec: dict, out_dir: Path, timeout_s: int) -> dict:
         return {"exit_code": None, "wall_ms": 0, "network_isolated": False, "output_files": [],
                 "stderr_tail": "BLOCKED_ISOLATION_OR_BROWSER: " + "; ".join(reasons), "result": {}, "command": []}
     executable = Path(executable).absolute()
-    shell = headless_shell_for(executable)
+    shell = headless_shell_for(executable) or any_headless_shell()
     spec = {**spec, "executable_path": str(executable)}
     if shell is not None:
         spec["headless_shell_path"] = str(shell)

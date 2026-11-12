@@ -12,7 +12,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from services.langgraph.agency.visual.browser import _playwright_cache_chromium, headless_shell_for
+from services.langgraph.agency.visual.browser import (
+    _playwright_cache_chromium,
+    any_headless_shell,
+    headless_shell_for,
+)
 
 
 def _install(root: Path, revision: str, *, with_shell: bool = True) -> Path:
@@ -107,3 +111,28 @@ def test_the_environment_variable_is_not_required(tmp_path, monkeypatch):
     monkeypatch.setattr(browser_mod, "DEFAULT_CHROMIUM", browser / "chrome")
     chosen = browser_mod._playwright_cache_chromium()
     assert chosen is not None and "chromium-1254" in str(chosen)
+
+
+def test_print_can_use_a_shell_from_another_install(tmp_path, monkeypatch):
+    """A distro browser has no revision, but printing still needs a shell.
+
+    The raster/measure browser and the print binary do not have to come from
+    one install -- only the page bytes cross between them -- so a shell from a
+    separate cache is acceptable when the chosen browser has none of its own.
+    """
+    distro = tmp_path / "usr" / "bin" / "chromium"
+    distro.parent.mkdir(parents=True)
+    distro.write_text("#!/bin/sh\n")
+
+    cache = tmp_path / "cache"
+    shell = cache / "chromium_headless_shell-1254" / "chrome-headless-shell-linux64"
+    shell.mkdir(parents=True)
+    (shell / "chrome-headless-shell").write_text("#!/bin/sh\n")
+
+    monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", str(cache))
+    # What matters is that a shell is found at all and that it is a shell, not
+    # that some specific lookup path returns it -- both lookups consult the
+    # cache, and either answer is usable by the print launch.
+    chosen = headless_shell_for(distro) or any_headless_shell()
+    assert chosen is not None and "chromium_headless_shell-1254" in str(chosen)
+    assert chosen.name in {"headless_shell", "chrome-headless-shell"}
