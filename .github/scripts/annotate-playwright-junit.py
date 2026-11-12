@@ -74,6 +74,36 @@ def _from_json() -> int:
     return 0
 
 
+def _from_log() -> int:
+    """Last resort: the reporter's stdout, which holds the call log.
+
+    Playwright prints the pending locator and the spec line to stdout, not to
+    the junit xml. CI tees it to /tmp/playwright-e2e.log precisely so this can
+    read it when the structured reports do not carry the detail.
+    """
+    log = Path("/tmp/playwright-e2e.log")
+    if not log.is_file():
+        emit("warning", "Playwright log missing", "no /tmp/playwright-e2e.log")
+        return 0
+    text = log.read_text(encoding="utf-8", errors="replace")
+    lines = text.splitlines()
+    emitted = 0
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if not (stripped.startswith("1) ") or stripped.startswith("2) ") or stripped.startswith("3) ")):
+            continue
+        title = stripped.split(")", 1)[1].strip()
+        window = " ".join(part.strip() for part in lines[index:index + 25])
+        emit("failure", f"playwright | {title}"[:120], window[:MAX_MESSAGE])
+        emitted += 1
+        if emitted >= 5:
+            break
+    if not emitted:
+        # Nothing structured at all: say what the tail looked like.
+        emit("warning", "Playwright log", " ".join(lines[-12:])[:MAX_MESSAGE] or "empty log")
+    return 0
+
+
 def main(argv: list[str]) -> int:
     if len(argv) != 2:
         emit("warning", "Playwright annotations", "usage: annotate-playwright-junit.py <junit.xml>")
@@ -93,7 +123,8 @@ def main(argv: list[str]) -> int:
         if found:
             report = Path(found[0])
         else:
-            return _from_json()
+            json_status = _from_json()
+            return _from_log() if json_status == 0 else json_status
     try:
         root = ET.parse(report).getroot()
     except ET.ParseError as exc:

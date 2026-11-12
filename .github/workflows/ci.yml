@@ -649,7 +649,11 @@ jobs:
         run: |
           echo "Playwright artifacts: apps/web/playwright-report, apps/web/test-results (PNG, WebM, trace.zip)"
           ls -ld apps/web/playwright-report apps/web/test-results 2>/dev/null || true
-          pnpm --filter @amc/web test:e2e
+          # Tee the reporter's own text as well. The junit xml carries the case
+          # names but Playwright prints the call log -- the locator it was still
+          # waiting on -- only to stdout, and stdout here is a blob-hosted log.
+          set -o pipefail
+          pnpm --filter @amc/web test:e2e 2>&1 | tee /tmp/playwright-e2e.log
 
       # Capture diagnostics and artifacts before Stop local stack tears down services.
       - name: Print service logs on failure
