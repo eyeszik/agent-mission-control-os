@@ -33,9 +33,13 @@ Call log:
 """
 
 
-def _run(script: Path, report: Path) -> str:
+def _run(script: Path, report: Path, cwd: Path | None = None) -> str:
+    # cwd matters: both annotators resolve their fallback reports relative to the
+    # working directory, exactly as the CI step does from the repository root.
+    # Pinning it here (rather than chdir-ing the test process) is what makes the
+    # difference between reading a report and reporting that none exists.
     proc = subprocess.run([sys.executable, str(script), str(report)],
-                          capture_output=True, text=True, timeout=60, cwd=str(REPO))
+                          capture_output=True, text=True, timeout=60, cwd=str(cwd or REPO))
     assert proc.returncode == 0, proc.stderr
     return proc.stdout
 
@@ -99,3 +103,40 @@ def test_playwright_annotation_falls_back_to_the_runner_log(tmp_path, monkeypatc
         assert "waiting for locator" in out
     finally:
         log.unlink(missing_ok=True)
+
+EMPTY_FAILURE = """<testsuites><testsuite name="visuals">
+  <testcase name="Compile, refuse a stale edit, apply a current one, request approval" time="422.5">
+    <failure/>
+  </testcase>
+</testsuite></testsuites>
+"""
+
+# What Playwright's JSON reporter writes for the same timed-out case: the error
+# message and the step durations that the junit body left empty.
+REPORT_JSON = """{"suites": [{"title": "visuals.spec.ts", "specs": [
+  {"title": "Compile, refuse a stale edit, apply a current one, request approval",
+   "tests": [{"results": [{"status": "failed", "duration": 422500,
+     "error": {"message": "Test timeout of 420000ms exceeded.",
+               "location": {"file": "visuals.spec.ts", "line": 96, "column": 47}},
+     "steps": [{"title": "open the visual compiler", "duration": 900},
+               {"title": "the compiled asset renders and evaluates", "duration": 419000}]}]}]}]}]}
+"""
+
+
+def test_an_empty_failure_still_names_the_case_and_its_location(tmp_path):
+    """A 420s timeout reached the check run as "exit code 1" and nothing else.
+
+    Playwright can write ``<failure/>`` with no text; GitHub drops an annotation
+    whose message is empty, so the one readable channel went blank. The JSON
+    report carries what the XML omitted, and the annotation must use it.
+    """
+    (tmp_path / "apps" / "web").mkdir(parents=True)
+    (tmp_path / "apps" / "web" / "report.json").write_text(REPORT_JSON, encoding="utf-8")
+    report = tmp_path / "junit.xml"
+    report.write_text(EMPTY_FAILURE, encoding="utf-8")
+    out = _run(PLAYWRIGHT, report, cwd=tmp_path)
+    assert "::failure title=playwright | Compile, refuse a stale edit" in out
+    assert "line 96:47" in out, f"empty failure lost its location:\n{out}"
+    assert "no JSON record" not in out, f"the JSON report was not consulted:\n{out}"
+    # The step durations say which phase ate the budget.
+    assert "the compiled asset renders and evaluates" in out

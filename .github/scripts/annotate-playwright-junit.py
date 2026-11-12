@@ -20,6 +20,50 @@ from pathlib import Path
 MAX_MESSAGE = 900
 
 
+def _json_case(name: str) -> str:
+    """The failing case's own record from the JSON report.
+
+    A junit ``<failure>`` can be empty -- Playwright writes the timeout with no
+    text for some failures -- and an annotation with an empty message is dropped
+    by GitHub, which is exactly how a 420s timeout reached the check run as
+    nothing but "Process completed with exit code 1". The JSON report always
+    carries ``error.message`` and ``error.location``, so it is consulted by name
+    rather than replacing the junit body when that body exists.
+    """
+    import glob
+    import json
+
+    for path in sorted(glob.glob("apps/web/**/report.json", recursive=True)):
+        try:
+            data = json.loads(Path(path).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        found: list[str] = []
+
+        def walk(suite: dict) -> None:
+            for spec in suite.get("specs", []) or []:
+                for test in spec.get("tests", []) or []:
+                    results = test.get("results", []) or []
+                    if not results or results[-1].get("status") in (None, "passed", "skipped"):
+                        continue
+                    if spec.get("title") and spec.get("title") not in name and name not in (spec.get("title") or ""):
+                        continue
+                    error = results[-1].get("error") or {}
+                    where = error.get("location") or {}
+                    at = f"pending at line {where.get('line')}:{where.get('column')}. " if where else ""
+                    steps = [f"{s.get('title')} {s.get('duration', 0)}ms" for s in (results[-1].get("steps") or [])
+                             if s.get("title")]
+                    found.append(at + (error.get("message") or "") + (" steps: " + " -> ".join(steps[-4:]) if steps else ""))
+            for child in suite.get("suites", []) or []:
+                walk(child)
+
+        for suite in data.get("suites", []) or []:
+            walk(suite)
+        if found:
+            return found[0]
+    return ""
+
+
 def emit(level: str, title: str, message: str) -> None:
     flat = " ".join(message.split())[:MAX_MESSAGE]
     print(f"::{level} title={title}::{flat}")
@@ -142,6 +186,10 @@ def main(argv: list[str]) -> int:
             continue
         name = case.get("name") or "(unnamed)"
         body = (failures[0].text or "") or failures[0].get("message") or ""
+        if not body.strip():
+            # An empty <failure> becomes an empty annotation, and GitHub drops
+            # those: the case is reported failed with no reason at all.
+            body = _json_case(name) or f"case failed with an empty <failure> element; no JSON record for {name!r}"
         # The last frame before the timeout points at the locator that never
         # resolved; earlier frames are Playwright internals.
         where = re.findall(r"at .*?\.spec\.ts:(\d+):(\d+)", body)

@@ -12,11 +12,11 @@
     },
     {
       "path": ".github/scripts/annotate-playwright-junit.py",
-      "git_blob_sha": "40da08f69b660a62d58cd12ebcd14b329633ffc5"
+      "git_blob_sha": "329aad8cad113ee18f92f3327ad0fbb929dd61c6"
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "f9fbe675e059f83a5e4cda581a12d569e8e84b70"
+      "git_blob_sha": "90fa7093c17968477298e15a3336960d40a785c6"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -96,7 +96,7 @@
     },
     {
       "path": "apps/web/playwright.config.ts",
-      "git_blob_sha": "bd950b084ead16609ee3659797b49c7abdb39b09"
+      "git_blob_sha": "7d64dd2fabd2e0458476575cdb54a8d2de428a28"
     },
     {
       "path": "apps/web/postcss.config.js",

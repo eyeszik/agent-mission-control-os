@@ -22,10 +22,26 @@ export default defineConfig({
         // location as apps/web/junit.xml after two wrong guesses. Name it
         // explicitly so the artifact upload and the annotator cannot drift.
         ['junit', { outputFile: 'junit.xml' }],
+        // The XML reporter can write an empty <failure> (no text, no location),
+        // and an empty message is dropped by GitHub's annotation API -- a 420s
+        // timeout then reaches the reviewer as "exit code 1" and nothing else.
+        // The JSON report always carries error.message, error.location and the
+        // step timings, so it is written next to the XML for the annotator to
+        // consult when a junit body is empty.
+        ['json', { outputFile: 'report.json' }],
       ]
     : 'list',
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3000',
+    // Playwright's default actionTimeout is 0 -- no limit at all. Combined with a
+    // raised per-test budget, one hung click is allowed to consume the entire
+    // 420s and the report says only "Test timeout of 420000ms exceeded": no
+    // action, no selector, no line. That is exactly how this job failed four
+    // times (240s, 420s, twice at 422.5s) without naming a step. An action now
+    // fails on its own clock and names itself, while the per-test budget above
+    // stays what it is -- a budget for several real renders.
+    actionTimeout: 20_000,
+    navigationTimeout: 30_000,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
