@@ -60,6 +60,34 @@ def chromium_path() -> Optional[Path]:
     return None
 
 
+def headless_shell_for(executable: Optional[Path]) -> Optional[Path]:
+    """The chrome-headless-shell beside this browser, if the install shipped one.
+
+    Playwright prefers it for headless work, and it is the only binary whose
+    print path avoids the compositor that fails inside the sandbox. Resolved
+    from the executable's own directory so both come from one install, and
+    never assumed to exist: a chromium-only install simply returns None and
+    the caller keeps the full browser.
+    """
+    if not executable:
+        return None
+    directory = Path(executable).parent
+    for name in ("headless_shell", "chrome-headless-shell", "headless-shell"):
+        candidate = directory / name
+        if candidate.is_file():
+            return candidate
+    # Playwright lays the shell out as a sibling install: .../chromium-N/chrome-linux64
+    # additionally ships .../chromium_headless_shell-N/chrome-headless-shell-linux64.
+    for parent in (directory.parent, directory.parent.parent):
+        for shell_dir in sorted(parent.glob("chromium_headless_shell-*")):
+            for inner in sorted(shell_dir.iterdir()) if shell_dir.is_dir() else []:
+                for name in ("headless_shell", "chrome-headless-shell"):
+                    candidate = inner / name
+                    if candidate.is_file():
+                        return candidate
+    return None
+
+
 @lru_cache(maxsize=1)
 def _playwright_chromium() -> Optional[str]:
     """Ask the installed Playwright where its Chromium is, and whether that file exists."""
@@ -152,8 +180,15 @@ def _run(spec: dict, out_dir: Path, timeout_s: int) -> dict:
         return {"exit_code": None, "wall_ms": 0, "network_isolated": False, "output_files": [],
                 "stderr_tail": "BLOCKED_ISOLATION_OR_BROWSER: " + "; ".join(reasons), "result": {}, "command": []}
     executable = Path(executable).absolute()
+    shell = headless_shell_for(executable)
     spec = {**spec, "executable_path": str(executable)}
+    if shell is not None:
+        spec["headless_shell_path"] = str(shell)
     browser_paths, extra = _browser_runtime_paths(executable)
+    if shell is not None:
+        # The shell is a separate file outside the browser's own directory; it
+        # must be bind-mounted or the print process cannot exec it.
+        browser_paths = tuple(dict.fromkeys((*browser_paths, shell)))
     start = time.monotonic()
     # Never mount the caller's output directory: it can contain other client data.
     # Reopen only declared regular outputs from a fresh scratch directory.

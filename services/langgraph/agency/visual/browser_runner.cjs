@@ -205,12 +205,22 @@ async function runStep(page, step) {
   }
 }
 
+// Playwright prints through chrome-headless-shell by default, and that binary
+// does not use the compositor's print pipeline at all. The full Chromium build
+// fails with "Page.printToPDF: Printing failed" inside this chroot while
+// rasterizing and measuring the very same page successfully, so print takes the
+// shell when the caller resolved one and falls back to the caller's binary when
+// it did not (a host that installed only chromium). The path is computed by the
+// Python side, which already knows the browser directory; guessing it from the
+// executable name here would be a second, weaker source of truth.
 async function printDocument(pw, spec, outDir) {
   const deadline = (spec.pdf_timeout_ms || 45000);
+  const shell = spec.headless_shell_path && fs.existsSync(spec.headless_shell_path)
+    ? spec.headless_shell_path : null;
   const job = async () => {
     const b = await pw.chromium.launch({
       headless: true,
-      executablePath: spec.executable_path || undefined,
+      executablePath: shell || spec.executable_path || undefined,
       // --no-zygote is the fix for the print path specifically. Chromium's
       // zygote forks each renderer; inside this chroot the fork fails with
       // "ZygoteCommunication::ForkRequest()" and takes the whole browser with
