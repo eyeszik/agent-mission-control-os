@@ -64,6 +64,64 @@ def _json_case(name: str) -> str:
     return ""
 
 
+
+def _context_snapshot() -> str:
+    """The page as the failed browser saw it, from Playwright's own capture.
+
+    ``test-results/<case>/error-context.md`` holds a YAML page snapshot taken at
+    the moment of failure. It is inside the artifact archive and therefore
+    unreachable to a reviewer here, and it is the only record that can say
+    whether a control was disabled, absent or simply not rendered -- the
+    difference between three completely different bugs. Emit the control-relevant
+    lines only; the whole snapshot would bury the message.
+    """
+    import glob
+
+    out: list[str] = []
+    for path in sorted(glob.glob("apps/web/test-results/**/error-context.md", recursive=True))[:1]:
+        try:
+            text = Path(path).read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if "```yaml" in text:
+            text = text.split("```yaml", 1)[1].split("```", 1)[0]
+        keep = ("button", "note", "heading", "textbox", "combobox", "alert", "status")
+        for line in text.splitlines():
+            stripped = line.strip()
+            if not stripped.startswith("- "):
+                continue
+            if any(f'"{kind}"' in stripped or f" {kind}" in stripped for kind in keep):
+                out.append(stripped[2:])
+        if out:
+            out = out[:24]
+    return " | ".join(out)[:MAX_MESSAGE]
+
+
+def _api_self_report() -> str:
+    """What the running API says about its own renderer, asked while it is up.
+
+    This annotator runs before "Stop local stack", so the backend that served the
+    failed page is still listening. When a render-dependent control is disabled,
+    the reason is the host's -- a missing sandbox tool, an unreachable browser --
+    and the API states it plainly in /avic/capabilities. Asking it here turns a
+    check run into an answer instead of sending someone to a log they cannot open.
+    """
+    import json
+    import os
+    import urllib.request
+
+    base = os.environ.get("AMC_API_BASE_URL") or "http://127.0.0.1:8000"
+    try:
+        with urllib.request.urlopen(f"{base}/avic/capabilities", timeout=15) as response:
+            data = json.loads(response.read() or b"{}")
+    except Exception as exc:  # noqa: BLE001 - a diagnostic must never mask the failure
+        return f"{type(exc).__name__}: {exc}"[:MAX_MESSAGE]
+    renderer = data.get("renderer") or {}
+    profiles = [p.get("profile_id") for p in (data.get("style_profiles") or [])
+                if p.get("state") == "IMPLEMENTED_VERIFIED"]
+    return (f"renderer={renderer.get('state')} blockers={renderer.get('blockers')} "
+            f"implemented_profiles={profiles}")
+
 def emit(level: str, title: str, message: str) -> None:
     flat = " ".join(message.split())[:MAX_MESSAGE]
     print(f"::{level} title={title}::{flat}")
@@ -224,6 +282,13 @@ def main(argv: list[str]) -> int:
              "; ".join(f"{name} {seconds:.1f}s" for seconds, name in slowest))
     if not failed:
         _from_log()
+    if failed:
+        emit("warning", "playwright api self-report", _api_self_report())
+        snapshot = _context_snapshot()
+        if snapshot:
+            # The snapshot is a separate annotation so it never competes with the
+            # error message for length; both are readable in the same check run.
+            emit("warning", "playwright page at failure", snapshot)
     return 0
 
 
