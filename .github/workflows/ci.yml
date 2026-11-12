@@ -457,6 +457,12 @@ jobs:
                   page = ('<html><body style="margin:0"><div data-page="p1" '
                           'style="width:200px;height:120px;font:12px sans-serif">'
                           'printable</div></body></html>')
+                  from services.langgraph.agency.visual.browser import chromium_path, headless_shell_for
+                  exe = chromium_path()
+                  shell = headless_shell_for(exe)
+                  print('browser exe  :', exe)
+                  print('headless shell:', shell)
+                  emit('warning', 'AVIC print binary', f"exe={exe} shell={shell}")
                   pdf = render_pdf(page, width_px=200, height_px=120, out_dir=_Path(tmp) / 'pdf', timeout_s=90)
                   print('pdf:', json.dumps(pdf, default=str)[:1200])
                   emit('warning' if pdf.get('status') == 'PASSED' else 'error',
