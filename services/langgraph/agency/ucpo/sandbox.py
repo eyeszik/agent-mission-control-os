@@ -119,8 +119,17 @@ def wrap(command: list[str], *, cwd: Path, home: Path, node: str, timeout_s: int
     cwd, home = Path(cwd).absolute(), Path(home).absolute()
     root = home / ".amc-sandbox-root"
     root.mkdir(parents=True, exist_ok=True)
+    # Chromium prints to PDF through a private temp directory it must be able to
+    # write. In this chroot the only writable paths are `home` and `cwd`, both
+    # under the caller's scratch directory, so HOME alone is not enough: the
+    # browser also honours TMPDIR for the print spool. Both are pointed at a
+    # directory that exists inside the namespace and is created below; when it
+    # did not, Page.printToPDF failed and the brand book silently had no PDF.
+    # TMPDIR must be the in-namespace path, not the host path, because the
+    # chroot sees only the bind-mounted tree.
     env = {"PATH": "/usr/local/bin:/usr/bin:/bin", "HOME": str(home), "TMPDIR": str(home),
            "NEXT_TELEMETRY_DISABLED": "1", "CI": "1", "LANG": "C.UTF-8", **(extra_env or {})}
+    env.setdefault("XDG_CACHE_HOME", str(home / ".cache"))
     readonly = [Path(p) for p in _SYSTEM_DIRS if Path(p).exists()]
     # The interpreter is often installed outside the system directories -- GitHub's
     # runners put it under /opt/hostedtoolcache -- and the chroot only contains what is
@@ -141,6 +150,10 @@ def wrap(command: list[str], *, cwd: Path, home: Path, node: str, timeout_s: int
     steps += [_mount(Path(p), root, readonly=False) for p in writable]
     steps += [_mount(Path(p), root, readonly=False) for p in _DEVICES if Path(p).exists()]
     steps.append(f"mkdir -p {shlex.quote(str(root / 'proc'))} && mount -t proc -o nosuid,nodev,noexec proc {shlex.quote(str(root / 'proc'))}")
+    # Create the browser's cache/temp directories after the mounts (they live in
+    # the writable home) so a renderer never has to discover they are missing.
+    for name in (".cache", "tmp"):
+        steps.append(f"mkdir -p {shlex.quote(str(home / name))}")
     env_args = " ".join(shlex.quote(f"{k}={v}") for k, v in sorted(env.items()))
     cmd_args = " ".join(shlex.quote(str(c)) for c in command)
     enter_cwd = shlex.quote('cd ' + shlex.quote(str(cwd)) + ' && exec "$@"')
@@ -195,7 +208,13 @@ def probe_isolation() -> Isolation:
                  "host_canary": "hidden", "repository_source": "hidden", "capabilities": "dropped",
                  "env_keys": env_keys, "limits": dict(LIMITS), "node": node,
                  "seccomp": False, "cgroup_quota": False}
-        allowed = {"PATH", "HOME", "TMPDIR", "NEXT_TELEMETRY_DISABLED", "CI", "LANG", "PWD", "SHLVL", "_", "OLDPWD"}
+        # The allowlist is the contract for what a sandboxed process may see.
+        # XDG_CACHE_HOME is added deliberately: it points at the writable home
+        # inside the namespace and is what lets Chromium print to PDF there.
+        # Anything not listed here is a leak and fails the probe, so adding a
+        # name is a security decision, never a convenience.
+        allowed = {"PATH", "HOME", "TMPDIR", "XDG_CACHE_HOME", "NEXT_TELEMETRY_DISABLED", "CI", "LANG",
+                   "PWD", "SHLVL", "_", "OLDPWD"}
         if set(env_keys) - allowed:
             reasons.append(f"environment not scrubbed: {sorted(set(env_keys) - allowed)}")
         try:

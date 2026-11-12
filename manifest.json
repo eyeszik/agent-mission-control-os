@@ -816,7 +816,7 @@
     },
     {
       "path": "services/langgraph/agency/ucpo/sandbox.py",
-      "git_blob_sha": "b398a4fa633af6e39446ec568d589936d811ac27"
+      "git_blob_sha": "5a99a8d822f95d716f5a028f6c4f806421c86791"
     },
     {
       "path": "services/langgraph/agency/ucpo/semantic.py",
