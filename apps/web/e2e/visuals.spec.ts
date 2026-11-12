@@ -49,7 +49,10 @@ test('Compile intake explains disabled actions and passes axe', async ({ page })
 });
 
 test('Compile, refuse a stale edit, apply a current one, request approval', async ({ page, request }) => {
-  test.setTimeout(240_000);
+  // Four real Chromium renders plus a two-step stale-edit sequence; measured at
+  // roughly 100s on a fast machine and over 240s on a loaded shared runner, so the
+  // budget is explicit rather than accidentally at the default.
+  test.setTimeout(420_000);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await openVisuals(page);

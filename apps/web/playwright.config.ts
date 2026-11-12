@@ -6,6 +6,11 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   fullyParallel: false,
   // Single attempt by design: the release gate is stateful and retries would mask failures.
+  // Note what this does and does not mean. A retry re-runs the whole journey against
+  // state the first attempt already changed, so it hides real defects -- that is why
+  // there are none. A per-test timeout is a different thing: it is a budget, and the
+  // three render journeys do several real Chromium renders each. Budgets are raised
+  // individually where measured, never by adding retries.
   retries: 0,
   workers: 1,
   reporter: process.env.CI
