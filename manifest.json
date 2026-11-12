@@ -832,11 +832,11 @@
     },
     {
       "path": "services/langgraph/agency/visual/browser.py",
-      "git_blob_sha": "90778324903440d0a3ff493c67e54133b520fcfe"
+      "git_blob_sha": "b182e9ae5b87ba2b1bed709d23b448b06f9c1f40"
     },
     {
       "path": "services/langgraph/agency/visual/browser_runner.cjs",
-      "git_blob_sha": "3000c06d9ed97e35a618ec7352b72ba235122db5"
+      "git_blob_sha": "d6c6d55bcae4b4d4358784aa0eae1273ad2bc4a0"
     },
     {
       "path": "services/langgraph/agency/visual/capabilities.py",
@@ -864,7 +864,7 @@
     },
     {
       "path": "services/langgraph/agency/vnexus/brandbook/service.py",
-      "git_blob_sha": "84a4536c306ab86ef827179981d27a8451650327"
+      "git_blob_sha": "ae2098c81d3707f583c27c3c6b00066484935163"
     },
     {
       "path": "services/langgraph/agency/vnexus/creative_service.py",

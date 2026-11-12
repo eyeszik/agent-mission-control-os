@@ -205,6 +205,51 @@ async function runStep(page, step) {
   }
 }
 
+async function printDocument(pw, spec, outDir) {
+  const deadline = (spec.pdf_timeout_ms || 45000);
+  const job = async () => {
+    const b = await pw.chromium.launch({
+      headless: true,
+      executablePath: spec.executable_path || undefined,
+      args: ["--no-sandbox", "--disable-dev-shm-usage", "--use-gl=angle", "--use-angle=swiftshader",
+             "--enable-unsafe-swiftshader"],
+    });
+    try {
+      const ctx = await b.newContext({ deviceScaleFactor: 1 });
+      await ctx.route("**/*", (route) => {
+        const url = route.request().url();
+        if (url.startsWith("data:") || url === "about:blank") return route.continue();
+        return route.abort();
+      });
+      const pg = await ctx.newPage();
+      await pg.setContent(spec.html);
+      await pg.emulateMedia({ media: "print" });
+      await pg.pdf({ path: path.join(outDir, "document.pdf"), width: `${spec.width_px}px`,
+                     height: `${spec.height_px}px`, printBackground: true,
+                     margin: { top: "0", right: "0", bottom: "0", left: "0" } });
+      return {
+        pdf: { capture: "document.pdf",
+               pages: await pg.evaluate(() => document.querySelectorAll("[data-page]").length || 1) },
+      };
+    } finally {
+      await Promise.race([b.close().catch(() => {}), new Promise((r) => setTimeout(r, 3000))]);
+    }
+  };
+  let timer;
+  try {
+    return await Promise.race([
+      job(),
+      new Promise((_resolve, reject) => {
+        timer = setTimeout(() => reject(new Error(`PRINT_TIMEOUT after ${deadline}ms`)), deadline);
+      }),
+    ]);
+  } catch (err) {
+    return { pdf_err: String(err && err.message ? err.message : err) };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function main() {
   const [specPath, outDir] = process.argv.slice(2);
   const spec = JSON.parse(fs.readFileSync(specPath, "utf8"));
@@ -309,29 +354,15 @@ async function main() {
         result.frames.push({ file, complete: r.complete });
       }
     } else if (spec.mode === "pdf") {
-      const printOnce = async (target) => {
-        await target.setContent(spec.html);
-        await target.emulateMedia({ media: "print" });
-        await target.pdf({ path: path.join(outDir, "document.pdf"), width: `${spec.width_px}px`,
-                           height: `${spec.height_px}px`, printBackground: true,
-                           margin: { top: "0", right: "0", bottom: "0", left: "0" } });
-      };
-      try {
-        await printOnce(page);
-      } catch (err) {
-        // A print compositor that died does not revive with the same page, but
-        // does with a fresh one. One bounded retry, and the error is preserved
-        // if it still fails so the caller can report it truthfully.
-        result.pdf_err = String(err && err.message ? err.message : err);
-        const retry = await context.newPage();
-        try {
-          await printOnce(retry);
-          result.pdf_retried = true;
-        } finally {
-          await retry.close().catch(() => {});
-        }
-      }
-      result.pdf = { capture: "document.pdf", pages: await page.evaluate(() => document.querySelectorAll("[data-page]").length || 1) };
+      // Printing runs in its own browser with its own deadline. Page.printToPDF
+      // in this sandbox does not merely fail: it wedges the whole browser, so
+      // the same process cannot open another tab, and a caller-level timeout
+      // then reports exit 124 with the cause unrecorded. A separate browser
+      // keeps a print fault inside the print path, and the deadline means the
+      // failure is reported as PRINT_TIMEOUT rather than as a killed process.
+      await browser.close().catch(() => {});
+      const printed = await printDocument(pw, spec, outDir);
+      Object.assign(result, printed);
     } else if (spec.mode === "layout") {
       // Measure each [data-page] section: content outside its body box, clipped or too-small text, overlapping
       // blocks, rendered copy text and placed marks. Nothing here decides pass/fail; the caller does.

@@ -320,6 +320,11 @@ def render_pdf(html: str, *, width_px: int, height_px: int, out_dir: Path, timeo
         findings.append("REMOTE_REQUEST_ATTEMPTED")
     if "document.pdf" not in run["output_files"] or not capture.read_bytes().startswith(b"%PDF-"):
         findings.append("PDF_NOT_WRITTEN")
+    # The runner reports its own print fault. Surfacing it here is the
+    # difference between "the PDF is missing" and why it is missing, and the
+    # caller's reason string is what an operator actually reads.
+    if run["result"].get("pdf_err"):
+        findings.append(f"PRINT_FAILED:{run['result']['pdf_err']}"[:300])
     ok = not findings
     return {**run, "status": "PASSED" if ok else "FAILED", "findings": findings, "capture": str(capture) if ok else None}
 

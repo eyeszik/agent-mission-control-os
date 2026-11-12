@@ -431,6 +431,7 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
         package_entry = _put(principal, project_id, f"{base}-package", package_bytes, "package",
                              depends_on=(book_entry["artifact_id"],))
         pdf = None
+        pdf_failure: list[str] = []
         if mode is Mode.PRODUCTION and can_measure:
             prior = _read(project_id, f"{base}-build")
             prior_doc = json.loads(prior[0]) if prior else {}
@@ -445,6 +446,12 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
                     entry = _put(principal, project_id, f"{base}-book-pdf", Path(run["capture"]).read_bytes(), "pdf",
                                  depends_on=(book_entry["artifact_id"],))
                     pdf = {"artifact_id": entry["artifact_id"], "version": entry["version"], "sha256": entry["sha256"]}
+                else:
+                    # A missing PDF is part of the record, never a silent None.
+                    # Otherwise the build reports READY_FOR_APPROVAL with no way
+                    # to tell why the document is absent, and the failure only
+                    # appears as an assertion in a caller.
+                    pdf_failure = list(run.get("findings") or ["PDF_UNKNOWN_FAILURE"])
         t = lap("assemble", t)
     all_checks = [c for pg in book.pages for c in page_checks.get(pg.page_id, [])]
     blocking_checks = checksmod.blocking(all_checks)
@@ -475,7 +482,7 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
                    "blocking": blocking_checks[:50]},
         "book": {"artifact_id": book_entry["artifact_id"], "version": book_entry["version"], "sha256": book_entry["sha256"]},
         "package": {"artifact_id": package_entry["artifact_id"], "sha256": package_entry["sha256"], "package_hash": book.package_hash},
-        "pdf": pdf, "status": status,
+        "pdf": pdf, "pdf_failure": pdf_failure, "status": status,
         "states": {"prompt": "READY", "rendered": "PASSED" if sections else "NOT_RUN",
                    "validated": ("NOT_RUN" if not can_measure else ("FAILED" if blocking_checks else "PASSED")),
                    "released": "NOT_RELEASED"},
