@@ -944,7 +944,7 @@
     },
     {
       "path": "services/langgraph/api/routes/avic.py",
-      "git_blob_sha": "935a3d84b4543686b1f640f4493e58c89eea7304"
+      "git_blob_sha": "241e4bfaf86ab19b4d39aa89d232c9fb898f4005"
     },
     {
       "path": "services/langgraph/api/routes/compiled_agency.py",
