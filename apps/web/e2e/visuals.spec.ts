@@ -73,6 +73,13 @@ test('Compile, refuse a stale edit, apply a current one, request approval', asyn
       test.skip(true, 'renderer unavailable on this host: the honest-refusal branch is asserted');
       return;
     }
+    // A disabled Compile is a statement about the host, and the note next to it
+    // is that statement. Waiting for the click to time out hides the sentence
+    // the page was already showing; read it and fail with it.
+    if (!(await compile.isEnabled())) {
+      const blocked = await page.getByTestId('avic-compile-blocked').textContent().catch(() => null);
+      throw new Error(`Compile is disabled, so this host cannot render: ${blocked ?? 'no reason was shown'}`);
+    }
     await compile.click();
     await expect(page.getByRole('heading', { name: `Asset ${ASSET}` })).toBeVisible({ timeout: 120_000 });
   });

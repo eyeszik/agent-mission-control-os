@@ -6,6 +6,7 @@ import {
   compileAsset, editAsset, fetchPreview, getAsset, getAvicCapabilities, listAssets, recompileAsset, releaseLocal, requestApproval,
 } from '../../lib/api/avic';
 import { ServiceError } from '../../lib/api/client';
+import { compileBlockedReason } from '../../lib/avic/intake';
 import { useAgencyStore } from '../../lib/stores/agencyStore';
 import { Badge, Button, Card, Empty, ErrorNote, Field, Hash, KeyValue, RunnerOutput, Skeleton, inputClass, useLoad, useRunner } from '../agency/ui';
 
@@ -174,7 +175,7 @@ function Editor({ view, onChanged }: { view: AvicAssetView; onChanged: () => voi
             throw e;
           }
         })}>Apply edit</Button>
-        {reason && <span className="text-sm text-fg" role="note">{reason}</span>}
+        {reason && <span id="avic-compile-blocked" data-testid="avic-compile-blocked" className="text-sm text-fg" role="note">{reason}</span>}
       </div>
       <RunnerOutput message={runner.message} error={runner.error} />
     </Card>
@@ -230,11 +231,21 @@ function BriefIntake({ projectId, onCompiled }: { projectId: string; onCompiled:
   }
   const chosen = profile || profiles[0]?.profile_id || '';
   const seedValue = Number.parseInt(seed, 10);
-  const reason = !requirement.trim() ? 'Paste an AssetRequirement JSON (the "requirement" in sample_avic_request.json).'
-    : parseError ? `The requirement is not valid JSON: ${parseError}`
-    : !chosen ? 'No implemented style profile is available.'
-    : !Number.isInteger(seedValue) || seedValue < 0 ? 'Seed must be a whole number of 0 or more.'
-    : caps.data && caps.data.renderer.state !== 'IMPLEMENTED_VERIFIED' ? `Renderer unavailable on the API host: ${caps.data.renderer.blockers.join('; ')}` : null;
+  // Compile stays disabled until the intake is valid *and* the host's renderer
+  // has been confirmed. Every one of those states names itself here: a disabled
+  // control whose reason is invisible is indistinguishable from a broken one,
+  // which is exactly how a five-minute E2E run ended with "element is not
+  // enabled" and no statement of what the element was waiting for.
+  // The reasons live in lib/avic/intake so they can be asserted without a
+  // browser: every one of them is a statement the UI makes about why a real
+  // render cannot start yet.
+  const reason = compileBlockedReason({
+    requirement, parseError, chosenProfile: chosen, seed,
+    capabilities: caps.loading ? { status: 'loading' }
+      : caps.error ? { status: 'error', error: caps.error }
+      : caps.data ? { status: 'ready', data: caps.data }
+      : { status: 'loading' },
+  });
   return (
     <Card title="Compile a visual" id="avic-intake"
       description="Brief text is data: instructions, publish/send/spend requests and third-party marks are refused. Colours come only from the server's brand projection.">
@@ -253,7 +264,9 @@ function BriefIntake({ projectId, onCompiled }: { projectId: string; onCompiled:
           onChange={(e) => setRequirement(e.target.value)} />
       </Field>
       <div className="flex flex-wrap items-center gap-3">
-        <Button variant="primary" disabled={runner.busy || reason !== null} onClick={() => runner.run('Compile', async () => {
+        <Button variant="primary" disabled={runner.busy || reason !== null}
+          aria-describedby={reason ? 'avic-compile-blocked' : undefined}
+          onClick={() => runner.run('Compile', async () => {
           const r = await compileAsset(projectId, parsed, chosen, seedValue);
           if (r.status !== 'BLOCKED' || r.artifacts) onCompiled(r.asset_id);
           return r.status === 'EVALUATED' ? 'Compiled, rendered and evaluated.' : `${r.status}: ${(r.reasons ?? []).slice(0, 4).join('; ')}`;
