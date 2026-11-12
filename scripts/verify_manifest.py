@@ -47,6 +47,11 @@ def main() -> None:
 
     required = {
         ".github/workflows/ci.yml",
+        # The CI failure-annotation scripts are the only readable evidence
+        # channel here, so they are pinned like the workflow that calls them:
+        # an unreviewed edit to one can silence every failure in the suite.
+        ".github/scripts/annotate-junit-failures.py",
+        ".github/scripts/annotate-playwright-junit.py",
         ".env.example",
         "README.md",
         "docs/production-activation.md",

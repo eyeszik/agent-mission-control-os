@@ -7,8 +7,16 @@
       "git_blob_sha": "3dd21f0d511372591b9f6ad472b159464beecf8a"
     },
     {
+      "path": ".github/scripts/annotate-junit-failures.py",
+      "git_blob_sha": "c46ccf7149e3e23295ad474cd17a85b4b70f612a"
+    },
+    {
+      "path": ".github/scripts/annotate-playwright-junit.py",
+      "git_blob_sha": "e23c10002c59577f6b231aea0609802f0f628dd9"
+    },
+    {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "89b54d27f3fd3d8ddcc8d851829a292baeca2e2d"
+      "git_blob_sha": "3db1a1124c7fc2392f25e60d702701c1894c2247"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -292,7 +300,7 @@
     },
     {
       "path": "scripts/verify_manifest.py",
-      "git_blob_sha": "ab8dc503a5e7fda4d61cc3a09b21f413a9a53a9d"
+      "git_blob_sha": "cc9a9cef393eff6130fb9c3dc6cb2e573903a56b"
     },
     {
       "path": "scripts/verify_northline_bundle.py",
