@@ -323,9 +323,23 @@ def _run(spec: dict, out_dir: Path, timeout_s: int) -> dict:
         spec["headless_shell_path"] = str(shell)
     browser_paths, extra = _browser_runtime_paths(executable)
     if shell is not None:
-        # The shell is a separate file outside the browser's own directory; it
-        # must be bind-mounted or the print process cannot exec it.
-        browser_paths = tuple(dict.fromkeys((*browser_paths, shell)))
+        # The shell is a separate install outside the browser's own directory,
+        # and it needs its own runtime files -- its libs, .pak bundles and
+        # locales -- not the render browser's. Mounting the bare executable is
+        # not enough: it launches and dies immediately because everything it
+        # loads at start-up is missing. Compute the shell's runtime paths the
+        # same way and merge them.
+        shell_paths, shell_extra = _browser_runtime_paths(shell)
+        # The shell's sibling files (a launcher wrapper, its own locales, its
+        # shared libraries) are not matched by the full browser's glob patterns,
+        # so its whole install directory is mounted when it is outside the
+        # browser's own tree. Mounting only the executable made the shell start
+        # and die immediately, because everything it loads at launch was absent.
+        shell_dir = Path(shell).parent
+        if not shell_dir.is_relative_to(Path(executable).parent):
+            shell_paths = (*shell_paths, shell_dir)
+        browser_paths = tuple(dict.fromkeys((*browser_paths, *shell_paths)))
+        extra = {**extra, **shell_extra}
     start = time.monotonic()
     # Never mount the caller's output directory: it can contain other client data.
     # Reopen only declared regular outputs from a fresh scratch directory.
