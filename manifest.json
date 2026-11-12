@@ -16,7 +16,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "3db1a1124c7fc2392f25e60d702701c1894c2247"
+      "git_blob_sha": "98f4776bf5893c6a09c59aa1593b9030e8619e6b"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -96,7 +96,7 @@
     },
     {
       "path": "apps/web/playwright.config.ts",
-      "git_blob_sha": "13efd2cd54d858b5bd0d59d5d024db0008185dcf"
+      "git_blob_sha": "bd950b084ead16609ee3659797b49c7abdb39b09"
     },
     {
       "path": "apps/web/postcss.config.js",
