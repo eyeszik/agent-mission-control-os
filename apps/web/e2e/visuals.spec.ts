@@ -48,6 +48,31 @@ test('Compile intake explains disabled actions and passes axe', async ({ page })
   await expectNoAxeViolations(page, 'empty intake');
 });
 
+test('Compile explains pending and failed capability checks', async ({ page }) => {
+  // Hold the response explicitly; machine speed cannot hide the loading state.
+  let release: () => void = () => {};
+  const pending = new Promise<void>((resolve) => { release = resolve; });
+  await page.route('**/avic/capabilities', async (route) => {
+    await pending;
+    await route.fulfill({ status: 503, contentType: 'application/json', body: '{"detail":"Test-only capability outage"}' });
+  });
+  try {
+    await openVisuals(page);
+    await page.getByLabel('AssetRequirement (JSON)').fill(JSON.stringify(SAMPLE.requirement));
+    const compile = page.getByRole('button', { name: 'Compile', exact: true });
+    const reason = page.locator('#avic-compile-blocked');
+    await expect(compile).toBeDisabled();
+    await expect(compile).toHaveAttribute('aria-describedby', 'avic-compile-blocked');
+    await expect(reason).toHaveCount(1);
+    await expect(reason).toHaveText('Checking the API host for a renderer…');
+    release();
+    await expect(reason).toContainText("Could not read the API host's capabilities:");
+    await expect(compile).toBeDisabled();
+  } finally {
+    release();
+  }
+});
+
 test('Compile, refuse a stale edit, apply a current one, request approval', async ({ page, request }) => {
   // Four real Chromium renders plus a two-step stale-edit sequence. Each phase
   // runs inside test.step and every wait is bounded well below the test budget:
@@ -65,7 +90,10 @@ test('Compile, refuse a stale edit, apply a current one, request approval', asyn
   const unavailable = page.getByText(/Renderer unavailable on the API host/);
   const compile = page.getByRole('button', { name: 'Compile', exact: true });
   await test.step('compile, or state honestly that the renderer is unavailable', async () => {
-    await expect(compile.or(unavailable).first()).toBeVisible({ timeout: 30_000 });
+    // Visibility precedes capability resolution. Wait for an actionable result,
+    // while keeping unexpected disabled states diagnostic and bounded.
+    await expect.poll(async () => (await compile.isEnabled()) || (await unavailable.isVisible()),
+      { timeout: 30_000, message: 'Compile must become ready or explain renderer unavailability' }).toBe(true);
     if (await unavailable.isVisible()) {
       // A host without the renderer must say so rather than pretend; that is a
       // success for this branch, not an early exit that hides a failure.

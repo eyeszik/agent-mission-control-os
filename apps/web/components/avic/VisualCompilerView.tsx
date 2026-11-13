@@ -175,7 +175,7 @@ function Editor({ view, onChanged }: { view: AvicAssetView; onChanged: () => voi
             throw e;
           }
         })}>Apply edit</Button>
-        {reason && <span id="avic-compile-blocked" data-testid="avic-compile-blocked" className="text-sm text-fg" role="note">{reason}</span>}
+        {reason && <span className="text-sm text-fg" role="note">{reason}</span>}
       </div>
       <RunnerOutput message={runner.message} error={runner.error} />
     </Card>
@@ -271,7 +271,7 @@ function BriefIntake({ projectId, onCompiled }: { projectId: string; onCompiled:
           if (r.status !== 'BLOCKED' || r.artifacts) onCompiled(r.asset_id);
           return r.status === 'EVALUATED' ? 'Compiled, rendered and evaluated.' : `${r.status}: ${(r.reasons ?? []).slice(0, 4).join('; ')}`;
         })}>Compile</Button>
-        {reason && <span className="text-sm text-fg" role="note">{reason}</span>}
+        {reason && <span id="avic-compile-blocked" data-testid="avic-compile-blocked" className="text-sm text-fg" role="note">{reason}</span>}
       </div>
       <RunnerOutput message={runner.message} error={runner.error} />
     </Card>

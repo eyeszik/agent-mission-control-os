@@ -60,7 +60,7 @@
     },
     {
       "path": "apps/web/e2e/agency-os.spec.ts",
-      "git_blob_sha": "0a7409c19d17a9d38753f1557e3146fca3c8d1ca"
+      "git_blob_sha": "796f153a4da7e3df3c3c1c7be3da93fe8d416dd3"
     },
     {
       "path": "apps/web/e2e/agency-smoke.spec.ts",

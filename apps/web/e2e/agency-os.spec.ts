@@ -73,7 +73,7 @@ test('Agency OS: shell, client, plan preview, refused external effect, honest st
   await search.fill('analytics');
   await expect(palette.getByRole('option', { name: 'Analytics Section', exact: true })).toHaveAttribute('aria-selected', 'true');
   await search.press('Enter');
-  await expect(page.getByText('Counts of stored records')).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('Counts of stored records with their source. Nothing here is estimated, forecast or simulated.', { exact: true })).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText('Not measured').first()).toBeVisible();
 
   await page.getByRole('button', { name: 'Use light theme' }).click();
