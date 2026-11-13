@@ -164,3 +164,55 @@ def test_default_backend_is_the_shared_database(monkeypatch):
     monkeypatch.delenv("UVICORN_WORKERS", raising=False)
     assert config.hmac_replay_backend() == "database"
     assert isinstance(replay_store.build_replay_store("database", window=300, max_entries=5), DatabaseReplayStore)
+
+
+def test_postgres_workers_serialize_replay_nonce_at_the_advisory_lock():
+    """Only run with a disposable PG test database; no managed project is implied."""
+    from services.langgraph.persistence.database import is_postgres, table, transaction
+
+    if not is_postgres():
+        pytest.skip("NOT_RUN: PostgreSQL replay contention requires a disposable PostgreSQL database")
+    nonce = f"pg-worker-race-{uuid.uuid4().hex}"
+    now = int(time.time())
+
+    def record():
+        try:
+            DatabaseReplayStore().check_and_record(nonce, timestamp=now, now=now)
+            return "ACCEPTED"
+        except ReplayDetected:
+            return "REPLAY"
+
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+            # Hold the *same* advisory lock used by the store until workers
+            # are observably waiting; thread scheduling alone is not evidence.
+            with transaction(write=True) as db:
+                db.execute("SELECT pg_advisory_xact_lock(hashtext(?))", (replay_store._ADVISORY_KEY,))
+                pid = db.execute("SELECT pg_backend_pid() AS pid").fetchone()["pid"]
+                futures = [pool.submit(record) for _ in range(8)]
+                # Ask the lock itself who is queued behind this backend. Sampling
+                # pg_stat_activity.wait_event was flaky by construction: the
+                # workers wait for a few milliseconds each, and a point-in-time
+                # sample can miss every one of them on a fast machine while the
+                # behaviour is perfectly correct. pg_locks plus
+                # pg_blocking_pids reports the same contention without depending
+                # on when the observer happens to look.
+                deadline = time.monotonic() + 15
+                waiting = 0
+                while time.monotonic() < deadline:
+                    waiting = db.execute(
+                        "SELECT count(*) AS n FROM pg_locks l "
+                        "WHERE l.locktype = 'advisory' AND NOT l.granted "
+                        "AND ? = ANY(pg_blocking_pids(l.pid))", (pid,)).fetchone()["n"]
+                    if waiting >= 2:
+                        break
+                    time.sleep(0.02)
+                assert waiting >= 2, ("workers did not queue on the replay advisory lock "
+                                      f"(waiting={waiting})")
+            outcomes = [future.result(timeout=30) for future in futures]
+        assert outcomes.count("ACCEPTED") == 1, outcomes
+        assert outcomes.count("REPLAY") == 7, outcomes
+    finally:
+        # Only the unique row created by this test, never the rest of the store.
+        with transaction(write=True) as db:
+            db.execute(f"DELETE FROM {table('hmac_replay_nonces')} WHERE nonce = ?", (nonce,))

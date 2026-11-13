@@ -143,6 +143,19 @@ def run_patch(base: dict[str, str], patch: dict[str, str], commands: list[list[s
         except SyntaxError as exc:
             raise SandboxViolation("PATCH_NOT_PARSEABLE", f"{rel}: {exc.msg} (line {exc.lineno})") from exc
 
+    changed = {p for p, text in checked_patch.items() if checked_base.get(p) != text}
+    if not changed:
+        raise SandboxViolation("EMPTY_PATCH", "at least one changed Python source is required")
+    if not commands:
+        raise SandboxViolation("EMPTY_CHECKS", "at least one allowlisted check is required")
+    checked_targets = set()
+    for command in commands:
+        if not command or command[0] not in COMMAND_ALLOWLIST or len(command) != 2:
+            raise SandboxViolation("COMMAND_REJECTED", repr(command))
+        checked_targets.add(safe_relpath(command[1]))
+    if not changed <= checked_targets:
+        raise SandboxViolation("UNCHECKED_PATCH", "every changed file needs a syntax check")
+
     results = []
     with tempfile.TemporaryDirectory(prefix="amc-sandbox-") as tmp:
         root = Path(tmp)

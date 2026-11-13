@@ -20,6 +20,7 @@ export * from './schemas/missionCouncil';
 export * from './schemas/agencyFramework';
 export * from './schemas/rendering';
 export * from './schemas/ucpo';
+export * from './schemas/brandWeb';
 export * from './schemas/avic';
 export * from './schemas/vnexusBrandbook';
 export * from './schemas/vnexusDirections';

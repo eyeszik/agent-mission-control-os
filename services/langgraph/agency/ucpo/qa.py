@@ -96,6 +96,17 @@ def _check(check: str, ok: Optional[bool], detail: str, refs: tuple[str, ...], r
                        evidence_ref=evidence)
 
 
+def _interaction_observation(value: object) -> tuple[Optional[bool], tuple[str, ...]]:
+    """Interpret only complete runner records; missing/malformed observations are not passes."""
+    if not isinstance(value, list) or any(
+        not isinstance(item, dict) or not isinstance(item.get("href"), str) or not item["href"]
+        or not isinstance(item.get("ok"), bool) or not isinstance(item.get("req"), (str, type(None)))
+        for item in value
+    ):
+        return None, ()
+    return all(item["ok"] for item in value), tuple(item["req"] for item in value if item.get("req"))
+
+
 def interpret(raw: dict, routes: list[str], shot_hashes: dict[str, str]) -> tuple[list[CheckResult], dict, tuple[str, ...]]:
     checks: list[CheckResult] = []
     evidence: dict[str, dict[str, list[str]]] = {}
@@ -120,6 +131,21 @@ def interpret(raw: dict, routes: list[str], shot_hashes: dict[str, str]) -> tupl
         lm = dom.get("landmarks") or {}
         checks.append(_check("landmarks", all(lm.get(k, 0) >= 1 for k in ("banner", "navigation", "main", "contentinfo"))
                              and dom.get("unnamedNav", 1) == 0, json.dumps(lm), ("req.a11y.automated",), route))
+        ctas = r.get("cta_interactions")
+        cta_ok, cta_refs = _interaction_observation(ctas)
+        if isinstance(ctas, list) and not ctas:
+            # A page can legitimately have no CTA. Record discovery, not a
+            # fictitious click; semantic coverage still requires click evidence
+            # for every CTA that the brief actually declares on this route.
+            checks.append(_check("cta_discovery", True, "zero CTA links observed; no clicks performed", (), route))
+        else:
+            checks.append(_check("cta_navigation", cta_ok, json.dumps(ctas), cta_refs, route))
+        if route == "/":
+            nav = r.get("nav_interactions")
+            nav_ok, nav_refs = _interaction_observation(nav)
+            if isinstance(nav, list) and not nav:
+                nav_ok = False  # an empty primary navigation is a real failure
+            checks.append(_check("nav_navigation", nav_ok, json.dumps(nav), nav_refs, route))
         for vp in VIEWPORTS:
             o = (r.get("viewports") or {}).get(str(vp))
             checks.append(_check("reflow", None if o is None else not o["overflow"], json.dumps(o), ("req.responsive.reflow",),
@@ -135,11 +161,16 @@ def interpret(raw: dict, routes: list[str], shot_hashes: dict[str, str]) -> tupl
         ok = None if stops is None else bool(stops) and "skip" in stops[0]["cls"] and all(s["outline"] or s["shadow"] for s in stops)
         checks.append(_check("keyboard_focus", ok, f"{len(stops or [])} stops; first={stops[0] if stops else None}",
                              ("req.keyboard.focus",), route))
-        checks.append(_check("console_clean", not r.get("console"), json.dumps(r.get("console", []))[:600],
-                             ("req.console.clean",), route))
-        checks.append(_check("no_external_requests", not r.get("aborted"), json.dumps(r.get("aborted", [])),
-                             ("req.network.none",), route))
-        aborted += r.get("aborted", [])
+        console = r.get("console")
+        requests = r.get("aborted")
+        console_observed = isinstance(console, list) and all(isinstance(item, str) for item in console)
+        requests_observed = isinstance(requests, list) and all(isinstance(item, str) for item in requests)
+        checks.append(_check("console_clean", not console if console_observed else None,
+                             json.dumps(console)[:600], ("req.console.clean",), route))
+        checks.append(_check("no_external_requests", not requests if requests_observed else None,
+                             json.dumps(requests)[:600], ("req.network.none",), route))
+        if requests_observed:
+            aborted += requests
         found = colour_findings(dom.get("colours") or [])
         checks.append(_check("psem_colours", None if not dom.get("colours") else not found,
                              "; ".join(found) or f"{len(dom.get('colours') or [])} pairings, all legal",
@@ -174,8 +205,14 @@ def verify_build(out_dir: Path, *, routes: list[str], expected_output_hash: str,
         env = {"NODE_PATH": node_path}
         if browsers:
             env["PLAYWRIGHT_BROWSERS_PATH"] = browsers
+        # The chroot exposes only these exact read-only inputs and the chosen evidence directory.
+        readonly = [RUNNER, out_dir]
+        if browsers:
+            readonly.append(Path(browsers))
+        if node_path and not Path(node_path).is_relative_to(WEB_NODE_MODULES):
+            readonly.append(Path(node_path))
         argv = wrap([iso.node or "node", str(RUNNER), str(work / "config.json")], cwd=work, home=work, node=iso.node or "node",
-                    timeout_s=RUNNER_TIMEOUT_S, extra_env=env)
+                    timeout_s=RUNNER_TIMEOUT_S, extra_env=env, readonly_paths=tuple(readonly), writable_paths=(ev,))
         try:
             proc = subprocess.run(argv, capture_output=True, text=True, timeout=RUNNER_TIMEOUT_S + 30)
             code, log = proc.returncode, proc.stdout + proc.stderr
@@ -191,7 +228,7 @@ def verify_build(out_dir: Path, *, routes: list[str], expected_output_hash: str,
     results = {c.result for c in checks}
     status = "FAILED" if "FAIL" in results else ("PASSED" if results == {"PASS"} else "BLOCKED")
     return BrowserVerification(status=status, build_output_hash=actual,
-                               browser={**raw.get("browser", {}), "isolation": "unshare -rmn; repo read-only; env -i",
+                               browser={**raw.get("browser", {}), "isolation": "user, mount, pid and network namespaces; minimal chroot; capabilities dropped; env -i",
                                         "origin": "http://amc-preview.invalid (route-fulfilled from the export)"},
                                checks=tuple(checks), dom_evidence=evidence, screenshots=shots, blocked_requests=aborted)
 

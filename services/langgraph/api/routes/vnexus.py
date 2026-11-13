@@ -93,11 +93,98 @@ def _blocked(code: str, message: str, detail: dict) -> JSONResponse:
                                                                               "details": detail}})
 
 
+_REPLAY_PROJECT_OPERATIONS = frozenset({
+    "production.identity", "production.video", "production.experience", "production.art_direction", "campaign.plan",
+    "brandbook.build", "directions.intent", "directions.generate", "directions.import", "directions.review", "directions.reconstruct",
+})
+_REPLAY_OPERATIONS = _REPLAY_PROJECT_OPERATIONS | frozenset({
+    "brand.create", "genome.create", "genome.submit", "genome.revert", "branch.fork", "branch.merge", "branch.submit",
+})
+
+
+def _replay_field(payload: dict, name: str) -> str:
+    value = payload.get(name)
+    if not isinstance(value, str) or not value:
+        raise HTTPException(status_code=409, detail=f"REPLAY_SCOPE_INVALID: missing {name}")
+    return value
+
+
+def _replay_brand(principal: Principal, brand_id: str) -> dict:
+    brand = service.brand_for(principal, brand_id)
+    service.authorize(principal, brand["owner_project_id"])
+    return brand
+
+
+def _authorize_replay(principal: Principal, operation: str, payload: dict) -> None:
+    """Recheck present authority before disclosing a historical idempotency receipt.
+
+    Resolve project scope from persisted resources rather than trusting a
+    caller's claimed access. Never settle approvals, regenerate assets or
+    dispatch effects while replaying. New operations fail closed until their
+    replay authorization is explicitly defined here.
+    """
+    if operation == "brand.create":
+        service.authorize(principal, _replay_field(payload, "owner_project_id"), write=True)
+        brand = service.brand_for(principal, _replay_field(payload, "brand_id"))
+        service.authorize(principal, brand["owner_project_id"], write=True)
+    elif operation == "genome.create":
+        brand = _replay_brand(principal, _replay_field(payload, "brand_id"))
+        project = service.scope_project(brand, Scope(_replay_field(payload, "scope")), _replay_field(payload, "scope_ref"))
+        service.authorize(principal, project, write=True)
+    elif operation in {"genome.submit", "genome.revert"}:
+        version = service.get_version(principal, _replay_field(payload, "version_id"), settle=False)
+        service.authorize(principal, version["project_id"], write=True)
+        _replay_brand(principal, version["brand_id"])
+    elif operation == "branch.fork":
+        version = service.get_version(principal, _replay_field(payload, "base_version_id"), settle=False)
+        if version["brand_id"] != _replay_field(payload, "brand_id"):
+            raise HTTPException(status_code=409, detail="REPLAY_SCOPE_INVALID: branch brand changed")
+        service.authorize(principal, version["project_id"], write=True)
+        _replay_brand(principal, version["brand_id"])
+        if payload.get("parent_branch_id"):
+            parent = creative_service._branch(principal, _replay_field(payload, "parent_branch_id"))
+            service.authorize(principal, parent["project_id"], write=True)
+            _replay_brand(principal, parent["brand_id"])
+    elif operation in {"branch.merge", "branch.submit"}:
+        fields = ("branch_id", "other_branch_id") if operation == "branch.merge" else ("branch_id",)
+        for name in fields:
+            branch = creative_service._branch(principal, _replay_field(payload, name))
+            service.authorize(principal, branch["project_id"], write=True)
+            _replay_brand(principal, branch["brand_id"])
+    elif operation in _REPLAY_PROJECT_OPERATIONS:
+        brand_id, project = _replay_field(payload, "brand_id"), _replay_field(payload, "project_id")
+        # Historical output may incorporate the brand's owner-project data,
+        # even when it was produced into a different, narrower project scope.
+        brand = _replay_brand(principal, brand_id)
+        service.authorize(principal, project, write=True)
+        if operation.startswith("directions.") and operation != "directions.intent":
+            intent = directions.load_intent(principal, brand_id, _replay_field(payload, "intent_id"), project, write=True)
+            scope, scope_ref = Scope(intent.scope), intent.scope_ref
+        else:
+            scope = Scope(_replay_field(payload, "scope"))
+            scope_ref = _replay_field(payload, "scope_ref")
+        service.authorize(principal, service.scope_project(brand, scope, scope_ref))
+        if payload.get("preview_version_id"):
+            service.get_version(principal, _replay_field(payload, "preview_version_id"), settle=False)
+    else:
+        raise HTTPException(status_code=409, detail="REPLAY_AUTHORIZATION_UNSUPPORTED: operation requires explicit review")
+
+
 def idempotent(principal: Principal, operation: str, key: str, payload: dict, run: Callable[[], dict]) -> dict:
+    if operation not in _REPLAY_OPERATIONS:
+        raise HTTPException(status_code=409, detail="REPLAY_AUTHORIZATION_UNSUPPORTED: operation requires explicit review")
     scope = f"{principal.tenant_id}:{principal.user_id}:vnexus.{operation}"
     reservation = reserve_idempotency(scope, key, hash_payload(payload))
     if reservation["state"] == "replay":
-        return reservation["record"]["result"]
+        _authorize_replay(principal, operation, payload)
+        result = reservation["record"]["result"]
+        if operation in {"production.identity", "production.video"} and (
+                not isinstance(result, dict) or result.get("qc_projection_version") != fabric_service.QC_PROJECTION_VERSION):
+            # Retain old receipts for audit, but do not replay a legacy Q4 pass
+            # as current evidence. A fresh, separately authorized request is
+            # needed; this branch performs no generation or external effect.
+            raise HTTPException(status_code=409, detail="LEGACY_QC_RECEIPT_RECHECK_REQUIRED: request a fresh review with a new key")
+        return result
     if reservation["state"] in {"in_progress", "conflict"}:
         raise HTTPException(status_code=409, detail="Idempotency-Key is in use or was reused with different input")
     try:
@@ -211,7 +298,7 @@ def edit_version(version_id: str, req: VersionEdit, principal: Principal = Depen
 @router.get("/versions/{version_id}/readiness")
 @vnexus_errors
 def readiness(version_id: str, principal: Principal = Depends(get_principal)) -> dict:
-    return {"readiness": service.readiness(service.get_version(principal, version_id, settle=False))}
+    return {"readiness": service.readiness(service.get_version(principal, version_id, settle=False), principal=principal)}
 
 
 @router.post("/versions/{version_id}/submit")
@@ -560,6 +647,8 @@ class VideoProduction(ProductionTarget):
 @vnexus_errors
 def produce_identity(brand_id: str, req: IdentityProduction, idempotency_key: str = Header(..., alias="Idempotency-Key"),
                      principal: Principal = Depends(get_principal)) -> dict:
+    # Replays are historical receipts, not a bypass of current project access.
+    service.authorize(principal, req.project_id, write=True)
     payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
     return idempotent(principal, "production.identity", idempotency_key, payload, lambda: production.produce_identity(
         principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, deliverables=tuple(req.deliverables),
@@ -588,6 +677,7 @@ def produce_art_direction(brand_id: str, req: ArtDirectionProduction, idempotenc
 @vnexus_errors
 def produce_video(brand_id: str, req: VideoProduction, idempotency_key: str = Header(..., alias="Idempotency-Key"),
                   principal: Principal = Depends(get_principal)) -> dict:
+    service.authorize(principal, req.project_id, write=True)
     payload = {"brand_id": brand_id, **req.model_dump(mode="json")}
     return idempotent(principal, "production.video", idempotency_key, payload, lambda: production.produce_video(
         principal, brand_id, scope=req.scope, scope_ref=req.scope_ref, project_id=req.project_id, brief=req.brief,

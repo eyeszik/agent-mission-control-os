@@ -1,0 +1,279 @@
+{
+  "request": {
+    "brand_id": "brand-cc47e3a3",
+    "mapping": {
+      "audience_key": "strategy.audience.primary",
+      "cta_label_key": "verbal.messaging.cta",
+      "cta_target": "contact#connect",
+      "images": [
+        {
+          "alt_key": "verbal.messaging.home_image_alt",
+          "asset_id": "workflow-plate",
+          "motif_seed": 17
+        }
+      ],
+      "locale": "en",
+      "offering_key": "strategy.positioning.statement",
+      "organization_key": "verbal.messaging.organization",
+      "pages": [
+        {
+          "description_key": "verbal.messaging.index_description",
+          "sections": [
+            {
+              "anchor": null,
+              "body_key": "verbal.messaging.index_body",
+              "cta": true,
+              "heading_key": "verbal.messaging.index_heading",
+              "image": "workflow-plate",
+              "kind": "hero",
+              "label_key": null
+            }
+          ],
+          "slug": "index",
+          "title_key": "verbal.messaging.index_title"
+        },
+        {
+          "description_key": "verbal.messaging.services_description",
+          "sections": [
+            {
+              "anchor": null,
+              "body_key": "verbal.messaging.services_body",
+              "cta": true,
+              "heading_key": "verbal.messaging.services_heading",
+              "image": null,
+              "kind": "hero",
+              "label_key": null
+            }
+          ],
+          "slug": "services",
+          "title_key": "verbal.messaging.services_title"
+        },
+        {
+          "description_key": "verbal.messaging.process_description",
+          "sections": [
+            {
+              "anchor": null,
+              "body_key": "verbal.messaging.process_body",
+              "cta": true,
+              "heading_key": "verbal.messaging.process_heading",
+              "image": null,
+              "kind": "hero",
+              "label_key": null
+            }
+          ],
+          "slug": "process",
+          "title_key": "verbal.messaging.process_title"
+        },
+        {
+          "description_key": "verbal.messaging.about_description",
+          "sections": [
+            {
+              "anchor": null,
+              "body_key": "verbal.messaging.about_body",
+              "cta": true,
+              "heading_key": "verbal.messaging.about_heading",
+              "image": null,
+              "kind": "hero",
+              "label_key": null
+            }
+          ],
+          "slug": "about",
+          "title_key": "verbal.messaging.about_title"
+        },
+        {
+          "description_key": "verbal.messaging.contact_description",
+          "sections": [
+            {
+              "anchor": "connect",
+              "body_key": "verbal.messaging.contact_body",
+              "cta": false,
+              "heading_key": "verbal.messaging.contact_heading",
+              "image": null,
+              "kind": "contact",
+              "label_key": null
+            }
+          ],
+          "slug": "contact",
+          "title_key": "verbal.messaging.contact_title"
+        },
+        {
+          "description_key": "verbal.messaging.workflow_diagnostic_description",
+          "sections": [
+            {
+              "anchor": null,
+              "body_key": "verbal.messaging.workflow_diagnostic_body",
+              "cta": true,
+              "heading_key": "verbal.messaging.workflow_diagnostic_heading",
+              "image": null,
+              "kind": "hero",
+              "label_key": null
+            }
+          ],
+          "slug": "workflow-diagnostic",
+          "title_key": "verbal.messaging.workflow_diagnostic_title"
+        },
+        {
+          "description_key": "verbal.messaging.implementation_planning_description",
+          "sections": [
+            {
+              "anchor": null,
+              "body_key": "verbal.messaging.implementation_planning_body",
+              "cta": true,
+              "heading_key": "verbal.messaging.implementation_planning_heading",
+              "image": null,
+              "kind": "hero",
+              "label_key": null
+            }
+          ],
+          "slug": "implementation-planning",
+          "title_key": "verbal.messaging.implementation_planning_title"
+        }
+      ],
+      "schema_version": "amc-brand-website-map/v1",
+      "seed": 17,
+      "tagline_key": "verbal.messaging.tagline"
+    },
+    "site_id": "northline"
+  },
+  "response": {
+    "brand": {
+      "brand_id": "brand-cc47e3a3",
+      "keys_used": [
+        "strategy.audience.primary",
+        "strategy.positioning.statement",
+        "verbal.content_rules.forbidden_phrases",
+        "verbal.messaging.about_body",
+        "verbal.messaging.about_description",
+        "verbal.messaging.about_heading",
+        "verbal.messaging.about_title",
+        "verbal.messaging.contact_body",
+        "verbal.messaging.contact_description",
+        "verbal.messaging.contact_heading",
+        "verbal.messaging.contact_title",
+        "verbal.messaging.cta",
+        "verbal.messaging.home_image_alt",
+        "verbal.messaging.implementation_planning_body",
+        "verbal.messaging.implementation_planning_description",
+        "verbal.messaging.implementation_planning_heading",
+        "verbal.messaging.implementation_planning_title",
+        "verbal.messaging.index_body",
+        "verbal.messaging.index_description",
+        "verbal.messaging.index_heading",
+        "verbal.messaging.index_title",
+        "verbal.messaging.organization",
+        "verbal.messaging.process_body",
+        "verbal.messaging.process_description",
+        "verbal.messaging.process_heading",
+        "verbal.messaging.process_title",
+        "verbal.messaging.services_body",
+        "verbal.messaging.services_description",
+        "verbal.messaging.services_heading",
+        "verbal.messaging.services_title",
+        "verbal.messaging.tagline",
+        "verbal.messaging.workflow_diagnostic_body",
+        "verbal.messaging.workflow_diagnostic_description",
+        "verbal.messaging.workflow_diagnostic_heading",
+        "verbal.messaging.workflow_diagnostic_title",
+        "visual.color.accent",
+        "visual.color.accent_2",
+        "visual.color.ink",
+        "visual.color.muted",
+        "visual.color.paper"
+      ],
+      "layers": [
+        {
+          "approval_id": "a9d00226-7ad1-4d25-978b-da8117979281",
+          "content_hash": "f26d5b30374471ae30d132a25cdc44907dc31e0c2b9a1705d5080fc1c47455b2",
+          "scope": "brand",
+          "scope_ref": "brand-cc47e3a3",
+          "version": 1,
+          "version_id": "gv-627eda471668495ba95ffd9683b82c23"
+        }
+      ],
+      "primary_accent": "signal_red",
+      "resolution_hash": "23105dba5922fb8546dfbaa17d54bdf270f2dbf97bf6f9aa84f2b9506dcc7e6b",
+      "unmapped_keys": [
+        "verbal.voice.tone"
+      ]
+    },
+    "external_effects": "none",
+    "handoff": {
+      "artifact_id": "art-prj-vnx-4d038ad2-foundry-uw-73c69d4c89b4c085-binding",
+      "content_hash": "ce88479f5b4a51188e1c4c74cc9269c20e87c440d0cc62bdbaf8b0791acbe33e",
+      "version": 1
+    },
+    "site": {
+      "compile_coverage": {
+        "coverage": 0.0208,
+        "mandatory_applicable": 48,
+        "mandatory_resolved": 1,
+        "unresolved_until_rendered": 47
+      },
+      "external_effects": "none",
+      "job_id": "ucpo-6fec395d5b19f803335e75663d13999b8cd17061",
+      "job_state": "SCHEDULED",
+      "requirements": 48,
+      "site_id": "northline",
+      "source_files": 21,
+      "source_tree": "ac2763d3e7cc73ef6747cfee1bb10cfd4810f2425a81d6eef837e2222c587133",
+      "stages": {
+        "brief": {
+          "action": "created",
+          "artifact_id": "art-prj-vnx-4d038ad2-foundry-ucpo-northline-brief",
+          "artifact_type": "product_spec",
+          "invalidated": [],
+          "role": "product_manager",
+          "version": 1
+        },
+        "genome": {
+          "action": "created",
+          "artifact_id": "art-prj-vnx-4d038ad2-foundry-ucpo-northline-genome",
+          "artifact_type": "design_system_spec",
+          "invalidated": [],
+          "role": "design_lead",
+          "version": 1
+        },
+        "image-workflow-plate": {
+          "action": "created",
+          "artifact_id": "art-prj-vnx-4d038ad2-foundry-ucpo-northline-image-workflow-plate",
+          "artifact_type": "media_asset",
+          "invalidated": [],
+          "role": "creative_director",
+          "version": 1
+        },
+        "requirements": {
+          "action": "created",
+          "artifact_id": "art-prj-vnx-4d038ad2-foundry-ucpo-northline-requirements",
+          "artifact_type": "product_spec",
+          "invalidated": [],
+          "role": "product_manager",
+          "version": 1
+        },
+        "site_ir": {
+          "action": "created",
+          "artifact_id": "art-prj-vnx-4d038ad2-foundry-ucpo-northline-site-ir",
+          "artifact_type": "website_lockup_spec",
+          "invalidated": [],
+          "role": "design_lead",
+          "version": 1
+        },
+        "source": {
+          "action": "created",
+          "artifact_id": "art-prj-vnx-4d038ad2-foundry-ucpo-northline-source",
+          "artifact_type": "app_build_spec",
+          "invalidated": [],
+          "role": "implementation_lead",
+          "version": 1
+        },
+        "tokens": {
+          "action": "created",
+          "artifact_id": "art-prj-vnx-4d038ad2-foundry-ucpo-northline-tokens",
+          "artifact_type": "design_token_set",
+          "invalidated": [],
+          "role": "design_lead",
+          "version": 1
+        }
+      }
+    }
+  }
+}

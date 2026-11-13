@@ -52,8 +52,9 @@ def open_artifact_approval(
     from services.langgraph.persistence.runs import create_run_record, get_run_record
 
     for existing in list_approvals_for_subject_refs(project_id, [artifact_id]):
-        if existing.get("status") == "pending" and existing.get("subject_hash") != content_hash:
-            mark_approval_stale(existing["approval_id"], "superseded: artifact content changed")
+        if existing.get("status") == "pending" and (existing.get("subject_hash") != content_hash
+                or existing.get("subject_version_ref") != str(version)):
+            mark_approval_stale(existing["approval_id"], "superseded: artifact version or content changed")
     run_id = approval_run_id(mission_id)
     if get_run_record(run_id) is None:
         create_run_record(run_id, tenant_id, project_id, run_pipeline, "needs_approval", {
@@ -61,7 +62,11 @@ def open_artifact_approval(
             "artifact_id": artifact_id, "artifact_version": version, "artifact_hash": content_hash, **(metadata or {}),
         })
     for existing in get_approvals_for_run(run_id):
-        if existing.get("status") == "pending" and existing.get("subject_hash") == content_hash:
+        binding = (existing.get("tenant_id"), existing.get("project_id"), existing.get("subject_ref"),
+                   existing.get("subject_version_ref"), existing.get("subject_hash"),
+                   existing.get("subject_type"), existing.get("policy_version"))
+        expected = (tenant_id, project_id, artifact_id, str(version), content_hash, subject_type, policy_version)
+        if existing.get("status") == "pending" and binding == expected:
             return existing
     approval = create_approval_request(
         run_id, tenant_id, project_id, reason, None, subject_type=subject_type, subject_ref=artifact_id,
@@ -99,6 +104,8 @@ def artifact_release_verdict(
         reasons.append("SIMULATION_NOT_RELEASABLE")
     if not verification_passed:
         reasons.append("VERIFICATION_NOT_PASSED")
+    if not artifact_id or verified_version is None or not verified_hash or not tenant_id or not project_id:
+        reasons.append("BINDING_INCOMPLETE")
     head = get_artifact(artifact_id) if artifact_id else None
     head_hash = head.get("content_hash") if head else None
     head_version = int(head["version"]) if head else None
@@ -108,6 +115,13 @@ def artifact_release_verdict(
         reasons.append("VERIFICATION_STALE: the artifact changed after it was verified")
     if head is not None and project_id is not None and head.get("project_id") != project_id:
         reasons.append("CROSS_PROJECT_ARTIFACT")
+    if head is not None and tenant_id is not None and head.get("tenant_id") != tenant_id:
+        reasons.append("CROSS_TENANT_ARTIFACT")
+    if head is not None and head.get("status") in {"invalidated", "review_required"}:
+        reasons.append("ARTIFACT_INVALIDATED")
+    if head is not None and head.get("subtype") == "ucpo.release_proof":
+        from services.langgraph.agency.ucpo.brand_web import proof_freshness
+        reasons.extend(proof_freshness(head, approval_id=approval_id))
     approval = get_approval(approval_id) if approval_id else None
     if approval is None:
         reasons.append("NO_APPROVAL")
@@ -123,13 +137,24 @@ def artifact_release_verdict(
             reasons.append("APPROVAL_REJECTED")
         if approval.get("subject_hash") != head_hash:
             reasons.append("SUBJECT_HASH_MISMATCH")
+        if approval.get("subject_ref") != artifact_id:
+            reasons.append("SUBJECT_REF_MISMATCH")
+        if head_version is None or approval.get("subject_version_ref") != str(head_version):
+            reasons.append("SUBJECT_VERSION_MISMATCH")
+        if head is not None and head.get("subtype") == "ucpo.release_proof":
+            from services.langgraph.agency.ucpo.service import APPROVAL_POLICY
+            if (approval.get("subject_type"), approval.get("policy_version")) != ("WEBSITE_RELEASE_PROOF", APPROVAL_POLICY):
+                reasons.append("APPROVAL_PURPOSE_MISMATCH")
         run = get_run_record(approval["run_id"]) if approval.get("run_id") else None
         initiator = run_initiator(run) if run else None
-        if status == "resolved" and decision == "approve" and not self_approval_allowed():
-            if initiator is None:
-                reasons.append("INITIATOR_UNKNOWN")
-            elif approval.get("reviewer") == initiator:
-                reasons.append("SEPARATION_OF_DUTIES")
+        if status == "resolved" and decision == "approve":
+            if not approval.get("reviewer"):
+                reasons.append("REVIEWER_UNKNOWN")
+            if not self_approval_allowed():
+                if initiator is None:
+                    reasons.append("INITIATOR_UNKNOWN")
+                elif approval.get("reviewer") == initiator:
+                    reasons.append("SEPARATION_OF_DUTIES")
     return ReleaseVerdict(allowed=not reasons, reasons=tuple(reasons), artifact_id=artifact_id,
                           artifact_version=head_version, artifact_hash=head_hash,
                           approval_id=(approval or {}).get("approval_id"))

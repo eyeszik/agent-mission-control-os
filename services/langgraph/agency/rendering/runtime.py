@@ -24,9 +24,16 @@ SOURCE = ROOT / 'packages/creative-renderer/worker.mjs'
 ADAPTER_VERSION = 'rough-svg/v1'
 ADAPTERS = {RenderEngineId.ROUGH: ADAPTER_VERSION, RenderEngineId.PAPER: 'paper-path-svg/v1',
             RenderEngineId.SVG: 'svg-path-array/v1'}
+# Exactly the files ``packages/creative-renderer/build.mjs`` emits. The Node helpers are
+# copied verbatim from the pinned ``paper`` package, whose ``dist/node`` ships self.js,
+# extend.js, canvas.js and browser.js -- there is no ``xml.js`` in paper 0.17.0. Listing a
+# file the dependency does not ship made ``fingerprint()`` fall back to the all-zero hash on
+# any clean build, so the worker looked unbuilt and every real media test skipped as
+# MEDIA_RUNTIME_UNAVAILABLE. The worker only imports ``paper/dist/paper-core.js``, which is
+# bundled into ``paper.cjs``; nothing reads these helpers by name.
 BUNDLE_FILES = ('worker.mjs', 'rough.cjs', 'LICENSE.roughjs', 'paper.cjs', 'LICENSE.paper',
-                'node/self.js', 'node/extend.js', 'node/canvas.js', 'node/xml.js', 'node/package.json',
-                'svg.cjs', 'LICENSE.svgjs')
+                'node/self.js', 'node/extend.js', 'node/canvas.js', 'node/browser.js',
+                'node/package.json', 'svg.cjs', 'LICENSE.svgjs')
 
 
 def fingerprint() -> dict:

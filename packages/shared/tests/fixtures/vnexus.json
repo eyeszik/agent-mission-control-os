@@ -953,16 +953,14 @@
           "detail": "1 geometry element(s)",
           "level": "Q3_NONBLANK",
           "passed": true
-        },
-        {
-          "check": "source_rights",
-          "detail": "procedural only",
-          "level": "Q4_RIGHTS",
-          "passed": true
         }
       ],
       "inconclusive": [],
       "passed": true,
+      "release_decision": "NOT_EVALUATED",
+      "rights_note": "No verified source inventory or licence/implicit-font clearance is bound to this job.",
+      "rights_status": "NOT_MEASURED",
+      "scope": "TECHNICAL_FORMAT_CHECKS_ONLY",
       "simulated": false,
       "verdict": "PASSED"
     },

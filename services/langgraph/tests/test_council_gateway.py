@@ -18,6 +18,7 @@ from services.langgraph.tests.council_support import (
     council,  # noqa: F401 - fixture
     decide,
     gated_mission,
+    isolated_python,
     key,
 )
 
@@ -137,13 +138,14 @@ _NON_EXECUTABLE.chmod(0o644)
 
 
 @pytest.fixture
-def mcp_server(monkeypatch, council):  # after ``council``, which clears AMC_MCP_SERVERS  # noqa: F811
+def mcp_server(monkeypatch, council, tmp_path):  # after ``council``, which clears AMC_MCP_SERVERS  # noqa: F811
     pytest.importorskip("mcp")
     pytest.importorskip("jsonschema")
     from services.langgraph.agency.council.mcp_client import file_sha256
+    interpreter = isolated_python(tmp_path)
     monkeypatch.setenv("AMC_MCP_SERVERS", json.dumps({"testsrv": {
-        "command": sys.executable, "args": ["-I", str(SERVER)],
-        "pins": {sys.executable: file_sha256(sys.executable), str(SERVER): file_sha256(str(SERVER))},
+        "command": interpreter, "args": ["-I", str(SERVER)],
+        "pins": {interpreter: file_sha256(interpreter), str(SERVER): file_sha256(str(SERVER))},
         "tools": {"echo": {"sensitivity": "READ"}, "fail": {"sensitivity": "READ"},
                   "slow": {"sensitivity": "READ", "timeout_s": 1}, "run_shell": {"sensitivity": "SHELL"},
                   "absent": {"sensitivity": "READ"}}},
@@ -155,7 +157,10 @@ def mcp_server(monkeypatch, council):  # after ``council``, which clears AMC_MCP
 def test_mcp_tools_are_allowlisted_only(mcp_server, council):  # noqa: F811
     body = client.get("/missions/tools").json()
     ids = {t["tool_id"] for t in body["tools"]}
-    assert {"mcp.testsrv.echo", "mcp.testsrv.run_shell"} <= ids
+    # Surface the operator-facing refusal reason on failure. Without this the only
+    # signal is "testsrv is missing from the allowlist", which does not say why the
+    # configuration was rejected.
+    assert {"mcp.testsrv.echo", "mcp.testsrv.run_shell"} <= ids, body["mcp_config_errors"]
     assert "mcp.testsrv.hidden_admin" not in ids
     assert any("relative: command must be an absolute path" in e for e in body["mcp_config_errors"])
 
@@ -172,9 +177,10 @@ def _tampered_server(monkeypatch, tmp_path, mcp_client):
     marker = tmp_path / "tampered-ran"
     copy = tmp_path / "server.py"
     copy.write_text(SERVER.read_text())
+    interpreter = isolated_python(tmp_path)
     monkeypatch.setenv("AMC_MCP_SERVERS", json.dumps({"tampered": {
-        "command": sys.executable, "args": ["-I", str(copy)],
-        "pins": {sys.executable: mcp_client.file_sha256(sys.executable), str(copy): mcp_client.file_sha256(str(copy))},
+        "command": interpreter, "args": ["-I", str(copy)],
+        "pins": {interpreter: mcp_client.file_sha256(interpreter), str(copy): mcp_client.file_sha256(str(copy))},
         "tools": {"echo": {"sensitivity": "READ"}}}}))
     servers, errors = mcp_client.configured_servers()
     assert "tampered" in servers and not errors

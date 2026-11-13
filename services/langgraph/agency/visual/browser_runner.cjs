@@ -11,6 +11,13 @@
 const fs = require("fs");
 const path = require("path");
 
+function safeOutputId(value) {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{1,80}$/.test(value)) {
+    throw new Error("UNSAFE_OUTPUT_ID");
+  }
+  return value;
+}
+
 function loadPlaywright() {
   const candidates = [process.env.AMC_PLAYWRIGHT_CORE, "playwright-core", "@playwright/test"].filter(Boolean);
   const searchPaths = [process.cwd(), path.resolve(__dirname, "../../../../apps/web")];
@@ -198,6 +205,68 @@ async function runStep(page, step) {
   }
 }
 
+// Playwright prints through chrome-headless-shell by default, and that binary
+// does not use the compositor's print pipeline at all. The full Chromium build
+// fails with "Page.printToPDF: Printing failed" inside this chroot while
+// rasterizing and measuring the very same page successfully, so print takes the
+// shell when the caller resolved one and falls back to the caller's binary when
+// it did not (a host that installed only chromium). The path is computed by the
+// Python side, which already knows the browser directory; guessing it from the
+// executable name here would be a second, weaker source of truth.
+async function printDocument(pw, spec, outDir) {
+  const deadline = (spec.pdf_timeout_ms || 45000);
+  const shell = spec.headless_shell_path && fs.existsSync(spec.headless_shell_path)
+    ? spec.headless_shell_path : null;
+  const job = async () => {
+    const b = await pw.chromium.launch({
+      headless: true,
+      executablePath: shell || spec.executable_path || undefined,
+      // --no-zygote is the fix for the print path specifically. Chromium's
+      // zygote forks each renderer; inside this chroot the fork fails with
+      // "ZygoteCommunication::ForkRequest()" and takes the whole browser with
+      // it. Rasterization and layout never need a new zygote child, writing a
+      // PDF does. With --no-sandbox already set the zygote provides no
+      // isolation here, so it is pure overhead that can fail: renderers are
+      // launched directly instead.
+      args: ["--no-sandbox", "--no-zygote", "--disable-dev-shm-usage", "--use-gl=angle",
+             "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
+    });
+    try {
+      const ctx = await b.newContext({ deviceScaleFactor: 1 });
+      await ctx.route("**/*", (route) => {
+        const url = route.request().url();
+        if (url.startsWith("data:") || url === "about:blank") return route.continue();
+        return route.abort();
+      });
+      const pg = await ctx.newPage();
+      await pg.setContent(spec.html);
+      await pg.emulateMedia({ media: "print" });
+      await pg.pdf({ path: path.join(outDir, "document.pdf"), width: `${spec.width_px}px`,
+                     height: `${spec.height_px}px`, printBackground: true,
+                     margin: { top: "0", right: "0", bottom: "0", left: "0" } });
+      return {
+        pdf: { capture: "document.pdf",
+               pages: await pg.evaluate(() => document.querySelectorAll("[data-page]").length || 1) },
+      };
+    } finally {
+      await Promise.race([b.close().catch(() => {}), new Promise((r) => setTimeout(r, 3000))]);
+    }
+  };
+  let timer;
+  try {
+    return await Promise.race([
+      job(),
+      new Promise((_resolve, reject) => {
+        timer = setTimeout(() => reject(new Error(`PRINT_TIMEOUT after ${deadline}ms`)), deadline);
+      }),
+    ]);
+  } catch (err) {
+    return { pdf_err: String(err && err.message ? err.message : err) };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function main() {
   const [specPath, outDir] = process.argv.slice(2);
   const spec = JSON.parse(fs.readFileSync(specPath, "utf8"));
@@ -215,7 +284,14 @@ async function main() {
   const browser = await pw.chromium.launch({
     headless: true,
     executablePath: spec.executable_path || undefined,
-    args: ["--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
+    // --disable-dev-shm-usage keeps the compositor's shared memory in TMPDIR
+    // instead of /dev/shm. Chromium's print pipeline is the most sensitive
+    // consumer: in a container with a small or freshly-mounted /dev/shm,
+    // Page.printToPDF fails with a bare "Printing failed" while rasterization
+    // and layout measurement succeed on the very same page. That asymmetry is
+    // what identified this, and the flag is the standard container remedy.
+    args: ["--no-sandbox", "--disable-dev-shm-usage", "--use-gl=angle", "--use-angle=swiftshader",
+           "--enable-unsafe-swiftshader"],
   });
   const result = { mode: spec.mode, blocked_requests: [], browser_version: browser.version() };
   try {
@@ -252,6 +328,38 @@ async function main() {
       result.raster = await page.evaluate(() => window.__result);
       await page.screenshot({ path: path.join(outDir, "raster.png"), clip: { x: 0, y: 0, width: spec.width, height: spec.height }, omitBackground: true });
       result.raster.capture = "raster.png";
+    } else if (spec.mode === "text_layout") {
+      // Rebuild only the supplied text attributes as DOM text nodes; never
+      // insert untrusted SVG markup or treat the copy as HTML/script.
+      await page.setViewportSize({ width: spec.width, height: spec.height });
+      await page.setContent('<!doctype html><html><body style="margin:0"><svg id="text" xmlns="http://www.w3.org/2000/svg" style="display:block"></svg></body></html>');
+      result.text_layout = await page.evaluate(async ({width, height, margin, elements}) => {
+        const ns = "http://www.w3.org/2000/svg", svg = document.getElementById("text");
+        svg.setAttribute("width", String(width)); svg.setAttribute("height", String(height));
+        svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        const nodes = elements.map((item) => {
+          const el = document.createElementNS(ns, "text");
+          for (const [attr, value] of Object.entries({x:item.x, y:item.y, "font-size":item.size, "font-weight":item.weight,
+              "font-family":item.family, "text-anchor":item.anchor, "letter-spacing":item.tracking})) el.setAttribute(attr, String(value));
+          if (item.rotation) el.setAttribute("transform", `rotate(${item.rotation} ${item.x} ${item.y})`);
+          el.textContent = item.text;
+          svg.appendChild(el);
+          return el;
+        });
+        if (document.fonts) await document.fonts.ready;
+        const boxes = nodes.map((node, index) => {
+          const r = node.getBoundingClientRect();
+          return { index, role:elements[index].role, left:r.left, top:r.top, right:r.right, bottom:r.bottom };
+        });
+        const inset = Math.min(width, height) * margin;
+        const outside = boxes.filter((b) => b.left < inset - 1 || b.top < inset - 1 || b.right > width - inset + 1 || b.bottom > height - inset + 1).map((b) => b.index);
+        const overlaps = [];
+        for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+          const a = boxes[i], b = boxes[j];
+          if (Math.min(a.right,b.right) - Math.max(a.left,b.left) > 1 && Math.min(a.bottom,b.bottom) - Math.max(a.top,b.top) > 1) overlaps.push([i,j]);
+        }
+        return { boxes, outside, overlaps };
+      }, spec);
     } else if (spec.mode === "frames") {
       await page.setViewportSize({ width: spec.width, height: spec.height });
       result.frames = [];
@@ -263,11 +371,15 @@ async function main() {
         result.frames.push({ file, complete: r.complete });
       }
     } else if (spec.mode === "pdf") {
-      await page.setContent(spec.html);
-      await page.emulateMedia({ media: "print" });
-      await page.pdf({ path: path.join(outDir, "document.pdf"), width: `${spec.width_px}px`, height: `${spec.height_px}px`,
-                       printBackground: true, margin: { top: "0", right: "0", bottom: "0", left: "0" } });
-      result.pdf = { capture: "document.pdf", pages: await page.evaluate(() => document.querySelectorAll("[data-page]").length || 1) };
+      // Printing runs in its own browser with its own deadline. Page.printToPDF
+      // in this sandbox does not merely fail: it wedges the whole browser, so
+      // the same process cannot open another tab, and a caller-level timeout
+      // then reports exit 124 with the cause unrecorded. A separate browser
+      // keeps a print fault inside the print path, and the deadline means the
+      // failure is reported as PRINT_TIMEOUT rather than as a killed process.
+      await browser.close().catch(() => {});
+      const printed = await printDocument(pw, spec, outDir);
+      Object.assign(result, printed);
     } else if (spec.mode === "layout") {
       // Measure each [data-page] section: content outside its body box, clipped or too-small text, overlapping
       // blocks, rendered copy text and placed marks. Nothing here decides pass/fail; the caller does.
@@ -312,9 +424,10 @@ async function main() {
       if (spec.capture) {
         result.captures = {};
         for (const p of result.layout) {
-          const file = `page-${p.id}.png`;
-          await page.locator(`section[data-page="${p.id}"]`).screenshot({ path: path.join(outDir, file) });
-          result.captures[p.id] = file;
+          const id = safeOutputId(p.id);
+          const file = `page-${id}.png`;
+          await page.locator(`section[data-page="${id}"]`).screenshot({ path: path.join(outDir, file) });
+          result.captures[id] = file;
         }
       }
     } else if (spec.mode === "experience") {
@@ -339,8 +452,9 @@ async function main() {
           catch (e) { steps.push({ ...step, ok: false, detail: String(e).slice(0, 200) }); }
         }
         const audit = await auditPage(sp);
-        if (scenario.capture) await sp.screenshot({ path: path.join(outDir, `${scenario.id}.png`), fullPage: true });
-        result.scenarios.push({ id: scenario.id, steps, audit, page_errors: errors, capture: scenario.capture ? `${scenario.id}.png` : null,
+        const captureName = scenario.capture ? `${safeOutputId(scenario.id)}.png` : null;
+        if (captureName) await sp.screenshot({ path: path.join(outDir, captureName), fullPage: true });
+        result.scenarios.push({ id: scenario.id, steps, audit, page_errors: errors, capture: captureName,
                                 passed: steps.every((s) => s.ok) && errors.length === 0 });
         await ctx.close();
       }
@@ -348,12 +462,39 @@ async function main() {
       result.error = `UNKNOWN_MODE:${spec.mode}`;
     }
   } finally {
-    await browser.close();
+    // Persist observations before closing. A failed render can leave the
+    // browser wedged -- printToPDF in particular throws and then close() never
+    // returns -- and the runner is killed by its own timeout, so a result.json
+    // written after close() is never written at all. The caller then sees only
+    // an exit code and cannot tell which step failed. Writing first makes the
+    // failure name itself, and the close is best-effort and bounded.
+    try {
+      fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify(result, null, 2));
+    } finally {
+      await Promise.race([
+        browser.close().catch(() => {}),
+        new Promise((resolve) => setTimeout(resolve, 5000)),
+      ]);
+    }
   }
-  fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify(result, null, 2));
+  if (!fs.existsSync(path.join(outDir, "result.json"))) {
+    fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify(result, null, 2));
+  }
 }
 
 main().catch((err) => {
+  // Even a top-level throw should leave a machine-readable result behind.
+  try {
+    const outDir = process.argv[3];
+    if (outDir) {
+      fs.mkdirSync(outDir, { recursive: true });
+      fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify({
+        error: "RUNNER_FAILED", message: String(err && err.message ? err.message : err),
+      }, null, 2));
+    }
+  } catch (_ignored) {
+    // Reporting must never mask the original failure.
+  }
   process.stderr.write(String(err && err.stack ? err.stack : err));
   process.exit(1);
 });

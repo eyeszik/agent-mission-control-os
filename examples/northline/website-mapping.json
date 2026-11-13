@@ -1,0 +1,108 @@
+{
+  "cta_target": "contact#connect",
+  "images": [
+    {
+      "alt_key": "verbal.messaging.home_image_alt",
+      "asset_id": "workflow-plate",
+      "motif_seed": 17
+    }
+  ],
+  "locale": "en",
+  "pages": [
+    {
+      "description_key": "verbal.messaging.index_description",
+      "sections": [
+        {
+          "body_key": "verbal.messaging.index_body",
+          "cta": true,
+          "heading_key": "verbal.messaging.index_heading",
+          "image": "workflow-plate",
+          "kind": "hero"
+        }
+      ],
+      "slug": "index",
+      "title_key": "verbal.messaging.index_title"
+    },
+    {
+      "description_key": "verbal.messaging.services_description",
+      "sections": [
+        {
+          "body_key": "verbal.messaging.services_body",
+          "cta": true,
+          "heading_key": "verbal.messaging.services_heading",
+          "kind": "hero"
+        }
+      ],
+      "slug": "services",
+      "title_key": "verbal.messaging.services_title"
+    },
+    {
+      "description_key": "verbal.messaging.process_description",
+      "sections": [
+        {
+          "body_key": "verbal.messaging.process_body",
+          "cta": true,
+          "heading_key": "verbal.messaging.process_heading",
+          "kind": "hero"
+        }
+      ],
+      "slug": "process",
+      "title_key": "verbal.messaging.process_title"
+    },
+    {
+      "description_key": "verbal.messaging.about_description",
+      "sections": [
+        {
+          "body_key": "verbal.messaging.about_body",
+          "cta": true,
+          "heading_key": "verbal.messaging.about_heading",
+          "kind": "hero"
+        }
+      ],
+      "slug": "about",
+      "title_key": "verbal.messaging.about_title"
+    },
+    {
+      "description_key": "verbal.messaging.contact_description",
+      "sections": [
+        {
+          "anchor": "connect",
+          "body_key": "verbal.messaging.contact_body",
+          "cta": false,
+          "heading_key": "verbal.messaging.contact_heading",
+          "kind": "contact"
+        }
+      ],
+      "slug": "contact",
+      "title_key": "verbal.messaging.contact_title"
+    },
+    {
+      "description_key": "verbal.messaging.workflow_diagnostic_description",
+      "sections": [
+        {
+          "body_key": "verbal.messaging.workflow_diagnostic_body",
+          "cta": true,
+          "heading_key": "verbal.messaging.workflow_diagnostic_heading",
+          "kind": "hero"
+        }
+      ],
+      "slug": "workflow-diagnostic",
+      "title_key": "verbal.messaging.workflow_diagnostic_title"
+    },
+    {
+      "description_key": "verbal.messaging.implementation_planning_description",
+      "sections": [
+        {
+          "body_key": "verbal.messaging.implementation_planning_body",
+          "cta": true,
+          "heading_key": "verbal.messaging.implementation_planning_heading",
+          "kind": "hero"
+        }
+      ],
+      "slug": "implementation-planning",
+      "title_key": "verbal.messaging.implementation_planning_title"
+    }
+  ],
+  "schema_version": "amc-brand-website-map/v1",
+  "seed": 17
+}

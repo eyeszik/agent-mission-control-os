@@ -209,3 +209,26 @@ def test_client_supplied_authority_fields_are_rejected(owned):
     ]:
         r = client.post(url, json=body, headers=headers())
         assert r.status_code == 422, (url, r.status_code, r.text)
+
+
+@pytest.mark.parametrize("operation", ("brand.create", "genome.create"))
+def test_idempotent_replay_requires_current_project_write_access(monkeypatch, tmp_path, operation):
+    """The same actor and key must not disclose a receipt after access is revoked."""
+    w = make_world(monkeypatch, tmp_path)
+    key = f"replay-access-{uuid4().hex}"
+    if operation == "brand.create":
+        path = "/vnexus/brands"
+        body = {"brand_id": f"brand-{uuid4().hex[:8]}", "display_name": "Synthetic replay",
+                "owner_project_id": w["owner"]}
+    else:
+        path = f"/vnexus/brands/{w['brand']}/versions"
+        body = {"scope": "brand", "scope_ref": w["brand"], "document": FULL_DOC.model_dump(mode="json")}
+    headers_for_request = {"Idempotency-Key": key}
+    first = client.post(path, json=body, headers=headers_for_request)
+    assert first.status_code == 201, first.text
+    replay = client.post(path, json=body, headers=headers_for_request)
+    assert replay.status_code == 201 and replay.json() == first.json()
+    as_user(monkeypatch, "alice", role="editor", tenant=w["tenant"], projects=w["other"])
+    assert client.post(path, json=body, headers=headers_for_request).status_code == 403
+    as_user(monkeypatch, "alice", role="viewer", tenant=w["tenant"], projects=w["owner"])
+    assert client.post(path, json=body, headers=headers_for_request).status_code == 403
