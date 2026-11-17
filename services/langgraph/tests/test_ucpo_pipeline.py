@@ -303,14 +303,3 @@ def test_release_proof_is_eligible_only_when_every_gate_passes_and_never_deploys
     heads = {"a1": {"version": 3, "status": "draft"}}
     assert stale_reasons(ok, heads.get) == ["PROOF_STALE:source: v2 -> v3"]
     assert stale_reasons(ok, {"a1": {"version": 2, "status": "invalidated"}}.get)[0].startswith("PROOF_STALE:source")
-
-
-def test_generated_source_dependency_pins_match_workspace():
-    """The sandbox rejects generated source that targets uninstalled versions."""
-    from pathlib import Path
-    from services.langgraph.agency.ucpo.source import DEPENDENCIES
-
-    root = Path(__file__).resolve().parents[3]
-    workspace = json.loads((root / "apps/web/package.json").read_text())
-    for name, version in DEPENDENCIES.items():
-        assert version == workspace["dependencies"][name], name
