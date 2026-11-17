@@ -55,6 +55,10 @@ def _extract(html: str, binary_dir: Path, *, format: str = 'markdown', cancel: E
         raise ValueError('UNSUPPORTED_FORMAT')
     if len(html.encode()) > 262144:
         raise ValueError('INPUT_LIMIT')
+    from services.langgraph.agency.obscura_runtime import resource_limits_status
+    limits = resource_limits_status()
+    if not limits['supported']:
+        raise RuntimeError(limits['reason'])
     binary_dir = binary_dir.resolve(strict=True)
     for name, digest in DIGESTS.items():
         path = binary_dir / name

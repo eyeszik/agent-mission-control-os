@@ -4,7 +4,7 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "0aedd9d5a6f51b7254a008346e0a2acc397a335c"
+      "git_blob_sha": "3a2032bcccdc12e7371b92cf40415008851b74a1"
     },
     {
       "path": ".github/scripts/annotate-junit-failures.py",
@@ -16,7 +16,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "e93faaed1b3fae55d80571c1ea4d30a2a288a5d9"
+      "git_blob_sha": "81183142fb5803dfc16be212e5fd6b9dcc43c8f0"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -92,7 +92,7 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "ca40c9c5974943958af22c6adb572b596e99a0a3"
+      "git_blob_sha": "b01cadb304061513be8920b93e5b9c5cdbaf3b25"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -1416,11 +1416,11 @@
     },
     {
       "path": "services/langgraph/agency/execution_fabric/adapters/obscura.py",
-      "git_blob_sha": "f546c832bbdcfb473fd40623e3b701e236af12cd"
+      "git_blob_sha": "58f85c5a507d8380fcfaf5da8069f3310bac786d"
     },
     {
       "path": "services/langgraph/agency/obscura_worker.py",
-      "git_blob_sha": "b11b4255f9c24525d7b2ae0a08b8618198fc9a27"
+      "git_blob_sha": "a680ec8bd99dcb93e9c3308dc6331cb6e304681a"
     },
     {
       "path": "services/langgraph/agency/obscura_egress.py",
@@ -1448,11 +1448,11 @@
     },
     {
       "path": "services/langgraph/api/routes/browser.py",
-      "git_blob_sha": "d3a474cf60e0f3fdc6dedf655379e6c62a6aed6e"
+      "git_blob_sha": "86d764bb395dfd04f8a755fc6ef9d70db0fa5361"
     },
     {
       "path": "packages/shared/src/schemas/browser.ts",
-      "git_blob_sha": "2227addfbcc4cba001bcaa9db78f6b39a2bf5555"
+      "git_blob_sha": "b07e038fab1a0597b0409083368bb0f85989820f"
     },
     {
       "path": "apps/web/lib/api/browser.ts",
@@ -1460,7 +1460,7 @@
     },
     {
       "path": "apps/web/components/agency/views/BrowserPanel.tsx",
-      "git_blob_sha": "668d601b9df6bbe9860d76aee2731b5d989c0c22"
+      "git_blob_sha": "ba2c28ae7e6d8912c4cbc0351979381262a0ea8d"
     },
     {
       "path": "apps/web/components/agency/views/IntegrationsView.tsx",
@@ -1468,7 +1468,31 @@
     },
     {
       "path": "apps/web/e2e/browser-extraction.spec.ts",
-      "git_blob_sha": "f32e4cb4b4797353cc05a8ff5ba3cdf044d856e0"
+      "git_blob_sha": "f74fea7d4e63958ed7cc281ffae33d6879bc4003"
+    },
+    {
+      "path": "infra/run/amc-api.sh",
+      "git_blob_sha": "1347670d438bcb37c9c1fbe10931f5c9672db776"
+    },
+    {
+      "path": "infra/run/amc-web.sh",
+      "git_blob_sha": "49c26cdcc859e692ea5a26eba8c0f1ba4984a083"
+    },
+    {
+      "path": "apps/web/scripts/build.mjs",
+      "git_blob_sha": "6619902c7532f10152d17245de7e3fb489f4532f"
+    },
+    {
+      "path": "apps/web/scripts/check-build.mjs",
+      "git_blob_sha": "cc97ef9affb418709ffa954bd2acb0ce97da2654"
+    },
+    {
+      "path": "apps/web/scripts/start.mjs",
+      "git_blob_sha": "bd072834ec836b1f0fdf7366a2be27f3cd0dba33"
+    },
+    {
+      "path": "services/langgraph/agency/obscura_runtime.py",
+      "git_blob_sha": "3670f287fb003cb011530a602a47907ba8462053"
     }
   ]
 }

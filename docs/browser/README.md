@@ -5,6 +5,8 @@ continues to own E2E, WebGL/WebGPU, SVG rendering, visual QA and compatibility
 work. Installing this branch does not replace those browsers or turn the feature
 on automatically. No production service is deployed by these changes.
 
+> Current workspace status: the saved profile is configured, but safe Obscura activation is blocked because this host has no enforceable Docker resource controllers. See [the follow-up audit](runtime-followup.md). Earlier successful extraction tests did not verify those controllers.
+
 ## Supported path
 
 In `/agency`, choose an authorized project, then **Integrations**. An enabled
@@ -125,3 +127,59 @@ ProjectOS artifacts and receipts remain intact. See [the historical engineering
 record](obscura.md) for earlier partial milestones; this document describes the
 current feature. No production readiness, universal security, performance gain
 or guaranteed compatibility is inferred from finite tests.
+
+## Repeatable local activation and host readiness
+
+Configuration can be saved without changing authentication, ownership or secrets:
+
+```sh
+python -m services.langgraph.agency.obscura_runtime configure \
+  --binary-dir /tmp/amc-obscura-v0.2.7 \
+  --image "$(docker image inspect amc-obscura-runtime:local --format '{{.Id}}')" --public
+python -m services.langgraph.agency.obscura_runtime doctor --probe
+```
+
+The optional `--proxy` and `--ssl-cert-file` arguments refer to an explicitly
+approved proxy and existing CA trust file. Credential-bearing proxy URLs and
+unknown/authority fields are refused. `.amc/obscura-runtime.json` is private and
+Git-ignored; it contains no account identity or permission settings. Existing
+environment settings take precedence, including emergency disable flags.
+Reconfiguration requires explicit `--replace`; no existing file is silently
+replaced. This profile persists across process restarts, but it is not an OS
+service and does not promise that a hosted workspace will restart processes.
+
+The doctor must report ready with a passing probe before untrusted browsing is
+considered available. Both readiness and dispatch now require actual Docker
+support for memory, swap, PID and CPU limits, with a working cgroup driver.
+**Accepting Docker command-line flags is not proof of enforcement.** Unsupported
+rootless daemons may ignore those flags. Such hosts are now refused, even if
+previous small extraction tests happened to succeed. Negative readiness results
+are cached for five seconds to bound repeated Docker queries; execution checks
+resource support again before launching a container.
+
+The inspected ChatGPT coding workspace currently reports `CgroupDriver=none`,
+with memory, swap, PID and CPU controls unsupported. Its user systemd manager is
+offline. Runtime configuration was saved, but safe Obscura activation here is
+BLOCKED. No privileged-container fallback or resource-check bypass was added.
+A host administrator must supply an appropriate Linux development host with
+working controllers before real worker execution is revalidated. See Docker's
+[official rootless resource-limits guidance](https://docs.docker.com/engine/security/rootless/tips/#limiting-resources).
+
+From the checkout, use `bash infra/run/amc-api.sh` and `bash infra/run/amc-web.sh`.
+These launchers resolve their own checkout path, preserve explicit configuration
+and use installed tools only. API startup loads the saved profile, or an explicit
+AMC_OBSCURA_PROFILE. An unavailable optional worker remains blocked while the
+independent API can start. AMC_PYTHON_BIN can select an already installed virtual
+environment; no Python or Next.js download is performed by these launchers.
+
+The frontend must be built with its intended public configuration. `pnpm build`
+now records a fingerprint of the canonical public app configuration, and
+`pnpm start` / the web launcher refuse a mismatched API/authentication binding.
+Rebuild with matching NEXT_PUBLIC_* values before restarting. The fingerprint
+is a consistency check, not an approval or human signature; no secret server
+configuration is recorded.
+
+URL idempotency keys are now reserved through the existing tenant/project-scoped
+idempotency store: the same key plus different input/runtime returns 409, an
+in-progress key returns 409, and a completed exact request replays its stored
+response without another retrieval. Use a new key for a deliberate fresh request.

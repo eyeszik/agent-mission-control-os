@@ -1,3 +1,5 @@
+> Resource-enforcement correction: earlier passing Docker/extraction tests did not establish kernel controller support. The current host is blocked by the new guard; see [the runtime follow-up](runtime-followup.md).
+
 > Historical engineering log. See [current setup and supported public extraction](README.md) for the current feature. Earlier disabled/unfinished statements below describe earlier milestones.
 
 # Obscura integration preflight (partial implementation)

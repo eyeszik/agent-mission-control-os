@@ -52,6 +52,7 @@ def test_public_input_and_policy(monkeypatch, export_root):
     monkeypatch.setenv('AMC_ENV','local')
     monkeypatch.setenv('AMC_OBSCURA_ENABLED','1')
     monkeypatch.setenv('AMC_OBSCURA_RUNTIME_IMAGE','sha256:'+'a'*64)
+    monkeypatch.setattr('services.langgraph.api.routes.browser.available',lambda:True)
     monkeypatch.delenv('AMC_OBSCURA_PUBLIC_ENABLED',raising=False)
     body={'url':'https://example.com','source_ref':'fixture:public-policy'}
     assert client.post(path,json=body).status_code==400
@@ -85,3 +86,31 @@ def test_live_public_retrieval_and_receipt(monkeypatch, export_root):
     assert result['proof']['matched_observation_count']==1
     replay=client.post(path,json=body,headers={'Idempotency-Key':'live-fixture-once'}).json()
     assert replay['replayed'] and replay['proof']['execution_count']==1
+
+
+def test_request_key_cannot_execute_different_url(monkeypatch, export_root):
+    """API-key binding fixture only; execution is explicitly unavailable."""
+    as_user(monkeypatch,'fixture-key-owner')
+    monkeypatch.setenv('AMC_ENV','local');monkeypatch.setenv('AMC_OBSCURA_ENABLED','1')
+    monkeypatch.setenv('AMC_OBSCURA_PUBLIC_ENABLED','1')
+    monkeypatch.setenv('AMC_OBSCURA_RUNTIME_IMAGE','sha256:'+'a'*64)
+    monkeypatch.setattr('services.langgraph.api.routes.browser.available',lambda:True)
+    calls=[]
+    def blocked_fixture(project_id,req,principal,workspace,identity):
+        calls.append(req.url)
+        return {'run_id':'fictional-unexecuted-run','status':'BLOCKED_TOOL','replayed':False,
+                'reasons':['FIXTURE_ONLY_NOT_EXECUTED'],'artifact_ref':None,'content':None,
+                'proof':{'dispatch_count':0,'execution_count':0,'observation_count':0}}
+    monkeypatch.setattr('services.langgraph.api.routes.browser._execute',blocked_fixture)
+    project=new_project('Idempotency fixture')['project_id']
+    path=f'/browser/projects/{project}/extractions'
+    headers={'Idempotency-Key':'same-fixture-key'}
+    body={'url':'https://fixture.example/first','source_ref':'fixture:unexecuted'}
+    first=client.post(path,json=body,headers=headers)
+    assert first.json()['status']=='BLOCKED_TOOL',first.text
+    conflict=client.post(path,json={**body,'url':'https://fixture.example/different'},headers=headers)
+    assert conflict.status_code==409,conflict.text
+    assert calls==[body['url']]
+    replay=client.post(path,json=body,headers=headers).json()
+    assert replay['replayed'] and replay['run_id']==first.json()['run_id']
+    assert replay['proof']['execution_count']==0

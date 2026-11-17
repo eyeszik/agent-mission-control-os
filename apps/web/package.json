@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/start.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run tests",
     "test:e2e": "playwright test",

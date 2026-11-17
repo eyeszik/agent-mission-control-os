@@ -16,6 +16,7 @@ from services.langgraph.agency.compiled.planner import CompiledAgencyRequest, co
 from services.langgraph.agency.compiled.backchain import DeliverableSpec
 from services.langgraph.agency.role_os import RoleOSRegistry
 from services.langgraph.persistence.proofs import get_run_proof_bundle
+from services.langgraph.persistence.idempotency import reserve_idempotency, complete_idempotency, fail_idempotency, hash_payload
 from services.langgraph.persistence.agency_kernel import get_artifact
 
 router = APIRouter()
@@ -28,6 +29,7 @@ class BrowserCapabilities(BaseModel):
     mode: Literal['SUPPLIED_HTML_ONLY', 'PUBLIC_HTTPS_EXTRACTION']
     public_browsing: bool
     max_input_bytes: int
+    reasons: tuple[str, ...] = ()
 
 
 class ExtractionResponse(BaseModel):
@@ -47,9 +49,13 @@ def enabled():
 @router.get('/projects/{project_id}/capabilities', response_model=BrowserCapabilities)
 def capabilities(project_id: str, principal: Principal = Depends(get_principal)):
     authorize_project_access(principal, project_id)
+    from services.langgraph.agency.obscura_runtime import runtime_status
+    status = runtime_status()
+    if os.environ.get('AMC_ENV') != 'local':
+        status = {**status, 'reasons':[*status['reasons'], 'LOCAL_DEVELOPMENT_ONLY']}
     public = enabled() and os.environ.get('AMC_OBSCURA_PUBLIC_ENABLED') == '1'
     return {'provider': 'obscura', 'enabled': enabled(), 'mode': 'PUBLIC_HTTPS_EXTRACTION' if public else 'SUPPLIED_HTML_ONLY',
-            'public_browsing': public, 'max_input_bytes': 262144}
+            'public_browsing': public, 'max_input_bytes': 262144, 'reasons':status['reasons']}
 
 
 @router.post('/projects/{project_id}/extractions', response_model=ExtractionResponse)
@@ -67,6 +73,33 @@ def extract(project_id: str, req: ExtractionInput, principal: Principal = Depend
     if req.html and len(req.html.encode()) > 262144:
         raise HTTPException(422, 'HTML exceeds byte limit')
     identity = hashlib.sha256(json.dumps({'inputs':req.model_dump(exclude_none=True), 'runtime_image':os.environ['AMC_OBSCURA_RUNTIME_IMAGE'], 'adapter':'obscura/v0.2.7', 'public':bool(req.url), 'retrieval_key':idempotency_key if req.url else None}, sort_keys=True).encode()).hexdigest()
+    scope = None
+    if req.url:
+        if not idempotency_key.strip():
+            raise HTTPException(400, 'Idempotency-Key must not be blank')
+        scope = 'browser-extraction:' + hash_payload({'tenant':workspace.tenant_id,'project':project_id})
+        payload_hash = hash_payload({'inputs':req.model_dump(exclude_none=True),
+                                    'runtime_image':os.environ['AMC_OBSCURA_RUNTIME_IMAGE'],
+                                    'adapter':'obscura/v0.2.7'})
+        reservation = reserve_idempotency(scope, idempotency_key, payload_hash)
+        if reservation['state'] == 'conflict':
+            raise HTTPException(409, 'Idempotency-Key is already bound to a different extraction request')
+        if reservation['state'] == 'in_progress':
+            raise HTTPException(409, 'Extraction is in progress; retry the same request key later')
+        if reservation['state'] == 'replay':
+            return {**reservation['record']['result'], 'replayed':True}
+    try:
+        result = _execute(project_id, req, principal, workspace, identity)
+        if scope and not complete_idempotency(scope, idempotency_key, result):
+            raise HTTPException(409, 'Extraction request reservation changed; reconcile before retrying')
+        return result
+    except Exception:
+        if scope:
+            fail_idempotency(scope, idempotency_key, 'EXTRACTION_FAILED')
+        raise
+
+
+def _execute(project_id, req, principal, workspace, identity):
     # Stable local plan epoch: no volatile constraints or upstream sources are
     # inferred from it. Actual execution times are recorded by canonical receipts.
     spec = DeliverableSpec(id='extraction', requested_outcome='Governed page extraction '+identity,

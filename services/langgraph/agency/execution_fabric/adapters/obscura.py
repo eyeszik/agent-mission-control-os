@@ -28,7 +28,8 @@ class Input(BaseModel):
 
 
 def available() -> bool:
-    return os.environ.get('AMC_OBSCURA_ENABLED') == '1' and bool(os.environ.get('AMC_OBSCURA_RUNTIME_IMAGE'))
+    from services.langgraph.agency.obscura_runtime import runtime_status
+    return runtime_status()['ready']
 
 
 def run(payload: dict) -> dict:

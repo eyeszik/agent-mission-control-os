@@ -13,6 +13,7 @@ export function BrowserPanel({ projectId }: { projectId: string }) {
   const [result, setResult] = useState<Awaited<ReturnType<typeof extractHtml>> | null>(null);
   return <Card title="Obscura local extraction" description="Extract supplied HTML or an enabled public HTTPS page. Page text remains untrusted. External scripts, images and subpages are not loaded; use Chromium for compatibility-critical browsing.">
     <p role="status">{capability.loading ? 'Checking availability…' : capability.data?.enabled ? 'Local extraction enabled' : 'Local extraction disabled'}</p>
+    {capability.data?.reasons.length ? <p role="note">{capability.data.reasons.join("; ")}</p> : null}
     {capability.error && <ErrorNote error={capability.error} />}
     {capability.data?.public_browsing && <>
       <Field label="Public HTTPS URL" htmlFor="browser-url"><input id="browser-url" type="url" className={inputClass} value={url} maxLength={2048} onChange={e => setUrl(e.target.value)} /></Field>

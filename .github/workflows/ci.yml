@@ -804,6 +804,13 @@ jobs:
           python -m services.langgraph.agency.obscura_artifact /tmp/obscura-v0.2.7.tar.gz /tmp/amc-obscura-v0.2.7
           python scripts/browser/build-obscura-runtime.py /tmp/obscura-v0.2.7.tar.gz
           echo "AMC_OBSCURA_RUNTIME_IMAGE=$(docker image inspect amc-obscura-runtime:local --format '{{.Id}}')" >> "$GITHUB_ENV"
+      - name: Require enforced Docker resource controllers
+        run: |
+          python - <<'PYTHON'
+          from services.langgraph.agency.obscura_runtime import resource_limits_status
+          status = resource_limits_status()
+          assert status["supported"], status["reason"]
+          PYTHON
       - name: Test worker, isolation, broker, authority and persisted receipts
         env:
           TEST_OBSCURA_BIN: /tmp/amc-obscura-v0.2.7

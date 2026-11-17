@@ -40,3 +40,20 @@ test('public HTTPS extraction produces retrieved evidence and persisted proof', 
   await page.getByText('Persisted proof summary', { exact: true }).click();
   await expect(page.getByText(/"matched_observation_count": 1/)).toBeVisible();
 });
+
+test('configured but unsupported runtime is refused visibly', async ({ page, request }) => {
+  test.skip(process.env.E2E_OBSCURA_EXPECT_BLOCKED !== '1', 'Explicit unsupported-host verification only');
+  const api=process.env.E2E_API_BASE_URL ?? 'http://127.0.0.1:8100';
+  const project='obscura-preview-fixture';
+  expect((await request.get(`${api}/health`)).status()).toBe(200);
+  const created=await request.post(`${api}/projects`,{headers:{'Idempotency-Key':'obscura-preview-project'},data:{project_id:project,slug:project,display_name:'Obscura activation fixture'}});
+  expect([201,409]).toContain(created.status());
+  await page.goto('/agency');
+  await page.getByLabel('Project',{exact:true}).selectOption(project);
+  await page.getByRole('button',{name:'Integrations',exact:true}).first().click();
+  await expect(page.getByText('Local extraction disabled',{exact:true})).toBeVisible();
+  await expect(page.getByRole('note').filter({hasText:'RESOURCE_LIMITS_UNAVAILABLE'})).toBeVisible();
+  await page.getByLabel('Source reference',{exact:true}).fill('fixture:blocked-runtime');
+  await page.getByLabel('Supplied HTML',{exact:true}).fill('<p>Fixture</p>');
+  await expect(page.getByRole('button',{name:'Extract supplied HTML',exact:true})).toBeDisabled();
+});
