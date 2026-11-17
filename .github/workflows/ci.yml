@@ -215,7 +215,12 @@ jobs:
         with:
           node-version: "22.12.0"
 
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Enable repository-pinned pnpm
+        run: |
+          pnpm_spec="$(node -e 'const p=require("./package.json").packageManager; if(typeof p!=="string"||!/^pnpm@\d+\.\d+\.\d+\+sha512\.[a-f0-9]{128}$/.test(p))throw new Error("Expected exact pnpm version and SHA-512 pin"); process.stdout.write(p)')"
+          corepack enable
+          corepack prepare "$pnpm_spec" --activate
+          pnpm --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -271,7 +276,12 @@ jobs:
         with:
           node-version: "22.12.0"
 
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Enable repository-pinned pnpm
+        run: |
+          pnpm_spec="$(node -e 'const p=require("./package.json").packageManager; if(typeof p!=="string"||!/^pnpm@\d+\.\d+\.\d+\+sha512\.[a-f0-9]{128}$/.test(p))throw new Error("Expected exact pnpm version and SHA-512 pin"); process.stdout.write(p)')"
+          corepack enable
+          corepack prepare "$pnpm_spec" --activate
+          pnpm --version
 
       - name: Install application dependencies
         run: |
@@ -332,7 +342,12 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22.12.0"
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Enable repository-pinned pnpm
+        run: |
+          pnpm_spec="$(node -e 'const p=require("./package.json").packageManager; if(typeof p!=="string"||!/^pnpm@\d+\.\d+\.\d+\+sha512\.[a-f0-9]{128}$/.test(p))throw new Error("Expected exact pnpm version and SHA-512 pin"); process.stdout.write(p)')"
+          corepack enable
+          corepack prepare "$pnpm_spec" --activate
+          pnpm --version
       - name: Install exact dependencies and renderer bundles
         run: |
           pnpm install --frozen-lockfile
@@ -373,7 +388,12 @@ jobs:
         with:
           node-version: "22.12.0"
 
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Enable repository-pinned pnpm
+        run: |
+          pnpm_spec="$(node -e 'const p=require("./package.json").packageManager; if(typeof p!=="string"||!/^pnpm@\d+\.\d+\.\d+\+sha512\.[a-f0-9]{128}$/.test(p))throw new Error("Expected exact pnpm version and SHA-512 pin"); process.stdout.write(p)')"
+          corepack enable
+          corepack prepare "$pnpm_spec" --activate
+          pnpm --version
 
       - name: Install application dependencies
         run: |
@@ -543,7 +563,12 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22.12.0"
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: Enable repository-pinned pnpm
+        run: |
+          pnpm_spec="$(node -e 'const p=require("./package.json").packageManager; if(typeof p!=="string"||!/^pnpm@\d+\.\d+\.\d+\+sha512\.[a-f0-9]{128}$/.test(p))throw new Error("Expected exact pnpm version and SHA-512 pin"); process.stdout.write(p)')"
+          corepack enable
+          corepack prepare "$pnpm_spec" --activate
+          pnpm --version
 
       - name: Audit production JavaScript dependencies
         run: |
