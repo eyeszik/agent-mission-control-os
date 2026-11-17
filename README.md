@@ -201,3 +201,10 @@ The [v3 capability increment](docs/innovation/v3.md) adds exact generation inten
 canonical approval checks, a one-call local model adapter, and actual bounded lexical
 experiments with execution receipts and learning. Live model availability, research,
 general concept experimentation, production release and public HTTPS remain separate gates.
+
+### Optional Obscura research browser
+
+The opt-in Obscura integration adds authenticated, project-scoped supplied-HTML
+and public HTTPS extraction with bounded isolation and persisted execution
+proofs. Chromium remains the compatibility, creative-rendering and E2E browser.
+See [setup, controls, verification and limitations](docs/browser/README.md).

@@ -16,6 +16,7 @@ from services.langgraph.api.routes import (
     agency_os,
     avic,
     agency,
+    browser,
     analytics,
     approvals,
     artifacts,
@@ -168,6 +169,7 @@ app.include_router(foundry.router, prefix="/foundry", tags=["Creative Foundry"])
 app.include_router(innovation.router, prefix="/innovation", tags=["UNBOUND Innovation Foundry"])
 app.include_router(rendering.router, prefix="/foundry", tags=["Governed Rendering"])
 app.include_router(ucpo.router, prefix="/ucpo", tags=["Website Production Line"])
+app.include_router(browser.router, prefix="/browser", tags=["Local browser extraction"])
 app.include_router(avic.router, prefix="/avic", tags=["Visual Compiler (AVIC)"])
 app.include_router(missions.router, prefix="/missions", tags=["Mission Council"])
 app.include_router(vnexus.router, prefix="/vnexus", tags=["VNEXUS"])
