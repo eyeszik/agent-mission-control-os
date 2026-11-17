@@ -46,7 +46,16 @@ def explain(case: ET.Element, problem: ET.Element) -> str:
         if len(candidates) > 1 and candidates[-2].startswith(("AssertionError", "Error")):
             detail = first_line(candidates[-2])
         if detail and detail not in message:
-            return f"{message} | {detail}"
+            message = f"{message} | {detail}"
+    # Keep the failing frame. Without it an annotation reading "assert (404 ==
+    # 200)" cannot be acted on: in this codebase a 404 is the domain's own
+    # LookupError mapping, and which of three consecutive requests produced it is
+    # only answerable from the line. The path is repo-relative, so it is also the
+    # annotation's file, which puts it on the diff.
+    for frame in reversed((problem.text or "").splitlines()):
+        stripped = frame.strip()
+        if stripped.startswith(">") or "test_" in stripped and ".py:" in stripped:
+            return f"{message} @ {stripped.lstrip('> ')[:180]}"
     return message
 
 

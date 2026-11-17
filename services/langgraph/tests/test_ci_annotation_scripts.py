@@ -156,3 +156,22 @@ def test_an_empty_failure_still_names_the_case_and_its_location(tmp_path):
     assert "no JSON record" not in out, f"the JSON report was not consulted:\n{out}"
     # The step durations say which phase ate the budget.
     assert "the compiled asset renders and evaluates" in out
+
+
+def test_annotation_carries_the_failing_line(tmp_path):
+    """An annotation that says only "assert (404 == 200)" cannot be acted on.
+
+    Three consecutive requests in this codebase can each 404 through the domain's
+    own LookupError mapping, so the line number is the answer, and the path makes
+    the annotation land on the diff instead of on .github.
+    """
+    report = tmp_path / "junit.xml"
+    report.write_text("""<testsuites><testsuite name="s"><testcase name="test_preview" classname="t">
+      <failure message="assert (404 == 200)">def test_preview():
+>       assert png.status_code == 200
+E       assert (404 == 200)
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+services/langgraph/tests/test_vnexus_brandbook.py:340: AssertionError</failure>
+    </testcase></testsuite></testsuites>""", encoding="utf-8")
+    out = _run(PYTEST_ANNOTATOR, report)
+    assert "test_vnexus_brandbook.py:340" in out, out
