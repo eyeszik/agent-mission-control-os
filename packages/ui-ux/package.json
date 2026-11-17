@@ -1,0 +1,26 @@
+{
+  "name": "@amc/ui-ux",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UI/UX design compiler (request to UIUXDesignIR with DTCG tokens), parity-checked against services/langgraph/agency/ui_ux.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@amc/design-tokens": "workspace:*",
+    "@amc/kernel": "workspace:*",
+    "@amc/shared": "workspace:*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
