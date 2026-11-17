@@ -8,7 +8,7 @@
     },
     {
       "path": ".github/scripts/annotate-junit-failures.py",
-      "git_blob_sha": "7374410a5de166d903d450f76c081dc381e433d5"
+      "git_blob_sha": "bbd1a538f067132136142ab97ba984fa65ba184c"
     },
     {
       "path": ".github/scripts/annotate-playwright-junit.py",
