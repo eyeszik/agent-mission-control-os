@@ -29,9 +29,18 @@ export function surfaceTemplate(mode: SurfaceMode): SurfaceTemplate {
   return structuredClone(template);
 }
 
+/** Python `str.strip("-")`, in a linear scan (no regex, so no backtracking on long runs of `-`). */
+function trimDashes(text: string): string {
+  let start = 0;
+  let end = text.length;
+  while (start < end && text.charCodeAt(start) === 45) start += 1;
+  while (end > start && text.charCodeAt(end - 1) === 45) end -= 1;
+  return text.slice(start, end);
+}
+
 /** Python `_slug`: lowercase, runs of non `[a-z0-9]` become `-`, edges trimmed, `item` if empty. */
 export function slug(text: string): string {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'item';
+  return trimDashes(text.toLowerCase().replace(/[^a-z0-9]+/g, '-')) || 'item';
 }
 
 /** Python `_add_unique`: append and report whether anything changed. */
