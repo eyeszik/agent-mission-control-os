@@ -1,6 +1,6 @@
 # TypeScript migration plan
 
-Status: **Wave 1 (core utilities) ported.** `@amc/canonical`, `@amc/execution`, `@amc/kernel`, `@amc/design-tokens`, `@amc/assets` and `@amc/pii` each reproduce a Python-generated parity fixture. No Python caller has been switched to them yet; Python is still the reference.
+Status: **Waves 1 and 2 (core utilities and services) ported.** Twelve packages, from `@amc/canonical` to `@amc/vnexus-directions`, each reproduce a Python-generated parity fixture. No Python caller has been switched to them yet; Python is still the reference. Wave 3 (persistence, API, security) has not started.
 
 ## Why not a big-bang port
 
@@ -55,19 +55,25 @@ There are three waves: core utilities, then services, then components. Inside a 
 | `security/pii.py`, `security/sanitize.py` | 131 | 0 | redaction callers | **Ported** → `@amc/pii` (1,933 cases); never more permissive than Python |
 | `core` | 329 | 0 | 6 areas | Already mirrored by `@amc/{errors,config,constants,logger}`; just keep `test_core.py` in step |
 
-### Wave 2: services (pure compilers over Wave 1)
+### Wave 2: services (pure compilers over Wave 1) — ported
 
-Each of these needs only Wave 1:
+Each area keeps its Python module as the reference. Only the pure computation moved; whatever touches the database, the filesystem, a browser, an image library or a subprocess stays in Python, and the twin takes that part's *result* as typed input.
 
-- `agency/compiled` (6,074 lines)
-- `agency/project_os` (3,172)
-- `agency/guidance`
-- `agency/prompt_families`
-- `agency/design`
-- `agency/ui_ux`
-- the pure parts of `agency/vnexus`: the genome, the brand book compiler and the directions review board
+| Python area | TS package | Parity cases | Stays in Python |
+|---|---|---|---|
+| `agency/design` | `@amc/design-mode` | ~500 | catalog file loading, `/design/*` routes |
+| `agency/ui_ux` | `@amc/ui-ux` | ~15,900 (14,225 contrast pairs, 384 full compiles with identical `spec_hash`) | CLI, file I/O |
+| `agency/vnexus` (core files) | `@amc/vnexus` | 6,723 | persistence, routes, approvals, imaging and video rendering, and everything that needs the foundry grammars or the prompt compiler |
+| `agency/project_os` | `@amc/project-os` | 3,892 | file and disk operations, ffmpeg probe, the pipeline call |
+| `agency/guidance` | `@amc/guidance` | ~380 (incl. the real registry hash) | pack file reading, CLI |
+| `agency/prompt_families` | `@amc/prompt-families` | ~430 | role registry lookup |
+| `agency/compiled` | `@amc/compiled` | 7,303 | archive/zip reads, the scenario harness, persistence-row adapters |
+| `agency/vnexus/brandbook` | `@amc/vnexus-brandbook` | ~5,000 | authorization, storage, release, Chromium measurement and PDF render |
+| `agency/vnexus/directions` | `@amc/vnexus-directions` | ~2,000 | PNG/Chromium/SVG image analysis, Lab distance, persistence, approvals, freeze flow |
 
-They are deterministic compilers, so a fixture of recorded inputs and outputs makes a complete parity proof. Persistence calls stay behind an interface that is still answered by Python over the existing API.
+Two things in this wave are stubbed in a fixture rather than exercised with real code: `@amc/vnexus-directions` replays a recorded `compile_genome_prompt` result and a recorded `scan_forms` verdict per text. They need the foundry and prompt-compiler ports first.
+
+Fail-closed rules carried over as literals, not configuration: `spend_authority_granted` and `execution_available` are `false`, a video QC result is never `PASS`, `allow_paid` is `false`, the live publication provider registry is private and empty, and a UI/UX request with no compiler adapter raises instead of returning a result.
 
 ### Wave 3: components (I/O edges)
 
@@ -100,6 +106,21 @@ So the realistic end state is a **TypeScript core and services behind the existi
 - **Sorting and key order.** Sort by code point or UTF-8 bytes, never by JS's default UTF-16 order. JS objects move integer-like keys first, so use `Map` wherever order is observable.
 - **Hashing stays synchronous.** Web Crypto only digests asynchronously, but Python's `commit()` and token hashing are synchronous, so `@amc/kernel` and `@amc/design-tokens` bundle a small synchronous SHA-256, checked against the standard test vectors.
 - **Ports find real bugs.** Mirroring `security/pii.py` exactly showed that its credential patterns ended in a raw-string `\\b`, a literal backslash followed by `b`, so GitHub tokens were **not detected**. The TS twin mirrored this faithfully, since a twin must not quietly fix its reference. The fix landed in Python first, then the fixture was regenerated and the twin updated.
+
+## What Wave 2 added
+
+Everything under "What Wave 1 taught" held. New findings:
+
+- **Hash floats and cross-instance identity.** Anything that reaches a hash must build floats through `pyFloat` / `CanonicalFloat`, and test them with `isPyFloat`. Under vitest the workspace package loaded from `src` and from a dependency's `dist` are two module graphs, so `instanceof CanonicalFloat` can fail across them. `@amc/design-tokens` re-exports one shared marker, and packages that inline workspace deps (`@amc/vnexus-directions` has a `vitest.config.ts` for this) must adopt a foreign instance.
+- **`pow`, `log` and `cbrt` differ from glibc in the last bit.** About 12% of sRGB linearisations, 9% of cube roots and 7% of logs differ by one ulp. Fixes in use: a Python-generated table (the 256 sRGB values), a double-double cube root, and a correctly rounded `log` computed in 128-bit fixed point. When a quantity cannot be tabled (Lab `t ** (1/3)`), it stays in Python and the twin takes the result as input.
+- **Object key order.** JS puts integer-like keys first. Use `Map`, or an explicit order array, wherever order is observable (for example lens keys `'10'`–`'14'` sorting before `'01'`).
+- **`datetime.fromisoformat` on CPython 3.11 is not the documented grammar.** The C parser accepts junk between seconds and an offset, and the error message embeds a `timedelta` repr. Twins either follow the C implementation (`@amc/project-os`) or take a strict subset and fail closed (`@amc/compiled`).
+- **Pydantic validators only run when field constraints hold**, and errors come in input-key order, then missing fields. Zod `superRefine` runs anyway, so rules need an explicit guard. Error text embeds a version and a docs URL, so compare each issue's location and type, plus the exact message only for custom `value_error`s.
+- **`model_dump(mode="json")` turns NaN and Infinity inside `Any` values into `null`.** This changed a registry hash until the twin did the same.
+- **`str.strip`, `rstrip` and friends: use a linear scan, not a regex.** CodeQL flags `/-+$/` and `/\/+$/` as polynomial-time regular expressions. They were not exploitable here, but `stripChar` in `packages/project-os/src/pytext.ts` is the same operation without the alert.
+- **Hash-seed independence.** A fixture builder that iterates a Python `set` varies with `PYTHONHASHSEED`. Iterate `sorted(...)`, and run each fixture-owner test under more than one seed.
+- **Fixture size.** Keep each fixture near 3 MB. A large domain is split across files (`@amc/ui-ux` uses four), with a full dump stored only for a sample and a digest for the rest.
+- **Python bugs are mirrored on purpose** and recorded as fixture cases (for example a `KeyError` while hashing a page, an `IndexError` on an empty list). A twin never quietly fixes its reference; the fix goes into Python first, then the fixture is regenerated.
 
 ## Rules for every wave
 
