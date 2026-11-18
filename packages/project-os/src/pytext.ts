@@ -35,6 +35,16 @@ export function isPySpace(cp: number): boolean {
 }
 
 /** `str.strip()` with no argument. */
+/** Python `str.strip(ch)` / `str.rstrip(ch)` for one ASCII character, as a linear scan (no regex, so no backtracking). */
+export function stripChar(text: string, ch: string, sides: 'both' | 'end' = 'both'): string {
+  const code = ch.charCodeAt(0);
+  let start = 0;
+  let end = text.length;
+  if (sides === 'both') while (start < end && text.charCodeAt(start) === code) start += 1;
+  while (end > start && text.charCodeAt(end - 1) === code) end -= 1;
+  return text.slice(start, end);
+}
+
 export function pyStrip(text: string): string {
   const chars = Array.from(text);
   let start = 0;

@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { ProjectManifestSchema } from '@amc/shared';
 import { WorkspacePathError } from './errors';
 import { canonicalSha256, type PyJson } from './json';
-import { lowerView, pyStrip } from './pytext';
+import { lowerView, pyStrip, stripChar } from './pytext';
 import { PROJECT_LIFECYCLE_STATES, SYSTEM_FOLDERS, WORKSPACE_FOLDERS, parseEnum } from './vocabulary';
 import { pyRepr } from '@amc/kernel';
 
@@ -45,7 +45,7 @@ export function safeSegment(value: string, label: string): string {
 
 export function slugify(value: string, fallback = 'project'): string {
   const dashed = lowerView(value).replace(/[^a-z0-9]+/g, '-');
-  const slug = dashed.replace(/^-+|-+$/g, '').slice(0, 64).replace(/^-+|-+$/g, '');
+  const slug = stripChar(stripChar(dashed, '-').slice(0, 64), '-');
   return slug || fallback;
 }
 

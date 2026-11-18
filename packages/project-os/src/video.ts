@@ -20,7 +20,7 @@ import { ReproducibilityRecordSchema } from '@amc/shared';
 import { compareCodePoints, pyStr } from '@amc/kernel';
 import { VideoBridgeError } from './errors';
 import { canonicalSha256, type PyJson } from './json';
-import { sliceCodePoints, strOf, truthy } from './pytext';
+import { sliceCodePoints, stripChar, strOf, truthy } from './pytext';
 import { pyRepr } from '@amc/kernel';
 
 export const VIDEO_PIPELINE_STAGES = [
@@ -240,7 +240,7 @@ function assertRunIsComplete(args: ReadRunArgs, manifest: Json): void {
 }
 
 function runFiles(args: ReadRunArgs): Record<string, RunFile> {
-  const dir = args.output_dir.replace(/\/+$/, '');
+  const dir = stripChar(args.output_dir, '/', 'end');
   return Object.fromEntries(
     Object.entries(FVF_OUTPUTS).map(([name, [mime, subtype]]) => {
       const digest = args.files[name] as FileDigest;
