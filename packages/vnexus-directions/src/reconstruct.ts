@@ -58,7 +58,9 @@ export function withText(svg: string, texts: readonly string[], box: Box, face: 
   const size = Math.max(6, Math.trunc(h * 0.7 / Math.max(1, texts.length)));
   const name = face ? fontName(face) : 'sans-serif';
   if (name === null) throw new PyAttributeError("'NoneType' object has no attribute 'replace'");
-  const family = escapeXml(name);
+  // `font_name` only passes letters, digits, space, dot, dash and underscore, so a quote cannot reach here;
+  // escaping it anyway keeps the attribute safe if that rule ever loosens. Output is unchanged for every reachable name.
+  const family = escapeXml(name).replace(/"/g, '&quot;');
   const lines = texts.map((t, i) => `<text x="${formatFixed(x + w / 2, 1)}" y="${formatFixed(y + (i + 1) * h / (texts.length + 0.5), 1)}" `
     + `font-family="${family}" font-size="${size}" text-anchor="middle" fill="${fill}">${escapeXml(t)}</text>`).join('');
   const trimmed = pyRstrip(pyRstrip(svg).replace(/<\/svg>$/, ''));

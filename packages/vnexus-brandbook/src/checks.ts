@@ -49,12 +49,36 @@ function tokenCheck(page: PagePackage, tokens: readonly string[], mode: Mode): C
     `labelled gaps: ${page.gaps.length}; raw tokens: ${listRepr(head(tokens, 5))}`, 'WARNING');
 }
 
+/**
+ * Python `re.sub(r"<[^>]+>", " ", html)` as a single linear pass. The regex form rescans to the end of the
+ * string for every `<` when no `>` follows (polynomial); here the first `>` is located once per tag.
+ * `<>` is not a tag (the class needs one character), and with no `>` ahead nothing later can match.
+ */
+export function stripTags(html: string): string {
+  const parts: string[] = [];
+  let pos = 0;
+  let open = html.indexOf('<');
+  while (open !== -1) {
+    const close = html.indexOf('>', open + 1);
+    if (close === -1) break;
+    if (close === open + 1) {
+      open = html.indexOf('<', open + 1);
+      continue;
+    }
+    parts.push(html.slice(pos, open), ' ');
+    pos = close + 1;
+    open = html.indexOf('<', pos);
+  }
+  parts.push(html.slice(pos));
+  return parts.join('');
+}
+
 /** Checks that need no browser: unresolved tokens, text contrast of the page colours, labelled status. */
 export function staticChecks(page: PagePackage, sections: ReadonlyArray<readonly [string, string]>, options: {
   readonly mode: Mode; readonly palette: Readonly<Record<string, string>>; readonly neutral: boolean;
 }): CheckResult[] {
   const html = sections.map(([, s]) => s).join('');
-  const text = html.replace(/<[^>]+>/g, ' ');
+  const text = stripTags(html);
   const ink = options.palette['ink'] ?? '';
   const paper = options.palette['paper'] ?? '';
   const ratio = wcagContrastRatio(ink, paper);
