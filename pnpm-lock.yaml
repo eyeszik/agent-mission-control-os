@@ -249,6 +249,22 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
 
+  packages/guidance:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
   packages/kernel:
     devDependencies:
       typescript:
@@ -300,6 +316,25 @@ importers:
       zod:
         specifier: ^4.6.7
         version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/prompt-families:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/guidance':
+        specifier: workspace:*
+        version: link:../guidance
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
     devDependencies:
       typescript:
         specifier: 7.0.2
