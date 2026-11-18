@@ -177,7 +177,7 @@ def _decorate(req: dict[str, Any], r: random.Random) -> dict[str, Any]:
         req["grants"] = grants
     ext = {s["external_action"] for s in req["deliverables"] if s.get("external_action")}
     if ext and r.random() < 0.6:
-        req["provider_status"] = {a: r.choice(["VERIFIED", "VERIFIED", "PENDING"]) for a in ext}
+        req["provider_status"] = {a: r.choice(["VERIFIED", "VERIFIED", "PENDING"]) for a in sorted(ext)}
     if r.random() < 0.2:
         req["artifact_hashes"] = {r.choice(nodes): "f" * 64}
     if r.random() < 0.15:
