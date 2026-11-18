@@ -258,10 +258,11 @@ jobs:
         with:
           node-version: "22.12.0"
 
-      - name: Enable pnpm via corepack (pin-verified from package.json packageManager)
+      - name: Enable repository-pinned pnpm (Node-bundled corepack, exact version + SHA-512)
         run: |
-          npm install --global corepack@latest --no-audit --no-fund
+          pnpm_spec="$(node -e 'const p=require("./package.json").packageManager; if(typeof p!=="string"||!/^pnpm@\d+\.\d+\.\d+\+sha512\.[a-f0-9]{128}$/.test(p))throw new Error("Expected exact pnpm version and SHA-512 pin"); process.stdout.write(p)')"
           corepack enable
+          corepack prepare "$pnpm_spec" --activate
           pnpm --version
 
       - name: Install dependencies
@@ -318,10 +319,11 @@ jobs:
         with:
           node-version: "22.12.0"
 
-      - name: Enable pnpm via corepack (pin-verified from package.json packageManager)
+      - name: Enable repository-pinned pnpm (Node-bundled corepack, exact version + SHA-512)
         run: |
-          npm install --global corepack@latest --no-audit --no-fund
+          pnpm_spec="$(node -e 'const p=require("./package.json").packageManager; if(typeof p!=="string"||!/^pnpm@\d+\.\d+\.\d+\+sha512\.[a-f0-9]{128}$/.test(p))throw new Error("Expected exact pnpm version and SHA-512 pin"); process.stdout.write(p)')"
           corepack enable
+          corepack prepare "$pnpm_spec" --activate
           pnpm --version
 
       - name: Install application dependencies
@@ -521,10 +523,11 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22.12.0"
-      - name: Enable pnpm via corepack (pin-verified from package.json packageManager)
+      - name: Enable repository-pinned pnpm (Node-bundled corepack, exact version + SHA-512)
         run: |
-          npm install --global corepack@latest --no-audit --no-fund
+          pnpm_spec="$(node -e 'const p=require("./package.json").packageManager; if(typeof p!=="string"||!/^pnpm@\d+\.\d+\.\d+\+sha512\.[a-f0-9]{128}$/.test(p))throw new Error("Expected exact pnpm version and SHA-512 pin"); process.stdout.write(p)')"
           corepack enable
+          corepack prepare "$pnpm_spec" --activate
           pnpm --version
       - name: Install exact dependencies and renderer bundles
         run: |
@@ -570,10 +573,11 @@ jobs:
         with:
           node-version: "22.12.0"
 
-      - name: Enable pnpm via corepack (pin-verified from package.json packageManager)
+      - name: Enable repository-pinned pnpm (Node-bundled corepack, exact version + SHA-512)
         run: |
-          npm install --global corepack@latest --no-audit --no-fund
+          pnpm_spec="$(node -e 'const p=require("./package.json").packageManager; if(typeof p!=="string"||!/^pnpm@\d+\.\d+\.\d+\+sha512\.[a-f0-9]{128}$/.test(p))throw new Error("Expected exact pnpm version and SHA-512 pin"); process.stdout.write(p)')"
           corepack enable
+          corepack prepare "$pnpm_spec" --activate
           pnpm --version
 
       - name: Install application dependencies
@@ -773,10 +777,11 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22.12.0"
-      - name: Enable pnpm via corepack (pin-verified from package.json packageManager)
+      - name: Enable repository-pinned pnpm (Node-bundled corepack, exact version + SHA-512)
         run: |
-          npm install --global corepack@latest --no-audit --no-fund
+          pnpm_spec="$(node -e 'const p=require("./package.json").packageManager; if(typeof p!=="string"||!/^pnpm@\d+\.\d+\.\d+\+sha512\.[a-f0-9]{128}$/.test(p))throw new Error("Expected exact pnpm version and SHA-512 pin"); process.stdout.write(p)')"
           corepack enable
+          corepack prepare "$pnpm_spec" --activate
           pnpm --version
 
       - name: Audit production JavaScript dependencies

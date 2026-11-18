@@ -16,7 +16,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "81183142fb5803dfc16be212e5fd6b9dcc43c8f0"
+      "git_blob_sha": "83eb437e3252f49773f9a8711ba7d8a8e8eaa83e"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -24,7 +24,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "29e8ccde2368b0b69abfac3c8cb282a69a47ea69"
+      "git_blob_sha": "f7b773b3bf7f6e462828d0ec63db6c841a36d714"
     },
     {
       "path": "apps/web/app/creative/page.tsx",
