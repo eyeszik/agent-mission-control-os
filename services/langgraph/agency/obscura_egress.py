@@ -51,6 +51,7 @@ def fetch_html(url: str, *, metadata: bool = False, respect_robots: bool = False
         if budget[0] <= 0: raise ValueError('REQUEST_LIMIT')
         budget[0] -= 1
         context = ssl.create_default_context()
+        context.minimum_version = ssl.TLSVersion.TLSv1_2  # explicit floor, as in security/mtls.py
         connection = http.client.HTTPSConnection(host, timeout=5, context=context)
         # connect directly to the validated numeric address; DNS is never consulted
         # again for this hop. TLS still authenticates the original host.

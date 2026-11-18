@@ -26,11 +26,13 @@ def tls_site(tmp_path):
         def log_message(self,*args): pass
     server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Handler)
     ctx=ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER);ctx.load_cert_chain(cert,key)
+    ctx.minimum_version=ssl.TLSVersion.TLSv1_2
     server.socket=ctx.wrap_socket(server.socket,server_side=True)
     thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
     original_dns=socket.getaddrinfo
     connect=socket.create_connection
     client=ssl.create_default_context(cafile=str(cert))
+    client.minimum_version=ssl.TLSVersion.TLSv1_2
     def route(address, **kw):
         assert address == ('8.8.8.8',443)
         return connect(('127.0.0.1',server.server_port),**kw)

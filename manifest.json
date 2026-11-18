@@ -1424,7 +1424,7 @@
     },
     {
       "path": "services/langgraph/agency/obscura_egress.py",
-      "git_blob_sha": "2266ba307f491080ac35b729a0e23f5f6a6726fd"
+      "git_blob_sha": "0373156f001589a4afac33e188a13a7c32bdd068"
     },
     {
       "path": "services/langgraph/agency/obscura_preflight.py",
