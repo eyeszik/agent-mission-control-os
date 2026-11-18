@@ -102,6 +102,22 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
 
+  packages/compiled:
+    dependencies:
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
   packages/config:
     dependencies:
       '@amc/constants':
@@ -192,6 +208,25 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
 
+  packages/design-mode:
+    dependencies:
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@amc/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
   packages/design-tokens:
     dependencies:
       '@amc/canonical':
@@ -230,6 +265,22 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
 
+  packages/guidance:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
   packages/kernel:
     devDependencies:
       typescript:
@@ -259,6 +310,53 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.1.0
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/project-os:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/design-tokens':
+        specifier: workspace:*
+        version: link:../design-tokens
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@amc/pii':
+        specifier: workspace:*
+        version: link:../pii
+      '@amc/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/prompt-families:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/guidance':
+        specifier: workspace:*
+        version: link:../guidance
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
         version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
 
   packages/shared:
@@ -291,6 +389,85 @@ importers:
         version: 7.0.2
       vitest:
         specifier: ^5.1.0
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/ui-ux:
+    dependencies:
+      '@amc/design-tokens':
+        specifier: workspace:*
+        version: link:../design-tokens
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@amc/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/vnexus:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/vnexus-brandbook:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+    devDependencies:
+      '@amc/shared':
+        specifier: workspace:*
+        version: link:../shared
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/vnexus-directions:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@amc/vnexus-brandbook':
+        specifier: workspace:*
+        version: link:../vnexus-brandbook
+    devDependencies:
+      '@amc/shared':
+        specifier: workspace:*
+        version: link:../shared
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
         version: 5.1.0(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
 
 packages:

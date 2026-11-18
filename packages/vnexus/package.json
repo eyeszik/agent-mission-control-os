@@ -1,0 +1,24 @@
+{
+  "name": "@amc/vnexus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pure core of VNEXUS ACE (genome, temporal graph, multiverse, immune checks, marketing plan), parity-checked against services/langgraph/agency/vnexus.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@amc/canonical": "workspace:*",
+    "@amc/kernel": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
