@@ -119,3 +119,12 @@ export function pyReprValue(value: unknown): string {
 export function orderedMap(entries: ReadonlyArray<readonly [string, PyValue]>): Map<string, PyValue> {
   return new Map(entries);
 }
+
+/** A Python float. Use these instead of importing `CanonicalFloat` so every consumer shares one class. */
+export function pyFloat(value: number): CanonicalFloat {
+  return new CanonicalFloat(value);
+}
+
+export function isPyFloat(value: unknown): value is CanonicalFloat {
+  return value instanceof CanonicalFloat;
+}
