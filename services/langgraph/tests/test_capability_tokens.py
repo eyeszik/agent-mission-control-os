@@ -118,6 +118,7 @@ def capability_server(monkeypatch, tmp_path, council):  # noqa: F811
     pytest.importorskip("mcp")
     pytest.importorskip("jsonschema")
     from services.langgraph.agency.council.mcp_client import file_sha256
+    from services.langgraph.tests.council_support import isolated_python
 
     issuer = cap.CapabilityIssuer()
     cap.reset_default_issuer()
@@ -125,9 +126,10 @@ def capability_server(monkeypatch, tmp_path, council):  # noqa: F811
     public_pem = tmp_path / "capability-public.pem"
     public_pem.write_bytes(issuer.public_key_pem())
     server = str(Path(__file__).parent / "fixtures" / "council_mcp_server.py")
+    interpreter = isolated_python(tmp_path)
     monkeypatch.setenv("AMC_MCP_SERVERS", json.dumps({"testsrv": {
-        "command": sys.executable, "args": ["-I", server, "--public-key-file", str(public_pem)],
-        "pins": {sys.executable: file_sha256(sys.executable), server: file_sha256(server),
+        "command": interpreter, "args": ["-I", server, "--public-key-file", str(public_pem)],
+        "pins": {interpreter: file_sha256(interpreter), server: file_sha256(server),
                  str(public_pem): file_sha256(str(public_pem))},
         "tools": {"echo_verified": {"sensitivity": "READ", "timeout_s": 20},
                   "echo": {"sensitivity": "READ"}}}}))

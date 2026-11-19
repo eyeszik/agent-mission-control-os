@@ -19,18 +19,21 @@ Requirement kinds:
 * ``HUMAN_REVIEW``: always NOT_MEASURED until an authorized human decides. The
   run's release approval is that decision, because its subject binds the
   contract hash.
+* ``DELIVERABLE``: finite quantity, format and acceptance criteria. Until the
+  existing delivery owner binds a trusted, verified inventory, the critic
+  returns NOT_MEASURED and enforce-mode release remains blocked.
 """
 
 from __future__ import annotations
 
 from typing import Literal, Optional
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from services.langgraph.agency.execution.canonical import canonical_hash
 
 CONTRACT_SCHEMA_VERSION = "amc-delivery-contract/v1"
-RequirementKind = Literal["FACT_PRESENT", "PHRASE_FORBIDDEN", "PATTERN", "HUMAN_REVIEW"]
+RequirementKind = Literal["FACT_PRESENT", "PHRASE_FORBIDDEN", "PATTERN", "HUMAN_REVIEW", "DELIVERABLE"]
 
 # A pattern engine is usable only if it is both importable and pinned in the
 # service's declared dependencies. None is pinned, so PATTERN stays rejected.
@@ -58,6 +61,25 @@ class RequiredFact(_Strict):
     source_refs: tuple[str, ...] = Field(default=(), max_length=50)
 
 
+class DeliverableSpecification(_Strict):
+    """Bounded expectation, not a caller-supplied proof of completion."""
+
+    category: Literal["BRAND", "WEB_PAGE", "SOCIAL_ASSET", "VIDEO_MASTER", "VIDEO_CUTDOWN", "CAPTIONS", "OTHER"]
+    quantity: int = Field(ge=1, le=100)
+    formats: tuple[str, ...] = Field(min_length=1, max_length=8)
+    acceptance_criteria: tuple[str, ...] = Field(min_length=1, max_length=12)
+
+    @field_validator("formats", "acceptance_criteria")
+    @classmethod
+    def _finite_nonempty_values(cls, values: tuple[str, ...]) -> tuple[str, ...]:
+        cleaned = tuple(value.strip() for value in values)
+        if any(not value or len(value) > 500 for value in cleaned):
+            raise ValueError("deliverable values must be non-empty and at most 500 characters")
+        if len(set(cleaned)) != len(cleaned):
+            raise ValueError("deliverable values must be unique")
+        return cleaned
+
+
 class ContractRequirement(_Strict):
     requirement_id: str = Field(min_length=1, max_length=120)
     kind: RequirementKind
@@ -70,6 +92,7 @@ class ContractRequirement(_Strict):
     equivalence: Optional[Literal["normalized_text"]] = None
     phrases: tuple[str, ...] = Field(default=(), max_length=200)
     pattern: Optional[str] = Field(default=None, max_length=500)
+    deliverable: Optional[DeliverableSpecification] = None
 
     @model_validator(mode="after")
     def _shape(self) -> "ContractRequirement":
@@ -88,6 +111,10 @@ class ContractRequirement(_Strict):
             raise ValueError("PATTERN requires a pattern")
         if self.kind != "PATTERN" and self.pattern is not None:
             raise ValueError("only PATTERN carries a pattern")
+        if self.kind == "DELIVERABLE" and self.deliverable is None:
+            raise ValueError("DELIVERABLE requires a deliverable specification")
+        if self.kind != "DELIVERABLE" and self.deliverable is not None:
+            raise ValueError("only DELIVERABLE carries a deliverable specification")
         return self
 
 
@@ -106,7 +133,14 @@ class DeliveryContract(_Strict):
 
 
 def contract_hash(contract: DeliveryContract) -> str:
-    return canonical_hash(contract.model_dump(mode="json"))
+    payload = contract.model_dump(mode="json")
+    # v1 contracts created before DELIVERABLE existed did not serialize this
+    # field. Preserve their hashes, including when they are reloaded through
+    # the new schema, so existing approval subjects do not silently change.
+    for requirement in payload["requirements"]:
+        if requirement["deliverable"] is None:
+            requirement.pop("deliverable")
+    return canonical_hash(payload)
 
 
 def pattern_engine_available() -> bool:

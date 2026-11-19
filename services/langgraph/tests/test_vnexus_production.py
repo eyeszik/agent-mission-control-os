@@ -66,6 +66,9 @@ def test_local_svg_job_lifecycle_idempotency_and_integrity(world):
     assert r.status_code == 201, r.text
     job = r.json()["job"]
     assert job["state"] == "QC_PASSED" and job["claimable_as_generated"] and not job["simulated"]
+    assert job["qc"]["scope"] == "TECHNICAL_FORMAT_CHECKS_ONLY"
+    assert job["qc"]["rights_status"] == "NOT_MEASURED" and job["qc"]["release_decision"] == "NOT_EVALUATED"
+    assert not any(c["check"] == "source_rights" for c in job["qc"]["checks"])
     assert job["authorized_by"] == "alice" and job["estimate"]["amount_minor"] == 0
     assert job["artifact"]["sha256"] == hashlib.sha256(SVG.encode()).hexdigest() == job["artifact"]["readback_sha256"]
     replay = _job(w, "local.svg", {"capability": "VECTOR_SVG", "spec": {"svg": SVG}, "width": 64, "height": 64}, key=key)
@@ -77,6 +80,57 @@ def test_local_svg_job_lifecycle_idempotency_and_integrity(world):
                                                                "ARTIFACT_RECEIVED", "QC_PASSED"]
     stored = client.get(f"/projects/{w['owner']}/artifacts/{job['artifact']['artifact_id']}")
     assert stored.status_code in (200, 404)  # project artifact routes vary; the job record carries the read-back proof
+
+
+def test_historical_qc_does_not_become_current_technical_or_rights_evidence(world):
+    """A pre-upgrade stored Q4 pass is preserved for audit, not projected as clearance."""
+    from services.langgraph.persistence import vnexus as db
+    from services.langgraph.persistence.database import json_param, table, transaction
+
+    w = world
+    key = str(uuid4())
+    req = {"capability": "VECTOR_SVG", "spec": {"svg": SVG}, "width": 64, "height": 64}
+    job = _job(w, "local.svg", req, key=key).json()["job"]
+    legacy = {"checks": [{"check": "svg_root", "level": "Q0_VALID_FILE", "passed": True, "detail": "old check"},
+                         {"check": "source_rights", "level": "Q4_RIGHTS", "passed": True, "detail": "procedural only"}],
+              "inconclusive": [], "passed": True, "simulated": False, "verdict": "PASSED"}
+    with transaction(write=True) as session:
+        session.execute(f"UPDATE {table('vnexus_media_jobs')} SET qc = ? WHERE job_id = ?", (json_param(legacy), job["job_id"]))
+    projected = client.get(f"/vnexus/media-jobs/{job['job_id']}").json()["job"]
+    assert projected["state"] == "QC_PASSED"  # historic transition is not rewritten
+    assert projected["claimable_as_generated"] is False
+    assert projected["qc"]["scope"] == "LEGACY_QC_REQUIRES_RECHECK"
+    assert projected["qc"]["verdict"] == "NOT_EVALUATED" and projected["qc"]["passed"] is None
+    assert projected["qc"]["rights_status"] == "NOT_MEASURED" and projected["qc"]["release_decision"] == "NOT_EVALUATED"
+    assert projected["qc"]["recheck_required"] is True
+    assert not any(c.get("check") == "source_rights" for c in projected["qc"]["checks"])
+    assert db.get_media_job(job["job_id"])["qc"] == legacy  # projection never mutates the audit record
+    replay = _job(w, "local.svg", req, key=key).json()["job"]
+    assert replay["job_id"] == job["job_id"] and replay["claimable_as_generated"] is False
+
+
+def test_qc_projection_rejects_inconsistent_or_unscoped_records():
+    import copy
+    from services.langgraph.agency.vnexus.fabric_service import TECHNICAL_QC_SCOPE, public_qc
+
+    current = {"checks": [{"check": "svg_root", "level": "Q0_VALID_FILE", "passed": True, "detail": "ok"}],
+               "inconclusive": [], "passed": True, "simulated": False, "verdict": "PASSED",
+               "scope": TECHNICAL_QC_SCOPE, "rights_status": "NOT_MEASURED", "release_decision": "NOT_EVALUATED"}
+    assert public_qc(current, state="QC_PASSED") == current
+    assert public_qc({}, state="PLANNED") == {}
+    cases = []
+    forged_rights = copy.deepcopy(current)
+    forged_rights["checks"].append({"check": "source_rights", "level": "Q4_RIGHTS", "passed": True, "detail": "claimed"})
+    cases.append(forged_rights)
+    contradictory = copy.deepcopy(current)
+    contradictory["checks"][0]["passed"] = False
+    cases += [contradictory, {**current, "checks": []}, {**current, "inconclusive": ["undone"]},
+              {**current, "rights_status": "CLEARED"}, {}]
+    for raw in cases:
+        projected = public_qc(raw, state="QC_PASSED")
+        assert projected["scope"] == "LEGACY_QC_REQUIRES_RECHECK"
+        assert projected["passed"] is None and projected["verdict"] == "NOT_EVALUATED"
+        assert projected["rights_status"] == "NOT_MEASURED" and projected["recheck_required"] is True
 
 
 def test_rejections_are_failures_not_outputs(world):
@@ -162,6 +216,94 @@ def test_production_requires_an_approved_genome(world):
     assert client.post(f"/vnexus/versions/{v['version_id']}/submit", headers=headers()).status_code == 409
 
 
+def test_historical_qc_cannot_promote_identity_or_video_reports(approved, monkeypatch):
+    """Synthetic old jobs exercise report decisions without rendering any media."""
+    from services.langgraph.agency.vnexus import production
+
+    w = approved
+    legacy = {"job_id": "synthetic-legacy-job", "state": "QC_PASSED", "error": None, "request": {},
+              "artifact": {"artifact_id": "synthetic-old-artifact", "sha256": "a" * 64, "simulated": False},
+              "qc": {"checks": [{"check": "source_rights", "level": "Q4_RIGHTS", "passed": True, "detail": "old"}],
+                     "inconclusive": [], "passed": True, "simulated": False, "verdict": "PASSED"}}
+    monkeypatch.setattr(production, "_run_spec", lambda *_args, **_kwargs: legacy)
+    identity = _produce(w, "identity", {"deliverables": ["monogram"]})
+    assert identity.status_code == 200, identity.text
+    report = identity.json()
+    assert report["qc_projection_version"] == "amc-vnexus-technical-qc-projection/v2"
+    assert report["status"] == "INCOMPLETE" and report["outputs"][0]["technical_qc_passed"] is False
+    assert report["outputs"][0]["claimable_as_generated"] is False and "graph_node" not in report["outputs"][0]
+
+    monkeypatch.setattr(production.fabric_service, "execute", lambda *_args, **_kwargs: legacy)
+    result = _produce(w, "video", {"brief": {"objective": "fixture", "headline": "Hello", "cta": "Go",
+                                             "width": 320, "height": 180, "fps": 8, "max_duration_s": 6}})
+    assert result.status_code == 200, result.text
+    report = result.json()
+    assert report["qc_projection_version"] == "amc-vnexus-technical-qc-projection/v2"
+    assert report["status"] == "INCOMPLETE" and not report["stages"]["master"]["procedural_preview_available"]
+    assert report["stages"]["quality_control"]["scope"] == "LEGACY_QC_REQUIRES_RECHECK"
+    assert not report["stages"]["master"]["deliverables"]
+
+
+def test_simulated_technical_qc_cannot_promote_identity_or_video_reports(approved, monkeypatch):
+    """A mock may test the lifecycle, but never becomes a generated deliverable."""
+    from services.langgraph.agency.vnexus import fabric_service, production
+
+    w = approved
+    simulated = {"job_id": "synthetic-mock-job", "state": "QC_PASSED", "error": None, "request": {},
+                 "artifact": {"artifact_id": "synthetic-artifact", "sha256": "a" * 64, "simulated": True},
+                 "qc": {"checks": [{"check": "svg_root", "level": "Q0", "passed": True, "detail": "mock"}],
+                        "inconclusive": [], "passed": True, "simulated": True, "verdict": "SIMULATED_ONLY",
+                        "scope": fabric_service.TECHNICAL_QC_SCOPE, "rights_status": "NOT_MEASURED",
+                        "release_decision": "NOT_EVALUATED"}}
+    monkeypatch.setattr(production, "_run_spec", lambda *_args, **_kwargs: simulated)
+    identity = _produce(w, "identity", {"deliverables": ["monogram"]}).json()
+    assert identity["status"] == "INCOMPLETE" and not identity["outputs"][0]["claimable_as_generated"]
+    assert "graph_node" not in identity["outputs"][0]
+    monkeypatch.setattr(production.fabric_service, "execute", lambda *_args, **_kwargs: simulated)
+    video = _produce(w, "video", {"brief": {"objective": "fixture", "headline": "Hello", "cta": "Go",
+                                            "width": 320, "height": 180, "fps": 8, "max_duration_s": 6}}).json()
+    assert video["status"] == "INCOMPLETE" and not video["stages"]["master"]["deliverables"]
+
+
+@pytest.mark.parametrize("kind,body", [("identity", {"deliverables": ["monogram"]}),
+                                      ("video", {"brief": {"objective": "fixture", "headline": "Hello", "cta": "Go"}})])
+def test_production_replays_reauthorize_and_refuse_legacy_receipts(approved, monkeypatch, kind, body):
+    """Synthetic generation: replays never invoke the producer or bypass current access."""
+    from services.langgraph.agency.vnexus import fabric_service, production
+    from services.langgraph.persistence.database import json_param, table, transaction
+    from services.langgraph.persistence.idempotency import get_idempotency_record
+
+    w = approved
+    calls = []
+    def produce(*_args, **_kwargs):
+        calls.append(kind)
+        return {"kind": kind, "qc_projection_version": fabric_service.QC_PROJECTION_VERSION,
+                "receipt_scope": "historical result; revalidate inputs and approvals before any release", "status": "INCOMPLETE"}
+    monkeypatch.setattr(production, f"produce_{kind}", produce)
+    key = f"receipt-{uuid4().hex}"
+    first = _produce(w, kind, body, key=key)
+    assert first.status_code == 200, first.text
+    replay = _produce(w, kind, body, key=key)
+    assert replay.status_code == 200 and replay.json() == first.json() and calls == [kind]
+
+    # Same actor/key but no longer authorized for this project, then read-only.
+    as_user(monkeypatch, "alice", role="editor", tenant=w["tenant"], projects=w["other"])
+    assert _produce(w, kind, body, key=key).status_code == 403
+    as_user(monkeypatch, "alice", role="viewer", tenant=w["tenant"], projects=w["owner"])
+    assert _produce(w, kind, body, key=key).status_code == 403
+    as_user(monkeypatch, "alice", role="editor", tenant=w["tenant"])
+
+    scope = f"{w['tenant']}:alice:vnexus.production.{kind}"
+    old = dict(first.json())
+    del old["qc_projection_version"]
+    with transaction(write=True) as session:
+        session.execute(f"UPDATE {table('idempotency_records')} SET result = ? WHERE scope = ? AND key = ?",
+                        (json_param(old), scope, key))
+    refused = _produce(w, kind, body, key=key)
+    assert refused.status_code == 409 and "LEGACY_QC_RECEIPT_RECHECK_REQUIRED" in refused.text
+    assert calls == [kind] and get_idempotency_record(scope, key)["result"] == old
+
+
 @needs_browser
 def test_identity_production_end_to_end(approved):
     w = approved
@@ -181,6 +323,7 @@ def test_identity_production_end_to_end(approved):
     assert checks[("poster", "text_contrast")]["status"] == "PASSED"
     assert all(v["status"] == "PASSED" for v in rep["validations"] if v["check"] == "palette_conformance")
     assert rep["status"] == "VERIFIED" and "visual coherence" in rep["human_review_required"]
+    assert rep["rights_status"] == "NOT_MEASURED" and rep["release_decision"] == "NOT_EVALUATED"
     graph = client.get(f"/vnexus/brands/{w['brand']}/graph").json()
     gv = next(n for n in graph["nodes"] if n["kind"] == "GenomeVersion")
     impact = client.post(f"/vnexus/brands/{w['brand']}/graph/impact", json={"node_ids": [gv["node_id"]]}).json()
@@ -229,10 +372,15 @@ def test_video_production_procedural_master_captions_and_blocked_ai_shot(approve
                                         "height": 270, "fps": 12, "max_duration_s": 10, "include_shots": ["LIVE_ACTION"]}})
     assert r.status_code == 200, r.text
     rep = r.json()
-    assert rep["status"] == "MASTER_READY"
+    assert rep["status"] == "INCOMPLETE"  # the requested live-action shot did not run
     master = rep["stages"]["master"]
+    assert master["procedural_preview_available"] is True and "REQUESTED_SHOTS_BLOCKED" in master["reasons"], {
+        "master": master, "compositing": rep["stages"].get("compositing"), "quality": rep["stages"].get("quality_control")
+    }
     assert {"master_silent", "captions", "reduced_motion_still"} <= set(master["deliverables"])
     assert master["procedural_only"] is True and master["blocked_shots"] == ["x1"]
+    assert master["rights_status"] == "NOT_MEASURED" and master["release_decision"] == "NOT_EVALUATED"
+    assert rep["stages"]["quality_control"]["scope"] == "TECHNICAL_FORMAT_CHECKS_ONLY"
     blocked = rep["stages"]["render_jobs"]["blocked_shots"][0]
     assert blocked["state"] == "FAILED" and "PROVIDER_DISABLED" in blocked["error"]
     assert rep["stages"]["audio"]["status"] == "SILENT"
@@ -259,6 +407,41 @@ def test_video_audio_requires_licence_and_muxes_real_audio(approved, tmp_path):
             "audio_artifact_id": audio["artifact_id"]}
     refused = _produce(w, "video", {"brief": base}).json()
     assert refused["stages"]["audio"]["status"] == "REFUSED"
+    assert refused["status"] == "INCOMPLETE" and "REQUESTED_AUDIO_UNAVAILABLE" in refused["stages"]["master"]["reasons"]
     muxed = _produce(w, "video", {"brief": {**base, "audio_licence": "test tone generated locally by ffmpeg lavfi; no third-party rights"}}).json()
     assert muxed["stages"]["audio"]["status"] == "MUXED" and muxed["stages"]["audio"]["streams"] == ["audio", "video"]
+    assert muxed["status"] == "MASTER_READY"
+    assert muxed["stages"]["master"]["release_decision"] == "NOT_EVALUATED"
+    assert muxed["stages"]["master"]["rights_status"] == "NOT_MEASURED"
     assert "master_with_audio" in muxed["stages"]["master"]["deliverables"]
+
+
+def test_video_budget_preserves_the_cta_and_never_silently_drops_shots():
+    from pydantic import ValidationError
+    from services.langgraph.agency.vnexus.video import ShotKind, VideoBrief, shot_list
+
+    brief = VideoBrief(objective="Introduce the studio", headline="See the work", points=("Map handoffs", "Plan next steps"),
+                       cta="Discuss your workflow", fps=12, max_duration_s=6, include_shots=(ShotKind.LIVE_ACTION,))
+    shots = shot_list(brief, "Northline")
+    procedural = [s for s in shots if s.path == "A_PROCEDURAL"]
+    assert [s.kind for s in procedural] == [ShotKind.MARK_REVEAL, ShotKind.HEADLINE, ShotKind.VALUE_POINTS, ShotKind.CALL_TO_ACTION]
+    assert procedural[-1].text == ("Discuss your workflow",)
+    assert all(s.transition == "cut" for s in procedural)  # the renderer is cut-only, not a crossfade compositor
+    assert sum(round(s.duration_s * brief.fps) for s in procedural) <= 6 * 12
+    assert all(round(s.duration_s * brief.fps) >= brief.fps for s in procedural)
+    assert any(s.kind == ShotKind.LIVE_ACTION and s.path == "B_AI_PROVIDER" for s in shots)
+    with pytest.raises(ValueError, match="VIDEO_BUDGET_TOO_SHORT"):
+        shot_list(brief.model_copy(update={"max_duration_s": 3}), "Northline")
+    with pytest.raises(ValidationError, match="only extra footage"):
+        VideoBrief(objective="x", include_shots=(ShotKind.HEADLINE,))
+
+
+def test_video_caption_text_is_escaped_and_timestamps_roll_over():
+    from services.langgraph.agency.vnexus.video import Shot, ShotKind, webvtt
+
+    shot = Shot(shot_id="s1", kind=ShotKind.HEADLINE, duration_s=1, text=("Hello <world>\n\n00:00:01.000 --> attack",),
+                camera="static", transition="cut", path="A_PROCEDURAL")
+    text = webvtt([{"shot_id": "s1", "start_s": 59.9999, "end_s": 61.0}], [shot])
+    assert "00:01:00.000 --> 00:01:01.000" in text
+    assert "&lt;world&gt;" in text and "--&gt; attack" in text
+    assert text.count(" --> ") == 1

@@ -45,10 +45,24 @@ def _graph(brand_id: str, *, as_of: Optional[str] = None, conn: Any = None) -> G
     return Graph([Node(**n) for n in nodes], [Edge(**e) for e in edges], as_of=as_of)
 
 
-def _brand_access(principal: Principal, brand_id: str, *, write: bool = False) -> dict:
+def require_brand_graph_access(principal: Principal, brand_id: str, *, write: bool = False) -> dict:
+    """Fail closed until graph records have enforceable project-level scope.
+
+    Graph nodes can contain data from several projects and older nodes do not
+    uniformly identify their originating project. Owner-project access alone
+    cannot authorize a brand-wide graph. A wildcard principal already has
+    tenant-wide project access; this guard must not be bypassed by granting a
+    wildcard to an otherwise restricted user.
+    """
     brand = service.brand_for(principal, brand_id)
     service.authorize(principal, brand["owner_project_id"], write=write)
+    if "*" not in principal.allowed_project_ids:
+        raise PermissionError("brand-wide graph requires tenant-wide project access until project-scoped lineage is enforced")
     return brand
+
+
+def _brand_access(principal: Principal, brand_id: str, *, write: bool = False) -> dict:
+    return require_brand_graph_access(principal, brand_id, write=write)
 
 
 def _attributes(attributes: dict[str, Any]) -> dict[str, Any]:
@@ -188,8 +202,11 @@ def _branch(principal: Principal, branch_id: str) -> dict:
     return row
 
 
-def _ancestors(row: dict) -> list:
-    """Approved layers strictly above the branch's scope."""
+def _ancestors(principal: Principal, row: dict) -> list:
+    """Approved layers strictly above the branch's scope, subject to source access."""
+    brand = service.brand_for(principal, row["brand_id"])
+    service.authorize(principal, brand["owner_project_id"])
+    service.authorize(principal, row["project_id"])
     layers = service.layers_for(row["brand_id"], Scope(row["scope"]), row["scope_ref"])
     return [layer for layer in layers if layer.scope_ref != row["scope_ref"] or layer.scope.value != row["scope"]]
 
@@ -256,7 +273,7 @@ def edit(principal: Principal, branch_id: str, *, expected_revision: int, change
 def compare(principal: Principal, branch_id: str) -> dict[str, Any]:
     row = _branch(principal, branch_id)
     _, base_doc = _base(principal, row["base_version_id"])
-    report = compare_with_base(base_doc, ChangeSet.model_validate(row["changes"]), _ancestors(row), scope_ref=row["scope_ref"],
+    report = compare_with_base(base_doc, ChangeSet.model_validate(row["changes"]), _ancestors(principal, row), scope_ref=row["scope_ref"],
                                scope=row["scope"])
     current = db.approved_version(row["brand_id"], row["scope"], row["scope_ref"])
     report["base_is_current"] = bool(current and current["version_id"] == row["base_version_id"])

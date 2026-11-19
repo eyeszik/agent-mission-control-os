@@ -431,6 +431,7 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
         package_entry = _put(principal, project_id, f"{base}-package", package_bytes, "package",
                              depends_on=(book_entry["artifact_id"],))
         pdf = None
+        pdf_failure: list[str] = []
         if mode is Mode.PRODUCTION and can_measure:
             prior = _read(project_id, f"{base}-build")
             prior_doc = json.loads(prior[0]) if prior else {}
@@ -445,6 +446,12 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
                     entry = _put(principal, project_id, f"{base}-book-pdf", Path(run["capture"]).read_bytes(), "pdf",
                                  depends_on=(book_entry["artifact_id"],))
                     pdf = {"artifact_id": entry["artifact_id"], "version": entry["version"], "sha256": entry["sha256"]}
+                else:
+                    # A missing PDF is part of the record, never a silent None.
+                    # Otherwise the build reports READY_FOR_APPROVAL with no way
+                    # to tell why the document is absent, and the failure only
+                    # appears as an assertion in a caller.
+                    pdf_failure = list(run.get("findings") or ["PDF_UNKNOWN_FAILURE"])
         t = lap("assemble", t)
     all_checks = [c for pg in book.pages for c in page_checks.get(pg.page_id, [])]
     blocking_checks = checksmod.blocking(all_checks)
@@ -480,6 +487,12 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
                    "validated": ("NOT_RUN" if not can_measure else ("FAILED" if blocking_checks else "PASSED")),
                    "released": "NOT_RELEASED"},
     }
+    if pdf_failure:
+        # Only present when printing actually failed. Adding it unconditionally
+        # would change the response shape of every successful build and break
+        # the recorded contract fixture, which is exactly what a stale fixture
+        # is supposed to catch.
+        record["pdf_failure"] = pdf_failure
     record["build_hash"] = canonical_hash(record)
     build_entry = _put(principal, project_id, f"{base}-build", (json.dumps(record, sort_keys=True, indent=2) + "\n").encode(),
                        "build", depends_on=(book_entry["artifact_id"],))

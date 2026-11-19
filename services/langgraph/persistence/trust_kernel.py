@@ -12,7 +12,7 @@ from services.langgraph.agency.reliability.models import (
     TenantProjectBinding,
 )
 from services.langgraph.agency.reliability.store import ReliabilityState, ReliabilityStoreError
-from services.langgraph.persistence.database import json_param, table, transaction
+from services.langgraph.persistence.database import is_postgres, json_param, table, transaction
 from services.langgraph.persistence.tenancy import ensure_tenant_project
 
 
@@ -174,8 +174,27 @@ class DatabaseReliabilityStore:
             ),
         )
 
+    # Every audit append must see the current tip of the chain, and the sequence
+    # has to be assigned from inside the same critical section. SQLite gets that
+    # for free: transaction(write=True) takes BEGIN IMMEDIATE, so writers are
+    # serialized and read-then-insert cannot interleave. PostgreSQL gives no such
+    # guarantee -- READ COMMITTED lets two writers both read tip N, both compute
+    # N+1 and both insert -- so the chain is serialized explicitly with a
+    # transaction-scoped advisory lock, held from just before the tip is read
+    # until commit or rollback. Taking the lock inside append_audit alone is not
+    # enough: the caller computes seq from store.state before it calls, so that
+    # value was already stale by the time the lock was taken.
+    _AUDIT_CHAIN_LOCK = "amc_audit_chain_tip_v1"
+
+    @staticmethod
+    def lock_audit_chain(tx) -> None:
+        """Serialize audit-chain writers for the life of this transaction."""
+        if is_postgres():
+            tx.execute("SELECT pg_advisory_xact_lock(hashtext(?))", (DatabaseReliabilityStore._AUDIT_CHAIN_LOCK,))
+
     @staticmethod
     def append_audit(tx, value: AuditCheckpoint) -> None:
+        DatabaseReliabilityStore.lock_audit_chain(tx)
         last = tx.execute(f"SELECT seq FROM {table('audit_checkpoints')} ORDER BY seq DESC LIMIT 1").fetchone()
         expected = (int(last["seq"]) + 1) if last else 1
         if value.seq != expected:

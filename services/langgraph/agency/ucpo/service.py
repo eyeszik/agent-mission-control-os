@@ -96,18 +96,30 @@ def _check_site_id(site_id: str) -> None:
 
 def _put(principal: Principal, project_id: str, site_id: str, stage: str, data: bytes, *, adapter: StorageAdapter,
          depends_on: tuple[str, ...] = (), spec: Optional[tuple[str, str, str]] = None, name: Optional[str] = None) -> dict:
-    """Store one stage through the Foundry store, after the N3 role check. Re-confirms unchanged-but-invalidated heads."""
-    from services.langgraph.persistence.agency_kernel import get_artifact
-    from services.langgraph.persistence.projects import revise_project_artifact
+    """Store and reconnect a stage through Project OS; never overwrite a colliding key."""
+    from services.langgraph.persistence.agency_kernel import ensure_artifact_dependency, get_artifact
+    from services.langgraph.persistence.projects import _dependency_refs, project_artifact_id, revise_project_artifact
 
     role, artifact_type, mime = spec or STAGES[stage]
     assert_role_may_produce(role, artifact_type)
+    artifact_id = project_artifact_id(project_id, "foundry-" + (name or _name(site_id, stage)))
+    prior = get_artifact(artifact_id)
+    if prior and (prior["project_id"] != project_id or prior["tenant_id"] != principal.tenant_id
+                  or prior.get("subtype") != f"ucpo.{stage}"):
+        raise ValueError("UCPO_ARTIFACT_KEY_COLLISION: use distinct shorter site or image ids")
+    existing_deps = set(_dependency_refs(artifact_id)) if prior else set()
+    new_deps = set(depends_on) - existing_deps if prior else set()
     entry = store(principal, project_id, name or _name(site_id, stage), data, mime=mime, artifact_type=artifact_type,
                   subtype=f"ucpo.{stage}", adapter=adapter, depends_on=depends_on,
                   v2={"ucpo_stage": stage, "ucpo_site": site_id, "produced_by_role": role})
+    # Foundry creates edges for new heads; revised/reused heads may gain inputs too.
+    # Retain removed edges conservatively: Project OS has no reviewed edge-removal API.
+    for upstream in depends_on:
+        ensure_artifact_dependency(entry["artifact_id"], upstream)
     head = get_artifact(entry["artifact_id"])
-    if entry["action"] == "reused_unchanged" and head and head.get("status") in {"invalidated", "review_required"}:
-        # Same bytes under changed upstream inputs: record that it was re-derived, so lineage is current again.
+    if entry["action"] == "reused_unchanged" and head and (
+            new_deps or head.get("status") in {"invalidated", "review_required"}):
+        # Same bytes with new or invalidated inputs still require a new derivation record.
         revised = revise_project_artifact(project_id=project_id, artifact_id=entry["artifact_id"], actor=principal.user_id,
                                           adapter=adapter, expected_version=int(head["version"]),
                                           content_hash=head["content_hash"], storage_uri=head["content_location"],
@@ -121,31 +133,77 @@ def _read(entry_or_id: Any, adapter: StorageAdapter) -> tuple[bytes, dict]:
     return observe(artifact_id, adapter)
 
 
-def site_job_id(project_id: str, site_id: str, source_hash: str) -> str:
-    return "ucpo-" + canonical_hash({"project": project_id, "site": site_id, "source": source_hash})[:40]
+def site_job_id(project_id: str, site_id: str, source_hash: str, handoff_hash: Optional[str] = None) -> str:
+    identity = {"project": project_id, "site": site_id, "source": source_hash}
+    if handoff_hash:
+        identity["brand_handoff"] = handoff_hash
+    return "ucpo-" + canonical_hash(identity)[:40]
 
 
 # ------------------------------------------------------------------------------ compile (trusted, deterministic)
 
 
+def lock_site(db: Any, tenant_id: str, project_id: str, site_id: str) -> None:
+    """Serialize competing compiles/commits for a site within the joined DB transaction.
+
+    SQLite's BEGIN IMMEDIATE supplies the write lock; PostgreSQL needs a stable
+    advisory transaction lock even when no artifact row exists yet.
+    """
+    from services.langgraph.persistence.database import is_postgres
+
+    _check_site_id(site_id)
+    if is_postgres():
+        db.execute("SELECT pg_advisory_xact_lock(hashtextextended(?, 0))",
+                   (f"ucpo-site:{tenant_id}:{project_id}:{site_id}",))
+
+
 def compile_site_line(principal: Principal, project_id: str, site_id: str, brief: WebsiteBrief, *,
-                      adapter: StorageAdapter, export_root: Path) -> dict:
-    """Run the deterministic stages, persist them, and enqueue the sandboxed build. Never executes generated code."""
+                      adapter: StorageAdapter, export_root: Path, brand_inputs: Optional[dict] = None) -> dict:
+    """Atomically persist the deterministic stages and enqueue the sandboxed build.
+
+    Content-addressed bytes may be orphaned if the database rolls back; no
+    artifact heads, dependency edges or jobs become visible in that case.
+    No generated source executes here.
+    """
+    from services.langgraph.persistence.database import atomic_transaction
+
+    with atomic_transaction() as db:
+        lock_site(db, principal.tenant_id, project_id, site_id)
+        return _compile_site_line(principal, project_id, site_id, brief, adapter=adapter, export_root=export_root,
+                                  brand_inputs=brand_inputs)
+
+
+def _compile_site_line(principal: Principal, project_id: str, site_id: str, brief: WebsiteBrief, *,
+                       adapter: StorageAdapter, export_root: Path, brand_inputs: Optional[dict] = None) -> dict:
     from services.langgraph.persistence import durable_runs
     from services.langgraph.persistence.database import atomic_transaction
     from services.langgraph.persistence.events import record_event
+    from services.langgraph.persistence.projects import project_artifact_id
     from services.langgraph.persistence.runs import create_run_record, get_run_record
 
     _check_site_id(site_id)
+    # Project OS artifact keys are truncated. Reject within-site collisions
+    # before a single stage is written rather than overwriting another image.
+    names = [*(_name(site_id, stage) for stage in STAGES),
+             *(_name(site_id, f"image-{image.asset_id}") for image in brief.images)]
+    artifact_ids = [project_artifact_id(project_id, "foundry-" + name) for name in names]
+    if len(artifact_ids) != len(set(artifact_ids)):
+        raise ValueError("UCPO_ARTIFACT_KEY_COLLISION: use distinct shorter site or image ids")
+    from .brand_web import handoff_head
+
+    if brand_inputs is None and handoff_head(project_id, site_id, adapter) is not None:
+        raise ValueError("BRAND_BOUND_SITE: compile this site through its approved brand handoff")
     stages: dict[str, dict] = {}
-    stages["brief"] = _put(principal, project_id, site_id, "brief", _dump(brief), adapter=adapter)
+    copy_deps = (brand_inputs["copy"]["artifact_id"],) if brand_inputs else ()
+    stages["brief"] = _put(principal, project_id, site_id, "brief", _dump(brief), adapter=adapter, depends_on=copy_deps)
     pkg = compile_requirements(brief, project_ref=project_id)
     stages["requirements"] = _put(principal, project_id, site_id, "requirements", _dump(pkg), adapter=adapter,
                                   depends_on=(stages["brief"]["artifact_id"],))
     genome = psem.compile_psem_genome(psem.psem_brief(brief.organization, offering=brief.offering,
                                                       target_audience=brief.audience, seed=brief.seed), project_id=project_id)
+    visual_deps = (brand_inputs["visual"]["artifact_id"],) if brand_inputs else (stages["brief"]["artifact_id"],)
     stages["genome"] = _put(principal, project_id, site_id, "genome", _dump(genome), adapter=adapter,
-                            depends_on=(stages["brief"]["artifact_id"],))
+                            depends_on=visual_deps)
     token_doc, token_css, token_hash = psem.compile_psem_tokens(genome)
     stages["tokens"] = _put(principal, project_id, site_id, "tokens", _dump({"dtcg": token_doc, "css": token_css,
                                                                              "source_hash": token_hash}),
@@ -155,16 +213,23 @@ def compile_site_line(principal: Principal, project_id: str, site_id: str, brief
         svg = psem.plate(genome, title=image.alt, motif_seed=image.motif_seed).encode()
         images.append(_put(principal, project_id, site_id, f"image-{image.asset_id}", svg, adapter=adapter,
                            depends_on=(stages["genome"]["artifact_id"],), spec=IMAGE_STAGE))
-    arch, ir = compile_site(brief, pkg, genome, token_refs={"dtcg_source_hash": token_hash})
+    arch, ir = compile_site(brief, pkg, genome, token_refs={"dtcg_source_hash": token_hash},
+                            primary_accent=brand_inputs["primary"] if brand_inputs else "signal_red")
+    ir_deps = (stages["requirements"]["artifact_id"], stages["tokens"]["artifact_id"])
+    if brand_inputs:
+        ir_deps += (brand_inputs["visual"]["artifact_id"],)
     stages["site_ir"] = _put(principal, project_id, site_id, "site_ir", _dump({"architecture": arch.model_dump(mode="json"),
                                                                               "ir": ir.model_dump(mode="json")}),
-                             adapter=adapter, depends_on=(stages["requirements"]["artifact_id"], stages["tokens"]["artifact_id"]))
+                             adapter=adapter, depends_on=ir_deps)
     files, manifest = generate_source(ir, genome, token_css)
     stages["source"] = _put(principal, project_id, site_id, "source", pack_tree(files, manifest), adapter=adapter,
                             depends_on=(stages["site_ir"]["artifact_id"], *(i["artifact_id"] for i in images)))
     report, _ = evaluate(pkg, arch=arch, ir=ir, files=files, manifest=manifest)
 
     refs = {k: _ref(v) for k, v in stages.items()} | {i["stage"]: _ref(i) for i in images}
+    if brand_inputs:
+        refs.update({"brand_handoff": _ref(brand_inputs["binding"]), "brand_copy": _ref(brand_inputs["copy"]),
+                     "brand_visual": _ref(brand_inputs["visual"])})
     job_spec = {"ucpo": {"site_id": site_id, "routes": [p.route for p in ir.pages], "artifact_refs": refs,
                          "source": {k: stages["source"][k] for k in ("artifact_id", "version", "content_hash")},
                          "revisions": {"brief": brief.content_hash, "requirements": pkg.content_hash,
@@ -172,7 +237,8 @@ def compile_site_line(principal: Principal, project_id: str, site_id: str, brief
                                        "source": manifest.tree_hash}},
                 "export_root": str(export_root)}
     spec_hash = canonical_hash(job_spec["ucpo"])
-    job_id = site_job_id(project_id, site_id, stages["source"]["content_hash"])
+    handoff_hash = brand_inputs["binding"]["content_hash"] if brand_inputs else None
+    job_id = site_job_id(project_id, site_id, stages["source"]["content_hash"], handoff_hash)
     with atomic_transaction():
         job = durable_runs.create_job(tenant_id=principal.tenant_id, project_id=project_id, kind=KIND, spec=job_spec,
                                       spec_hash=spec_hash, requested_by=principal.user_id, due_at=_now(), job_id=job_id)
@@ -241,8 +307,26 @@ class SiteBuildHandler:
             return RunState.BLOCKED_AUTHORITY, ["PROJECT_NOT_ADMISSIBLE"]
         src = _spec(job)["source"]
         head = get_artifact(src["artifact_id"])
-        if head is None or (int(head["version"]), head["content_hash"]) != (src["version"], src["content_hash"]):
-            return RunState.BLOCKED_ENVIRONMENT, ["SOURCE_SUPERSEDED: a newer source revision exists; build that instead"]
+        if (head is None or (int(head["version"]), head["content_hash"]) != (src["version"], src["content_hash"])
+                or head.get("status") in {"invalidated", "review_required"}):
+            return RunState.BLOCKED_ENVIRONMENT, ["SOURCE_SUPERSEDED: a newer or invalidated source exists; rebuild that instead"]
+        from .release import parse_ref
+
+        for stage, ref in sorted(_spec(job)["artifact_refs"].items()):
+            try:
+                artifact_id, version = parse_ref(ref)
+                current = get_artifact(artifact_id)
+                if (current is None or current["project_id"] != job["project_id"] or current["tenant_id"] != job["tenant_id"]
+                        or int(current["version"]) != version or current.get("status") in {"invalidated", "review_required"}):
+                    return RunState.BLOCKED_ENVIRONMENT, [f"INPUT_STALE:{stage}"]
+            except (ValueError, TypeError, KeyError):
+                return RunState.BLOCKED_ENVIRONMENT, [f"INPUT_INVALID:{stage}"]
+        brand_ref = _spec(job)["artifact_refs"].get("brand_handoff")
+        if brand_ref:
+            from .brand_web import freshness
+            problems = freshness(_requester(job), job["project_id"], _spec(job)["site_id"], _adapter(job), expected_ref=brand_ref)
+            if problems:
+                return RunState.BLOCKED_ENVIRONMENT, problems
         return None, []
 
     def pre_image(self, job: dict) -> dict:
@@ -311,10 +395,17 @@ class SiteBuildHandler:
         record = json.loads(adapter.get_bytes(observation["storage_uri"]))
         build = BuildResult.model_validate(record["build"])
         qa = BrowserVerification.model_validate(record["browser_qa"]) if record["browser_qa"] else None
-        loaded = load_stages(job["project_id"], spec["site_id"], adapter)
         site_id, project = spec["site_id"], job["project_id"]
         with atomic_transaction() as db:
+            lock_site(db, job["tenant_id"], project, site_id)
             durable_runs._active_fence(db, job_id=job["job_id"], fencing_token=job["lease_token"], now=_now())
+            # The current site inputs are read under the same lock as compile;
+            # a site revision cannot slip between this check and proof creation.
+            blocked, reasons = self.precheck(job)
+            if blocked:
+                update_run_status(job["job_id"], "blocked")
+                return RunState.DORMANT, {"site_id": site_id, "eligible_for_approval": False, "reasons": reasons}
+            loaded = load_stages(project, site_id, adapter)
             src_id = spec["source"]["artifact_id"]
             b = _put(principal, project, site_id, "build", _dump(record), adapter=adapter, depends_on=(src_id,))
             q = _put(principal, project, site_id, "browser_qa", _dump(qa or {"status": "NOT_RUN", "reason": build.status}),
@@ -330,7 +421,11 @@ class SiteBuildHandler:
                                                    "coverage": report.content_hash}
             proof = seal_proof(project_ref=project, site_id=site_id, revisions=revisions, artifact_refs=refs, build=build,
                                qa=qa, coverage=report)
-            p = _put(principal, project, site_id, "release_proof", _dump(proof), adapter=adapter, depends_on=(c["artifact_id"],))
+            proof_deps = (c["artifact_id"],)
+            if "brand_handoff" in refs:
+                from .release import parse_ref
+                proof_deps += (parse_ref(refs["brand_handoff"])[0],)
+            p = _put(principal, project, site_id, "release_proof", _dump(proof), adapter=adapter, depends_on=proof_deps)
             approval = None
             if proof.eligible_for_approval:
                 from services.langgraph.agency.intake.release import open_artifact_approval
@@ -415,14 +510,20 @@ def inspect_site(principal: Principal, project_id: str, site_id: str, *, adapter
     from services.langgraph.persistence import durable_runs
     from services.langgraph.persistence.agency_kernel import get_artifact
 
+    from .brand_web import freshness, handoff_head
+
     s = load_stages(project_id, site_id, adapter)
-    job_id = site_job_id(project_id, site_id, s["entries"]["source"]["content_hash"]) if "source" in s["entries"] else None
+    handoff = handoff_head(project_id, site_id, adapter)
+    handoff_hash = handoff[1]["content_hash"] if handoff else None
+    job_id = site_job_id(project_id, site_id, s["entries"]["source"]["content_hash"], handoff_hash) if "source" in s["entries"] else None
     job = durable_runs.get_job(job_id) if job_id else None
     result = (job or {}).get("result") or {}
     proof, proof_entry = s["proof"], s["entries"].get("release_proof")
     proof_current = bool(proof and result.get("proof_artifact", {}).get("version") == (proof_entry or {}).get("version")
                          and proof.revisions.get("source") == (s["manifest"].tree_hash if s["manifest"] else None))
     stale = stale_reasons(proof, get_artifact) if proof else []
+    if handoff:
+        stale.extend(freshness(principal, project_id, site_id, adapter))
     if proof and not proof_current:
         stale.append("PROOF_STALE: the proof does not belong to the current source revision")
     approval = result.get("approval") if proof_current else None

@@ -69,12 +69,25 @@ test.describe('Agent Mission Control local release smoke', () => {
     await expect(page.getByText('Lineage Remediation Queue', { exact: true })).toBeVisible();
     await expect(page.getByText('Run Remediation', { exact: true })).toBeVisible();
     await expect(page.getByTestId('mc-compile-blocked-banner')).toBeVisible();
-    await expect(page.getByTestId('mc-release-btn')).toBeVisible();
-    await expect(page.getByTestId('mc-release-btn')).toBeDisabled();
+    // The panel renders one approve button per pending approval, and a project can hold
+    // approvals from earlier runs. Assert on this run's button by its id, and keep the
+    // invariant that matters: while the compile gate is blocked, every release button is
+    // disabled, not merely the one this test created.
+    const releaseButton = page.getByTestId(`mc-release-btn-${payload.pending_approval.approval_id}`);
+    await expect(releaseButton).toBeVisible();
+    await expect(releaseButton).toBeDisabled();
+    const allReleaseButtons = page.locator('[data-testid^="mc-release-btn-"]');
+    await expect(allReleaseButtons.first()).toBeDisabled();
+    for (const button of await allReleaseButtons.all()) {
+      await expect(button).toBeDisabled();
+    }
     const runRemediationSection = page.getByText('Run Remediation', { exact: true }).locator('..');
     await expect(runRemediationSection).toContainText('compile gate');
     await expect(runRemediationSection).toContainText('BLOCKED');
-    await expect(runRemediationSection).toContainText(/hook gaps\s*[1-9]/i);
+    // The gate is decided project-wide, so assert the project count that closes it. The
+    // run-scoped count is legitimately 0 for a run created after the snapshot window,
+    // and asserting on that number asserted something the API cannot supply.
+    await expect(runRemediationSection).toContainText(/hook gaps \(project\)\s*[1-9]/i);
     await expect(page.getByRole('button', { name: 'Compile Idea Workspace' })).toBeDisabled();
   });
 

@@ -191,7 +191,7 @@ Chromium, Pillow and FFmpeg tests are skipped, and verification reports `NOT_RUN
   `MediaProvider`, verifying it, and obtaining explicit spend authorization; flipping a flag is not enough.
 - Provider jobs run synchronously in the request; no worker is deployed.
 - `SAAS_DASHBOARD` and `WEB_APPLICATION` experiences are specification only.
-- Graph read access is governed by the brand's owner project.
+- **Temporary graph access restriction:** graph reads and mutations, brand-wide twin summaries/simulations and immune scans require both brand-owner access and a principal with tenant-wide (`*`) project access. Graph nodes do not yet have consistently enforced per-project scope, so access limited to a known list of projects is refused rather than assumed safe. Do not grant wildcard access merely to bypass this restriction; project-scoped lineage and independent review are required before relaxing it.
 - Art-direction and immune checks are deterministic heuristics. They do not replace human creative review;
   approvals stay human.
 

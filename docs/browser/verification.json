@@ -1,0 +1,54 @@
+{
+  "status": "LOCAL_PUBLIC_HTTPS_EXTRACTION_VERIFIED",
+  "recorded_at": "2026-11-17T06:08:15.504250+00:00",
+  "baseline": "dcae954438f1db652f50e0ade5d056bec25616dd",
+  "checks": {
+    "backend": {
+      "passed": 61,
+      "failed": 0,
+      "live_public_test": true
+    },
+    "shared": {
+      "passed": 268
+    },
+    "web": {
+      "passed": 105
+    },
+    "production_browser": {
+      "passed": 2
+    },
+    "production_build": "PASS",
+    "typecheck": "PASS",
+    "ui_ast": "PASS",
+    "repository_gates": 7
+  },
+  "actual_public_receipt": {
+    "run_id": "fabric-b69a86700998aedaf87c1d51",
+    "artifact_ref": "art-obscura-preview-fixture-mission-03aac94e1c3b46bb747b-work-research-brief:v1",
+    "status": "SUCCEEDED",
+    "proof": {
+      "dispatch_count": 1,
+      "execution_count": 1,
+      "observation_count": 1,
+      "matched_observation_count": 1,
+      "failure_count": 0,
+      "latest_terminal_candidate": null,
+      "latest_confidence": null
+    },
+    "retrieval": {
+      "final_url": "https://example.com",
+      "http_requests": 2,
+      "retrieved_at": "2026-11-17T06:04:57.576249+00:00",
+      "robots_checked": true,
+      "source_sha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484"
+    }
+  },
+  "limits": [
+    "Linux x64 development runtime verified",
+    "Production deployment and hosting not verified",
+    "External page scripts/subresources not loaded; use Chromium for compatibility",
+    "Benchmarks NOT_MEASURED",
+    "Earlier broad fabric test cohort had three host-specific code_sandbox mount-namespace failures; not suppressed"
+  ],
+  "hosted_ci": "PENDING_PUSH"
+}

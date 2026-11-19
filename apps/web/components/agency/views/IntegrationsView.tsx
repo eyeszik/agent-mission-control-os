@@ -1,5 +1,7 @@
 "use client";
 
+import { BrowserPanel } from './BrowserPanel';
+import { useAgencyStore } from '../../../lib/stores/agencyStore';
 import { useMemo } from 'react';
 import { getBudget, getCatalog, getDrift } from '../../../lib/api/agencyOs';
 import { RISK_LABELS, formatMinor, labelOf, riskTone } from '../../../lib/agency/status';
@@ -14,6 +16,7 @@ const OWNER_LABEL: Record<string, string> = {
 };
 
 export function IntegrationsView() {
+  const projectId = useAgencyStore(s => s.projectId);
   const catalog = useLoad(getCatalog, []);
   const drift = useLoad(getDrift, []);
   const budget = useLoad(getBudget, []);
@@ -25,6 +28,7 @@ export function IntegrationsView() {
 
   return (
     <div className="flex flex-col gap-6">
+      {projectId && <BrowserPanel key={projectId} projectId={projectId} />}
       <Card id="capabilities" title="Integration center" description="What is actually connected, what is only described, and what is disabled. Live status is shown separately for every entry.">
         {catalog.error && <ErrorNote error={catalog.error} onRetry={catalog.reload} />}
         {!catalog.data && !catalog.error && <Skeleton lines={6} />}

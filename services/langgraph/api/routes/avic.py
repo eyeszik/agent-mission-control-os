@@ -86,6 +86,12 @@ def capabilities(principal: Principal = Depends(get_principal)) -> dict:
     state, blockers, _ = render.renderer_state()
     return {"capabilities": [c._asdict() for c in caps.CAPABILITIES], "style_profiles": profiles.catalogue(),
             "renderer": {"name": render.RENDERER, "state": state.value, "blockers": blockers,
+                         # Capacity is reported as a static bound, deliberately.
+                         # A live free-slot count belongs in telemetry, not in a
+                         # contract: it varies per request, so putting it here
+                         # would make the recorded response fixture
+                         # non-deterministic and turn a contract test into a
+                         # race. Diagnostics read render_slots_free() directly.
                          "concurrency": render.RENDER_SLOTS},
             "brand": {"source": "foundry.psem.PALETTE", "palette": dict(profiles.psem_brand().palette)}}
 

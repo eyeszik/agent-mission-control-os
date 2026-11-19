@@ -12,7 +12,7 @@ Before writing the website line, each needed capability was checked against what
 | Approval and release verdict | `intake/release.py`, `/approvals/{id}/decide`, separation of duties | Reused. |
 | Role authority | N3 `assert_role_may_produce` | Reused for every stage. |
 | Browser | Pre-installed Chromium + Playwright; `@axe-core/playwright` / `axe-core` 4.13.0 in `apps/web` | Reused; no install. |
-| Website toolchain | `apps/web` Next 16.4.3, React 19.3.1, TypeScript 7.0.2 | Reused by symlink inside the sandbox; exact versions are checked before building. |
+| Website toolchain | `apps/web` Next 16.4.5, React 19.3.1, TypeScript 7.0.2 | Reused by symlink inside the sandbox; exact versions are checked before building. |
 | Framework tasks | Agency Operating Framework catalog and refs | Proposed refs only; the ledger is untouched. |
 | Capability discovery | `foundry.capabilities.discover` | Reused by the discipline router. |
 | Prompt firewall | `prompt_compiler.GENERATION_FIREWALL` | Reused as the terminal state of modules and specs. |
