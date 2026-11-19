@@ -185,6 +185,26 @@ describe('reconciliation', () => {
     }
   });
 
+  it('reports a merchant whose credentials cannot be opened instead of failing the report', async () => {
+    const { rows } = await harness.db.query<{ id: string }>(
+      `INSERT INTO merchants (name, platform, api_credentials_encrypted, enabled)
+       VALUES ('Unsealed Co', 'shopify', '{}'::jsonb, false) RETURNING id`,
+    );
+    const unsealedId = rows[0]?.id ?? '';
+
+    try {
+      const report = await service.run();
+      const finding = report.findings.find((candidate) => candidate.check === 'merchant_credentials_unreadable');
+      expect(finding).toMatchObject({ severity: 'critical', count: 1 });
+      expect(finding?.samples[0]).toContain(unsealedId);
+
+      const probe = await harness.app.inject({ method: 'GET', url: '/internal/reconciliation' });
+      expect(probe.statusCode).not.toBe(500);
+    } finally {
+      await harness.db.query('DELETE FROM merchants WHERE id = $1', [unsealedId]);
+    }
+  });
+
   it('serves the operator probe with a status a monitor can alert on', async () => {
     const healthy = await harness.app.inject({ method: 'GET', url: '/internal/reconciliation' });
     expect(healthy.statusCode).toBe(200);

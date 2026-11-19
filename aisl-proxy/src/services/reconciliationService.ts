@@ -71,6 +71,7 @@ export class ReconciliationService {
         this.stalePayouts(),
         this.unpayableBalances(),
         this.uncollectableMerchants(),
+        this.unreadableMerchants(),
       ])
     ).filter((finding): finding is ReconciliationFinding => finding !== null);
 
@@ -205,13 +206,36 @@ export class ReconciliationService {
    * losing the commission. Catching it here means an operator finds out before
    * a customer does.
    */
+  /**
+   * Merchants whose stored credentials cannot be opened.
+   *
+   * Such a row can neither be charged nor audited for collectability. It is
+   * reported here, so one corrupt or legacy row surfaces as a finding instead
+   * of failing the whole reconciliation report.
+   */
+  private async unreadableMerchants(): Promise<ReconciliationFinding | null> {
+    const repository = this.deps.merchants;
+    if (!repository) return null;
+    const unreadable = (await repository.auditAll()).filter((entry) => entry.error !== null);
+    if (unreadable.length === 0) return null;
+    return {
+      check: 'merchant_credentials_unreadable',
+      severity: 'critical',
+      count: unreadable.length,
+      detail:
+        'Merchant credentials could not be opened, so these merchants can neither be charged nor checked for commission collection. Re-seal their credentials with the merchant CLI.',
+      samples: unreadable.slice(0, SAMPLE_LIMIT).map((entry) => `${entry.id} (${entry.name}): ${entry.error}`),
+    };
+  }
+
   private async uncollectableMerchants(): Promise<ReconciliationFinding | null> {
     const repository = this.deps.merchants;
     if (!repository) return null;
 
     const broken: string[] = [];
-    for (const merchant of await repository.listAll()) {
-      if (!merchant.enabled || merchant.commissionRateBps <= 0) continue;
+    for (const { merchant } of await repository.auditAll()) {
+      // Unreadable rows are reported by unreadableMerchants(), not here.
+      if (!merchant || !merchant.enabled || merchant.commissionRateBps <= 0) continue;
       const credentials = merchant.credentials;
       const account = 'stripe_account_id' in credentials ? credentials.stripe_account_id : null;
       if (!account) {
