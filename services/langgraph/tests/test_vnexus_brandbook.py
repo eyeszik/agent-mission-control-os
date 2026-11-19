@@ -352,3 +352,30 @@ def test_genome_values_cannot_inject_css_or_markup():
     # Hostile values may be printed as escaped text, but never reach CSS (inline style attributes or the stylesheet).
     assert not re.search(r'style="[^"]*evil\.invalid', html) and "evil.invalid" not in render.css(fields, 794, 1123)
     assert "<script>" not in html and "&lt;script&gt;" in html                       # printed as text, escaped
+
+
+def _failed_layout_run(calls):
+    """A Chromium layout run that exited without measuring anything, as a loaded CI runner can produce."""
+    def measure_layout(html, *, width, height, out_dir, capture=False, min_font_px=10, timeout_s=180):
+        calls.append(out_dir.name)
+        return {"exit_code": 1, "result": {}, "output_files": [], "status": "FAILED",
+                "findings": ["BROWSER_EXIT:1", "LAYOUT_NOT_MEASURED"], "pages": [], "captures": {}}
+    return measure_layout
+
+
+def test_a_failed_layout_run_is_retried_once_and_never_cached_as_measured(approved_world, monkeypatch):
+    """A browser failure must not be stored as a measured page: the next build has to measure again."""
+    from services.langgraph.agency.visual import browser
+    w, _v, _doc = approved_world
+    calls: list[str] = []
+    monkeypatch.setattr(browser, "probe_browser", lambda: {"available": True, "blockers": []})
+    monkeypatch.setattr(browser, "measure_layout", _failed_layout_run(calls))
+    first = _build(w)
+    assert first["checks"]["summary"].get("NOT_RUN", 0) > 0
+    runs_first = len(calls)
+    assert runs_first >= 2 and any(name.endswith("-retry") for name in calls), calls
+    q = {"scope": "brand", "scope_ref": w["brand"], "project_id": w["owner"], "mode": "PREVIEW"}
+    assert client.get(f"/vnexus/brands/{w['brand']}/brandbook/pages/p06/preview.png", params=q).status_code == 404
+    second = _build(w)
+    assert len(calls) > runs_first, "unmeasured pages were reused as if a browser had measured them"
+    assert second["telemetry"]["checks_reused"] == 0
