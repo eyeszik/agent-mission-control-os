@@ -63,6 +63,9 @@ def test_every_single_migration_rolls_back_to_its_predecessor():
 
 
 def _baseline_files() -> dict[str, str]:
+    present = subprocess.run(["git", "-C", str(ROOT), "cat-file", "-e", f"{PRIOR_MIGRATION_BASELINE}^{{commit}}"], capture_output=True)
+    assert present.returncode == 0, (f"prior migration baseline {PRIOR_MIGRATION_BASELINE} is not in this clone; "
+                                     "the upgrade path needs full history (actions/checkout fetch-depth: 0)")
     listing = subprocess.run(["git", "-C", str(ROOT), "ls-tree", "--name-only", PRIOR_MIGRATION_BASELINE, "supabase/migrations/"],
                              capture_output=True, text=True, check=True).stdout.split()
     return {Path(p).name: subprocess.run(["git", "-C", str(ROOT), "show", f"{PRIOR_MIGRATION_BASELINE}:{p}"],
