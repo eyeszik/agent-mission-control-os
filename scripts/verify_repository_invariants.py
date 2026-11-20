@@ -99,6 +99,94 @@ def missing_validator_references(root: Path = ROOT) -> list[str]:
     return problems
 
 
+SOP_REGISTRY = ROOT / "services/langgraph/agency/sop/data/sop_registry.v1.json"
+SOP_FIXTURE = ROOT / "packages/shared/tests/fixtures/sop-registry.json"
+
+
+def _sop_procedure_problems(steps: dict, procedure: dict) -> list[str]:
+    pid = procedure["procedure_id"]
+    entries = sorted(procedure["steps"], key=lambda e: e["sequence_index"])
+    problems = []
+    if [e["sequence_index"] for e in entries] != list(range(1, len(entries) + 1)):
+        problems.append(f"{pid}: sequence_index is not contiguous from 1")
+    ids = [e["sop_id"] for e in entries]
+    if len(set(ids)) != len(ids):
+        problems.append(f"{pid}: repeated step makes the procedure cyclic")
+    problems += [f"{pid}: unknown sop_id {i}" for i in ids if i not in steps]
+    if problems or procedure["kind"] != "pipeline":
+        return problems
+    produced: set[str] = set()
+    for sop_id in ids:
+        problems += [f"{pid}: {sop_id} requires {k} before it is produced"
+                     for k in steps[sop_id]["requires_state"] if k not in produced]
+        produced |= set(steps[sop_id]["output_schema"])
+    return problems
+
+
+def sop_registry_problems(stages: list[str]) -> list[str]:
+    """Static SOP checks: contiguity, acyclicity, dataflow and 100% stage coverage."""
+    registry = json.loads(SOP_REGISTRY.read_text(encoding="utf-8"))
+    steps = {s["sop_id"]: s for s in registry["steps"]}
+    problems = [] if len(steps) == len(registry["steps"]) else ["duplicate sop_id"]
+    roles_text = (ROOT / "services/langgraph/agency/kernel/roles.py").read_text(encoding="utf-8")
+    for step in registry["steps"]:
+        owner = step["owner_role"]
+        if owner not in registry["owner_principals"] and f'"{owner}"' not in roles_text:
+            problems.append(f"{step['sop_id']}: owner_role {owner} is not an N3 role or declared principal")
+    pipelines = {}
+    for procedure in registry["procedures"]:
+        problems += _sop_procedure_problems(steps, procedure)
+        if procedure["kind"] == "pipeline":
+            ordered = sorted(procedure["steps"], key=lambda e: e["sequence_index"])
+            pipelines[procedure["workflow_version"]] = [steps[e["sop_id"]]["stage_name"] for e in ordered if e["sop_id"] in steps]
+    if pipelines.get("agency/v1-legacy") != stages:
+        problems.append(f"SOP legacy pipeline {pipelines.get('agency/v1-legacy')} != AGENCY_PIPELINE_STAGES {stages}")
+    contract = stages[: stages.index("hitl_gate")] + ["contract_check"] + stages[stages.index("hitl_gate"):]
+    if pipelines.get("agency/v2-contract") != contract:
+        problems.append("SOP v2-contract pipeline must insert contract_check before hitl_gate")
+    if json.loads(SOP_FIXTURE.read_text(encoding="utf-8")) != registry:
+        problems.append("packages/shared/tests/fixtures/sop-registry.json drifted from the SOP registry")
+    return problems
+
+
+def _cycle(nodes: set[str], edges: list[tuple[str, str]]) -> bool:
+    indegree = {n: 0 for n in nodes}
+    for _, target in edges:
+        indegree[target] += 1
+    ready = [n for n, d in indegree.items() if d == 0]
+    seen = 0
+    while ready:
+        node = ready.pop()
+        seen += 1
+        for source, target in edges:
+            if source == node:
+                indegree[target] -= 1
+                if indegree[target] == 0:
+                    ready.append(target)
+    return seen != len(nodes)
+
+
+def planning_spec_problems() -> list[str]:
+    """task_dag.json is acyclic and self-consistent; fsm_spec.json references only declared states/events."""
+    dag = json.loads((ROOT / "task_dag.json").read_text(encoding="utf-8"))
+    tasks = {t["task_id"]: t for t in dag["tasks"]}
+    edges = [tuple(e) for e in dag["edges"]]
+    problems = [f"task_dag edge {e} references an unknown task" for e in edges if not set(e) <= set(tasks)]
+    declared = {(dep, tid) for tid, t in tasks.items() for dep in t["dependencies"]}
+    if declared != set(edges):
+        problems.append("task_dag edges disagree with task dependencies")
+    if not problems and _cycle(set(tasks), edges):
+        problems.append("task_dag.json contains a cycle")
+    fsm = json.loads((ROOT / "fsm_spec.json").read_text(encoding="utf-8"))["fsm_spec"]
+    states, events = set(fsm["states"]), set(fsm["events"])
+    for row in fsm["transition_matrix"]:
+        # "*" is the spec's documented any-state source for global failure events.
+        if (row["from"] != "*" and row["from"] not in states) or row["to"] not in states or row["event"] not in events:
+            problems.append(f"fsm_spec transition {row} references an undeclared state or event")
+    problems += [f"fsm_spec terminal state {s} undeclared" for s in fsm["terminal_states"] if s not in states]
+    return problems
+
+
 def main() -> None:
     missing = missing_validator_references()
     if missing:
@@ -110,6 +198,13 @@ def main() -> None:
         raise SystemExit(
             f"Pipeline contract drift: backend={backend!r} shared={shared!r} openapi={documented!r}"
         )
+
+    sop_problems = sop_registry_problems(backend) + planning_spec_problems()
+    if sop_problems:
+        raise SystemExit("SOP / planning-spec contract drift:\n" + "\n".join(sop_problems))
+    build_text = (ROOT / "services/langgraph/graph/agency/build.py").read_text(encoding="utf-8")
+    if "guard_stage(node_id, _NODE_FUNCTIONS[node_id])" not in build_text:
+        raise SystemExit("Live graph stages must run inside their SOP pre/post-condition guard")
 
     missing_env = sorted(REQUIRED_ENV_VARS - env_keys())
     if missing_env:

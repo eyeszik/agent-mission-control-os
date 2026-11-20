@@ -48,6 +48,12 @@ jobs:
       - name: Verify prompt guidance registry
         run: python scripts/verify_guidance_registry.py
 
+      - name: Verify canonical AGM binding (Phase 0 discovery)
+        run: python scripts/acceptance/discover.py > /dev/null
+
+      - name: Verify Source-to-AGM reconciliation and cross-stack parity
+        run: python scripts/verify_source_reconciliation.py
+
       - name: Compile Python sources
         run: python -m compileall -q services/langgraph scripts
 
@@ -130,6 +136,9 @@ jobs:
         env:
           AMC_DATABASE_BACKEND: postgres
           DATABASE_URL: postgresql://amc:amc@127.0.0.1:5432/amc_test
+          # Maintenance DB of this job's disposable service container; the
+          # migration round-trip tests create and drop scratch databases on it.
+          AMC_EPHEMERAL_POSTGRES_DSN: postgresql://amc:amc@127.0.0.1:5432/postgres
           AMC_EXPORT_ROOT: /tmp/amc-exports-pg-${{ github.run_id }}
         run: |
           set -o pipefail

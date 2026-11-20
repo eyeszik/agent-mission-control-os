@@ -147,6 +147,7 @@ Per-subsystem rules live in a `CLAUDE.md` inside each directory and load only wh
 - `services/langgraph/agency/compiled/` — Compiled Agency planner — plans over the kernel, never executes
 - `services/langgraph/agency/design/` — Design Mode — style catalog composed by dimension
 - `services/langgraph/agency/ui_ux/` — UI/UX design compiler and DTCG tokens
+- `services/langgraph/agency/sop/` — Ordered SOP contracts — a guard over the live graph, not an authority
 
 ### Cross-cutting rules (always apply)
 

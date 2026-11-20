@@ -1,0 +1,1843 @@
+{
+ "schema": "amc-reconciliation-report/v1",
+ "result": "PASS",
+ "sources": {
+  "planning_items": 87,
+  "agm_doc_rows": 24,
+  "total": 111
+ },
+ "status_counts": {
+  "MATCHED": 84,
+  "PARTIAL": 9,
+  "MISSING": 0,
+  "DRIFTED": 8,
+  "PROVIDER_GAP": 5,
+  "NOT_MEASURED": 5
+ },
+ "unresolved_drifted": 0,
+ "orphaned_sources": 0,
+ "excluded_source_kinds": {
+  "requirements_extract.json#/stakeholders": "people/roles, not requirements",
+  "constraint_ledger.yaml#/version": "document metadata",
+  "constraint_ledger.yaml#/status": "document metadata"
+ },
+ "parity": [
+  {
+   "check": "pipeline_stages: python == shared zod == openapi",
+   "status": "MATCHED"
+  },
+  {
+   "check": "agency_run_states: python == @amc/constants == @amc/shared zod",
+   "status": "MATCHED"
+  },
+  {
+   "check": "agency_run_states: openapi lists every state",
+   "status": "MATCHED"
+  },
+  {
+   "check": "error_codes: core/errors.py == @amc/errors",
+   "status": "MATCHED"
+  },
+  {
+   "check": "sop_ids: python registry == typescript fixture",
+   "status": "MATCHED"
+  },
+  {
+   "check": "agm_ids: catalog == bindings.py",
+   "status": "MATCHED"
+  },
+  {
+   "check": "agm_ids: catalog ⊇ typescript fixture",
+   "status": "MATCHED"
+  },
+  {
+   "check": "ontology/lifecycle: verify_ontology_parity.py",
+   "status": "MATCHED"
+  }
+ ],
+ "problems": [],
+ "rows": [
+  {
+   "source_id": "requirements_extract.json#/objectives/0",
+   "native_id": "OBJ-001",
+   "status": "PARTIAL",
+   "resolved": true,
+   "targets": [
+    "sop:PIPELINE.agency/v1-legacy"
+   ],
+   "implementation": [
+    "file:services/langgraph/agency/compiled/planner.py",
+    "file:task_dag.json"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_compiled_agency.py::test_high_consequence_never_autonomous_from_score_alone"
+   ],
+   "resolution": [],
+   "note": "The operating specification exists as the root planning bundle and as the runtime compiled planner; the root bundle still declares status draft_until_verified.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/objectives/1",
+   "native_id": "OBJ-002",
+   "status": "PARTIAL",
+   "resolved": true,
+   "targets": [
+    "sop:PIPELINE.agency/v1-legacy"
+   ],
+   "implementation": [
+    "file:services/langgraph/graph/agency/build.py",
+    "file:apps/web/app",
+    "file:infra/cloudflare/worker.ts"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_agency_pipeline.py::test_agency_graph_pauses_before_delivery_and_creates_approval"
+   ],
+   "resolution": [],
+   "note": "LangGraph and Next.js are implemented and tested; Cloudflare is a scaffold whose deployment bindings are unverified (PROVIDER_GAP).",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/objectives/2",
+   "native_id": "OBJ-003",
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "sop:PIPELINE.agency/v1-legacy",
+    "sop:RECOVERY.degraded_non_delivery",
+    "sop:RECOVERY.crash_reconciliation"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/agency/sop/guard.py::guard_stage",
+    "symbol:services/langgraph/persistence/idempotency.py::reserve_idempotency",
+    "symbol:services/langgraph/agency/kernel/lifecycle.py::release_guard_failures"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_sop_contracts.py::test_registry_loads_and_agrees_with_the_running_code",
+    "test:services/langgraph/tests/test_sop_contracts.py::test_guard_refuses_a_stage_invoked_out_of_order"
+   ],
+   "resolution": [],
+   "note": "Governance-gated, idempotency-aware and failure-mode-mapped through the SOP registry, N2 release guards and trust idempotency.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/objectives/3",
+   "native_id": "OBJ-004",
+   "status": "PARTIAL",
+   "resolved": true,
+   "targets": [
+    "sop:PIPELINE.agency/v2-contract"
+   ],
+   "implementation": [
+    "file:packages/shared/src/schemas",
+    "file:scripts/verify_ontology_parity.py",
+    "symbol:services/langgraph/persistence/events.py::list_events_for_run",
+    "file:infra/cloudflare/durable-object.ts"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_events.py::test_last_event_id_resumes_after_header_cursor",
+    "test:services/langgraph/tests/test_core.py::test_python_and_typescript_constants_agree"
+   ],
+   "resolution": [],
+   "note": "Shared contracts, typed runtime validation, lifecycle FSM, SSE replay and observability exist; the Cloudflare edge topology is scaffolded only.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/0",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:execution_blueprint.json"
+   ],
+   "implementation": [
+    "file:execution_blueprint.json"
+   ],
+   "verification": [
+    "check:parses:execution_blueprint.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/1",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:README.md"
+   ],
+   "implementation": [
+    "file:README.md"
+   ],
+   "verification": [
+    "check:parses:README.md"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/2",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:requirements_extract.json"
+   ],
+   "implementation": [
+    "file:requirements_extract.json"
+   ],
+   "verification": [
+    "check:parses:requirements_extract.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/3",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:assumption_ledger.json"
+   ],
+   "implementation": [
+    "file:assumption_ledger.json"
+   ],
+   "verification": [
+    "check:parses:assumption_ledger.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/4",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:constraint_ledger.yaml"
+   ],
+   "implementation": [
+    "file:constraint_ledger.yaml"
+   ],
+   "verification": [
+    "check:parses:constraint_ledger.yaml"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/5",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:task_dag.json"
+   ],
+   "implementation": [
+    "file:task_dag.json"
+   ],
+   "verification": [
+    "check:parses:task_dag.json",
+    "check:task_dag_fields"
+   ],
+   "resolution": [],
+   "note": "Present; acyclicity is also enforced by verify_repository_invariants.py.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/6",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:system_layers.json"
+   ],
+   "implementation": [
+    "file:system_layers.json"
+   ],
+   "verification": [
+    "check:parses:system_layers.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/7",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:contract_architecture.json"
+   ],
+   "implementation": [
+    "file:contract_architecture.json"
+   ],
+   "verification": [
+    "check:parses:contract_architecture.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/8",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:fsm_spec.json"
+   ],
+   "implementation": [
+    "file:fsm_spec.json"
+   ],
+   "verification": [
+    "check:parses:fsm_spec.json"
+   ],
+   "resolution": [],
+   "note": "Present; state/event references are enforced by verify_repository_invariants.py.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/9",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:mcp_integration_spec.json"
+   ],
+   "implementation": [
+    "file:mcp_integration_spec.json"
+   ],
+   "verification": [
+    "check:parses:mcp_integration_spec.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/10",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:streaming_resilience_spec.json"
+   ],
+   "implementation": [
+    "file:streaming_resilience_spec.json"
+   ],
+   "verification": [
+    "check:parses:streaming_resilience_spec.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/11",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:runtime_topology.yaml"
+   ],
+   "implementation": [
+    "file:runtime_topology.yaml"
+   ],
+   "verification": [
+    "check:parses:runtime_topology.yaml"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/12",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:governance_decisions.json"
+   ],
+   "implementation": [
+    "file:governance_decisions.json"
+   ],
+   "verification": [
+    "check:parses:governance_decisions.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/13",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:risk_register.json"
+   ],
+   "implementation": [
+    "file:risk_register.json"
+   ],
+   "verification": [
+    "check:parses:risk_register.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/14",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:execution_flow.json"
+   ],
+   "implementation": [
+    "file:execution_flow.json"
+   ],
+   "verification": [
+    "check:parses:execution_flow.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/15",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:risk_matrix.csv"
+   ],
+   "implementation": [
+    "file:risk_matrix.csv"
+   ],
+   "verification": [
+    "check:parses:risk_matrix.csv"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/16",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:role_orchestration.json"
+   ],
+   "implementation": [
+    "file:role_orchestration.json"
+   ],
+   "verification": [
+    "check:parses:role_orchestration.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/17",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:claim_registry.json"
+   ],
+   "implementation": [
+    "file:claim_registry.json"
+   ],
+   "verification": [
+    "check:parses:claim_registry.json",
+    "check:claim_statuses"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/18",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:tool_proof_log.json"
+   ],
+   "implementation": [
+    "file:tool_proof_log.json"
+   ],
+   "verification": [
+    "check:parses:tool_proof_log.json"
+   ],
+   "resolution": [],
+   "note": "Present; sealed with Phase 4 command proof.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/19",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:validation_report.json"
+   ],
+   "implementation": [
+    "file:validation_report.json"
+   ],
+   "verification": [
+    "check:parses:validation_report.json"
+   ],
+   "resolution": [],
+   "note": "Present; sealed with Phase 4 command proof.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/20",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:approval_decision.json"
+   ],
+   "implementation": [
+    "file:approval_decision.json"
+   ],
+   "verification": [
+    "check:parses:approval_decision.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/21",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:observability_hooks.yaml"
+   ],
+   "implementation": [
+    "file:observability_hooks.yaml"
+   ],
+   "verification": [
+    "check:parses:observability_hooks.yaml"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present (also pinned in manifest.json).",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/22",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:execution_trace.schema.json"
+   ],
+   "implementation": [
+    "file:execution_trace.schema.json"
+   ],
+   "verification": [
+    "check:parses:execution_trace.schema.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/23",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:WORKING_DRAFT.json"
+   ],
+   "implementation": [
+    "file:WORKING_DRAFT.json"
+   ],
+   "verification": [
+    "check:parses:WORKING_DRAFT.json"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/deliverables/24",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:CHANGELOG.md"
+   ],
+   "implementation": [
+    "file:CHANGELOG.md"
+   ],
+   "verification": [
+    "check:parses:CHANGELOG.md"
+   ],
+   "resolution": [],
+   "note": "Planning deliverable present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/success_metrics/0",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:requirements_extract.json"
+   ],
+   "implementation": [
+    "file:requirements_extract.json"
+   ],
+   "verification": [
+    "check:deliverables_present"
+   ],
+   "resolution": [],
+   "note": "Every listed deliverable exists and parses.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/success_metrics/1",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:claim_registry.json"
+   ],
+   "implementation": [
+    "file:claim_registry.json"
+   ],
+   "verification": [
+    "check:claim_statuses"
+   ],
+   "resolution": [],
+   "note": "Every claim carries verified, source_provided or inferred.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/success_metrics/2",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:task_dag.json",
+    "sop:PIPELINE.agency/v1-legacy"
+   ],
+   "implementation": [
+    "file:task_dag.json",
+    "file:services/langgraph/agency/sop/data/sop_registry.v1.json"
+   ],
+   "verification": [
+    "check:task_dag_fields",
+    "test:services/langgraph/tests/test_sop_contracts.py::test_registry_loads_and_agrees_with_the_running_code"
+   ],
+   "resolution": [],
+   "note": "Planning tasks declare inputs, outputs, dependencies, idempotency class and checks; runtime stages declare the same through SOP steps.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/success_metrics/3",
+   "native_id": null,
+   "status": "PARTIAL",
+   "resolved": true,
+   "targets": [
+    "file:governance_decisions.json"
+   ],
+   "implementation": [
+    "file:governance_decisions.json",
+    "symbol:services/langgraph/agency/durable/governance.py::decide"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_abc_v6.py::test_t15_publish_spend_send_never_dispatched"
+   ],
+   "resolution": [],
+   "note": "LEG/ETH/SEC/RG auditors with vetoes are defined in the planning bundle only; at runtime the equivalent vetoes are G3/G4 never allowed and human approval, not named auditors.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/success_metrics/4",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:task_dag.json"
+   ],
+   "implementation": [
+    "file:task_dag.json"
+   ],
+   "verification": [
+    "check:task_dag_fields"
+   ],
+   "resolution": [],
+   "note": "Every planning task lists failure modes.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/constraints/0",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "sop:SOP-AGY-09"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/agency/delivery/workflow.py::INTERRUPT_POINTS"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_agency_pipeline.py::test_agency_graph_pauses_before_delivery_and_creates_approval"
+   ],
+   "resolution": [],
+   "note": "Runs are staged and pause before delivery.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/constraints/1",
+   "native_id": null,
+   "status": "DRIFTED",
+   "resolved": true,
+   "targets": [
+    "file:README.md"
+   ],
+   "implementation": [
+    "file:README.md"
+   ],
+   "verification": [
+    "check:parses:README.md"
+   ],
+   "resolution": [
+    "file:README.md",
+    "file:CLAUDE.md"
+   ],
+   "note": "Planning-time constraint; production code was later explicitly requested and implemented.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/constraints/2",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "sop:RECOVERY.degraded_non_delivery"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/quality/evaluator.py::evaluate_quality"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_abc_v6.py::test_three_predicates_are_never_conflated_and_not_run_never_passes"
+   ],
+   "resolution": [],
+   "note": "NOT_RUN / NOT_MEASURED / BLOCKED are never reported as a pass.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/constraints/3",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:task_dag.json",
+    "sop:PIPELINE.agency/v1-legacy"
+   ],
+   "implementation": [
+    "file:task_dag.json",
+    "file:services/langgraph/agency/sop/data/sop_registry.v1.json"
+   ],
+   "verification": [
+    "check:task_dag_fields"
+   ],
+   "resolution": [],
+   "note": "Every planning task has an idempotency class; every runtime stage declares retry bounds.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/constraints/4",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:WORKING_DRAFT.json"
+   ],
+   "implementation": [
+    "file:WORKING_DRAFT.json",
+    "file:CHANGELOG.md",
+    "file:claim_registry.json",
+    "file:tool_proof_log.json",
+    "file:risk_register.json"
+   ],
+   "verification": [
+    "check:parses:WORKING_DRAFT.json",
+    "check:parses:CHANGELOG.md",
+    "check:parses:risk_register.json"
+   ],
+   "resolution": [],
+   "note": "All five maintained artifacts are present.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/constraints/5",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-22"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/security/preprocess.py::sanitize_deep",
+    "symbol:services/langgraph/security/pii.py::quarantine_payload"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_agency_framework.py::test_injected_authority_fields_are_refused_not_ignored",
+    "test:services/langgraph/tests/test_ace12_actions.py::test_t30_i18_injection_in_args_is_flagged_not_obeyed"
+   ],
+   "resolution": [],
+   "note": "User-supplied and retrieved text is sanitized, quarantined and treated as data.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/constraints/6",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-18"
+   ],
+   "implementation": [
+    "file:services/langgraph/agency/operating_framework/metrics.py"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_agency_framework.py::test_applicability_drives_progress_and_zero_denominator_is_not_measured"
+   ],
+   "resolution": [],
+   "note": "Unknown measurements are NOT_MEASURED, never invented.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/prohibitions/0",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-20"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/agency/durable/governance.py::decide"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_abc_v6.py::test_t15_publish_spend_send_never_dispatched"
+   ],
+   "resolution": [],
+   "note": "Deployment is a G3/G4 action and is never allowed by the runtime.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/prohibitions/1",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-24"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/agency/durable/governance.py::decide",
+    "file:scripts/verify_production_readiness.py"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_production_foundation.py::test_production_config_rejects_live_external_mutations"
+   ],
+   "resolution": [],
+   "note": "Infrastructure-mutating modes fail production readiness.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/prohibitions/2",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-24"
+   ],
+   "implementation": [
+    "file:services/langgraph/agency/actions"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_ace12_actions.py::test_t48_i16_secrets_are_refused_and_never_stored"
+   ],
+   "resolution": [],
+   "note": "Secrets are refused at the action boundary and never stored.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/prohibitions/3",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-24"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/security/pii.py::redact_value"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_ace_privacy.py::test_ace_multiple_credential_encodings_redact_without_leaking"
+   ],
+   "resolution": [],
+   "note": "Credential encodings are redacted.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/prohibitions/4",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-13",
+    "agm:AGM-14",
+    "agm:AGM-15"
+   ],
+   "implementation": [
+    "file:services/langgraph/integrations/publication.py",
+    "file:services/langgraph/integrations/paid_media.py"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_abc_v6.py::test_t15_publish_spend_send_never_dispatched",
+    "test:services/langgraph/tests/test_production_foundation.py::test_paid_media_has_no_execution_capability"
+   ],
+   "resolution": [],
+   "note": "Publish, spend and send are never dispatched.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/prohibitions/5",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "sop:RECOVERY.crash_reconciliation"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/agency/execution_fabric/consumer.py::EXECUTABLE_SIDE_EFFECTS"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_execution_fabric.py::test_x30_consequential_side_effects_are_never_dispatched"
+   ],
+   "resolution": [],
+   "note": "Only PURE and DRAFT effects are dispatched.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/prohibitions/6",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-22"
+   ],
+   "implementation": [
+    "file:services/langgraph/agency/creative"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_creative_runtime.py::test_generator_crash_mid_run_is_receipted_not_simulated",
+    "test:services/langgraph/tests/test_abc_v6.py::test_three_predicates_are_never_conflated_and_not_run_never_passes"
+   ],
+   "resolution": [],
+   "note": "Provider output is never simulated; absent proof stays NOT_RUN.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/non_goals/0",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-20"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/agency/durable/governance.py::decide"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_abc_v6.py::test_t15_publish_spend_send_never_dispatched"
+   ],
+   "resolution": [],
+   "note": "The system never deploys itself.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/non_goals/1",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:task_dag.json"
+   ],
+   "implementation": [
+    "file:task_dag.json"
+   ],
+   "verification": [
+    "check:bundle_is_data"
+   ],
+   "resolution": [],
+   "note": "Every planning deliverable is a data or document file, not code.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/non_goals/2",
+   "native_id": null,
+   "status": "NOT_MEASURED",
+   "resolved": true,
+   "targets": [],
+   "implementation": [],
+   "verification": [],
+   "resolution": [],
+   "note": "Process constraint on the planning agent; there is no runtime surface in this repository to measure.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/non_goals/3",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-23",
+    "agm:AGM-24"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/security/approval_authority.py::assert_may_decide"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_approval_authority.py::test_initiator_cannot_approve_their_own_run"
+   ],
+   "resolution": [],
+   "note": "Release stays a human decision under separation of duties.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/conflicts/0",
+   "native_id": "CONFLICT-001",
+   "status": "DRIFTED",
+   "resolved": true,
+   "targets": [
+    "file:README.md"
+   ],
+   "implementation": [
+    "file:README.md"
+   ],
+   "verification": [
+    "check:parses:README.md"
+   ],
+   "resolution": [
+    "file:README.md",
+    "file:CLAUDE.md"
+   ],
+   "note": "Selected resolution was a spec-only run; implementation was later explicitly requested.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/conflicts/1",
+   "native_id": "CONFLICT-002",
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:claim_registry.json"
+   ],
+   "implementation": [
+    "file:claim_registry.json"
+   ],
+   "verification": [
+    "check:claim_statuses"
+   ],
+   "resolution": [],
+   "note": "Platform claims are classified rather than asserted.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "requirements_extract.json#/conflicts/2",
+   "native_id": "CONFLICT-003",
+   "status": "PROVIDER_GAP",
+   "resolved": true,
+   "targets": [
+    "file:infra/cloudflare/wrangler.example.toml"
+   ],
+   "implementation": [
+    "file:infra/cloudflare/worker.ts"
+   ],
+   "verification": [],
+   "resolution": [],
+   "note": "Cloudflare is conditional architecture; bindings are an example file and deployment is unverified.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "assumption_ledger.json#/assumptions/0",
+   "native_id": "A-001",
+   "status": "DRIFTED",
+   "resolved": true,
+   "targets": [
+    "file:README.md"
+   ],
+   "implementation": [
+    "file:README.md"
+   ],
+   "verification": [
+    "check:parses:README.md"
+   ],
+   "resolution": [
+    "file:README.md",
+    "file:services/langgraph/app/main.py"
+   ],
+   "note": "The repository now contains production code.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "assumption_ledger.json#/assumptions/1",
+   "native_id": "A-002",
+   "status": "DRIFTED",
+   "resolved": true,
+   "targets": [
+    "file:README.md"
+   ],
+   "implementation": [
+    "file:README.md"
+   ],
+   "verification": [
+    "check:parses:README.md"
+   ],
+   "resolution": [
+    "file:acceptance/discovery_manifest.json"
+   ],
+   "note": "A repository is now attached; this map is checked inside it.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "assumption_ledger.json#/assumptions/2",
+   "native_id": "A-003",
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:packages/shared/openapi/agent-mission-control.openapi.yaml"
+   ],
+   "implementation": [
+    "file:packages/shared/openapi/agent-mission-control.openapi.yaml"
+   ],
+   "verification": [
+    "check:openapi_pipeline_enum"
+   ],
+   "resolution": [],
+   "note": "OpenAPI is committed and the stage enum is gated against Python and TypeScript.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "assumption_ledger.json#/assumptions/3",
+   "native_id": "A-004",
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "sop:PIPELINE.agency/v1-legacy"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/persistence/events.py::list_events_for_run"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_events.py::test_last_event_id_resumes_after_header_cursor"
+   ],
+   "resolution": [],
+   "note": "SSE with Last-Event-ID resume.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "assumption_ledger.json#/assumptions/4",
+   "native_id": "A-005",
+   "status": "PROVIDER_GAP",
+   "resolved": true,
+   "targets": [
+    "file:infra/cloudflare/durable-object.ts"
+   ],
+   "implementation": [
+    "file:infra/cloudflare/durable-object.ts",
+    "file:infra/cloudflare/shard.ts"
+   ],
+   "verification": [],
+   "resolution": [],
+   "note": "Durable Object coordination is scaffolded (shard by tenant/project/run) but not deployed.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/0",
+   "native_id": "C-001",
+   "status": "NOT_MEASURED",
+   "resolved": true,
+   "targets": [],
+   "implementation": [],
+   "verification": [],
+   "resolution": [],
+   "note": "Claim about an external coding tool; not re-verifiable from this repository.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/1",
+   "native_id": "C-002",
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "sop:SOP-AGY-09"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/persistence/checkpoints.py::get_checkpointer"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_agency_pipeline.py::test_agency_graph_resumes_and_delivers_after_successful_provider_approval"
+   ],
+   "resolution": [],
+   "note": "Runs pause and resume from the checkpointer.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/2",
+   "native_id": "C-003",
+   "status": "PROVIDER_GAP",
+   "resolved": true,
+   "targets": [
+    "file:infra/cloudflare/shard.ts"
+   ],
+   "implementation": [
+    "file:infra/cloudflare/shard.ts"
+   ],
+   "verification": [],
+   "resolution": [],
+   "note": "Sharding avoids a global Object in the scaffold; not deployed.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/3",
+   "native_id": "C-004",
+   "status": "NOT_MEASURED",
+   "resolved": true,
+   "targets": [],
+   "implementation": [],
+   "verification": [],
+   "resolution": [],
+   "note": "Cloudflare Workflows are not used; external platform fact.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/4",
+   "native_id": "C-005",
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:apps/web/app"
+   ],
+   "implementation": [
+    "file:apps/web/app"
+   ],
+   "verification": [
+    "check:parses:apps/web/package.json"
+   ],
+   "resolution": [],
+   "note": "The web app uses the App Router; build is exercised in Phase 4.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/5",
+   "native_id": "C-006",
+   "status": "NOT_MEASURED",
+   "resolved": true,
+   "targets": [],
+   "implementation": [],
+   "verification": [],
+   "resolution": [],
+   "note": "layoutId is not used in apps/web; external library fact.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/6",
+   "native_id": "C-007",
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "sop:PIPELINE.agency/v1-legacy"
+   ],
+   "implementation": [
+    "file:packages/shared/src/schemas/sop.ts"
+   ],
+   "verification": [
+    "test:packages/shared/tests/sop.test.ts::parses the canonical registry"
+   ],
+   "resolution": [],
+   "note": "Zod validates contracts at runtime.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/7",
+   "native_id": "C-008",
+   "status": "PARTIAL",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-24"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/security/pii.py::quarantine_payload",
+    "symbol:services/langgraph/persistence/idempotency.py::reserve_idempotency",
+    "file:apps/web/components/mission-control"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_abc_v6.py::test_idempotency_key_is_stable_and_scope_sensitive"
+   ],
+   "resolution": [],
+   "note": "PII quarantine, deterministic idempotency and Mission Control exist; N0-N9 and L0-L3 naming and Cloudflare infrastructure are not implemented as named.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/8",
+   "native_id": "C-009",
+   "status": "PARTIAL",
+   "resolved": true,
+   "targets": [
+    "file:apps/web/lib/api/client.ts"
+   ],
+   "implementation": [
+    "file:apps/web/lib/api/client.ts",
+    "file:apps/web/lib/stores"
+   ],
+   "verification": [
+    "check:parses:apps/web/package.json"
+   ],
+   "resolution": [],
+   "note": "Typed clients and sharded stores exist; the full frontend audit list is not machine-checked here.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/9",
+   "native_id": "C-010",
+   "status": "NOT_MEASURED",
+   "resolved": true,
+   "targets": [],
+   "implementation": [],
+   "verification": [],
+   "resolution": [],
+   "note": "Bundle size target was never measured.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/10",
+   "native_id": "C-011",
+   "status": "PROVIDER_GAP",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-22"
+   ],
+   "implementation": [
+    "file:services/langgraph/quality/grounded_evaluator.py"
+   ],
+   "verification": [],
+   "resolution": [],
+   "note": "External observability/eval adapters need verified provider contracts and credentials.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/11",
+   "native_id": "C-012",
+   "status": "DRIFTED",
+   "resolved": true,
+   "targets": [
+    "file:README.md"
+   ],
+   "implementation": [
+    "file:README.md"
+   ],
+   "verification": [
+    "check:parses:README.md"
+   ],
+   "resolution": [
+    "file:acceptance/discovery_manifest.json"
+   ],
+   "note": "A repository is now connected.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/12",
+   "native_id": "C-013",
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "sop:SOP-AGY-10"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/agency/kernel/lifecycle.py::release_guard_failures"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_delivery_gate.py::test_unresolved_approval_blocks_delivery"
+   ],
+   "resolution": [],
+   "note": "Release readiness needs runtime guards and a human approval, not documents.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "claim_registry.json#/13",
+   "native_id": "C-014",
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-24"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/agency/durable/governance.py::decide"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_abc_v6.py::test_t15_publish_spend_send_never_dispatched"
+   ],
+   "resolution": [],
+   "note": "Production deployment and unverified tool execution are refused.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/runtime_currency_policy",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "file:claim_registry.json"
+   ],
+   "implementation": [
+    "file:claim_registry.json"
+   ],
+   "verification": [
+    "check:claim_statuses"
+   ],
+   "resolution": [],
+   "note": "Claims carry their verification class.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/versions",
+   "native_id": null,
+   "status": "DRIFTED",
+   "resolved": true,
+   "targets": [
+    "file:apps/web/package.json"
+   ],
+   "implementation": [
+    "file:apps/web/package.json"
+   ],
+   "verification": [
+    "check:parses:apps/web/package.json"
+   ],
+   "resolution": [
+    "file:apps/web/package.json",
+    "file:services/langgraph/pyproject.toml",
+    "file:pnpm-lock.yaml"
+   ],
+   "note": "Ledger versions are null until a repo audit; real pins live in the manifests and lockfiles.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/auth",
+   "native_id": null,
+   "status": "DRIFTED",
+   "resolved": true,
+   "targets": [
+    "file:services/langgraph/security/auth.py"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/security/auth.py::authorize_resource"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_approval_authority.py::test_operator_role_cannot_decide_approvals"
+   ],
+   "resolution": [
+    "file:services/langgraph/app/config.py",
+    "table:amc.tenant_memberships"
+   ],
+   "note": "auth_provider is null in the ledger; the runtime uses Supabase JWTs and amc.tenant_memberships.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/pii",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-24"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/security/pii.py::quarantine_payload"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_ace_privacy.py::test_ace_multiple_credential_encodings_redact_without_leaking"
+   ],
+   "resolution": [],
+   "note": "Redaction and quarantine before persistence.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/timeouts",
+   "native_id": null,
+   "status": "PARTIAL",
+   "resolved": true,
+   "targets": [
+    "sop:RECOVERY.crash_reconciliation"
+   ],
+   "implementation": [
+    "file:services/langgraph/agency/reliability/execution_bounds.py"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_execution_fabric.py::test_x29_clock_desync_and_expiry_invalidate_permits"
+   ],
+   "resolution": [],
+   "note": "SSE idle, MCP connect and tool-call timeouts are null in the ledger; execution bounds and permit expiry exist at runtime.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/acceptance_thresholds",
+   "native_id": null,
+   "status": "DRIFTED",
+   "resolved": true,
+   "targets": [
+    "sop:SOP-AGY-10"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/security/approval_authority.py::assert_may_decide"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_compiled_agency.py::test_high_consequence_never_autonomous_from_score_alone"
+   ],
+   "resolution": [
+    "symbol:services/langgraph/security/approval_authority.py::assert_may_decide",
+    "file:services/langgraph/agency/sop/data/sop_registry.v1.json"
+   ],
+   "note": "Confidence-based auto-approval (0.85) was superseded by a stricter rule: release always needs a human approver; no score auto-approves.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/idempotency",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "sop:SOP-AGY-10"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/persistence/idempotency.py::reserve_idempotency"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_ace12_actions.py::test_t33_idempotent_replay_and_key_reuse",
+    "test:services/langgraph/tests/test_abc_v6.py::test_idempotency_key_is_stable_and_scope_sensitive"
+   ],
+   "resolution": [],
+   "note": "Scope tenant:user:operation:resource plus request hash; reuse with different input is a 409.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/streaming",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "sop:PIPELINE.agency/v1-legacy"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/persistence/events.py::list_events_for_run"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_events.py::test_last_event_id_resumes_after_header_cursor",
+    "test:services/langgraph/tests/test_events.py::test_cursor_returns_only_events_after_acknowledged_sequence"
+   ],
+   "resolution": [],
+   "note": "SSE with Last-Event-ID and monotonic sequence.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/cloudflare",
+   "native_id": null,
+   "status": "PROVIDER_GAP",
+   "resolved": true,
+   "targets": [
+    "file:infra/cloudflare/durable-object.ts"
+   ],
+   "implementation": [
+    "file:infra/cloudflare/durable-object.ts"
+   ],
+   "verification": [],
+   "resolution": [],
+   "note": "Scaffold only; no deployed binding.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/governance",
+   "native_id": null,
+   "status": "PARTIAL",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-22",
+    "agm:AGM-23"
+   ],
+   "implementation": [
+    "symbol:services/langgraph/agency/durable/governance.py::decide",
+    "symbol:services/langgraph/security/approval_authority.py::assert_may_decide"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_abc_v6.py::test_t15_publish_spend_send_never_dispatched"
+   ],
+   "resolution": [],
+   "note": "Human review is enforced for external writes, irreversible actions and deployment; named LEG/ETH/SEC/RG auditor vetoes are not runtime components.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/flags",
+   "native_id": null,
+   "status": "PARTIAL",
+   "resolved": true,
+   "targets": [
+    "file:infra/cloudflare/wrangler.example.toml"
+   ],
+   "implementation": [
+    "file:infra/cloudflare/wrangler.example.toml"
+   ],
+   "verification": [],
+   "resolution": [],
+   "note": "FLAG-REPO-NOT-PROVIDED and FLAG-VERSIONS-NULL are stale; FLAG-CLOUDFLARE-BINDINGS-UNVERIFIED still holds.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/agency_pipeline_decisions/spend_authority",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-14"
+   ],
+   "implementation": [
+    "file:services/langgraph/integrations/paid_media.py"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_production_foundation.py::test_paid_media_has_no_execution_capability"
+   ],
+   "resolution": [],
+   "note": "no_spend_mvp: paid media is planning-only.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "constraint_ledger.yaml#/agency_pipeline_decisions/analytics_metrics_source",
+   "native_id": null,
+   "status": "MATCHED",
+   "resolved": true,
+   "targets": [
+    "agm:AGM-18"
+   ],
+   "implementation": [
+    "file:services/langgraph/agency/operating_framework/metrics.py"
+   ],
+   "verification": [
+    "test:services/langgraph/tests/test_agency_framework.py::test_applicability_drives_progress_and_zero_denominator_is_not_measured"
+   ],
+   "resolution": [],
+   "note": "Deferred: KPIs come only from measurement evidence; otherwise NOT_MEASURED.",
+   "unresolved_refs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-01",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-01"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-02",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-02"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-03",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-03"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-04",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-04"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-05",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-05"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-06",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-06"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-07",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-07"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-08",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-08"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-09",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-09"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-10",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-10"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-11",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-11"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-12",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-12"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-13",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-13"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-14",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-14"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-15",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-15"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-16",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-16"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-17",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-17"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-18",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-18"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-19",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-19"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-20",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-20"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-21",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-21"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-22",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-22"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-23",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-23"
+   ],
+   "diffs": []
+  },
+  {
+   "source_id": "docs/agency-operating-framework.md#AGM-24",
+   "status": "MATCHED",
+   "targets": [
+    "agm:AGM-24"
+   ],
+   "diffs": []
+  }
+ ]
+}
