@@ -1,0 +1,27 @@
+Scope: 13 of 16 workspace projects
+packages/assets typecheck$ tsc --noEmit -p tsconfig.json
+packages/canonical typecheck$ tsc --noEmit -p tsconfig.json
+packages/constants typecheck$ tsc --noEmit -p tsconfig.json
+packages/creative-renderer typecheck$ node --check worker.mjs
+packages/creative-renderer typecheck: Done
+packages/errors typecheck$ tsc --noEmit -p tsconfig.json
+packages/assets typecheck: Done
+packages/kernel typecheck$ tsc --noEmit -p tsconfig.json
+packages/constants typecheck: Done
+packages/pii typecheck$ tsc --noEmit -p tsconfig.json
+packages/errors typecheck: Done
+packages/canonical typecheck: Done
+packages/pii typecheck: Done
+packages/kernel typecheck: Done
+packages/config typecheck$ tsc --noEmit -p tsconfig.json
+packages/db typecheck$ tsc --noEmit -p tsconfig.json
+packages/design-tokens typecheck$ tsc --noEmit -p tsconfig.json
+packages/execution typecheck$ tsc --noEmit -p tsconfig.json
+packages/db typecheck: Done
+packages/logger typecheck$ tsc --noEmit -p tsconfig.json
+packages/config typecheck: Done
+packages/logger typecheck: Done
+packages/design-tokens typecheck: Done
+packages/execution typecheck: Done
+packages/testing typecheck$ tsc --noEmit -p tsconfig.json
+packages/testing typecheck: Done

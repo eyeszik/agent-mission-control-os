@@ -16,7 +16,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "83eb437e3252f49773f9a8711ba7d8a8e8eaa83e"
+      "git_blob_sha": "2ef356f098e9aa98bca1a0e8268f34a694c49b23"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -204,7 +204,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "git_blob_sha": "83202558eb230cee63c5bccdab3c6de38b273055"
+      "git_blob_sha": "550a3f6cca9d6d8fe3b5d3f059b5253412d89ed5"
     },
     {
       "path": "packages/shared/src/schemas/ace-fixtures.json",
@@ -316,7 +316,7 @@
     },
     {
       "path": "scripts/verify_repository_invariants.py",
-      "git_blob_sha": "747b8d6c6a02f15dc29946e87bab569a2d309fa6"
+      "git_blob_sha": "113a6b37c1b6dd12a1a3d30cd5caba1b147c9ac5"
     },
     {
       "path": "services/langgraph/agency/ace_controls.py",
@@ -1493,6 +1493,38 @@
     {
       "path": "services/langgraph/agency/obscura_runtime.py",
       "git_blob_sha": "3670f287fb003cb011530a602a47907ba8462053"
+    },
+    {
+      "path": "scripts/acceptance/discover.py",
+      "git_blob_sha": "a8544fa49982d0c42108c74bc7c4d49cf62aaa3b"
+    },
+    {
+      "path": "scripts/verify_source_reconciliation.py",
+      "git_blob_sha": "7e9a949750508b553c7687be01bb1949dd2f0a01"
+    },
+    {
+      "path": "scripts/db_migrations.py",
+      "git_blob_sha": "f3a2f2bfcda9519fd8f3351e007b82cc5915fbae"
+    },
+    {
+      "path": "services/langgraph/agency/sop/contracts.py",
+      "git_blob_sha": "d7f074d99a0dda7e813116bb352db9b941eae2ab"
+    },
+    {
+      "path": "services/langgraph/agency/sop/guard.py",
+      "git_blob_sha": "a7619d6d0819c95da97cc529bc246dafeb1e0ec8"
+    },
+    {
+      "path": "services/langgraph/agency/sop/data/sop_registry.v1.json",
+      "git_blob_sha": "3fbc65ff0c6e8eaf04afc1d74dc912c7fb921cb0"
+    },
+    {
+      "path": "services/langgraph/graph/agency/build.py",
+      "git_blob_sha": "c0a0a40f1c45fbf77e039a957cd2bd3c42f2de4c"
+    },
+    {
+      "path": "acceptance/source_trace_map.json",
+      "git_blob_sha": "5bae412408605cc813c4075e9e8c599b685054b4"
     }
   ]
 }

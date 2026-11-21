@@ -1,0 +1,145 @@
+Scope: 13 of 16 workspace projects
+packages/assets test$ vitest run
+packages/canonical test$ vitest run
+packages/creative-renderer test$ node --test worker.test.mjs
+packages/constants test$ vitest run
+packages/creative-renderer test: TAP version 13
+packages/creative-renderer test: # Subtest: real seeded rough output is deterministic and changes with seed
+packages/creative-renderer test: ok 1 - real seeded rough output is deterministic and changes with seed
+packages/creative-renderer test:   ---
+packages/creative-renderer test:   duration_ms: 12.874679
+packages/creative-renderer test:   type: 'test'
+packages/creative-renderer test:   ...
+packages/creative-renderer test: # Subtest: worker rejects unsupported engines and active input
+packages/creative-renderer test: ok 2 - worker rejects unsupported engines and active input
+packages/creative-renderer test:   ---
+packages/creative-renderer test:   duration_ms: 0.661509
+packages/creative-renderer test:   type: 'test'
+packages/creative-renderer test:   ...
+packages/creative-renderer test: # Subtest: paper_js renders deterministic rectangle paths without a browser
+packages/creative-renderer test: ok 3 - paper_js renders deterministic rectangle paths without a browser
+packages/creative-renderer test:   ---
+packages/creative-renderer test:   duration_ms: 2.098981
+packages/creative-renderer test:   type: 'test'
+packages/creative-renderer test:   ...
+packages/creative-renderer test: # Subtest: paper_js renders deterministic ellipse paths without a browser
+packages/creative-renderer test: ok 4 - paper_js renders deterministic ellipse paths without a browser
+packages/creative-renderer test:   ---
+packages/creative-renderer test:   duration_ms: 0.994916
+packages/creative-renderer test:   type: 'test'
+packages/creative-renderer test:   ...
+packages/creative-renderer test: # Subtest: paper_js renders deterministic line paths without a browser
+packages/creative-renderer test: ok 5 - paper_js renders deterministic line paths without a browser
+packages/creative-renderer test:   ---
+packages/creative-renderer test:   duration_ms: 0.522902
+packages/creative-renderer test:   type: 'test'
+packages/creative-renderer test:   ...
+packages/creative-renderer test: # Subtest: svg_js renders deterministic rectangle paths without a browser
+packages/creative-renderer test: ok 6 - svg_js renders deterministic rectangle paths without a browser
+packages/creative-renderer test:   ---
+packages/creative-renderer test:   duration_ms: 1.028981
+packages/creative-renderer test:   type: 'test'
+packages/creative-renderer test:   ...
+packages/creative-renderer test: # Subtest: svg_js renders deterministic ellipse paths without a browser
+packages/creative-renderer test: ok 7 - svg_js renders deterministic ellipse paths without a browser
+packages/creative-renderer test:   ---
+packages/creative-renderer test:   duration_ms: 0.334585
+packages/creative-renderer test:   type: 'test'
+packages/creative-renderer test:   ...
+packages/creative-renderer test: # Subtest: svg_js renders deterministic line paths without a browser
+packages/creative-renderer test: ok 8 - svg_js renders deterministic line paths without a browser
+packages/creative-renderer test:   ---
+packages/creative-renderer test:   duration_ms: 0.18168
+packages/creative-renderer test:   type: 'test'
+packages/creative-renderer test:   ...
+packages/creative-renderer test: 1..8
+packages/creative-renderer test: # tests 8
+packages/creative-renderer test: # suites 0
+packages/creative-renderer test: # pass 8
+packages/creative-renderer test: # fail 0
+packages/creative-renderer test: # cancelled 0
+packages/creative-renderer test: # skipped 0
+packages/creative-renderer test: # todo 0
+packages/creative-renderer test: # duration_ms 299.081092
+packages/creative-renderer test: Done
+packages/errors test$ vitest run
+packages/assets test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/assets
+packages/constants test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/constants
+packages/canonical test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/canonical
+packages/constants test:  Test Files  1 passed (1)
+packages/constants test:       Tests  3 passed (3)
+packages/constants test:    Start at  02:12:02
+packages/constants test:    Duration  243ms (tests 36%, import 30%, transform 25%, worker 9%)
+packages/constants test: Done
+packages/kernel test$ vitest run
+packages/errors test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/errors
+packages/canonical test:  Test Files  1 passed (1)
+packages/canonical test:       Tests  7 passed (7)
+packages/canonical test:    Start at  02:12:02
+packages/canonical test:    Duration  347ms (tests 55%, import 31%, transform 12%, worker 2%)
+packages/canonical test: Done
+packages/pii test$ vitest run
+packages/errors test:  Test Files  1 passed (1)
+packages/errors test:       Tests  5 passed (5)
+packages/errors test:    Start at  02:12:02
+packages/errors test:    Duration  203ms (import 39%, tests 30%, transform 26%, worker 5%)
+packages/errors test: Done
+packages/kernel test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/kernel
+packages/pii test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/pii
+packages/kernel test:  Test Files  1 passed (1)
+packages/kernel test:       Tests  27 passed (27)
+packages/kernel test:    Start at  02:12:03
+packages/kernel test:    Duration  867ms (tests 43%, import 36%, transform 20%)
+packages/kernel test: Done
+packages/pii test:  Test Files  1 passed (1)
+packages/pii test:       Tests  11 passed (11)
+packages/pii test:    Start at  02:12:03
+packages/pii test:    Duration  1.14s (tests 85%, import 11%, transform 4%)
+packages/pii test: Done
+packages/assets test:  Test Files  1 passed (1)
+packages/assets test:       Tests  5 passed (5)
+packages/assets test:    Start at  02:12:02
+packages/assets test:    Duration  3.39s (tests 95%, import 3%, transform 2%)
+packages/assets test: Done
+packages/config test$ vitest run
+packages/design-tokens test$ vitest run
+packages/execution test$ vitest run
+packages/db test$ vitest run
+packages/execution test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/execution
+packages/design-tokens test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/design-tokens
+packages/config test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/config
+packages/db test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/db
+packages/db test:  Test Files  1 passed (1)
+packages/db test:       Tests  5 passed (5)
+packages/db test:    Start at  02:12:06
+packages/db test:    Duration  182ms (import 42%, transform 24%, tests 23%, worker 10%, environment 1%)
+packages/db test: Done
+packages/logger test$ vitest run
+packages/config test:  Test Files  1 passed (1)
+packages/config test:       Tests  5 passed (5)
+packages/config test:    Start at  02:12:06
+packages/config test:    Duration  252ms (import 62%, transform 15%, tests 12%, worker 10%)
+packages/config test: Done
+packages/execution test:  Test Files  1 passed (1)
+packages/execution test:       Tests  8 passed (8)
+packages/execution test:    Start at  02:12:06
+packages/execution test:    Duration  400ms (import 64%, tests 20%, transform 14%, worker 2%)
+packages/execution test: Done
+packages/logger test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/logger
+packages/design-tokens test:  Test Files  1 passed (1)
+packages/design-tokens test:       Tests  8 passed (8)
+packages/design-tokens test:    Start at  02:12:06
+packages/design-tokens test:    Duration  700ms (tests 44%, import 33%, transform 21%, worker 2%)
+packages/design-tokens test: Done
+packages/logger test:  Test Files  1 passed (1)
+packages/logger test:       Tests  3 passed (3)
+packages/logger test:    Start at  02:12:06
+packages/logger test:    Duration  158ms (import 36%, transform 32%, tests 19%, worker 12%)
+packages/logger test: Done
+packages/testing test$ vitest run
+packages/testing test:  RUN  v5.1.0 /home/user/agent-mission-control-os/packages/testing
+packages/testing test:  Test Files  1 passed (1)
+packages/testing test:       Tests  4 passed (4)
+packages/testing test:    Start at  02:12:07
+packages/testing test:    Duration  226ms (import 66%, tests 22%, transform 10%, worker 2%)
+packages/testing test: Done

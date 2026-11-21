@@ -1,0 +1,1 @@
+{"result": "PASS", "sources": {"planning_items": 87, "agm_doc_rows": 24, "total": 111}, "status_counts": {"MATCHED": 84, "PARTIAL": 9, "MISSING": 0, "DRIFTED": 8, "PROVIDER_GAP": 5, "NOT_MEASURED": 5}, "unresolved_drifted": 0, "orphaned_sources": 0}
