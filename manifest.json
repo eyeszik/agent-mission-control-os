@@ -204,7 +204,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "git_blob_sha": "550a3f6cca9d6d8fe3b5d3f059b5253412d89ed5"
+      "git_blob_sha": "2caa493490fe4c045aa3897cb60e047bd6550f58"
     },
     {
       "path": "packages/shared/src/schemas/ace-fixtures.json",
@@ -1016,7 +1016,7 @@
     },
     {
       "path": "services/langgraph/app/main.py",
-      "git_blob_sha": "752251f821ecc0c82e0f9b54031062cebbc5d992"
+      "git_blob_sha": "efc4e4bdf004daa6fbf4d14a92457bcf97498cff"
     },
     {
       "path": "services/langgraph/app/observability.py",
@@ -1533,6 +1533,14 @@
     {
       "path": "supabase/migrations/20261121_amc_tenant_rls_v1.sql",
       "git_blob_sha": "08297555ac706b72a3bd05ef2e35b7bbbda864bf"
+    },
+    {
+      "path": "services/langgraph/api/routes/brand_os.py",
+      "git_blob_sha": "11345f29f88db44ab942b96713e92e58b7c8cc92"
+    },
+    {
+      "path": "services/langgraph/agency/sop/brand_os_service.py",
+      "git_blob_sha": "2bf0b35eff3639c4c0a6e1d944b3ca0f76a9f7fe"
     }
   ]
 }

@@ -1,0 +1,1182 @@
+{
+  "schema_version": "amc-brand-os-agm-mapping/v1",
+  "catalog_sha256": "9a2c30e9e65c2a3a6de70245cc47bbeeea2c695b965c09a143935d8ce3df501a",
+  "catalog_path": "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json",
+  "method": "Each source step compared against candidate AGM task titles, module acceptance, output class and module role. EXACT or COMPOSITE needs evidence for every material dimension (purpose, inputs, outputs, behaviour, acceptance, evidence, role, authorization, failure recovery); the catalog does not define inputs or failure recovery per task, so no step can reach EXACT/COMPOSITE on catalog evidence. UNRESOLVED means no verified match was found, not a confirmed capability gap. Implementing AGM extensions is a separate scope decision.",
+  "classifications": [
+    "EXACT_CONTRACT_MATCH",
+    "COMPOSITE_MATCH",
+    "PARTIAL_MATCH",
+    "CONFLICT",
+    "NEW_EXTENSION_REQUIRED",
+    "UNRESOLVED"
+  ],
+  "summary": {
+    "steps": 63,
+    "by_disposition": {
+      "PARTIAL_MATCH": 54,
+      "UNRESOLVED": 9
+    },
+    "by_sop": {
+      "F01": {
+        "PARTIAL_MATCH": 6,
+        "UNRESOLVED": 2
+      },
+      "F02": {
+        "PARTIAL_MATCH": 7,
+        "UNRESOLVED": 1
+      },
+      "F03": {
+        "PARTIAL_MATCH": 7,
+        "UNRESOLVED": 1
+      },
+      "F04": {
+        "PARTIAL_MATCH": 7
+      },
+      "F05": {
+        "PARTIAL_MATCH": 7,
+        "UNRESOLVED": 1
+      },
+      "F06": {
+        "UNRESOLVED": 3,
+        "PARTIAL_MATCH": 5
+      },
+      "F07": {
+        "PARTIAL_MATCH": 8
+      },
+      "F08": {
+        "PARTIAL_MATCH": 7,
+        "UNRESOLVED": 1
+      }
+    }
+  },
+  "sops": [
+    {
+      "sop_id": "F01",
+      "source_sha256": "410db79d8524ba907a2c0c32e2bc8d6038b46b3170a3eb309ab9d9e91df1b119",
+      "steps": [
+        {
+          "step_ref": "F01.S1",
+          "line": 21,
+          "task_ids": [
+            "AGM-24-003",
+            "AGM-01-001"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-24-003",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-001"
+          ],
+          "covered": "consent and retention workflow; stakeholder interview",
+          "missing": [
+            "per-interview boundary script; exclusion list handling",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F01.S2",
+          "line": 22,
+          "task_ids": [
+            "AGM-01-002"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-002"
+          ],
+          "covered": "history documentation",
+          "missing": [
+            "open-question technique; uncertainty marking",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F01.S3",
+          "line": 23,
+          "task_ids": [
+            "AGM-01-002",
+            "AGM-06-007"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-002",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-06-007"
+          ],
+          "covered": "values documentation; brand principles",
+          "missing": [
+            "example/exception/cost elicitation",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F01.S4",
+          "line": 24,
+          "task_ids": [
+            "AGM-01-007"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-007"
+          ],
+          "covered": "commercial objectives",
+          "missing": [
+            "founder ambition and non-negotiables",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F01.S5",
+          "line": 25,
+          "task_ids": [],
+          "task_locators": [],
+          "covered": null,
+          "missing": [
+            "no catalog task covers founder-level distinctiveness testing"
+          ],
+          "dependencies": [],
+          "disposition": "UNRESOLVED"
+        },
+        {
+          "step_ref": "F01.S6",
+          "line": 26,
+          "task_ids": [
+            "AGM-01-004",
+            "AGM-01-008"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-004",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-008"
+          ],
+          "covered": "capacity constraints; assumptions and risks",
+          "missing": [
+            "ethical boundaries; founder uncertainty",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F01.S7",
+          "line": 27,
+          "task_ids": [],
+          "task_locators": [],
+          "covered": null,
+          "missing": [
+            "no catalog task for participant member-checking"
+          ],
+          "dependencies": [],
+          "disposition": "UNRESOLVED"
+        },
+        {
+          "step_ref": "F01.S8",
+          "line": 28,
+          "task_ids": [
+            "AGM-01-010"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-010"
+          ],
+          "covered": "discovery brief",
+          "missing": [
+            "founder-profile structure; quote/paraphrase labelling",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        }
+      ]
+    },
+    {
+      "sop_id": "F02",
+      "source_sha256": "770e765297c4ca12b5dddaebc3bded079ad743008060d1b22112a1c73bdd48a8",
+      "steps": [
+        {
+          "step_ref": "F02.S1",
+          "line": 16,
+          "task_ids": [
+            "AGM-01-007",
+            "AGM-03-001"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-007",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-03-001"
+          ],
+          "covered": "objectives; buyer/user identification",
+          "missing": [
+            "decision-to-question traceability",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F02.S2",
+          "line": 17,
+          "task_ids": [
+            "AGM-03-009"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-03-009"
+          ],
+          "covered": "survey construction",
+          "missing": [
+            "section template",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F02.S3",
+          "line": 18,
+          "task_ids": [
+            "AGM-03-009"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-03-009"
+          ],
+          "covered": "unbiased surveys",
+          "missing": [
+            "item-level wording review",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F02.S4",
+          "line": 19,
+          "task_ids": [
+            "AGM-01-001"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-001"
+          ],
+          "covered": "evidence source, method and dates are persisted (module acceptance)",
+          "missing": [
+            "per-answer provenance fields",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F02.S5",
+          "line": 20,
+          "task_ids": [],
+          "task_locators": [],
+          "covered": null,
+          "missing": [
+            "no catalog task for instrument piloting"
+          ],
+          "dependencies": [],
+          "disposition": "UNRESOLVED"
+        },
+        {
+          "step_ref": "F02.S6",
+          "line": 21,
+          "task_ids": [
+            "AGM-24-002",
+            "AGM-24-003"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-24-002",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-24-003"
+          ],
+          "covered": "personal data inventory; consent workflow",
+          "missing": [
+            "distribution logistics",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F02.S7",
+          "line": 22,
+          "task_ids": [
+            "AGM-03-009"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-03-009"
+          ],
+          "covered": "sample limitations",
+          "missing": [
+            "response-quality checks",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F02.S8",
+          "line": 23,
+          "task_ids": [
+            "AGM-01-010"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-010"
+          ],
+          "covered": "discovery brief",
+          "missing": [
+            "observed/interpretation/hypothesis split",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        }
+      ]
+    },
+    {
+      "sop_id": "F03",
+      "source_sha256": "77989b6bb99d16b6c6b97005c60c3acd3ffaac61555e225c9e2a5c5365cc3460",
+      "steps": [
+        {
+          "step_ref": "F03.S1",
+          "line": 16,
+          "task_ids": [
+            "AGM-03-012"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-03-012"
+          ],
+          "covered": "behavioural/contextual segmentation",
+          "missing": [
+            "research-question framing",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F03.S2",
+          "line": 17,
+          "task_ids": [
+            "AGM-03-002",
+            "AGM-03-007"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-03-002",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-03-007"
+          ],
+          "covered": "consented CRM/support review; reviews and search",
+          "missing": [
+            "unified evidence register format",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F03.S3",
+          "line": 18,
+          "task_ids": [
+            "AGM-03-010",
+            "AGM-03-011"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-03-010",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-03-011"
+          ],
+          "covered": "jobs/frustrations/gains; customer terminology",
+          "missing": [
+            "full coding scheme (emotional/social goals)",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F03.S4",
+          "line": 19,
+          "task_ids": [
+            "AGM-05-001"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-001"
+          ],
+          "covered": "jobs mapped to verified pain/gain evidence",
+          "missing": [
+            "per-segment map structure",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F03.S5",
+          "line": 20,
+          "task_ids": [],
+          "task_locators": [],
+          "covered": null,
+          "missing": [
+            "no catalog task for a claim-confidence ledger"
+          ],
+          "dependencies": [
+            "F06"
+          ],
+          "disposition": "UNRESOLVED"
+        },
+        {
+          "step_ref": "F03.S6",
+          "line": 21,
+          "task_ids": [
+            "AGM-02-008"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-008"
+          ],
+          "covered": "underserved segments and unmet needs",
+          "missing": [
+            "alternative-cost evidence",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F03.S7",
+          "line": 22,
+          "task_ids": [
+            "AGM-03-015"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-03-015"
+          ],
+          "covered": "persona validation against behaviour",
+          "missing": [
+            "theme-level disconfirmation",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F03.S8",
+          "line": 23,
+          "task_ids": [
+            "AGM-05-005"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-005"
+          ],
+          "covered": "segment value-proposition hypotheses",
+          "missing": [
+            "solution-neutral phrasing rule",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        }
+      ]
+    },
+    {
+      "sop_id": "F04",
+      "source_sha256": "6969b7a70e0a9e7a260e8e33d802e51cd9d3932e01b0ad005ccfe8b6829d921a",
+      "steps": [
+        {
+          "step_ref": "F04.S1",
+          "line": 16,
+          "task_ids": [
+            "AGM-04-001",
+            "AGM-04-002"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-001",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-002"
+          ],
+          "covered": "competitor cohorts; inclusion/exclusion criteria",
+          "missing": [
+            "substitute inclusion rule",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F04.S2",
+          "line": 17,
+          "task_ids": [
+            "AGM-04-003",
+            "AGM-04-006"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-003",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-006"
+          ],
+          "covered": "offers/prices inventory; website analysis",
+          "missing": [
+            "packaging and campaign capture",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F04.S3",
+          "line": 18,
+          "task_ids": [
+            "AGM-04-004",
+            "AGM-04-005"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-004",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-005"
+          ],
+          "covered": "segments/outcomes; positioning, promises, proof",
+          "missing": [
+            "tone, visual codes, channel dimensions",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F04.S4",
+          "line": 19,
+          "task_ids": [
+            "AGM-04-005"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-005"
+          ],
+          "covered": "positioning and proof audit",
+          "missing": [
+            "cross-artifact check",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F04.S5",
+          "line": 20,
+          "task_ids": [
+            "AGM-04-012"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-012"
+          ],
+          "covered": "evidence-linked positioning matrix",
+          "missing": [
+            "convention/gap tagging",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F04.S6",
+          "line": 21,
+          "task_ids": [
+            "AGM-24-009",
+            "AGM-24-004"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-24-009",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-24-004"
+          ],
+          "covered": "rights/trademark review; claim substantiation",
+          "missing": [
+            "competitive-identity risk triage",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F04.S7",
+          "line": 22,
+          "task_ids": [
+            "AGM-04-013",
+            "AGM-04-011"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-013",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-011"
+          ],
+          "covered": "opportunity/uncertainty register; strategic gaps",
+          "missing": [
+            "cross-SOP whitespace test",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [
+            "F03",
+            "F05",
+            "F06"
+          ],
+          "disposition": "PARTIAL_MATCH"
+        }
+      ]
+    },
+    {
+      "sop_id": "F05",
+      "source_sha256": "4a51079d5bb8eb5971e78b8e8f0fdf772c9948ac1cddcbd90614c0e2c11c0e6e",
+      "steps": [
+        {
+          "step_ref": "F05.S1",
+          "line": 16,
+          "task_ids": [
+            "AGM-02-001"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-001"
+          ],
+          "covered": "category and geographic scope",
+          "missing": [
+            "explicit exclusions",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F05.S2",
+          "line": 17,
+          "task_ids": [
+            "AGM-02-004"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-004"
+          ],
+          "covered": "credible primary research",
+          "missing": [
+            "methodology/coverage notes",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F05.S3",
+          "line": 18,
+          "task_ids": [
+            "AGM-02-003",
+            "AGM-02-007"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-003",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-007"
+          ],
+          "covered": "trends/demand drivers; emerging behaviours",
+          "missing": [
+            "willingness-to-switch evidence",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F05.S4",
+          "line": 19,
+          "task_ids": [
+            "AGM-02-005",
+            "AGM-02-006"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-005",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-006"
+          ],
+          "covered": "maturity/switching costs; regulatory influences",
+          "missing": [
+            "channel access analysis",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F05.S5",
+          "line": 20,
+          "task_ids": [
+            "AGM-02-008"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-008"
+          ],
+          "covered": "underserved segments and unmet needs",
+          "missing": [
+            "five-part hypothesis format",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F05.S6",
+          "line": 21,
+          "task_ids": [
+            "AGM-02-002"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-002"
+          ],
+          "covered": "TAM/SAM/SOM with documented assumptions",
+          "missing": [
+            "sensitivity analysis",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F05.S7",
+          "line": 22,
+          "task_ids": [
+            "AGM-02-009"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-009"
+          ],
+          "covered": "opportunity scoring",
+          "missing": [
+            "published weights and confidence",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F05.S8",
+          "line": 23,
+          "task_ids": [],
+          "task_locators": [],
+          "covered": null,
+          "missing": [
+            "no catalog task for validation-experiment design"
+          ],
+          "dependencies": [],
+          "disposition": "UNRESOLVED"
+        }
+      ]
+    },
+    {
+      "sop_id": "F06",
+      "source_sha256": "720a9301313720f0cf4bdb967b0a9bfe382069c750e022c702f97dac2f41d1ea",
+      "steps": [
+        {
+          "step_ref": "F06.S1",
+          "line": 16,
+          "task_ids": [],
+          "task_locators": [],
+          "covered": null,
+          "missing": [
+            "no catalog task for claim atomization"
+          ],
+          "dependencies": [],
+          "disposition": "UNRESOLVED"
+        },
+        {
+          "step_ref": "F06.S2",
+          "line": 17,
+          "task_ids": [
+            "AGM-01-001"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-01-001"
+          ],
+          "covered": "evidence source, method, dates persisted (module acceptance)",
+          "missing": [
+            "claim-type taxonomy; access status",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F06.S3",
+          "line": 18,
+          "task_ids": [
+            "AGM-02-004"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-02-004"
+          ],
+          "covered": "credible primary research",
+          "missing": [
+            "six-factor quality rubric",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F06.S4",
+          "line": 19,
+          "task_ids": [
+            "AGM-05-011"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-011"
+          ],
+          "covered": "disconfirming findings",
+          "missing": [
+            "alternative explanations per claim",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F06.S5",
+          "line": 20,
+          "task_ids": [],
+          "task_locators": [],
+          "covered": null,
+          "missing": [
+            "no catalog task defines a confidence scale"
+          ],
+          "dependencies": [],
+          "disposition": "UNRESOLVED"
+        },
+        {
+          "step_ref": "F06.S6",
+          "line": 21,
+          "task_ids": [
+            "AGM-04-013"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-013"
+          ],
+          "covered": "uncertainty register",
+          "missing": [
+            "verification queue fields",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F06.S7",
+          "line": 22,
+          "task_ids": [],
+          "task_locators": [],
+          "covered": null,
+          "missing": [
+            "no catalog task for ledger versioning (native N4 versions could carry it)"
+          ],
+          "dependencies": [],
+          "disposition": "UNRESOLVED"
+        },
+        {
+          "step_ref": "F06.S8",
+          "line": 23,
+          "task_ids": [
+            "AGM-24-012"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-24-012"
+          ],
+          "covered": "evidence register with unresolved critical blockers",
+          "missing": [
+            "pre-decision filter",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        }
+      ]
+    },
+    {
+      "sop_id": "F07",
+      "source_sha256": "d0d5632faa77b2ab5ba942ded9ba1dbddf34061e3fc4300b8b0a9f0137ac9f5b",
+      "steps": [
+        {
+          "step_ref": "F07.S1",
+          "line": 16,
+          "task_ids": [
+            "AGM-06-003"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-06-003"
+          ],
+          "covered": "category frame and reference set",
+          "missing": [
+            "horizon and unresolved-evidence intake",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [
+            "F06"
+          ],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F07.S2",
+          "line": 17,
+          "task_ids": [
+            "AGM-06-011"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-06-011"
+          ],
+          "covered": "alternative territories",
+          "missing": [
+            "three-source generation rule",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F07.S3",
+          "line": 18,
+          "task_ids": [
+            "AGM-06-004"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-06-004"
+          ],
+          "covered": "core positioning and differentiation",
+          "missing": [
+            "nine-field statement",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F07.S4",
+          "line": 19,
+          "task_ids": [
+            "AGM-06-005"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-06-005"
+          ],
+          "covered": "promise with substantiation",
+          "missing": [
+            "investment estimate",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F07.S5",
+          "line": 20,
+          "task_ids": [
+            "AGM-06-011",
+            "AGM-04-012"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-06-011",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-04-012"
+          ],
+          "covered": "territory comparison; positioning matrix",
+          "missing": [
+            "relevance test against F03",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [
+            "F03",
+            "F04"
+          ],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F07.S6",
+          "line": 21,
+          "task_ids": [
+            "AGM-06-001"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-06-001"
+          ],
+          "covered": "purpose as hypothesis",
+          "missing": [
+            "category attractiveness check",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [
+            "F01",
+            "F05"
+          ],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F07.S7",
+          "line": 22,
+          "task_ids": [
+            "AGM-06-011"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-06-011"
+          ],
+          "covered": "territory comparison against evidence",
+          "missing": [
+            "seven-criterion scoring",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F07.S8",
+          "line": 23,
+          "task_ids": [
+            "AGM-06-012"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-06-012"
+          ],
+          "covered": "approve strategy and pin versions",
+          "missing": [
+            "explicit no-decision path",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        }
+      ]
+    },
+    {
+      "sop_id": "F08",
+      "source_sha256": "25af0355c3428842c0b7ea7f6e9a7a8e3dc350d98a023361a3b8bcd88291979a",
+      "steps": [
+        {
+          "step_ref": "F08.S1",
+          "line": 16,
+          "task_ids": [
+            "AGM-05-001"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-001"
+          ],
+          "covered": "jobs mapped to pain/gain evidence",
+          "missing": [
+            "current-alternative restatement",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F08.S2",
+          "line": 17,
+          "task_ids": [
+            "AGM-05-002",
+            "AGM-05-006"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-002",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-006"
+          ],
+          "covered": "measurable outcome; benefit statements",
+          "missing": [
+            "four-way split",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F08.S3",
+          "line": 18,
+          "task_ids": [
+            "AGM-05-003"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-003"
+          ],
+          "covered": "differentiated mechanism and proof",
+          "missing": [
+            "candidate-distinction labelling",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [
+            "F04",
+            "F05"
+          ],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F08.S4",
+          "line": 19,
+          "task_ids": [
+            "AGM-05-005"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-005"
+          ],
+          "covered": "segment value-proposition hypotheses",
+          "missing": [
+            "plain-language scaffold",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F08.S5",
+          "line": 20,
+          "task_ids": [
+            "AGM-05-003",
+            "AGM-24-004"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-003",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-24-004"
+          ],
+          "covered": "credible proof; claim substantiation",
+          "missing": [
+            "per-claim proof map",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F08.S6",
+          "line": 21,
+          "task_ids": [],
+          "task_locators": [],
+          "covered": null,
+          "missing": [
+            "no catalog task for this six-criterion editorial check"
+          ],
+          "dependencies": [],
+          "disposition": "UNRESOLVED"
+        },
+        {
+          "step_ref": "F08.S7",
+          "line": 22,
+          "task_ids": [
+            "AGM-05-010"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-010"
+          ],
+          "covered": "consented concept testing",
+          "missing": [
+            "comprehension measures",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        },
+        {
+          "step_ref": "F08.S8",
+          "line": 23,
+          "task_ids": [
+            "AGM-05-011",
+            "AGM-24-004"
+          ],
+          "task_locators": [
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-05-011",
+            "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json#AGM-24-004"
+          ],
+          "covered": "disconfirming findings; claim substantiation",
+          "missing": [
+            "revision log",
+            "catalog tasks define a title and a module-level acceptance only; this step's inputs, per-step acceptance, evidence fields and failure recovery are not specified there"
+          ],
+          "dependencies": [],
+          "disposition": "PARTIAL_MATCH"
+        }
+      ]
+    }
+  ]
+}

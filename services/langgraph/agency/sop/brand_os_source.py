@@ -108,25 +108,34 @@ def verified_draft_bytes(entry: IndexEntry) -> bytes:
 class ProcedureStep(_Record):
     sequence: int = Field(ge=1)
     text: str = Field(min_length=1)
+    line: int = Field(ge=1, description="1-based line of the step in the source file")
 
 
-def _procedure_lines(text: str) -> list[str]:
+def step_ref(sop_id: str, sequence: int) -> str:
+    """Stable step reference; always read together with the source digest it was taken from."""
+    return f"{sop_id}.S{sequence}"
+
+
+def _procedure_lines(text: str) -> list[tuple[int, str]]:
     lines = text.splitlines()
     try:
         start = next(i for i, line in enumerate(lines) if line.strip() == _PROCEDURE_HEADING) + 1
     except StopIteration as exc:
         raise ValueError("no '## Procedure' section") from exc
     end = next((i for i in range(start, len(lines)) if lines[i].startswith("## ")), len(lines))
-    return lines[start:end]
+    return [(i + 1, lines[i]) for i in range(start, end)]
 
 
 def procedure_steps(text: str) -> tuple[ProcedureStep, ...]:
-    """The ordered numbered steps of the Procedure section, exactly as written. Fails on gaps or reordering."""
+    """The ordered numbered steps of the Procedure section, exactly as written. Fails on gaps or reordering.
+
+    Numbered lines outside the Procedure section (examples, outputs) are never steps.
+    """
     steps = []
-    for line in _procedure_lines(text):
+    for number, line in _procedure_lines(text):
         match = _STEP.match(line.strip())
         if match:
-            steps.append(ProcedureStep(sequence=int(match.group(1)), text=match.group(2).strip()))
+            steps.append(ProcedureStep(sequence=int(match.group(1)), text=match.group(2).strip(), line=number))
     if not steps:
         raise ValueError("the Procedure section has no numbered steps")
     if [s.sequence for s in steps] != list(range(1, len(steps) + 1)):
@@ -157,8 +166,85 @@ def summarize(sop_id: str) -> ProcedureSummary:
                             steps=steps)
 
 
+# ----------------------------------------------------------------------------- companion and AGM mapping (advisory)
+COMPANION_FILE = DATA_DIR / "brand_os_companion.v1.json"
+MAPPING_FILE = DATA_DIR / "brand_os_agm_mapping.v1.json"
+DISPOSITIONS = ("EXACT_CONTRACT_MATCH", "COMPOSITE_MATCH", "PARTIAL_MATCH", "CONFLICT", "NEW_EXTENSION_REQUIRED", "UNRESOLVED")
+
+
+def _load(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _inventory() -> dict[str, tuple[str, list[tuple[str, int]]]]:
+    """sop_id -> (pinned sha256, [(step_ref, line)]) from the actual draft bytes."""
+    out = {}
+    for entry in load_index().entries:
+        if entry.procedure_source:
+            steps = procedure_steps(verified_draft_bytes(entry).decode("utf-8"))
+            out[entry.sop_id] = (entry.procedure_source.sha256, [(step_ref(entry.sop_id, s.sequence), s.line) for s in steps])
+    return out
+
+
+def _keying_problems(name: str, sops: list[dict]) -> list[str]:
+    inventory = _inventory()
+    problems = [] if [s["sop_id"] for s in sops] == sorted(inventory) else [f"{name}: SOP set differs from the drafts"]
+    for sop in sops:
+        pinned, steps = inventory.get(sop["sop_id"], (None, []))
+        if sop["source_sha256"] != pinned:
+            problems.append(f"{name}: {sop['sop_id']} keyed to a digest that is not the pinned draft")
+        if [(s["step_ref"], s["line"]) for s in sop["steps"]] != steps:
+            problems.append(f"{name}: {sop['sop_id']} steps do not match the extracted procedure")
+    return problems
+
+
+def companion_problems(companion: Optional[dict] = None) -> list[str]:
+    from services.langgraph.agency.kernel import ROLE_REGISTRY
+
+    doc = companion if companion is not None else _load(COMPANION_FILE)
+    problems = [] if doc.get("scope") == "ADVISORY" else ["companion must stay ADVISORY (it is not adopted content)"]
+    problems += _keying_problems("companion", doc["sops"])
+    for sop in doc["sops"]:
+        for step in sop["steps"]:
+            role = step["native_role"]
+            if role["binding"] == "MISSING" and role["role"] is not None:
+                problems.append(f"{step['step_ref']}: MISSING binding cannot name a role")
+            if role["binding"] != "MISSING" and role["role"] not in ROLE_REGISTRY:
+                problems.append(f"{step['step_ref']}: {role['role']} is not an N3 role")
+            if not all(step.get(k) for k in ("performer_suggested", "inputs", "output", "evidence", "acceptance", "on_failure")):
+                problems.append(f"{step['step_ref']}: incomplete operational detail")
+    return problems
+
+
+def mapping_problems(mapping: Optional[dict] = None) -> list[str]:
+    from services.langgraph.agency.operating_framework.catalog import load_catalog
+
+    doc = mapping if mapping is not None else _load(MAPPING_FILE)
+    catalog = load_catalog()
+    problems = [] if doc["catalog_sha256"] == catalog.sha256 else ["mapping was made against another catalog revision"]
+    problems += _keying_problems("mapping", doc["sops"])
+    known, counts = {t.task_id for t in catalog.tasks}, {}
+    for step in (s for sop in doc["sops"] for s in sop["steps"]):
+        disposition = step["disposition"]
+        counts[disposition] = counts.get(disposition, 0) + 1
+        problems += [f"{step['step_ref']}: unknown task {t}" for t in step["task_ids"] if t not in known]
+        if disposition not in DISPOSITIONS:
+            problems.append(f"{step['step_ref']}: unknown disposition {disposition}")
+        if disposition in ("EXACT_CONTRACT_MATCH", "COMPOSITE_MATCH") and (step["missing"] or not step["task_ids"]):
+            problems.append(f"{step['step_ref']}: {disposition} needs tasks and no missing behaviour")
+        if disposition == "PARTIAL_MATCH" and not (step["task_ids"] and step["covered"] and step["missing"]):
+            problems.append(f"{step['step_ref']}: PARTIAL_MATCH must name tasks, covered and missing behaviour")
+        if disposition == "UNRESOLVED" and step["task_ids"]:
+            problems.append(f"{step['step_ref']}: UNRESOLVED cannot cite a task as a match")
+    if doc["summary"]["by_disposition"] != counts or doc["summary"]["steps"] != sum(counts.values()):
+        problems.append("mapping summary does not reconcile with the step dispositions")
+    return problems
+
+
 __all__ = [
     "BrandOsIndex",
+    "companion_problems",
+    "mapping_problems",
     "IndexEntry",
     "ProcedureSource",
     "ProcedureStep",
@@ -166,6 +252,7 @@ __all__ = [
     "draft_bytes",
     "load_index",
     "procedure_steps",
+    "step_ref",
     "summarize",
     "verified_draft_bytes",
 ]

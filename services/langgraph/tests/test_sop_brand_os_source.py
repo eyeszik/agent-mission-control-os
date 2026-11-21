@@ -157,3 +157,70 @@ def test_a_draft_path_cannot_escape_the_data_directory(monkeypatch):
 
     with pytest.raises(PermissionError):
         draft_bytes(escaped)
+
+
+# ----------------------------------------------------------------------------- companion and AGM mapping
+import copy  # noqa: E402
+
+from services.langgraph.agency.sop.brand_os_source import (  # noqa: E402
+    COMPANION_FILE,
+    MAPPING_FILE,
+    companion_problems,
+    mapping_problems,
+)
+
+
+def _doc(path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def test_the_step_inventory_is_63_with_lines_and_both_files_are_keyed_to_it():
+    total = sum(len(summarize(f"F0{n}").steps) for n in range(1, 9))
+    assert total == 63
+    assert summarize("F04").steps[0].line == 16 and summarize("F01").steps[0].line == 21
+    assert companion_problems() == [] and mapping_problems() == []
+
+
+def test_mapping_counts_reconcile_and_no_step_claims_an_unevidenced_exact_match():
+    doc = _doc(MAPPING_FILE)
+    steps = [s for sop in doc["sops"] for s in sop["steps"]]
+    assert len(steps) == 63 == doc["summary"]["steps"]
+    assert doc["summary"]["by_disposition"] == {"PARTIAL_MATCH": 54, "UNRESOLVED": 9}
+    assert not {s["disposition"] for s in steps} & {"EXACT_CONTRACT_MATCH", "COMPOSITE_MATCH"}
+
+
+def test_the_companion_is_advisory_and_separates_suggested_performers_from_native_bindings():
+    doc = _doc(COMPANION_FILE)
+    assert doc["scope"] == "ADVISORY" and "new draft revision" in doc["scope_note"]
+    bindings = [s["native_role"]["binding"] for sop in doc["sops"] for s in sop["steps"]]
+    assert bindings.count("MISSING") == 9 and bindings.count("AGM_MODULE_BINDING") == 54
+    assert "F03_F06" in doc["cross_sop_dependencies"] and "provisional" in doc["cross_sop_dependencies"]["F03_F06"]
+    handoffs = {sop["sop_id"]: {h["to"] for h in sop["handoffs"]} for sop in doc["sops"]}
+    assert "F08" in handoffs["F07"] and {"F07", "F08"} <= handoffs["F06"]
+
+
+def test_drift_in_either_file_is_detected():
+    comp = _doc(COMPANION_FILE)
+    bad = copy.deepcopy(comp)
+    bad["scope"] = "MANDATORY"
+    assert any("ADVISORY" in p for p in companion_problems(bad))
+    bad = copy.deepcopy(comp)
+    bad["sops"][0]["source_sha256"] = "0" * 64
+    assert any("pinned draft" in p for p in companion_problems(bad))
+    bad = copy.deepcopy(comp)
+    bad["sops"][3]["steps"].pop()
+    assert any("extracted procedure" in p for p in companion_problems(bad))
+    bad = copy.deepcopy(comp)
+    bad["sops"][0]["steps"][0]["native_role"]["role"] = "chief_wizard"
+    assert any("not an N3 role" in p for p in companion_problems(bad))
+    mp = _doc(MAPPING_FILE)
+    bad = copy.deepcopy(mp)
+    bad["catalog_sha256"] = "0" * 64
+    assert any("another catalog" in p for p in mapping_problems(bad))
+    bad = copy.deepcopy(mp)
+    bad["sops"][0]["steps"][0]["task_ids"] = ["AGM-99-999"]
+    assert any("unknown task" in p for p in mapping_problems(bad))
+    bad = copy.deepcopy(mp)
+    bad["sops"][0]["steps"][0]["disposition"] = "EXACT_CONTRACT_MATCH"
+    problems = mapping_problems(bad)
+    assert any("needs tasks and no missing" in p for p in problems) and any("reconcile" in p for p in problems)

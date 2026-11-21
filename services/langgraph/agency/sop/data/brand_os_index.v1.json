@@ -9,6 +9,7 @@
     "archive": "F01-F08_reconstructed_drafts.zip",
     "archive_sha256": "1c8f1c50765188fbb029aded2641fd8561c209527a455ed38bce31b085040781",
     "readme": "brand_os/README.md",
+    "readme_sha256": "815b53a8bf611db81ac9c84598b286cc3eafc76d7ad318b1909a3d738e81066a",
     "received": "2026-11-21",
     "adoption_decision": "Owner chose to adopt F01-F08 as newly written Brand OS 4.0 SOPs (2026-11-21). Each becomes canonical in a project only through a native BRAND_OS_SOP_ADOPTION approval decided by someone other than the requester.",
     "limitations": [
