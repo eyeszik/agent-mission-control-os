@@ -48,6 +48,12 @@ jobs:
       - name: Verify prompt guidance registry
         run: python scripts/verify_guidance_registry.py
 
+      - name: Verify canonical AGM binding (Phase 0 discovery)
+        run: python scripts/acceptance/discover.py > /dev/null
+
+      - name: Verify Source-to-AGM reconciliation and cross-stack parity
+        run: python scripts/verify_source_reconciliation.py
+
       - name: Compile Python sources
         run: python -m compileall -q services/langgraph scripts
 
@@ -102,6 +108,10 @@ jobs:
           --health-retries 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history: test_migration_roundtrip.py rebuilds the prior migration
+          # baseline from an older commit to prove the incremental upgrade path.
+          fetch-depth: 0
 
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
@@ -130,6 +140,9 @@ jobs:
         env:
           AMC_DATABASE_BACKEND: postgres
           DATABASE_URL: postgresql://amc:amc@127.0.0.1:5432/amc_test
+          # Maintenance DB of this job's disposable service container; the
+          # migration round-trip tests create and drop scratch databases on it.
+          AMC_EPHEMERAL_POSTGRES_DSN: postgresql://amc:amc@127.0.0.1:5432/postgres
           AMC_EXPORT_ROOT: /tmp/amc-exports-pg-${{ github.run_id }}
         run: |
           set -o pipefail

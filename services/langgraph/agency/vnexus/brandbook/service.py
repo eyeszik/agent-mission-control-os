@@ -304,6 +304,16 @@ def _page_record(page: compiler.PagePackage, sections: list[tuple[str, str]], ch
     return (json.dumps(doc, sort_keys=True, indent=1, ensure_ascii=False) + "\n").encode()
 
 
+def _measure_with_one_retry(measure_layout: Any, html: str, out_dir: Path, **kwargs: Any) -> tuple[dict[str, Any], Path, int]:
+    """(run, its output directory, browser runs used). A layout run only reads the given HTML, so one repeat after a
+    failed run has no side effect; a second failure is returned as is and its pages stay NOT_RUN and unmeasured."""
+    run = measure_layout(html, out_dir=out_dir, **kwargs)
+    if run.get("status") == "PASSED":
+        return run, out_dir, 1
+    retry_dir = out_dir.with_name(out_dir.name + "-retry")
+    return measure_layout(html, out_dir=retry_dir, **kwargs), retry_dir, 2
+
+
 def _sections_sha(sections: list[tuple[str, str]]) -> str:
     return canonical_hash([[k, html] for k, html in sections])
 
@@ -352,6 +362,7 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
     sections: dict[str, list[tuple[str, str]]] = {}
     page_checks: dict[str, list[dict[str, Any]]] = {}
     previews: dict[str, str] = {}
+    measured_ok: dict[str, bool] = {}
 
     def render_pages(pages: list[compiler.PagePackage], work: Path) -> None:
         """Render (or reuse) and check the given pages, running the overflow ladder on failures."""
@@ -382,13 +393,16 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
             measured: dict[str, list[dict[str, Any]]] = {pg.page_id: [] for pg in pending}
             if can_measure:
                 html = render.book_html([s for pg in pending for _, s in sections[pg.page_id]], title="measure", style=style)
-                run = measure_layout(html, width=width, height=height, out_dir=work / f"m{attempt}-{pending[0].page_id}",
-                                     capture=capture and attempt == 0, min_font_px=render.MIN_FONT_PX)
-                stats["browser_runs"] += 1
+                run, run_dir, runs = _measure_with_one_retry(
+                    measure_layout, html, work / f"m{attempt}-{pending[0].page_id}", width=width, height=height,
+                    capture=capture and attempt == 0, min_font_px=render.MIN_FONT_PX)
+                stats["browser_runs"] += runs
                 stats["pages_measured"] += len(pending)
                 measured = checksmod.measurement_for([pg.page_id for pg in pending], run["pages"])
                 for key, file in run["captures"].items():
-                    previews[key] = str(work / f"m{attempt}-{pending[0].page_id}" / file)
+                    previews[key] = str(run_dir / file)
+                for pg in pending:
+                    measured_ok[pg.page_id] = bool(measured[pg.page_id])
             t = lap("measure", t)
             still = []
             for pg in pending:
@@ -405,8 +419,12 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
                     still.append(pg)
             pending = still
         for pg in todo:
+            # A page counts as measured only if the browser actually measured it (and captured it when asked to);
+            # otherwise the next build must measure it again instead of reusing NOT_RUN checks as measured.
+            complete = measured_ok.get(pg.page_id, False) and (not capture or pg.page_id in previews)
             page_entry = _put(principal, project_id, f"{base}-{pg.page_id}",
-                              _page_record(pg, sections[pg.page_id], page_checks[pg.page_id], can_measure), "page")
+                              _page_record(pg, sections[pg.page_id], page_checks[pg.page_id], can_measure and complete),
+                              "page")
             count_write()
             key = pg.page_id
             if key in previews and Path(previews[key]).is_file():

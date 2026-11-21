@@ -1,0 +1,4 @@
+
+> @amc/web@0.1.0 typecheck /home/user/agent-mission-control-os/apps/web
+> tsc --noEmit
+

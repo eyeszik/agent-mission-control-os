@@ -186,6 +186,8 @@ describe('WooCommerceConnector.createOrder', () => {
     status: 'succeeded',
     amountCents: 25_990,
     currency: 'USD',
+    applicationFeeCents: 0,
+    stripeAccount: null,
   };
 
   it('places a paid order carrying the attribution trail', async () => {

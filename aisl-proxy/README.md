@@ -22,7 +22,7 @@ AISL gateway ── Postgres (merchants, intents, conversions, ledger_entries, p
   │
   ├─ Shopify Storefront GraphQL / WooCommerce REST   catalogue
   ├─ Shopify Admin REST / WooCommerce REST           order dispatch
-  ├─ Stripe PaymentIntents                           shared payment token redemption
+  ├─ Stripe PaymentIntents                           SPT redemption + commission collection
   └─ Stripe Transfers                                agent commission payouts
        ▲
        ├── POST /v1/webhooks/stripe-acp    settlement + clawback
@@ -158,6 +158,14 @@ exactly the outstanding balance on that account.
 Debits equal credits within every `entry_group_id`;
 `findUnbalancedEntryGroups()` returns the corruption alarm and is asserted
 empty by the test suite.
+
+**The commission is collected on the charge itself.** The PaymentIntent is a
+direct charge on the merchant's connected account carrying an
+`application_fee_amount` equal to the whole commission, so the merchant keeps
+its net and the platform receives the commission into its own balance. The
+agent's share is then transferred out of that balance by the payout sweep, and
+what remains is the platform's fee. Without this the platform would pay agents
+from its own funds on every sale.
 
 **Commission is never paid on money that did not move.** The gateway settles on
 `min(merchant order total, amount actually captured)`, and logs a
