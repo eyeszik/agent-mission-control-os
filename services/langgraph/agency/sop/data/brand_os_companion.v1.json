@@ -1,0 +1,1240 @@
+{
+  "schema_version": "amc-brand-os-companion/v1",
+  "scope": "ADVISORY",
+  "scope_note": "Operational guidance alongside the pinned F01-F08 drafts. It does not change their bytes or their mandatory behaviour, is not part of what an adoption approval covers, and binds no role. Making any of it mandatory requires a new draft revision (new file, new digest) and its own independent adoption decision.",
+  "eligible_approvers": {
+    "roles": [
+      "reviewer",
+      "approver",
+      "admin",
+      "owner"
+    ],
+    "rule": "decided only on /approvals/{id}/decide; the decider must not be the requester (server-enforced)"
+  },
+  "cross_sop_dependencies": {
+    "F03_F06": "F06 opens an initial ledger (S1-S2) from F01/F02 claims before F03 S5. F03 S5 rates themes provisionally against a named ledger version and appends its new claims as UNVERIFIED rows. F06 S7 updates the ledger as evidence arrives. F03 acceptance re-checks ratings against the ledger version current at decision time (F06 S8). Neither SOP waits for the other to finish.",
+    "F07_inputs": "F07 receives F06 unresolved critical evidence and open risks (F06 S8 output) with its F01-F05 positioning inputs.",
+    "F08_inputs": "F08 receives the selected F07 territory, its proof plan, open risks and F06 claim limitations."
+  },
+  "sops": [
+    {
+      "sop_id": "F01",
+      "source_sha256": "410db79d8524ba907a2c0c32e2bc8d6038b46b3170a3eb309ab9d9e91df1b119",
+      "steps": [
+        {
+          "step_ref": "F01.S1",
+          "line": 21,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Interviewer (strategist)",
+          "native_role": {
+            "role": "brand_safety_reviewer",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-24 (AGM-24-003); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Founder identity; consent; retention location",
+          "output": "Recorded consent, recording choice and excluded topics",
+          "evidence": "Consent note with date and scope",
+          "acceptance": "Consent and exclusions recorded before any question",
+          "review": "Privacy/consent owner for recording or sensitive topics",
+          "on_failure": "No consent: stop the interview; record why"
+        },
+        {
+          "step_ref": "F01.S2",
+          "line": 22,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Interviewer (strategist)",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-01 (AGM-01-002); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Consent record; interview guide",
+          "output": "Dated chronology of origin, pivots, setbacks",
+          "evidence": "Notes or transcript excerpt per event",
+          "acceptance": "Each event dated or marked approximate",
+          "review": null,
+          "on_failure": "Contradictory dates: record both and flag for step 7"
+        },
+        {
+          "step_ref": "F01.S3",
+          "line": 23,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Interviewer (strategist)",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-01 (AGM-01-002); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Chronology",
+          "output": "Stated values each with a decision example, exception and accepted cost",
+          "evidence": "Quoted or paraphrased example, labelled",
+          "acceptance": "Every principle has an example or is marked unverified",
+          "review": null,
+          "on_failure": "No example: keep principle as UNVERIFIED hypothesis"
+        },
+        {
+          "step_ref": "F01.S4",
+          "line": 24,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Interviewer (strategist)",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-01 (AGM-01-007); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Chronology; principles",
+          "output": "Problem worth solving, success by horizon, non-negotiables",
+          "evidence": "Notes",
+          "acceptance": "Horizons explicit; non-negotiables listed",
+          "review": null,
+          "on_failure": "Vague ambition: ask for one observable success signal; else record as open question"
+        },
+        {
+          "step_ref": "F01.S5",
+          "line": 25,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Interviewer (strategist)",
+          "native_role": {
+            "role": null,
+            "binding": "MISSING",
+            "basis": "no AGM task mapped, so no native role binding exists for this step"
+          },
+          "inputs": "Principles; category context",
+          "output": "Claimed distinctive beliefs/methods with evidence and competing explanations",
+          "evidence": "Evidence references per claim",
+          "acceptance": "Each distinctiveness claim cites observable evidence or is marked unverified",
+          "review": null,
+          "on_failure": "No evidence: pass the claim to F06 as UNVERIFIED"
+        },
+        {
+          "step_ref": "F01.S6",
+          "line": 26,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Interviewer (strategist)",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-01 (AGM-01-004); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Business context",
+          "output": "Capabilities, resources, legal/ethical limits, commitments, uncertainties",
+          "evidence": "Notes; references to supplied documents",
+          "acceptance": "Constraints listed with source",
+          "review": null,
+          "on_failure": "Unknown constraint: record as open question for AGM-01-008 owner"
+        },
+        {
+          "step_ref": "F01.S7",
+          "line": 27,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Interviewer (strategist)",
+          "native_role": {
+            "role": null,
+            "binding": "MISSING",
+            "basis": "no AGM task mapped, so no native role binding exists for this step"
+          },
+          "inputs": "Draft themes",
+          "output": "Founder-corrected themes",
+          "evidence": "Correction record (accepted/qualified/rejected)",
+          "acceptance": "Founder reviewed every theme",
+          "review": "Founder",
+          "on_failure": "Founder unavailable: mark synthesis UNREVIEWED; do not proceed to F07 as fact"
+        },
+        {
+          "step_ref": "F01.S8",
+          "line": 28,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-01 (AGM-01-010); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Reviewed themes; notes",
+          "output": "Founder profile: narrative, 3-7 principles, ambition, constraints, quotes, open questions",
+          "evidence": "Profile with quote/paraphrase labels and evidence refs",
+          "acceptance": "Profile passes the draft's quality conditions",
+          "review": "Reviewer (approver role) when the profile feeds F07",
+          "on_failure": "Unresolved tensions: keep them listed; do not smooth over"
+        }
+      ],
+      "handoffs": [
+        {
+          "to": "F06",
+          "artifact": "founder claims for the ledger",
+          "prerequisite": "F01 acceptance passed; artifact reviewed where the step says so"
+        },
+        {
+          "to": "F07",
+          "artifact": "founder profile: principles and constraints",
+          "prerequisite": "F01 acceptance passed; artifact reviewed where the step says so"
+        }
+      ]
+    },
+    {
+      "sop_id": "F02",
+      "source_sha256": "770e765297c4ca12b5dddaebc3bded079ad743008060d1b22112a1c73bdd48a8",
+      "steps": [
+        {
+          "step_ref": "F02.S1",
+          "line": 16,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-01 (AGM-01-007); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Decision to support; respondent groups",
+          "output": "Decision statement and respondent definition",
+          "evidence": "Scoping note",
+          "acceptance": "Every planned question maps to the decision",
+          "review": null,
+          "on_failure": "No decision defined: stop; return to requester"
+        },
+        {
+          "step_ref": "F02.S2",
+          "line": 17,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-03 (AGM-03-009); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Scoping note; existing research",
+          "output": "Sectioned draft questionnaire",
+          "evidence": "Versioned draft",
+          "acceptance": "All seven sections present or explicitly out of scope",
+          "review": null,
+          "on_failure": "Missing section: record why it is out of scope"
+        },
+        {
+          "step_ref": "F02.S3",
+          "line": 18,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-03 (AGM-03-009); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Draft questionnaire",
+          "output": "Neutrally worded items with fact/opinion split and opt-out answers",
+          "evidence": "Item review notes",
+          "acceptance": "No leading or double-barrelled items",
+          "review": "Second researcher",
+          "on_failure": "Leading item found: rewrite before pilot"
+        },
+        {
+          "step_ref": "F02.S4",
+          "line": 19,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-01 (AGM-01-001); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Fact-type items",
+          "output": "Source/date/basis/confidence fields for every factual claim",
+          "evidence": "Field definitions",
+          "acceptance": "Unsupported statements labelled hypotheses",
+          "review": null,
+          "on_failure": "Respondent cannot source a fact: keep it as hypothesis for F06"
+        },
+        {
+          "step_ref": "F02.S5",
+          "line": 20,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": null,
+            "binding": "MISSING",
+            "basis": "no AGM task mapped, so no native role binding exists for this step"
+          },
+          "inputs": "Questionnaire; 1-2 pilot respondents",
+          "output": "Pilot findings and revised questionnaire",
+          "evidence": "Pilot notes; revision diff",
+          "acceptance": "Comprehension, time and option-coverage issues resolved",
+          "review": null,
+          "on_failure": "Pilot fails: revise and re-pilot; do not distribute"
+        },
+        {
+          "step_ref": "F02.S6",
+          "line": 21,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "brand_safety_reviewer",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-24 (AGM-24-002); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Final questionnaire; privacy policy",
+          "output": "Distribution with purpose, data use, retention and contact",
+          "evidence": "Distribution notice; consent text",
+          "acceptance": "Minimum personal data; consent language present",
+          "review": "Privacy/consent owner",
+          "on_failure": "Privacy text missing: stop distribution"
+        },
+        {
+          "step_ref": "F02.S7",
+          "line": 22,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-03 (AGM-03-009); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Raw responses",
+          "output": "Cleaned dataset with missingness, duplicate and contradiction notes",
+          "evidence": "Quality log",
+          "acceptance": "No unlike populations averaged without explanation",
+          "review": null,
+          "on_failure": "Systematic missingness: report it; narrow conclusions"
+        },
+        {
+          "step_ref": "F02.S8",
+          "line": 23,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-01 (AGM-01-010); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Cleaned dataset",
+          "output": "Findings split into observed data, interpretation, hypothesis; dissent kept",
+          "evidence": "Summary with source links",
+          "acceptance": "Sample and limitations reported",
+          "review": "Reviewer (approver role) before F03/F06 use",
+          "on_failure": "Insufficient sample: report as directional only"
+        }
+      ],
+      "handoffs": [
+        {
+          "to": "F06",
+          "artifact": "questionnaire findings as claims",
+          "prerequisite": "F02 acceptance passed; artifact reviewed where the step says so"
+        },
+        {
+          "to": "F03",
+          "artifact": "response dataset as customer evidence",
+          "prerequisite": "F02 acceptance passed; artifact reviewed where the step says so"
+        }
+      ]
+    },
+    {
+      "sop_id": "F03",
+      "source_sha256": "77989b6bb99d16b6c6b97005c60c3acd3ffaac61555e225c9e2a5c5365cc3460",
+      "steps": [
+        {
+          "step_ref": "F03.S1",
+          "line": 16,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-03 (AGM-03-012); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Audience segment; research question",
+          "output": "Segment definition with inclusion criteria",
+          "evidence": "Segment note",
+          "acceptance": "Segments not merged across material differences",
+          "review": null,
+          "on_failure": "Undefined segment: stop"
+        },
+        {
+          "step_ref": "F03.S2",
+          "line": 17,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-03 (AGM-03-002); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Interviews, support records, reviews, surveys with provenance",
+          "output": "Evidence inventory (source, date, method, sample, limits)",
+          "evidence": "Evidence register rows",
+          "acceptance": "Statements and observations separated from interpretation",
+          "review": "Privacy/consent owner",
+          "on_failure": "Unclear provenance or consent: exclude the item"
+        },
+        {
+          "step_ref": "F03.S3",
+          "line": 18,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-03 (AGM-03-010); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Evidence register",
+          "output": "Coded evidence (situation, goals, progress, pain, workaround, barrier, success)",
+          "evidence": "Codebook; exact de-identified quotes",
+          "acceptance": "Quotes exact; codes traceable",
+          "review": null,
+          "on_failure": "Ambiguous code: double-code and note"
+        },
+        {
+          "step_ref": "F03.S4",
+          "line": 19,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-05 (AGM-05-001); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Coded evidence",
+          "output": "Desire map per segment with evidence IDs and counterexamples",
+          "evidence": "Map with evidence links",
+          "acceptance": "Every claim links to evidence IDs",
+          "review": null,
+          "on_failure": "Claim without evidence: drop or mark hypothesis"
+        },
+        {
+          "step_ref": "F03.S5",
+          "line": 20,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": null,
+            "binding": "MISSING",
+            "basis": "no AGM task mapped, so no native role binding exists for this step"
+          },
+          "inputs": "Desire map; current F06 ledger version",
+          "output": "Evidence-strength ratings (provisional against ledger version N)",
+          "evidence": "Ledger claim IDs per theme",
+          "acceptance": "Thin themes marked hypotheses; no invented percentages",
+          "review": null,
+          "on_failure": "Ledger not yet open: open an initial ledger (F06 S1-S2) and rate provisionally"
+        },
+        {
+          "step_ref": "F03.S6",
+          "line": 21,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-02 (AGM-02-008); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Rated map; alternatives",
+          "output": "Unmet/poorly served needs with importance and alternative-failure evidence",
+          "evidence": "Evidence refs",
+          "acceptance": "Each need shows importance and alternative cost",
+          "review": null,
+          "on_failure": "Weak evidence: keep as hypothesis"
+        },
+        {
+          "step_ref": "F03.S7",
+          "line": 22,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-03 (AGM-03-015); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Themes; follow-up sample",
+          "output": "Validated or revised themes with disconfirmation notes",
+          "evidence": "Validation notes",
+          "acceptance": "Disconfirming question asked for each major theme",
+          "review": "Stakeholder reviewer",
+          "on_failure": "Validation not possible: label themes UNVALIDATED"
+        },
+        {
+          "step_ref": "F03.S8",
+          "line": 23,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-05 (AGM-05-005); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Validated themes",
+          "output": "Opportunity statements (no premature solution)",
+          "evidence": "Statements linked to themes",
+          "acceptance": "No solution prescribed",
+          "review": "Reviewer (approver role) before F07",
+          "on_failure": "Statements imply a solution: rewrite as need"
+        }
+      ],
+      "handoffs": [
+        {
+          "to": "F06",
+          "artifact": "customer claims and ratings",
+          "prerequisite": "F03 acceptance passed; artifact reviewed where the step says so"
+        },
+        {
+          "to": "F04",
+          "artifact": "customer evidence for whitespace tests",
+          "prerequisite": "F03 acceptance passed; artifact reviewed where the step says so"
+        },
+        {
+          "to": "F07",
+          "artifact": "desire map and opportunity statements",
+          "prerequisite": "F03 acceptance passed; artifact reviewed where the step says so"
+        },
+        {
+          "to": "F08",
+          "artifact": "audience needs",
+          "prerequisite": "F03 acceptance passed; artifact reviewed where the step says so"
+        }
+      ]
+    },
+    {
+      "sop_id": "F04",
+      "source_sha256": "6969b7a70e0a9e7a260e8e33d802e51cd9d3932e01b0ad005ccfe8b6829d921a",
+      "steps": [
+        {
+          "step_ref": "F04.S1",
+          "line": 16,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-04 (AGM-04-001); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Category; geography; segment",
+          "output": "Comparison frame and disclosed competitor inclusion rule",
+          "evidence": "Rule text; competitor list",
+          "acceptance": "Rule disclosed; substitutes considered",
+          "review": null,
+          "on_failure": "Category/geography undefined: stop"
+        },
+        {
+          "step_ref": "F04.S2",
+          "line": 17,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-04 (AGM-04-003); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Competitor list; source-access policy",
+          "output": "Dated source log of public primary materials",
+          "evidence": "URL, capture date, market, access limits",
+          "acceptance": "Every row dated",
+          "review": null,
+          "on_failure": "Source inaccessible: record and exclude, do not guess"
+        },
+        {
+          "step_ref": "F04.S3",
+          "line": 18,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-04 (AGM-04-004); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Source log",
+          "output": "Identity dimensions per competitor, quotes vs interpretation",
+          "evidence": "Dimension table",
+          "acceptance": "Quotes and interpretation separated",
+          "review": null,
+          "on_failure": "Dimension unobservable: mark not observed"
+        },
+        {
+          "step_ref": "F04.S4",
+          "line": 19,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-04 (AGM-04-005); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Dimension table",
+          "output": "Cross-checked claims with stale/promotional labels",
+          "evidence": "Cross-check notes",
+          "acceptance": "Material claims checked across >1 artifact where possible",
+          "review": null,
+          "on_failure": "Single-source claim: label it"
+        },
+        {
+          "step_ref": "F04.S5",
+          "line": 20,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-04 (AGM-04-012); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Cross-checked table",
+          "output": "Comparison matrix: conventions, distinct positions, gaps",
+          "evidence": "Matrix",
+          "acceptance": "No customer-preference inference from messaging alone",
+          "review": null,
+          "on_failure": "Sparse coverage: label gaps as low confidence"
+        },
+        {
+          "step_ref": "F04.S6",
+          "line": 21,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "brand_safety_reviewer",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-24 (AGM-24-009); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Matrix",
+          "output": "Risk list (trademark, regulated claims, copied expression) for review",
+          "evidence": "Risk list",
+          "acceptance": "No legal conclusion drawn",
+          "review": "Qualified legal reviewer",
+          "on_failure": "Reviewer unavailable: keep risks open; block downstream reliance"
+        },
+        {
+          "step_ref": "F04.S7",
+          "line": 22,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-04 (AGM-04-013); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Matrix; F03 map; F05 hypotheses; F06 ledger",
+          "output": "Whitespace candidates with disconfirming examples",
+          "evidence": "Ledger claim IDs",
+          "acceptance": "Each candidate tested against F03, F05 and F06",
+          "review": "Reviewer (approver role) before F07",
+          "on_failure": "Whitespace rests on sparse web coverage only: drop it"
+        }
+      ],
+      "handoffs": [
+        {
+          "to": "F07",
+          "artifact": "comparison matrix and whitespace candidates",
+          "prerequisite": "F04 acceptance passed; artifact reviewed where the step says so"
+        },
+        {
+          "to": "F08",
+          "artifact": "competitive differentiation evidence",
+          "prerequisite": "F04 acceptance passed; artifact reviewed where the step says so"
+        }
+      ]
+    },
+    {
+      "sop_id": "F05",
+      "source_sha256": "4a51079d5bb8eb5971e78b8e8f0fdf772c9948ac1cddcbd90614c0e2c11c0e6e",
+      "steps": [
+        {
+          "step_ref": "F05.S1",
+          "line": 16,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-02 (AGM-02-001); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Concept; geography; horizon",
+          "output": "Category scope with exclusions",
+          "evidence": "Scope note",
+          "acceptance": "Exclusions stated",
+          "review": null,
+          "on_failure": "Boundaries undefined: stop"
+        },
+        {
+          "step_ref": "F05.S2",
+          "line": 17,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-02 (AGM-02-004); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Scope; source list",
+          "output": "Dated evidence with methodology and coverage",
+          "evidence": "Evidence register rows",
+          "acceptance": "Primary sources preferred and dated",
+          "review": null,
+          "on_failure": "No credible source: mark insufficient evidence"
+        },
+        {
+          "step_ref": "F05.S3",
+          "line": 18,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-02 (AGM-02-003); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Evidence register",
+          "output": "Demand signal analysis",
+          "evidence": "Signal table with sources",
+          "acceptance": "Each signal sourced",
+          "review": null,
+          "on_failure": "Invalid proxy (e.g. search volume): exclude with reason"
+        },
+        {
+          "step_ref": "F05.S4",
+          "line": 19,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-02 (AGM-02-005); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Evidence register",
+          "output": "Supply/structure analysis",
+          "evidence": "Structure table",
+          "acceptance": "Concentration only where measurable",
+          "review": null,
+          "on_failure": "Unmeasurable: say so"
+        },
+        {
+          "step_ref": "F05.S5",
+          "line": 20,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-02 (AGM-02-008); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Demand and supply analyses",
+          "output": "Opportunity hypotheses (segment + progress + why options fail + evidence + test)",
+          "evidence": "Hypothesis list",
+          "acceptance": "Every hypothesis has all five parts",
+          "review": null,
+          "on_failure": "Missing part: keep as idea, not hypothesis"
+        },
+        {
+          "step_ref": "F05.S6",
+          "line": 21,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-02 (AGM-02-002); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Hypotheses; reproducible inputs",
+          "output": "Market ranges with definitions, assumptions, sensitivity",
+          "evidence": "Calculation sheet",
+          "acceptance": "Recalculable; no single unsupported figure",
+          "review": null,
+          "on_failure": "Inputs unavailable: no sizing; report why"
+        },
+        {
+          "step_ref": "F05.S7",
+          "line": 22,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-02 (AGM-02-009); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Hypotheses; sizing",
+          "output": "Transparent scoring with weights and confidence",
+          "evidence": "Scoring sheet",
+          "acceptance": "Low dimensions visible, not averaged away",
+          "review": "Reviewer (approver role)",
+          "on_failure": "Weights disputed: show alternative weightings"
+        },
+        {
+          "step_ref": "F05.S8",
+          "line": 23,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": null,
+            "binding": "MISSING",
+            "basis": "no AGM task mapped, so no native role binding exists for this step"
+          },
+          "inputs": "Leading hypotheses",
+          "output": "Cheapest credible validation experiment and disconfirmation threshold each",
+          "evidence": "Experiment plan",
+          "acceptance": "Each leading hypothesis has a threshold",
+          "review": null,
+          "on_failure": "No feasible test: mark hypothesis untestable"
+        }
+      ],
+      "handoffs": [
+        {
+          "to": "F07",
+          "artifact": "opportunity hypotheses and scoring",
+          "prerequisite": "F05 acceptance passed; artifact reviewed where the step says so"
+        },
+        {
+          "to": "F04",
+          "artifact": "category evidence",
+          "prerequisite": "F05 acceptance passed; artifact reviewed where the step says so"
+        }
+      ]
+    },
+    {
+      "sop_id": "F06",
+      "source_sha256": "720a9301313720f0cf4bdb967b0a9bfe382069c750e022c702f97dac2f41d1ea",
+      "steps": [
+        {
+          "step_ref": "F06.S1",
+          "line": 16,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": null,
+            "binding": "MISSING",
+            "basis": "no AGM task mapped, so no native role binding exists for this step"
+          },
+          "inputs": "Claims from F01-F05",
+          "output": "Atomized claims (one testable statement + scope each)",
+          "evidence": "Ledger rows",
+          "acceptance": "One claim per row",
+          "review": null,
+          "on_failure": "Compound claim: split before rating"
+        },
+        {
+          "step_ref": "F06.S2",
+          "line": 17,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-01 (AGM-01-001); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Atomized claims; source artifacts",
+          "output": "Claim records: ID, wording, type, source, owner, date, method, coverage, access",
+          "evidence": "Ledger fields",
+          "acceptance": "All fields filled or marked unknown",
+          "review": null,
+          "on_failure": "Source inaccessible: record access status; never treat as false"
+        },
+        {
+          "step_ref": "F06.S3",
+          "line": 18,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-02 (AGM-02-004); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Claim records",
+          "output": "Source-quality ratings with rationale",
+          "evidence": "Rating rationale",
+          "acceptance": "Rationale given; prestige alone not used",
+          "review": null,
+          "on_failure": "Cannot assess: rate LOW with reason"
+        },
+        {
+          "step_ref": "F06.S4",
+          "line": 19,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-05 (AGM-05-011); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Claim records",
+          "output": "Supporting, contradicting, missing evidence and alternatives",
+          "evidence": "Evidence links",
+          "acceptance": "Counterevidence recorded",
+          "review": null,
+          "on_failure": "Counterevidence unresolved: keep visible"
+        },
+        {
+          "step_ref": "F06.S5",
+          "line": 20,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": null,
+            "binding": "MISSING",
+            "basis": "no AGM task mapped, so no native role binding exists for this step"
+          },
+          "inputs": "Evidence per claim",
+          "output": "Confidence: HIGH, MEDIUM, LOW or UNVERIFIED",
+          "evidence": "Rating with rationale",
+          "acceptance": "Not presented as probability unless calibrated",
+          "review": "Second researcher for critical claims",
+          "on_failure": "Disagreement: take the lower rating and record both"
+        },
+        {
+          "step_ref": "F06.S6",
+          "line": 21,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "market_researcher",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-04 (AGM-04-013); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Rated claims",
+          "output": "Verification queue: action, owner, trigger, decision impact, review date",
+          "evidence": "Queue entries",
+          "acceptance": "Every critical low-confidence claim has an owner",
+          "review": null,
+          "on_failure": "No owner: escalate to project lead"
+        },
+        {
+          "step_ref": "F06.S7",
+          "line": 22,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": null,
+            "binding": "MISSING",
+            "basis": "no AGM task mapped, so no native role binding exists for this step"
+          },
+          "inputs": "New evidence",
+          "output": "Updated ledger version with preserved history and reasons",
+          "evidence": "Change history",
+          "acceptance": "Prior status and reason preserved",
+          "review": null,
+          "on_failure": "Conflicting update: keep both versions; flag"
+        },
+        {
+          "step_ref": "F06.S8",
+          "line": 23,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_safety_reviewer",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-24 (AGM-24-012); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Ledger before a decision",
+          "output": "Critical/low-confidence/stale/contradicted claims escalated or decision narrowed",
+          "evidence": "Filter output",
+          "acceptance": "No high-impact recommendation rests on an unverified critical claim",
+          "review": "Reviewer (approver role)",
+          "on_failure": "Critical claim unverified: stop the recommendation"
+        }
+      ],
+      "handoffs": [
+        {
+          "to": "F03",
+          "artifact": "ledger version for evidence ratings",
+          "prerequisite": "F06 acceptance passed; artifact reviewed where the step says so"
+        },
+        {
+          "to": "F04",
+          "artifact": "confidence for whitespace",
+          "prerequisite": "F06 acceptance passed; artifact reviewed where the step says so"
+        },
+        {
+          "to": "F07",
+          "artifact": "unresolved critical evidence and risks",
+          "prerequisite": "F06 acceptance passed; artifact reviewed where the step says so"
+        },
+        {
+          "to": "F08",
+          "artifact": "claim limitations",
+          "prerequisite": "F06 acceptance passed; artifact reviewed where the step says so"
+        }
+      ]
+    },
+    {
+      "sop_id": "F07",
+      "source_sha256": "d0d5632faa77b2ab5ba942ded9ba1dbddf34061e3fc4300b8b0a9f0137ac9f5b",
+      "steps": [
+        {
+          "step_ref": "F07.S1",
+          "line": 16,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-06 (AGM-06-003); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Audience; F06 ledger",
+          "output": "Confirmed audience, category frame, progress, horizon; unresolved critical evidence",
+          "evidence": "Frame note with ledger IDs",
+          "acceptance": "Unresolved critical evidence listed",
+          "review": null,
+          "on_failure": "Audience/category unresolved: stop"
+        },
+        {
+          "step_ref": "F07.S2",
+          "line": 17,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-06 (AGM-06-011); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "F01 principles; F03 needs; F05 tensions",
+          "output": "Several position territories (need + tension + capability)",
+          "evidence": "Territory list",
+          "acceptance": "Not slogan- or style-led",
+          "review": null,
+          "on_failure": "Fewer than two territories: return to F03/F05"
+        },
+        {
+          "step_ref": "F07.S3",
+          "line": 18,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-06 (AGM-06-004); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Territories",
+          "output": "Territory statements (audience, need, frame, POV, promise, proof, overlap, implications, risks)",
+          "evidence": "Statement per territory",
+          "acceptance": "All nine fields present",
+          "review": null,
+          "on_failure": "Missing field: territory not eligible for scoring"
+        },
+        {
+          "step_ref": "F07.S4",
+          "line": 19,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-06 (AGM-06-005); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Statements; capabilities",
+          "output": "Credibility test with proof gaps and investments",
+          "evidence": "Proof plan",
+          "acceptance": "Delivery capability evidenced or gap stated",
+          "review": null,
+          "on_failure": "Promise undeliverable: drop territory"
+        },
+        {
+          "step_ref": "F07.S5",
+          "line": 20,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-06 (AGM-06-011); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "F04 matrix; F03 map",
+          "output": "Differentiation and relevance results",
+          "evidence": "Test notes with sources",
+          "acceptance": "Perception claims use customer evidence",
+          "review": null,
+          "on_failure": "No customer evidence: mark perception untested"
+        },
+        {
+          "step_ref": "F07.S6",
+          "line": 21,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-06 (AGM-06-001); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "F01 profile; F05 scan",
+          "output": "Coherence and attractiveness findings with tensions",
+          "evidence": "Notes",
+          "acceptance": "Tensions surfaced",
+          "review": null,
+          "on_failure": "Fatal tension: drop territory"
+        },
+        {
+          "step_ref": "F07.S7",
+          "line": 22,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-06 (AGM-06-011); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Tested territories",
+          "output": "Scores on disclosed criteria, critical dimensions separate",
+          "evidence": "Scoring sheet",
+          "acceptance": "No average hides a fatal weakness",
+          "review": "Reviewer (approver role)",
+          "on_failure": "Criteria disputed: show per-criterion results only"
+        },
+        {
+          "step_ref": "F07.S8",
+          "line": 23,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-06 (AGM-06-012); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Scores; thresholds",
+          "output": "Recommended territory or explicit no-decision with alternatives and tests",
+          "evidence": "Decision record",
+          "acceptance": "Recommendation clears evidence and feasibility thresholds",
+          "review": "Approver role (independent of requester) via native approval",
+          "on_failure": "Below threshold: record no-decision and tests"
+        }
+      ],
+      "handoffs": [
+        {
+          "to": "F08",
+          "artifact": "selected territory with proof plan, open risks and claim limits",
+          "prerequisite": "F07 acceptance passed; artifact reviewed where the step says so"
+        }
+      ]
+    },
+    {
+      "sop_id": "F08",
+      "source_sha256": "25af0355c3428842c0b7ea7f6e9a7a8e3dc350d98a023361a3b8bcd88291979a",
+      "steps": [
+        {
+          "step_ref": "F08.S1",
+          "line": 16,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-05 (AGM-05-001); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "F07 territory; audience; alternatives",
+          "output": "Restated audience, situation, progress, current alternative",
+          "evidence": "Note",
+          "acceptance": "Ambiguity resolved before writing",
+          "review": null,
+          "on_failure": "Ambiguous: return to F07"
+        },
+        {
+          "step_ref": "F08.S2",
+          "line": 17,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-05 (AGM-05-002); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Offer features and outcomes",
+          "output": "Deliverable outcomes split into features, benefits, emotional outcomes, claims needing evidence",
+          "evidence": "Outcome list",
+          "acceptance": "Every claim needing evidence flagged",
+          "review": null,
+          "on_failure": "Outcome undeliverable: remove"
+        },
+        {
+          "step_ref": "F08.S3",
+          "line": 18,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-05 (AGM-05-003); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "F04 matrix; F05 scan; capabilities",
+          "output": "Strongest supported differentiator (or candidate distinction)",
+          "evidence": "Evidence refs",
+          "acceptance": "Unverified uniqueness labelled candidate",
+          "review": null,
+          "on_failure": "No supported differentiator: no-decision"
+        },
+        {
+          "step_ref": "F08.S4",
+          "line": 19,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Copywriter with strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-05 (AGM-05-005); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Outcomes; differentiator",
+          "output": "Multiple plain-language propositions",
+          "evidence": "Draft variants",
+          "acceptance": "At least three variants",
+          "review": null,
+          "on_failure": "Fewer variants: keep drafting"
+        },
+        {
+          "step_ref": "F08.S5",
+          "line": 20,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-05 (AGM-05-003); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Variants; proof",
+          "output": "Proof attached to every material claim; unsupported claims removed or qualified",
+          "evidence": "Proof map",
+          "acceptance": "No material claim without proof or qualification",
+          "review": "Qualified legal reviewer for regulated/comparative claims",
+          "on_failure": "Proof missing: qualify or remove the claim"
+        },
+        {
+          "step_ref": "F08.S6",
+          "line": 21,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": null,
+            "binding": "MISSING",
+            "basis": "no AGM task mapped, so no native role binding exists for this step"
+          },
+          "inputs": "Proof-mapped variants",
+          "output": "Quality check results (specificity, relevance, comprehension, differentiation, credibility, consistency)",
+          "evidence": "Checklist per variant",
+          "acceptance": "No vague superlatives or unsupported comparisons",
+          "review": "Second strategist",
+          "on_failure": "Check failed: revise variant"
+        },
+        {
+          "step_ref": "F08.S7",
+          "line": 22,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Researcher",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-05 (AGM-05-010); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Checked variants; consented participants",
+          "output": "Comprehension and preference results with sample and method",
+          "evidence": "Test record",
+          "acceptance": "Participants identify audience, benefit and reason to believe",
+          "review": "Privacy/consent owner",
+          "on_failure": "No consented sample: mark UNTESTED; no publication"
+        },
+        {
+          "step_ref": "F08.S8",
+          "line": 23,
+          "action": "the source step text at this line (unchanged)",
+          "performer_suggested": "Brand strategist",
+          "native_role": {
+            "role": "brand_strategist",
+            "binding": "AGM_MODULE_BINDING",
+            "basis": "bindings.py role of module AGM-05 (AGM-05-011); a module-level binding, not a per-step role contract"
+          },
+          "inputs": "Test results",
+          "output": "Revised recommendation or no-decision; variants and unresolved claims preserved; regulated claims routed",
+          "evidence": "Revision log; review requests",
+          "acceptance": "High-risk claims routed before any publication",
+          "review": "Qualified legal reviewer",
+          "on_failure": "Review pending: no publication (this SOP never authorizes publishing)"
+        }
+      ],
+      "handoffs": []
+    }
+  ]
+}

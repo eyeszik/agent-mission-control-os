@@ -31,3 +31,4 @@ export * from './schemas/innovationCapabilities';
 
 export * from './schemas/browser';
 export * from './schemas/sop';
+export * from './schemas/brandOs';

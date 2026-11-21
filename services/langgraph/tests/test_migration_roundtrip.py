@@ -101,11 +101,15 @@ def test_data_api_roles_cannot_reach_tenant_data(role, table):
                 conn.execute(f"select * from {table}")
 
 
-def test_no_rls_policy_is_claimed_where_none_exists():
-    """Isolation is schema REVOKE + server-side memberships; the mapping must say so, not imply RLS."""
+def test_the_mapping_reports_exactly_the_rls_the_catalog_has():
+    """REVOKE stays the outer layer; RLS is claimed only as far as the migrated catalog actually has it."""
     mapping = json.loads((ROOT / "acceptance/migration_mapping.json").read_text(encoding="utf-8"))
     rls = mapping["row_level_security"]
-    assert rls["policies"] == 0 and rls["rls_enabled"] == 0
+    assert rls["rls_enabled"] == rls["tables"] and rls["rls_forced"] == 0
+    secured = [t["security"] for t in mapping["tables"] if t.get("security")]
+    assert secured and all(s["rls_enabled"] for s in secured)
+    assert all(s["policies"] == (["amc_tenant_isolation"] if s["tenant_scoped"] else []) for s in secured)
+    assert rls["policies"] == sum(1 for s in secured if s["tenant_scoped"])
     assert mapping["schema_privileges"] == {"anon": {"amc_usage": False}, "authenticated": {"amc_usage": False}}
 
 

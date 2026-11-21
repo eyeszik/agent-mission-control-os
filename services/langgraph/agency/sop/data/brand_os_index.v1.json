@@ -1,0 +1,558 @@
+{
+  "schema_version": "amc-brand-os-index/v1",
+  "identity_provenance": {
+    "origin": "USER_DECLARATION",
+    "note": "F01-F60 ids, names and departments as supplied by the owner (also declared in Possible_SOP_03.pdf, section 03). A title is identity only, not a procedure."
+  },
+  "draft_pack": {
+    "origin": "NEWLY_AUTHORED_SOP",
+    "archive": "F01-F08_reconstructed_drafts.zip",
+    "archive_sha256": "1c8f1c50765188fbb029aded2641fd8561c209527a455ed38bce31b085040781",
+    "readme": "brand_os/README.md",
+    "readme_sha256": "815b53a8bf611db81ac9c84598b286cc3eafc76d7ad318b1909a3d738e81066a",
+    "received": "2026-11-21",
+    "adoption_decision": "Owner chose to adopt F01-F08 as newly written Brand OS 4.0 SOPs (2026-11-21). Each becomes canonical in a project only through a native BRAND_OS_SOP_ADOPTION approval decided by someone other than the requester.",
+    "limitations": [
+      "Self-declared reconstructions from titles and general practice; no claim to reproduce any historical original.",
+      "The original Brand OS 3.0 procedures remain unrecovered; nothing here may be labelled ORIGINAL_CANONICAL_SOP."
+    ]
+  },
+  "entries": [
+    {
+      "sop_id": "F01",
+      "name": "Founder DNA Interview",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "procedure_source": {
+        "path": "brand_os/F01_Founder_DNA_Interview.md",
+        "sha256": "410db79d8524ba907a2c0c32e2bc8d6038b46b3170a3eb309ab9d9e91df1b119",
+        "origin": "NEWLY_AUTHORED_SOP",
+        "version": "0.1-draft",
+        "draft_date": "2026-11-21"
+      }
+    },
+    {
+      "sop_id": "F02",
+      "name": "Brand Discovery Questionnaire",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "procedure_source": {
+        "path": "brand_os/F02_Brand_Discovery_Questionnaire.md",
+        "sha256": "770e765297c4ca12b5dddaebc3bded079ad743008060d1b22112a1c73bdd48a8",
+        "origin": "NEWLY_AUTHORED_SOP",
+        "version": "0.1-draft",
+        "draft_date": "2026-11-21"
+      }
+    },
+    {
+      "sop_id": "F03",
+      "name": "Customer Desire Mapping",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "procedure_source": {
+        "path": "brand_os/F03_Customer_Desire_Mapping.md",
+        "sha256": "77989b6bb99d16b6c6b97005c60c3acd3ffaac61555e225c9e2a5c5365cc3460",
+        "origin": "NEWLY_AUTHORED_SOP",
+        "version": "0.1-draft",
+        "draft_date": "2026-11-21"
+      }
+    },
+    {
+      "sop_id": "F04",
+      "name": "Competitive Identity Audit",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "procedure_source": {
+        "path": "brand_os/F04_Competitive_Identity_Audit.md",
+        "sha256": "6969b7a70e0a9e7a260e8e33d802e51cd9d3932e01b0ad005ccfe8b6829d921a",
+        "origin": "NEWLY_AUTHORED_SOP",
+        "version": "0.1-draft",
+        "draft_date": "2026-11-21"
+      }
+    },
+    {
+      "sop_id": "F05",
+      "name": "Category Opportunity Scanner",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "procedure_source": {
+        "path": "brand_os/F05_Category_Opportunity_Scanner.md",
+        "sha256": "4a51079d5bb8eb5971e78b8e8f0fdf772c9948ac1cddcbd90614c0e2c11c0e6e",
+        "origin": "NEWLY_AUTHORED_SOP",
+        "version": "0.1-draft",
+        "draft_date": "2026-11-21"
+      }
+    },
+    {
+      "sop_id": "F06",
+      "name": "Research Confidence Ledger",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "procedure_source": {
+        "path": "brand_os/F06_Research_Confidence_Ledger.md",
+        "sha256": "720a9301313720f0cf4bdb967b0a9bfe382069c750e022c702f97dac2f41d1ea",
+        "origin": "NEWLY_AUTHORED_SOP",
+        "version": "0.1-draft",
+        "draft_date": "2026-11-21"
+      }
+    },
+    {
+      "sop_id": "F07",
+      "name": "Category Ownership Architect",
+      "department_id": "D02",
+      "department_name": "STRATEGIC POSITIONING",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "procedure_source": {
+        "path": "brand_os/F07_Category_Ownership_Architect.md",
+        "sha256": "d0d5632faa77b2ab5ba942ded9ba1dbddf34061e3fc4300b8b0a9f0137ac9f5b",
+        "origin": "NEWLY_AUTHORED_SOP",
+        "version": "0.1-draft",
+        "draft_date": "2026-11-21"
+      }
+    },
+    {
+      "sop_id": "F08",
+      "name": "Unique Value Proposition Builder",
+      "department_id": "D02",
+      "department_name": "STRATEGIC POSITIONING",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "procedure_source": {
+        "path": "brand_os/F08_Unique_Value_Proposition_Builder.md",
+        "sha256": "25af0355c3428842c0b7ea7f6e9a7a8e3dc350d98a023361a3b8bcd88291979a",
+        "origin": "NEWLY_AUTHORED_SOP",
+        "version": "0.1-draft",
+        "draft_date": "2026-11-21"
+      }
+    },
+    {
+      "sop_id": "F09",
+      "name": "Brand Purpose Designer",
+      "department_id": "D02",
+      "department_name": "STRATEGIC POSITIONING",
+      "batch": "BATCH_1",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F10",
+      "name": "Positioning Territory Generator",
+      "department_id": "D02",
+      "department_name": "STRATEGIC POSITIONING",
+      "batch": "BATCH_1",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F11",
+      "name": "Brand Architecture Planner",
+      "department_id": "D02",
+      "department_name": "STRATEGIC POSITIONING",
+      "batch": "BATCH_1",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F12",
+      "name": "Premium Value Strategist",
+      "department_id": "D02",
+      "department_name": "STRATEGIC POSITIONING",
+      "batch": "BATCH_1",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F13",
+      "name": "Brand Naming Laboratory",
+      "department_id": "D03",
+      "department_name": "NAMING & VERBAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F14",
+      "name": "Name Risk Screener",
+      "department_id": "D03",
+      "department_name": "NAMING & VERBAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F15",
+      "name": "Tagline & Slogan Generator",
+      "department_id": "D03",
+      "department_name": "NAMING & VERBAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F16",
+      "name": "Brand Story Architect",
+      "department_id": "D03",
+      "department_name": "NAMING & VERBAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F17",
+      "name": "Voice Identity Compiler",
+      "department_id": "D03",
+      "department_name": "NAMING & VERBAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F18",
+      "name": "Message Hierarchy Generator",
+      "department_id": "D03",
+      "department_name": "NAMING & VERBAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F19",
+      "name": "Logo Concept Director",
+      "department_id": "D04",
+      "department_name": "VISUAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F20",
+      "name": "Brand Symbolism Laboratory",
+      "department_id": "D04",
+      "department_name": "VISUAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F21",
+      "name": "Typography Director",
+      "department_id": "D04",
+      "department_name": "VISUAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F22",
+      "name": "Color Psychology & Accessibility Studio",
+      "department_id": "D04",
+      "department_name": "VISUAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F23",
+      "name": "Packaging Design Strategist",
+      "department_id": "D04",
+      "department_name": "VISUAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F24",
+      "name": "Brand Guidelines Compiler",
+      "department_id": "D04",
+      "department_name": "VISUAL IDENTITY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F25",
+      "name": "Emotional Decision Mapper",
+      "department_id": "D05",
+      "department_name": "CUSTOMER PSYCHOLOGY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F26",
+      "name": "Jobs-to-Be-Done Interpreter",
+      "department_id": "D05",
+      "department_name": "CUSTOMER PSYCHOLOGY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F27",
+      "name": "Objection Intelligence Engine",
+      "department_id": "D05",
+      "department_name": "CUSTOMER PSYCHOLOGY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F28",
+      "name": "Trust Architecture Designer",
+      "department_id": "D05",
+      "department_name": "CUSTOMER PSYCHOLOGY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F29",
+      "name": "Customer Identity Mapper",
+      "department_id": "D05",
+      "department_name": "CUSTOMER PSYCHOLOGY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F30",
+      "name": "Customer Journey Emotion Audit",
+      "department_id": "D05",
+      "department_name": "CUSTOMER PSYCHOLOGY",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F31",
+      "name": "Hook Point Generator",
+      "department_id": "D06",
+      "department_name": "ADVERTISING",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F32",
+      "name": "Direct-Response Copywriter",
+      "department_id": "D06",
+      "department_name": "ADVERTISING",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F33",
+      "name": "Offer Architect",
+      "department_id": "D06",
+      "department_name": "ADVERTISING",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F34",
+      "name": "Campaign Concept Generator",
+      "department_id": "D06",
+      "department_name": "ADVERTISING",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F35",
+      "name": "Landing Page Strategist",
+      "department_id": "D06",
+      "department_name": "ADVERTISING",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F36",
+      "name": "Creative Experiment Designer",
+      "department_id": "D06",
+      "department_name": "ADVERTISING",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F37",
+      "name": "Multi-Platform Content Strategist",
+      "department_id": "D07",
+      "department_name": "CONTENT & MEDIA",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F38",
+      "name": "Short-Form Video Scriptwriter",
+      "department_id": "D07",
+      "department_name": "CONTENT & MEDIA",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F39",
+      "name": "Editorial Campaign Planner",
+      "department_id": "D07",
+      "department_name": "CONTENT & MEDIA",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F40",
+      "name": "Creative Prompt Engineer",
+      "department_id": "D07",
+      "department_name": "CONTENT & MEDIA",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F41",
+      "name": "Brand Voice Consistency Editor",
+      "department_id": "D07",
+      "department_name": "CONTENT & MEDIA",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F42",
+      "name": "Content Repurposing Engine",
+      "department_id": "D07",
+      "department_name": "CONTENT & MEDIA",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F43",
+      "name": "Website Brand Experience Architect",
+      "department_id": "D08",
+      "department_name": "DIGITAL EXPERIENCE",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F44",
+      "name": "Conversion Journey Auditor",
+      "department_id": "D08",
+      "department_name": "DIGITAL EXPERIENCE",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F45",
+      "name": "E-commerce Product Storyteller",
+      "department_id": "D08",
+      "department_name": "DIGITAL EXPERIENCE",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F46",
+      "name": "Customer Onboarding Designer",
+      "department_id": "D08",
+      "department_name": "DIGITAL EXPERIENCE",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F47",
+      "name": "Retention & Loyalty Strategist",
+      "department_id": "D08",
+      "department_name": "DIGITAL EXPERIENCE",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F48",
+      "name": "Service Recovery Voice Designer",
+      "department_id": "D08",
+      "department_name": "DIGITAL EXPERIENCE",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F49",
+      "name": "Go-to-Market Architect",
+      "department_id": "D09",
+      "department_name": "LAUNCH & GROWTH",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F50",
+      "name": "Brand Extension Evaluator",
+      "department_id": "D09",
+      "department_name": "LAUNCH & GROWTH",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F51",
+      "name": "Partnership & Collaboration Planner",
+      "department_id": "D09",
+      "department_name": "LAUNCH & GROWTH",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F52",
+      "name": "Market Expansion Planner",
+      "department_id": "D09",
+      "department_name": "LAUNCH & GROWTH",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F53",
+      "name": "Launch Campaign Director",
+      "department_id": "D09",
+      "department_name": "LAUNCH & GROWTH",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F54",
+      "name": "Revenue Scenario Planner",
+      "department_id": "D09",
+      "department_name": "LAUNCH & GROWTH",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F55",
+      "name": "Brand Health Dashboard Designer",
+      "department_id": "D10",
+      "department_name": "ANALYTICS",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F56",
+      "name": "AI Creative Review Board",
+      "department_id": "D11",
+      "department_name": "AUTOMATION",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F57",
+      "name": "Brand Consistency Auditor",
+      "department_id": "D11",
+      "department_name": "AUTOMATION",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F58",
+      "name": "Client Workflow Orchestrator",
+      "department_id": "D11",
+      "department_name": "AUTOMATION",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F59",
+      "name": "Marketing Experiment Analyst",
+      "department_id": "D12",
+      "department_name": "PERFORMANCE & PROTECTION",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    },
+    {
+      "sop_id": "F60",
+      "name": "Brand Risk & Compliance Reviewer",
+      "department_id": "D12",
+      "department_name": "PERFORMANCE & PROTECTION",
+      "batch": "INDEX_ONLY",
+      "procedure_status": "SOURCE_UNAVAILABLE"
+    }
+  ]
+}
