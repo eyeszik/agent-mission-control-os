@@ -1528,7 +1528,7 @@
     },
     {
       "path": "services/langgraph/agency/sop/source_approval.py",
-      "git_blob_sha": "21a2bd6aed0aaf7ba5e9d53abf21ce7c2d301b32"
+      "git_blob_sha": "74a57a702fc7b7c60823534acdc068296d941464"
     },
     {
       "path": "supabase/migrations/20261121_amc_tenant_rls_v1.sql",

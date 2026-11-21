@@ -42,7 +42,7 @@ def source(tmp_path):
 def _open(s) -> dict:
     item = s["item"]
     return open_source_approval(s["alice"], tenant_id=s["tenant"], project_id=s["project"], artifact_id=item.artifact_id,
-                                version=item.version, content_hash=item.content_hash, sop_id="F01")
+                                version=item.version, content_hash=item.content_hash, sop_id="F09")
 
 
 def _decide(monkeypatch, s, approval_id: str, decision: str = "approve", user: str = "bob"):
@@ -118,7 +118,7 @@ def test_principals_outside_the_tenant_or_project_get_no_evidence(source, monkey
     with pytest.raises(PermissionError):
         open_source_approval(stranger, tenant_id=source["tenant"], project_id=source["project"],
                              artifact_id=source["item"].artifact_id, version=source["item"].version,
-                             content_hash=source["item"].content_hash, sop_id="F01")
+                             content_hash=source["item"].content_hash, sop_id="F09")
 
 
 def test_evidence_can_never_claim_runtime_authority():
@@ -127,3 +127,73 @@ def test_evidence_can_never_claim_runtime_authority():
     for override in ({"grants_runtime_authority": True}, {"external_effects": "publish"}, {"policy_version": "other"}):
         with pytest.raises(ValidationError):
             SourceApprovalEvidence(**base, **override)
+
+
+# ----------------------------------------------------------------------------- adoption of newly written drafts
+from services.langgraph.agency.sop.brand_os_source import load_index  # noqa: E402
+from services.langgraph.agency.sop.source_approval import (  # noqa: E402
+    ADOPTION_POLICY_VERSION,
+    ADOPTION_SUBJECT_TYPE,
+    stage_sop_for_adoption,
+    verify_sop_adoption,
+)
+
+
+def _stage(s, sop_id="F01") -> dict:
+    return stage_sop_for_adoption(s["alice"], project_id=s["project"], sop_id=sop_id, adapter=s["adapter"])
+
+
+def _verify_adoption(s, staged, *, principal=None) -> SourceApprovalEvidence:
+    head = staged["artifact"]
+    return verify_sop_adoption(principal or s["alice"], tenant_id=s["tenant"], project_id=s["project"],
+                               artifact_id=head["artifact_id"], version=head["version"],
+                               content_hash=head["content_hash"], approval_id=staged["approval"]["approval_id"])
+
+
+def test_staging_stores_the_exact_pinned_draft_bytes_and_opens_an_adoption_approval(source):
+    staged = _stage(source)
+    assert staged["artifact"]["content_hash"] == load_index().entry("F01").procedure_source.sha256
+    approval = staged["approval"]
+    assert (approval["subject_type"], approval["policy_version"], approval["status"]) == (
+        ADOPTION_SUBJECT_TYPE, ADOPTION_POLICY_VERSION, "pending")
+    assert "not a recovered original" in approval["reason"]
+
+
+def test_a_separate_reviewer_adopts_a_draft_and_the_initiator_cannot(source, monkeypatch):
+    staged = _stage(source, "F03")
+    assert "APPROVAL_PENDING" in _verify_adoption(source, staged).reasons
+    assert _decide(monkeypatch, source, staged["approval"]["approval_id"], user="alice").status_code == 403
+    assert _decide(monkeypatch, source, staged["approval"]["approval_id"]).status_code == 200
+    evidence = _verify_adoption(source, staged)
+    assert evidence.verified and evidence.subject_type == ADOPTION_SUBJECT_TYPE
+    assert evidence.grants_runtime_authority is False
+
+
+def test_adoption_and_original_authentication_never_satisfy_each_other(source, monkeypatch):
+    staged = _stage(source, "F02")
+    assert _decide(monkeypatch, source, staged["approval"]["approval_id"]).status_code == 200
+    head = staged["artifact"]
+    as_original = verify_source_approval(source["alice"], tenant_id=source["tenant"], project_id=source["project"],
+                                         artifact_id=head["artifact_id"], version=head["version"],
+                                         content_hash=head["content_hash"], approval_id=staged["approval"]["approval_id"])
+    assert not as_original.verified and "APPROVAL_PURPOSE_MISMATCH" in as_original.reasons
+    with pytest.raises(ValueError, match="never authenticated as an original"):
+        open_source_approval(source["alice"], tenant_id=source["tenant"], project_id=source["project"],
+                             artifact_id=head["artifact_id"], version=head["version"],
+                             content_hash=head["content_hash"], sop_id="F02")
+
+
+def test_only_drafts_can_be_staged_and_only_by_principals_in_the_project(source):
+    with pytest.raises(LookupError):
+        _stage(source, "F09")
+    outsider = Principal("carol", source["tenant"], "admin", frozenset({"prj-elsewhere"}))
+    with pytest.raises(PermissionError):
+        stage_sop_for_adoption(outsider, project_id=source["project"], sop_id="F01", adapter=source["adapter"])
+
+
+def test_a_changed_draft_file_is_refused_before_anything_is_stored(source, monkeypatch):
+    import services.langgraph.agency.sop.brand_os_source as bos
+
+    monkeypatch.setattr(bos, "draft_bytes", lambda entry: b"tampered draft bytes")
+    with pytest.raises(ValueError, match="draft bytes changed"):
+        _stage(source, "F04")
