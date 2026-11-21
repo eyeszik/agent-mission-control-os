@@ -4,7 +4,7 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "3a2032bcccdc12e7371b92cf40415008851b74a1"
+      "git_blob_sha": "aa8890be1725e3f1ba4caa59a5fe50b66ddf1e18"
     },
     {
       "path": ".github/scripts/annotate-junit-failures.py",
@@ -1108,7 +1108,7 @@
     },
     {
       "path": "services/langgraph/persistence/database.py",
-      "git_blob_sha": "a06dc4bfd72a406fdeeb825d8b3c6791d4575c3d"
+      "git_blob_sha": "b0d8f54879fcabc768b3297c1cda22278707826c"
     },
     {
       "path": "services/langgraph/persistence/delivery.py",
@@ -1504,7 +1504,7 @@
     },
     {
       "path": "scripts/db_migrations.py",
-      "git_blob_sha": "f3a2f2bfcda9519fd8f3351e007b82cc5915fbae"
+      "git_blob_sha": "8bedb07c8b24f7ce0695946b4969c643b2e03f28"
     },
     {
       "path": "services/langgraph/agency/sop/contracts.py",
@@ -1525,6 +1525,14 @@
     {
       "path": "acceptance/source_trace_map.json",
       "git_blob_sha": "5bae412408605cc813c4075e9e8c599b685054b4"
+    },
+    {
+      "path": "services/langgraph/agency/sop/source_approval.py",
+      "git_blob_sha": "21a2bd6aed0aaf7ba5e9d53abf21ce7c2d301b32"
+    },
+    {
+      "path": "supabase/migrations/20261121_amc_tenant_rls_v1.sql",
+      "git_blob_sha": "08297555ac706b72a3bd05ef2e35b7bbbda864bf"
     }
   ]
 }

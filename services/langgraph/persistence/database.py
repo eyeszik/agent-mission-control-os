@@ -14,6 +14,10 @@ from services.langgraph.persistence import sqlite_db
 
 _VALID_BACKENDS = frozenset(AMC_DATABASE_BACKENDS)
 _JOINED_SESSION: ContextVar[Any] = ContextVar("amc_explicit_atomic_session", default=None)
+# Tenant context for PostgreSQL row-level security (supabase/migrations/20261121_amc_tenant_rls_v1.sql).
+RLS_MODE_ENV = "AMC_DB_RLS_MODE"
+RLS_MODES = ("off", "scoped")
+_TENANT_SCOPE: ContextVar[str | None] = ContextVar("amc_tenant_scope", default=None)
 
 
 def database_backend() -> str:
@@ -32,6 +36,46 @@ def require_database_url() -> str:
     if not value:
         raise RuntimeError("DATABASE_URL is required when AMC_DATABASE_BACKEND=postgres")
     return value
+
+
+def rls_mode() -> str:
+    """``off`` (default): no tenant context is sent. ``scoped``: an active :func:`tenant_scope` is sent
+    to PostgreSQL as ``amc.tenant_id`` for the transaction. Unknown values fail closed."""
+    value = (os.environ.get(RLS_MODE_ENV) or "off").strip().lower()
+    if value not in RLS_MODES:
+        raise RuntimeError(f"Unsupported {RLS_MODE_ENV}={value!r}; expected one of {RLS_MODES}")
+    return value
+
+
+@contextmanager
+def tenant_scope(tenant_id: str) -> Iterator[None]:
+    """Bind database work in this context to one tenant for row-level security.
+
+    It narrows, never widens: the tenant must come from the server-resolved
+    principal, and an inner scope may not switch to a different tenant.
+    """
+    tenant = (tenant_id or "").strip()
+    if not tenant:
+        raise ValueError("tenant_scope requires a non-empty tenant_id")
+    outer = _TENANT_SCOPE.get()
+    if outer is not None and outer != tenant:
+        raise PermissionError("a tenant scope cannot be switched to another tenant inside an outer scope")
+    token = _TENANT_SCOPE.set(tenant)
+    try:
+        yield
+    finally:
+        _TENANT_SCOPE.reset(token)
+
+
+def current_tenant_scope() -> str | None:
+    return _TENANT_SCOPE.get()
+
+
+def _apply_tenant_scope(conn: Any) -> None:
+    """Transaction-local, so a pooled connection never carries one tenant's context into the next use."""
+    tenant = _TENANT_SCOPE.get()
+    if tenant is not None and rls_mode() == "scoped":
+        conn.execute("SELECT set_config('amc.tenant_id', %s, true)", (tenant,))
 
 
 def table(name: str) -> str:
@@ -136,6 +180,7 @@ def _pooled_session() -> Iterator[DBSession]:
     with pool.connection() as conn:
         session = DBSession(conn, True)
         try:
+            _apply_tenant_scope(conn)
             yield session
             conn.commit()
         except Exception:
@@ -186,6 +231,7 @@ def transaction(*, write: bool = False) -> Iterator[DBSession]:
         row_factory=dict_row,
     )
     try:
+        _apply_tenant_scope(conn)
         yield DBSession(conn, True)
         conn.commit()
     except Exception:

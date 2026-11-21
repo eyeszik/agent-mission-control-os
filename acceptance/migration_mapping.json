@@ -19,14 +19,16 @@
   "20261024_amc_agency_framework_v1.sql",
   "20261104_amc_approval_framing_v1.sql",
   "20261104_amc_durable_execution_v1_jobs_artifacts.sql",
-  "20261104_amc_hmac_replay_v1.sql"
+  "20261104_amc_hmac_replay_v1.sql",
+  "20261121_amc_tenant_rls_v1.sql"
  ],
- "postgres_catalog_sha256": "04174b5ca7238e22afd6fc9de4a093347f1c6d525736b5e832d78a0d43b9cf69",
+ "postgres_catalog_sha256": "2055ce73f8a7c3082b20aaa661b278a7c228e5ea2625e41c1c09b7405205e351",
  "row_level_security": {
   "tables": 90,
-  "rls_enabled": 0,
-  "policies": 0,
-  "isolation_model": "schema-level REVOKE from anon/authenticated + server-side amc.tenant_memberships authorization"
+  "rls_enabled": 90,
+  "rls_forced": 0,
+  "policies": 84,
+  "isolation_model": "schema-level REVOKE from anon/authenticated + server-side amc.tenant_memberships authorization + RLS enabled (not forced) with amc_tenant_isolation on every tenant_id table, keyed on the per-transaction amc.tenant_id context; the owning role is exempt"
  },
  "schema_privileges": {
   "anon": {
@@ -166,8 +168,10 @@
      "record_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "ace_provenance_pkey",
      "ace_provenance_project_id_fkey",
@@ -266,8 +270,10 @@
     ],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "action_budget_policies_ceiling_minor_check",
      "action_budget_policies_currency_check",
@@ -411,8 +417,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "action_budget_reservations_action_id_fkey",
      "action_budget_reservations_amount_minor_check",
@@ -531,8 +539,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "action_freezes_pkey",
      "action_freezes_scope_kind_check",
@@ -601,8 +611,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "action_project_settings_autonomy_check",
      "action_project_settings_pkey",
@@ -999,8 +1011,10 @@
      "lease_expires_at",
      "lease_owner"
     ],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "action_requests_attempts_check",
      "action_requests_effective_class_check",
@@ -1152,8 +1166,10 @@
      "payload_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "action_sandbox_effects_pkey",
      "action_sandbox_effects_tenant_id_fkey",
@@ -1279,8 +1295,10 @@
      "prev_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "action_transitions_action_id_fkey",
      "action_transitions_pkey",
@@ -1477,8 +1495,10 @@
      "content_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "agency_artifacts_engagement_id_fkey",
      "agency_artifacts_pkey",
@@ -1551,8 +1571,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "agency_client_projects_client_id_fkey",
      "agency_client_projects_pkey",
@@ -1660,8 +1682,10 @@
     ],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "agency_clients_pkey",
      "agency_clients_status_check",
@@ -1821,8 +1845,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "agency_decisions_engagement_id_fkey",
      "agency_decisions_pkey",
@@ -1965,8 +1991,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "agency_evidence_confidence_check",
      "agency_evidence_engagement_id_fkey",
@@ -2086,8 +2114,10 @@
      "catalog_sha256"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "agency_framework_plans_pkey",
      "agency_framework_plans_project_id_catalog_version_key",
@@ -2320,8 +2350,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "agency_task_instances_applicability_check",
      "agency_task_instances_pkey",
@@ -2449,8 +2481,10 @@
      "content_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "amc_artifact_versions_object_id_fkey",
      "amc_artifact_versions_pkey",
@@ -2632,8 +2666,10 @@
     "lease_columns": [
      "lease_expires_at"
     ],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "amc_jobs_attempt_count_check",
      "amc_jobs_kind_check",
@@ -2742,8 +2778,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "analytics_events_pkey",
      "analytics_events_run_id_fkey"
@@ -2957,8 +2995,10 @@
      "subject_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "approvals_decision_check",
      "approvals_framing_level_check",
@@ -3056,8 +3096,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "artifact_comments_artifact_id_fkey",
      "artifact_comments_pkey",
@@ -3119,7 +3161,7 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
+    "rls_enabled": true,
     "policies": [],
     "constraint_names": [
      "artifact_dependencies_artifact_id_fkey",
@@ -3236,8 +3278,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "artifact_edit_requests_artifact_id_fkey",
      "artifact_edit_requests_pkey",
@@ -3328,8 +3372,10 @@
     ],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "artifact_objects_pkey",
      "artifact_objects_project_id_fkey",
@@ -3465,8 +3511,10 @@
      "content_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "artifact_versions_artifact_id_fkey",
      "artifact_versions_change_kind_check",
@@ -3601,8 +3649,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "asset_rights_artifact_id_fkey",
      "asset_rights_pkey",
@@ -3722,8 +3772,10 @@
      "previous_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "audit_checkpoints_checkpoint_hash_key",
      "audit_checkpoints_pkey",
@@ -3802,8 +3854,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "calendars_pkey",
      "calendars_project_id_fkey",
@@ -3908,8 +3962,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "completion_evaluations_confidence_check",
      "completion_evaluations_pkey",
@@ -4039,8 +4095,10 @@
      "content_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "content_atoms_pkey",
      "content_atoms_project_id_fkey",
@@ -4254,8 +4312,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "content_items_pkey",
      "content_items_project_id_fkey",
@@ -4380,8 +4440,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "conversation_messages_pkey",
      "conversation_messages_project_id_fkey",
@@ -4488,8 +4550,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "conversation_threads_pkey",
      "conversation_threads_project_id_fkey",
@@ -4562,7 +4626,7 @@
      "action_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
+    "rls_enabled": true,
     "policies": [],
     "constraint_names": [
      "council_approval_consumptions_pkey"
@@ -4704,8 +4768,10 @@
      "content_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "council_blueprints_idea_id_fkey",
      "council_blueprints_pkey",
@@ -4822,7 +4888,7 @@
      "state_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
+    "rls_enabled": true,
     "policies": [],
     "constraint_names": [
      "council_checkpoints_mission_id_fkey",
@@ -4938,8 +5004,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "council_ideas_pkey",
      "council_ideas_project_id_fkey",
@@ -5131,8 +5199,10 @@
      "lease_expires_at",
      "lease_owner"
     ],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "council_missions_engine_check",
      "council_missions_idea_id_fkey",
@@ -5306,8 +5376,10 @@
      "args_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "council_tool_audits_decision_check",
      "council_tool_audits_pkey"
@@ -5393,8 +5465,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "dispatch_permits_pkey",
      "dispatch_permits_project_id_fkey",
@@ -5567,8 +5641,10 @@
     "lease_columns": [
      "fencing_token"
     ],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "durable_intents_job_id_fkey",
      "durable_intents_pkey",
@@ -5797,8 +5873,10 @@
      "lease_owner",
      "lease_token"
     ],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "durable_jobs_attempts_check",
      "durable_jobs_lease_token_check",
@@ -5917,8 +5995,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "durable_ticks_pkey"
     ]
@@ -6041,8 +6121,10 @@
     "lease_columns": [
      "fencing_token"
     ],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "durable_transitions_job_id_fkey",
      "durable_transitions_pkey"
@@ -6164,8 +6246,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "engagements_pkey",
      "engagements_project_id_fkey",
@@ -6261,8 +6345,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "execution_receipts_pkey",
      "execution_receipts_project_id_fkey",
@@ -6341,8 +6427,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "failure_fingerprints_pkey",
      "failure_fingerprints_project_id_fkey",
@@ -6520,8 +6608,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "growth_experiments_decision_check",
      "growth_experiments_pkey",
@@ -6575,7 +6665,7 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
+    "rls_enabled": true,
     "policies": [],
     "constraint_names": [
      "hmac_replay_nonces_nonce_check",
@@ -6731,7 +6821,7 @@
      "request_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
+    "rls_enabled": true,
     "policies": [],
     "constraint_names": [
      "idempotency_records_attempt_count_check",
@@ -6882,8 +6972,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "invalidation_obligations_event_class_check",
      "invalidation_obligations_pkey",
@@ -7044,8 +7136,10 @@
      "content_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "knowledge_items_pkey",
      "knowledge_items_project_id_fkey",
@@ -7151,8 +7245,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "learning_promotions_pkey",
      "learning_promotions_signal_id_fkey",
@@ -7253,8 +7349,10 @@
      "prev_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "learning_signals_pkey",
      "learning_signals_seq_check",
@@ -7405,8 +7503,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "lineage_remediation_queue_pkey",
      "lineage_remediation_queue_project_id_fkey",
@@ -7569,8 +7669,10 @@
      "content_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "memory_records_authority_check",
      "memory_records_pkey",
@@ -7660,8 +7762,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "observation_receipts_pkey",
      "observation_receipts_project_id_fkey",
@@ -7823,8 +7927,10 @@
      "payload_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "outbox_messages_attempts_check",
      "outbox_messages_pkey",
@@ -7979,8 +8085,10 @@
      "input_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "policy_decision_records_effect_check",
      "policy_decision_records_pkey",
@@ -8095,8 +8203,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "project_events_pkey",
      "project_events_project_id_fkey",
@@ -8252,8 +8362,10 @@
      "manifest_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "project_workspaces_lifecycle_state_check",
      "project_workspaces_pkey",
@@ -8315,8 +8427,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "projects_pkey",
      "projects_tenant_id_fkey"
@@ -8459,8 +8573,10 @@
      "prompt_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "prompt_records_pkey",
      "prompt_records_project_id_fkey",
@@ -8568,8 +8684,10 @@
     ],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "provider_profiles_mode_check",
      "provider_profiles_pkey",
@@ -8731,8 +8849,10 @@
      "request_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "publication_attempts_mode_check",
      "publication_attempts_pkey",
@@ -8876,8 +8996,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "publication_jobs_mode_check",
      "publication_jobs_pkey",
@@ -8977,8 +9099,10 @@
      "receipt_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "publication_receipts_attempt_id_fkey",
      "publication_receipts_kind_check",
@@ -9121,8 +9245,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "recovery_cases_pkey",
      "recovery_cases_project_id_fkey",
@@ -9628,8 +9754,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "run_events_pkey",
      "run_events_run_id_fkey",
@@ -9734,8 +9862,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "runs_pkey",
      "runs_project_id_fkey"
@@ -9839,8 +9969,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "schedule_slots_calendar_id_fkey",
      "schedule_slots_content_item_id_fkey",
@@ -10002,8 +10134,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "scheduled_jobs_attempts_check",
      "scheduled_jobs_idempotency_key_key",
@@ -10196,8 +10330,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "spend_authorizations_amount_minor_check",
      "spend_authorizations_currency_check",
@@ -10324,8 +10460,10 @@
      "content_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "storage_objects_backend_check",
      "storage_objects_byte_size_check",
@@ -10418,8 +10556,10 @@
      "binding_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "tenant_project_bindings_pkey",
      "tenant_project_bindings_project_id_fkey",
@@ -10471,8 +10611,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "tenants_pkey"
     ]
@@ -10586,8 +10728,10 @@
      "request_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "trust_idempotency_records_pkey",
      "trust_idempotency_records_project_id_fkey",
@@ -10732,8 +10876,10 @@
      "prev_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_audit_log_entry_hash_key",
      "vnexus_audit_log_pkey",
@@ -10841,8 +10987,10 @@
      "payload_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_branch_evaluations_branch_id_fkey",
      "vnexus_branch_evaluations_kind_check",
@@ -11040,8 +11188,10 @@
      "changes_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_branches_base_version_id_fkey",
      "vnexus_branches_brand_id_fkey",
@@ -11125,8 +11275,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_brands_owner_project_id_fkey",
      "vnexus_brands_pkey",
@@ -11350,8 +11502,10 @@
      "content_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_genome_versions_brand_id_fkey",
      "vnexus_genome_versions_brand_id_scope_scope_ref_version_key",
@@ -11482,8 +11636,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_graph_edges_brand_id_fkey",
      "vnexus_graph_edges_check",
@@ -11620,8 +11776,10 @@
      "content_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_graph_nodes_brand_id_fkey",
      "vnexus_graph_nodes_pkey",
@@ -11763,8 +11921,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_measurements_kind_check",
      "vnexus_measurements_pkey",
@@ -11861,8 +12021,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_media_job_transitions_job_id_fkey",
      "vnexus_media_job_transitions_pkey"
@@ -12105,8 +12267,10 @@
      "request_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_media_jobs_attempts_check",
      "vnexus_media_jobs_budget_ceiling_minor_check",
@@ -12256,8 +12420,10 @@
      "source_hash"
     ],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "vnexus_prompt_genomes_brand_id_fkey",
      "vnexus_prompt_genomes_brand_id_prompt_id_version_key",
@@ -12403,8 +12569,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "workstreams_engagement_id_fkey",
      "workstreams_pkey",
@@ -12438,7 +12606,7 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
+    "rls_enabled": true,
     "policies": [],
     "constraint_names": [
      "run_event_counters_next_sequence_check",
@@ -12502,8 +12670,10 @@
     "idempotency_unique": [],
     "content_hash_columns": [],
     "lease_columns": [],
-    "rls_enabled": false,
-    "policies": [],
+    "rls_enabled": true,
+    "policies": [
+     "amc_tenant_isolation"
+    ],
     "constraint_names": [
      "tenant_memberships_pkey",
      "tenant_memberships_tenant_id_fkey",
