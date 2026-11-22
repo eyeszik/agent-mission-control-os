@@ -20,9 +20,10 @@
   "20261104_amc_approval_framing_v1.sql",
   "20261104_amc_durable_execution_v1_jobs_artifacts.sql",
   "20261104_amc_hmac_replay_v1.sql",
-  "20261121_amc_tenant_rls_v1.sql"
+  "20261121_amc_tenant_rls_v1.sql",
+  "20261122_amc_brand_os_pending_approval_unique_v1.sql"
  ],
- "postgres_catalog_sha256": "2055ce73f8a7c3082b20aaa661b278a7c228e5ea2625e41c1c09b7405205e351",
+ "postgres_catalog_sha256": "47ea7643dedbeed9d138fa5efa55ace5c6b099c9a37badfea0d198a39ad6aa71",
  "row_level_security": {
   "tables": 90,
   "rls_enabled": 90,

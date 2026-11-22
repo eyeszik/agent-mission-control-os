@@ -1567,6 +1567,42 @@ def _ensure_approval_columns(conn: sqlite3.Connection) -> None:
             conn.execute(f"ALTER TABLE approvals ADD COLUMN {name} TEXT")
 
 
+BRAND_OS_PENDING_SUBJECTS = ("BRAND_OS_SOP_ADOPTION", "BRAND_OS_SOURCE")
+
+
+def _ensure_brand_os_pending_unique(conn: sqlite3.Connection) -> None:
+    """At most one pending Brand OS approval per (tenant, project, artifact, purpose), enforced by the database.
+
+    Mirrors supabase/migrations/20261122_amc_brand_os_pending_approval_unique_v1.sql. It runs after
+    ``_ensure_approval_columns`` because older databases gain the subject columns there. Duplicate
+    pending rows already present are marked stale (never approved, never deleted); the earliest stays.
+    ``init_db`` runs on every transaction, so this is a read-only check once the index exists.
+    """
+    exists = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'idx_approvals_brand_os_pending'"
+    ).fetchone()
+    if exists is not None:
+        return
+    conn.execute(
+        """
+        UPDATE approvals SET status = 'stale', stale_reason = 'superseded: duplicate pending Brand OS approval',
+               staled_at = strftime('%Y-%m-%dT%H:%M:%f+00:00', 'now')
+        WHERE status = 'pending' AND subject_type IN (?, ?) AND approval_id NOT IN (
+            SELECT approval_id FROM (
+                SELECT approval_id, ROW_NUMBER() OVER (PARTITION BY tenant_id, project_id, subject_ref, subject_type
+                                                       ORDER BY created_at, approval_id) AS rn
+                FROM approvals WHERE status = 'pending' AND subject_type IN (?, ?)
+            ) WHERE rn = 1)
+        """,
+        BRAND_OS_PENDING_SUBJECTS * 2,
+    )
+    conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_approvals_brand_os_pending ON approvals "
+        "(tenant_id, project_id, subject_ref, subject_type) "
+        "WHERE status = 'pending' AND subject_type IN ('BRAND_OS_SOP_ADOPTION', 'BRAND_OS_SOURCE')"
+    )
+
+
 @contextmanager
 def _migration_lock(db_path: str):
     """Serialize schema migration across worker processes.
@@ -1598,6 +1634,7 @@ def init_db() -> None:
             conn.executescript(script)
             conn.execute("INSERT INTO schema_migrations (version) VALUES (?)", (version,))
         _ensure_approval_columns(conn)
+        _ensure_brand_os_pending_unique(conn)
         conn.commit()
 
 
