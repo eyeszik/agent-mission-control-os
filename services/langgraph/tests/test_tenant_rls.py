@@ -143,10 +143,11 @@ def test_backend_transaction_sends_the_tenant_scope_only_in_scoped_mode(monkeypa
 
 def test_rollback_restores_the_pre_rls_catalog():
     files = mig.migration_files()
-    assert files[-1].name == "20261121_amc_tenant_rls_v1.sql"
+    names = [f.name for f in files]
+    rls = names.index("20261121_amc_tenant_rls_v1.sql")  # later migrations may follow it; roll back only this one
     with mig.scratch_database(DSN) as db:
-        mig.apply_all(db, files[:-1])
+        mig.apply_all(db, files[:rls])
         before = mig.snapshot(db)
-        mig.apply_all(db, files[-1:])
-        mig.run_sql(db, mig.rollback_file(files[-1]).read_text(encoding="utf-8"))
+        mig.apply_all(db, files[rls:rls + 1])
+        mig.run_sql(db, mig.rollback_file(files[rls]).read_text(encoding="utf-8"))
         assert mig.snapshot_digest(mig.snapshot(db)) == mig.snapshot_digest(before)
