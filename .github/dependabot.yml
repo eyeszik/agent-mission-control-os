@@ -34,6 +34,13 @@ updates:
     open-pull-requests-limit: 5
     cooldown:
       default-days: 3
+    # crewai, crewai-cli and crewai-core 1.15.37 each require tomli~=2.0.2 (>=2.0.2,<2.1).
+    # A tomli >=2.1 pin in constraints-council.txt makes the council extra unresolvable
+    # (#270 broke the Mission Council and Dependency audit jobs this way). Patch releases
+    # within 2.0.x stay eligible. Remove this entry when the crewai pin moves past 2.0.
+    ignore:
+      - dependency-name: "tomli"
+        versions: [">=2.1"]
 
   # =========================================================
   # 3. PNPM — ROOT MONOREPO
