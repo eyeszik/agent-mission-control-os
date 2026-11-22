@@ -22,9 +22,9 @@ The browser surfaces (Obscura isolated extraction; the `visual/browser.py` sandb
 
 Verdicts are taken from the full backend runs recorded in `COMPLETE_TEST_EVIDENCE.md`. A gate is claimed only where its tests ran and passed.
 
-| Gate (directive A7–A9) | Evidence tests | Verdict |
+| Gate (directive A7–A9) | Evidence tests (SQLite, this cycle) | Verdict |
 |---|---|---|
-| A7 governed dispatch (authorize → dispatch → receipt) | `test_ace12_actions.py`, `test_ace12_agency_os.py`, `test_execution_fabric.py`, `test_council_gateway.py` | see `COMPLETE_TEST_EVIDENCE.md` |
-| A8 independent observation and receipts | `test_ace12_actions.py`, `test_execution_fabric.py`, `test_obscura_*.py` | see `COMPLETE_TEST_EVIDENCE.md` |
-| A9 recovery and reconciliation | `test_ace12_actions.py` (UNKNOWN/reconcile), `test_execution_fabric.py` (stale reservation) | see `COMPLETE_TEST_EVIDENCE.md` |
+| A7 governed dispatch (authorize → dispatch → receipt) | `test_ace12_actions.py` 77 passed, `test_ace12_agency_os.py` 8 passed, `test_execution_fabric.py` 57 passed, `test_council_gateway.py` 9 passed (its 5 MCP tests skip without `mcp`; they ran and passed in the council venv, which ran 72 council tests) | PASS |
+| A8 independent observation and receipts | the same ACE v12 and fabric runs; `test_obscura_*.py` 68 passed, 9 skipped (they need a verified Obscura binary or authorized live retrieval; NOT_RUN here, and the Obscura CI job passed on master) | PASS (Obscura runtime cases NOT_RUN locally) |
+| A9 recovery and reconciliation | `test_t36_e02_i09_timeout_after_effect_reconciles_without_resending`, `test_t37_e02_timeout_before_effect_reconciles_to_not_applied_then_retries`, `test_x26_crash_after_intent_is_reconciled_then_retried`, `test_x07`/`test_x08` stale-plan refusals | PASS |
 | Live computer control (desktop or external web) | none: no adapter exists by design | NOT_APPLICABLE |
