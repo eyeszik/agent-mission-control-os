@@ -716,9 +716,13 @@ def test_a_crash_between_stage_writes_fails_closed_and_recompile_recovers(root, 
     with monkeypatch.context() as m:
         m.setattr(service, "_put", crashing_put)
         with pytest.raises(RuntimeError, match="simulated crash"):
-            service.edit_asset(alice, pid, "halden-kiln-poster", op="recolor",
-                               args={"object_id": "motif-ring-inner", "palette_key": "fog", "field": "stroke"},
-                               adapter=adapter, work_dir=tmp_path)
+            edited = service.edit_asset(alice, pid, "halden-kiln-poster", op="recolor",
+                                        args={"object_id": "motif-ring-inner", "palette_key": "fog", "field": "stroke"},
+                                        adapter=adapter, work_dir=tmp_path)
+            # Reaching here means the edit returned before its preview write (REJECTED or CONFLICT), so the crash
+            # under test never happened. Fail with the edit's own evidence rather than a bare "DID NOT RAISE".
+            pytest.fail(f"edit returned {edited.get('status')} before the preview write: reasons={edited.get('reasons')} "
+                        f"renderer_status={(edited.get('metrics') or {}).get('renderer_status')}")
     state = service.consistency(pid, "halden-kiln-poster", adapter=adapter)
     assert state["consistent"] is False and {"evaluation", "preview"} <= set(state["stale"])
     blocked = service.request_approval(alice, pid, "halden-kiln-poster", adapter=adapter)

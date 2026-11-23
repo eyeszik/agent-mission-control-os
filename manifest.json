@@ -572,7 +572,7 @@
     },
     {
       "path": "services/langgraph/agency/foundry/studio.py",
-      "git_blob_sha": "2d48b27e473dc379466ae3d2d0dcafaa82382120"
+      "git_blob_sha": "693ef2045b61da98ecc950c76d4087619d0de9a6"
     },
     {
       "path": "services/langgraph/agency/full_service.py",
@@ -656,7 +656,7 @@
     },
     {
       "path": "services/langgraph/agency/intake/release.py",
-      "git_blob_sha": "0ade57a639abc856de74f2654f6c3d947e5b9f24"
+      "git_blob_sha": "fea86a768193f236e852cafd0ac1073e86d4532f"
     },
     {
       "path": "services/langgraph/agency/intake/resolver.py",
@@ -732,7 +732,7 @@
     },
     {
       "path": "services/langgraph/agency/project_os/storage.py",
-      "git_blob_sha": "8d6b6efd44295f2c8d0647997dfd814bfa3cb000"
+      "git_blob_sha": "7ab8b49b5a14cce2297d0ff34da1df85dd9278ca"
     },
     {
       "path": "services/langgraph/agency/prompt_compiler.py",
@@ -1108,7 +1108,7 @@
     },
     {
       "path": "services/langgraph/persistence/database.py",
-      "git_blob_sha": "b0d8f54879fcabc768b3297c1cda22278707826c"
+      "git_blob_sha": "a611418cc69ee573ae029d3c627354ef1dc0d528"
     },
     {
       "path": "services/langgraph/persistence/delivery.py",
@@ -1156,7 +1156,7 @@
     },
     {
       "path": "services/langgraph/persistence/projects.py",
-      "git_blob_sha": "09107cc42ebf1f1a2d41a76bedf8057b181f4af1"
+      "git_blob_sha": "b66bbc6c135974a3607df6cd206bef93779d9fc7"
     },
     {
       "path": "services/langgraph/persistence/runs.py",
@@ -1164,7 +1164,7 @@
     },
     {
       "path": "services/langgraph/persistence/sqlite_db.py",
-      "git_blob_sha": "b467fb1bf5f0ef81f9fac066e13cc2847771504e"
+      "git_blob_sha": "37de337741c8f30e3751f4b71aad056c67aa2738"
     },
     {
       "path": "services/langgraph/persistence/tenancy.py",
@@ -1280,7 +1280,7 @@
     },
     {
       "path": "services/langgraph/tests/test_avic.py",
-      "git_blob_sha": "8a948a8b55605ebe357d7c3e7590968bf07c90ed"
+      "git_blob_sha": "0676f677f693f7799fe3f118f5513735a88ccfbd"
     },
     {
       "path": "services/langgraph/tests/test_compiled_agency.py",
@@ -1533,6 +1533,10 @@
     {
       "path": "supabase/migrations/20261121_amc_tenant_rls_v1.sql",
       "git_blob_sha": "08297555ac706b72a3bd05ef2e35b7bbbda864bf"
+    },
+    {
+      "path": "supabase/migrations/20261122_amc_brand_os_pending_approval_unique_v1.sql",
+      "git_blob_sha": "fc1424d5b3a4b8789e5567ee000ca4c8a2dcb822"
     },
     {
       "path": "services/langgraph/api/routes/brand_os.py",
