@@ -144,6 +144,65 @@ def snapshot_digest(snap: dict[str, list[tuple]]) -> str:
     return hashlib.sha256(json.dumps(snap, sort_keys=True, default=str).encode()).hexdigest()
 
 
+# ----------------------------------------------------------------------------- applied-migration detection
+# AMC records no migration ledger in the database, so a target's history is read from its catalog. Objects are
+# identified by stable keys (a table's grants differ per deployment, so they are ignored). A migration's signature
+# is the keys it adds on a scratch replay that are still present after the last migration, because a later
+# migration may legitimately rewrite an earlier object (a widened constraint, RLS switched on). A migration whose
+# every effect was superseded later has an empty signature and is reported UNDETECTABLE, never guessed.
+def _catalog_keys(snap: dict[str, list[tuple]]) -> set[tuple]:
+    keys: set[tuple] = {("table", r[0]) for r in snap["tables"]}
+    keys |= {("rls", r[0]) for r in snap["tables"] if r[1]}
+    keys |= {("column", r[0], r[1], r[2]) for r in snap["columns"]}
+    keys |= {("constraint", r[0], r[1], r[2]) for r in snap["constraints"]}
+    keys |= {("index", r[0], r[1]) for r in snap["indexes"]}
+    keys |= {("policy", r[0], r[1]) for r in snap["policies"]}
+    keys |= {("function", r[0]) for r in snap["functions"]}
+    return keys
+
+
+def migration_signatures(dsn: str) -> dict[str, set[tuple]]:
+    """Replay every migration on a scratch database; each one's surviving added keys, in order."""
+    added: dict[str, set[tuple]] = {}
+    with scratch_database(dsn) as db:
+        run_sql(db, SHIM.read_text(encoding="utf-8"))
+        before = _catalog_keys(snapshot(db))
+        for path in migration_files():
+            run_sql(db, path.read_text(encoding="utf-8"))
+            after = _catalog_keys(snapshot(db))
+            added[path.name] = after - before
+            before = after
+    return {name: keys & before for name, keys in added.items()}
+
+
+def readonly_snapshot(target_dsn: str) -> dict[str, list[tuple]]:
+    """``snapshot`` of a target inside a READ ONLY transaction: catalog reads only, nothing can be written."""
+    out: dict[str, list[tuple]] = {}
+    with psycopg.connect(target_dsn) as conn:
+        conn.execute("set transaction read only")
+        for key, query in _Q.items():
+            params = (list(SYSTEM_SCHEMAS),) if "%s" in query else None
+            out[key] = sorted(tuple(row) for row in conn.execute(query, params).fetchall())
+        conn.rollback()
+    return out
+
+
+def detect_applied(signatures: dict[str, set[tuple]], target: dict[str, list[tuple]]) -> list[dict]:
+    """APPLIED / PENDING / PARTIAL / UNDETECTABLE per migration, in order, with signature keys present."""
+    present = _catalog_keys(target)
+    report = []
+    for name, keys in signatures.items():
+        found = len(keys & present)
+        if not keys:
+            state = "UNDETECTABLE"
+        else:
+            state = "APPLIED" if found == len(keys) else ("PENDING" if found == 0 else "PARTIAL")
+        missing = sorted(keys - present)[:5]
+        report.append({"migration": name, "state": state, "present": found, "expected": len(keys),
+                       "missing_examples": [list(k) for k in missing]})
+    return report
+
+
 # ----------------------------------------------------------------------------- rollback generation
 def _by(rows: list[tuple], width: int) -> dict[tuple, tuple]:
     return {row[:width]: row for row in rows}
@@ -576,8 +635,10 @@ def backfill(sqlite_path: str, pg_dsn: str, tables: list[str], tenant: str | Non
 # ----------------------------------------------------------------------------- cli
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("command", choices=["mapping", "rollback", "apply", "backfill"])
+    parser.add_argument("command", choices=["mapping", "rollback", "apply", "backfill", "detect"])
     parser.add_argument("--dsn", required=True, help="maintenance DSN on an ephemeral local server")
+    parser.add_argument("--target", help="detect: DSN of the database to inspect; read only (catalog queries "
+                                         "in a READ ONLY transaction), never migrated")
     parser.add_argument("--down", action="store_true")
     parser.add_argument("--sqlite")
     parser.add_argument("--tables", default="tenants,projects,runs,approvals")
@@ -588,6 +649,10 @@ def main(argv: list[str] | None = None) -> int:
         write_mapping(args.dsn)
     elif args.command == "rollback":
         write_rollbacks(args.dsn)
+    elif args.command == "detect":
+        if not args.target:
+            raise SystemExit("detect needs --target")
+        print(json.dumps(detect_applied(migration_signatures(args.dsn), readonly_snapshot(args.target)), indent=1))
     elif args.command == "apply":
         print(json.dumps(rollback_all(args.dsn) if args.down else apply_all(args.dsn)))
     else:
