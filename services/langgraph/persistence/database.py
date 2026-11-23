@@ -78,6 +78,34 @@ def _apply_tenant_scope(conn: Any) -> None:
         conn.execute("SELECT set_config('amc.tenant_id', %s, true)", (tenant,))
 
 
+RLS_BYPASS_QUERY = """
+    SELECT r.rolsuper AS superuser, r.rolbypassrls AS bypassrls,
+           EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+                    WHERE n.nspname = 'amc' AND c.relkind = 'r' AND c.relrowsecurity AND NOT c.relforcerowsecurity
+                      AND pg_has_role(current_user, c.relowner, 'USAGE')) AS owns_tables
+      FROM pg_roles r WHERE r.rolname = current_user
+"""
+
+
+def rls_enforcement_problems(session: Any) -> list[str]:
+    """Why row-level security would NOT constrain the role this session runs as (empty when it would).
+
+    Read-only preflight for ``AMC_DB_RLS_MODE=scoped``: a superuser, a BYPASSRLS role, or a role that owns
+    (or is a member of the owner of) the non-FORCEd ``amc`` tables is exempt from every policy, so scoping it
+    would be a false assurance. It is not wired into startup or ``/ready``; enabling enforced mode in
+    production is a separate, approved change (docs/migrations/tenant-rls.md).
+    """
+    row = normalize_record(session.execute(RLS_BYPASS_QUERY).fetchone() or {})
+    problems = []
+    if row.get("superuser"):
+        problems.append("ROLE_IS_SUPERUSER: superusers bypass row-level security")
+    if row.get("bypassrls"):
+        problems.append("ROLE_HAS_BYPASSRLS: the role bypasses row-level security")
+    if row.get("owns_tables"):
+        problems.append("ROLE_OWNS_AMC_TABLES: table owners are exempt because RLS is enabled, not forced")
+    return problems
+
+
 def table(name: str) -> str:
     if is_postgres():
         return f"amc.{name}"
@@ -148,6 +176,7 @@ def _get_pool():
 
     global _pool
     if _pool is None:
+        from psycopg.rows import dict_row
         from psycopg_pool import ConnectionPool
 
         min_size = int((os.environ.get("AMC_DB_POOL_MIN") or "0").strip() or "0")
@@ -159,6 +188,8 @@ def _get_pool():
             max_size=max_size,
             timeout=timeout,
             open=True,
+            # The same connection settings as the direct path, so callers see identical rows either way.
+            kwargs={"autocommit": False, "prepare_threshold": 0, "row_factory": dict_row},
         )
     return _pool
 
@@ -218,7 +249,9 @@ def transaction(*, write: bool = False) -> Iterator[DBSession]:
         return
 
     if _pool_enabled():
-        yield from _pooled_session()
+        # _pooled_session is a context manager, not a generator: enter it, do not iterate it.
+        with _pooled_session() as session:
+            yield session
         return
 
     import psycopg

@@ -99,7 +99,16 @@ Every status states what the decision covers. `grants_runtime_authority` is type
 - A new request while the adoption is `PENDING` or `ADOPTED` opens nothing; it returns the current status.
 - After a failure between storing the document and opening the approval, a repeat request reuses the unchanged artifact and opens exactly one approval.
 
-**Residual race.** Two concurrent requests with different keys could both find no pending approval. `open_artifact_approval` doesn't lock, so this window is not closed.
+**Concurrent requests.** The database allows at most one pending Brand OS approval per tenant, project, artifact and purpose. It is a partial unique index: `idx_amc_approvals_brand_os_pending` in `supabase/migrations/20261122_amc_brand_os_pending_approval_unique_v1.sql`, and `idx_approvals_brand_os_pending` on SQLite.
+
+- A request that loses the insert race gets a unique violation, re-reads, and returns the winner's approval.
+- If the winner's approval binds different content, the request is refused with 409 `APPROVAL_CONFLICT`; it never opens a second approval.
+- Staging the document is race-safe as well. Concurrent writers of the same object no longer share a temp file, and a lost first create re-reads the head. Other content is refused as stale.
+- Duplicate pending rows that already exist when the index is built are marked `stale`, never approved or deleted; the earliest one is kept.
+
+`test_brand_os_adoption_concurrency.py` runs six parallel requests with different keys, a forced lost race, the database refusal itself, and a different-content racer. It passes on SQLite and PostgreSQL.
+
+**Same key, different payload.** The idempotency scope and payload are derived from the path (project and SOP), so the same key always describes the same request. A different project or SOP uses a different scope, so this route has no same-key/different-payload case to test.
 
 ### Reproduce locally (SQLite)
 

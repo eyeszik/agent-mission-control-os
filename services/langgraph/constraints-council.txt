@@ -33,7 +33,7 @@ flatbuffers==25.12.19
 frozenlist==1.8.0
 fsspec==2026.9.0
 google-re2==1.1.20251105
-googleapis-common-protos==1.76.0
+googleapis-common-protos==1.75.0
 grpcio==1.85.1
 h11==0.16.0
 hf-xet==1.8.0
@@ -108,7 +108,7 @@ pluggy==1.7.0
 portalocker==2.7.0
 propcache==0.5.4
 protobuf==5.29.6
-psycopg==3.3.8
+psycopg==3.3.9
 psycopg-binary==3.3.9
 psycopg-pool==3.3.3
 pyarrow==26.0.1
@@ -144,7 +144,7 @@ tenacity==9.2.1
 textual==8.2.8
 tiktoken==0.14.0
 tokenizers==0.23.3
-tomli==2.5.0
+tomli==2.0.2
 tomli_w==1.1.0
 tqdm==4.70.1
 truststore==0.10.5

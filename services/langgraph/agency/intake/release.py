@@ -21,6 +21,47 @@ def approval_run_id(mission_id: str) -> str:
     return "mission-" + canonical_hash({"mission": mission_id})[:24]
 
 
+def _is_unique_violation(exc: BaseException) -> bool:
+    """A unique/primary-key violation from either driver (sqlite3.IntegrityError, psycopg UniqueViolation)."""
+    sqlstate = getattr(exc, "sqlstate", None) or getattr(getattr(exc, "diag", None), "sqlstate", None)
+    return sqlstate == "23505" or (type(exc).__name__ == "IntegrityError" and "UNIQUE" in str(exc).upper())
+
+
+def _matching_pending(project_id: str, artifact_id: str, expected: tuple) -> Optional[dict]:
+    """The pending approval with exactly this binding, wherever it was opened from."""
+    from services.langgraph.persistence.approvals import list_approvals_for_subject_refs
+
+    for existing in list_approvals_for_subject_refs(project_id, [artifact_id]):
+        binding = (existing.get("tenant_id"), existing.get("project_id"), existing.get("subject_ref"),
+                   existing.get("subject_version_ref"), existing.get("subject_hash"),
+                   existing.get("subject_type"), existing.get("policy_version"))
+        if existing.get("status") == "pending" and binding == expected:
+            return existing
+    return None
+
+
+def _ensure_approval_run(run_id: str, tenant_id: str, project_id: str, run_pipeline: str, metadata: dict) -> None:
+    """Create the approval run once. A concurrent creator winning the insert is the same run, not an error."""
+    from services.langgraph.persistence.runs import create_run_record, get_run_record
+
+    if get_run_record(run_id) is not None:
+        return
+    try:
+        create_run_record(run_id, tenant_id, project_id, run_pipeline, "needs_approval", metadata)
+    except Exception as exc:  # noqa: BLE001 - only a lost insert race is tolerated; anything else re-raises
+        if not _is_unique_violation(exc) or get_run_record(run_id) is None:
+            raise
+
+
+def _stale_superseded(project_id: str, artifact_id: str, version: int, content_hash: str) -> None:
+    from services.langgraph.persistence.approvals import list_approvals_for_subject_refs, mark_approval_stale
+
+    for existing in list_approvals_for_subject_refs(project_id, [artifact_id]):
+        if existing.get("status") == "pending" and (existing.get("subject_hash") != content_hash
+                or existing.get("subject_version_ref") != str(version)):
+            mark_approval_stale(existing["approval_id"], "superseded: artifact version or content changed")
+
+
 def open_artifact_approval(
     principal: Principal,
     *,
@@ -40,39 +81,39 @@ def open_artifact_approval(
     """Open (or reuse) a pending approval bound to the exact content hash.
 
     Pending approvals for the same artifact with a different hash are marked
-    stale, so an approval can never carry over to changed content.
+    stale, so an approval can never carry over to changed content. Where the
+    database enforces one pending approval per subject (the Brand OS purposes),
+    a request that loses a concurrent insert re-reads and returns the winner's
+    approval when it binds the same content, and refuses (409) when it does not.
     """
-    from services.langgraph.persistence.approvals import (
-        create_approval_request,
-        get_approvals_for_run,
-        list_approvals_for_subject_refs,
-        mark_approval_stale,
-    )
+    from services.langgraph.core.errors import AMCError
+    from services.langgraph.persistence.approvals import create_approval_request
     from services.langgraph.persistence.projects import append_project_event
-    from services.langgraph.persistence.runs import create_run_record, get_run_record
 
-    for existing in list_approvals_for_subject_refs(project_id, [artifact_id]):
-        if existing.get("status") == "pending" and (existing.get("subject_hash") != content_hash
-                or existing.get("subject_version_ref") != str(version)):
-            mark_approval_stale(existing["approval_id"], "superseded: artifact version or content changed")
+    _stale_superseded(project_id, artifact_id, version, content_hash)
     run_id = approval_run_id(mission_id)
-    if get_run_record(run_id) is None:
-        create_run_record(run_id, tenant_id, project_id, run_pipeline, "needs_approval", {
-            "initiated_by": principal.user_id, "mission_id": mission_id, "contract_hash": contract_hash,
-            "artifact_id": artifact_id, "artifact_version": version, "artifact_hash": content_hash, **(metadata or {}),
-        })
-    for existing in get_approvals_for_run(run_id):
-        binding = (existing.get("tenant_id"), existing.get("project_id"), existing.get("subject_ref"),
-                   existing.get("subject_version_ref"), existing.get("subject_hash"),
-                   existing.get("subject_type"), existing.get("policy_version"))
-        expected = (tenant_id, project_id, artifact_id, str(version), content_hash, subject_type, policy_version)
-        if existing.get("status") == "pending" and binding == expected:
-            return existing
-    approval = create_approval_request(
-        run_id, tenant_id, project_id, reason, None, subject_type=subject_type, subject_ref=artifact_id,
-        subject_version_ref=str(version), subject_hash=content_hash, authority_ref="human-review",
-        policy_version=policy_version,
-    )
+    _ensure_approval_run(run_id, tenant_id, project_id, run_pipeline, {
+        "initiated_by": principal.user_id, "mission_id": mission_id, "contract_hash": contract_hash,
+        "artifact_id": artifact_id, "artifact_version": version, "artifact_hash": content_hash, **(metadata or {}),
+    })
+    expected = (tenant_id, project_id, artifact_id, str(version), content_hash, subject_type, policy_version)
+    existing = _matching_pending(project_id, artifact_id, expected)
+    if existing is not None and existing.get("run_id") == run_id:
+        return existing
+    try:
+        approval = create_approval_request(
+            run_id, tenant_id, project_id, reason, None, subject_type=subject_type, subject_ref=artifact_id,
+            subject_version_ref=str(version), subject_hash=content_hash, authority_ref="human-review",
+            policy_version=policy_version,
+        )
+    except Exception as exc:  # noqa: BLE001 - a lost race on the pending-uniqueness index is resolved by re-reading
+        if not _is_unique_violation(exc):
+            raise
+        winner = _matching_pending(project_id, artifact_id, expected)
+        if winner is None:
+            raise AMCError("Another pending approval already exists for this subject with different content",
+                           code="APPROVAL_CONFLICT", status=409) from exc
+        return winner
     append_project_event(tenant_id=tenant_id, project_id=project_id, event_type=ActivityType.APPROVAL_REQUIRED,
                          actor=principal.user_id, subject_ref=f"{artifact_id}:v{version}",
                          payload={"mission_id": mission_id, "approval_id": approval["approval_id"], "subject_hash": content_hash})

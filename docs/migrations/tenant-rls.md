@@ -2,7 +2,7 @@
 
 Migration: `supabase/migrations/20261121_amc_tenant_rls_v1.sql` (rollback generated in `supabase/rollback/`).
 Code: `services/langgraph/persistence/database.py` (`tenant_scope`, `AMC_DB_RLS_MODE`).
-Proof: `services/langgraph/tests/test_tenant_rls.py` (PostgreSQL), `test_tenant_scope.py`, `test_migration_roundtrip.py`.
+Proof: `services/langgraph/tests/test_tenant_rls.py` and `test_tenant_rls_enforcement.py` (PostgreSQL), `test_tenant_scope.py`, `test_migration_roundtrip.py`.
 
 ## The three options, layered
 
@@ -20,6 +20,19 @@ The context is transaction-local, so a pooled connection never carries one tenan
 `tenant_scope` only narrows: re-entering it with a different tenant raises `PermissionError`.
 `AMC_DB_RLS_MODE` accepts `off` (default) or `scoped`, and any other value raises.
 
+## Enforcement edges proven on PostgreSQL (`test_tenant_rls_enforcement.py`)
+
+| Case | Result |
+|---|---|
+| Privileged bypass | A `BYPASSRLS` role ignores the tenant context and sees every tenant. The superuser and the owning role are exempt as well. `rls_enforcement_problems(session)` in `persistence/database.py` names all three (`ROLE_IS_SUPERUSER`, `ROLE_HAS_BYPASSRLS`, `ROLE_OWNS_AMC_TABLES`) and returns nothing for a plain non-owner role. It is a read-only preflight and is not wired into startup or `/ready`. |
+| FORCE | With `FORCE ROW LEVEL SECURITY`, an ordinary owning role sees nothing without a tenant context; a superuser still bypasses it. That is why FORCE is not applied while the backend connects as the owner. |
+| Pooled connections (`AMC_DB_POOL_MAX>0`) | On a one-connection pool, a scoped read followed by an unscoped read on the same physical connection returns nothing, including after a rolled-back scoped transaction. |
+| Concurrent tenants | Four threads, two tenants, 25 scoped reads each on a two-connection pool: every read returns only its own tenant. |
+| Revoked membership (API) | Setting `tenant_memberships.active = false` makes the next request 403. |
+| Forged tenant (API) | An `X-AMC-Tenant` header naming a tenant outside the membership is 403, and the other tenant's project is not served. |
+
+**Pool defect fixed.** Before this change, `transaction()` with `AMC_DB_POOL_MAX>0` raised `TypeError: '_GeneratorContextManager' object is not iterable`, because it iterated the pooled context manager instead of entering it. Pooled connections also lacked the direct path's `dict_row` and `prepare_threshold=0` settings. Both were present since f863a4cb and untested; the pool now uses the same connection settings as the direct path.
+
 ## Activating option 3 (owner decision, not done)
 
 1. Create the application role in production. Roles are cluster-level and are not part of these migrations:
@@ -32,7 +45,7 @@ The context is transaction-local, so a pooled connection never carries one tenan
    dependency's context variable does not reach a sync route's threadpool. Work that is cross-tenant by
    design must keep running as the owner, or it must iterate tenants explicitly. That covers scheduler
    ticks, membership lookup before a tenant is known, and the run-event cursor.
-3. Point `DATABASE_URL` at `amc_app` and set `AMC_DB_RLS_MODE=scoped` in a staging environment. Run the
+3. Point `DATABASE_URL` at `amc_app` and confirm `rls_enforcement_problems` returns nothing for it. Set `AMC_DB_RLS_MODE=scoped` in a staging environment. Run the
    full PostgreSQL suite and the authenticated smoke gates in `docs/production-activation.md`.
 4. Roll back by pointing `DATABASE_URL` back at the owner. The policies stay and do no harm.
 
