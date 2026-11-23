@@ -12,7 +12,7 @@
     "@motion-canvas/2d": "3.17.2",
     "@motion-canvas/core": "3.17.2",
     "@react-three/fiber": "9.8.2",
-    "@remotion/player": "4.0.543",
+    "@remotion/player": "4.0.545",
     "@svgdotjs/svg.js": "3.2.8",
     "p5": "2.4.0",
     "paper": "0.17.0",
