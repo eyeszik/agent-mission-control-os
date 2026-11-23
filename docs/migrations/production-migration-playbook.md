@@ -13,6 +13,33 @@ Production itself is applied by the deployment's own migration history. See [`do
 
 ## 0. Preconditions (stop if any fails)
 
+**0a. Verify the target, independently of its name.** A database is production only when at least two of these agree, and the owner confirms in writing:
+
+- the production API deployment's `DATABASE_URL` host is `db.<ref>.supabase.co` (or its pooler) for that ref; the owner reads the host in the deployment dashboard and never shares the password;
+- `GET <production API>/ready` returns 200 and `GET /version` reports the deployed commit;
+- the database's own catalog holds the `amc` schema with live data (`select count(*) from amc.runs`, `select max(created_at) from amc.runs`).
+
+A paused project is never restored to find out. Restore only after the target is verified, as a decision of its own.
+
+**0b. Read its migration history, read only.** AMC keeps no ledger table, so history comes from the catalog:
+
+```bash
+python scripts/db_migrations.py detect --dsn postgresql://<user>@127.0.0.1:<port>/postgres --target "$READ_ONLY_TARGET_DSN"
+```
+
+`--dsn` is a local, disposable server, which replays the migrations to learn each one's signature (the stable keys it adds that survive to the final migration). `--target` is queried inside a `READ ONLY` transaction and is never migrated. Each migration reports `APPLIED`, `PENDING` or `PARTIAL`; stop on any `PARTIAL`. `test_migration_detect.py` proves the result at several prefixes and that the target's catalog is unchanged.
+
+**0c. Read-only preflight for the pending files:**
+
+```sql
+select count(*) as approvals from amc.approvals;
+select tenant_id, project_id, subject_ref, subject_type, count(*) as n
+  from amc.approvals
+ where status = 'pending' and subject_type in ('BRAND_OS_SOP_ADOPTION','BRAND_OS_SOURCE')
+ group by 1,2,3,4 having count(*) > 1;   -- rows the uniqueness migration will mark stale
+```
+
+
 1. Take a point-in-time backup and record its id. The rollbacks restore **schema only**. `20260824_amc_trust_kernel_v1.down.sql` carries `DATA CHANGE NOT REVERSED`, because its up migration rewrites rows; those rows come back only from the backup.
 2. CI is green on the exact commit being deployed, including `Backend on PostgreSQL (migrations + pytest)`, which runs the round-trip suite.
 3. Pick the upgrade path:
@@ -32,11 +59,20 @@ commit;
 
 `scripts/db_migrations.py apply` uses exactly these settings. If a lock times out, nothing is applied: retry outside peak load, never raise the timeout to force it through.
 
-All 19 current migrations are expand steps:
+The first 19 migrations are expand steps:
 - `create … if not exists`, new indexes, added nullable columns;
 - constraint widenings that only admit new values (`approval_stale_status_v1`, `durable_intent_uncertainty_v2`).
 
-None needs `CREATE INDEX CONCURRENTLY` today, because each index is created together with its new table. A future index on a populated table must use `CONCURRENTLY`, outside a transaction, as its own file.
+None of those 19 needs `CREATE INDEX CONCURRENTLY`, because each index is created together with its new table. A future index on a populated table must use `CONCURRENTLY`, outside a transaction, as its own file.
+
+**Review of the two newer files.**
+
+| File | What it does | Locks and data | Rollback |
+|---|---|---|---|
+| `20261121_amc_tenant_rls_v1.sql` | Adds `amc.current_tenant_id()`; enables (not forces) RLS on every `amc` table; adds `amc_tenant_isolation` on the 84 tables with `tenant_id`. | `ENABLE ROW LEVEL SECURITY` takes a brief `ACCESS EXCLUSIVE` lock on each table, all in one transaction. If any table is busy for 5 s, the whole file aborts and nothing changes. No data change. The owning backend role stays exempt, so behaviour is unchanged while `AMC_DB_RLS_MODE=off`. | Generated; restores the pre-RLS catalog exactly (tested). |
+| `20261122_amc_brand_os_pending_approval_unique_v1.sql` | Marks duplicate pending Brand OS approvals `stale` (keeps the earliest), then builds a partial unique index on `amc.approvals`. | **Deviates from the rule above.** The index is built on a populated table inside the transaction, not `CONCURRENTLY`: it holds a `SHARE` lock on `approvals` (writes wait) for one full scan. Acceptable when 0c shows a small `approvals` table. On a large one, split it into a data file plus a `CONCURRENTLY` file before applying. **Data change:** the duplicate rows become `stale` and are not restored by the rollback. | Generated; drops the index; staled rows come back only from the backup. |
+
+These two files do not switch on enforcement. Keep `AMC_DB_RLS_MODE=off` and the existing application role. `FORCE ROW LEVEL SECURITY` and scoped mode wait for every tenant-scoped route, background worker and cross-tenant operation to be handled and for staging isolation tests to pass (`docs/migrations/tenant-rls.md`).
 
 ## 2. Backfill (idempotent, chunked, tenant-scoped)
 
@@ -82,15 +118,11 @@ A rollback that restores a narrower `CHECK` constraint fails if rows already use
 
 - `amc` is revoked from the Supabase Data API roles. The suite proves `anon` and `authenticated` get `permission denied` on `amc.approvals`, `amc.runs` and `amc.tenant_memberships`.
 - Tenant and project authorization is server-side: verified Supabase JWT → `amc.tenant_memberships`. Browser-supplied tenant or reviewer values are never authoritative.
-- **Row-level security is not enabled, and no policy exists.** The mapping reports this as `rls_enabled: 0, policies: 0`. Adding RLS is a production security-design change and needs an owner decision. The design must say:
-  - which role the backend connects as;
-  - whether policies are `FORCE`d;
-  - how membership claims reach the session.
-
-  Until that decision, RLS tests are `BLOCKED`, not passed.
+- **Row-level security** is enabled (not forced) on every `amc` table by `20261121_amc_tenant_rls_v1.sql`, with `amc_tenant_isolation` on the 84 tables with `tenant_id`. The owning backend role is exempt, so it is defence in depth only until a non-owner role and scoped mode are activated. That activation is a separate owner decision, with its own staging gate (`docs/migrations/tenant-rls.md`). The PostgreSQL tests in `test_tenant_rls.py` and `test_tenant_rls_enforcement.py` cover it.
 
 ## 6. Post-apply verification
 
 1. `/ready` returns 200 (config valid and `ping_database()` succeeds).
 2. Run the PostgreSQL backend suite against a staging copy (`AMC_DATABASE_BACKEND=postgres`).
 3. Record the backup id, the applied files and the catalog digest from `acceptance/migration_mapping.json` in the release record.
+4. Re-run `scripts/db_migrations.py detect` against the target: every file must now be `APPLIED`.

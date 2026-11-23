@@ -1504,7 +1504,7 @@
     },
     {
       "path": "scripts/db_migrations.py",
-      "git_blob_sha": "8bedb07c8b24f7ce0695946b4969c643b2e03f28"
+      "git_blob_sha": "da3cc0b7820fb6f5a89f91ac07ac68a984e8b21c"
     },
     {
       "path": "services/langgraph/agency/sop/contracts.py",
