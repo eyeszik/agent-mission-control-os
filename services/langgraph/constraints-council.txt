@@ -100,7 +100,7 @@ ormsgpack==1.13.0
 overrides==7.7.0
 packaging==26.3
 pdfminer.six==20251230
-pdfplumber==0.11.9
+pdfplumber==0.11.10
 pendulum==3.3.0
 pillow==13.0.0
 platformdirs==4.14.5
