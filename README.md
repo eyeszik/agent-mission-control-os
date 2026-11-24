@@ -34,7 +34,7 @@ Runs execute *inside* durable **projects** (the Project OS, [`docs/project-os.md
 - Paid-media authorization ledger; no live spend executor is installed.
 - Canonical OpenAPI coverage for agency, approval, event, analytics, and operations APIs.
 - Vercel deployment manifests for frontend/backend project roots.
-- Next.js `16.3.8` (exact pin; patched for GHSA-vcvr-r3jv-pc5j) with an audited lockfile-pinned production dependency graph.
+- Next.js `16.4.5` (exact workspace pin, enforced by `scripts/verify_repository_invariants.py`) with lockfile-pinned production dependencies; dependency-audit results are recorded separately in CI.
 - **Browser E2E release gate** using pinned Playwright/Chromium against the real local Next.js + FastAPI stack.
 - CI production-readiness and critical-file integrity gates.
 - Deterministic **UI/UX design compiler** (`agency/ui_ux`) producing governed specs and `UI_UX` prompt packages, with one DTCG 2025.10 token compiler and frontend token gates — see [`docs/ui-ux-design-compiler.md`](docs/ui-ux-design-compiler.md).
@@ -201,3 +201,10 @@ The [v3 capability increment](docs/innovation/v3.md) adds exact generation inten
 canonical approval checks, a one-call local model adapter, and actual bounded lexical
 experiments with execution receipts and learning. Live model availability, research,
 general concept experimentation, production release and public HTTPS remain separate gates.
+
+### Optional Obscura research browser
+
+The opt-in Obscura integration adds authenticated, project-scoped supplied-HTML
+and public HTTPS extraction with bounded isolation and persisted execution
+proofs. Chromium remains the compatibility, creative-rendering and E2E browser.
+See [setup, controls, verification and limitations](docs/browser/README.md).

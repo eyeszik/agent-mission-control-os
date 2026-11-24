@@ -1,0 +1,462 @@
+{
+  "agm": {
+    "canonical": {
+      "bindings": {
+        "path": "services/langgraph/agency/operating_framework/bindings.py",
+        "sha256": "84aee2380fc0732d4ab290f889c4f60586aef5ac654e587e7758a6df44431d47"
+      },
+      "catalog": {
+        "catalog_id": "amc-agency-operating-framework-2026-2027",
+        "module_count": 24,
+        "module_ids": [
+          "AGM-01",
+          "AGM-02",
+          "AGM-03",
+          "AGM-04",
+          "AGM-05",
+          "AGM-06",
+          "AGM-07",
+          "AGM-08",
+          "AGM-09",
+          "AGM-10",
+          "AGM-11",
+          "AGM-12",
+          "AGM-13",
+          "AGM-14",
+          "AGM-15",
+          "AGM-16",
+          "AGM-17",
+          "AGM-18",
+          "AGM-19",
+          "AGM-20",
+          "AGM-21",
+          "AGM-22",
+          "AGM-23",
+          "AGM-24"
+        ],
+        "pin_matches_bytes": true,
+        "pinned_sha256": "9a2c30e9e65c2a3a6de70245cc47bbeeea2c695b965c09a143935d8ce3df501a",
+        "schema_version": "amc-agency-operating-framework/seed-v1",
+        "task_count": 295
+      },
+      "definition": {
+        "path": "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json",
+        "sha256": "9a2c30e9e65c2a3a6de70245cc47bbeeea2c695b965c09a143935d8ce3df501a"
+      },
+      "documentation": {
+        "path": "docs/agency-operating-framework.md",
+        "sha256": "431f7e409830713147202dd787d5a8781bc220bfe3e6e33e0f8740b311fe328c"
+      },
+      "loader": {
+        "path": "services/langgraph/agency/operating_framework/catalog.py",
+        "sha256": "0aa003468843e9a821187535b428e87e104e037c3cac0a67164755e46702f52f"
+      },
+      "schema": {
+        "path": "services/langgraph/agency/operating_framework/data/catalog.schema.json",
+        "sha256": "14dc999239f852c38eb67b5c9555a7b70611b98b0ebf7d967218ed323e678969"
+      }
+    },
+    "citing_files": {
+      "apps/web/components/framework/AssurancePanel.tsx": [
+        "AGM-10"
+      ],
+      "apps/web/components/framework/FrameworkView.tsx": [
+        "AGM-01"
+      ],
+      "apps/web/e2e/framework.spec.ts": [
+        "AGM-01",
+        "AGM-05"
+      ],
+      "docs/agency-operating-framework.md": [
+        "AGM-01",
+        "AGM-02",
+        "AGM-03",
+        "AGM-04",
+        "AGM-05",
+        "AGM-06",
+        "AGM-07",
+        "AGM-08",
+        "AGM-09",
+        "AGM-10",
+        "AGM-11",
+        "AGM-12",
+        "AGM-13",
+        "AGM-14",
+        "AGM-15",
+        "AGM-16",
+        "AGM-17",
+        "AGM-18",
+        "AGM-19",
+        "AGM-20",
+        "AGM-21",
+        "AGM-22",
+        "AGM-23",
+        "AGM-24"
+      ],
+      "docs/role-ownership-decisions.md": [
+        "AGM-11",
+        "AGM-16",
+        "AGM-17",
+        "AGM-22",
+        "AGM-23"
+      ],
+      "docs/ucpo/README.md": [
+        "AGM-08"
+      ],
+      "docs/ucpo/capability-gaps.md": [
+        "AGM-10"
+      ],
+      "packages/shared/tests/fixtures/agency-framework.json": [
+        "AGM-01",
+        "AGM-02",
+        "AGM-03",
+        "AGM-04",
+        "AGM-05",
+        "AGM-06",
+        "AGM-07",
+        "AGM-08",
+        "AGM-09",
+        "AGM-10",
+        "AGM-11",
+        "AGM-12",
+        "AGM-13",
+        "AGM-14",
+        "AGM-15",
+        "AGM-16",
+        "AGM-17",
+        "AGM-18",
+        "AGM-19",
+        "AGM-20",
+        "AGM-21",
+        "AGM-22",
+        "AGM-23",
+        "AGM-24"
+      ],
+      "services/langgraph/agency/operating_framework/bindings.py": [
+        "AGM-01",
+        "AGM-02",
+        "AGM-03",
+        "AGM-04",
+        "AGM-05",
+        "AGM-06",
+        "AGM-07",
+        "AGM-08",
+        "AGM-09",
+        "AGM-10",
+        "AGM-11",
+        "AGM-12",
+        "AGM-13",
+        "AGM-14",
+        "AGM-15",
+        "AGM-16",
+        "AGM-17",
+        "AGM-18",
+        "AGM-19",
+        "AGM-20",
+        "AGM-21",
+        "AGM-22",
+        "AGM-23",
+        "AGM-24"
+      ],
+      "services/langgraph/agency/operating_framework/data/catalog.seed-v1.json": [
+        "AGM-01",
+        "AGM-02",
+        "AGM-03",
+        "AGM-04",
+        "AGM-05",
+        "AGM-06",
+        "AGM-07",
+        "AGM-08",
+        "AGM-09",
+        "AGM-10",
+        "AGM-11",
+        "AGM-12",
+        "AGM-13",
+        "AGM-14",
+        "AGM-15",
+        "AGM-16",
+        "AGM-17",
+        "AGM-18",
+        "AGM-19",
+        "AGM-20",
+        "AGM-21",
+        "AGM-22",
+        "AGM-23",
+        "AGM-24"
+      ],
+      "services/langgraph/agency/ucpo/framework.py": [
+        "AGM-08",
+        "AGM-10",
+        "AGM-20",
+        "AGM-24"
+      ],
+      "services/langgraph/tests/test_agency_framework.py": [
+        "AGM-01",
+        "AGM-02",
+        "AGM-03",
+        "AGM-04",
+        "AGM-05",
+        "AGM-08",
+        "AGM-11",
+        "AGM-13",
+        "AGM-14",
+        "AGM-15",
+        "AGM-16",
+        "AGM-17",
+        "AGM-20",
+        "AGM-22",
+        "AGM-23",
+        "AGM-24",
+        "AGM-99"
+      ],
+      "services/langgraph/tests/test_agency_framework_archetypes.py": [
+        "AGM-01",
+        "AGM-02",
+        "AGM-03",
+        "AGM-04",
+        "AGM-05",
+        "AGM-06",
+        "AGM-13",
+        "AGM-14",
+        "AGM-16",
+        "AGM-17"
+      ],
+      "services/langgraph/tests/test_agency_framework_assurance.py": [
+        "AGM-01",
+        "AGM-06",
+        "AGM-07",
+        "AGM-10",
+        "AGM-99"
+      ],
+      "services/langgraph/tests/test_agency_framework_claims.py": [
+        "AGM-10"
+      ],
+      "services/langgraph/tests/test_agency_framework_contracts.py": [
+        "AGM-01",
+        "AGM-05",
+        "AGM-14",
+        "AGM-20"
+      ],
+      "services/langgraph/tests/test_agency_framework_release_candidate.py": [
+        "AGM-20"
+      ],
+      "services/langgraph/tests/test_agency_framework_slice.py": [
+        "AGM-01",
+        "AGM-06",
+        "AGM-08",
+        "AGM-10"
+      ],
+      "services/langgraph/tests/test_source_reconciliation.py": [
+        "AGM-05"
+      ],
+      "services/langgraph/tests/test_ucpo_api.py": [
+        "AGM-10",
+        "AGM-24"
+      ]
+    },
+    "competing_definitions": [],
+    "meaning": "Agency Operating Framework module (AGM-01..AGM-24) in the version-pinned catalog",
+    "precedence": [
+      "catalog.seed-v1.json bytes (SHA-256 pinned in catalog.py) are the definition",
+      "bindings.py maps modules to N3 roles and native owners; verify_bindings checks the live kernel",
+      "docs/agency-operating-framework.md is a description and is reconciled against the catalog"
+    ]
+  },
+  "problems": [],
+  "report_schemas": {
+    "claim_registry.json": [
+      {
+        "claim": "str",
+        "claim_id": "str",
+        "claim_type": "str",
+        "confidence": "float",
+        "required_action": "str",
+        "risk_if_wrong": "str",
+        "source_ref": "str",
+        "status": "str",
+        "tool_proof_ref": "str"
+      }
+    ],
+    "tool_proof_log.json": [
+      {
+        "confidence": "float",
+        "endpoint_or_resource": "str",
+        "http_code_or_status": "str",
+        "input_summary": "str",
+        "is_actual_call": "bool",
+        "limitations": [
+          "str"
+        ],
+        "operation": "str",
+        "output_summary": "str",
+        "timestamp_utc": "str",
+        "tool_name": "str",
+        "tool_proof_id": "str"
+      }
+    ],
+    "validation_report.json": {
+      "validation_report": {
+        "blocking_issues": [
+          "object"
+        ],
+        "checks": "object",
+        "final_validation_decision": "str",
+        "overall_confidence": "float",
+        "provenance": "object",
+        "runtime_schema_validation_executed": "bool",
+        "runtime_schema_validation_reason": "str",
+        "status": "str",
+        "validation_mode": "str",
+        "version": "str"
+      }
+    }
+  },
+  "required_paths": {
+    "agency_graph": {
+      "exists": true,
+      "path": "services/langgraph/graph/agency/build.py"
+    },
+    "agency_nodes": {
+      "exists": true,
+      "path": "services/langgraph/graph/agency/nodes.py"
+    },
+    "ci_supabase_shim": {
+      "exists": true,
+      "path": "supabase/ci/supabase_shim.sql"
+    },
+    "core_constants_py": {
+      "exists": true,
+      "path": "services/langgraph/core/constants.py"
+    },
+    "core_constants_ts": {
+      "exists": true,
+      "path": "packages/constants/src/index.ts"
+    },
+    "durable_runtime": {
+      "exists": true,
+      "path": "services/langgraph/agency/durable/fsm.py"
+    },
+    "execution_fabric": {
+      "exists": true,
+      "path": "services/langgraph/agency/execution_fabric/consumer.py"
+    },
+    "intake": {
+      "exists": true,
+      "path": "services/langgraph/agency/intake/__init__.py"
+    },
+    "invariants_gate": {
+      "exists": true,
+      "path": "scripts/verify_repository_invariants.py"
+    },
+    "n2_lifecycle": {
+      "exists": true,
+      "path": "services/langgraph/agency/kernel/lifecycle.py"
+    },
+    "n3_roles": {
+      "exists": true,
+      "path": "services/langgraph/agency/kernel/roles.py"
+    },
+    "openapi": {
+      "exists": true,
+      "path": "packages/shared/openapi/agent-mission-control.openapi.yaml"
+    },
+    "operating_framework_engine": {
+      "exists": true,
+      "path": "services/langgraph/agency/operating_framework/engine.py"
+    },
+    "postgres_migrations": {
+      "exists": true,
+      "path": "supabase/migrations"
+    },
+    "project_os": {
+      "exists": true,
+      "path": "services/langgraph/agency/project_os/__init__.py"
+    },
+    "sqlite_schema": {
+      "exists": true,
+      "path": "services/langgraph/persistence/sqlite_db.py"
+    },
+    "workflow_topology": {
+      "exists": true,
+      "path": "services/langgraph/agency/delivery/workflow.py"
+    }
+  },
+  "root_spec_note": "The root JSON/YAML bundle is a pre-implementation planning bundle (draft_until_verified); it is a reconciliation source, not runtime truth.",
+  "root_specs": {
+    "AGENTS.md": {
+      "exists": true,
+      "sha256": "6c34b5ae893e01cb3967017a2f334932811693dee85efa508292d899065f7a2d"
+    },
+    "CLAUDE.md": {
+      "exists": true,
+      "sha256": "5c3699b8c5dcac530b0716873200e66b2c4b0b98766ef2105d21e15a4914dd66"
+    },
+    "GEMINI.md": {
+      "exists": true,
+      "sha256": "e62a95f8176b8f09bd3db61b59194ad165e9e2815e05cb44c918b1f3f024767e"
+    },
+    "Makefile": {
+      "exists": true,
+      "sha256": "11d0ffb4e2694a007a89a4bde390845f442901cc97b4bd7ea2b707261cb7d830"
+    },
+    "README.md": {
+      "exists": true,
+      "sha256": "e646a76e475b422ab2a47850aa9562b3d70d3f3ac7e5cda522de9fce4af35de4"
+    },
+    "assumption_ledger.json": {
+      "exists": true,
+      "sha256": "fb28acfdeae41550337db748a5c40514addcd7c9ec281a5048a6711ced0422b9"
+    },
+    "claim_registry.json": {
+      "exists": true,
+      "sha256": "61b1b81e03bc0bc3304d27ab254d89aa3bd81f2b6b413b7b922af4516b7cf519"
+    },
+    "constraint_ledger.yaml": {
+      "exists": true,
+      "sha256": "0f9d83683e20ed172f61053d4fadd165475e3d279d3cf68751338ef67bc74adb"
+    },
+    "contract_architecture.json": {
+      "exists": true,
+      "sha256": "87ddf66ca6ecbc416d9f8ae135702a871974afd721c71c802c59d8bad3f67d18"
+    },
+    "execution_flow.json": {
+      "exists": true,
+      "sha256": "6e8b360a7611395e1e86c495a79152c0ee9fe68470c8108023492fccf5623838"
+    },
+    "execution_trace.schema.json": {
+      "exists": true,
+      "sha256": "d9bdc488e4bfbfbbe9a8406f35eb871b04559971312e98f6c303c459badc4e8d"
+    },
+    "fsm_spec.json": {
+      "exists": true,
+      "sha256": "3b7005e0aab469279685b757af0f80207631f0650152c51ec8facc390e670ab6"
+    },
+    "requirements_extract.json": {
+      "exists": true,
+      "sha256": "41046252a547c02326e9bd93f7e4d78f5033781de435c0def098e401b894cff8"
+    },
+    "role_orchestration.json": {
+      "exists": true,
+      "sha256": "cd2fa467dca98a15640d92e81474a8bad9a3e16c4248d429ebff390c1e61c6a2"
+    },
+    "system_layers.json": {
+      "exists": true,
+      "sha256": "9d55f9625c3c799547b13546d68c00d61b94b3004967c44d302eb6dd763ec407"
+    },
+    "task_dag.json": {
+      "exists": true,
+      "sha256": "6e3134ef0bb248e301d14f96dfd121ebd6cde86387e181baeabed35723f90024"
+    },
+    "tool_proof_log.json": {
+      "exists": true,
+      "sha256": "50e75fd8a41fd981d3a58f58331377bf4dcd40e7a9bc0796d9e76c322c9b2534"
+    },
+    "validation_report.json": {
+      "exists": true,
+      "sha256": "7870389fdd4f7e210f3d763b1abc77893d0d68a1a4dbc687ed1c390d2fa9e5de"
+    }
+  },
+  "schema": "amc-acceptance-discovery/v1",
+  "status": "BOUND"
+}
+discovery: BOUND (0 problems)

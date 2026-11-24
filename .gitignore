@@ -56,3 +56,6 @@ apps/web/test-results/
 
 # SQLite migration lock files (created by persistence/sqlite_db.py:_migration_lock)
 *.migrate.lock
+
+# Private, non-secret local runtime configuration
+.amc/

@@ -212,6 +212,44 @@ def _text_box(t: Any) -> tuple[float, float, float, float]:
     return x0, t.y - t.size * 0.8, x0 + width, t.y + t.size * 0.2
 
 
+def text_overlap(ir: CompositionIR) -> dict[str, Any]:
+    """Conservative preflight only; font geometry must also be measured after rendering."""
+    overlaps = []
+    for i, a in enumerate(ir.text):
+        ax0, ay0, ax1, ay1 = _text_box(a)
+        for b in ir.text[i + 1:]:
+            bx0, by0, bx1, by1 = _text_box(b)
+            if min(ax1, bx1) - max(ax0, bx0) > 1 and min(ay1, by1) - max(ay0, by0) > 1:
+                overlaps.append(f"{a.role}/{b.role}")
+    return _check("estimated_text_overlap", not overlaps,
+                  "estimated text boxes overlap: " + ", ".join(overlaps) if overlaps else
+                  "estimated text boxes do not overlap; rendered geometry still needs review")
+
+
+def rendered_text_layout(ir: CompositionIR, genome: CreativeGenome, *, margin: float, work: Any) -> dict[str, Any]:
+    """Check the actual text bounding boxes in the isolated local browser.
+
+    Text elements are constructed as textContent from the IR, never as inline
+    caller-supplied markup. This checks text/text and canvas bounds, not every
+    decorative primitive or the human judgment of visual quality.
+    """
+    from services.langgraph.agency.foundry import compose
+    from services.langgraph.agency.visual.browser import measure_svg_text
+
+    elements = [{"role": t.role, "text": t.text, "x": t.x, "y": t.y, "size": t.size, "weight": t.weight,
+                 "family": compose._family(genome, t.family),  # noqa: SLF001 - same font stack as SVG serialization
+                 "anchor": t.anchor, "tracking": round(t.tracking * t.size, 2), "rotation": t.rotation}
+                for t in ir.text]
+    result = measure_svg_text(elements, width=ir.width, height=ir.height, margin=margin, out_dir=work)
+    if result["status"] != "MEASURED":
+        return _check("rendered_text_layout", None, result.get("reason", "browser measurement unavailable"))
+    overlaps, outside = result["overlaps"], result["outside"]
+    ok = not overlaps and not outside
+    return _check("rendered_text_layout", ok,
+                  f"rendered boxes: {len(overlaps)} overlap(s), {len(outside)} outside safe area; "
+                  "decorative artwork and creative quality need human review")
+
+
 def safe_area(ir: CompositionIR, margin: float) -> dict[str, Any]:
     m = margin * min(ir.width, ir.height)
     outside = []
@@ -308,4 +346,5 @@ def min_reproduction(svg: str, *, sizes: tuple[int, ...] = (16, 24, 32), work: A
 
 __all__ = ["IDENTITY_DELIVERABLES", "OutputSpec", "PROVIDER_FOR", "color_system_svg", "crop_behavior",
            "min_reproduction", "monogram_svg", "optical_centre", "palette_check", "raster_metrics", "safe_area", "specs",
-           "stroke_consistency", "text_contrast", "transparency", "transparent_svg", "typography_specimen_svg"]
+           "stroke_consistency", "text_contrast", "text_overlap", "rendered_text_layout", "transparency", "transparent_svg",
+           "typography_specimen_svg"]

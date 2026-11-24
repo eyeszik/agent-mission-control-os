@@ -8,7 +8,10 @@ import { useProjectStore } from '../../lib/stores/projectStore';
 
 const VIEWS = ['Brief', 'Runs', 'Ideas', 'Lineage', 'Research', 'Evaluations', 'Experiments', 'Evidence', 'Reviews', 'Results', 'Configuration'] as const;
 type View = typeof VIEWS[number];
-const input = 'rounded-md border border-zinc-700 bg-zinc-950 p-2 text-zinc-100 focus-visible:ring-2 focus-visible:ring-emerald-400';
+// block w-full min-w-0 keeps textarea and select inside their column: a textarea
+// defaults to its `cols` width, which forced a 371px control into a 390px viewport
+// and pushed the page into horizontal scroll on phones.
+const input = 'block w-full min-w-0 rounded-md border border-zinc-700 bg-zinc-950 p-2 text-zinc-100 focus-visible:ring-2 focus-visible:ring-emerald-400';
 const button = 'rounded-md border border-zinc-700 px-3 py-2 text-sm text-zinc-100 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-emerald-400';
 
 function remember(project: string, run: string | null) {

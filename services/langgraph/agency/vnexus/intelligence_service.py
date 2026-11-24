@@ -10,7 +10,7 @@ from services.langgraph.persistence import vnexus as db
 from services.langgraph.security.auth import Principal
 
 from . import immune, marketing, prompt_genome, service
-from .creative_service import _graph
+from .creative_service import _graph, require_brand_graph_access
 from .genome import Scope
 from .graph import EdgeKind, NodeKind
 from .production import approved_projection, link_output
@@ -175,8 +175,10 @@ def regression(principal: Principal, brand_id: str, prompt_id: str, *, scope: Sc
 
 
 def scan(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str) -> dict[str, Any]:
-    brand = service.brand_for(principal, brand_id)
-    service.authorize(principal, brand["owner_project_id"])
+    # Scan observes artifacts referenced by the brand-wide graph. Until nodes
+    # carry enforceable project scope, a partial-project principal must not
+    # learn labels, references, findings or bytes from other projects.
+    require_brand_graph_access(principal, brand_id)
     resolution, layers = service.resolve_scope(principal, brand_id, scope=scope, scope_ref=scope_ref)
     findings = immune.genome_findings(resolution)
     if not layers:

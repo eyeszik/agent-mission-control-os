@@ -40,6 +40,20 @@ def _key(name: str) -> str:
     return f"foundry-{name}"
 
 
+def _head_after_lost_create(artifact_id: str, exc: Exception) -> dict:
+    """The head a concurrent creator just wrote. Re-raises ``exc`` unless it was that lost race."""
+    from services.langgraph.persistence.agency_kernel import get_artifact
+    from services.langgraph.persistence.projects import ProjectConflictError
+
+    sqlstate = getattr(exc, "sqlstate", None) or getattr(getattr(exc, "diag", None), "sqlstate", None)
+    unique = (isinstance(exc, ProjectConflictError) or sqlstate == "23505"
+              or (type(exc).__name__ == "IntegrityError" and "UNIQUE" in str(exc).upper()))
+    head = get_artifact(artifact_id) if unique else None
+    if head is None:
+        raise exc
+    return head
+
+
 def store(principal: Principal, project_id: str, name: str, data: bytes, *, mime: str, artifact_type: str, subtype: str,
           adapter: StorageAdapter, depends_on: tuple[str, ...] = (), v2: Optional[dict] = None,
           expect_head_hash: Optional[str] = None) -> dict:
@@ -66,12 +80,18 @@ def store(principal: Principal, project_id: str, name: str, data: bytes, *, mime
             and head.get("content_hash") != stored.content_hash:
         raise StaleArtifactVersionError(f"{artifact_id}: head changed since it was read")
     if head is None:
-        created = create_project_artifact(tenant_id=principal.tenant_id, project_id=project_id, actor=principal.user_id,
-                                          artifact_key=_key(name), artifact_type=artifact_type, adapter=adapter,
-                                          content_hash=stored.content_hash, storage_uri=stored.storage_uri, subtype=subtype,
-                                          v2=meta, depends_on=depends_on)
-        return {"artifact_id": created.artifact_id, "version": created.version, "content_hash": stored.content_hash,
-                "action": "created", "invalidated": []}
+        try:
+            created = create_project_artifact(tenant_id=principal.tenant_id, project_id=project_id, actor=principal.user_id,
+                                              artifact_key=_key(name), artifact_type=artifact_type, adapter=adapter,
+                                              content_hash=stored.content_hash, storage_uri=stored.storage_uri,
+                                              subtype=subtype, v2=meta, depends_on=depends_on)
+        except Exception as exc:  # noqa: BLE001 - only a lost create race is resolved here; anything else re-raises
+            head = _head_after_lost_create(artifact_id, exc)
+        else:
+            return {"artifact_id": created.artifact_id, "version": created.version, "content_hash": stored.content_hash,
+                    "action": "created", "invalidated": []}
+        if head.get("content_hash") != stored.content_hash:
+            raise StaleArtifactVersionError(f"{artifact_id}: created concurrently with other content")
     if head.get("content_hash") == stored.content_hash:
         return {"artifact_id": artifact_id, "version": int(head["version"]), "content_hash": stored.content_hash,
                 "action": "reused_unchanged", "invalidated": []}

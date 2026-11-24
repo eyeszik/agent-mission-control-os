@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
@@ -87,9 +88,15 @@ class LocalStorageAdapter:
         path = self._path(tenant_id, project_id, content_hash)
         if not path.is_file():
             path.parent.mkdir(parents=True, exist_ok=True)
-            tmp = path.with_name(f".{content_hash}.tmp")
-            tmp.write_bytes(data)
-            tmp.replace(path)
+            # A private temp name per writer: concurrent writers of the same content would otherwise share one
+            # temp file, and the second rename finds it already moved. The object is content-addressed, so
+            # whichever rename lands last leaves identical bytes.
+            tmp = path.with_name(f".{content_hash}.{uuid.uuid4().hex}.tmp")
+            try:
+                tmp.write_bytes(data)
+                tmp.replace(path)
+            finally:
+                tmp.unlink(missing_ok=True)
         return StoredObject(
             backend=self.backend,
             storage_uri=f"local://{tenant_id}/{project_id}/{content_hash}",

@@ -19,7 +19,7 @@ from services.langgraph.agency.kernel.ontology import ArtifactType, Capability
 from services.langgraph.agency.skills.dispatcher import Skill, register_skill
 from services.langgraph.integrations.zo import zo_available
 
-from .adapters import brand, cinematic, code_sandbox, innovation, seo, uiux
+from .adapters import brand, cinematic, code_sandbox, innovation, seo, uiux, obscura
 from .verifiers import Verdict
 
 
@@ -42,6 +42,7 @@ PROVIDERS: dict[str, Provider] = {
         Provider("ai_video", "PROVIDER", False, note="No AI video provider adapter is installed."),
         Provider("search_volume", "PROVIDER", False, note="No search-data provider is installed."),
         Provider("zo", "PROVIDER", True, zo_available, note="integrations/zo.py, AMC_ZO_MODE-gated."),
+        Provider("obscura", "LOCAL_TOOL", True, obscura.available, note="Disabled by default; offline isolated extraction only."),
         Provider("ffprobe", "LOCAL_TOOL", True, cinematic.ffprobe_available, note="FFmpeg's ffprobe, local binary."),
     )
 }
@@ -69,6 +70,7 @@ def sandbox_blocker(requirement: str) -> str | None:
 
 Validator = Callable[[dict[str, Any], dict[str, Any]], Verdict]
 VALIDATORS: dict[str, Validator] = {
+    "obscura_readback": obscura.verify,
     innovation.VALIDATOR_ID: innovation.verify_measurement,
     "svg_safety": brand.validate_svg,
     "palette_delta_e": brand.validate_palette,
@@ -94,6 +96,10 @@ def _spec(skill_id, capability, produces, handler, description, **meta) -> Skill
 FABRIC_SKILLS: dict[str, SkillSpec] = {
     s.skill.skill_id: s
     for s in (
+        _spec("obscura_extract", Capability.research_synthesis, ArtifactType.research_brief, obscura.run,
+              "Extract supplied untrusted HTML in a bounded network-disabled worker.",
+              provider_requirement="obscura", side_effect_class="DRAFT",
+              validator_ids=("obscura_readback",), timeout_class="FAST"),
         _spec(innovation.SKILL_ID, Capability.research_synthesis, ArtifactType.research_brief, innovation.lexical_measurement,
               "Actual bounded lexical-normalization counts over disclosed local input; no semantic or market claims.",
               side_effect_class="DRAFT", validator_ids=(innovation.VALIDATOR_ID,), timeout_class="FAST"),

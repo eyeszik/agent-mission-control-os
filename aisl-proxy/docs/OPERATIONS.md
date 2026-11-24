@@ -81,6 +81,7 @@ racing claim aborts its own transaction rather than funding a second transfer.
 | --- | --- | --- |
 | `ledger_unbalanced` | An entry group's debits ≠ credits. | Stop payouts. The books are corrupt; find the group and the code path that wrote it before transferring anything else. |
 | `conversion_split_violation` | A conversion violates the commission invariants. | `conversions_split_balance_check` must have been dropped. Restore the constraint, then correct the rows. |
+| `merchant_cannot_collect` | An enabled merchant charges commission but has no `stripe_account_id`. | No checkout against them can succeed — the platform cannot collect its cut, so the gateway refuses rather than transacting at a loss. Add the connected account with `npm run merchant`, or set their commission to zero. |
 | `orphaned_capture` | A `payment_intent.succeeded` / `charge.succeeded` matched no conversion. | Money moved that the gateway cannot attribute. Reconcile each event id against the Stripe dashboard; refund it if no order exists. |
 | `payout_in_flight_stale` | A payout claimed conversions over an hour ago and never resolved. | Check Stripe for a transfer carrying that payout's `idempotency_key`. If it landed, mark the row `PAID` by hand; if not, re-running with the same key is safe. **Never** release the claim without checking first. |
 
@@ -124,6 +125,22 @@ conversions and ledger entries intact. It is deliberately a flag, not a delete:
 the books must stay readable for a merchant that has stopped trading.
 
 Neither command prints credentials. Their output is safe to paste into a ticket.
+
+## Where the money physically sits
+
+The charge is a **direct charge** on the merchant's connected account, carrying
+an `application_fee_amount` equal to the whole commission. For a $100 sale at
+the 500/80 bps default:
+
+| Moment | Merchant balance | Platform balance | Agent balance |
+| --- | --- | --- | --- |
+| Charge confirmed | +$95.00 | +$5.00 | — |
+| Payout sweep runs | +$95.00 | +$0.80 | +$4.20 |
+
+The platform's $5.00 is not revenue — $4.20 of it is a liability to the agent,
+which `agent_payable` tracks until the sweep discharges it. Only the $0.80 is
+yours. **A platform balance that looks healthy between sweeps is mostly other
+people's money**; read `agent_payable` before spending it.
 
 ## Ledger accounts
 

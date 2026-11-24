@@ -689,3 +689,50 @@ def test_contract_mode_is_validated_by_production_config(monkeypatch):
     assert "AMC_CONTRACT_MODE must be off, shadow or enforce" in production_config_errors()
     monkeypatch.setenv("AMC_CONTRACT_MODE", "enforce")
     assert "AMC_CONTRACT_MODE must be off, shadow or enforce" not in production_config_errors()
+
+
+def test_finite_deliverable_declaration_is_bounded_and_never_self_proves_release():
+    from services.langgraph.agency.delivery.critic import result_hash
+
+    requirement = {"requirement_id": "social", "kind": "DELIVERABLE", "deliverable": {
+        "category": "SOCIAL_ASSET", "quantity": 6, "formats": ["image/png", "image/svg+xml"],
+        "acceptance_criteria": ["reviewed for legibility", "approved brand"]}}
+    contract = DeliveryContract.model_validate(_contract(requirement))
+    forged_inventory = {"inventory": [{"status": "PASSED", "count": 6, "approved": True}], "deliverable": requirement}
+    result = evaluate_contract(contract, forged_inventory, now=NOW)
+    assert result.dod == "ESCALATE"
+    assert result.results[0].verdict == "NOT_MEASURED"
+    assert result.results[0].reason == "VERIFIED_DELIVERABLE_INVENTORY_UNAVAILABLE"
+    digest = result_hash(result)
+    refs = _refs(("artifact", 1))
+    candidate = build_candidate_manifest(run_id="r", project_id="p", contract_hash=contract_hash(contract),
+        artifact_refs=refs, contract_result_refs=[digest], dependency_snapshot_hash="d")
+    graph = build_crg(contract=contract, result=result, candidate=candidate,
+        work_order_refs=[{"stage": "copywriting", "role_id": "copywriter", "justified_by": PIPELINE_INVARIANT}], dependency_edges=[])
+    assert graph["status"] == "PLAN_INCOMPLETE" and graph["incomplete_requirements"] == ["social"]
+    assert graph["requirements"][0]["artifact_versions"] == []  # do not fabricate requirement/artifact links
+    facts = ReleaseFacts(n2_failure_codes=(), contract_dod=result.dod, contract_result_hash=digest,
+        approval={"status": "resolved", "decision": "approve", "subject_hash": "subject"},
+        expected_approval_subject_hash="subject", sealed_candidate=candidate, current_artifact_refs=refs,
+        current_dependency_snapshot_hash="d", compile_blocked=False)
+    assert "CONTRACT_ESCALATED" in [block.code for block in evaluate_release_predicate(facts)]
+    for broken in (
+        {**requirement, "deliverable": {**requirement["deliverable"], "quantity": 0}},
+        {**requirement, "deliverable": {**requirement["deliverable"], "quantity": 101}},
+        {**requirement, "deliverable": {**requirement["deliverable"], "formats": []}},
+        {**requirement, "deliverable": {**requirement["deliverable"], "acceptance_criteria": [""]}},
+        {**requirement, "deliverable": {**requirement["deliverable"], "approved": True}},
+        {"requirement_id": "no-spec", "kind": "DELIVERABLE"},
+    ):
+        with pytest.raises(ValidationError):
+            DeliveryContract.model_validate(_contract(broken))
+    changed = DeliveryContract.model_validate(_contract({**requirement, "deliverable": {**requirement["deliverable"], "quantity": 7}}))
+    same_id = changed.model_copy(update={"contract_id": contract.contract_id})
+    assert contract_hash(same_id) != contract_hash(contract)
+
+
+def test_legacy_contract_hash_does_not_change_when_reloaded_with_new_schema():
+    legacy = DeliveryContract.model_validate({"contract_id": "legacy-fixture", "title": "Legacy",
+                                                "requirements": [{"requirement_id": "human", "kind": "HUMAN_REVIEW"}]})
+    assert contract_hash(legacy) == "e6575da52d0af10bd7fa7307c8ca7d3a5ee9bd36a852fcb9a915487b1b284cbf"
+    assert contract_hash(DeliveryContract.model_validate(legacy.model_dump(mode="json"))) == contract_hash(legacy)

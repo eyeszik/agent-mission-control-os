@@ -51,6 +51,42 @@ Token id prefix is `spt_`; the gateway does not validate the prefix, because the
 `merchant_shared_payment_token` credential type is explicitly allowed to carry a
 non-Stripe handle.
 
+## 1b. Commission collection via application fees — VERIFIED BY SHAPE
+
+A shared payment token is scoped to the seller, so the PaymentIntent is a
+**direct charge** on the merchant's connected account and the gross settles
+into the merchant's Stripe balance. Without an application fee the platform
+would finish every sale holding nothing while still owing the agent its
+commission — paying agents out of its own pocket.
+
+`application_fee_amount` on the PaymentIntent is Stripe's documented mechanism
+for routing a platform's cut out of a direct charge. The gateway sets it to the
+**whole commission**, not just the platform's slice, because the agent's payout
+is later transferred from that same platform balance:
+
+```
+application_fee_amount = commission_total = gross x commission_rate_bps / 10000
+merchant receives      = gross - application_fee_amount
+platform retains       = application_fee_amount - agent_payout = aisl_fee
+```
+
+Two Connect parameters are load-bearing and are asserted against the mock
+rather than a live account:
+
+- **`application_fee_amount`** is rejected by Stripe on a charge that is not on
+  a connected account. The gateway refuses that configuration up front
+  (`application_fee_without_connected_account`) rather than silently dropping
+  the commission, and reconciliation reports it as `merchant_cannot_collect`
+  before a buyer ever hits it.
+- **`refund_application_fee: true`** on the compensating refund returns the fee
+  when the sale is unwound. A refund must also carry `Stripe-Account`: a direct
+  charge does not exist from the platform account's point of view, so omitting
+  it looks up a missing PaymentIntent. The mock reproduces that 404.
+
+**Not verified against a live Stripe account.** Both parameters are exercised
+only against `tests/helpers/mockStripe.ts`, which enforces the connected-account
+requirement and the fee-below-amount bound.
+
 ## 2. Discovery manifest `/.well-known/acp/config.json` — BLUEPRINT, NOT UPSTREAM
 
 The blueprint's completion invariant fixes both the path and the exact document:

@@ -41,6 +41,9 @@ export class StripeDelegatedPaymentProcessor implements PaymentProcessor {
       throw AislError.badRequest('invalid_charge_amount', 'payment amount must be greater than zero');
     }
 
+    const account = stripeAccountOf(request.merchant);
+    const applicationFeeCents = this.resolveApplicationFee(request, account);
+
     const params = {
       amount: request.amountCents,
       currency: request.currency.toLowerCase(),
@@ -48,10 +51,10 @@ export class StripeDelegatedPaymentProcessor implements PaymentProcessor {
       payment_method_data: { shared_payment_granted_token: request.token } satisfies SharedPaymentTokenParams,
       description: request.description,
       metadata: request.metadata,
+      ...(applicationFeeCents > 0 ? { application_fee_amount: applicationFeeCents } : {}),
     } as unknown as Stripe.PaymentIntentCreateParams;
 
     const options: Stripe.RequestOptions = { idempotencyKey: request.idempotencyKey };
-    const account = stripeAccountOf(request.merchant);
     if (account) {
       // Direct charge on the seller's connected account: the SPT is scoped to
       // the seller's Stripe profile, so the charge must originate there.
@@ -81,19 +84,73 @@ export class StripeDelegatedPaymentProcessor implements PaymentProcessor {
       status: intent.status,
       amountCents: intent.amount_received > 0 ? intent.amount_received : intent.amount,
       currency: intent.currency.toUpperCase(),
+      applicationFeeCents,
+      stripeAccount: account,
     };
   }
 
-  async refund(request: { paymentIntentId: string; reason: string; stripeAccount?: string }): Promise<{
-    refundId: string;
-  }> {
+  /**
+   * How much of this charge the platform collects.
+   *
+   * A direct charge settles into the merchant's balance, so without an
+   * application fee the platform ends the transaction holding nothing while
+   * still owing the agent a commission — it would be paying agents out of its
+   * own pocket. The fee is therefore the whole commission, not just the
+   * platform's slice of it.
+   *
+   * On a charge created against the platform's own account the gross is
+   * already in the platform balance; an application fee there is meaningless
+   * (Stripe rejects it) and the merchant's net has to be settled separately.
+   */
+  private resolveApplicationFee(request: PaymentAuthorizationRequest, account: string | null): number {
+    const requested = request.applicationFeeCents;
+    if (!Number.isInteger(requested) || requested < 0) {
+      throw AislError.internal(
+        'invalid_application_fee',
+        `application fee must be a non-negative integer, received ${String(requested)}`,
+      );
+    }
+    if (requested === 0) return 0;
+
+    if (!account) {
+      // Refusing beats silently dropping the commission: a misconfigured
+      // merchant should fail loudly at the first checkout, not quietly cost
+      // the platform money on every sale.
+      throw AislError.internal(
+        'application_fee_without_connected_account',
+        `merchant ${request.merchant.id} has commission configured but no stripe_account_id; ` +
+          'a charge on the platform account cannot carry an application fee',
+      );
+    }
+    if (requested >= request.amountCents) {
+      throw AislError.internal(
+        'application_fee_exceeds_charge',
+        `application fee ${requested} is not less than the charge amount ${request.amountCents}`,
+      );
+    }
+    return requested;
+  }
+
+  async refund(request: {
+    paymentIntentId: string;
+    reason: string;
+    stripeAccount?: string | null;
+  }): Promise<{ refundId: string }> {
     const options: Stripe.RequestOptions = {};
     if (request.stripeAccount) {
+      // A direct charge does not exist from the platform account's point of
+      // view, so a refund that omits this looks up a missing PaymentIntent.
       options.stripeAccount = request.stripeAccount;
     }
     try {
       const refund = await this.stripe.refunds.create(
-        { payment_intent: request.paymentIntentId, metadata: { aisl_reason: request.reason } },
+        {
+          payment_intent: request.paymentIntentId,
+          metadata: { aisl_reason: request.reason },
+          // Unwinding the sale must unwind the commission too, or the platform
+          // keeps a fee on a transaction that did not happen.
+          ...(request.stripeAccount ? { refund_application_fee: true } : {}),
+        } as Stripe.RefundCreateParams,
         options,
       );
       return { refundId: refund.id };

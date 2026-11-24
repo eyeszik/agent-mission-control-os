@@ -28,7 +28,12 @@ def _env(monkeypatch, db_name):
 
 @pytest.fixture(autouse=True)
 def _isolated_database(tmp_path, monkeypatch):
-    """Replay state lives in the application database, so each test gets its own file."""
+    """These middleware fixtures use a separate SQLite file for each test.
+
+    Set the backend explicitly: under the PostgreSQL suite, changing DB_PATH
+    alone otherwise leaves these tests sharing the PostgreSQL replay table.
+    Drop any inherited DSN for the same reason.
+    """
     monkeypatch.setenv("AMC_DATABASE_BACKEND", "sqlite")
     monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.setattr(sqlite_db, "DB_PATH", str(tmp_path / "ingress.db"))

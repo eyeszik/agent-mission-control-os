@@ -1,0 +1,247 @@
+<testsuites id="" name="" tests="27" failures="2" skipped="5" errors="0" time="146.264537">
+<testsuite name="accessibility-smoke.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="1" failures="0" skipped="0" time="1.09" errors="0">
+<testcase name="Mission Control accessibility smoke › checks labels, keyboard order, reduced-motion preference, and measured heading contrast" classname="accessibility-smoke.spec.ts" time="1.09">
+</testcase>
+</testsuite>
+<testsuite name="agency-os.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="1" failures="0" skipped="0" time="3.805" errors="0">
+<testcase name="Agency OS: shell, client, plan preview, refused external effect, honest states" classname="agency-os.spec.ts" time="3.805">
+</testcase>
+</testsuite>
+<testsuite name="agency-smoke.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="4" failures="0" skipped="0" time="8.617" errors="0">
+<testcase name="Agent Mission Control local release smoke › renders the live Mission Control surface without browser errors" classname="agency-smoke.spec.ts" time="0.885">
+</testcase>
+<testcase name="Agent Mission Control local release smoke › reaches HITL through the real browser/API path with provider absence explicitly degraded" classname="agency-smoke.spec.ts" time="2.056">
+</testcase>
+<testcase name="Agent Mission Control local release smoke › surfaces stale approval lineage remediation on the real browser/API path" classname="agency-smoke.spec.ts" time="2.179">
+</testcase>
+<testcase name="Agent Mission Control local release smoke › renders artifact bindings and updates their versions after a real export revision" classname="agency-smoke.spec.ts" time="3.497">
+</testcase>
+</testsuite>
+<testsuite name="browser-extraction.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="3" failures="0" skipped="3" time="0.288" errors="0">
+<testcase name="local Obscura extracts supplied HTML and shows persisted proof" classname="browser-extraction.spec.ts">
+<properties>
+<property name="skip" value="Requires explicitly enabled, verified local container runtime">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="public HTTPS extraction produces retrieved evidence and persisted proof" classname="browser-extraction.spec.ts">
+<properties>
+<property name="skip" value="Explicit live public-web validation only">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="configured but unsupported runtime is refused visibly" classname="browser-extraction.spec.ts">
+<properties>
+<property name="skip" value="Explicit unsupported-host verification only">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="creative-rendering.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="1" failures="0" skipped="0" time="5.334" errors="0">
+<testcase name="creative workspace queues and cancels real scoped work without inventing verification" classname="creative-rendering.spec.ts" time="5.334">
+</testcase>
+</testsuite>
+<testsuite name="framework.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="4" failures="0" skipped="0" time="16.327" errors="0">
+<testcase name="Accessibility: the instantiation form passes axe and works from the keyboard" classname="framework.spec.ts" time="1.021">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+</testcase>
+<testcase name="Operating Framework: catalog, applicability, refused review and refs, assurance, audit" classname="framework.spec.ts" time="3.405">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+</testcase>
+<testcase name="Operating Framework: the API refuses to verify work that is not in review" classname="framework.spec.ts" time="0.079">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+</testcase>
+<testcase name="Accessibility: every framework state passes axe; keyboard, focus, announcements and motion hold" classname="framework.spec.ts" time="11.822">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+</testcase>
+</testsuite>
+<testsuite name="innovation-capabilities.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="2" failures="0" skipped="0" time="2.001" errors="0">
+<testcase name="mobile workbench reads actual lexical receipts without relabeling fixture inputs" classname="innovation-capabilities.spec.ts" time="1.239">
+</testcase>
+<testcase name="mobile live brief prepares a scoped blocked intent without calling a provider" classname="innovation-capabilities.spec.ts" time="0.762">
+</testcase>
+</testsuite>
+<testsuite name="innovation.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="1" failures="0" skipped="0" time="1.433" errors="0">
+<testcase name="UNBOUND persists a simulated cohort, controls, lineage and experiment drafts at mobile width" classname="innovation.spec.ts" time="1.433">
+</testcase>
+</testsuite>
+<testsuite name="missions.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="1" failures="0" skipped="0" time="2.63" errors="0">
+<testcase name="Mission Council: idea, dispatch, live timeline to the gate, accessible approval modal" classname="missions.spec.ts" time="2.63">
+</testcase>
+</testsuite>
+<testsuite name="tailwind-migration.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="1" failures="0" skipped="0" time="0.351" errors="0">
+<testcase name="Tailwind v4 emits semantic tokens and preserves migrated v3 sizes" classname="tailwind-migration.spec.ts" time="0.351">
+</testcase>
+</testsuite>
+<testsuite name="visuals.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="4" failures="1" skipped="1" time="67.439" errors="0">
+<testcase name="Compile intake explains disabled actions and passes axe" classname="visuals.spec.ts" time="2.666">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+</testcase>
+<testcase name="Compile explains pending and failed capability checks" classname="visuals.spec.ts" time="0.864">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+</testcase>
+<testcase name="Compile, refuse a stale edit, apply a current one, request approval" classname="visuals.spec.ts" time="63.909">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/visuals-Compile-refuse-a-s-1ccd0-urrent-one-request-approval-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/visuals-Compile-refuse-a-s-1ccd0-urrent-one-request-approval-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/visuals-Compile-refuse-a-s-1ccd0-urrent-one-request-approval-chromium/trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  [chromium] › visuals.spec.ts:76:1 › Compile, refuse a stale edit, apply a current one, request approval › the compiled asset renders and evaluates 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('img', { name: /Rendered preview of halden-kiln-poster/ })
+    Expected: visible
+    Timeout: 60000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('img', { name: /Rendered preview of halden-kiln-poster/ }) with timeout 60000ms
+      - waiting for getByRole('img', { name: /Rendered preview of halden-kiln-poster/ })
+
+
+      128 |
+      129 |   await test.step('the compiled asset renders and evaluates', async () => {
+    > 130 |     await expect(page.getByRole('img', { name: new RegExp(`Rendered preview of ${ASSET}`) })).toBeVisible({ timeout: 60_000 });
+          |                                                                                               ^
+      131 |     await expect(page.getByRole('heading', { name: 'Independent evaluation' })).toBeVisible();
+      132 |     await expect(page.getByRole('button', { name: 'Recompile from scene' })).toBeDisabled();
+      133 |     await expectNoAxeViolations(page, 'compiled asset');
+        at /home/user/agent-mission-control-os/apps/web/e2e/visuals.spec.ts:130:95
+        at /home/user/agent-mission-control-os/apps/web/e2e/visuals.spec.ts:129:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/visuals-Compile-refuse-a-s-1ccd0-urrent-one-request-approval-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/visuals-Compile-refuse-a-s-1ccd0-urrent-one-request-approval-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/visuals-Compile-refuse-a-s-1ccd0-urrent-one-request-approval-chromium/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ../test-results/visuals-Compile-refuse-a-s-1ccd0-urrent-one-request-approval-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Holds its layout at phone width" classname="visuals.spec.ts">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="vnexus-studio.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="1" failures="0" skipped="0" time="9.905" errors="0">
+<testcase name="VNEXUS studio: draft to review, honest refusals, keyboard navigation" classname="vnexus-studio.spec.ts" time="9.905">
+</testcase>
+</testsuite>
+<testsuite name="websites.spec.ts" timestamp="2026-11-20T02:54:01.167Z" hostname="chromium" tests="3" failures="1" skipped="1" time="24.746" errors="0">
+<testcase name="Brief intake explains disabled actions and passes axe" classname="websites.spec.ts" time="1.942">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+</testcase>
+<testcase name="Compile, build in the sandbox, and report the real outcome" classname="websites.spec.ts" time="22.804">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/websites-Compile-build-in--0fd90-and-report-the-real-outcome-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/websites-Compile-build-in--0fd90-and-report-the-real-outcome-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/websites-Compile-build-in--0fd90-and-report-the-real-outcome-chromium/trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeEnabled() failed" type="expect.toBeEnabled">
+<![CDATA[  [chromium] › websites.spec.ts:48:1 › Compile, build in the sandbox, and report the real outcome ──
+
+    Error: expect(locator).toBeEnabled() failed
+
+    Locator:  getByRole('button', { name: 'Open approval queue' })
+    Expected: enabled
+    Received: disabled
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toBeEnabled" getByRole('button', { name: 'Open approval queue' }) with timeout 10000ms
+      - waiting for getByRole('button', { name: 'Open approval queue' })
+        24 × locator resolved to <button disabled type="button" class="inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 bg-surface text-fg-strong border border-line-strong hover:bg-surface-raised focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-canvas ">Open approval queue</button>
+           - unexpected value "disabled"
+
+
+      67 |   if (await evidence.isVisible()) {
+      68 |     await expect(page.getByText(/Eligible for approval/)).toBeVisible();
+    > 69 |     await expect(page.getByRole('button', { name: 'Open approval queue' })).toBeEnabled();
+         |                                                                             ^
+      70 |   } else {
+      71 |     await expect(page.getByRole('button', { name: 'Open approval queue' })).toBeDisabled();
+      72 |   }
+        at /home/user/agent-mission-control-os/apps/web/e2e/websites.spec.ts:69:77
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/websites-Compile-build-in--0fd90-and-report-the-real-outcome-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/websites-Compile-build-in--0fd90-and-report-the-real-outcome-chromium/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/websites-Compile-build-in--0fd90-and-report-the-real-outcome-chromium/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ../test-results/websites-Compile-build-in--0fd90-and-report-the-real-outcome-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Holds its layout at phone width" classname="websites.spec.ts">
+<properties>
+<property name="serial" value="">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+</testsuites>

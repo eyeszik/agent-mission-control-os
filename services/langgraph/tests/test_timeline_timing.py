@@ -168,7 +168,7 @@ def test_cutdown_extending_a_master_shot_is_rejected():
 
 def test_cutdown_with_wrong_length_or_unknown_source_is_rejected():
     master = _reference_master()
-    short = _cutdown([_clip("w1", "message", 100, ref="m1"),
+    short = _cutdown([_clip("w1", "message", 100, ref="m4"),
                       _clip("w2", "cta", 100, overlap=12, ref="m6")])
     with pytest.raises(TimingError, match="target"):
         validate_cutdown(master, short, target_seconds="15")
@@ -198,3 +198,17 @@ def test_content_hash_is_deterministic_and_changes_with_timing():
         _clip(f"m{i + 1}", r, 160, overlap=12)
         for i, r in enumerate(["headline", "proof", "message", "proof", "cta"], start=1)])
     assert changed.content_hash() != a.content_hash()
+
+
+def test_cutdown_cannot_relabel_a_master_shot_as_message_or_cta():
+    master = _reference_master()
+    false_message = _cutdown([_clip("f1", "message", 154, ref="m1"),
+                              _clip("f2", "proof", 160, overlap=12, ref="m3"),
+                              _clip("f3", "cta", 160, overlap=12, ref="m6")])
+    with pytest.raises(TimingError, match="relabels"):
+        validate_cutdown(master, false_message, target_seconds="15")
+    false_cta = _cutdown([_clip("f1", "headline", 154, ref="m2"),
+                          _clip("f2", "proof", 160, overlap=12, ref="m3"),
+                          _clip("f3", "cta", 160, overlap=12, ref="m5")])
+    with pytest.raises(TimingError, match="relabels"):
+        validate_cutdown(master, false_cta, target_seconds="15")

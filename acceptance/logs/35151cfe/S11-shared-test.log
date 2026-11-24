@@ -1,0 +1,16 @@
+
+> @amc/shared@0.1.0 test /home/user/agent-mission-control-os/packages/shared
+> vitest run
+
+
+ RUN  v5.1.0 /home/user/agent-mission-control-os/packages/shared
+
+
+ Test Files  23 passed (23)
+      Tests  272 passed (272)
+   Start at  02:11:54
+   Duration  1.96s (import 63%, tests 24%, transform 11%, worker 3%)
+
+    Isolate  23 workers spawned · ~111ms startup each (spawn + environment, per file)
+             at least ~741ms faster with isolate: false — reuses workers across files instead of one per file
+

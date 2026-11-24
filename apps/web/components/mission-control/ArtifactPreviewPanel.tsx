@@ -172,7 +172,7 @@ export function ArtifactPreviewPanel() {
                     <button
                       onClick={() => handleResolve(approval.approval_id, approval.run_id, 'approve')}
                       disabled={isResolving || Boolean(trust?.compile_blocked)}
-                      data-testid="mc-release-btn"
+                      data-testid={`mc-release-btn-${approval.approval_id}`}
                       className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-sm text-xs font-medium transition-colors disabled:opacity-50"
                     >
                       {isResolving ? 'Working…' : 'Approve'}

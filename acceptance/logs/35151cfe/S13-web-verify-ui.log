@@ -1,0 +1,5 @@
+
+> @amc/web@0.1.0 verify:ui /home/user/agent-mission-control-os/apps/web
+> node scripts/verify-ui-ast.mjs
+
+ui-ast gate: no inline visual styles, arbitrary class colors, or duplicate AI provenance roots

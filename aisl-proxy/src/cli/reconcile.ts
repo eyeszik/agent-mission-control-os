@@ -2,6 +2,7 @@ import { loadEnv } from '../config/env.js';
 import { createDatabase } from '../db/pool.js';
 import { ConversionRepository } from '../db/repositories/conversions.js';
 import { PayoutRepository } from '../db/repositories/payouts.js';
+import { MerchantRepository } from '../db/repositories/merchants.js';
 import { ReconciliationService } from '../services/reconciliationService.js';
 import { numberArg, parseArgs } from './args.js';
 
@@ -27,6 +28,7 @@ async function main(): Promise<void> {
       db,
       conversions: new ConversionRepository(db),
       payouts: new PayoutRepository(db),
+      merchants: new MerchantRepository(db, env.AISL_CREDENTIAL_ENCRYPTION_KEY),
       thresholds: {
         ...(pendingSettlementMinutes !== undefined ? { pendingSettlementMinutes } : {}),
         ...(stalePayoutMinutes !== undefined ? { stalePayoutMinutes } : {}),

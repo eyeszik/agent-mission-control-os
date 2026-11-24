@@ -34,6 +34,25 @@ updates:
     open-pull-requests-limit: 5
     cooldown:
       default-days: 3
+    # crewai, crewai-cli and crewai-core 1.15.37 each require tomli~=2.0.2 (>=2.0.2,<2.1).
+    # A tomli >=2.1 pin in constraints-council.txt makes the council extra unresolvable
+    # (#270 broke the Mission Council and Dependency audit jobs this way). Patch releases
+    # within 2.0.x stay eligible. Remove this entry when the crewai pin moves past 2.0.
+    # googleapis-common-protos 1.76.0 requires protobuf>=6.33.5, but constraints-council.txt pins
+    # protobuf 5.29.6, so #268 made the council extra unresolvable again. Patch releases within
+    # 1.75.x stay eligible. Remove this entry when the protobuf pin moves to 6.x.
+    ignore:
+      - dependency-name: "tomli"
+        versions: [">=2.1"]
+      - dependency-name: "googleapis-common-protos"
+        versions: [">=1.76"]
+    # psycopg pins its compiled twin exactly (psycopg 3.3.8 requires psycopg-binary==3.3.8), so a
+    # bump of one without the other is unresolvable (#266). Update them in one pull request.
+    groups:
+      psycopg:
+        patterns:
+          - "psycopg"
+          - "psycopg-binary"
 
   # =========================================================
   # 3. PNPM — ROOT MONOREPO

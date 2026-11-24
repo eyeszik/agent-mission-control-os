@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shlex
 from uuid import uuid4
 
 import pytest
@@ -77,3 +78,43 @@ def gated_mission(monkeypatch, project_id: str, engine: str = "langgraph") -> di
     mission = client.get(f"/missions/{response.json()['mission_id']}").json()
     assert mission["status"] == "needs_approval", mission
     return mission
+
+
+def isolated_python(tmp_path) -> str:
+    """A private launcher for the running interpreter, safe to pin as an MCP command.
+
+    ``mcp_client`` refuses to start a server whose command is group- or world-writable,
+    because a writable interpreter cannot be trusted to still be the file that was
+    pinned. The interpreter a hosted CI runner supplies does not meet that bar --
+    GitHub's ``/opt/hostedtoolcache/.../bin/python`` is writable -- so a fixture that
+    pins ``sys.executable`` is admitted locally and rejected on CI, which is why these
+    MCP tests failed only on the runner.
+
+    The launcher lives in a ``0700`` directory and is a short script that execs this
+    exact interpreter, so:
+
+    * the pinned file is not writable by anyone else;
+    * the server still runs with this interpreter's own environment and packages,
+      which a copied binary would lose;
+    * it is byte-identical for the same interpreter path, so pinning is stable.
+
+    Skipping when the interpreter is writable would drop the MCP coverage on exactly
+    the machines that need it, so the launch is made valid rather than skipped.
+    """
+    import os
+    import stat
+    import sys
+    from pathlib import Path
+
+    if not (os.stat(sys.executable).st_mode & (stat.S_IWGRP | stat.S_IWOTH)):
+        return sys.executable
+
+    private = Path(tmp_path) / "mcp-interpreter"
+    private.mkdir(mode=0o700, exist_ok=True)
+    os.chmod(private, 0o700)
+    target = private / "python"
+    target.write_text(f'#!/bin/sh\nexec {shlex.quote(sys.executable)} "$@"\n', encoding="utf-8")
+    os.chmod(target, 0o755)
+    if os.stat(target).st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+        raise RuntimeError(f"could not create a private launcher for {sys.executable}")
+    return str(target)

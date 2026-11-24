@@ -63,5 +63,793 @@
       "JSON/YAML/CSV validity must be machine-validated after export if strict ingestion is required."
     ],
     "reason": "not_needed_for_planning_bundle"
+  },
+  {
+    "tool_proof_id": "TP-AC-001",
+    "tool_name": "bash",
+    "operation": "S01-check-env",
+    "endpoint_or_resource": "python check_env.py",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python check_env.py",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S01-check-env.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-002",
+    "tool_name": "bash",
+    "operation": "S02-verify_repository_invariants",
+    "endpoint_or_resource": "python scripts/verify_repository_invariants.py",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python scripts/verify_repository_invariants.py",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S02-verify_repository_invariants.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-003",
+    "tool_name": "bash",
+    "operation": "S02-verify_production_readiness",
+    "endpoint_or_resource": "python scripts/verify_production_readiness.py",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python scripts/verify_production_readiness.py",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S02-verify_production_readiness.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-004",
+    "tool_name": "bash",
+    "operation": "S02-verify_auth_bindings",
+    "endpoint_or_resource": "python scripts/verify_auth_bindings.py",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python scripts/verify_auth_bindings.py",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S02-verify_auth_bindings.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-005",
+    "tool_name": "bash",
+    "operation": "S02-verify_ontology_parity",
+    "endpoint_or_resource": "python scripts/verify_ontology_parity.py",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python scripts/verify_ontology_parity.py",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S02-verify_ontology_parity.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-006",
+    "tool_name": "bash",
+    "operation": "S02-verify_design_tokens",
+    "endpoint_or_resource": "python scripts/verify_design_tokens.py",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python scripts/verify_design_tokens.py",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S02-verify_design_tokens.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-007",
+    "tool_name": "bash",
+    "operation": "S02-verify_manifest",
+    "endpoint_or_resource": "python scripts/verify_manifest.py",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python scripts/verify_manifest.py",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S02-verify_manifest.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-008",
+    "tool_name": "bash",
+    "operation": "S02-verify_guidance_registry",
+    "endpoint_or_resource": "python scripts/verify_guidance_registry.py",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python scripts/verify_guidance_registry.py",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S02-verify_guidance_registry.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-009",
+    "tool_name": "bash",
+    "operation": "S03-discover",
+    "endpoint_or_resource": "python scripts/acceptance/discover.py",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python scripts/acceptance/discover.py",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S03-discover.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-010",
+    "tool_name": "bash",
+    "operation": "S03-reconcile",
+    "endpoint_or_resource": "python scripts/verify_source_reconciliation.py",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python scripts/verify_source_reconciliation.py",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S03-reconcile.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-011",
+    "tool_name": "bash",
+    "operation": "S04-compileall",
+    "endpoint_or_resource": "python -m compileall -q services/langgraph scripts",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python -m compileall -q services/langgraph scripts",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S04-compileall.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-012",
+    "tool_name": "bash",
+    "operation": "S04-pip-check",
+    "endpoint_or_resource": "python -m pip check",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python -m pip check",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S04-pip-check.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-013",
+    "tool_name": "bash",
+    "operation": "S10-pnpm-install",
+    "endpoint_or_resource": "pnpm install --frozen-lockfile",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm install --frozen-lockfile",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S10-pnpm-install.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-014",
+    "tool_name": "bash",
+    "operation": "S11-shared-build",
+    "endpoint_or_resource": "pnpm --filter @amc/shared build",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm --filter @amc/shared build",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S11-shared-build.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-015",
+    "tool_name": "bash",
+    "operation": "S11-shared-typecheck",
+    "endpoint_or_resource": "pnpm --filter @amc/shared typecheck",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm --filter @amc/shared typecheck",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S11-shared-typecheck.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-016",
+    "tool_name": "bash",
+    "operation": "S11-shared-test",
+    "endpoint_or_resource": "pnpm --filter @amc/shared test",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm --filter @amc/shared test",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S11-shared-test.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-017",
+    "tool_name": "bash",
+    "operation": "S12-packages-build",
+    "endpoint_or_resource": "pnpm --filter ./packages/* --filter !@amc/shared build",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm --filter ./packages/* --filter !@amc/shared build",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S12-packages-build.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-018",
+    "tool_name": "bash",
+    "operation": "S12-packages-typecheck",
+    "endpoint_or_resource": "pnpm --filter ./packages/* --filter !@amc/shared typecheck",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm --filter ./packages/* --filter !@amc/shared typecheck",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S12-packages-typecheck.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-019",
+    "tool_name": "bash",
+    "operation": "S12-packages-test",
+    "endpoint_or_resource": "pnpm --filter ./packages/* --filter !@amc/shared test",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm --filter ./packages/* --filter !@amc/shared test",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S12-packages-test.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-020",
+    "tool_name": "bash",
+    "operation": "S13-web-typecheck",
+    "endpoint_or_resource": "pnpm --filter @amc/web typecheck",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm --filter @amc/web typecheck",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S13-web-typecheck.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-021",
+    "tool_name": "bash",
+    "operation": "S13-web-test",
+    "endpoint_or_resource": "pnpm --filter @amc/web test",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm --filter @amc/web test",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S13-web-test.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-022",
+    "tool_name": "bash",
+    "operation": "S13-web-verify-ui",
+    "endpoint_or_resource": "pnpm --filter @amc/web verify:ui",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm --filter @amc/web verify:ui",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S13-web-verify-ui.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-023",
+    "tool_name": "bash",
+    "operation": "S14-compile-tokens-check",
+    "endpoint_or_resource": "python compile_tokens.py --check",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python compile_tokens.py --check",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S14-compile-tokens-check.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-024",
+    "tool_name": "bash",
+    "operation": "S16-db-migration-rls-suite",
+    "endpoint_or_resource": "python -m pytest services/langgraph/tests/test_migration_roundtrip.py -q -rs -p no:cacheprovider --junitxml=/tmp/claude-0/-home-user-agent-mission-control-os/af2d6589-53bf-56b8-bd21-2a1794bb5fe8/scratchpad/p4/junit-db.xml",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts={'total': 14, 'passed': 14}",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python -m pytest services/langgraph/tests/test_migration_roundtrip.py -q -rs -p no:cacheprovider --junitxml=/tmp/claude-0/-home-user-agent-mission-control-os/af2d6589-53bf-56b8-bd21-2a1794bb5fe8/scratchpad/p4/junit-db.xml",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S16-db-migration-rls-suite.log",
+    "junit_path": "acceptance/logs/35151cfe/junit-db.xml"
+  },
+  {
+    "tool_proof_id": "TP-AC-025",
+    "tool_name": "bash",
+    "operation": "S17-sop-recon-suites",
+    "endpoint_or_resource": "python -m pytest services/langgraph/tests/test_sop_contracts.py services/langgraph/tests/test_source_reconciliation.py -q -p no:cacheprovider --junitxml=/tmp/claude-0/-home-user-agent-mission-control-os/af2d6589-53bf-56b8-bd21-2a1794bb5fe8/scratchpad/p4/junit-sop-recon.xml",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts={'total': 19, 'passed': 19}",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "python -m pytest services/langgraph/tests/test_sop_contracts.py services/langgraph/tests/test_source_reconciliation.py -q -p no:cacheprovider --junitxml=/tmp/claude-0/-home-user-agent-mission-control-os/af2d6589-53bf-56b8-bd21-2a1794bb5fe8/scratchpad/p4/junit-sop-recon.xml",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S17-sop-recon-suites.log",
+    "junit_path": "acceptance/logs/35151cfe/junit-sop-recon.xml"
+  },
+  {
+    "tool_proof_id": "TP-AC-026",
+    "tool_name": "bash",
+    "operation": "S13-web-build",
+    "endpoint_or_resource": "pnpm --filter @amc/web build",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=0 status=PASSED counts=None",
+    "http_code_or_status": "PASSED",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Local execution in an ephemeral container."
+    ],
+    "command": "pnpm --filter @amc/web build",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 0,
+    "log_path": "acceptance/logs/35151cfe/S13-web-build.log",
+    "junit_path": null
+  },
+  {
+    "tool_proof_id": "TP-AC-027",
+    "tool_name": "bash",
+    "operation": "S15-browser-e2e",
+    "endpoint_or_resource": "pnpm --filter @amc/web test:e2e",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=1 status=FAILED counts={'total': 27, 'passed': 20, 'skipped': 5, 'failed': 2}",
+    "http_code_or_status": "FAILED",
+    "is_actual_call": true,
+    "confidence": 0.9,
+    "limitations": [
+      "Every failure is environment-caused (see failures_root_cause); none is in a file this candidate changed. The same suite PASSED in hosted CI at this exact SHA (see hosted_ci)."
+    ],
+    "command": "pnpm --filter @amc/web test:e2e",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 1,
+    "log_path": "acceptance/logs/35151cfe/S15-browser-e2e.log",
+    "junit_path": "acceptance/logs/35151cfe/junit-e2e.xml"
+  },
+  {
+    "tool_proof_id": "TP-AC-028",
+    "tool_name": "bash",
+    "operation": "S20-backend-sqlite-full-pytest",
+    "endpoint_or_resource": "python -m pytest services/langgraph/tests -q -rf --junitxml=...",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=1 status=FAILED counts={'total': 2630, 'passed': 2500, 'skipped': 91, 'failed': 39}",
+    "http_code_or_status": "FAILED",
+    "is_actual_call": true,
+    "confidence": 0.9,
+    "limitations": [
+      "Every failure is environment-caused (see failures_root_cause); none is in a file this candidate changed. The same suite PASSED in hosted CI at this exact SHA (see hosted_ci)."
+    ],
+    "command": "python -m pytest services/langgraph/tests -q -rf --junitxml=...",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 1,
+    "log_path": "acceptance/logs/35151cfe/pytest-backend-sqlite.log",
+    "junit_path": "acceptance/logs/35151cfe/junit-backend-sqlite.xml"
+  },
+  {
+    "tool_proof_id": "TP-AC-029",
+    "tool_name": "bash",
+    "operation": "S20-backend-postgres-full-pytest",
+    "endpoint_or_resource": "python -m pytest services/langgraph/tests -q -rf --junitxml=...",
+    "timestamp_utc": null,
+    "input_summary": "cwd=/home/user/agent-mission-control-os git_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "exit_code=1 status=FAILED counts={'total': 2630, 'passed': 2519, 'skipped': 72, 'failed': 39}",
+    "http_code_or_status": "FAILED",
+    "is_actual_call": true,
+    "confidence": 0.9,
+    "limitations": [
+      "Every failure is environment-caused (see failures_root_cause); none is in a file this candidate changed. The same suite PASSED in hosted CI at this exact SHA (see hosted_ci)."
+    ],
+    "command": "python -m pytest services/langgraph/tests -q -rf --junitxml=...",
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+    "exit_code": 1,
+    "log_path": "acceptance/logs/35151cfe/pytest-backend-postgres.log",
+    "junit_path": "acceptance/logs/35151cfe/junit-backend-postgres.xml"
+  },
+  {
+    "tool_proof_id": "TP-AC-030",
+    "tool_name": "github.check_runs",
+    "operation": "CodeQL",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/runs/136032445811",
+    "timestamp_utc": "2026-11-20T02:12:00Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-031",
+    "tool_name": "github.check_runs",
+    "operation": "Browser E2E (local degraded HITL)",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226808",
+    "timestamp_utc": "2026-11-20T02:15:05Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-032",
+    "tool_name": "github.check_runs",
+    "operation": "Rendering adapters + video + remote protocol",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226598",
+    "timestamp_utc": "2026-11-20T02:14:40Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-033",
+    "tool_name": "github.check_runs",
+    "operation": "Backend (compile + invariants + pytest)",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226500",
+    "timestamp_utc": "2026-11-20T02:29:12Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-034",
+    "tool_name": "github.check_runs",
+    "operation": "Mission Council engines (CrewAI + AutoGen + MCP, offline)",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226408",
+    "timestamp_utc": "2026-11-20T02:12:50Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-035",
+    "tool_name": "github.check_runs",
+    "operation": "Backend on PostgreSQL (migrations + pytest)",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226403",
+    "timestamp_utc": "2026-11-20T02:44:35Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-036",
+    "tool_name": "github.check_runs",
+    "operation": "Obscura isolated extraction (offline fixtures)",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226394",
+    "timestamp_utc": "2026-11-20T02:12:21Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-037",
+    "tool_name": "github.check_runs",
+    "operation": "Dependency audit",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226356",
+    "timestamp_utc": "2026-11-20T02:13:20Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-038",
+    "tool_name": "github.check_runs",
+    "operation": "Frontend (contracts + typecheck + test + build)",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226340",
+    "timestamp_utc": "2026-11-20T02:12:10Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-039",
+    "tool_name": "github.check_runs",
+    "operation": "UCPO sandboxed build + browser QA (must not skip)",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226019",
+    "timestamp_utc": "2026-11-20T02:23:19Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-040",
+    "tool_name": "github.check_runs",
+    "operation": "Analyze (python)",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658985354/job/136032210873",
+    "timestamp_utc": "2026-11-20T02:12:20Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-041",
+    "tool_name": "github.check_runs",
+    "operation": "Analyze (actions)",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658985354/job/136032210670",
+    "timestamp_utc": "2026-11-20T02:12:07Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
+  },
+  {
+    "tool_proof_id": "TP-AC-042",
+    "tool_name": "github.check_runs",
+    "operation": "Analyze (javascript-typescript)",
+    "endpoint_or_resource": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658985354/job/136032210449",
+    "timestamp_utc": "2026-11-20T02:12:18Z",
+    "input_summary": "head_sha=35151cfe52e9a1446a985395ac745e3356c254d5",
+    "output_summary": "conclusion=success",
+    "http_code_or_status": "success",
+    "is_actual_call": true,
+    "confidence": 1.0,
+    "limitations": [
+      "Hosted CI result read through the GitHub API; logs live in GitHub Actions."
+    ],
+    "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5"
   }
 ]
