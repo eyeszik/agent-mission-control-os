@@ -15,7 +15,7 @@ Machine-readable evidence: [`evidence/mcp-integration-2026-11/`](evidence/mcp-in
 | Tool authority | `agency/council/gateway.py` `invoke`: allowlist → seat scopes → execution bounds → schema → Ed25519 capability → approval (non-READ) → timeout → redacted audit |
 | Approvals / audit | `approvals` rows decided on `/approvals/{id}/decide`; `council_tool_audits` via `persistence/council.py` |
 | CI | `backend-council` job installs `[dev,council]` with `constraints-council.txt` (`mcp==1.30.0`) |
-| Gates at base | 5/7 pass; `verify_repository_invariants` and `verify_manifest` **fail at base** (DEF-2) |
+| Gates at base | 5/7 pass; `verify_repository_invariants` and `verify_manifest` **fail at base** (DEF-2; fixed on `master` by #301, merged into this branch: 7/7 pass) |
 | Council MCP tests at base | 23/23 pass on `mcp 1.30.0`; **3 fail on `mcp 2.3.0`** (DEF-1) |
 
 Subsystem classification relevant to MCP: gateway + MCP client `IMPLEMENTED_VERIFIED` (tests above); HTTP/SSE MCP
@@ -128,7 +128,7 @@ connector or MCP server, which seats or operators can use when deciding whether 
 |---|---|---|---|
 | DEF-1 | DEPENDENCY_CONFLICT | **Fixed** | `mcp>=1.28,<3` admitted 2.x, under which `call_tool(read_timeout_seconds=timedelta)` raises `TypeError`; every MCP call failed as `MCP_CALL_FAILED`. Now `<2`, and an installed 2.x lists no MCP tool |
 | DEF-3 | SECURITY_FAILURE (audit gap) | **Fixed** | A violation of an operator-declared MCP `input_schema` raised raw `jsonschema.ValidationError` out of `invoke`: untyped, **unaudited**. Now `SCHEMA_INVALID` + DENIED audit. Regression: 4 parametrised cases failed before the fix |
-| DEF-2 | AUTHORIZATION_BLOCKER (pre-existing) | **Not fixed — needs a human** | Commit `7ac18f8` (dependabot) bumped Next.js 16.4.5→16.4.6 without updating the audited-version invariant or `manifest.json`. Fixing it asserts an audit of 16.4.6; that decision is not this change's to make. `apps/web/package.json` and `pnpm-lock.yaml` (the only two drifted manifest entries) were deliberately **not** re-pinned |
+| DEF-2 | AUTHORIZATION_BLOCKER (pre-existing) | **Resolved upstream by the repository owner in #301** (merged into this branch); not changed here | Commit `7ac18f8` (dependabot) bumped Next.js 16.4.5→16.4.6 without updating the audited-version invariant or `manifest.json`. Fixing it asserts an audit of 16.4.6; that decision is not this change's to make. `apps/web/package.json` and `pnpm-lock.yaml` (the only two drifted manifest entries) were deliberately **not** re-pinned |
 
 ## D09 — Test evidence
 
@@ -141,7 +141,7 @@ connector or MCP server, which seats or operators can use when deciding whether 
 | Same MCP files on unsupported `mcp 2.3.0` | 29 PASS, 24 SKIP, 0 FAIL (base: 3 FAIL) |
 | Full backend suite | 2566 PASS / 19 FAIL / 164 SKIP; base 2536 / 19 / 164 — **identical failure set**, all reproduced on a clean base worktree (Python 3.13 Unicode parity fixtures, host ffprobe, DEF-2) |
 | Live API enable → rollback | PASS: 3 tools listed, then none |
-| Verifier gates | 5/7 PASS; 2 BLOCKED by pre-existing DEF-2 only |
+| Verifier gates | 7/7 PASS after merging `master` (#301 resolved DEF-2); before the merge 5/7, the other 2 failing only on DEF-2 |
 
 ## D10 — Operation and rollback
 

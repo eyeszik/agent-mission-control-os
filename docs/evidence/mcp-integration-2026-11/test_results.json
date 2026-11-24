@@ -71,10 +71,10 @@
    "test_id": "GATES",
    "command": "scripts/verify_*.py (7)",
    "expected": "5 pass; 2 fail only on DEF-2 as at base",
-   "observed": "5 pass; invariants+manifest fail only on apps/web/package.json, pnpm-lock.yaml (Next.js 16.4.6)",
-   "status": "BLOCKED",
-   "evidence": "identical to base; needs a human audit decision",
-   "limitation": "DEF-2 is pre-existing on master"
+   "observed": "before merging master: 5 pass, 2 fail only on DEF-2; after merging master (#301, owner's fix for DEF-2): 7/7 pass",
+   "status": "PASS",
+   "evidence": "DEF-2 resolved upstream by #301, not by this change",
+   "limitation": ""
   },
   {
    "test_id": "LINT",
@@ -93,6 +93,15 @@
    "status": "NOT_TESTED",
    "evidence": "CI job on the PR",
    "limitation": "no local Postgres"
+  },
+  {
+   "test_id": "REG-AFTER-MERGE",
+   "command": "pytest test_mcp_paara_profile test_council_gateway test_capability_tokens test_manifest_regressions (merged tree)",
+   "expected": "pass",
+   "observed": "54 passed",
+   "status": "PASS",
+   "evidence": "test_manifest_regressions was a baseline failure (DEF-2) and passes after #301",
+   "limitation": ""
   }
  ],
  "baseline_failures": [
