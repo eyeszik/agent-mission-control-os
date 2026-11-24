@@ -1,0 +1,24 @@
+{
+  "name": "@amc/guidance",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Guidance registry, deterministic router and claims-audit prompt compiler, parity-checked against services/langgraph/agency/guidance and prompt_compiler.py. Stops at PROMPT_PACKAGE_READY; generates nothing.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@amc/canonical": "workspace:*",
+    "@amc/kernel": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "^5.1.1"
+  }
+}

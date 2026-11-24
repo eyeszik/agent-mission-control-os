@@ -102,6 +102,22 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
 
+  packages/compiled:
+    dependencies:
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
   packages/config:
     dependencies:
       '@amc/constants':
@@ -192,6 +208,25 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
 
+  packages/design-mode:
+    dependencies:
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@amc/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
   packages/design-tokens:
     dependencies:
       '@amc/canonical':
@@ -222,6 +257,22 @@ importers:
       zod:
         specifier: ^4.6.7
         version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/guidance:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
     devDependencies:
       typescript:
         specifier: 7.0.2
@@ -261,6 +312,53 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
 
+  packages/project-os:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/design-tokens':
+        specifier: workspace:*
+        version: link:../design-tokens
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@amc/pii':
+        specifier: workspace:*
+        version: link:../pii
+      '@amc/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/prompt-families:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/guidance':
+        specifier: workspace:*
+        version: link:../guidance
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
   packages/shared:
     dependencies:
       zod:
@@ -286,6 +384,85 @@ importers:
         specifier: workspace:*
         version: link:../logger
     devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/ui-ux:
+    dependencies:
+      '@amc/design-tokens':
+        specifier: workspace:*
+        version: link:../design-tokens
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@amc/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/vnexus:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+    devDependencies:
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/vnexus-brandbook:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+    devDependencies:
+      '@amc/shared':
+        specifier: workspace:*
+        version: link:../shared
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(vite@8.0.14(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  packages/vnexus-directions:
+    dependencies:
+      '@amc/canonical':
+        specifier: workspace:*
+        version: link:../canonical
+      '@amc/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@amc/vnexus-brandbook':
+        specifier: workspace:*
+        version: link:../vnexus-brandbook
+    devDependencies:
+      '@amc/shared':
+        specifier: workspace:*
+        version: link:../shared
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -1545,22 +1722,6 @@ packages:
     resolution: {integrity: sha512-RVHEU9/Pp1Fnjr/MpAJsZoADukCKhfIi15OunEYiGktIkYLkPVvC1sioWolGDS7XByMTx9m/IGbro0Js13zhnQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.33:
-    resolution: {integrity: sha512-RVHEU9/Pp1Fnjr/MpAJsZoADukCKhfIi15OunEYiGktIkYLkPVvC1sioWolGDS7XByMTx9m/IGbro0Js13zhnQ==}
-    engines: {node: ^10 || ^12 || >=14}
-
-  postcss@8.5.33:
-    resolution: {integrity: sha512-RVHEU9/Pp1Fnjr/MpAJsZoADukCKhfIi15OunEYiGktIkYLkPVvC1sioWolGDS7XByMTx9m/IGbro0Js13zhnQ==}
-    engines: {node: ^10 || ^12 || >=14}
-
-  postcss@8.5.33:
-    resolution: {integrity: sha512-RVHEU9/Pp1Fnjr/MpAJsZoADukCKhfIi15OunEYiGktIkYLkPVvC1sioWolGDS7XByMTx9m/IGbro0Js13zhnQ==}
-    engines: {node: ^10 || ^12 || >=14}
-
-  postcss@8.5.33:
-    resolution: {integrity: sha512-RVHEU9/Pp1Fnjr/MpAJsZoADukCKhfIi15OunEYiGktIkYLkPVvC1sioWolGDS7XByMTx9m/IGbro0Js13zhnQ==}
-    engines: {node: ^10 || ^12 || >=14}
-
   react-dom@19.3.1:
     resolution: {integrity: sha512-Y0bARz53lhEC1NMCASs0/j+faB/zqt3R8hpvg1e8+61ZVJ4UL0UdC4cBbXfZMcIuhrfgeILTLe+ZeBCavQPtKQ==}
     peerDependencies:
@@ -1578,12 +1739,6 @@ packages:
   react@19.3.1:
     resolution: {integrity: sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==}
     engines: {node: '>=0.10.0'}
-
-  remotion@4.0.543:
-    resolution: {integrity: sha512-p3PS2+ZsaFBp1KiyiTsMDyLM9x7csvkCaFQN3DLSwuye+BFht+eLT7hvp2R3rvhQ7pa0SHPZwcYdOEKS1XbqIA==}
-    peerDependencies:
-      react: '>=16.8.0'
-      react-dom: '>=16.8.0'
 
   remotion@4.0.545:
     resolution: {integrity: sha512-8WHeKZWm4wHsji45eeDJbXdnvecljCP+YR9xv71On1xNrrJzk1Y2YvwqVPAdRXebff+CZw3555AABPw8lzV1Yw==}
@@ -1615,22 +1770,6 @@ packages:
     peerDependenciesMeta:
       '@types/node':
         optional: true
-
-  source-map-js@1.2.4:
-    resolution: {integrity: sha512-J7ZjMvHd9O1fcT/5V09QWaaSl2BbWx3F6O08spde82Namf9UB0GxRVIPiNbVsdKkoizHiSpTodo3vp2bAy91MA==}
-    engines: {node: '>=6.0.0'}
-
-  source-map-js@1.2.4:
-    resolution: {integrity: sha512-J7ZjMvHd9O1fcT/5V09QWaaSl2BbWx3F6O08spde82Namf9UB0GxRVIPiNbVsdKkoizHiSpTodo3vp2bAy91MA==}
-    engines: {node: '>=6.0.0'}
-
-  source-map-js@1.2.4:
-    resolution: {integrity: sha512-J7ZjMvHd9O1fcT/5V09QWaaSl2BbWx3F6O08spde82Namf9UB0GxRVIPiNbVsdKkoizHiSpTodo3vp2bAy91MA==}
-    engines: {node: '>=6.0.0'}
-
-  source-map-js@1.2.4:
-    resolution: {integrity: sha512-J7ZjMvHd9O1fcT/5V09QWaaSl2BbWx3F6O08spde82Namf9UB0GxRVIPiNbVsdKkoizHiSpTodo3vp2bAy91MA==}
-    engines: {node: '>=6.0.0'}
 
   source-map-js@1.2.4:
     resolution: {integrity: sha512-J7ZjMvHd9O1fcT/5V09QWaaSl2BbWx3F6O08spde82Namf9UB0GxRVIPiNbVsdKkoizHiSpTodo3vp2bAy91MA==}
@@ -2777,30 +2916,6 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.4
 
-  postcss@8.5.33:
-    dependencies:
-      nanoid: 3.3.20
-      picocolors: 1.1.1
-      source-map-js: 1.2.4
-
-  postcss@8.5.33:
-    dependencies:
-      nanoid: 3.3.20
-      picocolors: 1.1.1
-      source-map-js: 1.2.4
-
-  postcss@8.5.33:
-    dependencies:
-      nanoid: 3.3.20
-      picocolors: 1.1.1
-      source-map-js: 1.2.4
-
-  postcss@8.5.33:
-    dependencies:
-      nanoid: 3.3.20
-      picocolors: 1.1.1
-      source-map-js: 1.2.4
-
   react-dom@19.3.1(react@19.3.1):
     dependencies:
       react: 19.3.1
@@ -2813,11 +2928,6 @@ snapshots:
       react-dom: 19.3.1(react@19.3.1)
 
   react@19.3.1: {}
-
-  remotion@4.0.543(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
-    dependencies:
-      react: 19.3.1
-      react-dom: 19.3.1(react@19.3.1)
 
   remotion@4.0.545(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
     dependencies:
@@ -2890,14 +3000,6 @@ snapshots:
       '@img/sharp-win32-x64': 0.35.5
       '@types/node': 26.6.6
     optional: true
-
-  source-map-js@1.2.4: {}
-
-  source-map-js@1.2.4: {}
-
-  source-map-js@1.2.4: {}
-
-  source-map-js@1.2.4: {}
 
   source-map-js@1.2.4: {}
 

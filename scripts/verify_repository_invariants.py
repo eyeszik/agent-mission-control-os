@@ -227,8 +227,8 @@ def main() -> None:
     web_package = json.loads((ROOT / "apps/web/package.json").read_text(encoding="utf-8"))
     if web_package.get("dependencies", {}).get("next") != "16.4.5":
         raise SystemExit("Web package must remain pinned to audited Next.js 16.4.5")
-    if web_package.get("devDependencies", {}).get("@playwright/test") != "1.65.0":
-        raise SystemExit("Browser gate must pin @playwright/test to 1.65.0")
+    if web_package.get("devDependencies", {}).get("@playwright/test") != "1.65.1":
+        raise SystemExit("Browser gate must pin @playwright/test to 1.65.1")
     if web_package.get("scripts", {}).get("test") != "vitest run tests":
         raise SystemExit("Web unit tests must be scoped to tests/ so Vitest cannot execute Playwright specs")
     if web_package.get("scripts", {}).get("test:e2e") != "playwright test":
@@ -240,9 +240,9 @@ def main() -> None:
     for required in [
         "specifier: 16.4.5",
         "sharp@0.35.5",
-        "postcss@8.5.32",
-        "'@playwright/test@1.65.0'",
-        "playwright-core@1.65.0",
+        "postcss@8.5.33",
+        "'@playwright/test@1.65.1'",
+        "playwright-core@1.65.1",
     ]:
         if required not in lockfile:
             raise SystemExit(f"Audited frontend lockfile token missing: {required}")

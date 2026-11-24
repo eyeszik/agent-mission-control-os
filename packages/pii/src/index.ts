@@ -14,6 +14,6 @@ export {
   quarantinePayload,
   redactValue,
 } from './pii';
-export { INJECTION_PATTERNS, INJECTION_REPLACEMENT, sanitizeInput } from './sanitize';
+export { INJECTION_PATTERNS, INJECTION_REPLACEMENT, sanitizeDeep, sanitizeInput } from './sanitize';
 export { decodeBase64Fragment, decodeUtf8, unquote, type Base64Result, type Utf8Errors } from './pycodec';
 export { PYTHON_UNIDATA_VERSION } from './python-unicode';

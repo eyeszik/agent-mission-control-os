@@ -1,0 +1,25 @@
+{
+  "name": "@amc/vnexus-brandbook",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VNEXUS brand book compiler, deterministic renderer and page checks, byte-for-byte with services/langgraph/agency/vnexus/brandbook.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@amc/canonical": "workspace:*",
+    "@amc/kernel": "workspace:*"
+  },
+  "devDependencies": {
+    "@amc/shared": "workspace:*",
+    "typescript": "7.0.2",
+    "vitest": "^5.1.1"
+  }
+}
