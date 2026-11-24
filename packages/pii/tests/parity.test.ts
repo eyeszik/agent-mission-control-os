@@ -6,6 +6,7 @@ import {
   detectPii,
   quarantinePayload,
   redactValue,
+  sanitizeDeep,
   sanitizeInput,
   unquote,
 } from '../src/index';
@@ -21,6 +22,7 @@ interface Fixture {
   readonly redact: ReadonlyArray<{ readonly input: unknown; readonly output: unknown }>;
   readonly quarantine: ReadonlyArray<{ readonly input: Record<string, unknown>; readonly output: unknown }>;
   readonly sanitize: ReadonlyArray<{ readonly input: Record<string, unknown>; readonly output: unknown }>;
+  readonly sanitize_deep: ReadonlyArray<{ readonly input: unknown; readonly output: unknown }>;
   readonly unquote: ReadonlyArray<{ readonly text: string; readonly output: string }>;
   readonly base64: ReadonlyArray<{ readonly fragment: string; readonly ok: boolean; readonly hex?: string }>;
   readonly utf8: ReadonlyArray<{ readonly hex: string; readonly replace: string; readonly ignore: string }>;
@@ -75,6 +77,11 @@ describe('@amc/pii parity with the Python reference', () => {
   it('redacts exactly like Python', () => {
     for (const c of fixture.redact) expect(redactValue(c.input), JSON.stringify(c.input)).toStrictEqual(c.output);
     for (const c of fixture.quarantine) expect(quarantinePayload(c.input)).toStrictEqual(c.output);
+  });
+
+  it('sanitizeDeep matches Python sanitize_deep', () => {
+    expect(fixture.sanitize_deep.length).toBeGreaterThanOrEqual(150);
+    for (const c of fixture.sanitize_deep) expect(sanitizeDeep(c.input), JSON.stringify(c.input)).toStrictEqual(c.output);
   });
 
   it('sanitizes exactly like Python', () => {

@@ -1,6 +1,6 @@
 # TypeScript migration plan
 
-Status: **Waves 1 and 2 (core utilities and services) ported.** Twelve packages, from `@amc/canonical` to `@amc/vnexus-directions`, each reproduce a Python-generated parity fixture. No Python caller has been switched to them yet; Python is still the reference. Wave 3 (persistence, API, security) has not started.
+Status: **Waves 1 and 2 (core utilities and services) ported.** Twelve packages, from `@amc/canonical` to `@amc/vnexus-directions`, each reproduce a Python-generated parity fixture. No Python caller has been switched to them yet; Python is still the reference. Wave 3 has started with its pure security slice: `sanitize_deep` (`security/preprocess.py`) is twinned in `@amc/pii`. Persistence, API and the rest of `security` are blocked on the HTTP-runtime and database decisions below; nothing is invented ahead of them.
 
 ## Why not a big-bang port
 

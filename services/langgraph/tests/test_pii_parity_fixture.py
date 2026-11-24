@@ -33,6 +33,7 @@ from services.langgraph.security.pii import (
     quarantine_payload,
     redact_value,
 )
+from services.langgraph.security.preprocess import sanitize_deep
 from services.langgraph.security.sanitize import sanitize_input
 
 PACKAGE = Path(__file__).resolve().parents[3] / "packages/pii"
@@ -263,6 +264,7 @@ def _scanner_sections(r: random.Random) -> tuple[list[str], dict[str, Any]]:
         "redact": [{"input": p, "output": redact_value(p)} for p in payloads + texts[:200]],
         "quarantine": [{"input": p, "output": quarantine_payload(p)} for p in payloads[:50]],
         "sanitize": [{"input": s, "output": sanitize_input(s)} for s in sanitize],
+        "sanitize_deep": [{"input": v, "output": sanitize_deep(v)} for v in _deep_inputs(sanitize)],
     }
 
 
@@ -279,6 +281,13 @@ def _codec_sections(r: random.Random, texts: list[str]) -> dict[str, Any]:
                  for b in utf8],
         "lower_to_ascii": _lower_to_ascii(),
     }
+
+
+def _deep_inputs(sanitized: list[dict[str, Any]]) -> list[Any]:
+    """Containers, bare strings and lists: sanitize_deep also takes a top-level string or list."""
+    cases: list[Any] = list(sanitized) + [INJECTIONS[0], " ".join(INJECTIONS), "clean text", "", 7, None, True, 1.5]
+    cases += [[s, [s]] for s in sanitized[:20]] + [[INJECTIONS, {"k": INJECTIONS}]]
+    return cases
 
 
 def build_fixture() -> dict[str, Any]:
@@ -362,6 +371,10 @@ def test_fixture_redact_and_quarantine_match_python() -> None:
 
 def test_fixture_sanitize_matches_python() -> None:
     _check("sanitize", lambda c: sanitize_input(c["input"]) == c["output"], 150)
+
+
+def test_fixture_sanitize_deep_matches_python() -> None:
+    _check("sanitize_deep", lambda c: sanitize_deep(c["input"]) == c["output"], 150)
 
 
 def test_fixture_codecs_match_python() -> None:
