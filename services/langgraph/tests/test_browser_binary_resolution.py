@@ -68,9 +68,13 @@ def test_no_browser_means_no_shell():
     assert headless_shell_for(Path("/nonexistent/chromium-9999/chrome-linux64/chrome")) is None
 
 
+# Revisions here are deliberately far above any real Playwright build (1254, 1255, ...):
+# the resolver also scans /home/runner/pw-browsers and ~/.cache/ms-playwright, and the
+# newest installed pair wins, so a fake revision at or below the runner's real one
+# would be shadowed whenever Playwright is bumped.
 def test_cache_prefers_the_newest_pair_and_skips_a_browser_without_a_shell(tmp_path, monkeypatch):
     """A browser without its shell is the configuration that cannot print."""
-    for revision in ("1248", "1254"):
+    for revision in ("9248", "9254"):
         browser = tmp_path / f"chromium-{revision}" / "chrome-linux64"
         browser.mkdir(parents=True)
         (browser / "chrome").write_text("#!/bin/sh\n")
@@ -78,13 +82,13 @@ def test_cache_prefers_the_newest_pair_and_skips_a_browser_without_a_shell(tmp_p
         shell.mkdir(parents=True)
         (shell / "chrome-headless-shell").write_text("#!/bin/sh\n")
     # Newer, but no shell: must be skipped, not preferred.
-    orphan = tmp_path / "chromium-1300" / "chrome-linux64"
+    orphan = tmp_path / "chromium-9300" / "chrome-linux64"
     orphan.mkdir(parents=True)
     (orphan / "chrome").write_text("#!/bin/sh\n")
 
     monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", str(tmp_path))
     chosen = _playwright_cache_chromium()
-    assert chosen is not None and "chromium-1254" in str(chosen)
+    assert chosen is not None and "chromium-9254" in str(chosen)
     assert headless_shell_for(chosen) is not None
 
 
@@ -98,10 +102,10 @@ def test_the_environment_variable_is_not_required(tmp_path, monkeypatch):
     # Mirror Playwright's own layout: the browser and its shell are siblings
     # under the cache root, which is what DEFAULT_CHROMIUM's parents describe.
     root = tmp_path / "ms-playwright"
-    browser = root / "chromium-1254" / "chrome-linux64"
+    browser = root / "chromium-9254" / "chrome-linux64"
     browser.mkdir(parents=True)
     (browser / "chrome").write_text("#!/bin/sh\n")
-    shell = root / "chromium_headless_shell-1254" / "chrome-headless-shell-linux64"
+    shell = root / "chromium_headless_shell-9254" / "chrome-headless-shell-linux64"
     shell.mkdir(parents=True)
     (shell / "chrome-headless-shell").write_text("#!/bin/sh\n")
 
@@ -110,7 +114,7 @@ def test_the_environment_variable_is_not_required(tmp_path, monkeypatch):
     monkeypatch.delenv("PLAYWRIGHT_BROWSERS_PATH", raising=False)
     monkeypatch.setattr(browser_mod, "DEFAULT_CHROMIUM", browser / "chrome")
     chosen = browser_mod._playwright_cache_chromium()
-    assert chosen is not None and "chromium-1254" in str(chosen)
+    assert chosen is not None and "chromium-9254" in str(chosen)
 
 
 def test_print_can_use_a_shell_from_another_install(tmp_path, monkeypatch):
