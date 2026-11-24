@@ -133,7 +133,7 @@ def test_profile_refuses_symlinks_relative_paths_writable_files_and_unknown_prof
     with pytest.raises(mcp_profiles.ProfileError, match="absolute"):
         mcp_profiles.build_server_entry("paara", Path("paara_mcp_server.py"), interpreter)
     with pytest.raises(mcp_profiles.ProfileError, match="unknown profile"):
-        mcp_profiles.build_server_entry("upgrowth", SERVER, interpreter)
+        mcp_profiles.build_server_entry("no-such-profile", SERVER, interpreter)
     script = _copy_server(tmp_path)
     script.chmod(0o666)
     with pytest.raises(mcp_profiles.ProfileError, match="writable"):

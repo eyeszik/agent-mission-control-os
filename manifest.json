@@ -4,7 +4,7 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "99dbbb9c7e80465b1c68ac70c911739c1eaf25a5"
+      "git_blob_sha": "ae8b682c4a765b9078962bd496a2f4d0286324e8"
     },
     {
       "path": ".github/scripts/annotate-junit-failures.py",
@@ -16,7 +16,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "ab4c68e23f84903949ed0c9eadc57cdf32359143"
+      "git_blob_sha": "4e8c50fe292e9f5be14a08ebd95695ab1e8bd88c"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -432,7 +432,15 @@
     },
     {
       "path": "services/langgraph/agency/council/mcp_profiles.py",
-      "git_blob_sha": "5b9115b03553f0ae6435d10882f781caffc6c45a"
+      "git_blob_sha": "54482b48b68c97611c7a15b41a62883d904b53dc"
+    },
+    {
+      "path": "services/langgraph/agency/council/mcp_profile_upgrowth.py",
+      "git_blob_sha": "4a3b69de8773594db572263952eea283abb34d8e"
+    },
+    {
+      "path": "services/langgraph/agency/council/mcp_no_network.mjs",
+      "git_blob_sha": "22d8b569c6de64028b8957b6f1fc2da1f780848e"
     },
     {
       "path": "services/langgraph/agency/council/policy.py",
@@ -1184,7 +1192,7 @@
     },
     {
       "path": "services/langgraph/pyproject.toml",
-      "git_blob_sha": "3b3a6d1244ab3cf1b58e5bce2c9300ae242ecf8d"
+      "git_blob_sha": "46d97cff8b776d45521d1e7c60b2929f51a4d2eb"
     },
     {
       "path": "services/langgraph/quality/brand_safety.py",

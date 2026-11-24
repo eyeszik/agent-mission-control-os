@@ -189,6 +189,12 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
+      # The upGrowth MCP profile runs its server under the operator's Node (permission model + no-network
+      # preload). 22.12.0 is the repository's Node; it exercises the --experimental-permission path.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22.12.0"
+
       - name: Install backend with the council extra
         # Constraints pin the council extra to the versions resolved and tested locally.
         run: python -m pip install -e "./services/langgraph[dev,council]" -c services/langgraph/constraints-council.txt
@@ -211,9 +217,23 @@ jobs:
           services/langgraph/tests/test_council_engines.py \
           services/langgraph/tests/test_council_gateway.py \
           services/langgraph/tests/test_mcp_paara_profile.py \
+          services/langgraph/tests/test_mcp_upgrowth_profile.py \
           services/langgraph/tests/test_capability_tokens.py \
           services/langgraph/tests/test_council_ported_scenarios.py \
           services/langgraph/tests/test_council_contracts.py 2>&1 | tee /tmp/pytest-council.log
+
+      - name: Require the upGrowth MCP profile tests to run (must not skip)
+        env:
+          AMC_DATABASE_BACKEND: sqlite
+          AMC_DB_PATH: /tmp/amc_council_upgrowth_${{ github.run_id }}.db
+          AMC_EXPORT_ROOT: /tmp/amc-council-upgrowth-${{ github.run_id }}
+        run: |
+          set -o pipefail
+          python -m pytest -q -rs services/langgraph/tests/test_mcp_upgrowth_profile.py | tee /tmp/upgrowth.log
+          if grep -q "SKIPPED" /tmp/upgrowth.log; then
+            echo "::error::upGrowth MCP profile tests were skipped; Node or the mcp SDK is missing on this runner"
+            exit 1
+          fi
 
       - name: Summarize failing tests (last 100 lines of pytest output)
         if: failure()
