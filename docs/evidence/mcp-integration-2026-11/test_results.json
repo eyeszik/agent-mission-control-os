@@ -1,0 +1,119 @@
+{
+ "schema": "amc-mcp-test-results/v1",
+ "date": "2026-11-24",
+ "base_commit": "7ac18f8af1079cdff91dd11f672ba023100b4b06",
+ "environment": "AMC_DATABASE_BACKEND=sqlite; Python 3.13.18; mcp==1.30.0 (CI constraint) unless stated",
+ "results": [
+  {
+   "test_id": "UNIT-PROTO-SEC-REL-E2E",
+   "command": "pytest services/langgraph/tests/test_mcp_paara_profile.py",
+   "expected": "30 pass",
+   "observed": "30 passed",
+   "status": "PASS",
+   "evidence": "unit: disabled-by-default, reviewed bytes, AST network-free, strict allowlist, admission, 4 tamper refusals, symlink/relative/writable/unknown, CLI, SDK 2.x fail-closed, result-bound config; protocol/E2E: tools listed exactly, 4 round trips audited; security: 4 schema refusals, unlisted tool, scope, cross-tenant audit 403/404, redaction, injection stays data, PAARA_KIT_SRC/env not honoured, spawn-time pin on script and data; reliability: oversized, timeout, malformed server, duplicate idempotent",
+   "limitation": ""
+  },
+  {
+   "test_id": "DEF-3-NEGATIVE-CONTROL",
+   "command": "same file before the gateway fix",
+   "expected": "declared-schema cases fail",
+   "observed": "4 failed (raw jsonschema.ValidationError escaped invoke)",
+   "status": "PASS",
+   "evidence": "proves the regression tests detect DEF-3",
+   "limitation": ""
+  },
+  {
+   "test_id": "REG-COUNCIL-CI-SET",
+   "command": "pytest test_missions_council test_council_engines test_council_gateway services/langgraph/tests/test_mcp_paara_profile.py test_capability_tokens test_council_ported_scenarios test_council_contracts test_execution_bounds test_asi10_anomaly_halt test_approval_framing test_approvals",
+   "expected": "0 failures",
+   "observed": "137 passed, 8 skipped, 0 failed (145)",
+   "status": "PASS",
+   "evidence": "skips: crewai/autogen not installed locally (run in CI backend-council)",
+   "limitation": "CrewAI/AutoGen engines NOT_TESTED locally"
+  },
+  {
+   "test_id": "REG-SDK-2X",
+   "command": "same three MCP files under mcp 2.3.0",
+   "expected": "no failures; explicit skips",
+   "observed": "29 passed, 24 skipped, 0 failed (base: 3 failed)",
+   "status": "PASS",
+   "evidence": "DEF-1 fail-closed",
+   "limitation": ""
+  },
+  {
+   "test_id": "REG-FULL-BACKEND",
+   "command": "pytest services/langgraph/tests",
+   "expected": "no new failures vs base",
+   "observed": "after: 19 failed / 2566 passed / 164 skipped; base: 19 failed / 2536 passed / 164 skipped; failure sets identical",
+   "status": "PASS",
+   "evidence": "all 19 reproduce on a clean worktree at the base commit",
+   "limitation": "19 pre-existing failures: Unicode-table parity fixtures differ on Python 3.13 (CI uses 3.11), ffprobe present on this host, and DEF-2 (manifest/UCPO pins vs Next.js 16.4.6)"
+  },
+  {
+   "test_id": "E2E-LIVE-API",
+   "command": "uvicorn + AMC_MCP_SERVERS=<profile entry>; GET /missions/tools",
+   "expected": "exactly 3 mcp.paara.* tools, no config errors",
+   "observed": "mcp_installed true, errors [], 3 tools",
+   "status": "PASS",
+   "evidence": "then rollback: empty variable + restart -> 0 MCP tools (rollback VERIFIED)",
+   "limitation": ""
+  },
+  {
+   "test_id": "CLI",
+   "command": "python -m services.langgraph.agency.council.mcp_profiles paara ...",
+   "expected": "exit 0 reviewed / exit 2 tampered",
+   "observed": "exit 0 / exit 2 'does not match the reviewed sha256'",
+   "status": "PASS",
+   "evidence": "",
+   "limitation": ""
+  },
+  {
+   "test_id": "GATES",
+   "command": "scripts/verify_*.py (7)",
+   "expected": "5 pass; 2 fail only on DEF-2 as at base",
+   "observed": "5 pass; invariants+manifest fail only on apps/web/package.json, pnpm-lock.yaml (Next.js 16.4.6)",
+   "status": "BLOCKED",
+   "evidence": "identical to base; needs a human audit decision",
+   "limitation": "DEF-2 is pre-existing on master"
+  },
+  {
+   "test_id": "LINT",
+   "command": "ruff check --select E4,E7,E9,F <changed>",
+   "expected": "clean on new code",
+   "observed": "clean; 2 pre-existing F401 in existing test files",
+   "status": "PASS",
+   "evidence": "",
+   "limitation": ""
+  },
+  {
+   "test_id": "POSTGRES",
+   "command": "CI Backend on PostgreSQL",
+   "expected": "pass",
+   "observed": "not run locally",
+   "status": "NOT_TESTED",
+   "evidence": "CI job on the PR",
+   "limitation": "no local Postgres"
+  }
+ ],
+ "baseline_failures": [
+  "services/langgraph/tests/test_assets_parity_fixture.py::test_fixture_unicode_tables_match_python",
+  "services/langgraph/tests/test_assets_parity_fixture.py::test_unicode_module_matches_python_str_methods",
+  "services/langgraph/tests/test_compiled_parity_fixture.py::test_core_fixture_matches_python",
+  "services/langgraph/tests/test_compiled_parity_fixture.py::test_unicode_module_matches_python",
+  "services/langgraph/tests/test_design_mode_parity_fixture.py::test_unicode_module_matches_python",
+  "services/langgraph/tests/test_ffprobe_provisioning.py::test_ffprobe_binary_resolution_is_deterministic",
+  "services/langgraph/tests/test_ffprobe_provisioning.py::test_missing_ffprobe_fails_explicitly",
+  "services/langgraph/tests/test_guidance_parity_fixture.py::test_guidance_parity_fixture_matches_python",
+  "services/langgraph/tests/test_manifest_regressions.py::test_manifest_rejects_boundary_drift_and_missing_required_pins",
+  "services/langgraph/tests/test_pii_parity_fixture.py::test_fixture_codecs_match_python",
+  "services/langgraph/tests/test_pii_parity_fixture.py::test_fixture_detect_matches_python",
+  "services/langgraph/tests/test_pii_parity_fixture.py::test_fixture_redact_and_quarantine_match_python",
+  "services/langgraph/tests/test_pii_parity_fixture.py::test_unicode_module_matches_python_re",
+  "services/langgraph/tests/test_project_os_parity_fixture.py::test_casefold_tables_match_python",
+  "services/langgraph/tests/test_ucpo_dependency_pins.py::test_generated_source_dependency_pins_match_workspace",
+  "services/langgraph/tests/test_ui_ux_parity_fixture.py::test_unicode_module_matches_python_re",
+  "services/langgraph/tests/test_vnexus_brandbook_parity_fixture.py::test_unicode_module_matches_python",
+  "services/langgraph/tests/test_vnexus_core_parity_fixture.py::test_vnexus_core_parity_fixture_matches_python",
+  "services/langgraph/tests/test_vnexus_directions_parity_fixture.py::test_fixture_matches_python"
+ ]
+}

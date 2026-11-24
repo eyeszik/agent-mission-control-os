@@ -132,7 +132,16 @@ connector or MCP server, which seats or operators can use when deciding whether 
 
 ## D09 — Test evidence
 
-Summarised in the final report and `evidence/mcp-integration-2026-11/test_results.json`.
+`evidence/mcp-integration-2026-11/test_results.json` (TEST_ID, command, expected, observed, status, limitation).
+
+| Suite | Result |
+|---|---|
+| New `test_mcp_paara_profile.py` | 30/30 PASS (4 declared-schema cases failed before the DEF-3 fix) |
+| Council CI set + security regressions | 137 PASS, 8 SKIP (CrewAI/AutoGen absent locally), 0 FAIL |
+| Same MCP files on unsupported `mcp 2.3.0` | 29 PASS, 24 SKIP, 0 FAIL (base: 3 FAIL) |
+| Full backend suite | 2566 PASS / 19 FAIL / 164 SKIP; base 2536 / 19 / 164 — **identical failure set**, all reproduced on a clean base worktree (Python 3.13 Unicode parity fixtures, host ffprobe, DEF-2) |
+| Live API enable → rollback | PASS: 3 tools listed, then none |
+| Verifier gates | 5/7 PASS; 2 BLOCKED by pre-existing DEF-2 only |
 
 ## D10 — Operation and rollback
 
