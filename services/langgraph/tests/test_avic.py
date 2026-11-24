@@ -657,8 +657,10 @@ def test_an_edit_against_a_stale_base_conflicts_and_stores_nothing(root, tmp_pat
 
     adapter = LocalStorageAdapter(root)
     _tenant, pid, alice = _project(root)
-    assert service.compile_asset(alice, pid, _req(), brand=profiles.psem_brand(), style_profile=PROFILE, adapter=adapter,
-                                 work_dir=tmp_path)["status"] == "EVALUATED"
+    compiled = service.compile_asset(alice, pid, _req(), brand=profiles.psem_brand(), style_profile=PROFILE, adapter=adapter,
+                                     work_dir=tmp_path)
+    # The reasons are what tells a render fault (BROWSER_EXIT, timeout, RENDER_CAPACITY) from a product defect.
+    assert compiled["status"] == "EVALUATED", compiled.get("reasons")
     base = service.export_package(pid, "halden-kiln-poster", adapter=adapter, out_dir=tmp_path / "p0")["master.svg"]
     args = {"object_id": "motif-ring-inner", "palette_key": "fog", "field": "stroke"}
     first = service.edit_asset(alice, pid, "halden-kiln-poster", op="recolor", args=args, adapter=adapter,
