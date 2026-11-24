@@ -10,6 +10,7 @@ import pytest
 from services.langgraph.agency.council import capability as cap
 from services.langgraph.agency.council.gateway import GatewayDenied, invoke
 from services.langgraph.tests.council_support import council  # noqa: F401 - fixture
+from services.langgraph.tests.council_support import require_supported_mcp
 
 pytest.importorskip("cryptography")
 SCOPES = frozenset({"mcp:read"})
@@ -115,7 +116,7 @@ def test_signing_key_loads_from_a_file_and_must_be_ed25519(tmp_path, monkeypatch
 
 @pytest.fixture
 def capability_server(monkeypatch, tmp_path, council):  # noqa: F811
-    pytest.importorskip("mcp")
+    require_supported_mcp()
     pytest.importorskip("jsonschema")
     from services.langgraph.agency.council.mcp_client import file_sha256
     from services.langgraph.tests.council_support import isolated_python

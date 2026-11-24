@@ -68,6 +68,7 @@ class ToolSpec:
     input_schema: dict
     timeout_s: float = 10.0
     server: str | None = None
+    max_result_bytes: int = 64_000  # MCP results larger than this are refused (untrusted, unbounded data)
     handler: Callable[..., dict] | None = field(default=None, compare=False)
     args_model: type[BaseModel] | None = field(default=None, compare=False)
 
@@ -363,7 +364,11 @@ def _validate_json_schema(spec: ToolSpec, args: dict) -> dict:
         import jsonschema
     except ImportError as exc:  # MCP tools are only listed when the mcp extra (which ships jsonschema) is installed
         raise ValueError("jsonschema unavailable; MCP tool arguments cannot be validated") from exc
-    jsonschema.validate(args, spec.input_schema)
+    try:
+        jsonschema.validate(args, spec.input_schema)
+    except jsonschema.ValidationError as exc:
+        # Not a ValueError subclass: without this, a declared-schema violation escaped ``invoke`` untyped and unaudited.
+        raise ValueError(exc.message) from exc
     return args
 
 

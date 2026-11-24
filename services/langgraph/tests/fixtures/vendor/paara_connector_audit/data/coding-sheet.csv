@@ -1,0 +1,14 @@
+connector,F1,F2,F3,F4,F5,F6,F7,default_lower,default_upper,restricted_lower,restricted_upper,documentation_retrieved
+MCP Filesystem,U,N,U,U,Y,N,Y,High,Crit,Mod,High,2026-11-09
+MCP Git,N,N,U,U,Y,N,Y,High,Crit,,,2026-11-09
+MCP Memory,Y,N,Y,U,N,N,Y,Crit,Crit,,,2026-11-09
+MCP Fetch,U,N,U,U,Y,Y,N,Mod,High,,,2026-11-09
+GitHub MCP,Y,N,N,U,Y,Y,Y,Crit,Crit,High,High,2026-11-09
+Notion MCP,U,Y,Y,U,Y,N,Y,Crit,Crit,High,High,2026-11-09
+Atlassian MCP,U,Y,Y,U,Y,Y,Y,Crit,Crit,High,High,2026-11-09
+Linear MCP,N,N,Y,U,Y,N,Y,Crit,Crit,High,High,2026-11-09
+Sentry MCP,N,N,U,U,Y,N,U,Mod,Crit,,,2026-11-09
+Stripe MCP,Y,N,Y,N,Y,Y,Y,Crit,Crit,,,2026-11-09
+Slack MCP,Y,N,N,N,Y,Y,Y,Crit,Crit,High,High,2026-11-09
+MS Graph perms.,Y,Y,Y,U,Y,U,Y,Crit,Crit,High,High,2026-11-09
+Claude connectors,Y,Y,Y,U,Y,Y,Y,Crit,Crit,High,High,2026-11-09
