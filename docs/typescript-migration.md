@@ -1,6 +1,6 @@
 # TypeScript migration plan
 
-Status: **Waves 1 and 2 (core utilities and services) ported.** Twelve packages, from `@amc/canonical` to `@amc/vnexus-directions`, each reproduce a Python-generated parity fixture. No Python caller has been switched to them yet; Python is still the reference. Wave 3 has started with its pure security slice: `sanitize_deep` (`security/preprocess.py`) is twinned in `@amc/pii`. Persistence, API and the rest of `security` are blocked on the HTTP-runtime and database decisions below; nothing is invented ahead of them.
+Status: **Waves 1 and 2 (core utilities and services) ported.** Twelve packages, from `@amc/canonical` to `@amc/vnexus-directions`, each reproduce a Python-generated parity fixture. No Python caller has been switched to them yet; Python is still the reference. Wave 3 has started with its pure security slice: `sanitize_deep` (`security/preprocess.py`) and the ASI09 approval-framing check (`security/approval_framing.py`) are twinned in `@amc/pii`. Persistence, API and the rest of `security` are blocked on the HTTP-runtime and database decisions below; nothing is invented ahead of them.
 
 ## Why not a big-bang port
 
@@ -83,7 +83,19 @@ These come last, and only once Waves 1 and 2 are complete:
 - `api` (7,296 lines, FastAPI);
 - `security`.
 
-Moving them means a new HTTP runtime, and either a Postgres driver plus a SQLite story or a Postgres-only decision. It also means re-pointing `verify_auth_bindings.py` and `verify_production_readiness.py`. Those gates grep literal strings in Python source, so each must gain a TypeScript equivalent *before* its Python source is deleted. Weakening a gate is never the fix.
+The pure part of `security` (no HTTP, database, filesystem or environment access) can move ahead of those decisions, with the same fixture discipline as Waves 1 and 2. No caller has switched.
+
+| Python module | TS twin | Parity cases | Status |
+|---|---|---|---|
+| `security/preprocess.py` (`sanitize_deep`) | `@amc/pii` `sanitizeDeep` | in `pii-parity.json` | **Ported** |
+| `security/approval_framing.py` (`assess`, ASI09) | `@amc/pii` `assessFraming`, plus `pyLower` for `str.lower()` | 1,529 assessments + 811 `str.lower()` cases in `approval-framing-parity.json` | **Ported**; the approve path in `persistence/approvals.py` still calls Python |
+| `security/distributed.py` (shared halt, JTI replay) | — | — | Blocked: database decision |
+| `security/hmac_ingress.py`, `replay_store.py` | — | — | Blocked: database and HTTP-runtime decisions |
+| `security/auth.py`, `approval_authority.py`, `local_generation_approval.py`, `mtls.py` | — | — | Blocked: HTTP-runtime decision (FastAPI errors, environment-driven config, TLS) |
+
+What the approval-framing port added: `String#toLowerCase` follows the engine's Unicode version (Node 22 here ships Unicode 17), while CPython 3.11 follows Unicode 14.0. U+A7CB, U+1C89 and other later case pairs lowercase in JS but not in Python, so a `toLowerCase` twin would find targets Python does not and clear `OMITS_TARGET`, which is more permissive than the reference. `pyLower` instead reads Python's mapping and the two classes CPython's final-sigma rule consults (`python-casing.ts`, generated from `str.lower()` by `test_approval_framing_parity_fixture.py`). Six mutations (JS `toLowerCase`, JS `\b`, dropping the IGNORECASE class extras, no final sigma, the HIGH threshold, and the empty-target quirk) each fail the suite.
+
+Moving the rest means a new HTTP runtime, and either a Postgres driver plus a SQLite story or a Postgres-only decision. It also means re-pointing `verify_auth_bindings.py` and `verify_production_readiness.py`. Those gates grep literal strings in Python source, so each must gain a TypeScript equivalent *before* its Python source is deleted. Weakening a gate is never the fix.
 
 ## What stays in Python, and why
 
