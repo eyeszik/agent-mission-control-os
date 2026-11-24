@@ -54,3 +54,17 @@ function sanitizeEntry(value: unknown): unknown {
 export function sanitizeInput(data: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(data).map(([key, value]) => [key, sanitizeEntry(value)]));
 }
+
+function sanitizeDeepEntry(value: unknown): unknown {
+  if (typeof value === 'string') return sanitizeString(value);
+  if (Array.isArray(value)) return value.map((item: unknown) => sanitizeDeepEntry(item));
+  if (isPlainObject(value)) {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, sanitizeDeepEntry(item)]));
+  }
+  return value;
+}
+
+/** Python `preprocess.sanitize_deep`: the string sanitizer over any JSON-like value (keys are left as is). */
+export function sanitizeDeep(value: unknown): unknown {
+  return sanitizeDeepEntry(value);
+}

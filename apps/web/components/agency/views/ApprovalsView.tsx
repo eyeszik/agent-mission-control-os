@@ -13,6 +13,8 @@ const SUBJECT_LABEL: Record<string, string> = {
   ACTION_SPEND: 'Approve the money',
   ACTION_GOVERNANCE: 'Privileged governance review',
   MISSION_ARTIFACT: 'Release this exact artifact version',
+  BRAND_OS_SOP_ADOPTION: 'Adopt this newly written Brand OS SOP for this project',
+  BRAND_OS_SOURCE: 'Confirm these bytes are the original Brand OS procedure',
 };
 
 function ActionBinding({ actionId }: { actionId: string }) {

@@ -1,0 +1,24 @@
+{
+  "name": "@amc/compiled",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Compiled Agency planner and method routing/delegation compiler, parity-checked against services/langgraph/agency/compiled.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@amc/kernel": "workspace:*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "^5.1.1"
+  }
+}

@@ -123,15 +123,27 @@ def _primitives_for(grammar: str, n: int, rng: random.Random, box: tuple[float, 
 
 
 def _wrap(text: str, size: float, max_width: float) -> list[str]:
+    """Wrap using the composer's estimate; refuse copy it cannot represent.
+
+    Slicing to four lines silently discarded the rest of an approved headline or
+    subhead. Fail before rendering instead; a human can shorten or redesign it.
+    This is only a layout estimate, not proof of rendered typography fitting.
+    """
     per_line = max(8, int(max_width / (size * 0.56)))
     lines, line = [], ""
     for word in text.split():
+        if len(word) > per_line:
+            raise ValueError("COPY_EXCEEDS_LAYOUT: a word is wider than the estimated line")
         if line and len(line) + 1 + len(word) > per_line:
             lines.append(line)
             line = word
         else:
             line = f"{line} {word}".strip()
-    return (lines + [line])[:4] if line else lines[:4]
+    if line:
+        lines.append(line)
+    if len(lines) > 4:
+        raise ValueError("COPY_EXCEEDS_LAYOUT: text needs more than four lines")
+    return lines
 
 
 def poster(genome: CreativeGenome, *, headline: str, subhead: str = "", cta: str = "", meta: str = "",
@@ -152,29 +164,61 @@ def poster(genome: CreativeGenome, *, headline: str, subhead: str = "", cta: str
         prims += _primitives_for(g, n, random.Random(f"{rng.random()}:{g}"), art, cols, angle)
     dark = dominant in DARK_GROUND
     text_fill, bg = ("paper", "ink") if dark else ("ink", "paper")
-    size = width * scale
     centered = dominant in {"art_deco", "cinematic_typography"}
     x = width / 2 if centered else margin
     anchor = "middle" if centered else "start"
-    y = height * 0.66
+    foot = height - margin
+    # Reserve separate art, copy and footer zones. The former fixed 66% start
+    # and font size allowed three-line headlines to overlap the footer. Scale
+    # down deterministically until the *estimated* boxes fit; never truncate.
+    # Browser text geometry and a human still need to verify the rendered file.
+    initial_size = width * scale
+    size = initial_size
+    headline_lines: list[str] = []
+    subhead_lines: list[str] = []
+    y = 0.0
+    for _ in range(40):
+        try:
+            headline_lines = _wrap(headline, size, width - 2 * margin)
+            subhead_lines = _wrap(subhead, size * 0.32, width - 2 * margin) if subhead else []
+        except ValueError:
+            size *= 0.94
+            continue
+        if not headline_lines:
+            break
+        y = max(height * 0.66, height * 0.58 + size * 0.9 + height * 0.015)
+        last_baseline = y + (len(headline_lines) - 1) * size * 1.25
+        bottom = last_baseline + size * 0.25
+        if subhead_lines:
+            first_subhead = last_baseline + size * 1.5
+            bottom = first_subhead + (len(subhead_lines) - 1) * size * 0.42 + size * 0.32 * 0.25
+        footer_top = foot - width * 0.03 * 0.9
+        if bottom + height * 0.015 <= footer_top:
+            break
+        size *= 0.94
+    else:
+        raise ValueError("COPY_EXCEEDS_LAYOUT: text cannot fit between art and footer")
+    if size < initial_size * 0.15 or (headline and not headline_lines):
+        raise ValueError("COPY_EXCEEDS_LAYOUT: text cannot fit between art and footer")
     blocks: list[TextBlock] = []
     weight = int(o.get("display_weight", genome.typography_rules.get("display_weight", 700)))
-    for line in _wrap(headline, size, width - 2 * margin):
+    for line in headline_lines:
         blocks.append(TextBlock(role="headline", text=line, x=x, y=y, size=round(size, 2), weight=weight, anchor=anchor,
                                 fill=text_fill, tracking=genome.typography_rules.get("tracking", 0)))
-        y += size * 1.05
-    if subhead:
+        y += size * 1.25
+    if subhead_lines:
         y += size * 0.25
-        for line in _wrap(subhead, size * 0.32, width - 2 * margin):
+        for line in subhead_lines:
             blocks.append(TextBlock(role="subhead", text=line, x=x, y=y, size=round(size * 0.32, 2), weight=400,
                                     family="text", anchor=anchor, fill=text_fill))
             y += size * 0.42
-    foot = height - margin
     blocks.append(TextBlock(role="wordmark", text=genome.brand_name, x=margin, y=foot, size=round(width * 0.03, 2),
                             weight=700, anchor="start", fill=text_fill, tracking=0.04))
     if cta:
+        # Accent-on-paper can fail body-text contrast (and is forbidden in
+        # PSEM). Use the same legible foreground as the rest of the copy.
         blocks.append(TextBlock(role="cta", text=cta, x=width - margin, y=foot, size=round(width * 0.022, 2), weight=600,
-                                family="text", anchor="end", fill="accent" if not dark else "paper"))
+                                family="text", anchor="end", fill=text_fill))
     if meta:
         blocks.append(TextBlock(role="meta", text=meta, x=margin, y=margin * 0.62, size=round(width * 0.014, 2),
                                 weight=500, family="mono", anchor="start", fill=text_fill))

@@ -84,7 +84,7 @@ export default function MissionControlPage() {
         </div>
       </header>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
-        <div className="lg:col-span-3 flex flex-col gap-4">{mode === 'innovation' ? <ProjectWorkspacePanel /> : <><CommandInputPanel /><ConsequentialLifecyclePanel /></>}</div>
+        <div className="lg:col-span-3 flex flex-col gap-4 min-w-0">{mode === 'innovation' ? <ProjectWorkspacePanel /> : <><CommandInputPanel /><ConsequentialLifecyclePanel /></>}</div>
         {mode === 'innovation' ? (
           <div className="lg:col-span-9 min-w-0"><InnovationFoundryPanel /></div>
         ) : mode === 'vnexus' ? (

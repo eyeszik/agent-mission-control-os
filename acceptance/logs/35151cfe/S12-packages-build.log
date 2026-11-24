@@ -1,0 +1,27 @@
+Scope: 13 of 16 workspace projects
+packages/assets build$ tsc -p tsconfig.build.json
+packages/canonical build$ tsc -p tsconfig.build.json
+packages/constants build$ tsc -p tsconfig.build.json
+packages/creative-renderer build$ node build.mjs
+packages/assets build: Done
+packages/errors build$ tsc -p tsconfig.build.json
+packages/canonical build: Done
+packages/constants build: Done
+packages/kernel build$ tsc -p tsconfig.build.json
+packages/pii build$ tsc -p tsconfig.build.json
+packages/errors build: Done
+packages/pii build: Done
+packages/kernel build: Done
+packages/creative-renderer build: Done
+packages/config build$ tsc -p tsconfig.build.json
+packages/db build$ tsc -p tsconfig.build.json
+packages/design-tokens build$ tsc -p tsconfig.build.json
+packages/execution build$ tsc -p tsconfig.build.json
+packages/design-tokens build: Done
+packages/logger build$ tsc -p tsconfig.build.json
+packages/db build: Done
+packages/config build: Done
+packages/execution build: Done
+packages/logger build: Done
+packages/testing build$ tsc -p tsconfig.build.json
+packages/testing build: Done

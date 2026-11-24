@@ -28,6 +28,8 @@ async function seedShopifyMerchant(name: string, token = 'shpstf_original') {
       storefront_api_version: '2026-01',
       admin_token: 'shpat_original',
       admin_api_version: '2026-01',
+      // A commission-charging merchant needs a connected account to collect its fee.
+      stripe_account_id: 'acct_test_merchant',
     },
   });
 }
@@ -44,6 +46,7 @@ describe('credential rotation', () => {
       storefront_api_version: '2026-01',
       admin_token: 'shpat_rotated',
       admin_api_version: '2026-01',
+      stripe_account_id: 'acct_test_merchant',
     });
 
     expect(rotated.credentials).toMatchObject({ storefront_token: 'shpstf_rotated' });
@@ -62,6 +65,7 @@ describe('credential rotation', () => {
       storefront_token: 'shpstf_replacement',
       storefront_api_version: '2026-01',
       admin_api_version: '2026-01',
+      stripe_account_id: 'acct_test_merchant',
     });
 
     const { rows } = await harness.db.query<{ api_credentials_encrypted: unknown }>(

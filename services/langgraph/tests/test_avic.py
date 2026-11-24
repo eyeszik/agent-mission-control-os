@@ -657,8 +657,10 @@ def test_an_edit_against_a_stale_base_conflicts_and_stores_nothing(root, tmp_pat
 
     adapter = LocalStorageAdapter(root)
     _tenant, pid, alice = _project(root)
-    assert service.compile_asset(alice, pid, _req(), brand=profiles.psem_brand(), style_profile=PROFILE, adapter=adapter,
-                                 work_dir=tmp_path)["status"] == "EVALUATED"
+    compiled = service.compile_asset(alice, pid, _req(), brand=profiles.psem_brand(), style_profile=PROFILE, adapter=adapter,
+                                     work_dir=tmp_path)
+    # The reasons are what tells a render fault (BROWSER_EXIT, timeout, RENDER_CAPACITY) from a product defect.
+    assert compiled["status"] == "EVALUATED", compiled.get("reasons")
     base = service.export_package(pid, "halden-kiln-poster", adapter=adapter, out_dir=tmp_path / "p0")["master.svg"]
     args = {"object_id": "motif-ring-inner", "palette_key": "fog", "field": "stroke"}
     first = service.edit_asset(alice, pid, "halden-kiln-poster", op="recolor", args=args, adapter=adapter,
@@ -716,9 +718,13 @@ def test_a_crash_between_stage_writes_fails_closed_and_recompile_recovers(root, 
     with monkeypatch.context() as m:
         m.setattr(service, "_put", crashing_put)
         with pytest.raises(RuntimeError, match="simulated crash"):
-            service.edit_asset(alice, pid, "halden-kiln-poster", op="recolor",
-                               args={"object_id": "motif-ring-inner", "palette_key": "fog", "field": "stroke"},
-                               adapter=adapter, work_dir=tmp_path)
+            edited = service.edit_asset(alice, pid, "halden-kiln-poster", op="recolor",
+                                        args={"object_id": "motif-ring-inner", "palette_key": "fog", "field": "stroke"},
+                                        adapter=adapter, work_dir=tmp_path)
+            # Reaching here means the edit returned before its preview write (REJECTED or CONFLICT), so the crash
+            # under test never happened. Fail with the edit's own evidence rather than a bare "DID NOT RAISE".
+            pytest.fail(f"edit returned {edited.get('status')} before the preview write: reasons={edited.get('reasons')} "
+                        f"renderer_status={(edited.get('metrics') or {}).get('renderer_status')}")
     state = service.consistency(pid, "halden-kiln-poster", adapter=adapter)
     assert state["consistent"] is False and {"evaluation", "preview"} <= set(state["stale"])
     blocked = service.request_approval(alice, pid, "halden-kiln-poster", adapter=adapter)
@@ -836,3 +842,37 @@ def test_render_capacity_is_bounded_and_reported(monkeypatch, tmp_path):
     finally:
         slots.release()
     assert out["status"] == "BLOCKED" and out["png"] is None and out["findings"][0].startswith("RENDER_CAPACITY")
+
+
+def test_a_full_render_pool_refuses_immediately_instead_of_parking_a_thread(monkeypatch, tmp_path):
+    """A sync route must never block a threadpool worker waiting for a slot.
+
+    The server runs sync routes on a bounded anyio threadpool. Parking a worker
+    here for up to SLOT_WAIT_S lets a few concurrent compiles hold every slot,
+    and unrelated requests -- /health included -- stop being answered, which is
+    indistinguishable from a hang. Measure the wait: it must be near zero.
+    """
+    import threading
+    import time
+
+    from services.langgraph.agency.avic.contracts import CapabilityState
+
+    monkeypatch.setattr(render, "renderer_state", lambda: (CapabilityState.IMPLEMENTED_VERIFIED, [], "chromium"))
+    monkeypatch.setattr(render, "_slots", threading.BoundedSemaphore(1))
+    monkeypatch.setattr(render, "SLOT_WAIT_S", 30)
+    assert render._slots.acquire()
+    try:
+        started = time.perf_counter()
+        out = render.render("<svg/>", width=4, height=4, work_dir=tmp_path)
+        waited = time.perf_counter() - started
+    finally:
+        render._slots.release()
+    assert out["status"] == "BLOCKED"
+    assert waited < 1.0, f"render blocked for {waited:.2f}s waiting for a slot"
+
+
+def test_capacity_probe_does_not_consume_a_slot():
+    """Reporting capacity must not take it, or the probe becomes the outage."""
+    before = render.render_slots_free()
+    assert render.render_slots_free() == before
+    assert 0 <= before <= render.RENDER_SLOTS

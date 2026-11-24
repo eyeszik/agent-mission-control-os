@@ -52,7 +52,8 @@ def capture(monkeypatch) -> dict:
             "base_svg_sha256": view["svg_sha256"]}
     edited = client.post(f"{base}/{ASSET}/edits", json=edit, headers=headers())
     conflict = client.post(f"{base}/{ASSET}/edits", json=edit, headers={"Idempotency-Key": str(uuid4())})
-    assert conflict.status_code == 409
+    # A render fault rejects the first edit, so the stale-base conflict never happens; show why.
+    assert conflict.status_code == 409, (edited.status_code, edited.text[:600], conflict.text[:600])
     approval = client.post(f"{base}/{ASSET}/approval", headers=headers()).json()
     release = client.post(f"{base}/{ASSET}/release", json={"approval_id": approval["approval_id"]}, headers=headers()).json()
     return {

@@ -78,6 +78,14 @@ jobs:
       - name: Build
         run: npm run build
 
+      # The smoke test and the operator CLIs assert properties of a freshly migrated
+      # database ("reconciles clean"); the suite above leaves deliberate test rows in
+      # aisl_test, so give them the fresh database they describe.
+      - name: Create a fresh database for the smoke test
+        env:
+          PGPASSWORD: aisl
+        run: psql -h 127.0.0.1 -U aisl -d aisl_test -v ON_ERROR_STOP=1 -c 'CREATE DATABASE aisl_smoke'
+
       - name: Smoke-test the compiled gateway
         env:
           NODE_ENV: development
@@ -85,7 +93,7 @@ jobs:
           HOST: 127.0.0.1
           PORT: 8080
           PUBLIC_BASE_URL: http://127.0.0.1:8080
-          DATABASE_URL: postgresql://aisl:aisl@127.0.0.1:5432/aisl_test
+          DATABASE_URL: postgresql://aisl:aisl@127.0.0.1:5432/aisl_smoke
           REDIS_URL: redis://127.0.0.1:6379
           STRIPE_SECRET_KEY: sk_test_ci
           STRIPE_WEBHOOK_SECRET: whsec_test_ci
@@ -142,7 +150,7 @@ jobs:
           NODE_ENV: development
           LOG_LEVEL: warn
           PUBLIC_BASE_URL: http://127.0.0.1:8080
-          DATABASE_URL: postgresql://aisl:aisl@127.0.0.1:5432/aisl_test
+          DATABASE_URL: postgresql://aisl:aisl@127.0.0.1:5432/aisl_smoke
           REDIS_URL: redis://127.0.0.1:6379
           STRIPE_SECRET_KEY: sk_test_ci
           STRIPE_WEBHOOK_SECRET: whsec_test_ci

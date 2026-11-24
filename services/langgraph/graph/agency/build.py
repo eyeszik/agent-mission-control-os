@@ -6,6 +6,7 @@ from services.langgraph.agency.delivery.workflow import (
     LEGACY_WORKFLOW,
     topology,
 )
+from services.langgraph.agency.sop.guard import guard_stage
 from services.langgraph.graph.agency.contract_check import contract_check_node
 from services.langgraph.graph.state import GraphState
 from services.langgraph.persistence.checkpoints import get_checkpointer
@@ -61,7 +62,9 @@ def build_agency_workflow(workflow_version: str = LEGACY_WORKFLOW) -> StateGraph
     graph_shape = topology(workflow_version)
     workflow = StateGraph(GraphState)
     for node_id in graph_shape["node_ids"]:
-        workflow.add_node(node_id, _NODE_FUNCTIONS[node_id])
+        # Each stage is wrapped in its SOP pre/post-condition guard. The guard
+        # is behaviour, not topology, so graph_fingerprint is unchanged.
+        workflow.add_node(node_id, guard_stage(node_id, _NODE_FUNCTIONS[node_id]))
     workflow.set_entry_point(graph_shape["node_ids"][0])
     for source, target in graph_shape["edges"]:
         workflow.add_edge(source, target)

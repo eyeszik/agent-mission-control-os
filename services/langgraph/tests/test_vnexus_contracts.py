@@ -101,3 +101,7 @@ def test_vnexus_responses_match_the_recorded_contract(world):
     recorded = json.loads(FIXTURE.read_text())
     problems = _shape_matches(json.loads(json.dumps(live, default=str)), recorded)
     assert not problems, "VNEXUS API drifted from the Zod contract fixture:\n" + "\n".join(problems)
+    for source, qc in (("live", live["media_job"]["qc"]), ("recorded", recorded["media_job"]["qc"])):
+        assert qc["scope"] == "TECHNICAL_FORMAT_CHECKS_ONLY", source
+        assert qc["rights_status"] == "NOT_MEASURED" and qc["release_decision"] == "NOT_EVALUATED", source
+        assert all(check["check"] != "source_rights" for check in qc["checks"]), source

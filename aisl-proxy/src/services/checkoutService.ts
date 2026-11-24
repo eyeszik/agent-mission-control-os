@@ -139,9 +139,21 @@ export class CheckoutService {
       throw AislError.badRequest('invalid_charge_amount', 'quoted price multiplied by quantity is not positive');
     }
 
+    // The platform collects the whole commission out of the charge, not just
+    // its own slice: it owes the agent the rest, and pays that from its own
+    // balance. Computed on the amount actually being charged, which is the
+    // only figure known at this point — settlement later books on
+    // min(order total, captured), and logs when the two disagree.
+    const { commissionTotalCents } = computeCommissionSplit({
+      grossAmountCents: chargeAmountCents,
+      commissionRateBps: merchant.commissionRateBps,
+      aislCutBps: merchant.aislCutBps,
+    });
+
     const payment = await this.deps.payments.authorize({
       merchant,
       amountCents: chargeAmountCents,
+      applicationFeeCents: commissionTotalCents,
       currency: binding.currency,
       token: request.payment_credential.token,
       tokenType: request.payment_credential.type,
@@ -215,6 +227,20 @@ export class CheckoutService {
         'merchant order total differs from the captured amount; settling on the lower of the two',
       );
     }
+    if (order.totalAmountCents < payment.amountCents && payment.applicationFeeCents > 0) {
+      // The application fee was taken on the quoted charge; commission is
+      // booked on the lower settled gross. The difference is a small overage
+      // sitting in the platform balance against this merchant.
+      this.deps.logger.warn(
+        {
+          click_id: binding.clickId,
+          external_order_id: order.externalOrderId,
+          application_fee_cents: payment.applicationFeeCents,
+          settled_gross_cents: order.totalAmountCents,
+        },
+        'application fee was collected on a larger charge than the settled gross',
+      );
+    }
     // Commission is never paid on money that was not captured, and never on
     // more than the merchant actually billed.
     const grossAmountCents = Math.min(order.totalAmountCents, payment.amountCents);
@@ -278,6 +304,8 @@ export class CheckoutService {
       const refund = await this.deps.payments.refund({
         paymentIntentId: payment.paymentIntentId,
         reason: 'aisl_order_dispatch_failed',
+        // Must target the account the charge lives on, or the lookup misses.
+        stripeAccount: payment.stripeAccount,
       });
       this.deps.logger.warn(
         {

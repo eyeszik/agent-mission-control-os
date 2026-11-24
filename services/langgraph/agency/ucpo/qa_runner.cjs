@@ -111,6 +111,48 @@ async function main() {
         return { version: window.axe.version, violations: res.violations.map((v) => ({ id: v.id, impact: v.impact,
           nodes: v.nodes.length, sample: (v.nodes[0] && v.nodes[0].target.join(" ")) || "" })) };
       });
+      // Exercise links in a second page so clicks do not disturb screenshot/keyboard evidence.
+      // Route fulfilment still applies and every non-local request is aborted and recorded.
+      const clickPage = await ctx.newPage();
+      clickPage.on("console", (m) => { if (m.type() === "error") r.console.push(m.text().slice(0, 300)); });
+      clickPage.on("pageerror", (e) => r.console.push("pageerror: " + String(e).slice(0, 300)));
+      const ctas = await page.locator('a[data-req$=".cta"]').evaluateAll((els) =>
+        els.map((el) => ({ href: el.getAttribute("href"), req: el.getAttribute("data-req") })));
+      r.cta_interactions = [];
+      for (let i = 0; i < ctas.length; i++) {
+        const item = ctas[i];
+        try {
+          const target = new URL(item.href, ORIGIN + route);
+          if (target.origin !== ORIGIN) throw new Error("external CTA");
+          await clickPage.goto(ORIGIN + route, { waitUntil: "domcontentloaded" });
+          await clickPage.locator('a[data-req$=".cta"]').nth(i).click({ timeout: 5000 });
+          await clickPage.waitForURL((u) => u.pathname === target.pathname && u.hash === target.hash, { timeout: 5000 });
+          const targetPresent = !target.hash || await clickPage.evaluate((id) => {
+            const el = document.getElementById(id); return !!el && el.checkVisibility();
+          }, decodeURIComponent(target.hash.slice(1)));
+          r.cta_interactions.push({ ...item, ok: targetPresent, detail: targetPresent ? "target reached" : "anchor missing or hidden" });
+        } catch (e) { r.cta_interactions.push({ ...item, ok: false, detail: String(e).slice(0, 200) }); }
+      }
+      if (route === "/") {
+        const nav = await page.locator("nav a").evaluateAll((els) => els.map((el) => ({
+          href: el.getAttribute("href"), req: el.getAttribute("data-req")
+        })));
+
+        r.nav_interactions = [];
+        for (let i = 0; i < nav.length; i++) {
+          const item = nav[i];
+          try {
+            const target = new URL(item.href, ORIGIN + route);
+            if (target.origin !== ORIGIN) throw new Error("external navigation");
+            await clickPage.goto(ORIGIN + route, { waitUntil: "domcontentloaded" });
+            await clickPage.locator("nav a").nth(i).click({ timeout: 5000 });
+            await clickPage.waitForURL((u) => u.pathname === target.pathname, { timeout: 5000 });
+            const main = await clickPage.locator("main[data-page]").count();
+            r.nav_interactions.push({ ...item, ok: main === 1, detail: main === 1 ? "page reached" : "main missing" });
+          } catch (e) { r.nav_interactions.push({ ...item, ok: false, detail: String(e).slice(0, 200) }); }
+        }
+      }
+      await clickPage.close();
       // Keyboard: the first stop must be the skip link, and every stop must show a visible indicator.
       const stops = [];
       for (let i = 0; i < 30; i++) {

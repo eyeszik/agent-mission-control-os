@@ -15,7 +15,7 @@ from services.langgraph.persistence import vnexus as db
 from services.langgraph.security.auth import Principal
 
 from . import immune, media_fabric, service
-from .creative_service import _graph
+from .creative_service import _graph, require_brand_graph_access
 from .genome import SCOPE_ORDER, GenomeDocument, GenomeLayer, Scope, VersionStatus, ancestor_refs, resolve
 from .graph import NodeKind
 from .multiverse import ChangeSet, apply_changes, compare_with_base
@@ -45,9 +45,14 @@ def _is_descendant(scope: Scope, scope_ref: str, other: dict) -> bool:
 
 
 def snapshot(principal: Principal, brand_id: str) -> dict[str, Any]:
-    brand = service.brand_for(principal, brand_id)
-    service.authorize(principal, brand["owner_project_id"])
+    require_brand_graph_access(principal, brand_id)
     approved = _approved(brand_id)
+    branches = db.list_branches(brand_id)
+    in_review = db.list_versions(brand_id, statuses=["IN_REVIEW"])
+    # A brand-wide summary includes child-project identifiers and aggregates.
+    # Refuse an incomplete view rather than disclose or silently omit projects.
+    for row in (*approved, *branches, *in_review):
+        service.authorize(principal, row["project_id"])
     scopes = []
     for row in approved:
         res = resolve(_layers(brand_id, Scope(row["scope"]), row["scope_ref"]))
@@ -55,8 +60,6 @@ def snapshot(principal: Principal, brand_id: str) -> dict[str, Any]:
                        "resolution_hash": res.resolution_hash, "failed_findings": [f.constraint_id for f in res.findings if not f.passed],
                        "conflicts": [c.reason.value for c in res.conflicts]})
     g = _graph(brand_id)
-    branches = db.list_branches(brand_id)
-    in_review = db.list_versions(brand_id, statuses=["IN_REVIEW"])
     produced = [n for n in g.nodes.values() if n.kind in (NodeKind.ASSET, NodeKind.EXPERIENCE)]
     return {"brand_id": brand_id, "approved_scopes": scopes, "graph": g.snapshot(), "produced_outputs": len(produced),
             "open_branches": sum(1 for b in branches if b["state"] == "OPEN"), "versions_in_review": len(in_review),
@@ -67,8 +70,14 @@ def snapshot(principal: Principal, brand_id: str) -> dict[str, Any]:
 
 
 def simulate_change(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, changes: ChangeSet) -> dict[str, Any]:
-    brand = service.brand_for(principal, brand_id)
+    # The simulation evaluates the brand-wide graph as well as inherited layers.
+    brand = require_brand_graph_access(principal, brand_id)
     service.authorize(principal, service.scope_project(brand, scope, scope_ref))
+    approved = _approved(brand_id)
+    # This simulation compares descendant scopes and graph impact across the
+    # brand. Inaccessible project scopes cannot be exposed in the result.
+    for row in approved:
+        service.authorize(principal, row["project_id"])
     base = db.approved_version(brand_id, scope.value, scope_ref)
     if base is None:
         raise db.VnexusNotFound("no approved version at this scope to simulate against")
@@ -77,7 +86,7 @@ def simulate_change(principal: Principal, brand_id: str, *, scope: Scope, scope_
     ancestors = [layer for layer in _layers(brand_id, scope, scope_ref) if layer.scope_ref != scope_ref or layer.scope is not scope]
     own = compare_with_base(base_doc, changes, ancestors, scope_ref=scope_ref, scope=scope.value)
     descendants = []
-    for row in _approved(brand_id):
+    for row in approved:
         if not _is_descendant(scope, scope_ref, row):
             continue
         s, ref = Scope(row["scope"]), row["scope_ref"]

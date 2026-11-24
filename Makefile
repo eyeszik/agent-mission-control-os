@@ -78,3 +78,5 @@ gates:
 	@python3 scripts/verify_design_tokens.py
 	@python3 scripts/verify_manifest.py
 	@python3 scripts/verify_guidance_registry.py
+	@python3 scripts/acceptance/discover.py > /dev/null
+	@python3 scripts/verify_source_reconciliation.py

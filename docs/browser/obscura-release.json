@@ -1,0 +1,27 @@
+{
+  "release": "v0.2.7",
+  "source": "https://github.com/h4ckf0r0day/obscura/releases/tag/v0.2.7",
+  "license": "Apache-2.0",
+  "assets": [
+    {
+      "name": "obscura-aarch64-linux.tar.gz",
+      "url": "https://github.com/h4ckf0r0day/obscura/releases/download/v0.2.7/obscura-aarch64-linux.tar.gz",
+      "digest": "sha256:4ee0aeeb38fa8bb2cb004ba104abe1c79f1bdfd02f51672c694e8234a5ae0e5c"
+    },
+    {
+      "name": "obscura-aarch64-macos.tar.gz",
+      "url": "https://github.com/h4ckf0r0day/obscura/releases/download/v0.2.7/obscura-aarch64-macos.tar.gz",
+      "digest": "sha256:fc7e73f23058f18d6d5be983d83b24ba374d12167677657a307a9476c0f5a7c1"
+    },
+    {
+      "name": "obscura-x86_64-linux.tar.gz",
+      "url": "https://github.com/h4ckf0r0day/obscura/releases/download/v0.2.7/obscura-x86_64-linux.tar.gz",
+      "digest": "sha256:11b53d27cd743e00e196e216920e7f3f794cf378e3f1792b8d25d3beabaf9cad"
+    },
+    {
+      "name": "obscura-x86_64-macos.tar.gz",
+      "url": "https://github.com/h4ckf0r0day/obscura/releases/download/v0.2.7/obscura-x86_64-macos.tar.gz",
+      "digest": "sha256:c47383e5b5551e09d2055ee7bdcce788af409fb4394e39bdaf179734df18e829"
+    }
+  ]
+}

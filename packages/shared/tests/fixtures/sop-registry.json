@@ -1,0 +1,930 @@
+{
+  "schema_version": "amc-sop-registry/v1",
+  "description": "Ordered standard operating procedures for the live agency graph and its recovery paths. The registry describes and guards existing behaviour; it grants no authority.",
+  "owner_principals": [
+    "server",
+    "membership:approver"
+  ],
+  "steps": [
+    {
+      "sop_id": "SOP-AGY-01",
+      "stage_name": "brief_intake",
+      "kind": "production",
+      "owner_role": "market_researcher",
+      "roleos_skill": "account-manager",
+      "entry_preconditions": [
+        "run.metadata.input_data.brief is present (sanitized and PII-quarantined before use)"
+      ],
+      "requires_state": [],
+      "input_schema": {
+        "run.metadata.input_data.brief": "CampaignBrief"
+      },
+      "output_schema": {
+        "brief": "CampaignBrief"
+      },
+      "exit_postconditions": [
+        "agency.brief written"
+      ],
+      "idempotency_key_formula": "run: reserve_idempotency(scope='{tenant_id}:{user_id}:agency.create:{project_id}', key=Idempotency-Key, request_hash); stage: LangGraph checkpoint thread_id=run_id",
+      "gate_binding": {
+        "governance_level": "G1",
+        "gates": [
+          "N3:get_role(market_researcher)"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "on_exception": "run status=failed; idempotency FAILED"
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/graph/agency/nodes.py::_assert_live_stage_contract",
+        "services/langgraph/security/pii.py::quarantine_payload"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_agency_pipeline.py::test_pipeline_stage_order_is_stable"
+      ]
+    },
+    {
+      "sop_id": "SOP-AGY-02",
+      "stage_name": "brand_strategy",
+      "kind": "production",
+      "owner_role": "brand_strategist",
+      "roleos_skill": "brand-strategist",
+      "entry_preconditions": [
+        "agency.brief present"
+      ],
+      "requires_state": [
+        "brief"
+      ],
+      "input_schema": {
+        "brief": "CampaignBrief"
+      },
+      "output_schema": {
+        "brand_strategy": "BrandStrategy"
+      },
+      "exit_postconditions": [
+        "agency.brand_strategy written",
+        "generation provenance appended; degraded output sets agency.degraded"
+      ],
+      "idempotency_key_formula": "LangGraph checkpoint thread_id=run_id; a resumed run replays from the last checkpoint and does not re-execute completed nodes",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "N3:assert_role_may_produce(brand_strategist, positioning_statement)"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "on_exception": "run status=failed; idempotency FAILED"
+      },
+      "failure_disposition": "FALLBACK_DEGRADED",
+      "enforced_by": [
+        "services/langgraph/graph/agency/nodes.py::_assert_live_stage_contract",
+        "services/langgraph/graph/agency/nodes.py::_record_generation"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_m0_truthful_records.py::test_a_degraded_run_stores_computed_coverage_and_not_measured_scores"
+      ]
+    },
+    {
+      "sop_id": "SOP-AGY-03",
+      "stage_name": "creative_concepting",
+      "kind": "production",
+      "owner_role": "creative_director",
+      "roleos_skill": "creative-director",
+      "entry_preconditions": [
+        "agency.brief present",
+        "agency.brand_strategy present"
+      ],
+      "requires_state": [
+        "brief",
+        "brand_strategy"
+      ],
+      "input_schema": {
+        "brief": "CampaignBrief",
+        "brand_strategy": "BrandStrategy"
+      },
+      "output_schema": {
+        "creative_concepts": "list[CreativeConcept]"
+      },
+      "exit_postconditions": [
+        "agency.creative_concepts written"
+      ],
+      "idempotency_key_formula": "LangGraph checkpoint thread_id=run_id",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "N3:assert_role_may_produce(creative_director, creative_concept)"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "on_exception": "run status=failed; idempotency FAILED"
+      },
+      "failure_disposition": "FALLBACK_DEGRADED",
+      "enforced_by": [
+        "services/langgraph/graph/agency/nodes.py::_assert_live_stage_contract",
+        "services/langgraph/graph/agency/nodes.py::_record_generation"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_design_corpus.py::test_degraded_corpus_changes_no_release_semantics"
+      ]
+    },
+    {
+      "sop_id": "SOP-AGY-04",
+      "stage_name": "copywriting",
+      "kind": "production",
+      "owner_role": "copywriter",
+      "roleos_skill": "copywriter",
+      "entry_preconditions": [
+        "agency.brand_strategy present",
+        "agency.creative_concepts present"
+      ],
+      "requires_state": [
+        "brand_strategy",
+        "creative_concepts"
+      ],
+      "input_schema": {
+        "brand_strategy": "BrandStrategy",
+        "creative_concepts": "list[CreativeConcept]"
+      },
+      "output_schema": {
+        "copy_variants": "list[CopyVariant]"
+      },
+      "exit_postconditions": [
+        "agency.copy_variants written"
+      ],
+      "idempotency_key_formula": "LangGraph checkpoint thread_id=run_id",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "N3:assert_role_may_produce(copywriter, copy_variant)"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "on_exception": "run status=failed; idempotency FAILED"
+      },
+      "failure_disposition": "FALLBACK_DEGRADED",
+      "enforced_by": [
+        "services/langgraph/graph/agency/nodes.py::_assert_live_stage_contract",
+        "services/langgraph/graph/agency/nodes.py::_record_generation"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_agency_pipeline.py::test_agency_graph_pauses_before_delivery_and_creates_approval"
+      ]
+    },
+    {
+      "sop_id": "SOP-AGY-05",
+      "stage_name": "design_brief",
+      "kind": "production",
+      "owner_role": "design_lead",
+      "roleos_skill": "art-director",
+      "entry_preconditions": [
+        "agency.brief present",
+        "agency.brand_strategy present"
+      ],
+      "requires_state": [
+        "brief",
+        "brand_strategy"
+      ],
+      "input_schema": {
+        "brief": "CampaignBrief",
+        "brand_strategy": "BrandStrategy"
+      },
+      "output_schema": {
+        "design_brief": "DesignBrief"
+      },
+      "exit_postconditions": [
+        "agency.design_brief written",
+        "UI briefs also write agency.ui_ux_compilation"
+      ],
+      "idempotency_key_formula": "LangGraph checkpoint thread_id=run_id",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "N3:assert_role_may_produce(design_lead, design_brief)"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "on_exception": "run status=failed; idempotency FAILED"
+      },
+      "failure_disposition": "FALLBACK_DEGRADED",
+      "enforced_by": [
+        "services/langgraph/graph/agency/nodes.py::_assert_live_stage_contract",
+        "services/langgraph/graph/agency/nodes.py::_record_generation"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_ui_ux.py::test_ui_brief_compiles_a_spec_and_keeps_degraded_and_hitl_semantics"
+      ]
+    },
+    {
+      "sop_id": "SOP-AGY-06",
+      "stage_name": "campaign_assembly",
+      "kind": "production",
+      "owner_role": "growth_lead",
+      "roleos_skill": "creative-producer",
+      "entry_preconditions": [
+        "agency.brief, brand_strategy, creative_concepts, copy_variants and design_brief present"
+      ],
+      "requires_state": [
+        "brief",
+        "brand_strategy",
+        "creative_concepts",
+        "copy_variants",
+        "design_brief"
+      ],
+      "input_schema": {
+        "brief": "CampaignBrief",
+        "brand_strategy": "BrandStrategy",
+        "creative_concepts": "list[CreativeConcept]",
+        "copy_variants": "list[CopyVariant]",
+        "design_brief": "DesignBrief"
+      },
+      "output_schema": {
+        "campaign_package": "CampaignPackage"
+      },
+      "exit_postconditions": [
+        "agency.campaign_package written"
+      ],
+      "idempotency_key_formula": "LangGraph checkpoint thread_id=run_id",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "N3:assert_role_may_produce(growth_lead, campaign_package)"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "on_exception": "run status=failed; idempotency FAILED"
+      },
+      "failure_disposition": "FALLBACK_DEGRADED",
+      "enforced_by": [
+        "services/langgraph/graph/agency/nodes.py::_assert_live_stage_contract"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_agency_pipeline.py::test_agency_graph_pauses_before_delivery_and_creates_approval"
+      ]
+    },
+    {
+      "sop_id": "SOP-AGY-07",
+      "stage_name": "brand_safety_qa",
+      "kind": "production",
+      "owner_role": "brand_safety_reviewer",
+      "roleos_skill": "qa-engineer",
+      "entry_preconditions": [
+        "agency.campaign_package present",
+        "agency.design_brief present"
+      ],
+      "requires_state": [
+        "campaign_package",
+        "design_brief"
+      ],
+      "input_schema": {
+        "campaign_package": "CampaignPackage",
+        "design_brief": "DesignBrief"
+      },
+      "output_schema": {
+        "qa_report": "QAReport"
+      },
+      "exit_postconditions": [
+        "agency.qa_report written",
+        "qa_report.release_blocked is true when any generation was degraded"
+      ],
+      "idempotency_key_formula": "LangGraph checkpoint thread_id=run_id",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "N3:assert_role_may_produce(brand_safety_reviewer, qa_report)",
+          "N2:FALLBACK_DEGRADED release guard input"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "on_exception": "run status=failed; idempotency FAILED"
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/graph/agency/nodes.py::_assert_live_stage_contract",
+        "services/langgraph/quality/brand_safety.py::evaluate_brand_compliance"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_agency_pipeline.py::test_brand_safety_qa_node_flags_banned_claims_in_assembled_copy"
+      ]
+    },
+    {
+      "sop_id": "SOP-AGY-08",
+      "stage_name": "contract_check",
+      "kind": "measurement",
+      "owner_role": "server",
+      "roleos_skill": null,
+      "entry_preconditions": [
+        "agency.campaign_package present",
+        "run pinned to agency/v2-contract"
+      ],
+      "requires_state": [
+        "campaign_package"
+      ],
+      "input_schema": {
+        "campaign_package": "CampaignPackage",
+        "delivery_contract": "DeliveryContract"
+      },
+      "output_schema": {
+        "contract_evaluation": "ContractEvaluation"
+      },
+      "exit_postconditions": [
+        "agency.contract_evaluation written; recorded only in shadow mode, read by the release gate in enforce mode"
+      ],
+      "idempotency_key_formula": "LangGraph checkpoint thread_id=run_id",
+      "gate_binding": {
+        "governance_level": "G0",
+        "gates": [
+          "delivery contract critic (no model, no tool, no artifact)"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "on_exception": "run status=failed; idempotency FAILED"
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/graph/agency/contract_check.py::contract_check_node",
+        "services/langgraph/persistence/delivery.py::evaluate_run_contract"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_unified_delivery.py::test_v2_topology_inserts_contract_check_before_hitl_and_keeps_static_interrupt"
+      ]
+    },
+    {
+      "sop_id": "SOP-AGY-09",
+      "stage_name": "hitl_gate",
+      "kind": "gate",
+      "owner_role": "release_manager",
+      "roleos_skill": "account-director",
+      "entry_preconditions": [
+        "agency.campaign_package present",
+        "agency.qa_report present"
+      ],
+      "requires_state": [
+        "campaign_package",
+        "qa_report"
+      ],
+      "input_schema": {
+        "campaign_package": "CampaignPackage",
+        "qa_report": "QAReport"
+      },
+      "output_schema": {
+        "pending_approval_id": "str"
+      },
+      "exit_postconditions": [
+        "approval row opened for the run with its subject hash",
+        "agency.pending_approval_id written",
+        "graph pauses at interrupt_before=delivery"
+      ],
+      "idempotency_key_formula": "approval bound to run_id and subject_hash; LangGraph checkpoint thread_id=run_id",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "HITL:hash-bound approval",
+          "interrupt_before=delivery"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "on_exception": "run status=failed; idempotency FAILED"
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/graph/agency/nodes.py::hitl_gate_node",
+        "services/langgraph/persistence/approvals.py::create_approval_request",
+        "services/langgraph/agency/delivery/workflow.py::INTERRUPT_POINTS"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_agency_pipeline.py::test_agency_graph_pauses_before_delivery_and_creates_approval",
+        "services/langgraph/tests/test_approvals.py::test_approval_subject_binding_and_stale_marking"
+      ]
+    },
+    {
+      "sop_id": "SOP-AGY-10",
+      "stage_name": "delivery",
+      "kind": "production",
+      "owner_role": "release_manager",
+      "roleos_skill": "project-manager",
+      "entry_preconditions": [
+        "approval decided approve by an approver who is not the initiator",
+        "subject hash unchanged since approval",
+        "N2 release guards pass (no FALLBACK_DEGRADED)",
+        "run status CAS needs_approval -> delivering"
+      ],
+      "requires_state": [
+        "campaign_package",
+        "qa_report",
+        "pending_approval_id"
+      ],
+      "input_schema": {
+        "campaign_package": "CampaignPackage",
+        "qa_report": "QAReport",
+        "pending_approval_id": "str"
+      },
+      "output_schema": {
+        "delivery": "json_bundle_v1"
+      },
+      "exit_postconditions": [
+        "agency.delivery written; no publication, spend or send is dispatched"
+      ],
+      "idempotency_key_formula": "reserve_idempotency(scope='{tenant_id}:{user_id}:agency.resume:{run_id}', key=Idempotency-Key); compare_and_set_run_status(needs_approval -> delivering)",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "N2:release_guard_failures",
+          "HITL:hash-bound approval",
+          "approver role + separation of duties"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "lease": "run status CAS; a concurrent resume receives 409",
+        "on_exception": "run status=failed; idempotency FAILED"
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/api/routes/agency.py::release_guard_failures",
+        "services/langgraph/graph/agency/nodes.py::delivery_node",
+        "services/langgraph/security/approval_authority.py::assert_may_decide"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_delivery_gate.py::test_unresolved_approval_blocks_delivery",
+        "services/langgraph/tests/test_agency_pipeline.py::test_agency_graph_resumes_and_delivers_after_successful_provider_approval"
+      ]
+    },
+    {
+      "sop_id": "SOP-REC-DEG-01",
+      "stage_name": "record_degraded_generation",
+      "kind": "recovery",
+      "owner_role": "server",
+      "roleos_skill": null,
+      "entry_preconditions": [
+        "a generation returned mode=FALLBACK_DEGRADED"
+      ],
+      "requires_state": [],
+      "input_schema": {
+        "generation_outcome": "GenerationOutcome"
+      },
+      "output_schema": {
+        "degraded": "bool"
+      },
+      "exit_postconditions": [
+        "agency.degraded=true",
+        "provenance records the fallback"
+      ],
+      "idempotency_key_formula": "LangGraph checkpoint thread_id=run_id",
+      "gate_binding": {
+        "governance_level": "G1",
+        "gates": [
+          "N2:FALLBACK_DEGRADED"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0
+      },
+      "failure_disposition": "FALLBACK_DEGRADED",
+      "enforced_by": [
+        "services/langgraph/graph/agency/nodes.py::_record_generation"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_m0_truthful_records.py::test_a_degraded_run_stores_computed_coverage_and_not_measured_scores"
+      ]
+    },
+    {
+      "sop_id": "SOP-REC-DEG-02",
+      "stage_name": "refuse_degraded_delivery",
+      "kind": "recovery",
+      "owner_role": "server",
+      "roleos_skill": null,
+      "entry_preconditions": [
+        "agency.degraded=true or qa_report.release_blocked=true"
+      ],
+      "requires_state": [],
+      "input_schema": {
+        "qa_report": "QAReport"
+      },
+      "output_schema": {
+        "http_status": "409"
+      },
+      "exit_postconditions": [
+        "resume refused with 409 even after human approval",
+        "delivery_node raises if reached"
+      ],
+      "idempotency_key_formula": "reserve_idempotency(scope='{tenant_id}:{user_id}:agency.resume:{run_id}')",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "N2:release_guard_failures"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/agency/kernel/lifecycle.py::release_guard_failures",
+        "services/langgraph/graph/agency/nodes.py::delivery_node"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_delivery_gate.py::test_degraded_output_blocks_before_the_approval_guard",
+        "services/langgraph/tests/test_delivery_gate.py::test_degraded_output_is_not_discharged_by_human_approval",
+        "services/langgraph/tests/test_agency_ontology.py::test_degraded_generation_blocks_every_client_visible_transition"
+      ]
+    },
+    {
+      "sop_id": "SOP-REC-STALE-01",
+      "stage_name": "refuse_stale_approval",
+      "kind": "recovery",
+      "owner_role": "server",
+      "roleos_skill": null,
+      "entry_preconditions": [
+        "the approved subject hash differs from the current run output, or a framework task write carries an old version"
+      ],
+      "requires_state": [],
+      "input_schema": {
+        "approval": "Approval",
+        "current_subject_hash": "str"
+      },
+      "output_schema": {
+        "http_status": "409"
+      },
+      "exit_postconditions": [
+        "409 returned",
+        "approval marked stale",
+        "OBSERVATION_MISMATCH recovery case opened"
+      ],
+      "idempotency_key_formula": "idempotency record failed with reason approval_stale",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "HITL:hash-bound approval",
+          "CAS:version"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/api/routes/agency.py::_agency_subject_hash",
+        "services/langgraph/persistence/approvals.py::mark_approval_stale",
+        "services/langgraph/agency/reliability/service.py::open_recovery_case"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_sop_contracts.py::test_resume_after_the_run_output_changed_is_a_409_and_stales_the_approval",
+        "services/langgraph/tests/test_agency_framework.py::test_stale_version_is_an_explicit_conflict"
+      ]
+    },
+    {
+      "sop_id": "SOP-REC-STALE-02",
+      "stage_name": "require_fresh_approval",
+      "kind": "recovery",
+      "owner_role": "membership:approver",
+      "roleos_skill": null,
+      "entry_preconditions": [
+        "previous approval is stale"
+      ],
+      "requires_state": [],
+      "input_schema": {
+        "approval": "Approval"
+      },
+      "output_schema": {
+        "approval": "Approval"
+      },
+      "exit_postconditions": [
+        "only a new approval bound to the current hash can release"
+      ],
+      "idempotency_key_formula": "approval_id; decision recorded once via /approvals/{id}/decide",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "HITL:hash-bound approval",
+          "approver role + separation of duties"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/security/approval_authority.py::assert_may_decide"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_agency_kernel.py::test_artifact_revision_auto_stales_bound_approvals_and_opens_lineage_remediation"
+      ]
+    },
+    {
+      "sop_id": "SOP-REC-CRASH-01",
+      "stage_name": "hold_uncertain_effect",
+      "kind": "recovery",
+      "owner_role": "server",
+      "roleos_skill": null,
+      "entry_preconditions": [
+        "a dispatch or write was in flight when the process stopped"
+      ],
+      "requires_state": [],
+      "input_schema": {
+        "intent": "DurableIntent"
+      },
+      "output_schema": {
+        "status": "UNCERTAIN"
+      },
+      "exit_postconditions": [
+        "no new dispatch for the same intent until reconciled"
+      ],
+      "idempotency_key_formula": "execution_key / intent_id reserved before the effect",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "lease + reservation"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0,
+        "lease": "a live reservation inside its lease is never stolen"
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/agency/execution_fabric/consumer.py::EXECUTABLE_SIDE_EFFECTS"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_execution_fabric.py::test_x28_a_live_reservation_inside_its_lease_is_not_stolen",
+        "services/langgraph/tests/test_ace100_uncertainty.py::test_unconfirmed_effect_holds_new_r3_dispatch_until_reconciled"
+      ]
+    },
+    {
+      "sop_id": "SOP-REC-CRASH-02",
+      "stage_name": "reconcile_before_retry",
+      "kind": "recovery",
+      "owner_role": "server",
+      "roleos_skill": null,
+      "entry_preconditions": [
+        "an uncertain intent exists"
+      ],
+      "requires_state": [],
+      "input_schema": {
+        "intent": "DurableIntent"
+      },
+      "output_schema": {
+        "status": "APPLIED|NOT_APPLIED"
+      },
+      "exit_postconditions": [
+        "an applied effect is adopted without a second write",
+        "a not-applied effect is retried under the same intent"
+      ],
+      "idempotency_key_formula": "same execution_key / intent_id",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "read-back reconciliation"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 1,
+        "note": "one retry only after reconciliation proves NOT_APPLIED"
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/agency/durable/visual_job.py::reconcile"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_execution_fabric.py::test_x26_crash_after_intent_is_reconciled_then_retried",
+        "services/langgraph/tests/test_execution_fabric.py::test_x27_crash_after_the_write_is_adopted_without_a_second_version",
+        "services/langgraph/tests/test_abc_v6.py::test_t16_crash_after_dispatch_is_reconciled_by_adoption_not_redispatch"
+      ]
+    },
+    {
+      "sop_id": "SOP-REC-REJ-01",
+      "stage_name": "record_rejection",
+      "kind": "recovery",
+      "owner_role": "membership:approver",
+      "roleos_skill": null,
+      "entry_preconditions": [
+        "approval pending"
+      ],
+      "requires_state": [],
+      "input_schema": {
+        "decision": "reject"
+      },
+      "output_schema": {
+        "approval": "Approval"
+      },
+      "exit_postconditions": [
+        "approval rejected; the initiator may reject their own run"
+      ],
+      "idempotency_key_formula": "approval_id; Idempotency-Key on /approvals/{id}/decide",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "approver role"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/security/approval_authority.py::assert_may_decide"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_approval_authority.py::test_initiator_may_still_reject_their_own_run"
+      ]
+    },
+    {
+      "sop_id": "SOP-REC-REJ-02",
+      "stage_name": "refuse_rejected_delivery",
+      "kind": "recovery",
+      "owner_role": "server",
+      "roleos_skill": null,
+      "entry_preconditions": [
+        "approval rejected"
+      ],
+      "requires_state": [],
+      "input_schema": {
+        "approval": "Approval"
+      },
+      "output_schema": {
+        "http_status": "409"
+      },
+      "exit_postconditions": [
+        "resume refused with 409; run reaches rejected"
+      ],
+      "idempotency_key_formula": "reserve_idempotency(scope='{tenant_id}:{user_id}:agency.resume:{run_id}')",
+      "gate_binding": {
+        "governance_level": "G2",
+        "gates": [
+          "N2:release_guard_failures"
+        ]
+      },
+      "retry_and_lease_bounds": {
+        "node_retries": 0
+      },
+      "failure_disposition": "BLOCKED",
+      "enforced_by": [
+        "services/langgraph/agency/kernel/lifecycle.py::release_guard_failures"
+      ],
+      "tests": [
+        "services/langgraph/tests/test_delivery_gate.py::test_rejected_approval_blocks_delivery_and_names_the_decision"
+      ]
+    }
+  ],
+  "procedures": [
+    {
+      "procedure_id": "PIPELINE.agency/v1-legacy",
+      "kind": "pipeline",
+      "workflow_version": "agency/v1-legacy",
+      "steps": [
+        {
+          "sequence_index": 1,
+          "sop_id": "SOP-AGY-01"
+        },
+        {
+          "sequence_index": 2,
+          "sop_id": "SOP-AGY-02"
+        },
+        {
+          "sequence_index": 3,
+          "sop_id": "SOP-AGY-03"
+        },
+        {
+          "sequence_index": 4,
+          "sop_id": "SOP-AGY-04"
+        },
+        {
+          "sequence_index": 5,
+          "sop_id": "SOP-AGY-05"
+        },
+        {
+          "sequence_index": 6,
+          "sop_id": "SOP-AGY-06"
+        },
+        {
+          "sequence_index": 7,
+          "sop_id": "SOP-AGY-07"
+        },
+        {
+          "sequence_index": 8,
+          "sop_id": "SOP-AGY-09"
+        },
+        {
+          "sequence_index": 9,
+          "sop_id": "SOP-AGY-10"
+        }
+      ]
+    },
+    {
+      "procedure_id": "PIPELINE.agency/v2-contract",
+      "kind": "pipeline",
+      "workflow_version": "agency/v2-contract",
+      "steps": [
+        {
+          "sequence_index": 1,
+          "sop_id": "SOP-AGY-01"
+        },
+        {
+          "sequence_index": 2,
+          "sop_id": "SOP-AGY-02"
+        },
+        {
+          "sequence_index": 3,
+          "sop_id": "SOP-AGY-03"
+        },
+        {
+          "sequence_index": 4,
+          "sop_id": "SOP-AGY-04"
+        },
+        {
+          "sequence_index": 5,
+          "sop_id": "SOP-AGY-05"
+        },
+        {
+          "sequence_index": 6,
+          "sop_id": "SOP-AGY-06"
+        },
+        {
+          "sequence_index": 7,
+          "sop_id": "SOP-AGY-07"
+        },
+        {
+          "sequence_index": 8,
+          "sop_id": "SOP-AGY-08"
+        },
+        {
+          "sequence_index": 9,
+          "sop_id": "SOP-AGY-09"
+        },
+        {
+          "sequence_index": 10,
+          "sop_id": "SOP-AGY-10"
+        }
+      ]
+    },
+    {
+      "procedure_id": "RECOVERY.degraded_non_delivery",
+      "kind": "recovery",
+      "workflow_version": null,
+      "steps": [
+        {
+          "sequence_index": 1,
+          "sop_id": "SOP-REC-DEG-01"
+        },
+        {
+          "sequence_index": 2,
+          "sop_id": "SOP-REC-DEG-02"
+        }
+      ]
+    },
+    {
+      "procedure_id": "RECOVERY.stale_edit_conflict",
+      "kind": "recovery",
+      "workflow_version": null,
+      "steps": [
+        {
+          "sequence_index": 1,
+          "sop_id": "SOP-REC-STALE-01"
+        },
+        {
+          "sequence_index": 2,
+          "sop_id": "SOP-REC-STALE-02"
+        }
+      ]
+    },
+    {
+      "procedure_id": "RECOVERY.crash_reconciliation",
+      "kind": "recovery",
+      "workflow_version": null,
+      "steps": [
+        {
+          "sequence_index": 1,
+          "sop_id": "SOP-REC-CRASH-01"
+        },
+        {
+          "sequence_index": 2,
+          "sop_id": "SOP-REC-CRASH-02"
+        }
+      ]
+    },
+    {
+      "procedure_id": "RECOVERY.approval_rejected",
+      "kind": "recovery",
+      "workflow_version": null,
+      "steps": [
+        {
+          "sequence_index": 1,
+          "sop_id": "SOP-REC-REJ-01"
+        },
+        {
+          "sequence_index": 2,
+          "sop_id": "SOP-REC-REJ-02"
+        }
+      ]
+    }
+  ]
+}

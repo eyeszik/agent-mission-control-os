@@ -1,0 +1,16 @@
+
+> @amc/web@0.1.0 test /home/user/agent-mission-control-os/apps/web
+> vitest run tests
+
+
+ RUN  v5.1.0 /home/user/agent-mission-control-os/apps/web
+
+
+ Test Files  19 passed (19)
+      Tests  106 passed (106)
+   Start at  02:12:09
+   Duration  2.19s (import 74%, tests 12%, transform 12%, worker 2%)
+
+    Isolate  19 workers spawned · ~119ms startup each (spawn + environment, per file)
+             at least ~635ms faster with isolate: false — reuses workers across files instead of one per file
+

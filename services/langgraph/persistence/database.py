@@ -14,6 +14,10 @@ from services.langgraph.persistence import sqlite_db
 
 _VALID_BACKENDS = frozenset(AMC_DATABASE_BACKENDS)
 _JOINED_SESSION: ContextVar[Any] = ContextVar("amc_explicit_atomic_session", default=None)
+# Tenant context for PostgreSQL row-level security (supabase/migrations/20261121_amc_tenant_rls_v1.sql).
+RLS_MODE_ENV = "AMC_DB_RLS_MODE"
+RLS_MODES = ("off", "scoped")
+_TENANT_SCOPE: ContextVar[str | None] = ContextVar("amc_tenant_scope", default=None)
 
 
 def database_backend() -> str:
@@ -32,6 +36,74 @@ def require_database_url() -> str:
     if not value:
         raise RuntimeError("DATABASE_URL is required when AMC_DATABASE_BACKEND=postgres")
     return value
+
+
+def rls_mode() -> str:
+    """``off`` (default): no tenant context is sent. ``scoped``: an active :func:`tenant_scope` is sent
+    to PostgreSQL as ``amc.tenant_id`` for the transaction. Unknown values fail closed."""
+    value = (os.environ.get(RLS_MODE_ENV) or "off").strip().lower()
+    if value not in RLS_MODES:
+        raise RuntimeError(f"Unsupported {RLS_MODE_ENV}={value!r}; expected one of {RLS_MODES}")
+    return value
+
+
+@contextmanager
+def tenant_scope(tenant_id: str) -> Iterator[None]:
+    """Bind database work in this context to one tenant for row-level security.
+
+    It narrows, never widens: the tenant must come from the server-resolved
+    principal, and an inner scope may not switch to a different tenant.
+    """
+    tenant = (tenant_id or "").strip()
+    if not tenant:
+        raise ValueError("tenant_scope requires a non-empty tenant_id")
+    outer = _TENANT_SCOPE.get()
+    if outer is not None and outer != tenant:
+        raise PermissionError("a tenant scope cannot be switched to another tenant inside an outer scope")
+    token = _TENANT_SCOPE.set(tenant)
+    try:
+        yield
+    finally:
+        _TENANT_SCOPE.reset(token)
+
+
+def current_tenant_scope() -> str | None:
+    return _TENANT_SCOPE.get()
+
+
+def _apply_tenant_scope(conn: Any) -> None:
+    """Transaction-local, so a pooled connection never carries one tenant's context into the next use."""
+    tenant = _TENANT_SCOPE.get()
+    if tenant is not None and rls_mode() == "scoped":
+        conn.execute("SELECT set_config('amc.tenant_id', %s, true)", (tenant,))
+
+
+RLS_BYPASS_QUERY = """
+    SELECT r.rolsuper AS superuser, r.rolbypassrls AS bypassrls,
+           EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+                    WHERE n.nspname = 'amc' AND c.relkind = 'r' AND c.relrowsecurity AND NOT c.relforcerowsecurity
+                      AND pg_has_role(current_user, c.relowner, 'USAGE')) AS owns_tables
+      FROM pg_roles r WHERE r.rolname = current_user
+"""
+
+
+def rls_enforcement_problems(session: Any) -> list[str]:
+    """Why row-level security would NOT constrain the role this session runs as (empty when it would).
+
+    Read-only preflight for ``AMC_DB_RLS_MODE=scoped``: a superuser, a BYPASSRLS role, or a role that owns
+    (or is a member of the owner of) the non-FORCEd ``amc`` tables is exempt from every policy, so scoping it
+    would be a false assurance. It is not wired into startup or ``/ready``; enabling enforced mode in
+    production is a separate, approved change (docs/migrations/tenant-rls.md).
+    """
+    row = normalize_record(session.execute(RLS_BYPASS_QUERY).fetchone() or {})
+    problems = []
+    if row.get("superuser"):
+        problems.append("ROLE_IS_SUPERUSER: superusers bypass row-level security")
+    if row.get("bypassrls"):
+        problems.append("ROLE_HAS_BYPASSRLS: the role bypasses row-level security")
+    if row.get("owns_tables"):
+        problems.append("ROLE_OWNS_AMC_TABLES: table owners are exempt because RLS is enabled, not forced")
+    return problems
 
 
 def table(name: str) -> str:
@@ -104,6 +176,7 @@ def _get_pool():
 
     global _pool
     if _pool is None:
+        from psycopg.rows import dict_row
         from psycopg_pool import ConnectionPool
 
         min_size = int((os.environ.get("AMC_DB_POOL_MIN") or "0").strip() or "0")
@@ -115,6 +188,8 @@ def _get_pool():
             max_size=max_size,
             timeout=timeout,
             open=True,
+            # The same connection settings as the direct path, so callers see identical rows either way.
+            kwargs={"autocommit": False, "prepare_threshold": 0, "row_factory": dict_row},
         )
     return _pool
 
@@ -136,6 +211,7 @@ def _pooled_session() -> Iterator[DBSession]:
     with pool.connection() as conn:
         session = DBSession(conn, True)
         try:
+            _apply_tenant_scope(conn)
             yield session
             conn.commit()
         except Exception:
@@ -173,7 +249,9 @@ def transaction(*, write: bool = False) -> Iterator[DBSession]:
         return
 
     if _pool_enabled():
-        yield from _pooled_session()
+        # _pooled_session is a context manager, not a generator: enter it, do not iterate it.
+        with _pooled_session() as session:
+            yield session
         return
 
     import psycopg
@@ -186,6 +264,7 @@ def transaction(*, write: bool = False) -> Iterator[DBSession]:
         row_factory=dict_row,
     )
     try:
+        _apply_tenant_scope(conn)
         yield DBSession(conn, True)
         conn.commit()
     except Exception:

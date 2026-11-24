@@ -17,8 +17,10 @@ import hashlib
 import json
 import os
 import shutil
+import struct
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -117,21 +119,96 @@ def render_blender(intent: VisualIntent, out_dir: Path, *, logical_tick: Optiona
 
 
 def encode_video(frames: list[Path], out_path: Path, *, fps: int, logical_tick: Optional[int] = None) -> RenderReceipt:
+    """Encode bounded PNG frames in a fail-closed chroot, not on the host filesystem.
+
+    Frame bytes are copied into a private read-only input directory, and only the
+    resulting MP4 is copied out. This local boundary has no seccomp or cgroups;
+    it is not a hardened hostile multi-tenant container.
+    """
+    from services.langgraph.agency.ucpo.sandbox import probe_isolation, wrap
+    from services.langgraph.agency.visual.file_staging import UnsafeInput, copy_regular_bounded
+
+    def failed(reason: str, **details: object) -> RenderReceipt:
+        return RenderReceipt(route=Route.LOCAL_VIDEO, status="FAILED", observed_at=_now(), reasons=(reason,),
+                             logical_tick=logical_tick, **details)
+
     if not frames:
-        return RenderReceipt(route=Route.LOCAL_VIDEO, status="FAILED", observed_at=_now(), reasons=("NO_FRAMES",))
-    pattern = str(frames[0].parent / "frame_%04d.png")
-    cmd, isolated = _isolated([shutil.which("ffmpeg") or "ffmpeg", "-y", "-loglevel", "error", "-framerate", str(fps),
-                               "-i", pattern, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-                               "-crf", "18", str(out_path)])
+        return failed("NO_FRAMES")
+    if len(frames) > 900 or not isinstance(fps, int) or isinstance(fps, bool) or not 1 <= fps <= 60:
+        return failed("FRAME_OR_FPS_BUDGET_EXCEEDED")
+    executable = shutil.which("ffmpeg")
+    if not executable:
+        return failed("MISSING_DEPENDENCY:ffmpeg")
+    isolation = probe_isolation()
+    if not isolation.available:
+        return failed("BLOCKED_ISOLATION:" + "; ".join(isolation.reasons))
+    executable = str(Path(executable).resolve())
     started = time.monotonic()
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=FFMPEG_TIMEOUT_S, env=_env())
-    wall_ms = int((time.monotonic() - started) * 1000)
-    if proc.returncode != 0 or not out_path.is_file():
-        return RenderReceipt(route=Route.LOCAL_VIDEO, status="FAILED", command=tuple(cmd), exit_code=proc.returncode,
-                             wall_ms=wall_ms, observed_at=_now(), reasons=(proc.stderr[-400:],), network_isolated=isolated)
+    with tempfile.TemporaryDirectory(prefix="amc-encode-input-") as inp, tempfile.TemporaryDirectory(prefix="amc-encode-work-") as tmp:
+        inputs, work = Path(inp), Path(tmp)
+        dims: Optional[tuple[int, int]] = None
+        total_bytes = 0
+        try:
+            for index, frame in enumerate(frames, start=1):
+                staged = inputs / f"frame_{index:04d}.png"
+                remaining = 512 * 1024 * 1024 - total_bytes
+                try:
+                    total_bytes += copy_regular_bounded(Path(frame), staged, max_bytes=min(64 * 1024 * 1024, remaining))
+                except UnsafeInput as exc:
+                    return failed("FRAME_BYTE_BUDGET_EXCEEDED" if "budget" in str(exc) or remaining <= 0 else "FRAME_NOT_REGULAR")
+                with staged.open("rb") as source:
+                    header = source.read(24)
+                if len(header) != 24 or header[:8] != b"\x89PNG\r\n\x1a\n" or header[12:16] != b"IHDR":
+                    return failed("FRAME_NOT_PNG")
+                width, height = struct.unpack(">II", header[16:24])
+                if not width or not height or width % 2 or height % 2 or width * height * len(frames) > 400_000_000:
+                    return failed("FRAME_PIXEL_BUDGET_OR_DIMENSIONS_INVALID")
+                if dims is not None and dims != (width, height):
+                    return failed("FRAME_DIMENSIONS_MISMATCH")
+                dims = (width, height)
+        except OSError as exc:
+            return failed(f"FRAME_READ_FAILED:{type(exc).__name__}")
+        output = work / "encoded.mp4"
+        command = ["/usr/bin/prlimit", "--as=2147483648", "--cpu=300", "--fsize=268435456", "--", executable, "-nostdin", "-y", "-loglevel", "error",
+                   "-protocol_whitelist", "file,pipe", "-framerate", str(fps), "-i", str(inputs / "frame_%04d.png"),
+                   "-frames:v", str(len(frames)), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+                   "-crf", "18", str(output)]
+        cmd = wrap(command, cwd=work, home=work, node=isolation.node or "node", timeout_s=FFMPEG_TIMEOUT_S,
+                   readonly_paths=(Path(executable), inputs))
+        log = work / "encoder.err"
+        try:
+            with log.open("wb") as errors:
+                proc = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=errors, timeout=FFMPEG_TIMEOUT_S + 30)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            return failed(f"ENCODER_FAILED:{type(exc).__name__}", command=tuple(cmd),
+                          wall_ms=int((time.monotonic() - started) * 1000))
+        wall_ms = int((time.monotonic() - started) * 1000)
+        if proc.returncode != 0 or output.is_symlink() or not output.is_file() or output.stat().st_size > 256 * 1024 * 1024:
+            with log.open("rb") as errors:
+                errors.seek(max(0, log.stat().st_size - 400))
+                detail = errors.read(400).decode("utf-8", "replace")
+            return failed(detail or "ENCODER_OUTPUT_MISSING_OR_TOO_LARGE", command=tuple(cmd), exit_code=proc.returncode,
+                          wall_ms=wall_ms, network_isolated=False)
+        try:
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(dir=out_path.parent, prefix=".amc-encode-", delete=False) as dest:
+                temporary = Path(dest.name)
+                try:
+                    with output.open("rb") as source:
+                        shutil.copyfileobj(source, dest)
+                except BaseException:
+                    temporary.unlink(missing_ok=True)
+                    raise
+            try:
+                os.replace(temporary, out_path)
+            finally:
+                temporary.unlink(missing_ok=True)
+        except OSError as exc:
+            return failed(f"OUTPUT_WRITE_FAILED:{type(exc).__name__}", command=tuple(cmd), exit_code=proc.returncode,
+                          wall_ms=wall_ms, network_isolated=True)
     return RenderReceipt(route=Route.LOCAL_VIDEO, status="SUCCEEDED", command=tuple(cmd), exit_code=0, wall_ms=wall_ms,
                          outputs=({"path": str(out_path), "sha256": _sha(out_path), "bytes": out_path.stat().st_size},),
-                         observed_at=_now(), logical_tick=logical_tick, network_isolated=isolated)
+                         observed_at=_now(), logical_tick=logical_tick, network_isolated=True)
 
 
 def render_diffusion(intent: VisualIntent, prompt: str, out_dir: Path, *, logical_tick: Optional[int] = None) -> RenderReceipt:

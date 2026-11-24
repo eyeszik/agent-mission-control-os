@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 from services.langgraph.agency.ucpo import service
 from services.langgraph.agency.ucpo.capabilities import capability_matrix
 from services.langgraph.agency.ucpo.contracts import WebsiteBrief
+from services.langgraph.agency.ucpo.brand_web_contracts import BrandSiteRequest
 from services.langgraph.agency.ucpo.framework import framework_bindings
 from services.langgraph.api.routes._project_common import authorize_project_access, domain_errors, storage_adapter
 from services.langgraph.persistence.idempotency import complete_idempotency, fail_idempotency, hash_payload, reserve_idempotency
@@ -85,6 +86,34 @@ def compile_site(project_id: str, req: SiteRequest, idempotency_key: str = Heade
         raise
     complete_idempotency(scope, idempotency_key, result)
     return result
+
+
+@router.post("/projects/{project_id}/sites/from-brand", status_code=201)
+@domain_errors
+def compile_from_brand(project_id: str, req: BrandSiteRequest,
+                       idempotency_key: str = Header(..., alias="Idempotency-Key"),
+                       principal: Principal = Depends(get_principal)) -> dict:
+    """Compile approved brand values into UCPO; mapping contains keys, never authority."""
+    authorize_project_access(principal, project_id)
+    _operator(principal)
+    from services.langgraph.agency.exporter import resolve_export_root
+    from services.langgraph.agency.ucpo.brand_web import compile_from_brand as compile_brand
+    from services.langgraph.persistence.database import atomic_transaction
+
+    scope = f"{principal.tenant_id}:{principal.user_id}:ucpo.brand-site:{project_id}"
+    # Reservation, artifact heads/edges, job and receipt commit together. A
+    # crash rolls back the reservation too, so the same key can be retried.
+    with atomic_transaction():
+        reservation = reserve_idempotency(scope, idempotency_key, hash_payload(req.model_dump(mode="json")))
+        if reservation["state"] == "replay":
+            return reservation["record"]["result"]
+        if reservation["state"] in {"in_progress", "conflict"}:
+            raise HTTPException(status_code=409, detail="Idempotency-Key is in use or was reused with different input")
+        result = compile_brand(principal, project_id, req.site_id, req.brand_id, req.mapping,
+                               adapter=storage_adapter(), export_root=resolve_export_root())
+        if not complete_idempotency(scope, idempotency_key, result):
+            raise RuntimeError("could not complete brand-site idempotency receipt")
+        return result
 
 
 @router.get("/projects/{project_id}/sites/{site_id}")

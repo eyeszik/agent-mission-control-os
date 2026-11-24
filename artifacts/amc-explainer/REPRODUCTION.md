@@ -9,25 +9,30 @@ Tested on: Debian-ish x86_64, Python 3.11.2, Node v22.22.3, 2026-11-09.
 ```bash
 # 0. Pin the source
 git clone <this-repo> && cd agent-mission-control-os
-git checkout f947863a85dfb31f56f06b37b0dfeafaf9de0149
+git checkout <reviewed-PR-262-repair-commit>
 
 # 1. Python environment (build tools only; never committed, .venv is gitignored)
 python3 -m venv .venv
 .venv/bin/pip install --upgrade pip
-.venv/bin/pip install pillow imageio-ffmpeg piper-tts joe-us-piper-voice
+.venv/bin/pip install pillow imageio-ffmpeg piper-tts
+.venv/bin/pip install --only-binary=:all: --no-deps --require-hashes \
+  -r artifacts/amc-explainer/source/voice-requirements.txt
 
 # 1a. The Piper voice — installed by pip from PyPI, NOT downloaded by FreeVideoForge.
 #     joe-us-piper-voice bundles en_US-joe-medium (CC0). Expected SHA-256:
 #       en_US-joe-medium.onnx      58afce0321b8d9c46d7cdf9c16500cc55a793b4220212dba6b70fb788b3baf06
 #       en_US-joe-medium.onnx.json 3d6d5410b3795cb1950595247ef8f06190719e6fdbfa3a2356d8ec368e1aad33
-python3 - <<'PY'
-import hashlib, pathlib
-from joe_us_piper_voice import model_path
-p = pathlib.Path(model_path())
-print(p)
-print('onnx  ', hashlib.sha256(p.read_bytes()).hexdigest())
-print('config', hashlib.sha256(p.with_suffix('.onnx.json').read_bytes()).hexdigest())
+# Locate installed data using standard-library metadata; do not import package code.
+export FVF_PIPER_MODEL="$(.venv/bin/python -I - <<'PY'
+from importlib.metadata import distribution
+package = distribution("joe-us-piper-voice")
+models = [p for p in package.files or [] if p.name == "en_US-joe-medium.onnx"]
+if len(models) != 1:
+    raise SystemExit("Expected exactly one recorded local voice model")
+print(package.locate_file(models[0]).resolve())
 PY
+)"
+.venv/bin/python -I artifacts/amc-explainer/tools/verify_voice.py "$FVF_PIPER_MODEL"
 ```
 
 ```bash
@@ -41,7 +46,8 @@ cd -
 # 3. Piper must be resolvable: the `piper` executable on PATH and FVF_PIPER_MODEL
 #    pointing at the .onnx voice. With the steps above:
 export PATH="$PWD/.venv/bin:$PATH"
-export FVF_PIPER_MODEL="$(.venv/bin/python -c 'from joe_us_piper_voice import model_path; print(model_path())')"
+# Reuse the explicit FVF_PIPER_MODEL from step 1a. generate.sh checks it again.
+: "${FVF_PIPER_MODEL:?Complete step 1a or provide the recorded local voice path}"
 
 # 4. Preflight doctor — must report "No blockers" and list `+ speech piper`
 FVF_FFPROBE="$FFPROBE" PYTHONPATH=services/freevideoforge \
@@ -122,8 +128,28 @@ one-timing-authority invariant the QC gate enforces.
 - **ffprobe version**: the QC gate runs whatever `FVF_FFPROBE` resolves to; results
   recorded here used ffprobe 4.0.2-static (render encoder was FFmpeg n9.0.2). Mixing
   eras is supported by the gate but is called out for honesty.
-- **voice provenance**: `joe-us-piper-voice` is a third-party repackaging of upstream
-  rhasspy `piper-voices` (voice CC0). If you prefer the official artifacts, download
-  `en_US-lessac-medium` instead and set `FVF_PIPER_MODEL` to it — fewer questions to
-  answer, ~60 MB you choose to fetch. Re-run QC either way.
+- **voice provenance**: the delivery records `joe-us-piper-voice` as a third-party
+  repackaging of upstream rhasspy `piper-voices` (voice CC0). This recipe now pins
+  its exact 1.0.0 wheel and verifies both local voice files before generation.
+  A different voice, including official `en_US-lessac-medium`, will be refused by
+  this delivery's verifier. Use the FreeVideoForge CLI for an explicitly reviewed
+  variant with its own provenance and full QC; do not overwrite this delivery's pins.
 - **`.venv/` and `out/`** are gitignored; nothing here depends on them being committed.
+
+## Recipe security correction — 2026-11-24
+
+The checkout placeholder above means the reviewed repair commit containing these
+checks; `environment-record.json.source_revision` still identifies the historical
+render source. The wheel SHA-256 was read from PyPI's version-specific metadata:
+https://pypi.org/pypi/joe-us-piper-voice/1.0.0/json. Only that wheel is accepted;
+source distributions and automatic dependencies are excluded from its install.
+
+The voice verifier imports no third-party model package, bounds file reads, compares
+recorded sizes and SHA-256 hashes, and exits nonzero on either mismatch. The shell
+recipe stops before generation on failure. Hash correspondence does not establish
+publisher authenticity, licensing authority or release approval. Other build tools
+remain incompletely locked, so this is not a claim of bit-identical builds everywhere.
+
+This correction did not install the voice or re-render the delivered video. Its
+regressions use explicitly fictional model bytes and an instrumented render command;
+those tests cannot establish the production voice's availability or quality.

@@ -147,6 +147,7 @@ Per-subsystem rules live in a `CLAUDE.md` inside each directory and load only wh
 - `services/langgraph/agency/compiled/` — Compiled Agency planner — plans over the kernel, never executes
 - `services/langgraph/agency/design/` — Design Mode — style catalog composed by dimension
 - `services/langgraph/agency/ui_ux/` — UI/UX design compiler and DTCG tokens
+- `services/langgraph/agency/sop/` — Ordered SOP contracts — a guard over the live graph, not an authority
 
 ### Cross-cutting rules (always apply)
 
@@ -171,7 +172,7 @@ Three endpoints, deliberately separated: `/health` is pure liveness (no config/D
 
 ### Auth and persistence
 
-`security/auth.py`: `AMC_AUTH_MODE=local` (loopback dev only — never expose to a network) vs `supabase` (production bearer-token verification). Tenant/project authorization is resolved server-side via `amc.tenant_memberships` — client-supplied tenant/reviewer values are never authoritative. `persistence/database.py`: dual-mode SQLite (local/CI, default) / PostgreSQL (production, `AMC_DATABASE_BACKEND=postgres` + `DATABASE_URL`), with `ping_database()` doing a real connectivity check. All external mutation and idempotency machinery (`persistence/idempotency.py`, `agency/reliability/outbox.py`) exists whether or not a real external write is installed, since the reliability substrate and the adapter are separate concerns here.
+`security/auth.py`: `AMC_AUTH_MODE=local` (loopback dev only — never expose to a network) vs `supabase` (production bearer-token verification). Tenant/project authorization is resolved server-side via `amc.tenant_memberships` — client-supplied tenant/reviewer values are never authoritative. `persistence/database.py`: dual-mode SQLite (local/CI, default) / PostgreSQL (production, `AMC_DATABASE_BACKEND=postgres` + `DATABASE_URL`), with `ping_database()` doing a real connectivity check. PostgreSQL also has row-level security on every `amc` table (`amc_tenant_isolation` keyed on the per-transaction `amc.tenant_id`, enabled not forced, so the owning backend role is exempt); `tenant_scope()` + `AMC_DB_RLS_MODE=scoped` + a non-owner role is the opt-in enforced path — see `docs/migrations/tenant-rls.md`. A new `amc` table with `tenant_id` needs the same policy (`test_tenant_rls.py` fails otherwise). All external mutation and idempotency machinery (`persistence/idempotency.py`, `agency/reliability/outbox.py`) exists whether or not a real external write is installed, since the reliability substrate and the adapter are separate concerns here.
 
 ### Frontend state (Zustand)
 

@@ -15,6 +15,8 @@ from services.langgraph.agency.ucpo.requirements import compile_requirements, di
 from services.langgraph.agency.ucpo.semantic import IntentLinker, evaluate
 from services.langgraph.agency.ucpo.site import check_colour_plan, colour_plan, compile_site
 from services.langgraph.agency.ucpo.source import (
+    DEPENDENCIES,
+    DEV_DEPENDENCIES,
     SourcePolicyError,
     check_path,
     generate_source,
@@ -73,6 +75,11 @@ def rendered_from_source(pkg, ir, files) -> BrowserVerification:
                                                    ("text_zoom_200", "req.text.zoom"), ("reduced_motion", "req.motion.reduced"),
                                                    ("keyboard_focus", "req.keyboard.focus"), ("console_clean", "req.console.clean"),
                                                    ("no_external_requests", "req.network.none"), ("psem_colours", "req.psem.colour")))
+    checks += (CheckResult(check="nav_navigation", route="/", result="PASS",
+                           req_refs=tuple(r.req_id for r in pkg.requirements if r.kind == "NAV_LINK")),)
+    checks += tuple(CheckResult(check="cta_navigation", route=p.route, result="PASS",
+                               req_refs=tuple(r.req_id for r in pkg.requirements
+                                              if r.kind == "CTA" and r.subject["route"] == p.route)) for p in ir.pages)
     return BrowserVerification(status="PASSED", build_output_hash="b" * 64, browser={"name": "fixture"}, checks=checks,
                                dom_evidence=ev)
 
@@ -148,6 +155,19 @@ def test_illegal_ir_colours_are_reported():
 # ------------------------------------------------------------------ source policy
 
 
+WORKSPACE_PINS = json.loads((Path(__file__).resolve().parents[3] / "apps/web/package.json").read_text())
+
+
+def test_template_pins_equal_the_workspace_pins_the_sandbox_build_requires():
+    """build_site refuses to run unless the installed apps/web packages equal these exact versions.
+
+    A Dependabot bump of apps/web that leaves the template behind makes every sandboxed website
+    build fail its dependency_check, so the template must follow apps/web/package.json.
+    """
+    assert DEPENDENCIES == {k: WORKSPACE_PINS["dependencies"][k] for k in DEPENDENCIES}
+    assert DEV_DEPENDENCIES == {k: WORKSPACE_PINS["devDependencies"][k] for k in DEV_DEPENDENCIES}
+
+
 def test_source_is_deterministic_hashed_and_carries_requirement_ids():
     *_, files, manifest = line()
     *_, files2, manifest2 = line()
@@ -155,7 +175,7 @@ def test_source_is_deterministic_hashed_and_carries_requirement_ids():
     assert "data-req={s.req_refs.heading}" in files["components/Section.tsx"].decode()
     content = json.loads(files["content/site.json"])
     assert content["pages"]["index"]["sections"][0]["req_refs"]["heading"] == "req.index.s1.heading"
-    assert json.loads(files["package.json"])["dependencies"]["next"] == "16.4.5"
+    assert json.loads(files["package.json"])["dependencies"]["next"] == WORKSPACE_PINS["dependencies"]["next"]
     assert set(files) >= {"app/page.tsx", "app/works/page.tsx", "app/visit/page.tsx", "public/assets/plate-kiln.svg"}
 
 
@@ -303,3 +323,40 @@ def test_release_proof_is_eligible_only_when_every_gate_passes_and_never_deploys
     heads = {"a1": {"version": 3, "status": "draft"}}
     assert stale_reasons(ok, heads.get) == ["PROOF_STALE:source: v2 -> v3"]
     assert stale_reasons(ok, {"a1": {"version": 2, "status": "invalidated"}}.get)[0].startswith("PROOF_STALE:source")
+
+
+def test_markup_without_the_matching_navigation_and_cta_clicks_cannot_preserve_requirements():
+    """Synthetic observations test semantic logic, not browser execution."""
+    _brief, pkg, _genome, arch, ir, files, manifest = line()
+    full = rendered_from_source(pkg, ir, files)
+    missing = full.model_copy(update={"checks": tuple(c for c in full.checks
+                                                      if c.check not in {"nav_navigation", "cta_navigation"})})
+    report, _ = evaluate(pkg, arch=arch, ir=ir, files=files, manifest=manifest, verification=missing)
+    entries = {e.req_id: e for e in report.entries}
+    assert entries["req.nav.index"].status == "UNRESOLVED"
+    assert entries["req.index.s1.cta"].status == "UNRESOLVED"
+    assert report.release_blocked
+
+    # A route with no discovered CTA has a valid discovery observation, not
+    # a successful click. A mandatory CTA remains unresolved even if its DOM
+    # markup is otherwise present.
+    no_click = full.model_copy(update={"checks": tuple(c for c in full.checks
+                                if not (c.check == "cta_navigation" and c.route == "/"))
+                               + (CheckResult(check="cta_discovery", route="/", result="PASS",
+                                              detail="zero CTA links observed; no clicks performed"),)})
+    report, _ = evaluate(pkg, arch=arch, ir=ir, files=files, manifest=manifest, verification=no_click)
+    assert {e.req_id: e.status for e in report.entries}["req.index.s1.cta"] == "UNRESOLVED"
+    assert report.release_blocked
+
+    failed = full.model_copy(update={"checks": tuple(c.model_copy(update={"result": "FAIL"})
+                                      if c.check == "cta_navigation" and c.route == "/" else c
+                                      for c in full.checks)})
+    report, _ = evaluate(pkg, arch=arch, ir=ir, files=files, manifest=manifest, verification=failed)
+    assert {e.req_id: e.status for e in report.entries}["req.index.s1.cta"] == "UNAPPROVED_CHANGE"
+    assert report.release_blocked
+
+    wrong_route = full.model_copy(update={"checks": tuple(c.model_copy(update={"route": "/visit/"})
+                                           if c.check == "cta_navigation" and c.route == "/" else c
+                                           for c in full.checks)})
+    report, _ = evaluate(pkg, arch=arch, ir=ir, files=files, manifest=manifest, verification=wrong_route)
+    assert {e.req_id: e.status for e in report.entries}["req.index.s1.cta"] == "UNRESOLVED"

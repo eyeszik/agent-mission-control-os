@@ -16,7 +16,7 @@
   },
   "toolchain": {
     "ffmpeg": "n9.0.2-17-g2a571b6068-20260930 (imageio-ffmpeg wheel 9.0.2, binary ffmpeg-linux-x86_64-v9.0.2)",
-    "ffprobe": "4.0.2-static (npm ffprobe-static@3.1.0, johnvansickle static build) — tool mismatch documented",
+    "ffprobe": "4.0.2-static (npm ffprobe-static@3.1.0, johnvansickle static build) \u2014 tool mismatch documented",
     "pillow": "13.0.0",
     "piper_tts": "1.8.0 (GPL-3.0-or-later; OHF-voice/piper1-gpl distribution)",
     "joe_us_piper_voice": "1.0.0 (third-party repackaging of rhasspy piper-voices v1.0.0; packaging MIT; voice CC0)",
@@ -36,7 +36,7 @@
       "bytes": 63201294,
       "sha256": "58afce0321b8d9c46d7cdf9c16500cc55a793b4220212dba6b70fb788b3baf06",
       "license": "CC0 (upstream rhasspy piper-voices v1.0.0; lessac-family finetune)",
-      "packaging": "joe-us-piper-voice 1.0.0 (MIT metadata) — third-party repackaging, not an official rhasspy artifact"
+      "packaging": "joe-us-piper-voice 1.0.0 (MIT metadata) \u2014 third-party repackaging, not an official rhasspy artifact"
     },
     "en_US-joe-medium.onnx.json": {
       "bytes": 4794,
@@ -76,8 +76,8 @@
       "sha256": "f1cd12496a8ff8eb7f19e9f187644b9bcc463945210d3ecec9b99e74f3549b9c"
     },
     "REPRODUCTION.md": {
-      "bytes": 6399,
-      "sha256": "4b8ba7f43deb3c5419d9ec623db292c4e9d29133a16702233c563bf65572ad22"
+      "bytes": 8111,
+      "sha256": "bbfffe62da6ac6d40c3f9807130ff91733b19d7995b85a5e5c97cd5c615116ae"
     },
     "captions.srt": {
       "bytes": 546,
@@ -160,8 +160,8 @@
       "sha256": "7a57e222381f53c4d45c1a0db3d15d37fe77ad00ec9ff8d45c94aa6bfc83842a"
     },
     "source/generate.sh": {
-      "bytes": 917,
-      "sha256": "4e4fa67ae12de84727eb1fa19afdccb312a773e7b0b7b8ba4cc1b6b8c329ff72"
+      "bytes": 1002,
+      "sha256": "e5c37f47debb30cc9d1d9932b7600af49207d60c78921bcf26116000bdf9eeb5"
     },
     "storyboard.json": {
       "bytes": 11962,
@@ -174,6 +174,22 @@
     "tools/espeak-ng-shim.py": {
       "bytes": 3188,
       "sha256": "ce9c4fbfabbc1321224642197f38db8240dece918aab5362ee4df0aa9517b9cb"
+    },
+    "source/voice-requirements.txt": {
+      "bytes": 309,
+      "sha256": "3be714ef265f53fcde252b287e78ce905096fc4c8449ffb5c7b2ff382c45a1e2"
+    },
+    "tools/verify_voice.py": {
+      "bytes": 2206,
+      "sha256": "cdb63e7f81b7a5f096843bf80ad2411354473465ae8270daf19ccc6691f1d413"
     }
+  },
+  "recipe_security_correction": {
+    "date_utc": "2026-11-24",
+    "voice_package": "joe-us-piper-voice==1.0.0",
+    "wheel_metadata_source": "https://pypi.org/pypi/joe-us-piper-voice/1.0.0/json",
+    "wheel_sha256": "f46a74bc8d193dddb2f9f71adca95b009e2157a3f7fa96c1b34fd4ff55e0292a",
+    "enforcement": "Wheel-only hash-required install; explicit model path; mandatory size and SHA-256 checks for model and sidecar before generation.",
+    "validation_scope": "Offline refusal tests with fictional model bytes; no voice installation or delivered-media re-render."
   }
 }

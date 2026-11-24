@@ -1,0 +1,1064 @@
+...................ss..F................................................ [  2%]
+........................................................................ [  5%]
+........................................................................ [  8%]
+........................................................................ [ 10%]
+........................................................................ [ 13%]
+........................................................................ [ 16%]
+........................................................................ [ 19%]
+....................FFFFF..F.F.FFF.FF...................F..F............ [ 21%]
+........................................................................ [ 24%]
+..................ss.................................................... [ 27%]
+.......ss............................................................... [ 30%]
+.......................ss.ss.ss...............s.ssss.......ss........... [ 32%]
+........................................................................ [ 35%]
+........................................................................ [ 38%]
+........................................................................ [ 41%]
+........................................................................ [ 43%]
+...................................sssss................................ [ 46%]
+.....................................................F.F.........F...FF. [ 49%]
+sF.....F................................................................ [ 52%]
+........................................................................ [ 54%]
+........................................................................ [ 57%]
+........................................................................ [ 60%]
+........................................................................ [ 62%]
+........................................................................ [ 65%]
+................s.s....................................s................ [ 68%]
+............ss..ssss.................................................... [ 71%]
+........................................................................ [ 73%]
+..........................................................ssssssssssssss [ 76%]
+sssssss.........ssssssssssss..sss....................................... [ 79%]
+........................................................................ [ 82%]
+........................................................................ [ 84%]
+............................................................s..s.......F [ 87%]
+F....................................................................... [ 90%]
+........................................................................ [ 93%]
+..................................F...FF.....FF.........FF...FF......... [ 95%]
+..............F.F..............................................FF.FF.... [ 98%]
+......................................                                   [100%]
+=================================== FAILURES ===================================
+_ test_t11_browser_executes_shaders_handles_context_loss_and_renders_svg_sizes _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_t11_browser_executes_shad0')
+
+    @pytest.mark.skipif(not HAS_BROWSER, reason="NOT_RUN: node, Chromium or @playwright/test missing")
+    def test_t11_browser_executes_shaders_handles_context_loss_and_renders_svg_sizes(tmp_path):
+        from services.langgraph.agency.visual.browser import capture_svg_sizes, capture_webgl
+        from services.langgraph.agency.assets import render_logo_svg
+    
+        good = capture_webgl(
+            vertex="attribute vec2 position; void main(){ gl_Position = vec4(position,0.0,1.0); }",
+            fragment=("precision mediump float; uniform vec2 resolution; uniform vec3 primary;"
+                      "void main(){ vec2 uv = gl_FragCoord.xy/resolution; gl_FragColor = vec4(primary*uv.x + uv.y*0.5, 1.0); }"),
+            width=96, height=64, uniforms={"primary": [0.36, 0.1, 0.13]}, out_dir=tmp_path / "gl")
+>       assert good["status"] == "PASSED", good["findings"]
+E       AssertionError: ['BROWSER_EXIT:1', 'SHADER_COMPILE_FAILED', 'MISSING_CAPTURE']
+E       assert 'FAILED' == 'PASSED'
+E         
+E         - PASSED
+E         + FAILED
+
+services/langgraph/tests/test_abc_v6.py:554: AssertionError
+_____________ test_slice_renders_and_passes_independent_evaluation _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_slice_renders_and_passes_0')
+
+    @NEEDS_BROWSER
+    def test_slice_renders_and_passes_independent_evaluation(tmp_path):
+        it, brand, man, sc = _slice()
+        text = svg.emit(sc)
+        r = _render(text, 1200, 1500, tmp_path)
+>       assert r["status"] == "PASSED", r["findings"]
+E       AssertionError: ['BROWSER_EXIT:1', 'SVG_NOT_DECODED', 'MISSING_CAPTURE']
+E       assert 'FAILED' == 'PASSED'
+E         
+E         - PASSED
+E         + FAILED
+
+services/langgraph/tests/test_avic.py:422: AssertionError
+_________________ test_evaluator_reads_the_bytes_not_the_scene _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_evaluator_reads_the_bytes0')
+
+    @NEEDS_BROWSER
+    def test_evaluator_reads_the_bytes_not_the_scene(tmp_path):
+        it, brand, man, sc = _slice()
+        tampered = svg.emit(sc).replace(">MADE SLOWLY<", ">MADE QUICKLY<")
+        r = _render(tampered, 1200, 1500, tmp_path)
+        report = evalmod.evaluate(sc, tampered, intent=it, brand=brand, png_bytes=r["png"], renderer=render.RENDERER,
+                                  renderer_version=r["renderer_version"])
+>       assert {c.check for c in report.failures()} == {"exact_text.headline"}
+E       AssertionError: assert {'exact_text....ne', 'render'} == {'exact_text.headline'}
+E         
+E         Extra items in the left set:
+E         'render'
+E         Use -v to get more diff
+
+services/langgraph/tests/test_avic.py:438: AssertionError
+_ test_h3_repairs_a_contrast_defect_with_an_isolated_render_and_independent_evaluation _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_h3_repairs_a_contrast_def0')
+
+    @NEEDS_BROWSER
+    def test_h3_repairs_a_contrast_defect_with_an_isolated_render_and_independent_evaluation(tmp_path):
+        it, brand, man, sc = _slice()
+        bad, _ = edits.recolor(sc, brand, "headline", "graphite")
+        text = svg.emit(bad)
+        r = _render(text, 1200, 1500, tmp_path / "bad")
+        report = evalmod.evaluate(bad, text, intent=it, brand=brand, png_bytes=r["png"], renderer=render.RENDERER,
+                                  renderer_version=r["renderer_version"])
+>       assert {c.check for c in report.failures()} == {"contrast.headline"}
+E       AssertionError: assert {'contrast.he...ne', 'render'} == {'contrast.headline'}
+E         
+E         Extra items in the left set:
+E         'render'
+E         Use -v to get more diff
+
+services/langgraph/tests/test_avic.py:449: AssertionError
+__________________ test_h1_measured_fidelity_with_real_render __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_h1_measured_fidelity_with0')
+
+    @NEEDS_BROWSER
+    def test_h1_measured_fidelity_with_real_render(tmp_path):
+        data = _synthetic_png()
+        ref = png.decode(data)
+        rows = []
+        for c in optimize.candidates(data, budgets=(8, 128)):
+            r = _render(c["svg"], ref.width, ref.height, tmp_path / str(c["budget"]))
+>           m = optimize.compare(ref, png.decode(r["png"]), size=max(ref.width, ref.height))
+                                      ^^^^^^^^^^^^^^^^^^^^
+
+services/langgraph/tests/test_avic.py:466: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = None, max_pixels = 24000000
+
+    def decode(data: bytes, *, max_pixels: int = MAX_PIXELS) -> Raster:
+>       if data[:8] != SIGNATURE:
+           ^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+services/langgraph/agency/avic/png.py:43: TypeError
+_____ test_h4_branches_keep_immutable_constraints_and_never_carry_approval _____
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_h4_branches_keep_immutabl0')
+
+    @NEEDS_BROWSER
+    def test_h4_branches_keep_immutable_constraints_and_never_carry_approval(tmp_path):
+        it, brand, man, sc = _slice()
+        with pytest.raises(brandmod.BrandMutationRejected):
+            brandmod.explore(sc, intent=it, brand=brand, profile=profiles.get_profile(PROFILE), refs=man, axes=("accent_choice",),
+                             n=2, seed=1, render=_render, work_dir=tmp_path, renderer=render.RENDERER, renderer_version=None)
+        out = brandmod.explore(sc, intent=it, brand=brand, profile=profiles.get_profile(PROFILE), refs=man,
+                               axes=("motif", "material"), n=3, seed=1, render=_render, work_dir=tmp_path,
+                               renderer=render.RENDERER, renderer_version=None)
+        assert len(out) == 3 and len({b.branch_id for b, _, _ in out}) == 3
+        for b, text, _ in out:
+            assert b.parent_version == sc.scene_hash
+            assert set(b.immutable_constraints) == {c.constraint_id for c in sc.constraints}
+            assert b.status in {CandidateStatus.SELECTED, CandidateStatus.EVALUATED, CandidateStatus.REJECTED}
+            assert "approval" not in b.model_dump()
+            assert svg.text_content(text)["headline"] == "MADE SLOWLY"
+>       assert any(b.status == CandidateStatus.SELECTED for b, _, _ in out)
+E       assert False
+E        +  where False = any(<generator object test_h4_branches_keep_immutable_constraints_and_never_carry_approval.<locals>.<genexpr> at 0x7f3ff4277920>)
+
+services/langgraph/tests/test_avic.py:488: AssertionError
+_____ test_project_os_lineage_approval_release_and_no_approval_inheritance _____
+
+root = PosixPath('/tmp/pytest-of-root/pytest-23/test_project_os_lineage_approv0/exports')
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_project_os_lineage_approv0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff30e0ad0>
+capsys = <_pytest.capture.CaptureFixture object at 0x7f3ff30e1bd0>
+
+    @NEEDS_BROWSER
+    def test_project_os_lineage_approval_release_and_no_approval_inheritance(root, tmp_path, monkeypatch, capsys):
+        from services.langgraph.agency.avic import service
+        from services.langgraph.agency.project_os.storage import LocalStorageAdapter
+        from services.langgraph.tests._project_os_support import as_user, client, headers
+    
+        monkeypatch.setenv("OPENAI_API_KEY", "sk-test-avic-secret-must-not-leak")
+        adapter = LocalStorageAdapter(root)
+        tenant, pid, alice = _project(root)
+        out = service.compile_asset(alice, pid, _req(), brand=profiles.psem_brand(), style_profile=PROFILE, adapter=adapter,
+                                    work_dir=tmp_path, seed=7)
+>       assert out["status"] == "EVALUATED", out.get("evaluation")
+E       AssertionError: {'schema_version': 'amc-avic/1', 'scene_hash': 'a9cf15b0861c4c96294569675a73c4a4c6105ef4844d356876fb5ef307906333', 'svg_sha256': '8d1209aa66f70defa0ce88c0cee7a50fe7e74d57768ac31eff77d48eb6171cc3', 'png_sha256': None, ...}
+E       assert 'BLOCKED' == 'EVALUATED'
+E         
+E         - EVALUATED
+E         + BLOCKED
+
+services/langgraph/tests/test_avic.py:551: AssertionError
+______________________ test_cache_divergence_is_rejected _______________________
+
+root = PosixPath('/tmp/pytest-of-root/pytest-23/test_cache_divergence_is_rejec0/exports')
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_cache_divergence_is_rejec0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff30b4310>
+
+    @NEEDS_BROWSER
+    def test_cache_divergence_is_rejected(root, tmp_path, monkeypatch):
+        from services.langgraph.agency.avic import service
+        from services.langgraph.agency.project_os.storage import LocalStorageAdapter
+    
+        adapter = LocalStorageAdapter(root)
+        tenant, pid, alice = _project(root)
+>       assert service.compile_asset(alice, pid, _req(), brand=profiles.psem_brand(), style_profile=PROFILE, adapter=adapter,
+                                     work_dir=tmp_path)["status"] == "EVALUATED"
+E       AssertionError: assert 'BLOCKED' == 'EVALUATED'
+E         
+E         - EVALUATED
+E         + BLOCKED
+
+services/langgraph/tests/test_avic.py:621: AssertionError
+________ test_an_edit_against_a_stale_base_conflicts_and_stores_nothing ________
+
+root = PosixPath('/tmp/pytest-of-root/pytest-23/test_an_edit_against_a_stale_b0/exports')
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_an_edit_against_a_stale_b0')
+
+    @NEEDS_BROWSER
+    def test_an_edit_against_a_stale_base_conflicts_and_stores_nothing(root, tmp_path):
+        from services.langgraph.agency.avic import service
+        from services.langgraph.agency.project_os.storage import LocalStorageAdapter
+    
+        adapter = LocalStorageAdapter(root)
+        _tenant, pid, alice = _project(root)
+>       assert service.compile_asset(alice, pid, _req(), brand=profiles.psem_brand(), style_profile=PROFILE, adapter=adapter,
+                                     work_dir=tmp_path)["status"] == "EVALUATED"
+E       AssertionError: assert 'BLOCKED' == 'EVALUATED'
+E         
+E         - EVALUATED
+E         + BLOCKED
+
+services/langgraph/tests/test_avic.py:660: AssertionError
+________ test_a_writer_that_slips_in_between_read_and_write_is_detected ________
+
+root = PosixPath('/tmp/pytest-of-root/pytest-23/test_a_writer_that_slips_in_be0/exports')
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_a_writer_that_slips_in_be0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff239a610>
+
+    @NEEDS_BROWSER
+    def test_a_writer_that_slips_in_between_read_and_write_is_detected(root, tmp_path, monkeypatch):
+        from services.langgraph.agency.avic import service
+        from services.langgraph.agency.foundry.studio import observe
+        from services.langgraph.agency.project_os.storage import LocalStorageAdapter
+    
+        adapter = LocalStorageAdapter(root)
+        _tenant, pid, alice = _project(root)
+>       assert service.compile_asset(alice, pid, _req(), brand=profiles.psem_brand(), style_profile=PROFILE, adapter=adapter,
+                                     work_dir=tmp_path)["status"] == "EVALUATED"
+E       AssertionError: assert 'BLOCKED' == 'EVALUATED'
+E         
+E         - EVALUATED
+E         + BLOCKED
+
+services/langgraph/tests/test_avic.py:683: AssertionError
+____ test_a_crash_between_stage_writes_fails_closed_and_recompile_recovers _____
+
+root = PosixPath('/tmp/pytest-of-root/pytest-23/test_a_crash_between_stage_wri0/exports')
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_a_crash_between_stage_wri0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff386de10>
+
+    @NEEDS_BROWSER
+    def test_a_crash_between_stage_writes_fails_closed_and_recompile_recovers(root, tmp_path, monkeypatch):
+        """Defect 2: the scene is the commit record; any later stage left behind is detected and re-derived from it."""
+        from services.langgraph.agency.avic import service
+        from services.langgraph.agency.project_os.storage import LocalStorageAdapter
+    
+        adapter = LocalStorageAdapter(root)
+        _tenant, pid, alice = _project(root)
+>       assert service.compile_asset(alice, pid, _req(), brand=profiles.psem_brand(), style_profile=PROFILE, adapter=adapter,
+                                     work_dir=tmp_path)["status"] == "EVALUATED"
+E       AssertionError: assert 'BLOCKED' == 'EVALUATED'
+E         
+E         - EVALUATED
+E         + BLOCKED
+
+services/langgraph/tests/test_avic.py:707: AssertionError
+_________ test_pixels_catch_an_overflow_that_the_glyph_estimate_misses _________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_pixels_catch_an_overflow_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff43fc490>
+
+    @NEEDS_BROWSER
+    def test_pixels_catch_an_overflow_that_the_glyph_estimate_misses(tmp_path, monkeypatch):
+        """The estimate says it fits; the render shows the headline running off the canvas."""
+        monkeypatch.setattr(scenemod, "GLYPH_ADVANCE_EM", 0.25)
+        monkeypatch.setattr(evalmod, "GLYPH_ADVANCE_EM", 0.25)
+        it, brand, man, sc = _slice(_req(exact_text=["AN EXTREMELY LONG HEADLINE THAT CANNOT FIT", "FIG. 1"]))
+        text = svg.emit(sc)
+        r = _render(text, 1200, 1500, tmp_path)
+        report = evalmod.evaluate(sc, text, intent=it, brand=brand, png_bytes=r["png"], renderer=render.RENDERER,
+                                  renderer_version=r["renderer_version"])
+        results = {c.check: c.result for c in report.checks}
+        assert results["text_fit.headline"] == Result.PASS  # the estimate is fooled
+>       assert results["margin_bands"] == Result.FAIL and "right" in next(c.detail for c in report.checks if c.check == "margin_bands")
+               ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'margin_bands'
+
+services/langgraph/tests/test_avic.py:768: KeyError
+____________________ test_a_normal_slice_has_clean_margins _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_a_normal_slice_has_clean_0')
+
+    @NEEDS_BROWSER
+    def test_a_normal_slice_has_clean_margins(tmp_path):
+        it, brand, man, sc = _slice()
+        text = svg.emit(sc)
+        r = _render(text, 1200, 1500, tmp_path)
+        report = evalmod.evaluate(sc, text, intent=it, brand=brand, png_bytes=r["png"], renderer=render.RENDERER,
+                                  renderer_version=r["renderer_version"])
+>       assert report.passed and any(c.check == "margin_bands" and c.result == Result.PASS for c in report.checks)
+E       AssertionError: assert (False)
+E        +  where False = EvaluationReport(schema_version='amc-avic/1', scene_hash='a9cf15b0861c4c96294569675a73c4a4c6105ef4844d356876fb5ef30790...='Q7', result=<Result.BLOCKED: 'BLOCKED'>, detail='no rendered preview (renderer unavailable or failed)')), metrics={}).passed
+
+services/langgraph/tests/test_avic.py:781: AssertionError
+__________ test_operator_path_edit_conflict_recovery_approval_release __________
+
+owned = 'prj-test-eb10d6b25469'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff422aed0>
+
+    @NEEDS_BROWSER
+    def test_operator_path_edit_conflict_recovery_approval_release(owned, monkeypatch):
+        view = client.get(f"{_base(owned)}/{ASSET}").json()
+>       assert view["evaluation"]["passed"] and view["consistency"] == {"consistent": True, "stale": []}
+E       assert (False)
+
+services/langgraph/tests/test_avic_api.py:131: AssertionError
+_________________ test_recorded_fixture_matches_live_responses _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff2385ad0>
+export_root = PosixPath('/tmp/pytest-of-root/pytest-23/test_recorded_fixture_matches_1/exports')
+
+    @NEEDS_BROWSER
+    def test_recorded_fixture_matches_live_responses(monkeypatch, export_root):  # noqa: F811
+>       live = capture(monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^
+
+services/langgraph/tests/test_avic_contracts.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff2385ad0>
+
+    def capture(monkeypatch) -> dict:
+        as_user(monkeypatch, "alice")
+        project = new_project("AVIC fixture")["project_id"]
+        base = f"/avic/projects/{project}/assets"
+        compiled = client.post(base, json=BODY, headers=headers())
+        assert compiled.status_code == 201, compiled.text
+        view = client.get(f"{base}/{ASSET}").json()
+        edit = {"op": "recolor", "args": {"object_id": "motif-ring-inner", "palette_key": "fog", "field": "stroke"},
+                "base_svg_sha256": view["svg_sha256"]}
+        edited = client.post(f"{base}/{ASSET}/edits", json=edit, headers=headers())
+        conflict = client.post(f"{base}/{ASSET}/edits", json=edit, headers={"Idempotency-Key": str(uuid4())})
+>       assert conflict.status_code == 409
+E       assert 200 == 409
+E        +  where 200 = <Response [200 OK]>.status_code
+
+services/langgraph/tests/test_avic_contracts.py:55: AssertionError
+_______________ test_ffprobe_binary_resolution_is_deterministic ________________
+
+    def test_ffprobe_binary_resolution_is_deterministic():
+        from services.freevideoforge.freevideoforge.ffmpeg import FFTools
+        import os
+    
+        # Explicit override takes precedence (FFTools uses positional arg name ffprobe)
+        tools_override = FFTools(None, "/nonexistent/ffprobe")
+>       assert tools_override.ffprobe is None or tools_override.ffprobe == "/nonexistent/ffprobe"
+E       AssertionError: assert ('/usr/bin/ffprobe' is None or '/usr/bin/ffprobe' == '/nonexistent/ffprobe'
+E        +  where '/usr/bin/ffprobe' = <services.freevideoforge.freevideoforge.ffmpeg.FFTools object at 0x7f3ff3f888d0>.ffprobe
+E         
+E         - /nonexistent/ffprobe
+E         + /usr/bin/ffprobe)
+
+services/langgraph/tests/test_ffprobe_provisioning.py:29: AssertionError
+____________________ test_missing_ffprobe_fails_explicitly _____________________
+
+    def test_missing_ffprobe_fails_explicitly():
+        from services.freevideoforge.freevideoforge.ffmpeg import FFTools, run
+        from services.freevideoforge.freevideoforge.errors import DependencyError
+    
+        tools = FFTools(None, "/nonexistent/ffprobe-xyz")
+        # Probe of nonexistent file should not crash
+>       assert tools.ffprobe is None or not Path(tools.ffprobe).exists()
+E       AssertionError: assert ('/usr/bin/ffprobe' is None or not True)
+E        +  where '/usr/bin/ffprobe' = <services.freevideoforge.freevideoforge.ffmpeg.FFTools object at 0x7f3ff4267050>.ffprobe
+E        +  and   True = exists()
+E        +    where exists = PosixPath('/usr/bin/ffprobe').exists
+E        +      where PosixPath('/usr/bin/ffprobe') = Path('/usr/bin/ffprobe')
+E        +        where '/usr/bin/ffprobe' = <services.freevideoforge.freevideoforge.ffmpeg.FFTools object at 0x7f3ff4267050>.ffprobe
+
+services/langgraph/tests/test_ffprobe_provisioning.py:55: AssertionError
+_ test_a05_a06_a07_svg_renders_and_raster_has_real_pixels_at_the_specified_size _
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_a05_a06_a07_svg_renders_a0')
+
+    @NEEDS_BROWSER
+    def test_a05_a06_a07_svg_renders_and_raster_has_real_pixels_at_the_specified_size(tmp_path):
+        from services.langgraph.agency.visual.browser import rasterize_svg
+    
+        g = compile_genome(BRIEF, project_id="p")
+        svg = compose.to_svg(compose.poster(g, headline="Made slowly, used daily", width=600, height=800), g)
+        r = rasterize_svg(svg, width=600, height=800, out_dir=tmp_path)
+>       assert r["status"] == "PASSED" and r["result"]["blocked_requests"] == []
+E       AssertionError: assert ('FAILED' == 'PASSED'
+E         
+E         - PASSED
+E         + FAILED)
+
+services/langgraph/tests/test_foundry.py:173: AssertionError
+___________ test_a11_functional_interface_survives_visual_restyling ____________
+
+twin = (CreativeGenome(schema_version='amc-creative-genome/v1', project_ref='p', brand_name='Halden & Fen', brand_canon_hash=...='e37c1e26e83bca1a371523dc02b852008a5b3050db7b5706e1a1e2a5aad41fad'), PosixPath('/tmp/pytest-of-root/pytest-23/twin0'))
+
+    def test_a11_functional_interface_survives_visual_restyling(twin):
+        g, ir, out = twin
+        alt = compile_genome(BRIEF.model_copy(update={"visual_direction": {"synthetic_futurism": 1.0}, "seed": 99}), project_id="p")
+        result = experience.counterfactual_skins(ir, g, alternate=alt, out_dir=out / "skins")
+        for name in ("canonical", "unstyled", "alternate_dark"):
+>           assert result[name]["accepted"], (name, result[name])
+E           AssertionError: ('canonical', {'status': 'FAILED', 'findings': ['BROWSER_EXIT:1', 'SCENARIOS_RUN:0/12', 'MISSING_CAPTURE'], 'passed_scenarios': 0, 'total': 0, ...})
+E           assert False
+
+services/langgraph/tests/test_foundry.py:260: AssertionError
+__________ test_a12_a13_a14_keyboard_reduced_motion_and_font_fallback __________
+
+twin = (CreativeGenome(schema_version='amc-creative-genome/v1', project_ref='p', brand_name='Halden & Fen', brand_canon_hash=...='e37c1e26e83bca1a371523dc02b852008a5b3050db7b5706e1a1e2a5aad41fad'), PosixPath('/tmp/pytest-of-root/pytest-23/twin0'))
+
+    def test_a12_a13_a14_keyboard_reduced_motion_and_font_fallback(twin):
+        g, ir, out = twin
+        missing_font = g.model_copy(update={"typography_rules": {**g.typography_rules, "stacks": {
+            **g.typography_rules["stacks"], "display": ["AMC Missing Display", "DejaVu Sans", "sans-serif"]}}})
+        ev = experience.evaluate(experience.render_html(ir, missing_font), out_dir=out / "a12", primary_font="AMC Missing Display")
+        by_id = {s["id"]: s for s in ev["scenarios"]}
+>       assert ev["status"] == "PASSED", ev["findings"]
+E       AssertionError: ['BROWSER_EXIT:1', 'SCENARIOS_RUN:0/12', 'MISSING_CAPTURE']
+E       assert 'FAILED' == 'PASSED'
+E         
+E         - PASSED
+E         + FAILED
+
+services/langgraph/tests/test_foundry.py:270: AssertionError
+__________________ test_a16_motion_file_has_decodable_frames ___________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_a16_motion_file_has_decod0')
+
+    @pytest.mark.skipif(not (HAS_BROWSER and HAS_FFMPEG), reason="NOT_RUN: needs local Chromium and FFmpeg")
+    def test_a16_motion_file_has_decodable_frames(tmp_path):
+        from services.langgraph.agency.visual.browser import render_svg_frames
+        from services.langgraph.agency.visual.renderers import encode_video
+    
+        g = compile_genome(BRIEF, project_id="p")
+        ir = motion.logo_reveal(g, width=320, height=180, fps=12, duration_s=1.0)
+        fr = render_svg_frames(motion.frames(ir, g), width=ir.width, height=ir.height, out_dir=tmp_path)
+        video = encode_video([Path(f) for f in fr["files"]], tmp_path / "m.mp4", fps=ir.fps)
+>       v = verify_media((tmp_path / "m.mp4").read_bytes(), mime_type="video/mp4",
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         expect={"width": 320, "height": 180, "fps": 12, "frames": ir.frame_count})
+
+services/langgraph/tests/test_foundry.py:307: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-root/pytest-23/test_a16_motion_file_has_decod0/m.mp4')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-23/test_a16_motion_file_has_decod0/m.mp4'
+
+/usr/lib/python3.11/pathlib.py:1044: FileNotFoundError
+_____________ test_a21_generated_pages_cannot_contact_remote_hosts _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_a21_generated_pages_canno0')
+
+    @NEEDS_BROWSER
+    def test_a21_generated_pages_cannot_contact_remote_hosts(tmp_path):
+        from services.langgraph.agency.visual.browser import run_experience
+    
+        html = ('<!doctype html><html><body><main><h1 id="t">x</h1><img src="https://example.com/pixel.png" alt="">'
+                '<script>fetch("https://example.com/beacon").catch(function(){})</script></main></body></html>')
+        run = run_experience(html, [{"id": "probe", "steps": [{"action": "wait", "value": 300}]}], out_dir=tmp_path)
+>       assert run["result"]["blocked_requests"] and "REMOTE_REQUEST_ATTEMPTED" in run["findings"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'blocked_requests'
+
+services/langgraph/tests/test_foundry.py:428: KeyError
+________ test_sandboxed_build_browser_qa_release_and_stale_after_change ________
+
+root = PosixPath('/tmp/pytest-of-root/pytest-23/test_sandboxed_build_browser_q0/exports')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff3729c10>
+
+    @needs_sandbox
+    @needs_browser
+    def test_sandboxed_build_browser_qa_release_and_stale_after_change(root, monkeypatch):
+        tenant, project, alice = _project(root)
+        adapter = LocalStorageAdapter(root)
+        brief = WebsiteBrief.model_validate(SAMPLE)
+        compiled = service.compile_site_line(alice, project, "halden", brief, adapter=adapter, export_root=root)
+        again = service.compile_site_line(alice, project, "halden", brief, adapter=adapter, export_root=root)
+        assert again["job_id"] == compiled["job_id"]
+        assert {s["action"] for s in again["stages"].values()} == {"reused_unchanged"}
+    
+        report = service.run_build_tick(compiled["job_id"])
+        view = service.inspect_site(alice, project, "halden", adapter=adapter)
+>       assert report.final_state == RunState.WAITING_APPROVAL.value, (report.reasons, view["release"]["reasons"], [
+            c for c in (view["browser_qa"] or {}).get("checks", []) if c["result"] != "PASS"][:5])
+E       AssertionError: ([], ['VERIFICATION_NOT_PASSED', 'PROOF_NOT_ELIGIBLE', 'NO_APPROVAL'], [{'check': 'qa_runner', 'route': None, 'viewport': None, 'result': 'BLOCKED', ...}])
+E       assert 'DORMANT' == 'WAITING_APPROVAL'
+E         
+E         - WAITING_APPROVAL
+E         + DORMANT
+
+services/langgraph/tests/test_ucpo_build.py:114: AssertionError
+________________ test_browser_qa_catches_a_defective_generator _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_browser_qa_catches_a_defe0')
+
+    @needs_sandbox
+    @needs_browser
+    def test_browser_qa_catches_a_defective_generator(tmp_path):
+        brief = WebsiteBrief.model_validate(SAMPLE)
+        pkg = compile_requirements(brief, project_ref="p")
+        genome = psem.compile_psem_genome(psem.psem_brief(brief.organization, seed=brief.seed), project_id="p")
+        _, css, sh = psem.compile_psem_tokens(genome)
+        arch, ir = compile_site(brief, pkg, genome, token_refs={"dtcg_source_hash": sh})
+        files, _ = generate_source(ir, genome, css)
+        # Simulate a defective template: accent labels on paper, the skip link gone, a fixed-width block.
+        files["app/globals.css"] += (b"\n.sec--paper .sec__label { color: var(--amc-color-accent); }\n"
+                                     b".sec__body { min-width: 900px; }\n")
+        files["components/SiteHeader.tsx"] = files["components/SiteHeader.tsx"].replace(
+            b'<a className="skip" href="#main">Skip to content</a>\n', b"")
+        entries = tuple(SourceFile(path=p, sha256=__import__("hashlib").sha256(b).hexdigest(), bytes=len(b), role="config")
+                        for p, b in sorted(files.items()))
+        manifest = SourceTreeManifest(website_ir_ref=ir.content_hash, files=entries, dependencies={
+            **service.DEPENDENCIES, **service.DEV_DEPENDENCIES}, tree_hash=tree_hash(entries))
+        routes = [p.route for p in ir.pages]
+        result, out = build_mod.build_site(files, manifest, routes=routes, keep_output=True, isolation=isolation())
+        try:
+            assert result.status == "PASSED", result.steps
+            v = verify_build(out, routes=routes, expected_output_hash=result.output_hash, isolation=isolation())
+        finally:
+            build_mod.cleanup(out.parent.parent)
+        failed = {c.check for c in v.checks if c.result == "FAIL"}
+>       assert v.status == "FAILED", [c.detail for c in v.checks if c.result == "BLOCKED"]
+E       AssertionError: ['exit 1:                               ║
+E         ║     npx playwright install                                 ║
+E         ║          ...n    at Object.<anonymous> (/home/user/agent-mission-control-os/services/langgraph/agency/ucpo/qa_runner.cjs:213:1)
+E         ']
+E       assert 'BLOCKED' == 'FAILED'
+E         
+E         - FAILED
+E         + BLOCKED
+
+services/langgraph/tests/test_ucpo_build.py:180: AssertionError
+________ test_visual_browser_isolates_client_output_and_blocks_network _________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_visual_browser_isolates_c0')
+
+    def test_visual_browser_isolates_client_output_and_blocks_network(tmp_path):
+        from services.langgraph.agency.visual import browser
+    
+        probe = browser.probe_browser()
+        if not probe["available"]:
+            pytest.skip(f"NOT_RUN: browser/isolation unavailable: {probe['blockers']}")
+        out = tmp_path / "output"
+        out.mkdir()
+        canary = out / "other-client-canary"
+        canary.write_text("synthetic host-only data", encoding="utf-8")
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect width="16" height="16" fill="navy"/></svg>'
+        result = browser.rasterize_svg(svg, width=16, height=16, out_dir=out)
+>       assert result["status"] == "PASSED" and result["network_isolated"]
+E       AssertionError: assert ('FAILED' == 'PASSED'
+E         
+E         - PASSED
+E         + FAILED)
+
+services/langgraph/tests/test_unified_security.py:191: AssertionError
+______________ test_video_encoder_and_probe_use_isolated_scratch _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_video_encoder_and_probe_u0')
+
+    def test_video_encoder_and_probe_use_isolated_scratch(tmp_path):
+        import shutil
+        from services.langgraph.agency.ucpo.sandbox import probe_isolation
+        from services.langgraph.agency.visual.renderers import encode_video
+        from services.langgraph.agency.visual.verify import verify_media
+    
+        if not shutil.which("ffmpeg") or not shutil.which("ffprobe") or not probe_isolation().available:
+            pytest.skip("NOT_RUN: ffmpeg, ffprobe or sandbox unavailable")
+        Image = pytest.importorskip("PIL.Image")
+        ImageDraw = pytest.importorskip("PIL.ImageDraw")
+        frames = []
+        for i in range(5):
+            image = Image.new("RGB", (32, 32), (20 + i * 20, 30, 100))
+            ImageDraw.Draw(image).rectangle((8, 8, 24, 24), fill=(245, 235, 200))
+            p = tmp_path / f"original-{i}.png"
+            image.save(p)
+            frames.append(p)
+        out = tmp_path / "video.mp4"
+        encoded = encode_video(frames, out, fps=5)
+>       assert encoded.status == "SUCCEEDED" and encoded.network_isolated is True, encoded.reasons
+E       AssertionError: ('/usr/bin/ffmpeg: error while loading shared libraries: libblas.so.3: cannot open shared object file: No such file or directory
+E         ',)
+E       assert ('FAILED' == 'SUCCEEDED'
+E         
+E         - SUCCEEDED
+E         + FAILED)
+
+services/langgraph/tests/test_unified_security.py:266: AssertionError
+____________ test_mux_refuses_short_audio_that_would_truncate_video ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_mux_refuses_short_audio_t0')
+
+    def test_mux_refuses_short_audio_that_would_truncate_video(tmp_path):
+        import shutil
+        from services.langgraph.agency.ucpo.sandbox import probe_isolation
+        from services.langgraph.agency.visual.renderers import encode_video
+        from services.langgraph.agency.vnexus.video import mux_audio
+    
+        if not shutil.which("ffmpeg") or not shutil.which("ffprobe") or not probe_isolation().available:
+            pytest.skip("NOT_RUN: ffmpeg, ffprobe or sandbox unavailable")
+        Image = pytest.importorskip("PIL.Image")
+        frames = []
+        for i in range(10):
+            p = tmp_path / f"frame-{i}.png"
+            Image.new("RGB", (64, 64), (20 + i * 20, 30, 100)).save(p)
+            frames.append(p)
+        original = tmp_path / "original.mp4"
+>       assert encode_video(frames, original, fps=5).status == "SUCCEEDED"
+E       AssertionError: assert 'FAILED' == 'SUCCEEDED'
+E         
+E         - SUCCEEDED
+E         + FAILED
+
+services/langgraph/tests/test_unified_security.py:288: AssertionError
+________ test_a_nonzero_duration_black_video_does_not_pass_nonblank_qc _________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_a_nonzero_duration_black_0')
+
+    def test_a_nonzero_duration_black_video_does_not_pass_nonblank_qc(tmp_path):
+        import shutil
+        from services.langgraph.agency.visual.renderers import encode_video
+        from services.langgraph.agency.visual.verify import verify_media
+    
+        if not shutil.which("ffmpeg") or not shutil.which("ffprobe") or not probe_isolation().available:
+            pytest.skip("NOT_RUN: ffmpeg, ffprobe or isolation unavailable")
+        Image = pytest.importorskip("PIL.Image")
+        frames = []
+        for i in range(5):
+            p = tmp_path / f"black-{i}.png"
+            Image.new("RGB", (32, 32), (0, 0, 0)).save(p)
+            frames.append(p)
+        out = tmp_path / "black.mp4"
+>       assert encode_video(frames, out, fps=5).status == "SUCCEEDED"
+E       AssertionError: assert 'FAILED' == 'SUCCEEDED'
+E         
+E         - SUCCEEDED
+E         + FAILED
+
+services/langgraph/tests/test_unified_security.py:408: AssertionError
+_ test_video_sampling_allows_one_fade_frame_but_rejects_a_flat_sampled_region __
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_video_sampling_allows_one0')
+
+    def test_video_sampling_allows_one_fade_frame_but_rejects_a_flat_sampled_region(tmp_path):
+        import shutil
+        from services.langgraph.agency.visual.renderers import encode_video
+        from services.langgraph.agency.visual.verify import verify_media
+    
+        if not shutil.which("ffmpeg") or not shutil.which("ffprobe") or not probe_isolation().available:
+            pytest.skip("NOT_RUN: ffmpeg, ffprobe or isolation unavailable")
+        Image = pytest.importorskip("PIL.Image")
+        Draw = pytest.importorskip("PIL.ImageDraw")
+    
+        def make_video(name, dark_indexes):
+            paths = []
+            for i in range(30):
+                image = Image.new("RGB", (32, 32), (0, 0, 0))
+                if i not in dark_indexes:
+                    Draw.Draw(image).rectangle((6, 6, 25, 25), fill=(230, 230, 230))
+                p = tmp_path / f"{name}-{i}.png"
+                image.save(p)
+                paths.append(p)
+            output = tmp_path / f"{name}.mp4"
+            assert encode_video(paths, output, fps=10).status == "SUCCEEDED"
+            return verify_media(output.read_bytes(), mime_type="video/mp4",
+                                expect={"width": 32, "height": 32, "fps": 10, "frames": 30})
+    
+>       fade = make_video("fade", {15})
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+services/langgraph/tests/test_unified_security.py:438: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'fade', dark_indexes = {15}
+
+    def make_video(name, dark_indexes):
+        paths = []
+        for i in range(30):
+            image = Image.new("RGB", (32, 32), (0, 0, 0))
+            if i not in dark_indexes:
+                Draw.Draw(image).rectangle((6, 6, 25, 25), fill=(230, 230, 230))
+            p = tmp_path / f"{name}-{i}.png"
+            image.save(p)
+            paths.append(p)
+        output = tmp_path / f"{name}.mp4"
+>       assert encode_video(paths, output, fps=10).status == "SUCCEEDED"
+E       AssertionError: assert 'FAILED' == 'SUCCEEDED'
+E         
+E         - SUCCEEDED
+E         + FAILED
+
+services/langgraph/tests/test_unified_security.py:434: AssertionError
+___________ test_build_is_incremental_cached_and_rebinds_provenance ____________
+
+approved_world = ({'tenant': 'tenant-vnx-ad07886e', 'owner': 'prj-vnx-219b4f17', 'other': 'prj-vnx-4452737c', 'brand': 'brand-b46af41a'...straintKind.REQUIRED: 'REQUIRED'>, params={}, severity=<Severity.BLOCKING: 'BLOCKING'>, rationale='')), provenance=()))
+
+    def test_build_is_incremental_cached_and_rebinds_provenance(approved_world):
+        w, v, doc = approved_world
+        cold = _build(w)
+        assert cold["genome_ref"] == v["version_id"] and len(cold["pages"]) == 24
+        assert cold["telemetry"]["pages_rendered"] >= 24 and cold["telemetry"]["model_calls"] == 0
+        warm = _build(w)
+>       assert warm["telemetry"]["pages_rendered"] == 0 and warm["telemetry"]["browser_runs"] == 0
+E       assert (24 == 0)
+
+services/langgraph/tests/test_vnexus_brandbook.py:221: AssertionError
+_______________ test_interrupted_build_resumes_from_stored_pages _______________
+
+approved_world = ({'tenant': 'tenant-vnx-013e281e', 'owner': 'prj-vnx-717b06f8', 'other': 'prj-vnx-c1e987d8', 'brand': 'brand-35b37ada'...straintKind.REQUIRED: 'REQUIRED'>, params={}, severity=<Severity.BLOCKING: 'BLOCKING'>, rationale='')), provenance=()))
+
+    def test_interrupted_build_resumes_from_stored_pages(approved_world):
+        w, _v, _doc = approved_world
+        as_user(w["mp"], "alice", role="editor", tenant=w["tenant"])
+        from services.langgraph.agency.vnexus.genome import Scope
+        from services.langgraph.security.auth import Principal
+    
+        alice = Principal(user_id="alice", tenant_id=w["tenant"], role="editor", allowed_project_ids=frozenset({"*"}))
+        with pytest.raises(RuntimeError, match="interrupted"):
+            bookservice.build(alice, w["brand"], scope=Scope.BRAND, scope_ref=w["brand"], project_id=w["owner"], mode=Mode.PREVIEW,
+                              interrupt_after=5)
+        bookservice.clear_cache()
+        resumed = bookservice.build(alice, w["brand"], scope=Scope.BRAND, scope_ref=w["brand"], project_id=w["owner"], mode=Mode.PREVIEW)
+>       assert resumed["telemetry"]["pages_reused"] >= 5 and resumed["telemetry"]["pages_rendered"] <= 19
+E       assert (0 >= 5)
+
+services/langgraph/tests/test_vnexus_brandbook.py:251: AssertionError
+_____________ test_production_book_approval_release_and_freshness ______________
+
+approved_world = ({'tenant': 'tenant-vnx-d0ac5312', 'owner': 'prj-vnx-35fd5705', 'other': 'prj-vnx-09d7de27', 'brand': 'brand-51bdc53c'...straintKind.REQUIRED: 'REQUIRED'>, params={}, severity=<Severity.BLOCKING: 'BLOCKING'>, rationale='')), provenance=()))
+
+    @NEEDS_BROWSER
+    def test_production_book_approval_release_and_freshness(approved_world):
+        w, v, doc = approved_world
+        build = _build(w, mode="PRODUCTION")
+>       assert build["status"] == "READY_FOR_APPROVAL", (build["status"], build["checks"]["blocking"][:3], build["gaps"][:3])
+E       AssertionError: ('BLOCKED', [{'page_id': 'p01', 'check': 'no_overflow', 'status': 'NOT_RUN', 'detail': 'page was not measured', ...}, ...ured', ...}, {'page_id': 'p01', 'check': 'min_font', 'status': 'NOT_RUN', 'detail': 'page was not measured', ...}], [])
+E       assert 'BLOCKED' == 'READY_FOR_APPROVAL'
+E         
+E         - READY_FOR_APPROVAL
+E         + BLOCKED
+
+services/langgraph/tests/test_vnexus_brandbook.py:303: AssertionError
+_________ test_preview_pages_pass_measured_checks_and_serve_inert_html _________
+
+approved_world = ({'tenant': 'tenant-vnx-00677370', 'owner': 'prj-vnx-64a62303', 'other': 'prj-vnx-7228a98f', 'brand': 'brand-5eac4961'...straintKind.REQUIRED: 'REQUIRED'>, params={}, severity=<Severity.BLOCKING: 'BLOCKING'>, rationale='')), provenance=()))
+
+    @NEEDS_BROWSER
+    def test_preview_pages_pass_measured_checks_and_serve_inert_html(approved_world):
+        w, _v, _doc = approved_world
+        build = _build(w)
+        assert build["checks"]["summary"]["FAILED"] == 0, build["checks"]["blocking"][:5]
+        q = {"scope": "brand", "scope_ref": w["brand"], "project_id": w["owner"], "mode": "PREVIEW"}
+        html = client.get(f"/vnexus/brands/{w['brand']}/brandbook/book.html", params=q)
+        assert html.status_code == 200 and "default-src 'none'" in html.headers["content-security-policy"]
+        assert "<script" not in html.text and html.text.count('data-page="p') >= 24
+        png = client.get(f"/vnexus/brands/{w['brand']}/brandbook/pages/p06/preview.png", params=q)
+>       assert png.status_code == 200 and png.content.startswith(b"\x89PNG")
+E       assert (404 == 200)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+services/langgraph/tests/test_vnexus_brandbook.py:340: AssertionError
+______________ test_end_to_end_brief_to_version_pinned_brand_book ______________
+
+world = ({'tenant': 'tenant-vnx-b61e8d01', 'owner': 'prj-vnx-bb685db6', 'other': 'prj-vnx-dff57dda', 'brand': 'brand-846aa1ad'...39275416065e4f1c86d5592a6c96d8fb', 'brand_id': 'brand-846aa1ad', 'scope': 'brand', 'scope_ref': 'brand-846aa1ad', ...})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff22f8d90>
+
+    @NEEDS_BROWSER
+    def test_end_to_end_brief_to_version_pinned_brand_book(world, monkeypatch):
+        w, _ = world
+        it = _intent(w)
+        # 3 GENERATE/IMPORT: two operator imports through the manual route.
+        a = _import(w, it, disc_png(size=128, ring=(0.18, 0.24, PAPER)), rights_basis="operator-owned", provider="hosted (operator)")
+        b = _import(w, it, disc_png(size=128, fg=ACCENT, radius=0.25), slot=2, rights_basis="operator-owned")
+        probe = _review(w, it, "COMPARE", [a["candidate_id"], b["candidate_id"]])
+        lab = {cid: label for label, cid in probe["labels"].items()}
+        from services.langgraph.agency.vnexus.directions.review import LENSES
+    
+        def board(cid, value):
+            rows = [{"candidate": lab[cid], "seat": "13", "criterion": "safety_privacy_rights", "evidence_class": "OBSERVED",
+                     "observation": "no third-party marks or personal data", "gate": "SAFETY_PRIVACY_RIGHTS", "gate_status": "PASS"}]
+            rows += [{"candidate": lab[cid], "seat": s, "criterion": c, "evidence_class": "INFERRED", "observation": c, "score": value}
+                     for s in ("01", "02", "03", "05", "10") for c in LENSES[s]["criteria"]]
+            return rows
+        s = _review(w, it, "COMPARE", [a["candidate_id"], b["candidate_id"]], board(a["candidate_id"], 8) + board(b["candidate_id"], 6))
+        assert s["recommendation"]["verdict"] == "RECOMMENDED_DIRECTION"
+        # 6 SELECT: existing approval, decided by someone else.
+        sel = client.post(_base(w, it) + "/selection", json={"project_id": w["owner"], "candidate_id": a["candidate_id"],
+                                                              "session_id": s["session_id"]}, headers=headers()).json()
+        assert sel["status"] == "PENDING"
+        assert client.post(f"/approvals/{sel['approval_id']}/decide", json={"decision": "approve"}, headers=headers()).status_code == 403
+        as_user(monkeypatch, "bob", role="reviewer", tenant=w["tenant"])
+        assert client.post(f"/approvals/{sel['approval_id']}/decide", json={"decision": "approve"}, headers=headers()).status_code == 200
+        as_user(monkeypatch, "alice", role="editor", tenant=w["tenant"])
+        # 7 RECONSTRUCT: required for a logo mark, measured against the selected raster.
+        r = client.post(_base(w, it) + "/reconstructions", json={"project_id": w["owner"], "candidate_id": a["candidate_id"],
+                                                                  "method": "controlled_trace"}, headers=headers())
+        assert r.status_code == 201, r.text
+        rec, vec = r.json()["reconstruction"], r.json()["candidate"]
+>       assert rec["classification"] == "VECTOR" and rec["fidelity"]["status"] == "PASS" and rec["status"] == "PASSED", json.dumps(rec, indent=1)[:3000]
+E       AssertionError: {
+E          "reconstruction_id": "vdv-14e4bf159a51fd50",
+E          "intent_id": "vdi-df9ca18e54104dd8",
+E          "candidate_id": "vdc-77bb10d47f8a7fc4",
+E          "candidate_sha256": "c6f1b6da2459dd63236ae991d160ba0720b2736c9f71ead712bb7455f5bfe8d4",
+E          "selection_approval_id": "075e486a-d626-440e-9ca8-06929d63f3ba",
+E          "need": "REQUIRED",
+E          "method": "controlled_trace",
+E          "artifact_id": "art-prj-vnx-bb685db6-foundry-vdx-df9ca18e54104dd8-v14e4bf159a51-svg",
+E          "artifact_version": 1,
+E          "sha256": "aec344a5e4d0d39abe86e457613cb8946dcd8ccd130859f942c05d620599ad5e",
+E          "classification": "VECTOR",
+E          "checks": [
+E           {
+E            "check": "svg_safety",
+E            "status": "PASS",
+E            "detail": "well-formed SVG without active content or external references"
+E           },
+E           {
+E            "check": "native_geometry",
+E            "status": "PASS",
+E            "detail": "725 shapes, 0 path commands"
+E           },
+E           {
+E            "check": "view_box",
+E            "status": "PASS",
+E            "detail": "0 0 128 128"
+E           },
+E           {
+E            "check": "palette_only_fills",
+E            "status": "PASS",
+E            "detail": "palette roles only"
+E           },
+E           {
+E            "check": "editable_exact_text",
+E            "status": "NOT_APPLICABLE",
+E            "detail": "no identity text in the brief"
+E           },
+E           {
+E            "check": "clipping",
+E            "status": "PASS",
+E            "detail": "0 clip paths"
+E           },
+E           {
+E            "check": "self_intersections",
+E            "status": "NOT_VERIFIED",
+E            "detail": "no geometry kernel is installed; inspect paths in an editor"
+E           },
+E           {
+E            "check": "curve_quality_and_nodes",
+E            "status": "NOT_VERIFIED",
+E            "detail": "0 path commands; curve quality needs a designer"
+E           },
+E           {
+E            "check": "rendered_fidelity",
+E            "status": "NOT_VERIFIED",
+E            "detail": "\"render failed: BROWSER_EXIT:1, SVG_NOT_DECODED, MISSING_CAPTURE\""
+E           }
+E          ],
+E          "fidelity": {
+E           "status": "NOT_RUN",
+E           "reason": "render failed: BROWSER_EXIT:1, SVG_NOT_DECODED, MISSING_CAPTURE"
+E          },
+E          "status": "NOT_VERIFIED",
+E          "reasons": [],
+E          "text_handling": "text decided NONE",
+E          "created_by": "alice",
+E          "created_at": "2026-11-20T02:45:48.958569Z"
+E         }
+E       assert ('VECTOR' == 'VECTOR'
+E         
+E           VECTOR and 'NOT_RUN' == 'PASS'
+E         
+E         - PASS
+E         + NOT_RUN)
+
+services/langgraph/tests/test_vnexus_directions.py:375: AssertionError
+_________________ test_recorded_fixture_matches_live_responses _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ff3cc2350>
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_recorded_fixture_matches_5')
+
+    @pytest.mark.skipif(not probe_browser().get("available", False), reason="NOT_RUN: local Chromium unavailable")
+    def test_recorded_fixture_matches_live_responses(monkeypatch, tmp_path):
+        live = capture(monkeypatch, tmp_path)
+        text = json.dumps(live)
+        assert "/tmp/" not in text and "/home/" not in text and "/root/" not in text
+        assert live["compare"]["session"]["recommendation"]["verdict"] == "RECOMMENDED_DIRECTION"
+>       assert live["freeze"]["status"] == "PENDING_GENOME_REVIEW"
+E       AssertionError: assert 'BLOCKED' == 'PENDING_GENOME_REVIEW'
+E         
+E         - PENDING_GENOME_REVIEW
+E         + BLOCKED
+
+services/langgraph/tests/test_vnexus_directions_contracts.py:109: AssertionError
+_____________________ test_identity_production_end_to_end ______________________
+
+approved = {'tenant': 'tenant-vnx-f568f3d8', 'owner': 'prj-vnx-232473f6', 'other': 'prj-vnx-ac429a1c', 'brand': 'brand-cd134b55', ...}
+
+    @needs_browser
+    def test_identity_production_end_to_end(approved):
+        w = approved
+        r = _produce(w, "identity", {"deliverables": ["logo_mark", "logo_lockup", "monogram", "icon_family", "color_system",
+                                                      "typography_specimen", "poster", "social_graphics", "brand_guidelines"],
+                                     "copy_text": {"headline": "Made slowly, used daily", "cta": "Join the studio list"}})
+        assert r.status_code == 200, r.text
+        rep = r.json()
+        states = {o["name"]: o["state"] for o in rep["outputs"]}
+>       assert all(s == "QC_PASSED" for s in states.values()), {k: v for k, v in states.items() if v != "QC_PASSED"}
+E       AssertionError: {'logo-mark-transparent.png': 'FAILED', 'logo-lockup.pdf': 'FAILED', 'color-system.pdf': 'FAILED', 'poster.png': 'FAILED', ...}
+E       assert False
+E        +  where False = all(<generator object test_identity_production_end_to_end.<locals>.<genexpr> at 0x7f3ff3531220>)
+
+services/langgraph/tests/test_vnexus_production.py:316: AssertionError
+_______________ test_experience_production_and_spec_only_targets _______________
+
+approved = {'tenant': 'tenant-vnx-17900f30', 'owner': 'prj-vnx-9b4cd0d8', 'other': 'prj-vnx-ae098d39', 'brand': 'brand-f0938841', ...}
+
+    @needs_browser
+    def test_experience_production_and_spec_only_targets(approved):
+        w = approved
+        r = _produce(w, "experience", {"request": {"target": "LANDING_PAGE", "objective": "Grow the studio list",
+                                                   "primary_action": "Join the studio list",
+                                                   "content": [{"title": "Plates", "body": "Stoneware for every day."}]}})
+        assert r.status_code == 200, r.text
+        rep = r.json()
+>       assert rep["verification"]["status"] == "PASSED" and rep["status"] == "VERIFIED"
+E       AssertionError: assert ('FAILED' == 'PASSED'
+E         
+E         - PASSED
+E         + FAILED)
+
+services/langgraph/tests/test_vnexus_production.py:341: AssertionError
+_____ test_video_production_procedural_master_captions_and_blocked_ai_shot _____
+
+approved = {'tenant': 'tenant-vnx-225f3401', 'owner': 'prj-vnx-459ebdd2', 'other': 'prj-vnx-73d7ee80', 'brand': 'brand-d17582f2', ...}
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_video_production_procedur0')
+
+    @needs_ffmpeg
+    def test_video_production_procedural_master_captions_and_blocked_ai_shot(approved, tmp_path):
+        w = approved
+        r = _produce(w, "video", {"brief": {"objective": "Introduce the studio", "headline": "Made slowly, used daily",
+                                            "points": ["Small batches", "Repairable"], "cta": "Join the studio list", "width": 480,
+                                            "height": 270, "fps": 12, "max_duration_s": 10, "include_shots": ["LIVE_ACTION"]}})
+        assert r.status_code == 200, r.text
+        rep = r.json()
+        assert rep["status"] == "INCOMPLETE"  # the requested live-action shot did not run
+        master = rep["stages"]["master"]
+>       assert master["procedural_preview_available"] is True and "REQUESTED_SHOTS_BLOCKED" in master["reasons"], {
+            "master": master, "compositing": rep["stages"].get("compositing"), "quality": rep["stages"].get("quality_control")
+        }
+E       AssertionError: {'master': {'status': 'INCOMPLETE', 'deliverables': {}, 'procedural_preview_available': False, 'reasons': ['PROCEDURAL...66666667, ...}, {'shot_id': 's9', 'start_frame': 92, 'frames': 28, 'start_s': 7.666666666666667, ...}]}, 'quality': {}}
+E       assert (False is True)
+
+services/langgraph/tests/test_vnexus_production.py:377: AssertionError
+____________ test_video_audio_requires_licence_and_muxes_real_audio ____________
+
+approved = {'tenant': 'tenant-vnx-9cae6daf', 'owner': 'prj-vnx-40b654a0', 'other': 'prj-vnx-b743a280', 'brand': 'brand-fcacbf3c', ...}
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-23/test_video_audio_requires_lice0')
+
+    @needs_ffmpeg
+    def test_video_audio_requires_licence_and_muxes_real_audio(approved, tmp_path):
+        w = approved
+        tone = tmp_path / "tone.m4a"
+        subprocess.run(["ffmpeg", "-nostdin", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "sine=frequency=440:duration=8",
+                        "-c:a", "aac", str(tone)], check=True)
+        from services.langgraph.agency.foundry.studio import store
+        from services.langgraph.api.routes._project_common import storage_adapter
+        from services.langgraph.security.auth import Principal
+    
+        alice = Principal(user_id="alice", tenant_id=w["tenant"], role="editor", allowed_project_ids=frozenset({w["owner"]}))
+        audio = store(alice, w["owner"], "tone.m4a", tone.read_bytes(), mime="audio/mp4", artifact_type="media_asset", subtype="audio",
+                      adapter=storage_adapter())
+        base = {"objective": "x", "headline": "Hello", "cta": "Go", "width": 320, "height": 180, "fps": 8, "max_duration_s": 6,
+                "audio_artifact_id": audio["artifact_id"]}
+        refused = _produce(w, "video", {"brief": base}).json()
+>       assert refused["stages"]["audio"]["status"] == "REFUSED"
+E       AssertionError: assert 'SILENT' == 'REFUSED'
+E         
+E         - REFUSED
+E         + SILENT
+
+services/langgraph/tests/test_vnexus_production.py:409: AssertionError
+=============================== warnings summary ===============================
+tests/test_mtls_transport.py::test_trusted_client_certificate_is_accepted
+tests/test_mtls_transport.py::test_trusted_client_certificate_is_accepted
+tests/test_mtls_transport.py::test_client_certificate_from_another_ca_is_refused
+tests/test_mtls_transport.py::test_client_certificate_from_another_ca_is_refused
+  /tmp/claude-0/-home-user-agent-mission-control-os/af2d6589-53bf-56b8-bd21-2a1794bb5fe8/scratchpad/venv311/lib/python3.11/site-packages/httpx/_config.py:63: DeprecationWarning: `cert=...` is deprecated. Use `verify=<ssl_context>` instead,with `.load_cert_chain()` to configure the certificate chain.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED services/langgraph/tests/test_abc_v6.py::test_t11_browser_executes_shaders_handles_context_loss_and_renders_svg_sizes
+FAILED services/langgraph/tests/test_avic.py::test_slice_renders_and_passes_independent_evaluation
+FAILED services/langgraph/tests/test_avic.py::test_evaluator_reads_the_bytes_not_the_scene
+FAILED services/langgraph/tests/test_avic.py::test_h3_repairs_a_contrast_defect_with_an_isolated_render_and_independent_evaluation
+FAILED services/langgraph/tests/test_avic.py::test_h1_measured_fidelity_with_real_render
+FAILED services/langgraph/tests/test_avic.py::test_h4_branches_keep_immutable_constraints_and_never_carry_approval
+FAILED services/langgraph/tests/test_avic.py::test_project_os_lineage_approval_release_and_no_approval_inheritance
+FAILED services/langgraph/tests/test_avic.py::test_cache_divergence_is_rejected
+FAILED services/langgraph/tests/test_avic.py::test_an_edit_against_a_stale_base_conflicts_and_stores_nothing
+FAILED services/langgraph/tests/test_avic.py::test_a_writer_that_slips_in_between_read_and_write_is_detected
+FAILED services/langgraph/tests/test_avic.py::test_a_crash_between_stage_writes_fails_closed_and_recompile_recovers
+FAILED services/langgraph/tests/test_avic.py::test_pixels_catch_an_overflow_that_the_glyph_estimate_misses
+FAILED services/langgraph/tests/test_avic.py::test_a_normal_slice_has_clean_margins
+FAILED services/langgraph/tests/test_avic_api.py::test_operator_path_edit_conflict_recovery_approval_release
+FAILED services/langgraph/tests/test_avic_contracts.py::test_recorded_fixture_matches_live_responses
+FAILED services/langgraph/tests/test_ffprobe_provisioning.py::test_ffprobe_binary_resolution_is_deterministic
+FAILED services/langgraph/tests/test_ffprobe_provisioning.py::test_missing_ffprobe_fails_explicitly
+FAILED services/langgraph/tests/test_foundry.py::test_a05_a06_a07_svg_renders_and_raster_has_real_pixels_at_the_specified_size
+FAILED services/langgraph/tests/test_foundry.py::test_a11_functional_interface_survives_visual_restyling
+FAILED services/langgraph/tests/test_foundry.py::test_a12_a13_a14_keyboard_reduced_motion_and_font_fallback
+FAILED services/langgraph/tests/test_foundry.py::test_a16_motion_file_has_decodable_frames
+FAILED services/langgraph/tests/test_foundry.py::test_a21_generated_pages_cannot_contact_remote_hosts
+FAILED services/langgraph/tests/test_ucpo_build.py::test_sandboxed_build_browser_qa_release_and_stale_after_change
+FAILED services/langgraph/tests/test_ucpo_build.py::test_browser_qa_catches_a_defective_generator
+FAILED services/langgraph/tests/test_unified_security.py::test_visual_browser_isolates_client_output_and_blocks_network
+FAILED services/langgraph/tests/test_unified_security.py::test_video_encoder_and_probe_use_isolated_scratch
+FAILED services/langgraph/tests/test_unified_security.py::test_mux_refuses_short_audio_that_would_truncate_video
+FAILED services/langgraph/tests/test_unified_security.py::test_a_nonzero_duration_black_video_does_not_pass_nonblank_qc
+FAILED services/langgraph/tests/test_unified_security.py::test_video_sampling_allows_one_fade_frame_but_rejects_a_flat_sampled_region
+FAILED services/langgraph/tests/test_vnexus_brandbook.py::test_build_is_incremental_cached_and_rebinds_provenance
+FAILED services/langgraph/tests/test_vnexus_brandbook.py::test_interrupted_build_resumes_from_stored_pages
+FAILED services/langgraph/tests/test_vnexus_brandbook.py::test_production_book_approval_release_and_freshness
+FAILED services/langgraph/tests/test_vnexus_brandbook.py::test_preview_pages_pass_measured_checks_and_serve_inert_html
+FAILED services/langgraph/tests/test_vnexus_directions.py::test_end_to_end_brief_to_version_pinned_brand_book
+FAILED services/langgraph/tests/test_vnexus_directions_contracts.py::test_recorded_fixture_matches_live_responses
+FAILED services/langgraph/tests/test_vnexus_production.py::test_identity_production_end_to_end
+FAILED services/langgraph/tests/test_vnexus_production.py::test_experience_production_and_spec_only_targets
+FAILED services/langgraph/tests/test_vnexus_production.py::test_video_production_procedural_master_captions_and_blocked_ai_shot
+FAILED services/langgraph/tests/test_vnexus_production.py::test_video_audio_requires_licence_and_muxes_real_audio
+39 failed, 2519 passed, 72 skipped, 4 warnings in 2512.18s (0:41:52)

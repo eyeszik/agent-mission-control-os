@@ -64,6 +64,576 @@
       "record_status": "HISTORICAL_SUPERSEDED",
       "superseded_by": "docs/audit-remediation-2026-09-26.md",
       "note": "This record predates live repository verification. Preserve it as provenance; repository-availability statements are not current runtime facts."
+    },
+    "acceptance_closure": {
+      "candidate_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+      "overall": "BLOCKED",
+      "acceptance_matrix": {
+        "0_canonical_agm_binding": {
+          "result": "PASS",
+          "evidence": "acceptance/discovery_manifest.json (BOUND, 0 problems)"
+        },
+        "1_ordered_sop_contracts": {
+          "result": "PASS",
+          "evidence": [
+            "test_sop_contracts.py 12/12",
+            "sop.test.ts 4/4",
+            "verify_repository_invariants.py (contiguity, acyclicity, dataflow, 100% coverage)",
+            "guard_stage on every live node"
+          ]
+        },
+        "2_source_to_agm_reconciliation": {
+          "result": "PASS",
+          "status_counts": {
+            "MATCHED": 84,
+            "PARTIAL": 9,
+            "MISSING": 0,
+            "DRIFTED": 8,
+            "PROVIDER_GAP": 5,
+            "NOT_MEASURED": 5
+          },
+          "unresolved_drifted": 0,
+          "orphaned": 0,
+          "parity": "8/8"
+        },
+        "3_production_migration_mappings": {
+          "result": "BLOCKED",
+          "sub_results": {
+            "field_level_mapping": "PASS",
+            "expand_backfill_contract_playbook": "PASS",
+            "generated_rollbacks_committed_and_equal": "PASS",
+            "clean_init": "PASS",
+            "upgrade_from_bb91590a": "PASS",
+            "migrate_rollback_remigrate_catalog_equivalence": "PASS",
+            "per_migration_rollback": "PASS",
+            "langgraph_checkpoint_roundtrip_postgres": "PASS",
+            "privilege_isolation_anon_authenticated": "PASS",
+            "tenant_scoped_backfill_checksums": "PASS",
+            "rls_policy_negative_tests": "BLOCKED"
+          },
+          "blocker": "Row-level security is not enabled on any amc table and no policy exists (rls_enabled=0, policies=0). Adding RLS is a production security-design decision for the owner; tests for policies that do not exist would be fabricated, so they are BLOCKED."
+        },
+        "4_executed_tests": {
+          "result": "PASS",
+          "basis": "Every hosted CI job PASSED at the candidate SHA. Local failures are all environment-caused and acknowledged per test.",
+          "not_measured_locally": [
+            "Blender (absent)",
+            "TTS espeak-ng (absent)",
+            "pinned Chromium 1254 renders",
+            "sandboxed UCPO build isolation"
+          ]
+        }
+      },
+      "versions": {
+        "python": "Python 3.11.18",
+        "node": "v22.23.5",
+        "pnpm": "10.29.3",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "next": "16.4.5",
+        "playwright": "1.65.0 (local run used Chromium build 1243 in place of the pinned 1254)",
+        "os": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39"
+      },
+      "steps": [
+        {
+          "step": "S01-check-env",
+          "command": "python check_env.py",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 2,
+          "log": "acceptance/logs/35151cfe/S01-check-env.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S02-verify_repository_invariants",
+          "command": "python scripts/verify_repository_invariants.py",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 0,
+          "log": "acceptance/logs/35151cfe/S02-verify_repository_invariants.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S02-verify_production_readiness",
+          "command": "python scripts/verify_production_readiness.py",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 0,
+          "log": "acceptance/logs/35151cfe/S02-verify_production_readiness.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S02-verify_auth_bindings",
+          "command": "python scripts/verify_auth_bindings.py",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 0,
+          "log": "acceptance/logs/35151cfe/S02-verify_auth_bindings.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S02-verify_ontology_parity",
+          "command": "python scripts/verify_ontology_parity.py",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 0,
+          "log": "acceptance/logs/35151cfe/S02-verify_ontology_parity.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S02-verify_design_tokens",
+          "command": "python scripts/verify_design_tokens.py",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 0,
+          "log": "acceptance/logs/35151cfe/S02-verify_design_tokens.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S02-verify_manifest",
+          "command": "python scripts/verify_manifest.py",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 1,
+          "log": "acceptance/logs/35151cfe/S02-verify_manifest.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S02-verify_guidance_registry",
+          "command": "python scripts/verify_guidance_registry.py",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 0,
+          "log": "acceptance/logs/35151cfe/S02-verify_guidance_registry.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S03-discover",
+          "command": "python scripts/acceptance/discover.py",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 1,
+          "log": "acceptance/logs/35151cfe/S03-discover.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S03-reconcile",
+          "command": "python scripts/verify_source_reconciliation.py",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 1,
+          "log": "acceptance/logs/35151cfe/S03-reconcile.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S04-compileall",
+          "command": "python -m compileall -q services/langgraph scripts",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 0,
+          "log": "acceptance/logs/35151cfe/S04-compileall.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S04-pip-check",
+          "command": "python -m pip check",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 0,
+          "log": "acceptance/logs/35151cfe/S04-pip-check.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S10-pnpm-install",
+          "command": "pnpm install --frozen-lockfile",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 1,
+          "log": "acceptance/logs/35151cfe/S10-pnpm-install.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S11-shared-build",
+          "command": "pnpm --filter @amc/shared build",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 1,
+          "log": "acceptance/logs/35151cfe/S11-shared-build.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S11-shared-typecheck",
+          "command": "pnpm --filter @amc/shared typecheck",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 2,
+          "log": "acceptance/logs/35151cfe/S11-shared-typecheck.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S11-shared-test",
+          "command": "pnpm --filter @amc/shared test",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 3,
+          "log": "acceptance/logs/35151cfe/S11-shared-test.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S12-packages-build",
+          "command": "pnpm --filter ./packages/* --filter !@amc/shared build",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 2,
+          "log": "acceptance/logs/35151cfe/S12-packages-build.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S12-packages-typecheck",
+          "command": "pnpm --filter ./packages/* --filter !@amc/shared typecheck",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 3,
+          "log": "acceptance/logs/35151cfe/S12-packages-typecheck.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S12-packages-test",
+          "command": "pnpm --filter ./packages/* --filter !@amc/shared test",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 6,
+          "log": "acceptance/logs/35151cfe/S12-packages-test.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S13-web-typecheck",
+          "command": "pnpm --filter @amc/web typecheck",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 1,
+          "log": "acceptance/logs/35151cfe/S13-web-typecheck.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S13-web-test",
+          "command": "pnpm --filter @amc/web test",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 3,
+          "log": "acceptance/logs/35151cfe/S13-web-test.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S13-web-verify-ui",
+          "command": "pnpm --filter @amc/web verify:ui",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 2,
+          "log": "acceptance/logs/35151cfe/S13-web-verify-ui.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S14-compile-tokens-check",
+          "command": "python compile_tokens.py --check",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 0,
+          "log": "acceptance/logs/35151cfe/S14-compile-tokens-check.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S16-db-migration-rls-suite",
+          "command": "python -m pytest services/langgraph/tests/test_migration_roundtrip.py -q -rs -p no:cacheprovider --junitxml=/tmp/claude-0/-home-user-agent-mission-control-os/af2d6589-53bf-56b8-bd21-2a1794bb5fe8/scratchpad/p4/junit-db.xml",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 10,
+          "counts": {
+            "total": 14,
+            "passed": 14
+          },
+          "junit": "acceptance/logs/35151cfe/junit-db.xml",
+          "log": "acceptance/logs/35151cfe/S16-db-migration-rls-suite.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S17-sop-recon-suites",
+          "command": "python -m pytest services/langgraph/tests/test_sop_contracts.py services/langgraph/tests/test_source_reconciliation.py -q -p no:cacheprovider --junitxml=/tmp/claude-0/-home-user-agent-mission-control-os/af2d6589-53bf-56b8-bd21-2a1794bb5fe8/scratchpad/p4/junit-sop-recon.xml",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 11,
+          "counts": {
+            "total": 19,
+            "passed": 19
+          },
+          "junit": "acceptance/logs/35151cfe/junit-sop-recon.xml",
+          "log": "acceptance/logs/35151cfe/S17-sop-recon-suites.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S13-web-build",
+          "command": "pnpm --filter @amc/web build",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 0,
+          "seconds": 3,
+          "log": "acceptance/logs/35151cfe/S13-web-build.log",
+          "status": "PASSED"
+        },
+        {
+          "step": "S15-browser-e2e",
+          "command": "pnpm --filter @amc/web test:e2e",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 1,
+          "seconds": 147,
+          "counts": {
+            "total": 27,
+            "passed": 20,
+            "skipped": 5,
+            "failed": 2
+          },
+          "junit": "acceptance/logs/35151cfe/junit-e2e.xml",
+          "failures_root_cause": {
+            "ts.py::Compile, refuse a stale edit, apply a current one, request approval": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "ts.py::Compile, build in the sandbox, and report the real outcome": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)"
+          },
+          "log": "acceptance/logs/35151cfe/S15-browser-e2e.log",
+          "status": "FAILED",
+          "note": "Every failure is environment-caused (see failures_root_cause); none is in a file this candidate changed. The same suite PASSED in hosted CI at this exact SHA (see hosted_ci)."
+        },
+        {
+          "step": "S20-backend-sqlite-full-pytest",
+          "command": "python -m pytest services/langgraph/tests -q -rf --junitxml=...",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 1,
+          "seconds": 1600,
+          "counts": {
+            "total": 2630,
+            "passed": 2500,
+            "skipped": 91,
+            "failed": 39
+          },
+          "junit": "acceptance/logs/35151cfe/junit-backend-sqlite.xml",
+          "failures_root_cause": {
+            "test_abc_v6.py::test_t11_browser_executes_shaders_handles_context_loss_and_renders_svg_sizes": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_slice_renders_and_passes_independent_evaluation": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_evaluator_reads_the_bytes_not_the_scene": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_h3_repairs_a_contrast_defect_with_an_isolated_render_and_independent_evaluation": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_h1_measured_fidelity_with_real_render": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_h4_branches_keep_immutable_constraints_and_never_carry_approval": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_project_os_lineage_approval_release_and_no_approval_inheritance": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_cache_divergence_is_rejected": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_an_edit_against_a_stale_base_conflicts_and_stores_nothing": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_a_writer_that_slips_in_between_read_and_write_is_detected": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_a_crash_between_stage_writes_fails_closed_and_recompile_recovers": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_pixels_catch_an_overflow_that_the_glyph_estimate_misses": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_a_normal_slice_has_clean_margins": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic_api.py::test_operator_path_edit_conflict_recovery_approval_release": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic_contracts.py::test_recorded_fixture_matches_live_responses": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_ffprobe_provisioning.py::test_ffprobe_binary_resolution_is_deterministic": "ffprobe is installed at /usr/bin/ffprobe, which defeats the missing-binary fixture",
+            "test_ffprobe_provisioning.py::test_missing_ffprobe_fails_explicitly": "ffprobe is installed at /usr/bin/ffprobe, which defeats the missing-binary fixture",
+            "test_foundry.py::test_a05_a06_a07_svg_renders_and_raster_has_real_pixels_at_the_specified_size": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_foundry.py::test_a11_functional_interface_survives_visual_restyling": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_foundry.py::test_a12_a13_a14_keyboard_reduced_motion_and_font_fallback": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_foundry.py::test_a16_motion_file_has_decodable_frames": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_foundry.py::test_a21_generated_pages_cannot_contact_remote_hosts": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_ucpo_build.py::test_sandboxed_build_browser_qa_release_and_stale_after_change": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_ucpo_build.py::test_browser_qa_catches_a_defective_generator": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_unified_security.py::test_visual_browser_isolates_client_output_and_blocks_network": "/usr/bin/ffmpeg cannot load libblas.so.3; the visual browser case needs the pinned Chromium",
+            "test_unified_security.py::test_video_encoder_and_probe_use_isolated_scratch": "/usr/bin/ffmpeg cannot load libblas.so.3; the visual browser case needs the pinned Chromium",
+            "test_unified_security.py::test_mux_refuses_short_audio_that_would_truncate_video": "/usr/bin/ffmpeg cannot load libblas.so.3; the visual browser case needs the pinned Chromium",
+            "test_unified_security.py::test_a_nonzero_duration_black_video_does_not_pass_nonblank_qc": "/usr/bin/ffmpeg cannot load libblas.so.3; the visual browser case needs the pinned Chromium",
+            "test_unified_security.py::test_video_sampling_allows_one_fade_frame_but_rejects_a_flat_sampled_region": "/usr/bin/ffmpeg cannot load libblas.so.3; the visual browser case needs the pinned Chromium",
+            "test_vnexus_brandbook.py::test_build_is_incremental_cached_and_rebinds_provenance": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_brandbook.py::test_interrupted_build_resumes_from_stored_pages": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_brandbook.py::test_production_book_approval_release_and_freshness": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_brandbook.py::test_preview_pages_pass_measured_checks_and_serve_inert_html": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_directions.py::test_end_to_end_brief_to_version_pinned_brand_book": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_directions_contracts.py::test_recorded_fixture_matches_live_responses": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_production.py::test_identity_production_end_to_end": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_production.py::test_experience_production_and_spec_only_targets": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_production.py::test_video_production_procedural_master_captions_and_blocked_ai_shot": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_production.py::test_video_audio_requires_licence_and_muxes_real_audio": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)"
+          },
+          "log": "acceptance/logs/35151cfe/pytest-backend-sqlite.log",
+          "status": "FAILED",
+          "note": "Every failure is environment-caused (see failures_root_cause); none is in a file this candidate changed. The same suite PASSED in hosted CI at this exact SHA (see hosted_ci)."
+        },
+        {
+          "step": "S20-backend-postgres-full-pytest",
+          "command": "python -m pytest services/langgraph/tests -q -rf --junitxml=...",
+          "cwd": "/home/user/agent-mission-control-os",
+          "git_sha": "35151cfe52e9a1446a985395ac745e3356c254d5",
+          "exit_code": 1,
+          "seconds": 2514,
+          "counts": {
+            "total": 2630,
+            "passed": 2519,
+            "skipped": 72,
+            "failed": 39
+          },
+          "junit": "acceptance/logs/35151cfe/junit-backend-postgres.xml",
+          "failures_root_cause": {
+            "test_abc_v6.py::test_t11_browser_executes_shaders_handles_context_loss_and_renders_svg_sizes": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_slice_renders_and_passes_independent_evaluation": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_evaluator_reads_the_bytes_not_the_scene": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_h3_repairs_a_contrast_defect_with_an_isolated_render_and_independent_evaluation": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_h1_measured_fidelity_with_real_render": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_h4_branches_keep_immutable_constraints_and_never_carry_approval": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_project_os_lineage_approval_release_and_no_approval_inheritance": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_cache_divergence_is_rejected": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_an_edit_against_a_stale_base_conflicts_and_stores_nothing": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_a_writer_that_slips_in_between_read_and_write_is_detected": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_a_crash_between_stage_writes_fails_closed_and_recompile_recovers": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_pixels_catch_an_overflow_that_the_glyph_estimate_misses": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic.py::test_a_normal_slice_has_clean_margins": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic_api.py::test_operator_path_edit_conflict_recovery_approval_release": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_avic_contracts.py::test_recorded_fixture_matches_live_responses": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_ffprobe_provisioning.py::test_ffprobe_binary_resolution_is_deterministic": "ffprobe is installed at /usr/bin/ffprobe, which defeats the missing-binary fixture",
+            "test_ffprobe_provisioning.py::test_missing_ffprobe_fails_explicitly": "ffprobe is installed at /usr/bin/ffprobe, which defeats the missing-binary fixture",
+            "test_foundry.py::test_a05_a06_a07_svg_renders_and_raster_has_real_pixels_at_the_specified_size": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_foundry.py::test_a11_functional_interface_survives_visual_restyling": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_foundry.py::test_a12_a13_a14_keyboard_reduced_motion_and_font_fallback": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_foundry.py::test_a16_motion_file_has_decodable_frames": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_foundry.py::test_a21_generated_pages_cannot_contact_remote_hosts": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_ucpo_build.py::test_sandboxed_build_browser_qa_release_and_stale_after_change": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_ucpo_build.py::test_browser_qa_catches_a_defective_generator": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_unified_security.py::test_visual_browser_isolates_client_output_and_blocks_network": "/usr/bin/ffmpeg cannot load libblas.so.3; the visual browser case needs the pinned Chromium",
+            "test_unified_security.py::test_video_encoder_and_probe_use_isolated_scratch": "/usr/bin/ffmpeg cannot load libblas.so.3; the visual browser case needs the pinned Chromium",
+            "test_unified_security.py::test_mux_refuses_short_audio_that_would_truncate_video": "/usr/bin/ffmpeg cannot load libblas.so.3; the visual browser case needs the pinned Chromium",
+            "test_unified_security.py::test_a_nonzero_duration_black_video_does_not_pass_nonblank_qc": "/usr/bin/ffmpeg cannot load libblas.so.3; the visual browser case needs the pinned Chromium",
+            "test_unified_security.py::test_video_sampling_allows_one_fade_frame_but_rejects_a_flat_sampled_region": "/usr/bin/ffmpeg cannot load libblas.so.3; the visual browser case needs the pinned Chromium",
+            "test_vnexus_brandbook.py::test_build_is_incremental_cached_and_rebinds_provenance": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_brandbook.py::test_interrupted_build_resumes_from_stored_pages": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_brandbook.py::test_production_book_approval_release_and_freshness": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_brandbook.py::test_preview_pages_pass_measured_checks_and_serve_inert_html": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_directions.py::test_end_to_end_brief_to_version_pinned_brand_book": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_directions_contracts.py::test_recorded_fixture_matches_live_responses": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_production.py::test_identity_production_end_to_end": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_production.py::test_experience_production_and_spec_only_targets": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_production.py::test_video_production_procedural_master_captions_and_blocked_ai_shot": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)",
+            "test_vnexus_production.py::test_video_audio_requires_licence_and_muxes_real_audio": "Chromium renderer / sandbox unavailable locally (pinned Chromium 1254 absent; local 1243 renders refused)"
+          },
+          "log": "acceptance/logs/35151cfe/pytest-backend-postgres.log",
+          "status": "FAILED",
+          "note": "Every failure is environment-caused (see failures_root_cause); none is in a file this candidate changed. The same suite PASSED in hosted CI at this exact SHA (see hosted_ci)."
+        }
+      ],
+      "superseded_candidates": [
+        {
+          "sha": "7f4805d2c6c53ef73f8d41d66cf0eb02b39f5cc9",
+          "reason": "hosted Backend on PostgreSQL failed test_incremental_upgrade_from_the_prior_baseline_equals_clean_init: shallow CI clone lacked baseline commit bb91590a; fixed in 35151cfe (fetch-depth: 0) and the entire matrix was re-run"
+        }
+      ],
+      "hosted_ci": [
+        {
+          "name": "CodeQL",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/runs/136032445811",
+          "completed_at": "2026-11-20T02:12:00Z"
+        },
+        {
+          "name": "Browser E2E (local degraded HITL)",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226808",
+          "completed_at": "2026-11-20T02:15:05Z"
+        },
+        {
+          "name": "Rendering adapters + video + remote protocol",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226598",
+          "completed_at": "2026-11-20T02:14:40Z"
+        },
+        {
+          "name": "Backend (compile + invariants + pytest)",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226500",
+          "completed_at": "2026-11-20T02:29:12Z"
+        },
+        {
+          "name": "Mission Council engines (CrewAI + AutoGen + MCP, offline)",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226408",
+          "completed_at": "2026-11-20T02:12:50Z"
+        },
+        {
+          "name": "Backend on PostgreSQL (migrations + pytest)",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226403",
+          "completed_at": "2026-11-20T02:44:35Z"
+        },
+        {
+          "name": "Obscura isolated extraction (offline fixtures)",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226394",
+          "completed_at": "2026-11-20T02:12:21Z"
+        },
+        {
+          "name": "Dependency audit",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226356",
+          "completed_at": "2026-11-20T02:13:20Z"
+        },
+        {
+          "name": "Frontend (contracts + typecheck + test + build)",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226340",
+          "completed_at": "2026-11-20T02:12:10Z"
+        },
+        {
+          "name": "UCPO sandboxed build + browser QA (must not skip)",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658991009/job/136032226019",
+          "completed_at": "2026-11-20T02:23:19Z"
+        },
+        {
+          "name": "Analyze (python)",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658985354/job/136032210873",
+          "completed_at": "2026-11-20T02:12:20Z"
+        },
+        {
+          "name": "Analyze (actions)",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658985354/job/136032210670",
+          "completed_at": "2026-11-20T02:12:07Z"
+        },
+        {
+          "name": "Analyze (javascript-typescript)",
+          "conclusion": "success",
+          "html_url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/44658985354/job/136032210449",
+          "completed_at": "2026-11-20T02:12:18Z"
+        }
+      ],
+      "ephemeral_database": "PostgreSQL on 127.0.0.1:54329 created for this run; no production database was contacted",
+      "seal_rule": "This section and tool_proof_log.json are the only files changed after the candidate SHA; see the seal commit diff.",
+      "redaction": "6 credential-shaped test-parameter strings (synthetic fixtures from test_pii_secret_patterns.py, built by concatenation in source) were replaced with REDACTED-SYNTHETIC-FIXTURE in acceptance/logs; counts and statuses are unchanged."
     }
   }
 }

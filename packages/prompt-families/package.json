@@ -1,0 +1,25 @@
+{
+  "name": "@amc/prompt-families",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reusable prompt families (invariants, variation axes, concept ledger) compiled through @amc/guidance, parity-checked against services/langgraph/agency/prompt_families. Terminal state is PROMPT_PACKAGE_READY; nothing executes.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@amc/canonical": "workspace:*",
+    "@amc/guidance": "workspace:*",
+    "@amc/kernel": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "^5.1.1"
+  }
+}

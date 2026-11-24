@@ -63,6 +63,14 @@ export interface Merchant {
   credentialsRotatedAt: Date | null;
 }
 
+/** One merchant as seen by an operator audit: either readable, or the reason it is not. */
+export interface MerchantAuditEntry {
+  id: string;
+  name: string;
+  merchant: Merchant | null;
+  error: string | null;
+}
+
 export class MerchantRepository {
   constructor(
     private readonly db: Database,
@@ -170,6 +178,26 @@ export class MerchantRepository {
       throw AislError.notFound('merchant_not_found', `merchant ${merchantId} does not exist`, 'merchant_id');
     }
     return this.hydrate(row);
+  }
+
+  /**
+   * Every merchant for operator audits. A row whose credentials cannot be
+   * opened is returned with its error instead of failing the whole listing, so
+   * one corrupt or legacy row cannot hide the state of every other merchant.
+   */
+  async auditAll(limit = 100): Promise<MerchantAuditEntry[]> {
+    const { rows } = await this.db.query<MerchantRow>(
+      `SELECT id, name, platform, api_credentials_encrypted, commission_rate_bps, aisl_cut_bps, created_at, enabled, credentials_rotated_at FROM merchants ORDER BY created_at ASC LIMIT $1`,
+      [limit],
+    );
+    return rows.map((row) => {
+      try {
+        return { id: row.id, name: row.name, merchant: this.hydrate(row), error: null };
+      } catch (err) {
+        if (!(err instanceof AislError)) throw err;
+        return { id: row.id, name: row.name, merchant: null, error: err.message };
+      }
+    });
   }
 
   /** Every merchant, disabled ones included — for operator tooling, not search. */

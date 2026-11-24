@@ -58,7 +58,10 @@ def build_crg(
     incomplete = []
     for req, check in zip(contract.requirements, result.results):
         human_path = req.kind == "HUMAN_REVIEW"
-        executable_path = artifact_versions if not human_path else []
+        # A candidate's artifacts are not proof that they satisfy a specific
+        # finite deliverable. Do not invent requirement-to-artifact edges.
+        inventory_path = req.kind == "DELIVERABLE"
+        executable_path = artifact_versions if not human_path and not inventory_path else []
         if req.blocking and not human_path and not executable_path:
             incomplete.append(req.requirement_id)
         requirements.append(

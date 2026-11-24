@@ -13,9 +13,11 @@ from services.langgraph.core.errors import register_error_handlers
 from services.langgraph.api.routes import (
     actions,
     agency_framework,
+    brand_os,
     agency_os,
     avic,
     agency,
+    browser,
     analytics,
     approvals,
     artifacts,
@@ -168,12 +170,14 @@ app.include_router(foundry.router, prefix="/foundry", tags=["Creative Foundry"])
 app.include_router(innovation.router, prefix="/innovation", tags=["UNBOUND Innovation Foundry"])
 app.include_router(rendering.router, prefix="/foundry", tags=["Governed Rendering"])
 app.include_router(ucpo.router, prefix="/ucpo", tags=["Website Production Line"])
+app.include_router(browser.router, prefix="/browser", tags=["Local browser extraction"])
 app.include_router(avic.router, prefix="/avic", tags=["Visual Compiler (AVIC)"])
 app.include_router(missions.router, prefix="/missions", tags=["Mission Council"])
 app.include_router(vnexus.router, prefix="/vnexus", tags=["VNEXUS"])
 app.include_router(actions.router, prefix="/actions", tags=["Governed Actions"])
 app.include_router(agency_os.router, prefix="/agency-os", tags=["Agency OS"])
 app.include_router(agency_framework.router, prefix="/agency-framework", tags=["Agency Operating Framework"])
+app.include_router(brand_os.router, prefix="/brand-os", tags=["Brand OS SOPs"])
 app.include_router(compiled_agency.router, prefix="/compiled-agency", tags=["Compiled Agency"])
 app.include_router(projects.router, prefix="/projects", tags=["Projects"])
 app.include_router(project_ops.router, prefix="/projects", tags=["Project Operations"])

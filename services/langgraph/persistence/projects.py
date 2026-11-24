@@ -480,6 +480,21 @@ def _storage_from_row(row: Any) -> StorageObject:
 
 
 def register_storage_object(*, tenant_id: str, project_id: str, stored: StoredObject, mime_type: str) -> StorageObject:
+    """Record (or re-verify) a stored object. Content-addressed, so concurrent registrations converge on one row.
+
+    PostgreSQL's READ COMMITTED lets two writers both miss the row and both insert; the loser's unique violation
+    is retried once, which then takes the existing-row path. Any other error, or a second failure, re-raises.
+    """
+    try:
+        return _register_storage_object_once(tenant_id=tenant_id, project_id=project_id, stored=stored, mime_type=mime_type)
+    except Exception as exc:  # noqa: BLE001 - only a lost insert race is retried; anything else re-raises
+        sqlstate = getattr(exc, "sqlstate", None) or getattr(getattr(exc, "diag", None), "sqlstate", None)
+        if sqlstate != "23505" and not (type(exc).__name__ == "IntegrityError" and "UNIQUE" in str(exc).upper()):
+            raise
+    return _register_storage_object_once(tenant_id=tenant_id, project_id=project_id, stored=stored, mime_type=mime_type)
+
+
+def _register_storage_object_once(*, tenant_id: str, project_id: str, stored: StoredObject, mime_type: str) -> StorageObject:
     now = _now()
     with transaction(write=True) as db:
         row = db.execute(

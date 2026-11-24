@@ -10,9 +10,9 @@ Steps, each recorded with its command, exit status, duration and log tail:
 5. ``output_check`` -- the export exists, stays under the quota, holds one HTML file per route, and every
    file is hashed into ``output_hash``.
 
-The work directory is a fresh directory outside the repository; the repository is read-only
-inside the sandbox. ``keep_output`` returns the export directory for QA and preview; the caller
-removes it with ``cleanup``.
+The work directory is fresh. The sandbox exposes only the installed web dependencies,
+not the rest of the repository or host home. ``keep_output`` returns the export directory
+for QA and preview; the caller removes it with ``cleanup``.
 """
 
 from __future__ import annotations

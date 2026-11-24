@@ -48,6 +48,9 @@ from .media_fabric import (
 TERMINAL = frozenset({"QC_PASSED", "CANCELED"})
 CANCELABLE = ("PLANNED", "VALIDATED", "AUTHORIZED", "QUEUED")
 SUBJECT_MEDIA_JOB = "VNEXUS_MEDIA_JOB"
+TECHNICAL_QC_SCOPE = "TECHNICAL_FORMAT_CHECKS_ONLY"
+QC_PROJECTION_VERSION = "amc-vnexus-technical-qc-projection/v2"
+RIGHTS_NOTE = "No verified source inventory or licence/implicit-font clearance is bound to this job."
 
 
 class RateLimited(RuntimeError):
@@ -62,14 +65,61 @@ def _job(principal: Principal, job_id: str) -> dict:
     return row
 
 
+def _current_technical_qc(qc: Any) -> bool:
+    """Recognize the current technical-only result without trusting legacy Q4 claims."""
+    if not isinstance(qc, dict):
+        return False
+    checks, inconclusive = qc.get("checks"), qc.get("inconclusive")
+    if (qc.get("scope") != TECHNICAL_QC_SCOPE or qc.get("rights_status") != "NOT_MEASURED"
+            or qc.get("release_decision") != "NOT_EVALUATED" or not isinstance(checks, list)
+            or not isinstance(inconclusive, list) or not all(isinstance(item, str) for item in inconclusive)
+            or not isinstance(qc.get("simulated"), bool) or not isinstance(qc.get("passed"), bool)):
+        return False
+    if any(not isinstance(c, dict) or not all(isinstance(c.get(k), str) for k in ("check", "level", "detail"))
+           or not isinstance(c.get("passed"), bool) or c["check"] == "source_rights" or c["level"] == "Q4_RIGHTS"
+           for c in checks):
+        return False
+    passed = bool(checks) and all(c["passed"] for c in checks) and not inconclusive
+    verdict = "SIMULATED_ONLY" if qc["simulated"] and passed else ("PASSED" if passed else "FAILED")
+    return qc["passed"] == passed and qc.get("verdict") == verdict
+
+
+def public_qc(qc: Any, *, state: str) -> dict:
+    """Project old QC without rewriting its persisted audit record or inventing clearance.
+
+    Previous jobs could contain a caller-declared Q4 pass. A historical
+    ``QC_PASSED`` transition remains in the lifecycle, but its unscoped QC is
+    not current technical evidence; a new job/recheck is required.
+    """
+    if _current_technical_qc(qc):
+        return dict(qc)
+    if not qc and state != "QC_PASSED":
+        return {}
+    original = qc if isinstance(qc, dict) else {}
+    projected = dict(original)
+    old_checks = original.get("checks")
+    projected["checks"] = [c for c in old_checks if isinstance(c, dict) and c.get("check") != "source_rights"
+                           and c.get("level") != "Q4_RIGHTS"] if isinstance(old_checks, list) else []
+    if "passed" in original:
+        projected["legacy_passed"] = original["passed"]
+    if "verdict" in original:
+        projected["legacy_verdict"] = original["verdict"]
+    projected.update({"passed": None, "verdict": "NOT_EVALUATED", "scope": "LEGACY_QC_REQUIRES_RECHECK",
+                      "rights_status": "NOT_MEASURED", "rights_note": RIGHTS_NOTE,
+                      "release_decision": "NOT_EVALUATED", "recheck_required": True})
+    return projected
+
+
 def public(row: dict) -> dict:
     artifact = row.get("artifact") or {}
+    qc = public_qc(row.get("qc"), state=row["state"])
+    generated = can_claim_generated(row["state"], artifact) and qc.get("scope") == TECHNICAL_QC_SCOPE and qc.get("passed") is True
     return {**{k: row.get(k) for k in ("job_id", "project_id", "provider_id", "capability", "request_hash", "idempotency_key", "state",
                                        "estimate", "budget_ceiling_minor", "currency", "authorized_by", "authorized_at", "attempts",
-                                       "max_attempts", "provider_job_ref", "artifact", "qc", "error", "created_by", "created_at",
+                                       "max_attempts", "provider_job_ref", "artifact", "error", "created_by", "created_at",
                                        "updated_at", "version")},
-            "label": (row.get("request") or {}).get("label", ""),
-            "claimable_as_generated": can_claim_generated(row["state"], artifact), "simulated": bool(artifact.get("simulated"))}
+            "qc": qc, "label": (row.get("request") or {}).get("label", ""),
+            "claimable_as_generated": generated, "simulated": bool(artifact.get("simulated"))}
 
 
 def plan(principal: Principal, project_id: str, *, provider_id: str, request: MediaRequest, idempotency_key: str,
@@ -275,9 +325,14 @@ def quality_control(data: bytes, request: MediaRequest, *, simulated: bool) -> d
         if mime == "image/png":
             expect.setdefault("min_unique_colours", int(request.spec.get("min_unique_colours", 2)))
         v = verify_media(data, mime_type=mime, expect=expect)
-        checks = [{"check": c["check"], "level": c["level"], "passed": bool(c["passed"]), "detail": c["detail"]} for c in v.checks
+        # This job contract does not bind an independently verified source
+        # inventory. verify_media's legacy empty-source assumption must not be
+        # presented here as proof of rights or font clearance. QC_PASSED below
+        # is a technical-format verdict, not a release authorization.
+        technical = [c for c in v.checks if c["check"] != "source_rights"]
+        checks = [{"check": c["check"], "level": c["level"], "passed": bool(c["passed"]), "detail": c["detail"]} for c in technical
                   if c["passed"] is not None]
-        inconclusive = [c["check"] for c in v.checks if c["passed"] is None]
+        inconclusive = [c["check"] for c in technical if c["passed"] is None]
     elif mime == "image/webp":
         checks, inconclusive = _webp_checks(data, expect), []
     elif mime == "application/pdf":
@@ -286,7 +341,9 @@ def quality_control(data: bytes, request: MediaRequest, *, simulated: bool) -> d
         checks, inconclusive = [], [f"NO_VERIFIER_FOR:{mime}"]
     passed = bool(checks) and all(c["passed"] for c in checks) and not inconclusive
     return {"checks": checks, "inconclusive": inconclusive, "passed": passed, "simulated": simulated,
-            "verdict": "SIMULATED_ONLY" if simulated and passed else ("PASSED" if passed else "FAILED")}
+            "verdict": "SIMULATED_ONLY" if simulated and passed else ("PASSED" if passed else "FAILED"),
+            "scope": TECHNICAL_QC_SCOPE, "rights_status": "NOT_MEASURED", "rights_note": RIGHTS_NOTE,
+            "release_decision": "NOT_EVALUATED"}
 
 
 def _webp_checks(data: bytes, expect: dict) -> list[dict[str, Any]]:
@@ -337,5 +394,5 @@ def list_jobs(principal: Principal, project_id: str) -> list[dict]:
     return [public(r) for r in db.list_media_jobs(project_id)]
 
 
-__all__ = ["CANCELABLE", "RateLimited", "TERMINAL", "authorize", "cancel", "execute", "get_job", "list_jobs", "plan", "public",
-           "quality_control", "retry", "run", "validate"]
+__all__ = ["CANCELABLE", "QC_PROJECTION_VERSION", "RateLimited", "TECHNICAL_QC_SCOPE", "TERMINAL", "authorize", "cancel", "execute", "get_job", "list_jobs",
+           "plan", "public", "public_qc", "quality_control", "retry", "run", "validate"]

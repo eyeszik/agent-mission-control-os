@@ -1,0 +1,223 @@
+{
+  "sops": [
+    {
+      "sop_id": "F01",
+      "name": "Founder DNA Interview",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "origin": "NEWLY_AUTHORED_SOP",
+      "draft_version": "0.1-draft",
+      "source_sha256": "410db79d8524ba907a2c0c32e2bc8d6038b46b3170a3eb309ab9d9e91df1b119",
+      "step_count": 8
+    },
+    {
+      "sop_id": "F02",
+      "name": "Brand Discovery Questionnaire",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "origin": "NEWLY_AUTHORED_SOP",
+      "draft_version": "0.1-draft",
+      "source_sha256": "770e765297c4ca12b5dddaebc3bded079ad743008060d1b22112a1c73bdd48a8",
+      "step_count": 8
+    },
+    {
+      "sop_id": "F03",
+      "name": "Customer Desire Mapping",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "origin": "NEWLY_AUTHORED_SOP",
+      "draft_version": "0.1-draft",
+      "source_sha256": "77989b6bb99d16b6c6b97005c60c3acd3ffaac61555e225c9e2a5c5365cc3460",
+      "step_count": 8
+    },
+    {
+      "sop_id": "F04",
+      "name": "Competitive Identity Audit",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "origin": "NEWLY_AUTHORED_SOP",
+      "draft_version": "0.1-draft",
+      "source_sha256": "6969b7a70e0a9e7a260e8e33d802e51cd9d3932e01b0ad005ccfe8b6829d921a",
+      "step_count": 7
+    },
+    {
+      "sop_id": "F05",
+      "name": "Category Opportunity Scanner",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "origin": "NEWLY_AUTHORED_SOP",
+      "draft_version": "0.1-draft",
+      "source_sha256": "4a51079d5bb8eb5971e78b8e8f0fdf772c9948ac1cddcbd90614c0e2c11c0e6e",
+      "step_count": 8
+    },
+    {
+      "sop_id": "F06",
+      "name": "Research Confidence Ledger",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "origin": "NEWLY_AUTHORED_SOP",
+      "draft_version": "0.1-draft",
+      "source_sha256": "720a9301313720f0cf4bdb967b0a9bfe382069c750e022c702f97dac2f41d1ea",
+      "step_count": 8
+    },
+    {
+      "sop_id": "F07",
+      "name": "Category Ownership Architect",
+      "department_id": "D02",
+      "department_name": "STRATEGIC POSITIONING",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "origin": "NEWLY_AUTHORED_SOP",
+      "draft_version": "0.1-draft",
+      "source_sha256": "d0d5632faa77b2ab5ba942ded9ba1dbddf34061e3fc4300b8b0a9f0137ac9f5b",
+      "step_count": 8
+    },
+    {
+      "sop_id": "F08",
+      "name": "Unique Value Proposition Builder",
+      "department_id": "D02",
+      "department_name": "STRATEGIC POSITIONING",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "origin": "NEWLY_AUTHORED_SOP",
+      "draft_version": "0.1-draft",
+      "source_sha256": "25af0355c3428842c0b7ea7f6e9a7a8e3dc350d98a023361a3b8bcd88291979a",
+      "step_count": 8
+    },
+    {
+      "sop_id": "F09",
+      "name": "Brand Purpose Designer",
+      "department_id": "D02",
+      "department_name": "STRATEGIC POSITIONING",
+      "batch": "BATCH_1",
+      "procedure_status": "SOURCE_UNAVAILABLE",
+      "origin": null,
+      "draft_version": null,
+      "source_sha256": null,
+      "step_count": 0
+    }
+  ],
+  "detail": {
+    "sop": {
+      "sop_id": "F04",
+      "name": "Competitive Identity Audit",
+      "department_id": "D01",
+      "department_name": "BRAND INTELLIGENCE",
+      "batch": "BATCH_1",
+      "procedure_status": "NEWLY_AUTHORED_DRAFT",
+      "origin": "NEWLY_AUTHORED_SOP",
+      "draft_version": "0.1-draft",
+      "source_sha256": "6969b7a70e0a9e7a260e8e33d802e51cd9d3932e01b0ad005ccfe8b6829d921a",
+      "step_count": 7
+    },
+    "steps": [
+      {
+        "step_ref": "F04.S1",
+        "sequence": 1,
+        "line": 16,
+        "text": "Define the comparison frame and select competitors using a stated rule (for example, customer alternatives or category search visibility). Include substitutes where relevant.",
+        "agm_disposition": "PARTIAL_MATCH",
+        "agm_task_ids": [
+          "AGM-04-001",
+          "AGM-04-002"
+        ]
+      },
+      {
+        "step_ref": "F04.S2",
+        "sequence": 2,
+        "line": 17,
+        "text": "Gather current, public primary materials: official websites, product pages, pricing, packaging, public campaigns, and public company statements. Record URL, capture date, market, and access limitations.",
+        "agm_disposition": "PARTIAL_MATCH",
+        "agm_task_ids": [
+          "AGM-04-003",
+          "AGM-04-006"
+        ]
+      },
+      {
+        "step_ref": "F04.S3",
+        "sequence": 3,
+        "line": 18,
+        "text": "Record observable identity dimensions: stated promise, audience, category language, proof, offer, price cues, tone, visual codes, channels, and calls to action. Distinguish quoted claims from analyst interpretation.",
+        "agm_disposition": "PARTIAL_MATCH",
+        "agm_task_ids": [
+          "AGM-04-004",
+          "AGM-04-005"
+        ]
+      },
+      {
+        "step_ref": "F04.S4",
+        "sequence": 4,
+        "line": 19,
+        "text": "Cross-check material claims across more than one primary artifact where possible. Label inaccessible, stale, or promotional claims as such.",
+        "agm_disposition": "PARTIAL_MATCH",
+        "agm_task_ids": [
+          "AGM-04-005"
+        ]
+      },
+      {
+        "step_ref": "F04.S5",
+        "sequence": 5,
+        "line": 20,
+        "text": "Compare patterns in a matrix. Mark common conventions, distinct positions, and apparent gaps; do not infer customer preference from competitor messaging alone.",
+        "agm_disposition": "PARTIAL_MATCH",
+        "agm_task_ids": [
+          "AGM-04-012"
+        ]
+      },
+      {
+        "step_ref": "F04.S6",
+        "sequence": 6,
+        "line": 21,
+        "text": "Identify potential conflicts, trademark/name risks, regulated claims, and copied expression for qualified legal review; do not make a legal conclusion.",
+        "agm_disposition": "PARTIAL_MATCH",
+        "agm_task_ids": [
+          "AGM-24-009",
+          "AGM-24-004"
+        ]
+      },
+      {
+        "step_ref": "F04.S7",
+        "sequence": 7,
+        "line": 22,
+        "text": "Test proposed whitespace against customer evidence (F03), category evidence (F05), and confidence (F06). Record disconfirming examples.",
+        "agm_disposition": "PARTIAL_MATCH",
+        "agm_task_ids": [
+          "AGM-04-013",
+          "AGM-04-011"
+        ]
+      }
+    ],
+    "companion_scope": "ADVISORY",
+    "original_authenticated": false
+  },
+  "status": {
+    "project_id": "prj_1",
+    "sop_id": "F01",
+    "name": "Founder DNA Interview",
+    "origin": "NEWLY_AUTHORED_SOP",
+    "draft_version": "0.1-draft",
+    "source_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "state": "PENDING",
+    "decision_covers": "fixture",
+    "artifact_id": null,
+    "artifact_version": null,
+    "artifact_hash": null,
+    "approval_id": "a1",
+    "decision_route": "/approvals/a1/decide",
+    "reasons": [],
+    "grants_runtime_authority": false,
+    "external_effects": "none"
+  }
+}

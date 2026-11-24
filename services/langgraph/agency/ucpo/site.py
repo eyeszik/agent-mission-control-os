@@ -102,12 +102,15 @@ def check_colour_plan(ir: WebsiteIR) -> list[str]:
     return errors
 
 
-def _page_accent(index: int) -> str:
-    return psem.ACCENTS[index % len(psem.ACCENTS)]
+def _page_accent(index: int, primary_accent: str = "signal_red") -> str:
+    if primary_accent not in psem.ACCENTS:
+        raise psem.PsemUsageError("the primary accent must be a supported PSEM accent")
+    offset = psem.ACCENTS.index(primary_accent)
+    return psem.ACCENTS[(index + offset) % len(psem.ACCENTS)]
 
 
 def compile_site(brief: WebsiteBrief, requirements: RequirementsPackage, genome: CreativeGenome, *,
-                 token_refs: dict[str, str]) -> tuple[SiteArchitecture, WebsiteIR]:
+                 token_refs: dict[str, str], primary_accent: str = "signal_red") -> tuple[SiteArchitecture, WebsiteIR]:
     if requirements.brief_hash != brief.content_hash:
         raise ValueError("requirements were compiled from a different brief")
     if genome.composition_rules.get("dominant_grammar") != psem.GRAMMAR_ID:
@@ -121,7 +124,7 @@ def compile_site(brief: WebsiteBrief, requirements: RequirementsPackage, genome:
 
     pages: list[PageSpec] = []
     for p_i, page in enumerate(brief.pages):
-        accent = _page_accent(p_i)
+        accent = _page_accent(p_i, primary_accent)
         sections: list[SectionSpec] = []
         for s_i, sb in enumerate(page.sections):
             pre = section_req_prefix(page.slug, s_i)

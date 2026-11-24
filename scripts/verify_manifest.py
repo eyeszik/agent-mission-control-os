@@ -47,6 +47,11 @@ def main() -> None:
 
     required = {
         ".github/workflows/ci.yml",
+        # The CI failure-annotation scripts are the only readable evidence
+        # channel here, so they are pinned like the workflow that calls them:
+        # an unreviewed edit to one can silence every failure in the suite.
+        ".github/scripts/annotate-junit-failures.py",
+        ".github/scripts/annotate-playwright-junit.py",
         ".env.example",
         "README.md",
         "docs/production-activation.md",
@@ -98,6 +103,23 @@ def main() -> None:
         "services/langgraph/persistence/operations.py",
         "services/langgraph/persistence/sqlite_db.py",
         "services/langgraph/security/auth.py",
+        "services/langgraph/security/replay_store.py",
+        # Trust boundaries introduced or exercised by unified production.
+        # The verifier protects the preview's mechanical readback, not release authority.
+        "services/langgraph/agency/delivery/crg.py",
+        "services/langgraph/agency/ucpo/brand_web.py",
+        "services/langgraph/agency/ucpo/brand_web_contracts.py",
+        "services/langgraph/agency/ucpo/contracts.py",
+        "services/langgraph/agency/ucpo/requirements.py",
+        "services/langgraph/agency/ucpo/semantic.py",
+        "services/langgraph/agency/visual/file_staging.py",
+        "services/langgraph/agency/vnexus/timeline_render.py",
+        "services/langgraph/agency/vnexus/twin.py",
+        "services/langgraph/agency/vnexus/video.py",
+        "services/langgraph/tests/test_vnexus_cross_project_replay.py",
+        "services/langgraph/tests/test_vnexus_project_source_authorization.py",
+        "services/langgraph/tests/test_vnexus_replay_authorization.py",
+        "scripts/verify_northline_bundle.py",
         "services/langgraph/pyproject.toml",
         "services/langgraph/vercel.json",
         "services/langgraph/tests/test_full_service_operations.py",

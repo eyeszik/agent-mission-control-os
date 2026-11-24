@@ -1,0 +1,26 @@
+{
+  "name": "@amc/vnexus-directions",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VNEXUS creative directions: intent compiler, route registry, 14-lens review board and reconstruction rules, parity-checked against services/langgraph/agency/vnexus/directions.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@amc/canonical": "workspace:*",
+    "@amc/kernel": "workspace:*",
+    "@amc/vnexus-brandbook": "workspace:*"
+  },
+  "devDependencies": {
+    "@amc/shared": "workspace:*",
+    "typescript": "7.0.2",
+    "vitest": "^5.1.1"
+  }
+}
