@@ -15,6 +15,8 @@ from services.langgraph.agency.ucpo.requirements import compile_requirements, di
 from services.langgraph.agency.ucpo.semantic import IntentLinker, evaluate
 from services.langgraph.agency.ucpo.site import check_colour_plan, colour_plan, compile_site
 from services.langgraph.agency.ucpo.source import (
+    DEPENDENCIES,
+    DEV_DEPENDENCIES,
     SourcePolicyError,
     check_path,
     generate_source,
@@ -153,6 +155,19 @@ def test_illegal_ir_colours_are_reported():
 # ------------------------------------------------------------------ source policy
 
 
+WORKSPACE_PINS = json.loads((Path(__file__).resolve().parents[3] / "apps/web/package.json").read_text())
+
+
+def test_template_pins_equal_the_workspace_pins_the_sandbox_build_requires():
+    """build_site refuses to run unless the installed apps/web packages equal these exact versions.
+
+    A Dependabot bump of apps/web that leaves the template behind makes every sandboxed website
+    build fail its dependency_check, so the template must follow apps/web/package.json.
+    """
+    assert DEPENDENCIES == {k: WORKSPACE_PINS["dependencies"][k] for k in DEPENDENCIES}
+    assert DEV_DEPENDENCIES == {k: WORKSPACE_PINS["devDependencies"][k] for k in DEV_DEPENDENCIES}
+
+
 def test_source_is_deterministic_hashed_and_carries_requirement_ids():
     *_, files, manifest = line()
     *_, files2, manifest2 = line()
@@ -160,7 +175,7 @@ def test_source_is_deterministic_hashed_and_carries_requirement_ids():
     assert "data-req={s.req_refs.heading}" in files["components/Section.tsx"].decode()
     content = json.loads(files["content/site.json"])
     assert content["pages"]["index"]["sections"][0]["req_refs"]["heading"] == "req.index.s1.heading"
-    assert json.loads(files["package.json"])["dependencies"]["next"] == "16.4.5"
+    assert json.loads(files["package.json"])["dependencies"]["next"] == WORKSPACE_PINS["dependencies"]["next"]
     assert set(files) >= {"app/page.tsx", "app/works/page.tsx", "app/visit/page.tsx", "public/assets/plate-kiln.svg"}
 
 
