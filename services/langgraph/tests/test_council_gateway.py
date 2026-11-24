@@ -20,6 +20,7 @@ from services.langgraph.tests.council_support import (
     gated_mission,
     isolated_python,
     key,
+    require_supported_mcp,
 )
 
 
@@ -139,7 +140,7 @@ _NON_EXECUTABLE.chmod(0o644)
 
 @pytest.fixture
 def mcp_server(monkeypatch, council, tmp_path):  # after ``council``, which clears AMC_MCP_SERVERS  # noqa: F811
-    pytest.importorskip("mcp")
+    require_supported_mcp()
     pytest.importorskip("jsonschema")
     from services.langgraph.agency.council.mcp_client import file_sha256
     interpreter = isolated_python(tmp_path)
@@ -191,7 +192,7 @@ def _tampered_server(monkeypatch, tmp_path, mcp_client):
 
 
 def test_mcp_server_changed_after_listing_is_refused_at_spawn(monkeypatch, tmp_path, council):  # noqa: F811
-    pytest.importorskip("mcp")
+    require_supported_mcp()
     from services.langgraph.agency.council import mcp_client
     spec, marker = _tampered_server(monkeypatch, tmp_path, mcp_client)
     # Configuration is re-read at call time, so the tampered server is no longer configured. The refusal
@@ -203,7 +204,7 @@ def test_mcp_server_changed_after_listing_is_refused_at_spawn(monkeypatch, tmp_p
 
 
 def test_mcp_tampered_server_is_dropped_from_the_registry(monkeypatch, tmp_path, council):  # noqa: F811
-    pytest.importorskip("mcp")
+    require_supported_mcp()
     from services.langgraph.agency.council import mcp_client
     _, marker = _tampered_server(monkeypatch, tmp_path, mcp_client)
     mission = gated_mission(monkeypatch, council["project_id"])

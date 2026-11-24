@@ -1,0 +1,294 @@
+{
+ "schema": "amc-mcp-benchmark/v1",
+ "environment": {
+  "os": "Linux 6.18 (cloud container)",
+  "python": "3.13.18",
+  "node": "v22.23.5",
+  "mcp_sdk_client": "1.30.0 (CI constraint)",
+  "network": "none: every server ran in an unshare -rn network namespace",
+  "date": "2026-11-24"
+ },
+ "limitations": [
+  "Single host, single run per batch; no statistical significance is claimed.",
+  "Latency is local stdio on an idle container and excludes the gateway's per-call process spawn.",
+  "Correctness oracles were written independently from documented formulas / the published band rule; they are not upstream tests.",
+  "One harness defect (wrong output key for campaign_roi) was found and corrected once; the pre-fix run is recorded below."
+ ],
+ "B0_protocol_probe": {
+  "method": "official mcp SDK stdio client: initialize, tools/list, N=10 repeated sessions",
+  "paara": {
+   "server": "paara-connector-audit",
+   "version": "1.2.2",
+   "protocol": "2025-11-25",
+   "init_ms": 30.4,
+   "tool_count": 3,
+   "tools": [
+    "list_connectors",
+    "lookup_connector",
+    "score_connector"
+   ],
+   "annotations_readonly": 3,
+   "calls": [
+    {
+     "tool": "list_connectors",
+     "isError": false,
+     "ms": 7.23,
+     "bytes": 6486,
+     "structured": true,
+     "head": "{\n  \"count\": 13,\n  \"snapshot\": \"documentation retrieved 2026-11-09\",\n  \"source\": \"PAARA 13-connector audit (documentation snapshot, 9 Nov 2026)\",\n  \"factors\": ["
+    },
+    {
+     "tool": "score_connector",
+     "isError": false,
+     "ms": 6.89,
+     "bytes": 2450,
+     "structured": true,
+     "head": "{\n  \"name\": \"adhoc connector\",\n  \"codes\": {\n    \"F1\": \"Y\",\n    \"F2\": \"N\",\n    \"F3\": \"N\",\n    \"F4\": \"N\",\n    \"F5\": \"Y\",\n    \"F6\": \"Y\",\n    \"F7\": \"Y\"\n  },\n  \"code"
+    },
+    {
+     "tool": "score_connector",
+     "isError": false,
+     "ms": 6.57,
+     "bytes": 2579,
+     "structured": true,
+     "head": "{\n  \"name\": \"adhoc connector\",\n  \"codes\": {\n    \"F1\": \"Y\",\n    \"F2\": \"N\",\n    \"F3\": \"N\",\n    \"F4\": \"N\",\n    \"F5\": \"Y\",\n    \"F6\": \"Y\",\n    \"F7\": \"Y\"\n  },\n  \"code"
+    },
+    {
+     "tool": "lookup_connector",
+     "isError": false,
+     "ms": 7.15,
+     "bytes": 487,
+     "structured": true,
+     "head": "{\n  \"found\": false,\n  \"query\": \"gmail\",\n  \"known_connectors\": [\n    \"MCP Filesystem\",\n    \"MCP Git\",\n    \"MCP Memory\",\n    \"MCP Fetch\",\n    \"GitHub MCP\",\n    \"N"
+    },
+    {
+     "tool": "score_connector",
+     "isError": true,
+     "ms": 0.48,
+     "bytes": 46,
+     "structured": false,
+     "head": "Error: F1 must be one of Y, N, U (got 'maybe')"
+    }
+   ],
+   "total_ms": 64.4,
+   "n": 10,
+   "init_ms_median": 23.3,
+   "total_ms_median": 54.5,
+   "call_ms_median": {
+    "list_connectors#0": 6.835,
+    "score_connector#1": 6.45,
+    "score_connector#2": 6.37,
+    "lookup_connector#3": 6.465,
+    "score_connector#4": 0.375
+   },
+   "deterministic": true
+  },
+  "upgrowth": {
+   "server": "upgrowth-growth-toolkit",
+   "version": "1.4.2",
+   "protocol": "2025-11-25",
+   "init_ms": 51.1,
+   "tool_count": 29,
+   "tools": [
+    "acos_check",
+    "ad_budget_planner",
+    "ai_crawler_access_check",
+    "attrition_rate",
+    "book_strategy_call",
+    "break_even",
+    "campaign_roi",
+    "content_seo_check",
+    "customer_lifetime_value",
+    "ecommerce_metrics",
+    "engagement_rate",
+    "find_growth_moves",
+    "growth_projection",
+    "growth_rate",
+    "instagram_earnings",
+    "max_affordable_cac",
+    "mdr_charges",
+    "meta_tags_builder",
+    "period_change",
+    "ppc_forecast",
+    "roas_check",
+    "robots_txt_generator",
+    "schema_generator",
+    "seo_roi",
+    "share_of_voice",
+    "unit_economics",
+    "website_ad_revenue",
+    "youtube_earnings",
+    "ytd_growth"
+   ],
+   "annotations_readonly": 29,
+   "calls": [
+    {
+     "tool": "roas_check",
+     "isError": true,
+     "ms": 1.57,
+     "bytes": 51,
+     "structured": false,
+     "head": "Spend must be above 0 and margin between 0 and 100."
+    },
+    {
+     "tool": "ai_crawler_access_check",
+     "isError": true,
+     "ms": 13.55,
+     "bytes": 84,
+     "structured": false,
+     "head": "Could not reach https://example.com/robots.txt. Check the domain is live over HTTPS."
+    },
+    {
+     "tool": "book_strategy_call",
+     "isError": false,
+     "ms": 0.93,
+     "bytes": 103,
+     "structured": true,
+     "head": "Book a free 30-minute growth strategy call with upGrowth: https://calendar.app.google/qKL9ceeHas4K4BF19"
+    },
+    {
+     "tool": "roas_check",
+     "isError": true,
+     "ms": 0.75,
+     "bytes": 51,
+     "structured": false,
+     "head": "Spend must be above 0 and margin between 0 and 100."
+    }
+   ],
+   "total_ms": 75.7,
+   "n": 10,
+   "init_ms_median": 43.85,
+   "total_ms_median": 66.8,
+   "call_ms_median": {
+    "roas_check#0": 1.275,
+    "ai_crawler_access_check#1": 13.425,
+    "book_strategy_call#2": 0.91,
+    "roas_check#3": 0.66
+   },
+   "deterministic": true
+  }
+ },
+ "B1_paara_correctness": {
+  "oracle": "13 published connectors (published_bands_match) + all 128 Y/N combinations vs the documented band rule",
+  "result": {
+   "candidate": "paara",
+   "cases": 141,
+   "passed": 141,
+   "p50_ms": 6.58,
+   "p95_ms": 8.64,
+   "failures": [],
+   "sample": [
+    {
+     "tool": "lookup_connector",
+     "args": {
+      "name": "MCP Filesystem"
+     },
+     "ok": true,
+     "ms": 8.35,
+     "detail": {
+      "name": "MCP Filesystem",
+      "default_lower": "High",
+      "default_upper": "Critical",
+      "published_bands_match": true
+     }
+    },
+    {
+     "tool": "lookup_connector",
+     "args": {
+      "name": "MCP Git"
+     },
+     "ok": true,
+     "ms": 6.97,
+     "detail": {
+      "name": "MCP Git",
+      "default_lower": "High",
+      "default_upper": "Critical",
+      "published_bands_match": true
+     }
+    },
+    {
+     "tool": "lookup_connector",
+     "args": {
+      "name": "MCP Memory"
+     },
+     "ok": true,
+     "ms": 6.83,
+     "detail": {
+      "name": "MCP Memory",
+      "default_lower": "Critical",
+      "default_upper": "Critical",
+      "published_bands_match": true
+     }
+    }
+   ]
+  }
+ },
+ "B2_upgrowth_correctness": {
+  "oracle": "hand-derived ROAS, break-even ROAS, break-even units, ROI on revenue, CAC/LTV/payback, invalid-input rejection",
+  "pre_fix_run": {
+   "cases": 9,
+   "passed": 7,
+   "cause": "harness used key roi_pct; tool returns roi_on_revenue_pct (classification: IMPLEMENTATION_DEFECT in harness)"
+  },
+  "result": {
+   "candidate": "upgrowth",
+   "cases": 9,
+   "passed": 9,
+   "p50_ms": 0.7,
+   "p95_ms": 1.24,
+   "failures": [],
+   "sample": [
+    {
+     "tool": "roas_check",
+     "args": {
+      "ad_spend": 1000,
+      "ad_revenue": 4000,
+      "gross_margin_pct": 40
+     },
+     "ok": true,
+     "ms": 13.75,
+     "detail": {
+      "roas": 4,
+      "break_even_roas": 2.5
+     }
+    },
+    {
+     "tool": "roas_check",
+     "args": {
+      "ad_spend": 2500,
+      "ad_revenue": 5000,
+      "gross_margin_pct": 25
+     },
+     "ok": true,
+     "ms": 1.24,
+     "detail": {
+      "roas": 2,
+      "break_even_roas": 4
+     }
+    },
+    {
+     "tool": "roas_check",
+     "args": {
+      "ad_spend": 800,
+      "ad_revenue": 800,
+      "gross_margin_pct": 50
+     },
+     "ok": true,
+     "ms": 0.72,
+     "detail": {
+      "roas": 1,
+      "break_even_roas": 2
+     }
+    }
+   ]
+  }
+ },
+ "not_run": {
+  "CodeExplorer_vs_Graphenium": "NOT_TESTED: developer-side (category A), not a runtime gap; needs a Node/VS Code build and a Rust build (rmcp 0.1) plus a ground-truth corpus.",
+  "WebRouter_vs_OpenSERP": "BLOCKED: both need paid provider credentials; spending is not authorised and hosted research providers are DISABLED by repository rule.",
+  "Sentinel_IR_vs_existing_summarisation": "NOT_TESTED: developer-side; AMCOS runtime has no code-summarisation consumer to compare against.",
+  "Security_tools_vs_existing_pipeline": "NOT_TESTED: Draugr needs cloud/VirusTotal credentials for most value; CI has no scanner stage to baseline.",
+  "Memory_tools_vs_Project_OS": "NOT_TESTED: rejected on architecture (a second system of record) before benchmarking.",
+  "Document_tools_vs_artifact_generation": "NOT_TESTED: AGPL-3.0 and update-check egress deferred them before benchmarking."
+ }
+}

@@ -4,7 +4,7 @@
   "files": [
     {
       "path": ".env.example",
-      "git_blob_sha": "aa8890be1725e3f1ba4caa59a5fe50b66ddf1e18"
+      "git_blob_sha": "99dbbb9c7e80465b1c68ac70c911739c1eaf25a5"
     },
     {
       "path": ".github/scripts/annotate-junit-failures.py",
@@ -16,7 +16,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "git_blob_sha": "2ef356f098e9aa98bca1a0e8268f34a694c49b23"
+      "git_blob_sha": "04fd16dc0384506aa59cb091901d497cf420924c"
     },
     {
       "path": ".github/workflows/export-to-drive.yml",
@@ -24,7 +24,7 @@
     },
     {
       "path": "README.md",
-      "git_blob_sha": "f7b773b3bf7f6e462828d0ec63db6c841a36d714"
+      "git_blob_sha": "c4b867b1cd35c7adb315f82b43787e3cf4921d8d"
     },
     {
       "path": "apps/web/app/creative/page.tsx",
@@ -92,7 +92,7 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "058c6a078c1829c5c700a579f439e1a4e29db41b"
+      "git_blob_sha": "c212a689f7637ace19454e84bd47c16a1e38a287"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -268,7 +268,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "git_blob_sha": "9e9f4ab6ef24deddb2867dd745b4881f59a0a0cb"
+      "git_blob_sha": "c4f8b2e0edfe626b5335846666331aacf2b67cb5"
     },
     {
       "path": "runtime/abc/run-fsm.yaml",
@@ -316,7 +316,7 @@
     },
     {
       "path": "scripts/verify_repository_invariants.py",
-      "git_blob_sha": "1eb327295af3fa696f6009a76f761b6ae6a8c7b4"
+      "git_blob_sha": "30fee5ba758385a27312d31872b905f820b9b5b2"
     },
     {
       "path": "services/langgraph/agency/ace_controls.py",
@@ -424,11 +424,15 @@
     },
     {
       "path": "services/langgraph/agency/council/gateway.py",
-      "git_blob_sha": "18ae0cae076f53de25b31b34cc7a3ed84b5efa37"
+      "git_blob_sha": "79cc5335863f9b6848a27f855b775122ac318e40"
     },
     {
       "path": "services/langgraph/agency/council/mcp_client.py",
-      "git_blob_sha": "bea4635c116f54956b951d8ba7748e8f851c8137"
+      "git_blob_sha": "a7d10a2ca4466a0551914523b5a925513aefb6dc"
+    },
+    {
+      "path": "services/langgraph/agency/council/mcp_profiles.py",
+      "git_blob_sha": "5b9115b03553f0ae6435d10882f781caffc6c45a"
     },
     {
       "path": "services/langgraph/agency/council/policy.py",
@@ -836,7 +840,7 @@
     },
     {
       "path": "services/langgraph/agency/ucpo/source.py",
-      "git_blob_sha": "554299e808450b48ffe5919a472b78e0742d3880"
+      "git_blob_sha": "6fd6130b1f2a8674bec93d8a87f568f7e25a6867"
     },
     {
       "path": "services/langgraph/agency/visual/browser.py",
@@ -1180,7 +1184,7 @@
     },
     {
       "path": "services/langgraph/pyproject.toml",
-      "git_blob_sha": "683e6950daf9480a4e410a052c19881b9dd3631f"
+      "git_blob_sha": "3b3a6d1244ab3cf1b58e5bce2c9300ae242ecf8d"
     },
     {
       "path": "services/langgraph/quality/brand_safety.py",
@@ -1280,7 +1284,7 @@
     },
     {
       "path": "services/langgraph/tests/test_avic.py",
-      "git_blob_sha": "0676f677f693f7799fe3f118f5513735a88ccfbd"
+      "git_blob_sha": "57c0dadd5fded9275c88d878f29b1467fb7bb58e"
     },
     {
       "path": "services/langgraph/tests/test_compiled_agency.py",
