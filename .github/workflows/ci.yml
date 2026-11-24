@@ -284,22 +284,30 @@ jobs:
 
       # The CC0 voice drives the end-to-end "good render" gate test with real
       # speech. Pinned by hash; the job fails loudly if either drifts.
-      - name: Install pinned Piper engine and CC0 voice; verify hash
+      - name: Install pinned Piper engine and hash-locked voice; verify both voice files
         run: |
-          python -m pip install piper-tts==1.8.0 joe-us-piper-voice==1.0.0
-          python - <<'PY'
-          import hashlib
-          from joe_us_piper_voice import model_path
-          with open(model_path(), 'rb') as handle:
-              h = hashlib.sha256(handle.read()).hexdigest()
-          expected = "58afce0321b8d9c46d7cdf9c16500cc55a793b4220212dba6b70fb788b3baf06"
-          assert h == expected, f"voice hash drifted: {h}"
-          print("voice hash OK", h)
+          python -m pip install piper-tts==1.8.0
+          python -m pip install --only-binary=:all: --no-deps --require-hashes \
+            -r artifacts/amc-explainer/source/voice-requirements.txt
+          python -I - <<'PY'
+          from importlib.metadata import distribution
+          import os
+          import subprocess
+          import sys
+          package = distribution("joe-us-piper-voice")
+          models = [p for p in package.files or [] if p.name == "en_US-joe-medium.onnx"]
+          if package.version != "1.0.0" or len(models) != 1:
+              raise SystemExit("Expected the pinned local voice distribution")
+          model = str(package.locate_file(models[0]).resolve())
+          if "\n" in model or "\r" in model:
+              raise SystemExit("Invalid local model path")
+          subprocess.run([sys.executable, "-I", "artifacts/amc-explainer/tools/verify_voice.py", model], check=True)
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as output:
+              output.write(f"FVF_PIPER_MODEL={model}\n")
           PY
 
       - name: Run FreeVideoForge suite; forbid gate-skip greenwash
         run: |
-          export FVF_PIPER_MODEL="$(python -c 'from joe_us_piper_voice import model_path; print(model_path())')"
           set -o pipefail
           python -m pytest services/freevideoforge/tests -q -rs | tee /tmp/freevideoforge.log
           if grep -qE 'SKIPPED.*good_render' /tmp/freevideoforge.log; then
