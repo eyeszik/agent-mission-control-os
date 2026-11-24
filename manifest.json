@@ -92,7 +92,7 @@
     },
     {
       "path": "apps/web/package.json",
-      "git_blob_sha": "bf02ac8a1d414560c7943c21a1d546a6e2180e3f"
+      "git_blob_sha": "058c6a078c1829c5c700a579f439e1a4e29db41b"
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -188,7 +188,7 @@
     },
     {
       "path": "packages/creative-renderer/package.json",
-      "git_blob_sha": "64ebc9f8b98149f746d8e8767a75bfda6bb782fd"
+      "git_blob_sha": "5e54706788d3230328307f4f44db7d3d9d6bd6ab"
     },
     {
       "path": "packages/creative-renderer/worker.mjs",
@@ -316,7 +316,7 @@
     },
     {
       "path": "scripts/verify_repository_invariants.py",
-      "git_blob_sha": "113a6b37c1b6dd12a1a3d30cd5caba1b147c9ac5"
+      "git_blob_sha": "1eb327295af3fa696f6009a76f761b6ae6a8c7b4"
     },
     {
       "path": "services/langgraph/agency/ace_controls.py",
