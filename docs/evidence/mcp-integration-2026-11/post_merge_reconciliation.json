@@ -1,0 +1,160 @@
+{
+ "schema": "amc-post-merge-reconciliation/v1",
+ "recorded": "2026-11-24",
+ "repository": "eyeszik/agent-mission-control-os",
+ "master_sha": "977158d2750b5083bc99c82c8ff24cdf40e38f45",
+ "source_prs": {
+  "#302": "8b27501 (PAARA profile, DEF-1, DEF-3)",
+  "#303": "c1e4d0a (unrelated: @amc/pii approval_framing twin)",
+  "#304": "977158d (upGrowth profile)"
+ },
+ "inclusion_check": "All 17 files changed by PR #304's head e83538d are byte-identical on 977158d; c1e4d0a..977158d touches exactly those 17 files. #303 touched no manifest-pinned file; verify_manifest passes on 977158d.",
+ "ci": {
+  "workflow": "CI",
+  "run_id": 45490073702,
+  "attempt": 1,
+  "event": "push",
+  "head_sha": "977158d2750b5083bc99c82c8ff24cdf40e38f45",
+  "jobs": [
+   {
+    "name": "Backend (compile + invariants + pytest)",
+    "job_id": 138785883666,
+    "status": "completed",
+    "conclusion": "success",
+    "completed_at": "2026-11-24T21:38:51Z",
+    "url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/45490073702/job/138785883666"
+   },
+   {
+    "name": "Backend on PostgreSQL (migrations + pytest)",
+    "job_id": 138785883733,
+    "status": "completed",
+    "conclusion": "success",
+    "completed_at": "2026-11-24T21:51:17Z",
+    "url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/45490073702/job/138785883733"
+   },
+   {
+    "name": "Mission Council engines (CrewAI + AutoGen + MCP, offline)",
+    "job_id": 138785883621,
+    "status": "completed",
+    "conclusion": "success",
+    "completed_at": "2026-11-24T21:23:57Z",
+    "url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/45490073702/job/138785883621"
+   },
+   {
+    "name": "Frontend (contracts + typecheck + test + build)",
+    "job_id": 138785883201,
+    "status": "completed",
+    "conclusion": "success",
+    "completed_at": "2026-11-24T21:22:10Z",
+    "url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/45490073702/job/138785883201"
+   },
+   {
+    "name": "UCPO sandboxed build + browser QA (must not skip)",
+    "job_id": 138785883610,
+    "status": "completed",
+    "conclusion": "success",
+    "completed_at": "2026-11-24T21:36:04Z",
+    "url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/45490073702/job/138785883610"
+   },
+   {
+    "name": "Browser E2E (local degraded HITL)",
+    "job_id": 138785883794,
+    "status": "completed",
+    "conclusion": "success",
+    "completed_at": "2026-11-24T21:25:04Z",
+    "url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/45490073702/job/138785883794"
+   },
+   {
+    "name": "Rendering adapters + video + remote protocol",
+    "job_id": 138785883834,
+    "status": "completed",
+    "conclusion": "success",
+    "completed_at": "2026-11-24T21:24:06Z",
+    "url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/45490073702/job/138785883834"
+   },
+   {
+    "name": "Dependency audit",
+    "job_id": 138785883608,
+    "status": "completed",
+    "conclusion": "success",
+    "completed_at": "2026-11-24T21:21:48Z",
+    "url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/45490073702/job/138785883608"
+   },
+   {
+    "name": "Obscura isolated extraction (offline fixtures)",
+    "job_id": 138785884041,
+    "status": "completed",
+    "conclusion": "success",
+    "completed_at": "2026-11-24T21:22:17Z",
+    "url": "https://github.com/eyeszik/agent-mission-control-os/actions/runs/45490073702/job/138785884041"
+   }
+  ],
+  "notes": [
+   "Mission Council job includes the step 'Require the upGrowth MCP profile tests to run (must not skip)': success",
+   "Backend on PostgreSQL runs with AMC_EPHEMERAL_POSTGRES_DSN set (ci.yml), so tenant RLS tests execute there"
+  ]
+ },
+ "codeql": {
+  "push_analysis": {
+   "run_id": 45490073598,
+   "conclusion": "success",
+   "note": "analysis run succeeded; alert contents not visible"
+  },
+  "pr_304_check": {
+   "check_run_id": 138782199897,
+   "conclusion": "failure",
+   "summary": "1 new alert including 1 medium severity security vulnerability",
+   "commit": "e83538d45072cf1f0906024c0da548e6513d1ccb"
+  },
+  "classification": "UNDETERMINED (CODEQL_ATTRIBUTION_BLOCKED)",
+  "channels_tried": {
+   "A_code_scanning_api": "not available in this session (no tool; gh CLI is search-only by policy)",
+   "B_ui_metadata": "requires authenticated repository access",
+   "C_sarif_artifacts": "none on runs 45490073598 and 45488976229",
+   "D_annotations_comments": "check output has no annotation text; no review comments; get_check_run returns summary only",
+   "E_local_tools": "CodeQL CLI download denied; not retried",
+   "F_manual_review": "see attribution_analysis"
+  },
+  "attribution_analysis": [
+   "The aggregate check failed at 21:14:38Z, 1 s after the Actions analysis upload completed (21:14:37.98Z) and before the JavaScript and Python analysis jobs completed (21:15:13Z, 21:15:17Z); the summary named only Python as missing, so the alert came from the Actions or JavaScript analysis.",
+   "Actions: ci.yml declares workflow-level 'permissions: contents: read', triggers only on push/pull_request, uses no secrets; this excludes missing-workflow-permissions, secrets exposure, untrusted-checkout, cache/artifact poisoning and code/env injection queries. The only new 'uses:' is actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1, already used five times on master.",
+   "JavaScript: the only new JS is the vendored upstream worker.mjs/stdio.mjs (test fixture) and mcp_no_network.mjs. Manual review found no prototype-polluting assignment (dynamic keys are constants), HTML output is escaped, JSON-LD escapes '<'. Not conclusive against CodeQL's dataflow."
+  ],
+  "minimum_evidence_needed": "From Security > Code scanning (filter tool:CodeQL pr:304 or branch master): alert number, rule id, path:line, or the SARIF result for that alert."
+ },
+ "denied_actions": [
+  {
+   "action": "git push --force-with-lease",
+   "target": "claude/nifty-cori-2ltmqp",
+   "authorization_boundary": "auto-mode classifier: destructive",
+   "safe_alternative": "history-only 'ours' merge, then fast-forward push",
+   "residual_blocker": "none"
+  },
+  {
+   "action": "download CodeQL CLI bundle",
+   "target": "github/codeql-action release asset",
+   "authorization_boundary": "auto-mode classifier: oversight",
+   "safe_alternative": "none that preserves the policy; owner-supplied alert details",
+   "residual_blocker": "CodeQL attribution"
+  },
+  {
+   "action": "push of commit containing synthetic credential-shaped fixture literals",
+   "target": "claude/nifty-cori-2ltmqp",
+   "authorization_boundary": "GitHub push protection",
+   "safe_alternative": "seeded fixture generator; unblock URL deliberately not used",
+   "residual_blocker": "none"
+  }
+ ],
+ "local_validation_on_master": {
+  "gates": "7/7 PASS (worktree at 977158d)",
+  "targeted": "194 passed, 15 skipped (CrewAI/AutoGen absent; tenant RLS needs Postgres), 0 failed; upGrowth suite 53/53 on Node 22.12.0",
+  "full_backend": "2625 passed, 18 failed, 164 skipped; all 18 failures are Unicode-version parity fixtures (local Python 3.13/Unicode 15.1 vs CI 3.11/Unicode 14) or host ffprobe; CI Backend job on 3.11 passed"
+ },
+ "mcp_dispositions": {
+  "C05": "IMPLEMENTED (#302)",
+  "C09": "IMPLEMENTED (#304)",
+  "C14": "REJECT as MCP; measured value redirected to security/pii.py hardening proposal (pii_benchmark_c14.json)",
+  "C07": "DEFER_PENDING_OWNER_AUTHORIZATION (self-hosted mode is free but scrapes third-party search engines)",
+  "others": "unchanged from candidate_matrix.json"
+ }
+}
