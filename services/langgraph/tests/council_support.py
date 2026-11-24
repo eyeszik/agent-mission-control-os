@@ -94,6 +94,36 @@ def require_supported_mcp() -> None:
         pytest.skip("a supported (1.x) mcp SDK is required for MCP round trips")
 
 
+def isolated_node(tmp_path) -> str | None:
+    """A pinnable launcher for ``node`` from PATH, or None when Node >= 20 is not installed.
+
+    Same reasoning as ``isolated_python`` below: a hosted runner's toolcache ``node`` is group-writable, so
+    it is wrapped in a private ``0700`` launcher that execs it. ``mcp_profiles`` probes the version through
+    the launcher, so the permission flag matches the real binary.
+    """
+    import os
+    import shutil
+    import stat
+    import subprocess
+    from pathlib import Path
+
+    node = shutil.which("node")
+    if node is None:
+        return None
+    version = subprocess.run([node, "--version"], capture_output=True, text=True, check=False).stdout.strip()
+    if not version.startswith("v") or int(version[1:].split(".")[0]) < 20:
+        return None
+    if not (os.stat(node).st_mode & (stat.S_IWGRP | stat.S_IWOTH)):
+        return node
+    private = Path(tmp_path) / "mcp-node"
+    private.mkdir(mode=0o700, exist_ok=True)
+    os.chmod(private, 0o700)
+    target = private / "node"
+    target.write_text(f'#!/bin/sh\nexec {shlex.quote(node)} "$@"\n', encoding="utf-8")
+    os.chmod(target, 0o755)
+    return str(target)
+
+
 def isolated_python(tmp_path) -> str:
     """A private launcher for the running interpreter, safe to pin as an MCP command.
 

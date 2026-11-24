@@ -1,7 +1,9 @@
-# MCP integration audit — candidate selection and the PAARA profile (2026-11-24)
+# MCP integration audit — candidate selection, the PAARA and upGrowth profiles (2026-11-24)
 
-**Terminal state: `IMPLEMENTED_WITH_LIMITATIONS`.** One candidate (C05 PAARA Connector Audit) is integrated as a
-reviewed, pinned, read-only, **disabled-by-default** gateway profile. Nothing is enabled, deployed or billed.
+**Terminal state: `IMPLEMENTED_WITH_LIMITATIONS`.** Two candidates are integrated as reviewed, pinned, read-only,
+**disabled-by-default** gateway profiles: C05 PAARA Connector Audit (first increment, #302) and C09 upGrowth
+Growth Toolkit (second increment, [below](#second-increment--c09-upgrowth-growth-toolkit)). Nothing is enabled,
+deployed or billed.
 
 Machine-readable evidence: [`evidence/mcp-integration-2026-11/`](evidence/mcp-integration-2026-11/) —
 `candidate_matrix.json` (C01–C18, gates, scores), `benchmarks.json` (raw runs), `test_results.json`, `harness/`.
@@ -45,7 +47,7 @@ paths, and G9 only when every executed file is covered by a pin.
 | C06 | WebRouter | D | REJECT | Paid providers + arbitrary fetch; research providers DISABLED by rule |
 | C07 | OpenSERP | D | DEFER | Hosted API key; billing |
 | C08 | Social Fetch | D | REJECT | Hosted proxy with key; third-party social data |
-| C09 | upGrowth Toolkit | B | PILOT | Best feature fit; G3 UNKNOWN (Node), G9 FAIL as-is (unpinned `worker.mjs`), SSRF tool |
+| **C09** | **upGrowth Toolkit** | **B** | **SELECT (2nd increment)** | Gates met after mitigation: operator-supplied Node, every executed file pinned, permission model + no-network preload, 26 calculators only |
 | C10–C12 | KitchenSink4Word/PPT/XL | C | DEFER | AGPL-3.0; startup update check egress |
 | C13 | Surehand | C | REJECT | Needs After Effects; arbitrary ExtendScript |
 | C14 | Fairquery Agent Trust | B/D | DEFER | Free tools overlap `security/pii.py`; paid Apify tools |
@@ -169,15 +171,92 @@ No new runtime dependency. `mcp` range narrowed (`<2`). Vendored test fixture: P
 Kumar), standard library only, no transitive dependencies. Candidate licences: `candidate_matrix.json`
 (AGPL-3.0: C10–C12, C18).
 
-## Recommended next candidate — C09 upGrowth Growth Toolkit (PILOT)
+## Second increment — C09 upGrowth Growth Toolkit
 
-Highest agency value (26 deterministic marketing calculators: ROAS, CAC/LTV, PPC forecast, break-even, schema and
-meta-tag builders; 9/9 oracle checks). Before it can pass the gates:
+**Decision:** SELECT, after the repository owner authorised Node as an operator-supplied runtime for this
+profile ("proceed with next candidate"). Upstream re-checked at implementation time: unchanged at
+`3b6472027ebbd7f7fc69b82766e61810fb400615` (v1.4.2, MIT).
 
-1. **G3** — decide that the API runtime ships Node ≥ 18 (it is in the web toolchain but not declared for the
-   backend), or reject.
-2. **G9/ASI04** — pin `worker.mjs` too: pass it as an extra argument (the stdio shim ignores argv) through a
-   reviewed profile, exactly as the PAARA data file is pinned here.
-3. **G7** — allowlist the calculators only; exclude `ai_crawler_access_check` (fetches caller-chosen hosts,
-   SSRF to internal names), `book_strategy_call` (vendor upsell) and `find_growth_moves` (third-party text).
-4. Add a correctness suite per allowlisted tool against independent formulas, since outputs feed client advice.
+### Gates after mitigation
+
+| Gate | Before | After | How |
+|---|---|---|---|
+| G3 runtime | UNKNOWN | PASS (conditional on the operator) | The operator supplies Node ≥ 20 by absolute path; the profile reads its version and refuses older or non-Node binaries. Not added to the API's own dependencies. |
+| G7 scope | CONDITIONAL | PASS | Node permission model with read access to exactly three files (no child processes, workers, addons or writes); `mcp_no_network.mjs` preload makes `fetch`/`WebSocket`/`EventSource`/`XMLHttpRequest` throw and cannot be undone; the only network tool is never allowlisted; source check: no imports, no `node:net`/`http`. |
+| G9 pins | FAIL | PASS | `worker.mjs` is passed as an argument the shim ignores, so the gateway pins it; the preload is pinned the same way. Pinned: `node`, `stdio.mjs`, `worker.mjs`, `mcp_no_network.mjs`. |
+| G8 bounds | PASS | PASS | Hardened schemas: `additionalProperties: false`, every string bounded (2,000; 60,000 for article text), arrays ≤ 50, free-form `data` ≤ 40 properties; 24 KB result bound; 10 s timeout; upstream rejects bodies > 64 KiB. |
+| G1, G2, G4, G5, G6, G10 | PASS | PASS | MIT; verified handshake on Node 22.12 and 22.23; no credentials; one process per call; all READ; 26 calculators absent from AMCOS before. |
+
+The permission flag follows the interpreter: `--permission` on Node ≥ 22.13 / 23.5, `--experimental-permission`
+on 20.0–22.12 and 23.0–23.4 (verified on a checksum-verified Node 22.12.0: `--permission` is rejected there).
+
+### Allowlist
+
+26 tools: `acos_check`, `ad_budget_planner`, `attrition_rate`, `break_even`, `campaign_roi`, `content_seo_check`,
+`customer_lifetime_value`, `ecommerce_metrics`, `engagement_rate`, `growth_projection`, `growth_rate`,
+`instagram_earnings`, `max_affordable_cac`, `mdr_charges`, `meta_tags_builder`, `period_change`, `ppc_forecast`,
+`roas_check`, `robots_txt_generator`, `schema_generator`, `seo_roi`, `share_of_voice`, `unit_economics`,
+`website_ad_revenue`, `youtube_earnings`, `ytd_growth`. Never allowlisted: `ai_crawler_access_check` (network,
+SSRF to internal names), `book_strategy_call` (vendor sales link), `find_growth_moves` (third-party news text).
+
+Note: outputs default to the INR currency label unless `currency` is passed; seats should pass it.
+
+### Changes
+
+| File | Change |
+|---|---|
+| `agency/council/mcp_profiles.py` | Runtime-aware builder (`python` / `node`), `UPGROWTH` profile, version-based permission flag, schema hardening |
+| `agency/council/mcp_profile_upgrowth.py` | **New.** The 26 upstream input schemas (descriptions removed) and the excluded tools |
+| `agency/council/mcp_no_network.mjs` | **New.** Network-denial preload (packaged via `pyproject.toml` include) |
+| `tests/test_mcp_upgrowth_profile.py` | **New.** 53 tests |
+| `tests/fixtures/vendor/upgrowth_growth_toolkit/` | **New.** Byte-identical upstream `stdio.mjs`, `worker.mjs`, MIT licence, provenance (tests only) |
+| `tests/council_support.py` | `isolated_node` launcher (a hosted runner's `node` is group-writable) |
+| `tests/test_mcp_paara_profile.py` | The "unknown profile" case used the name `upgrowth`, which now exists; it uses `no-such-profile` |
+| `.github/workflows/ci.yml` | Council job: Node 22.12.0, the new test file, and a step that fails if the upGrowth tests skip |
+
+### Defects found while building it
+
+| ID | Class | Status | Description |
+|---|---|---|---|
+| DEF-4 | IMPLEMENTATION_DEFECT (this change) | **Fixed before merge** | The schema generator stripped every key named `title`/`description`, including *property names*: `meta_tags_builder` lost its required `title` and `description`. The gateway refused the calls (fail closed). The drift test used the same stripping, so it could not see it. Both now strip only annotation keywords; a negative control (re-injecting the loss) makes the drift test fail. |
+| — | Design interaction (not a defect) | Documented | ASI10's `TOOL_SPRAWL` guard refuses a 9th distinct tool in one session. It applies to MCP tools too (tested). A seat that needs more than 8 distinct tools splits the work across missions; the limit is the code constant `execution_bounds.MAX_NOVEL_TOOLS` (8), and `TOOL_SPRAWL` is also an anomaly strike (three strikes halt the session). |
+
+### Test evidence
+
+| Suite | Result |
+|---|---|
+| `test_mcp_upgrowth_profile.py`, Node 22.23.5 (`--permission`) | 53/53 PASS |
+| Same, Node 22.12.0 (`--experimental-permission`, CI's version) | 53/53 PASS |
+| Per-tool correctness | 22/22 calculators match textbook-formula oracles; 4/4 generators pass structural and escaping checks (JSON-LD cannot break out of `<script>`, meta tags HTML-escaped, `javascript:` URLs dropped, robots.txt newline injection refused) |
+| Isolation | `fetch` refused even with network present and after an attempt to reassign it; child process and file write `ERR_ACCESS_DENIED`; an allowlisted crawler would still fail ("Could not reach") |
+| Council CI set + security regressions (mcp 1.30) | 190 PASS, 8 SKIP (CrewAI/AutoGen absent locally), 0 FAIL |
+| Unsupported mcp 2.3 | 48 PASS, 58 SKIP, 0 FAIL |
+| Live API | PAARA + upGrowth: 3 + 26 tools, no config errors; remove upGrowth → 3; empty → 0 (rollback verified) |
+
+Full-suite and gate results: `evidence/mcp-integration-2026-11/upgrowth_test_results.json`.
+
+### Operation and rollback
+
+1. Place the reviewed `src/stdio.mjs` and `src/worker.mjs` (commit `3b64720`) in a root-owned read-only directory,
+   e.g. `/opt/mcp/upgrowth/src/` (files 0644, dirs 0755).
+2. Install Node ≥ 20 (the repository uses 22.12.0) at a path that is not group- or world-writable.
+3. `python -m services.langgraph.agency.council.mcp_profiles upgrowth --server-script /opt/mcp/upgrowth/src/stdio.mjs --interpreter /usr/bin/node`
+4. Merge the printed JSON into `AMC_MCP_SERVERS`, restart, and confirm `GET /missions/tools` lists the 26
+   `mcp.upgrowth.*` tools and no `mcp_config_errors`.
+
+Rollback: remove the `upgrowth` key (other entries such as `paara` keep working) and restart; verify no
+`mcp.upgrowth.*` tool is listed. Code rollback: `git revert` the merge commit.
+
+### Residual risks
+
+- The preload is defence in depth, not a sandbox: it cannot stop code that imports `node:net`. The reviewed bytes
+  do not, and any change to them is refused by the pins; a new upstream release needs a new review.
+- On Node 20.0–22.12 the permission model is experimental (it prints a warning on stderr).
+- Calculator outputs are advice inputs, not facts about a client; seats must still cite their inputs.
+
+## Recommended next candidate
+
+None clears the gates without new authority. The closest are C14 Fairquery (its free, local PII tools overlap
+`security/pii.py`, so G10 needs a demonstrated gap first; its other tools are network or paid) and C07 OpenSERP
+(hosted, paid; needs a spending decision and lifting the DISABLED rule for research providers). Recommendation:
+stop here unless one of those decisions is made.
