@@ -132,12 +132,17 @@ With `ENABLE_REAL_MODELS=true`, seats use `DEFAULT_MODEL_PROVIDER` through the c
   - Only the 1.x `mcp` SDK is supported. With 2.x installed no MCP tool is listed (`mcp_installed: false`).
   - **Reviewed profiles.** `agency/council/mcp_profiles.py` builds a pinned, read-only entry for a server whose
     upstream source was reviewed, and refuses any other bytes. It prints the entry; it never sets the variable.
-    The one profile today is `paara` (PAARA Connector Audit, MIT, three READ tools that score a connector's risk
-    band). Decision record, gates, benchmarks and rollback: [mcp-integration-audit.md](mcp-integration-audit.md).
+    Two profiles exist: `paara` (PAARA Connector Audit, MIT, three READ tools that score a connector's risk band)
+    and `upgrowth` (upGrowth Growth Toolkit, MIT, 26 READ marketing calculators and generators). `upgrowth` needs an
+    operator-supplied Node >= 20 and runs under the Node permission model with a preload that disables `fetch`
+    (`mcp_no_network.mjs`). Decision record, gates, tests and rollback:
+    [mcp-integration-audit.md](mcp-integration-audit.md).
 
     ```bash
     python -m services.langgraph.agency.council.mcp_profiles paara \
-      --server-script /opt/mcp/paara/paara_mcp_server.py --python /usr/bin/python3
+      --server-script /opt/mcp/paara/paara_mcp_server.py --interpreter /usr/bin/python3
+    python -m services.langgraph.agency.council.mcp_profiles upgrowth \
+      --server-script /opt/mcp/upgrowth/src/stdio.mjs --interpreter /usr/bin/node
     ```
   - No HTTP route invokes an arbitrary tool. Seats reach tools only through the gateway; today that is the approved scaffold write.
 

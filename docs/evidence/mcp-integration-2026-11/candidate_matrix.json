@@ -216,22 +216,22 @@
    "commit": "3b647202",
    "license": "MIT",
    "runtime": "Node >=18 (globals Request/fetch); 110 KB worker.mjs",
-   "transport": "stdio shim over the Worker handler (primary transport: hosted Streamable HTTP); VERIFIED_RUNTIME",
+   "transport": "stdio shim over the Worker handler; VERIFIED_RUNTIME on Node 22.12.0 and 22.23.5 under the permission model",
    "category": "B (D if hosted)",
-   "decision": "PILOT",
+   "decision": "SELECT (second increment)",
    "gates": {
     "G1": "PASS",
     "G2": "PASS",
-    "G3": "UNKNOWN",
+    "G3": "PASS (operator-supplied Node >= 20, authorised by the repository owner)",
     "G4": "PASS",
     "G5": "PASS",
     "G6": "PASS",
-    "G7": "CONDITIONAL",
+    "G7": "PASS",
     "G8": "PASS",
-    "G9": "FAIL",
+    "G9": "PASS",
     "G10": "PASS"
    },
-   "notes": "Highest feature value: 26 deterministic marketing calculators (9/9 oracle checks). Blocked from SELECT: Node is not a declared backend runtime (G3); stdio.mjs imports worker.mjs, which the gateway pin does not cover (G9, ASI04); ai_crawler_access_check fetches caller-chosen hosts (SSRF; allowlist must exclude it); book_strategy_call is a vendor upsell."
+   "notes": "Implemented as the `upgrowth` profile: 26 calculators allowlisted; ai_crawler_access_check, book_strategy_call, find_growth_moves excluded. worker.mjs and the no-network preload are pinned; Node permission model denies processes, workers, addons and writes; fetch disabled. 22/22 calculator oracles and 4/4 generator security checks pass."
   },
   {
    "id": "C10",
@@ -473,6 +473,17 @@
    "total": 68,
    "confidence": "medium (runtime verified; production Node runtime unknown)",
    "evidence_coverage": "9/10 gates (G3 UNKNOWN)"
+  },
+  "C09_after_mitigation": {
+   "feature_gap": 4,
+   "architecture": 4,
+   "security": 4,
+   "measured_improvement": 5,
+   "reliability": 3,
+   "cost_simplicity": 3,
+   "total": 79,
+   "confidence": "high (source + runtime on two Node versions + per-tool oracles)",
+   "evidence_coverage": "10/10 gates"
   }
  }
 }
