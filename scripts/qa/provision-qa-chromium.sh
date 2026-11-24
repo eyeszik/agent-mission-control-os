@@ -3,7 +3,7 @@
 #
 # Why: Playwright's own browser download host is not reachable from this sandbox. The QA runner
 # launches Chromium from Playwright's cache, so this script places a Chromium build there, at the exact
-# paths Playwright 1.64 expects. Source: npm package @sparticuz/chromium (MIT), pinned to 153.0.0.
+# paths the repository's installed Playwright expects. Source: npm package @sparticuz/chromium (MIT), pinned to 153.0.0.
 #
 # Honest limits: this is a stand-in binary, not an official Playwright download. It is used only to
 # run the local QA gate. CI should install Playwright's own Chromium (`pnpm exec playwright install chromium`).
@@ -16,6 +16,18 @@ PKG_VERSION="153.0.0"
 CACHE="${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}"
 
 command -v node >/dev/null || { echo "node is required" >&2; exit 1; }
+
+# 0. The playwright-core that apps/web's @playwright/test actually loads, resolved the way Playwright resolves it
+#    (@playwright/test -> playwright -> playwright-core). Never a hard-coded version: the lockfile decides, so a
+#    Playwright bump cannot leave this script pointing at a directory a fresh install no longer has.
+PW_CORE="$(cd "$REPO/apps/web" && node -e '
+const p = require("path");
+const test = p.dirname(require.resolve("@playwright/test/package.json"));
+const pw = p.dirname(require.resolve("playwright/package.json", { paths: [test] }));
+console.log(p.dirname(require.resolve("playwright-core/package.json", { paths: [pw] })));
+')" || { echo "playwright-core not resolvable from apps/web: run pnpm install --frozen-lockfile" >&2; exit 1; }
+if [ "${AMC_QA_RESOLVE_ONLY:-0}" = "1" ]; then echo "$PW_CORE"; exit 0; fi
+
 mkdir -p "$SCRATCH"
 cd "$SCRATCH"
 [ -f package.json ] || npm init -y >/dev/null
@@ -40,8 +52,7 @@ tar -xf "$SCRATCH/al2023.tar" -C "$SCRATCH/al2023"
 LIBDIR="$(dirname "$(find "$SCRATCH/al2023" -name 'libnspr4.so' | head -1)")"
 [ -d "$LIBDIR" ] || { echo "al2023 libraries not found" >&2; exit 1; }
 
-# 3. The exact Playwright-expected executable paths, from the repo's pinned playwright-core.
-PW_CORE="$(ls -d "$REPO"/node_modules/.pnpm/playwright-core@1.65.0/node_modules/playwright-core | head -1)"
+# 3. The exact Playwright-expected executable paths, from the playwright-core resolved in step 0.
 EXE="$(node -e 'console.log(require(process.argv[1]).chromium.executablePath())' "$PW_CORE")"
 # Playwright 1.65 runs default headless with a separate headless-shell build, at a path derived from the same revision.
 REV="$(basename "$(dirname "$(dirname "$EXE")")" | sed 's/^chromium-//')"

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from freevideoforge.audio import pad_wav, peak_amplitude, wav_duration, write_silence
+from freevideoforge.audio import measure_peak, pad_wav, peak_amplitude, wav_duration, write_silence
 from freevideoforge.config import ResourceGovernor, Settings
 from freevideoforge.errors import ConfigError, RenderError, ResourceError
 from freevideoforge.ffmpeg import _frame_rate, find_ffmpeg, run
@@ -152,6 +152,68 @@ class TestCompressedAudioPeak:
 
     def test_a_readable_silent_wav_still_reads_as_zero(self, tmp_path):
         assert peak_amplitude(write_silence(tmp_path / "quiet.wav", 0.5)) == 0.0
+
+
+class TestSilenceIsMeasuredNotUnmeasurable:
+    """Digital silence is a measurement (0.0); only a failed measurement is ``None``.
+
+    Regression witness: the structural gate used to receive 0.0 for both and report a silent master as
+    "could not be measured" (NOT_VERIFIED), so a real voice provider emitting pure zeros never failed QC.
+    """
+
+    def test_a_silent_wav_measures_as_zero_and_garbage_as_unmeasurable(self, tmp_path):
+        assert measure_peak(write_silence(tmp_path / "s.wav", 0.5)) == 0.0
+        garbage = tmp_path / "not.wav"
+        garbage.write_bytes(b"nonsense")
+        assert measure_peak(garbage) is None
+        assert peak_amplitude(garbage) == 0.0, "the legacy helper keeps its contract"
+
+    def test_a_silent_aac_track_is_measured_as_silence(self, tmp_path):
+        import subprocess
+
+        from freevideoforge.ffmpeg import find_ffmpeg
+
+        ffmpeg = find_ffmpeg()
+        if not ffmpeg:
+            pytest.skip("ffmpeg not installed on this host")
+        out = tmp_path / "silent.m4a"
+        subprocess.run([ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi",
+                        "-i", "anullsrc=r=48000:cl=mono", "-t", "1", "-c:a", "aac", str(out)], check=True)
+        from freevideoforge.providers.quality_structural import PEAK_FLOOR
+
+        peak = measure_peak(out)
+        # volumedetect reports digital silence at its -91 dB floor: a measurement, below the silence floor.
+        assert peak is not None and peak < PEAK_FLOOR
+
+
+class TestAudioPeakClassification:
+    @pytest.mark.parametrize("provider", ["espeak", "piper", "auto"])
+    def test_a_silent_master_from_a_real_voice_fails(self, provider):
+        from freevideoforge.providers.quality_structural import classify_audio_peak
+
+        status, detail, _expected, observed = classify_audio_peak(0.0, provider)
+        assert (status, detail, observed) == ("FAIL", "master is effectively silent", 0.0)
+
+    @pytest.mark.parametrize("provider", ["silence", "espeak+silence_fallback"])
+    def test_silence_by_design_is_not_applicable_and_says_why(self, provider):
+        from freevideoforge.providers.quality_structural import classify_audio_peak
+
+        status, detail, _expected, _observed = classify_audio_peak(0.0, provider)
+        assert status == "NOT_APPLICABLE" and provider in detail and "could not be measured" not in detail
+
+    def test_only_a_failed_measurement_is_not_verified(self):
+        from freevideoforge.providers.quality_structural import classify_audio_peak
+
+        assert classify_audio_peak(None, "espeak")[0] == "NOT_VERIFIED"
+        assert classify_audio_peak(None, "silence")[0] == "NOT_VERIFIED"
+
+    def test_levels_and_clipping_are_unchanged(self):
+        from freevideoforge.providers.quality_structural import PEAK_CEILING, classify_audio_peak
+
+        assert classify_audio_peak(0.5, "espeak")[0] == "PASS"
+        assert classify_audio_peak(0.01, "silence")[0] == "NOT_APPLICABLE"
+        assert classify_audio_peak(0.01, "espeak")[0] == "FAIL"
+        assert classify_audio_peak(PEAK_CEILING + 0.001, "silence")[0] == "FAIL", "clipping fails regardless"
 
 
 class TestFFmpegLayer:

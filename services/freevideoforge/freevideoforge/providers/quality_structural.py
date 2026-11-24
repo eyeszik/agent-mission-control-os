@@ -18,7 +18,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from ..audio import peak_amplitude
+from ..audio import measure_peak
 from ..errors import DependencyError, RenderError
 from ..ffmpeg import FFTools
 from ..models import Project, QualityCheck, QualityReport
@@ -32,6 +32,30 @@ DURATION_TOLERANCE_FLOOR = 0.35
 PEAK_CEILING = 0.995
 #: Below this, a track that claims to contain speech is effectively silent.
 PEAK_FLOOR = 0.02
+
+
+def intentionally_silent(speech_provider: str) -> bool:
+    """True when narration is silent by design: the silence provider, or a provider that fell back to it."""
+    return speech_provider == "silence" or speech_provider.endswith("+silence_fallback")
+
+
+def classify_audio_peak(peak: float | None, speech_provider: str) -> tuple[str, str, Any, Any]:
+    """``(status, detail, expected, observed)`` for the audio.peak check.
+
+    ``None`` is unmeasurable (NOT_VERIFIED). A silent or near-silent master FAILs, unless the run's narration
+    is silent by design (NOT_APPLICABLE, stated as such). It is never reported as "could not be measured".
+    """
+    if peak is None:
+        return "NOT_VERIFIED", "peak could not be measured from this audio format", None, None
+    observed = round(peak, 4)
+    if peak < PEAK_FLOOR:
+        if intentionally_silent(speech_provider):
+            return ("NOT_APPLICABLE", f"narration is silent by design (speech provider: {speech_provider})",
+                    None, observed)
+        return "FAIL", "master is effectively silent", f">= {PEAK_FLOOR}", observed
+    if peak > PEAK_CEILING:
+        return "FAIL", "master is clipping", f"<= {PEAK_CEILING}", observed
+    return "PASS", "", None, observed
 
 
 class StructuralQualityProvider:
@@ -164,19 +188,9 @@ class StructuralQualityProvider:
             else:
                 add(self._check("audio.stream_present", "PASS",
                                 observed=probe.audio.codec_name))
-                peak = peak_amplitude(outputs["audio"])
-                if peak == 0.0:
-                    add(self._check("audio.peak", "NOT_VERIFIED",
-                                    "peak could not be measured from this audio format"))
-                elif peak < PEAK_FLOOR:
-                    add(self._check("audio.peak", "FAIL",
-                                    "master is effectively silent",
-                                    expected=f">= {PEAK_FLOOR}", observed=round(peak, 4)))
-                elif peak > PEAK_CEILING:
-                    add(self._check("audio.peak", "FAIL", "master is clipping",
-                                    expected=f"<= {PEAK_CEILING}", observed=round(peak, 4)))
-                else:
-                    add(self._check("audio.peak", "PASS", observed=round(peak, 4)))
+                status, detail, expected, observed = classify_audio_peak(
+                    measure_peak(outputs["audio"]), project.providers.get("speech", ""))
+                add(self._check("audio.peak", status, detail, expected=expected, observed=observed))
         else:
             add(self._check("audio.stream_present", "NOT_APPLICABLE",
                             "this run produced no audio bed"))
