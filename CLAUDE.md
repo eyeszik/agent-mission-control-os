@@ -148,6 +148,7 @@ Per-subsystem rules live in a `CLAUDE.md` inside each directory and load only wh
 - `services/langgraph/agency/design/` — Design Mode — style catalog composed by dimension
 - `services/langgraph/agency/ui_ux/` — UI/UX design compiler and DTCG tokens
 - `services/langgraph/agency/sop/` — Ordered SOP contracts — a guard over the live graph, not an authority
+- `services/langgraph/agency/frre/` — FRRE repair engine (W1) — contracts, FSM and guards, inert until authorized
 
 ### Cross-cutting rules (always apply)
 
