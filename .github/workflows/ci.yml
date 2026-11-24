@@ -209,6 +209,8 @@ jobs:
           services/langgraph/tests/test_missions_council.py \
           services/langgraph/tests/test_council_engines.py \
           services/langgraph/tests/test_council_gateway.py \
+          services/langgraph/tests/test_mcp_paara_profile.py \
+          services/langgraph/tests/test_capability_tokens.py \
           services/langgraph/tests/test_council_ported_scenarios.py \
           services/langgraph/tests/test_council_contracts.py 2>&1 | tee /tmp/pytest-council.log
 
