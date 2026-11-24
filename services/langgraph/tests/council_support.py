@@ -80,6 +80,20 @@ def gated_mission(monkeypatch, project_id: str, engine: str = "langgraph") -> di
     return mission
 
 
+def require_supported_mcp() -> None:
+    """Skip unless a supported (1.x) ``mcp`` SDK is installed.
+
+    ``mcp_client`` lists no MCP tool under an unsupported SDK (2.x changed the client API), so MCP
+    round-trip tests would fail on a missing tool rather than on the behaviour they test. CI pins
+    the supported SDK (``constraints-council.txt``) and runs ``pip check``, so this never skips there.
+    """
+    pytest.importorskip("mcp")
+    from services.langgraph.agency.council.mcp_client import mcp_installed
+
+    if not mcp_installed():
+        pytest.skip("a supported (1.x) mcp SDK is required for MCP round trips")
+
+
 def isolated_python(tmp_path) -> str:
     """A private launcher for the running interpreter, safe to pin as an MCP command.
 

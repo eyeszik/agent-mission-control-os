@@ -21,8 +21,17 @@ read-only tree.
 
 The server process gets a minimal environment (no credentials are passed
 through), its declared input schema is enforced before a call, and errors,
-timeouts and unavailable servers become typed gateway errors. Requires the
-``council`` extra; without it no MCP tool is listed.
+timeouts and unavailable servers become typed gateway errors. A result larger than the
+tool's ``max_result_bytes`` (default 64000) is refused as ``MCP_RESULT_TOO_LARGE``: tool output
+is untrusted data and is never passed on unbounded.
+
+Requires the ``council`` extra with the 1.x ``mcp`` SDK; without it no MCP tool is listed.
+The 2.x SDK changed the client API this module calls (``read_timeout_seconds`` became a float,
+``FastMCP`` was renamed), so an installed 2.x SDK is treated as unsupported and also lists no
+MCP tool, rather than listing tools whose every call would fail.
+
+Reviewed upstream servers can be admitted with a profile (``mcp_profiles.py``), which builds a
+pinned, read-only entry for this variable; it never sets the variable itself.
 """
 
 from __future__ import annotations
@@ -30,6 +39,7 @@ from __future__ import annotations
 import asyncio
 import builtins
 import hashlib
+import importlib.metadata
 import importlib.util
 import json
 import os
@@ -43,10 +53,24 @@ from .gateway import GatewayDenied, ToolSpec
 SENSITIVITIES = {"READ", "WRITE", "EXTERNAL", "SHELL"}
 _HASH_CHUNK = 1 << 20
 _SAFE_ENV = ("PATH", "LANG", "LC_ALL")
+SUPPORTED_MCP_MAJOR = 1
+DEFAULT_MAX_RESULT_BYTES = 64_000
+MAX_RESULT_BYTES_CEILING = 1_000_000
+
+
+def mcp_major_version() -> int | None:
+    """Major version of the installed ``mcp`` SDK, or None when it is absent or unreadable."""
+    try:
+        return int(importlib.metadata.version("mcp").split(".")[0])
+    except (importlib.metadata.PackageNotFoundError, ValueError):
+        return None
 
 
 def mcp_installed() -> bool:
-    return importlib.util.find_spec("mcp") is not None
+    """True only when a supported (1.x) ``mcp`` SDK is importable. Fails closed on 2.x."""
+    if importlib.util.find_spec("mcp") is None:
+        return False
+    return mcp_major_version() == SUPPORTED_MCP_MAJOR
 
 
 def configured_servers() -> tuple[dict[str, dict], list[str]]:
@@ -77,6 +101,10 @@ def configured_servers() -> tuple[dict[str, dict], list[str]]:
         if bad:
             errors.append(f"{name}: tools {bad} need a sensitivity in {sorted(SENSITIVITIES)}")
             continue
+        oversized = [t for t, spec in tools.items() if not _valid_result_bound(spec.get("max_result_bytes"))]
+        if oversized:
+            errors.append(f"{name}: tools {oversized} need max_result_bytes between 1 and {MAX_RESULT_BYTES_CEILING}")
+            continue
         args = [str(a) for a in entry.get("args") or []]
         pin_error = _pin_problem(name, command, args, entry.get("pins"))
         if pin_error:
@@ -84,6 +112,12 @@ def configured_servers() -> tuple[dict[str, dict], list[str]]:
             continue
         valid[name] = {"command": command, "args": args, "tools": tools, "pins": dict(entry["pins"])}
     return valid, errors
+
+
+def _valid_result_bound(value) -> bool:
+    if value is None:
+        return True
+    return isinstance(value, int) and not isinstance(value, bool) and 0 < value <= MAX_RESULT_BYTES_CEILING
 
 
 def pinned_paths(command: str, args: list[str]) -> list[str]:
@@ -135,7 +169,8 @@ def mcp_tools() -> dict[str, ToolSpec]:
                 tool_id=tool_id, provider="mcp", description=str(spec.get("description") or f"{tool} on MCP server {server}"),
                 sensitivity=spec["sensitivity"], scopes=frozenset(spec.get("scopes") or [f"mcp:{spec['sensitivity'].lower()}"]),
                 input_schema=spec.get("input_schema") or {"type": "object"},
-                timeout_s=float(spec.get("timeout_s") or 10), server=server)
+                timeout_s=float(spec.get("timeout_s") or 10), server=server,
+                max_result_bytes=int(spec.get("max_result_bytes") or DEFAULT_MAX_RESULT_BYTES))
     return out
 
 
@@ -167,7 +202,18 @@ async def _call(spec: ToolSpec, args: dict, capability: str | None = None) -> di
     texts = [c.text for c in result.content if getattr(c, "type", "") == "text"]
     if result.isError:
         raise GatewayDenied("MCP_TOOL_ERROR", ("; ".join(texts) or "tool reported an error")[:300], 502)
+    _enforce_result_bound(spec, texts, result.structuredContent)
     return {"content": texts, "structured": result.structuredContent}
+
+
+def _enforce_result_bound(spec: ToolSpec, texts: list[str], structured) -> None:
+    """Refuse a result whose text plus structured content exceeds the tool's byte bound."""
+    size = sum(len(t.encode("utf-8")) for t in texts)
+    if structured is not None:
+        size += len(json.dumps(structured, default=str).encode("utf-8"))
+    if size > spec.max_result_bytes:
+        raise GatewayDenied("MCP_RESULT_TOO_LARGE",
+                            f"{spec.tool_id} returned {size} bytes; the limit is {spec.max_result_bytes}", 502)
 
 
 _GROUP = getattr(builtins, "BaseExceptionGroup", ())  # Python 3.11+; anyio wraps task failures in it
@@ -181,7 +227,7 @@ def _unwrap(exc: BaseException) -> BaseException:
 
 def call_mcp_tool(spec: ToolSpec, args: dict, *, capability: str | None = None) -> dict:
     if not mcp_installed():
-        raise GatewayDenied("MCP_NOT_INSTALLED", "the mcp package is not installed", 503)
+        raise GatewayDenied("MCP_NOT_INSTALLED", "a supported (1.x) mcp package is not installed", 503)
     try:
         return asyncio.run(asyncio.wait_for(_call(spec, args, capability), timeout=spec.timeout_s + 5))
     except GatewayDenied:
@@ -197,4 +243,5 @@ def call_mcp_tool(spec: ToolSpec, args: dict, *, capability: str | None = None) 
         raise GatewayDenied("MCP_CALL_FAILED", f"{spec.tool_id}: {type(inner).__name__}", 502) from None
 
 
-__all__ = ["call_mcp_tool", "configured_servers", "file_sha256", "mcp_installed", "mcp_tools", "pinned_paths", "verify_pins"]
+__all__ = ["DEFAULT_MAX_RESULT_BYTES", "SUPPORTED_MCP_MAJOR", "call_mcp_tool", "configured_servers", "file_sha256",
+           "mcp_installed", "mcp_major_version", "mcp_tools", "pinned_paths", "verify_pins"]

@@ -126,6 +126,19 @@ With `ENABLE_REAL_MODELS=true`, seats use `DEFAULT_MODEL_PROVIDER` through the c
   - The server gets a minimal environment, with no credentials passed through.
   - Unavailable servers, tool errors, missing tools and timeouts become typed errors.
   - `GET /missions/tools` lists the effective allowlist and any configuration errors.
+  - Every command and file argument is SHA-256 pinned (`pins`), checked at configuration and again at spawn.
+  - Each tool's result is bounded by `max_result_bytes` (default 64000, at most 1000000); a larger result is refused
+    as `MCP_RESULT_TOO_LARGE`. A violation of a declared `input_schema` is refused as `SCHEMA_INVALID` and audited.
+  - Only the 1.x `mcp` SDK is supported. With 2.x installed no MCP tool is listed (`mcp_installed: false`).
+  - **Reviewed profiles.** `agency/council/mcp_profiles.py` builds a pinned, read-only entry for a server whose
+    upstream source was reviewed, and refuses any other bytes. It prints the entry; it never sets the variable.
+    The one profile today is `paara` (PAARA Connector Audit, MIT, three READ tools that score a connector's risk
+    band). Decision record, gates, benchmarks and rollback: [mcp-integration-audit.md](mcp-integration-audit.md).
+
+    ```bash
+    python -m services.langgraph.agency.council.mcp_profiles paara \
+      --server-script /opt/mcp/paara/paara_mcp_server.py --python /usr/bin/python3
+    ```
   - No HTTP route invokes an arbitrary tool. Seats reach tools only through the gateway; today that is the approved scaffold write.
 
 ## Ideas, blueprints and promotion
