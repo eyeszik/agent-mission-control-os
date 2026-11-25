@@ -15,8 +15,19 @@ PII_PATTERNS = {
     "credit_card": re.compile(r"\b(?:\d[ -]*?){13,16}\b"),
     "api_key_like": re.compile(r"\b(?:sk|api|key)[-_][A-Za-z0-9_-]{12,}\b", re.IGNORECASE),
     "bearer": re.compile(r"\bBearer\s+[A-Za-z0-9._~+/-]{12,}=*", re.IGNORECASE),
+    # Added after the C14 benchmark (docs/evidence/mcp-integration-2026-11/pii_benchmark_c14.json).
+    # Purely additive and applied after the patterns above: nothing redacted before is redacted
+    # less. credit_card keeps over-matching (an ISBN-13 or EAN-13 is redacted too): a Luhn gate
+    # would also stop redacting other long numbers (account and order ids), which fails open.
+    "aws_access_key": re.compile(r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b"),
+    "google_api_key": re.compile(r"\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])"),
+    # E.164: "+", a country code, then the rest; at most 15 digits in all. ASCII digits only.
+    "phone_intl": re.compile(r"(?<![\w+])\+[1-9][0-9]{0,2}(?:[ .-]?[0-9]){6,14}(?![0-9])"),
+    # Owner decision point: IP addresses are treated as personal data and redacted. Remove this
+    # entry (and its twin in packages/pii/src/pii.ts) to stop redacting them.
+    "ipv4": re.compile(r"\b(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}"
+                       r"(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\b"),
 }
-
 
 _BASE64_FRAGMENT = re.compile(r"(?<![A-Za-z0-9+/])(?:[A-Za-z0-9+/]{24,}={0,2})(?![A-Za-z0-9+/=])")
 _EXTRA_SECRET_PATTERNS = (
