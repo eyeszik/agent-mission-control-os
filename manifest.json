@@ -852,11 +852,11 @@
     },
     {
       "path": "services/langgraph/agency/visual/browser.py",
-      "git_blob_sha": "e8e8710104ccf294e81db1598ca9df6896f45667"
+      "git_blob_sha": "6bacef127d07973f0f5c9d372722e3d5a6e6417b"
     },
     {
       "path": "services/langgraph/agency/visual/browser_runner.cjs",
-      "git_blob_sha": "a6da8b3445b1a85e40b6f4afaa723603cdbd21f4"
+      "git_blob_sha": "b76e274543ccd9e54226935826f45eb67c368188"
     },
     {
       "path": "services/langgraph/agency/visual/capabilities.py",

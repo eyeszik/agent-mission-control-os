@@ -530,7 +530,11 @@ def measure_layout(html: str, *, width: int, height: int, out_dir: Path, capture
     pages = run["result"].get("layout")
     if pages is None:
         findings.append("LAYOUT_NOT_MEASURED")
+    if run["result"].get("error"):
+        findings.append(f"{run['result']['error']}: {str(run['result'].get('message', ''))[:300]}")
     captures = run["result"].get("captures") or {}
+    for page_id, reason in sorted((run["result"].get("capture_errors") or {}).items()):
+        findings.append(f"CAPTURE_FAILED:{page_id}: {reason}")
     if capture and (len(captures) != len(pages or []) or any(name not in run["output_files"] for name in captures.values())):
         findings.append("MISSING_CAPTURE")
     return {**run, "status": "PASSED" if not findings else "FAILED", "findings": findings, "pages": pages or [],
