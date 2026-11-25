@@ -292,8 +292,42 @@ keeps DISABLED, plus a terms-of-service question for the owner.
 
 **Others.** Unchanged from `candidate_matrix.json`; no new evidence.
 
+## Follow-up (2026-11-25): PII hardening done, CodeQL narrowed, C07 still deferred
+
+**C14 follow-up — `security/pii.py` + `@amc/pii` hardened.** On the owner's go-ahead ("proceed"), four patterns
+were added to both twins: `aws_access_key`, `google_api_key`, `phone_intl` (E.164, at most 15 digits) and `ipv4`.
+
+- **Strictly additive.** They run after the existing patterns, so nothing is redacted less: on a 25,029-string
+  corpus, 0 strings lost detection or a redaction compared with master.
+- **No Luhn gate.** It was implemented and then removed. It would have removed the ISBN/EAN false positives, but
+  on a separate 3,046-string corpus it also stopped redacting 155 strings that master redacts (an IBAN's digit block, 13–16-digit account and
+  order ids). That fails open, so ISBN/EAN over-redaction stays as an accepted false positive.
+- **IPv4 is redacted.** This was the open owner decision; the protective default was taken. The entry is marked
+  in both twins, and removing it from both is the whole revert.
+- **Parity.** The fixture `packages/pii/tests/fixtures/pii-parity.json` was regenerated on Python 3.11 (Unicode
+  14, as CI). `python-unicode.ts` is unchanged. `@amc/pii` passes 17/17; a negative control (ipv4 removed from
+  the TypeScript side only) fails 2 parity tests.
+- **Effect.** On the C14 fixture, recall goes from 12/19 to 17/19 (equal to Fairquery's free tools), with false
+  positives unchanged at 2/10. Both twins still miss the UK NINO and the fixture's random-payload JWT.
+- **Not covered.** `(555) 010-0199` (a space after the bracket) is not detected; that is a pre-existing gap,
+  not a regression.
+
+**CodeQL — narrowed, rule still unknown.**
+- PR #306 changed only documentation. Its first CodeQL check still reported one new medium alert, because the
+  branch was not descended from #304's squash commit, so GitHub compared it against `c1e4d0a` and counted
+  #304's 17 files as #306's.
+- After master was merged in (head `cc519b1`, 6 files changed), the CodeQL check was `neutral` and all three
+  analyses succeeded.
+- So the alert sits in #304's changes and is now an existing open alert on master, not introduced by #306.
+  Both failing runs failed as the Actions analysis uploaded, which points at `.github/workflows/ci.yml`.
+- To close it, the alert number, rule id and `path:line` from Security → Code scanning are still needed.
+  Nothing has been dismissed.
+
+**C07 OpenSERP — still `DEFER_PENDING_OWNER_AUTHORIZATION`.** A general "proceed" was not treated as lifting
+the repository rule that keeps research providers DISABLED, or as accepting the search engines' terms of
+service. Both need an explicit decision.
+
 ## Recommended next step
 
-No further MCP server. The highest-value follow-up is a `security/pii.py` + `@amc/pii` hardening change (Luhn-check
-cards; add AWS/Google key and international phone patterns; decide whether IPv4 counts as sensitive), with the C14
-fixture as its regression set. It needs the owner's decision because it changes what the system redacts.
+No further MCP server. Open items: the CodeQL alert details (above), and an explicit C07 policy decision if
+self-hosted search is wanted.

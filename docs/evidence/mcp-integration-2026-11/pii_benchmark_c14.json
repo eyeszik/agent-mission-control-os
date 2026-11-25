@@ -276,5 +276,19 @@
    "amcos_pass": false,
    "fairquery_types": []
   }
- ]
+ ],
+ "after_hardening": {
+  "commit": "e623e03",
+  "amcos_recall": "17/19",
+  "amcos_false_positives": "2/10",
+  "still_missed": [
+   "uk_nino",
+   "jwt"
+  ],
+  "false_positives": [
+   "benign_3 (ISBN-13)",
+   "benign_9 (EAN-13)"
+  ],
+  "note": "four additive patterns in security/pii.py and @amc/pii; no Luhn gate (on a 3,046-string corpus it stopped redacting 155 strings master redacts, i.e. failed open)"
+ }
 }
