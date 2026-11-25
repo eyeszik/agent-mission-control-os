@@ -218,7 +218,9 @@ def test_build_is_incremental_cached_and_rebinds_provenance(approved_world):
     assert cold["genome_ref"] == v["version_id"] and len(cold["pages"]) == 24
     assert cold["telemetry"]["pages_rendered"] >= 24 and cold["telemetry"]["model_calls"] == 0
     warm = _build(w)
-    assert warm["telemetry"]["pages_rendered"] == 0 and warm["telemetry"]["browser_runs"] == 0
+    # Pages the cold build could not measure are re-rendered by design; the cold telemetry says how many runs it took.
+    assert warm["telemetry"]["pages_rendered"] == 0 and warm["telemetry"]["browser_runs"] == 0, \
+        {"cold": cold["telemetry"], "warm": warm["telemetry"]}
     assert warm["telemetry"]["pages_reused"] == 24 and warm["book"]["sha256"] == cold["book"]["sha256"]
     assert warm["build_artifact"]["action"] == "reused_unchanged"
     v2, doc2 = _new_version(w, doc, {"verbal.voice.tone": ["plain", "precise"]})
