@@ -289,6 +289,18 @@
    "benign_3 (ISBN-13)",
    "benign_9 (EAN-13)"
   ],
-  "note": "four additive patterns in security/pii.py and @amc/pii; no Luhn gate (on a 3,046-string corpus it stopped redacting 155 strings master redacts, i.e. failed open)"
+  "note": "four additive patterns in security/pii.py and @amc/pii; no Luhn gate (on a 3,046-string corpus it stopped redacting 155 strings master redacts, i.e. failed open)",
+  "regression_check": {
+   "full_backend_suite_python_3_11_local": {
+    "branch": "2697 passed, 36 failed, 184 skipped",
+    "master_834a157_worktree": "2674 passed, 2 failed, 223 skipped",
+    "shared_failures": [
+     "test_ffprobe_provisioning.py x2 (no ffprobe in this container)"
+    ],
+    "branch_only_failures": "34 browser/render tests; master's worktree skipped them (no node_modules: '@playwright/test missing'). Re-run with master's pii.py swapped in: the same 34 fail, so they come from this container's missing Playwright browser (~/.cache/ms-playwright absent), not from this change.",
+    "redaction_reachability": "agency/foundry, agency/vnexus and agency/visual do not import security.pii"
+   },
+   "ci": "authoritative for browser tests; see PR #309"
+  }
  }
 }
