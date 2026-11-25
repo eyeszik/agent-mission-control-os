@@ -422,12 +422,19 @@ async function main() {
         return pages;
       }, spec.min_font_px || 10);
       if (spec.capture) {
+        // One section that cannot be captured must not cost the others their capture, nor anyone their
+        // measurement: record the failure per page and keep going. The caller treats a missing capture as such.
         result.captures = {};
+        result.capture_errors = {};
         for (const p of result.layout) {
           const id = safeOutputId(p.id);
           const file = `page-${id}.png`;
-          await page.locator(`section[data-page="${id}"]`).screenshot({ path: path.join(outDir, file) });
-          result.captures[id] = file;
+          try {
+            await page.locator(`section[data-page="${id}"]`).screenshot({ path: path.join(outDir, file) });
+            result.captures[id] = file;
+          } catch (err) {
+            result.capture_errors[id] = String(err && err.message ? err.message : err).split("\n")[0].slice(0, 300);
+          }
         }
       }
     } else if (spec.mode === "experience") {
@@ -488,8 +495,13 @@ main().catch((err) => {
     const outDir = process.argv[3];
     if (outDir) {
       fs.mkdirSync(outDir, { recursive: true });
-      fs.writeFileSync(path.join(outDir, "result.json"), JSON.stringify({
-        error: "RUNNER_FAILED", message: String(err && err.message ? err.message : err),
+      // main() persists its observations in `finally` before the error reaches here. Add the error to that
+      // record instead of replacing it: overwriting discarded every measurement taken before the fault.
+      const file = path.join(outDir, "result.json");
+      let prior = {};
+      try { prior = JSON.parse(fs.readFileSync(file, "utf8")); } catch (_none) { prior = {}; }
+      fs.writeFileSync(file, JSON.stringify({
+        ...prior, error: "RUNNER_FAILED", message: String(err && err.message ? err.message : err),
       }, null, 2));
     }
   } catch (_ignored) {
