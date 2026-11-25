@@ -245,3 +245,60 @@ def test_tools_endpoint_reports_mcp_absence_honestly(monkeypatch, council):  # n
     assert body["mcp_installed"] is False
     assert not any(t["provider"] == "mcp" for t in body["tools"])
     assert client.get("/missions/engines", headers=key()).status_code == 200
+
+
+# --- Scaffold writes never follow a link planted at the temp path ------------------------------------------------------
+# A symlink at "<target>.tmp" used to redirect write_text outside the mission workspace (found during the branch
+# reconciliation audit; open PR #265 proposed a resolve-then-write check). The temp file is now created with
+# O_CREAT|O_EXCL|O_NOFOLLOW, so nothing that occupies the temp path can be written through.
+
+def _scaffold_ctx(monkeypatch, tmp_path: Path) -> tuple[dict, Path]:
+    monkeypatch.setenv("AMC_EXPORT_ROOT", str(tmp_path / "exports"))
+    ctx = {"tenant_id": "t-scaffold", "project_id": "p-scaffold", "mission_id": "m-scaffold", "user_id": "tester"}
+    root = gateway.mission_workspace(ctx["tenant_id"], ctx["project_id"], ctx["mission_id"]) / "scaffold"
+    root.mkdir(parents=True)
+    return ctx, root
+
+
+def test_scaffold_write_does_not_follow_a_symlink_at_the_temp_path(monkeypatch, tmp_path):
+    ctx, root = _scaffold_ctx(monkeypatch, tmp_path)
+    victim = tmp_path / "outside" / "victim.md"
+    victim.parent.mkdir()
+    victim.write_text("original")
+    (root / "notes.md.tmp").symlink_to(victim)
+    gateway._write_scaffold(ctx, gateway._WriteArgs(files=[{"path": "notes.md", "content": "attacker"}]))
+    assert victim.read_text() == "original"
+    written = root / "notes.md"
+    assert written.read_text() == "attacker" and not written.is_symlink()
+
+
+def test_scaffold_write_refuses_a_target_link_that_leaves_the_workspace(monkeypatch, tmp_path):
+    ctx, root = _scaffold_ctx(monkeypatch, tmp_path)
+    victim = tmp_path / "outside.md"
+    victim.write_text("original")
+    (root / "alias.md").symlink_to(victim)
+    with pytest.raises(GatewayDenied) as denied:
+        gateway._write_scaffold(ctx, gateway._WriteArgs(files=[{"path": "alias.md", "content": "attacker"}]))
+    assert denied.value.code == "PATH_OUTSIDE_WORKSPACE" and victim.read_text() == "original"
+
+
+def test_scaffold_temp_path_still_occupied_is_refused(monkeypatch, tmp_path):
+    ctx, root = _scaffold_ctx(monkeypatch, tmp_path)
+    real_unlink = Path.unlink
+
+    def replant(self, missing_ok=False):  # a racing writer re-creates the temp path right after the cleanup
+        real_unlink(self, missing_ok=missing_ok)
+        self.symlink_to(tmp_path / "elsewhere.md")
+
+    monkeypatch.setattr(Path, "unlink", replant)
+    with pytest.raises(GatewayDenied) as denied:
+        gateway._write_scaffold(ctx, gateway._WriteArgs(files=[{"path": "notes.md", "content": "x"}]))
+    assert denied.value.code == "PATH_UNSAFE" and not (tmp_path / "elsewhere.md").exists()
+
+
+def test_scaffold_write_recovers_from_a_leftover_temp_file(monkeypatch, tmp_path):
+    ctx, root = _scaffold_ctx(monkeypatch, tmp_path)
+    (root / "notes.md.tmp").write_text("half-written by a crash")
+    result = gateway._write_scaffold(ctx, gateway._WriteArgs(files=[{"path": "notes.md", "content": "done"}]))
+    assert result["written"][0]["path"] == "scaffold/notes.md" and (root / "notes.md").read_text() == "done"
+    assert not (root / "notes.md.tmp").exists()

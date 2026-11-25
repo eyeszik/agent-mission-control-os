@@ -130,6 +130,18 @@ def _list_files(ctx: dict, args: _ListArgs) -> dict:
     return {"files": sorted(str(p.relative_to(root)) for p in root.rglob("*") if p.is_file())[:200]}
 
 
+def _write_new_file(path: Path, content: str) -> None:
+    """Create ``path`` as a new regular file. O_EXCL refuses any existing entry and O_NOFOLLOW any
+    link, so a symlink planted at the temp path can never redirect the write outside the workspace."""
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(path, flags, 0o644)
+    except OSError as exc:  # FileExistsError, or ELOOP from O_NOFOLLOW: something occupies the temp path
+        raise GatewayDenied("PATH_UNSAFE", "scaffold temp path is occupied; refusing to write through it") from exc
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(content)
+
+
 def _write_scaffold(ctx: dict, args: _WriteArgs) -> dict:
     root = mission_workspace(ctx["tenant_id"], ctx["project_id"], ctx["mission_id"]) / "scaffold"
     written = []
@@ -137,8 +149,9 @@ def _write_scaffold(ctx: dict, args: _WriteArgs) -> dict:
         target = _inside(root, item.path)
         target.parent.mkdir(parents=True, exist_ok=True)
         tmp = target.with_suffix(target.suffix + ".tmp")
-        tmp.write_text(item.content, encoding="utf-8")
-        os.replace(tmp, target)  # atomic per file; rewriting identical bytes is idempotent
+        tmp.unlink(missing_ok=True)  # a leftover from a crashed write; unlink removes a link itself, never its target
+        _write_new_file(tmp, item.content)
+        os.replace(tmp, target)  # atomic per file; rename replaces a link at target, never writes through it
         written.append({"path": f"scaffold/{item.path}", "sha256": hashlib.sha256(item.content.encode()).hexdigest()})
     return {"written": written}
 
