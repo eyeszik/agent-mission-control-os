@@ -62,10 +62,10 @@ def pad_wav(path: str | Path, target_duration: float) -> float:
     return target_duration
 
 
-def _peak_via_ffmpeg(path: str | Path) -> float:
+def _peak_via_ffmpeg(path: str | Path) -> float | None:
     """Peak from ffmpeg's ``volumedetect`` for containers the WAV reader cannot open (e.g. AAC in MP4).
 
-    Returns 0.0 when ffmpeg is unavailable, the file has no audio, or the output cannot be parsed.
+    Returns ``None`` when ffmpeg is unavailable, the file has no audio, or the output cannot be parsed.
     """
     import re
     import subprocess
@@ -74,7 +74,7 @@ def _peak_via_ffmpeg(path: str | Path) -> float:
 
     binary = find_ffmpeg()
     if not binary:
-        return 0.0
+        return None
     try:
         proc = subprocess.run(
             [binary, "-hide_banner", "-nostats", "-i", str(path), "-map", "0:a:0", "-af", "volumedetect",
@@ -82,19 +82,20 @@ def _peak_via_ffmpeg(path: str | Path) -> float:
             capture_output=True, text=True, timeout=120, check=False,
         )
     except (OSError, subprocess.SubprocessError):
-        return 0.0
+        return None
     match = re.search(r"max_volume:\s*(-?[\d.]+)\s*dB", proc.stderr)
     if proc.returncode != 0 or not match:
-        return 0.0
+        return None
     return min(1.0, 10 ** (float(match.group(1)) / 20.0))
 
 
-def peak_amplitude(path: str | Path, max_frames: int = 2_000_000) -> float:
-    """Peak sample magnitude in [0, 1].
+def measure_peak(path: str | Path, max_frames: int = 2_000_000) -> float | None:
+    """Peak sample magnitude in [0, 1], or ``None`` when nothing could be measured.
 
-    16-bit PCM WAV is read directly. Any other readable container (for example the AAC track in
-    final.mp4) is measured with ffmpeg's volumedetect. Used by the structural QC gate to catch
-    silent or clipped audio. Returns 0.0 when nothing can be measured, rather than guessing.
+    ``0.0`` means measured digital silence; ``None`` means unmeasurable. Keeping the two apart lets the
+    structural QC gate fail a silent master instead of reporting it as "could not be measured".
+    16-bit PCM WAV is read directly; any other readable container (for example the AAC track in
+    final.mp4) is measured with ffmpeg's volumedetect.
     """
     try:
         with contextlib.closing(wave.open(str(path), "rb")) as handle:
@@ -105,7 +106,17 @@ def peak_amplitude(path: str | Path, max_frames: int = 2_000_000) -> float:
     except (wave.Error, OSError):
         return _peak_via_ffmpeg(path)
     if not frames:
-        return 0.0
+        return None
     count = len(frames) // 2
     samples = struct.unpack(f"<{count}h", frames[: count * 2])
     return max(abs(min(samples)), abs(max(samples))) / 32768.0
+
+
+def peak_amplitude(path: str | Path, max_frames: int = 2_000_000) -> float:
+    """Peak sample magnitude in [0, 1]; 0.0 when silent *or* unmeasurable.
+
+    Kept for existing callers. A gate that must tell silence from "could not measure" uses
+    ``measure_peak`` instead.
+    """
+    peak = measure_peak(path, max_frames)
+    return 0.0 if peak is None else peak

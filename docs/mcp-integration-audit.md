@@ -254,9 +254,46 @@ Rollback: remove the `upgrowth` key (other entries such as `paara` keep working)
 - On Node 20.0–22.12 the permission model is experimental (it prints a warning on stderr).
 - Calculator outputs are advice inputs, not facts about a client; seats must still cite their inputs.
 
-## Recommended next candidate
+## Post-merge reconciliation (2026-11-24)
 
-None clears the gates without new authority. The closest are C14 Fairquery (its free, local PII tools overlap
-`security/pii.py`, so G10 needs a demonstrated gap first; its other tools are network or paid) and C07 OpenSERP
-(hosted, paid; needs a spending decision and lifting the DISABLED rule for research providers). Recommendation:
-stop here unless one of those decisions is made.
+Evidence: [`post_merge_reconciliation.json`](evidence/mcp-integration-2026-11/post_merge_reconciliation.json),
+[`pii_benchmark_c14.json`](evidence/mcp-integration-2026-11/pii_benchmark_c14.json).
+
+**State.** `master` = `977158d` (#304, squash). All 17 files of #304's head `e83538d` are byte-identical on it;
+#303 (`c1e4d0a`, unrelated) touched no pinned file. All seven verifier gates pass on `977158d`.
+
+**CI on `977158d`** (run [45490073702](https://github.com/eyeszik/agent-mission-control-os/actions/runs/45490073702),
+push, attempt 1): all nine jobs `success`, including Backend on PostgreSQL (tenant RLS runs there with
+`AMC_EPHEMERAL_POSTGRES_DSN`) and the council step that fails if the upGrowth tests skip.
+
+**CodeQL — `UNDETERMINED`, attribution blocked.** PR #304's `CodeQL` check reported one new medium alert. Timing
+puts it in the Actions or JavaScript analysis. The workflow-permission, secret, untrusted-checkout, poisoning and
+injection queries cannot match `ci.yml` as written (workflow-level `contents: read`, push/pull_request only, no
+secrets), and manual review of the new JavaScript found no matching pattern; that is not proof against CodeQL's
+dataflow. No code-scanning API, annotation or SARIF is reachable from this session, and the local CodeQL download
+was denied (not retried). Needed to close it: the alert number, rule id and `path:line` from Security → Code scanning.
+Nothing was suppressed or dismissed.
+
+**C14 Fairquery — REJECT as an MCP server; its value goes to `security/pii.py`.** An offline benchmark on 29
+synthetic cases (seeded generator, no committed credential-shaped strings) measured Fairquery's free local
+detectors at 17/19 recall and 0/10 false positives, against 12/19 and 2/10 for `security/pii.py`. AMCOS misses
+international phone numbers, IPv4, AWS access key ids and Google API keys, and redacts ISBN/EAN codes as cards
+(no Luhn check). As an MCP tool it cannot fill the gap: redaction runs in-process on every audit write, and its
+npm dependency tree (99 packages installed with dev tooling; the runtime imports `@modelcontextprotocol/sdk`, `zod` and `libphonenumber-js` modules) cannot be covered by the gateway's file pins (G9). The right change is to harden
+`security/pii.py` and its byte-parity TypeScript twin `@amc/pii` (manifest-pinned, 11 runtime callers) — a
+redaction-policy change for the owner to approve, not done here.
+
+**C07 OpenSERP — DEFER_PENDING_OWNER_AUTHORIZATION.** The MCP package (`@openserp/mcp` 0.1.12, MIT) has a
+self-hosted mode (`http://localhost:7000`) backed by [karust/openserp](https://github.com/karust/openserp) (MIT,
+no per-search billing). That removes the spending question but not the policy one: the server drives headless
+Chromium against Google, Bing, Yandex, Baidu, DuckDuckGo and Ecosia (with captcha/proxy handling), sends agents'
+query text to those engines, and adds a Go + Chromium service. That is the research-provider egress the repository
+keeps DISABLED, plus a terms-of-service question for the owner.
+
+**Others.** Unchanged from `candidate_matrix.json`; no new evidence.
+
+## Recommended next step
+
+No further MCP server. The highest-value follow-up is a `security/pii.py` + `@amc/pii` hardening change (Luhn-check
+cards; add AWS/Google key and international phone patterns; decide whether IPv4 counts as sensitive), with the C14
+fixture as its regression set. It needs the owner's decision because it changes what the system redacts.
