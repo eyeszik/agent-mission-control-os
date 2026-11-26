@@ -339,7 +339,7 @@ def test_preview_pages_pass_measured_checks_and_serve_inert_html(approved_world)
     assert html.status_code == 200 and "default-src 'none'" in html.headers["content-security-policy"]
     assert "<script" not in html.text and html.text.count('data-page="p') >= 24
     png = client.get(f"/vnexus/brands/{w['brand']}/brandbook/pages/p06/preview.png", params=q)
-    assert png.status_code == 200 and png.content.startswith(b"\x89PNG")
+    assert png.status_code == 200 and png.content.startswith(b"\x89PNG"), build.get("capture_failures")
     assert client.get(f"/vnexus/brands/{w['brand']}/brandbook/pages/p99/preview.png", params=q).status_code == 404
 
 

@@ -28,13 +28,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import resource
 import tempfile
 import threading
 import time
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, NamedTuple, Optional
 
 from services.langgraph.agency.execution.canonical import canonical_hash
 from services.langgraph.agency.kernel.roles import assert_role_may_produce
@@ -304,14 +305,41 @@ def _page_record(page: compiler.PagePackage, sections: list[tuple[str, str]], ch
     return (json.dumps(doc, sort_keys=True, indent=1, ensure_ascii=False) + "\n").encode()
 
 
-def _measure_with_one_retry(measure_layout: Any, html: str, out_dir: Path, **kwargs: Any) -> tuple[dict[str, Any], Path, int]:
-    """(run, its output directory, browser runs used). A layout run only reads the given HTML, so one repeat after a
-    failed run has no side effect; a second failure is returned as is and its pages stay NOT_RUN and unmeasured."""
-    run = measure_layout(html, out_dir=out_dir, **kwargs)
-    if run.get("status") == "PASSED":
-        return run, out_dir, 1
+class _Measured(NamedTuple):
+    run: dict[str, Any]          # the run whose measurements are used
+    runs: int                    # browser runs spent
+    captures: dict[str, Path]    # section key -> capture file, from every attempt
+    findings: list[str]          # findings of every attempt, in order
+
+
+def _measure_with_one_retry(measure_layout: Any, html: str, out_dir: Path, **kwargs: Any) -> _Measured:
+    """Measure, repeating once after a failed run. A layout run only reads the given HTML, so the repeat has no side
+    effect, and both attempts saw the same HTML: a capture the first run made stays valid when the retry misses it,
+    and the first run's measurements stand when the retry measured nothing. A second failure is returned as is."""
+    first = measure_layout(html, out_dir=out_dir, **kwargs)
+    captures = {key: out_dir / name for key, name in (first.get("captures") or {}).items()}
+    if first.get("status") == "PASSED":
+        return _Measured(first, 1, captures, [])
     retry_dir = out_dir.with_name(out_dir.name + "-retry")
-    return measure_layout(html, out_dir=retry_dir, **kwargs), retry_dir, 2
+    retry = measure_layout(html, out_dir=retry_dir, **kwargs)
+    captures.update({key: retry_dir / name for key, name in (retry.get("captures") or {}).items()})
+    chosen = retry if retry.get("pages") or not first.get("pages") else first
+    return _Measured(chosen, 2, captures, list(first.get("findings") or []) + list(retry.get("findings") or []))
+
+
+_LOCAL_PATH = re.compile(r"(?:[A-Za-z]:)?(?:/[^\s/'\"()<>]+){2,}/?")
+
+
+def _public_reason(finding: str) -> str:
+    """A browser finding fit for an API response: one line, no local filesystem paths, bounded length."""
+    return _LOCAL_PATH.sub("<path>", finding.splitlines()[0] if finding else "")[:200]
+
+
+def _capture_reasons(page_id: str, findings: list[str]) -> list[str]:
+    """Why ``page_id`` has no preview: its own CAPTURE_FAILED entries, else the run-level findings."""
+    own = [f for f in findings if f.startswith(f"CAPTURE_FAILED:{page_id}:")]
+    general = [f for f in findings if not f.startswith("CAPTURE_FAILED:")]
+    return [_public_reason(f) for f in (own or general or ["NO_CAPTURE_RECORDED"])[:6]]
 
 
 def _sections_sha(sections: list[tuple[str, str]]) -> str:
@@ -363,6 +391,8 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
     page_checks: dict[str, list[dict[str, Any]]] = {}
     previews: dict[str, str] = {}
     measured_ok: dict[str, bool] = {}
+    capture_findings: dict[str, list[str]] = {}   # page -> findings of the capturing run(s)
+    capture_failures: dict[str, list[str]] = {}   # page -> why its requested preview is missing
 
     def render_pages(pages: list[compiler.PagePackage], work: Path) -> None:
         """Render (or reuse) and check the given pages, running the overflow ladder on failures."""
@@ -393,14 +423,16 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
             measured: dict[str, list[dict[str, Any]]] = {pg.page_id: [] for pg in pending}
             if can_measure:
                 html = render.book_html([s for pg in pending for _, s in sections[pg.page_id]], title="measure", style=style)
-                run, run_dir, runs = _measure_with_one_retry(
+                done = _measure_with_one_retry(
                     measure_layout, html, work / f"m{attempt}-{pending[0].page_id}", width=width, height=height,
                     capture=capture and attempt == 0, min_font_px=render.MIN_FONT_PX)
-                stats["browser_runs"] += runs
+                stats["browser_runs"] += done.runs
                 stats["pages_measured"] += len(pending)
-                measured = checksmod.measurement_for([pg.page_id for pg in pending], run["pages"])
-                for key, file in run["captures"].items():
-                    previews[key] = str(run_dir / file)
+                measured = checksmod.measurement_for([pg.page_id for pg in pending], done.run["pages"])
+                for key, path in done.captures.items():
+                    previews[key] = str(path)
+                if capture and attempt == 0:
+                    capture_findings.update({pg.page_id: done.findings for pg in pending})
                 for pg in pending:
                     measured_ok[pg.page_id] = bool(measured[pg.page_id])
             t = lap("measure", t)
@@ -422,6 +454,8 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
             # A page counts as measured only if the browser actually measured it (and captured it when asked to);
             # otherwise the next build must measure it again instead of reusing NOT_RUN checks as measured.
             complete = measured_ok.get(pg.page_id, False) and (not capture or pg.page_id in previews)
+            if can_measure and capture and pg.page_id not in previews:
+                capture_failures[pg.page_id] = _capture_reasons(pg.page_id, capture_findings.get(pg.page_id, []))
             page_entry = _put(principal, project_id, f"{base}-{pg.page_id}",
                               _page_record(pg, sections[pg.page_id], page_checks[pg.page_id], can_measure and complete),
                               "page")
@@ -511,6 +545,10 @@ def build(principal: Principal, brand_id: str, *, scope: Scope, scope_ref: str, 
         # the recorded contract fixture, which is exactly what a stale fixture
         # is supposed to catch.
         record["pdf_failure"] = pdf_failure
+    if capture_failures:
+        # Same rule as pdf_failure: present only when a requested page preview is missing, so a caller sees which
+        # page and why instead of a later 404. Those pages are stored as unmeasured and re-measured next build.
+        record["capture_failures"] = dict(sorted(capture_failures.items()))
     record["build_hash"] = canonical_hash(record)
     build_entry = _put(principal, project_id, f"{base}-build", (json.dumps(record, sort_keys=True, indent=2) + "\n").encode(),
                        "build", depends_on=(book_entry["artifact_id"],))

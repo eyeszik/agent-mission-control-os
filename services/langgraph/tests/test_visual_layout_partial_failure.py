@@ -29,6 +29,8 @@ def test_a_failed_capture_keeps_every_page_already_measured(tmp_path):
     assert [p["id"] for p in run["pages"]] == ["p01", "p02", "p03"], "measurements taken before the fault survive"
     assert set(run["captures"]) == {"p01", "p03"}, "the other pages are still captured"
     assert any(f.startswith("CAPTURE_FAILED:p02") for f in run["findings"]), run["findings"]
+    assert any(f.startswith("CAPTURE_FAILED:p02") and "| retry:" in f for f in run["findings"]), \
+        "a failed capture is retried once before it is recorded"
 
 
 @NEEDS_BROWSER

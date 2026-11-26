@@ -79,7 +79,12 @@ def test_recorded_fixture_matches_live_responses(monkeypatch, tmp_path):
         FIXTURE.write_text(json.dumps(live, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
     recorded = json.loads(FIXTURE.read_text(encoding="utf-8"))
     assert set(live) == set(recorded)
-    # Telemetry timings vary per run and per stage; compare everything else structurally.
+    # Telemetry timings vary per run and per stage; compare everything else structurally. pdf_failure and
+    # capture_failures appear only when that output failed (optional in the Zod twin, which a test covers), so a
+    # real render failure surfaces in the brand book tests instead of as fixture drift here.
     for doc in (live, recorded):
         doc["build"].pop("telemetry", None)
+        for name in ("build", "current"):
+            for conditional in ("pdf_failure", "capture_failures"):
+                doc[name].pop(conditional, None)
     assert _shape_matches(structure(live), structure(recorded)) == []
