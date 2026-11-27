@@ -27,7 +27,7 @@
             "start_time": "0.000000",
             "duration_ts": 462813,
             "duration": "30.131055",
-            "bit_rate": "2064166",
+            "bit_rate": "2061555",
             "bits_per_raw_sample": "8",
             "nb_frames": "904",
             "disposition": {
@@ -71,7 +71,7 @@
             "start_time": "0.000000",
             "duration_ts": 1332085,
             "duration": "30.206009",
-            "bit_rate": "150551",
+            "bit_rate": "150054",
             "max_bit_rate": "160000",
             "nb_frames": "1302",
             "disposition": {
@@ -95,15 +95,15 @@
         }
     ],
     "format": {
-        "filename": "out/run-20261109-122818-4225db/final.mp4",
+        "filename": "<run output dir>/final.mp4",
         "nb_streams": 2,
         "nb_programs": 0,
         "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
         "format_long_name": "QuickTime / MOV",
         "start_time": "0.000000",
         "duration": "30.206009",
-        "size": "8377437",
-        "bit_rate": "2218747",
+        "size": "8365719",
+        "bit_rate": "2215643",
         "probe_score": 100,
         "tags": {
             "major_brand": "isom",

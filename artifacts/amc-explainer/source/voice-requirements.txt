@@ -1,0 +1,5 @@
+# Official PyPI metadata for version 1.0.0, inspected 2026-11-24:
+# https://pypi.org/pypi/joe-us-piper-voice/1.0.0/json
+# Wheel only; no third-party source build or automatic dependency resolution.
+joe-us-piper-voice==1.0.0 \
+    --hash=sha256:f46a74bc8d193dddb2f9f71adca95b009e2157a3f7fa96c1b34fd4ff55e0292a

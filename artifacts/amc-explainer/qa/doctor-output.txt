@@ -10,10 +10,10 @@ Host
   platform      Linux-6.1.158+-x86_64-with-glibc2.36
   python        3.11.2
   cpu / workers 2 / 1
-  disk free     18910 MB
+  disk free     18512 MB
 
 Toolchain
-  ffmpeg        /home/user/agent-mission-control-os/.venv/lib/python3.11/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v9.0.2
+  ffmpeg        /tmp/fvf-venv/lib/python3.11/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v9.0.2
   ffprobe       /tmp/ffprobe-scratch/node_modules/ffprobe-static/bin/linux/x64/ffprobe
   pillow        13.0.0
   display font  /usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf
@@ -23,7 +23,7 @@ Providers - active
   + quality    structural     [4.0.2-static] Deterministic structural validation via ffprobe and a full decode pass.
   + render     ffmpeg_motion  [n9.0.2-17-g2a571b6068-20260930] Procedural motion-graphics renderer. CPU only, no model, no network.
   + script     template       [1.0.0] Deterministic narrative-structure compiler. No model, no network, no credentials.
-  + speech     espeak         [eSpeak NG text-to-speech: libespeak-ng via espeakng-loader (local, offline)] Local formant-synthesis TTS. Offline, free, no model download.
+  + speech     piper          Local neural TTS with an installed voice. Offline and free.
   + speech     silence        [1.0.0] Timed silence. Always available; produces no narration. Install a local TTS engine for real voiceover.
   + storyboard deterministic  [1.0.0] Seeded shot planner with explicit content/visual/motion separation.
 
@@ -36,12 +36,11 @@ Providers - unavailable (each with the exact fix)
         2. Pull a small model, e.g. `ollama pull llama3.2:3b` (a multi-GB download you choose to make).
         3. Optionally set FVF_OLLAMA_MODEL.
       Without it, the deterministic template engine is used.
-  - speech     piper          The `piper` executable is not on PATH.
-      Piper is free and offline (MIT licensed). To enable it:
-        1. pip install piper-tts
-        2. Download one voice (~20-120 MB) from the Piper voices release
-           and point FVF_PIPER_MODEL at the .onnx file.
-      FreeVideoForge will not download a voice model for you.
+  - speech     espeak         espeak-ng is not on PATH.
+      Install it (free, offline, no account):
+        Debian/Ubuntu : sudo apt-get install -y espeak-ng
+        macOS         : brew install espeak-ng
+        Windows       : winget install eSpeak-NG.eSpeak-NG
   - video      local_video    No local video backend responded at http://127.0.0.1:8188.
       Tier A (local generative video) needs all of:
         1. A GPU with enough VRAM for the chosen model.

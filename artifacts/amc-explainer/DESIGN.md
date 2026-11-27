@@ -7,15 +7,15 @@
 
 - `script` = **template** (deterministic narrative-structure compiler; no LLM on this host),
 - `storyboard` = **deterministic** seeded shot planner,
-- `speech` = **espeak** (offline formant TTS),
+- `speech` = **piper** (offline neural TTS; `en_US-joe-medium`, CC0),
 - `captions` = **script_derived** (timed from measured narration),
 - `render` = **ffmpeg_motion** (procedural motion graphics; no AI inference, no network),
 - QC = **structural** (ffprobe + full decode), tier-letter **C**.
 
 Rejected routes: ComfyUI/diffusion (no backend, no GPU, would break the zero-cost and
-truthfulness constraints); Piper (no voice model downloaded — will not be downloaded for
-this delivery); Ollama-written script (absent; the template engine keeps every fact
-traceable to the supplied brief).
+truthfulness constraints); Ollama-written script (absent; the template engine keeps every
+fact traceable to the supplied brief). espeak-ng formant synthesis was the first build's
+narration and is retained as a documented fallback, not used in this delivery.
 
 ## Treatment
 
@@ -69,18 +69,20 @@ visual rhyme of the approval gate the film is about. It is procedural, seeded
 
 \* Renderer-derived overlay, 8 words; legible and factual, but flagged in REVIEW as the
 weakest typographic frame. Kept because it is exactly what the narration says.
+The mint `strata` line crosses behind the "Approval is" glyph row (D-1, LOW — see
+`qa/qa-report.md`); glyphs are drawn on top and uninterrupted.
 
 ## Cue map (burned captions = sidecar `captions.srt`)
 
 | Cue | In → Out (s) | Line | Scene |
 | --- | --- | --- | --- |
-| 1 | 0.080 → 2.859 | Agent Mission Control, explained properly. | s01 |
-| 2 | 5.736 → 7.221 | It matters more than it looks. | s02 |
-| 3 | 10.408 → 14.319 | Agent Mission Control OS is the execution and governance layer. | s03 |
-| 4 | 15.326 → 18.277 | Human approval is required before anything is delivered. | s04 |
-| 5 | 20.244 → 24.096 | Change that one assumption and the whole picture reorders itself. | s05 |
-| 6 | 24.876 → 26.362 | That is the whole idea, | s06 |
-| 7 | 26.362 → 28.272 | end to end, without the noise. | s06 |
+| 1 | 0.080 → 2.740 | Agent Mission Control, explained properly. | s01 |
+| 2 | 5.736 → 7.223 | It matters more than it looks. | s02 |
+| 3 | 10.408 → 14.299 | Agent Mission Control OS is the execution and governance layer. | s03 |
+| 4 | 15.326 → 18.346 | Human approval is required before anything is delivered. | s04 |
+| 5 | 20.244 → 23.496 | Change that one assumption and the whole picture reorders itself. | s05 |
+| 6 | 24.876 → 26.324 | That is the whole idea, | s06 |
+| 7 | 26.324 → 28.186 | end to end, without the noise. | s06 |
 
 One timing authority: FreeVideoForge's per-scene measured speech durations → scene lengths
 → caption cues → burn-in → AAC track. Nothing is hand-timed.
@@ -96,11 +98,12 @@ The 404×720 draft (`--quality draft`) is the animatic. Findings and resolutions
 2. **Pacing** — planned 30.21 s vs 30.0 s target (+0.21 s); the longest beat (s01, 5.66 s)
    earns it as the cold open; no beat is under 4.4 s. No re-cut needed.
 3. **Caption split** — the payoff splits across two cues at a clause boundary (24.876 /
-   26.362); both lines sit inside the scene and inside the safe plate. No fix.
+   26.324); both lines sit inside the scene and inside the safe plate. No fix.
 4. **Drift** — `manifest.json → duration.drift_seconds = +0.206`, within the 0.480 s gate.
 5. **Legibility** — kickers are small caps; verified at 100% and at 320 px downscale in
    `qa/frames/`.
 
-Animatic artifacts used for this decision live in `out/run-20261109-122659-e588b6/`
-(draft, superseded by the final render for delivery; draft retained only in `out/`, which
-is gitignored).
+The animatic draft and both espeak/piper renders live under gitignored `out/` on the
+build host; only the packaged delivery is committed. The scene plan (motifs, camera,
+transitions, seeds) is byte-identical between the superseded espeak build and this Piper
+re-render — narration-derived caption timings and audio are what changed.
