@@ -125,6 +125,11 @@ def _secrets(r: random.Random) -> list[str]:
         f"Bearer {_tok(r, 20, ALNUM + '._~+/-')}==", f"bearer　{_tok(r, 16)}", f"BEARER\x1c{_tok(r, 16)}",
         f"ghp_{_tok(r, 24)}\\b",
         "-----BEGIN RSA PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----",
+        # C14 additions. Key-shaped values are low-entropy on purpose (never credential-like).
+        "AKIA" + "0" * 16, "ASIA" + "Z" * 16, "AIza" + "0" * 35, "AIza" + "-" * 35,
+        f"+44 20 {r.randint(1000, 9999)} {r.randint(1000, 9999)}", f"+91 9{r.randint(1000, 9999)} {r.randint(10000, 99999)}",
+        f"+33.1.{r.randint(10, 99)}.{r.randint(10, 99)}.{r.randint(10, 99)}.{r.randint(10, 99)}",
+        f"{r.randint(0, 255)}.{r.randint(0, 255)}.{r.randint(0, 255)}.{r.randint(0, 255)}",
     ]
 
 
@@ -136,6 +141,8 @@ NEAR_MISSES = [
     "ghp_" + "a" * 24,
     "-----BEGIN PUBLIC KEY-----", "123456789012", "١٢٣-٤٥-٦٧٨٩", "skeleton-keys-are-fine",
     "QUJDREVGR0hJSktMTU5PUFFSU1Q", "QUJDREVGR0hJSktMTU5PUFFSU1RVVld",
+    "AKIA" + "0" * 15, "xAKIA" + "0" * 16, "AIza" + "0" * 34, "AIza" + "0" * 36, "+12", "+0 1234567", "x+44 20 7946 0958",
+    "++44 20 7946 0958", "+44 1234567890123456", "256.1.1.1", "1.2.3", "v1.2.3.4", "1.2.3.4x", "2026.11.24.1",
 ]
 
 FILLERS = ["", " ", "brand", "launch plan", "\n", "\\n", "\\r", "é", "中文", "_", "-", ".", ":", "\t",
@@ -186,6 +193,8 @@ def _handwritten_texts() -> list[str]:
         quote("ada.lovelace@example.test"), quote(quote("sk-test1234567890ABCD")),
         quote(quote(quote("sk-test1234567890ABCD"))), "%E2%82é%AC", "%FFsk-test1234567890ABCD",
         "é5550100199", "5550100199é", "٤١١١٤١١١٤١١١٤١١١", "line\\n123-45-6789", "line\\r\\n(555) 010-0199",
+        "UK office: +44 20 7946 0958.", "India desk +91 98765 43210", "+١٢ 345 678 901", "origin 203.0.113.42.",
+        "1.2.3.4.5", "aws_access_key_id = AKIA" + "0" * 16, "maps AIza" + "0" * 35 + "!", "é203.0.113.42",
         base64.b64encode(b"sk-\xffABCDEFGHIJKLMNOP").decode(), "Q" * 25, "Q" * 26 + "=", "Q" * 27 + "==",
         "Q" * 4097, base64.b64encode(b"sk-ABCDEFGHIJKLMNOPQRSTUVWXYZ" * 120).decode(),
     ]
