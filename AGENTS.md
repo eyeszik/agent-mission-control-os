@@ -19,3 +19,7 @@ This document outlines the specialized agents, their roles, and their responsibi
 4. **Governance Agent**
    - **Role:** Risk management and compliance.
    - **Responsibilities:** Evaluates actions against the `risk_register.json` and updates the `governance_decisions.json`.
+
+## Specialist methods
+
+For candidate verification, recurring-IP production, commercial packaging or independent artifact review, apply the corresponding method in [Specialist methods](docs/specialist-methods.md). Follow the current task’s scope and the accepted contracts for the candidate. Historical blocker references identify verification obligations; check their current disposition before opening work.
