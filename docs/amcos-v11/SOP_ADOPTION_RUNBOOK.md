@@ -11,14 +11,15 @@
 | Tenant id | `‹TENANT›` | query 0.1 |
 | Project id | `‹PROJECT›` | query 0.1 |
 | SOP | `‹F01…F08›` (one draft, newly written v0.1, not a recovered original) | `GET /brand-os/sops/‹SOP›` |
-| Pinned draft digest (`source_sha256`) | `‹64 hex›` | the index file and the API agree, query 0.4 |
+| Pinned draft digest (`source_sha256`) | `‹64 hex›` | `data/brand_os_index.v1.json`, `GET /brand-os/sops/‹SOP›` and (once staged) the adoption `artifact_hash` all agree; query 0.4 shows which earlier decisions were for other digests |
+| SOP artifact id (`subject_ref`) | `art-‹PROJECT›-foundry-brand-os-‹f0n›` | `artifact_id` from `GET …/sops/‹SOP›/adoption` (use that exact value; do not build it by hand); query 0.4 |
 | **Requester**: name, Supabase user id | `‹name›`, `‹uuid›` | query 0.2 |
 | Requester role | one of `admin`, `operator`, `owner`, `approver` | query 0.2 |
 | **Independent approver**: name, Supabase user id | `‹name›`, `‹uuid›` (must differ from the requester) | query 0.3 |
 | Approver role | one of `reviewer`, `approver`, `admin`, `owner` | query 0.3 |
 | Pre-adoption database backup id | `‹backup id›` | owner |
 
-The pending migrations, including `20261122_amc_brand_os_pending_approval_unique_v1.sql`, must already be `APPLIED` on this database (`scripts/db_migrations.py detect`). `AMC_AUTH_MODE` must be `supabase`, and `AMC_DB_RLS_MODE` stays `off`.
+The pending migrations, including `20261122_amc_brand_os_pending_approval_unique_v1.sql`, must already be applied to this database, with every stop rule in [production migration playbook](../migrations/production-migration-playbook.md) §0b clear. `APPLIED` from `scripts/db_migrations.py detect` matches by name only, so it is not enough on its own: also confirm, read only, that `idx_amc_approvals_brand_os_pending` is **unique** and keeps its pending/Brand OS predicate (§0b check 6). `AMC_AUTH_MODE` must be `supabase`, and `AMC_DB_RLS_MODE` stays `off`.
 
 ## Step 0: verify identities and permissions (read only)
 
@@ -37,13 +38,26 @@ select user_id, role, active from amc.tenant_memberships
  where tenant_id = '‹TENANT›' and user_id = '‹APPROVER_UUID›';
 -- expect active = true, role in (reviewer, approver, admin, owner), and ‹APPROVER_UUID› <> ‹REQUESTER_UUID›
 
--- 0.4 nothing is already pending or decided for this SOP in this project
-select approval_id, status, decision, subject_hash from amc.approvals
- where project_id = '‹PROJECT›' and subject_type = 'BRAND_OS_SOP_ADOPTION'
- order by created_at desc limit 5;
+-- 0.4 the complete decision history for THIS SOP's artifact in THIS tenant and project.
+--     No row limit; stale and rejected rows are kept on purpose; oldest first, deterministic.
+select approval_id, status, decision, reviewer, created_at, decided_at,
+       subject_ref, subject_version_ref, subject_hash, policy_version, stale_reason, run_id
+  from amc.approvals
+ where tenant_id = '‹TENANT›' and project_id = '‹PROJECT›'
+   and subject_type = 'BRAND_OS_SOP_ADOPTION'
+   and subject_ref = '‹ARTIFACT_ID›'
+ order by created_at, approval_id;
+-- An empty result is expected before the first request, and also when the SOP was never staged in this project.
+-- Read each row against ‹digest›:
+--   status = 'pending'                              -> a request is already open: stop, do not open another
+--   decision = 'approve' and subject_hash = digest  -> already adopted: stop, nothing to do
+--   decision = 'approve' and subject_hash <> digest -> approval of an EARLIER revision: it does not cover these bytes
+--   decision = 'reject', or status = 'stale'        -> keep it in the record; it never counts as approval
 ```
 
-**Stop if:** any check fails; requester and approver are the same person; or either person holds a shared or service account. One human per identity.
+The API's adoption state reads only the newest non-stale row (`list_approvals_for_subject_refs`), so it can hide older or stale decisions. That is why this query, not `GET …/adoption`, is the evidence of prior decisions.
+
+**Stop if:** any check fails; query 0.4 shows a pending row or an approval of the same digest; requester and approver are the same person; or either person holds a shared or service account. One human per identity.
 
 ## Step 1: the requester asks (requester's own session)
 
