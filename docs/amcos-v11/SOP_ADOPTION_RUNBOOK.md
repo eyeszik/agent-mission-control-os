@@ -110,20 +110,22 @@ select approval_id, status, decision, reviewer, decided_at, subject_ref, subject
 -- expect status = 'resolved', decision = 'approve', reviewer = '‹APPROVER_UUID›',
 --   subject_hash = '‹digest›', policy_version = 'amc-brand-os-sop-adoption/v1'
 
--- who asked: the anchor run's initiated_by is the requester
-select r.run_id, r.metadata->>'initiated_by' as requester, r.metadata->>'artifact_hash' as artifact_hash
+-- the anchor run. One run is shared by every request for this artifact and keeps the FIRST request's metadata,
+-- so initiated_by is the requester only when this is the artifact's first approval; the event below is per request.
+select r.run_id, r.status, r.metadata->>'initiated_by' as first_requester, r.metadata->>'artifact_hash' as first_hash
   from amc.runs r join amc.approvals a on a.run_id = r.run_id where a.approval_id = '‹APPROVAL_ID›';
 
--- the project's activity trail for this request
+-- who asked, and the activity trail: the APPROVAL_REQUIRED event for this approval names its requester as actor
 select sequence, event_type, actor, subject_ref, created_at from amc.project_events
  where project_id = '‹PROJECT›' and payload->>'approval_id' = '‹APPROVAL_ID›' order by sequence;
+-- expect an APPROVAL_REQUIRED row with actor = '‹REQUESTER_UUID›'
 ```
 
 Store, with the adoption record above: these three result sets, the step 1 and step 3 API responses, and the timestamps. Any other state means it is **not** adopted:
 
 | State | Meaning and next step |
 |---|---|
-| `REJECTED` | A new request opens a new decision. |
+| `REJECTED` | A new request opens a new pending approval, but **it cannot currently be decided**: it reuses the artifact's anchor run, which the first decision moved out of `needs_approval`, so `/approvals/{id}/decide` returns 409. Stop and escalate; do not work around it. |
 | `STALE` or `REVISION_CHANGED` | The stored bytes changed. Do not rely on this approval; re-request. |
 | `STAGED_NO_APPROVAL` | Repeat step 1 once; it reuses the artifact and opens one approval. |
 

@@ -1176,7 +1176,7 @@
     },
     {
       "path": "services/langgraph/persistence/sqlite_db.py",
-      "git_blob_sha": "37de337741c8f30e3751f4b71aad056c67aa2738"
+      "git_blob_sha": "4adec190a115acfb15dc1f85b189f3d86352968b"
     },
     {
       "path": "services/langgraph/persistence/tenancy.py",
@@ -1516,7 +1516,7 @@
     },
     {
       "path": "scripts/db_migrations.py",
-      "git_blob_sha": "da3cc0b7820fb6f5a89f91ac07ac68a984e8b21c"
+      "git_blob_sha": "f6312654f6f9505629ee70b4d13d84bece6945ca"
     },
     {
       "path": "services/langgraph/agency/sop/contracts.py",

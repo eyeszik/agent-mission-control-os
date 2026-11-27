@@ -36,6 +36,19 @@ python scripts/db_migrations.py detect --dsn postgresql://<user>@127.0.0.1:<port
 
 `--dsn` is a local, disposable server, which replays the migrations to learn each one's signature (the stable keys it adds that survive to the final migration). `--target` is queried inside a `READ ONLY` transaction and is never migrated. `test_migration_detect.py` proves the result at several prefixes and that the target's catalog is unchanged.
 
+Each row keeps `state`, `present`, `expected` and `missing_examples`, and also carries descriptive decision fields (tested in `test_migration_decision.py` and, natively, in `test_migration_detect.py`):
+
+| Field | Values | Meaning |
+|---|---|---|
+| `definition_status` | `MATCH` / `MISMATCH` / `PARTIAL` / `UNVERIFIABLE` | Present index (uniqueness, columns, operator classes, predicate, validity), policy (roles, command, permissiveness, `USING`, `WITH CHECK`) and function (result, security, volatility, config, definition digest) properties against the scratch replay. A different server major version is `UNVERIFIABLE`, never `MATCH`. |
+| `sequence_status` | `CONSISTENT` / `GAP` / `UNKNOWN` | `GAP`: not fully present while a later file is. AMC defines no out-of-order execution, so a gap is unexplained. |
+| `history_status`, `history_source` | `UNKNOWN`, `null` | `detect` reads no ledger. |
+| `has_data_effects` | bool | the file contains `UPDATE` / `INSERT` / `DELETE` |
+| `reconciliation` | `UNVERIFIABLE` while history is unknown | |
+| `blockers`, `eligibility` | `INELIGIBLE` / `UNVERIFIABLE` | With unknown history no row is ever `ELIGIBLE_FOR_APPROVAL_REVIEW`. A fully present, matching file is `INELIGIBLE` with `ALREADY_PRESENT` (no replay needed). |
+
+The command exits 0 whenever it completes; the exit status says nothing about any migration.
+
 What `detect` does **not** prove:
 
 - **It is not history.** A migration whose objects were dropped later reads `PENDING`, even though it was applied. For a single-object migration such as `20261122_amc_brand_os_pending_approval_unique_v1.sql`, one missing index gives `PENDING`, not `PARTIAL`.
