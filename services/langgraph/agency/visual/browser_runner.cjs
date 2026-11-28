@@ -110,6 +110,28 @@ const RASTER_PAGE = (svg, width, height) => `<!doctype html><html><body style="m
 });</script></body></html>`;
 
 // In-page audit of the rendered document: labels, focus visibility, contrast, reflow.
+function firstLine(err) {
+  return String(err && err.message ? err.message : err).split("\n")[0].slice(0, 300);
+}
+
+// Screenshot one [data-page] section, repeating once (scrolled into view) when the first attempt throws.
+// Returns null on success, or the reason both attempts failed; it never throws.
+async function captureSection(page, id, filePath) {
+  const target = page.locator(`section[data-page="${id}"]`);
+  try {
+    await target.screenshot({ path: filePath });
+    return null;
+  } catch (first) {
+    try {
+      await target.scrollIntoViewIfNeeded();
+      await target.screenshot({ path: filePath });
+      return null;
+    } catch (second) {
+      return `${firstLine(first)} | retry: ${firstLine(second)}`.slice(0, 300);
+    }
+  }
+}
+
 async function auditPage(page) {
   return page.evaluate(() => {
     const lum = (rgb) => {
@@ -429,12 +451,9 @@ async function main() {
         for (const p of result.layout) {
           const id = safeOutputId(p.id);
           const file = `page-${id}.png`;
-          try {
-            await page.locator(`section[data-page="${id}"]`).screenshot({ path: path.join(outDir, file) });
-            result.captures[id] = file;
-          } catch (err) {
-            result.capture_errors[id] = String(err && err.message ? err.message : err).split("\n")[0].slice(0, 300);
-          }
+          const failure = await captureSection(page, id, path.join(outDir, file));
+          if (failure === null) result.captures[id] = file;
+          else result.capture_errors[id] = failure;
         }
       }
     } else if (spec.mode === "experience") {

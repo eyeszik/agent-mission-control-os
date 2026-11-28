@@ -57,5 +57,7 @@ apps/web/test-results/
 # SQLite migration lock files (created by persistence/sqlite_db.py:_migration_lock)
 *.migrate.lock
 
+# QA deliverable referenced by the explainer package docs (kept despite the *.log rule)
+!artifacts/amc-explainer/qa/decode-check.log
 # Private, non-secret local runtime configuration
 .amc/

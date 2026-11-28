@@ -1,6 +1,6 @@
 {
   "schema_version": "freevideoforge/quality-report/v1",
-  "run_id": "run-20261109-122818-4225db",
+  "run_id": "run-20261109-222039-37a408",
   "passed": true,
   "summary": {
     "PASS": 21,
@@ -14,7 +14,7 @@
       "status": "PASS",
       "detail": "",
       "expected": null,
-      "observed": "8377437 bytes"
+      "observed": "8365719 bytes"
     },
     {
       "id": "artifact.thumbnail",
@@ -38,7 +38,7 @@
       "status": "PASS",
       "detail": "",
       "expected": null,
-      "observed": "12375 bytes"
+      "observed": "12256 bytes"
     },
     {
       "id": "artifact.captions",
@@ -54,7 +54,7 @@
       "status": "PASS",
       "detail": "",
       "expected": null,
-      "observed": "30077 bytes"
+      "observed": "29372 bytes"
     },
     {
       "id": "scenes.positive_duration",
@@ -126,7 +126,7 @@
       "status": "PASS",
       "detail": "",
       "expected": null,
-      "observed": 0.7674
+      "observed": 0.8206
     },
     {
       "id": "video.decodes",
@@ -150,7 +150,7 @@
       "status": "PASS",
       "detail": "all cues land inside the timeline",
       "expected": "end <= 30.206s",
-      "observed": 28.272
+      "observed": 28.186
     },
     {
       "id": "captions.monotonic",

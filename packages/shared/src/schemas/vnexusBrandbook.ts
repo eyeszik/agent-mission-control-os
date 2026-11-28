@@ -87,6 +87,9 @@ export const BrandBookBuildRecordSchema = z.object({
   checks: z.object({ summary: CheckSummarySchema, measured: z.boolean(), blocking: z.array(z.record(z.string(), z.unknown())) }).strict(),
   book: StoredRef, package: z.object({ artifact_id: z.string(), sha256: hash, package_hash: hash }).strict(),
   pdf: StoredRef.nullable(), status: BrandBookBuildStatusSchema,
+  // Present only when that output was requested and is missing (see brandbook/service.py): never on a clean build.
+  pdf_failure: z.array(z.string()).min(1).optional(),
+  capture_failures: z.record(pageId, z.array(z.string()).min(1)).optional(),
   states: z.object({ prompt: z.string(), rendered: z.string(), validated: z.enum(['PASSED', 'FAILED', 'NOT_RUN', 'INCONCLUSIVE']),
     released: z.string() }).strict(),
   build_hash: hash,

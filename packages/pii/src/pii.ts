@@ -13,12 +13,16 @@ import {
   PY_BOUNDARY as B,
   PY_DIGIT as D,
   PY_SPACE as S,
+  PY_WORD as W,
   ignoreCase,
   ignoreCaseSet,
   pyRegExp,
   pySearch,
   pySub,
 } from './pyre';
+
+/** One IPv4 octet, 0-255, exactly as in pii.py. */
+const IPV4_OCTET = '(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])';
 
 export const PII_PATTERNS: ReadonlyArray<readonly [string, RegExp]> = [
   ['email', pyRegExp(String.raw`[a-zA-Z0-9_.+\-]+@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-.]+`)],
@@ -30,6 +34,13 @@ export const PII_PATTERNS: ReadonlyArray<readonly [string, RegExp]> = [
     pyRegExp(String.raw`${B}(?:${ignoreCase('sk')}|${ignoreCase('api')}|${ignoreCase('key')})[\-_][A-Za-z0-9_\-${CI}]{12,}${B}`),
   ],
   ['bearer', pyRegExp(String.raw`${B}${ignoreCase('Bearer')}${S}+[A-Za-z0-9._~+/\-${CI}]{12,}=*`)],
+  // Added after the C14 benchmark; purely additive (see pii.py).
+  ['aws_access_key', pyRegExp(String.raw`${B}(?:AKIA|ASIA)[0-9A-Z]{16}${B}`)],
+  ['google_api_key', pyRegExp(String.raw`${B}AIza[0-9A-Za-z_\-]{35}(?![0-9A-Za-z_\-])`)],
+  // Python `(?<![\w+])` is "not after a word character and not after +".
+  ['phone_intl', pyRegExp(String.raw`(?<!${W})(?<!\+)\+[1-9][0-9]{0,2}(?:[ .\-]?[0-9]){6,14}(?![0-9])`)],
+  // Owner decision point: IP addresses are redacted (mirror of the pii.py entry).
+  ['ipv4', pyRegExp(String.raw`${B}(?:${IPV4_OCTET}\.){3}${IPV4_OCTET}${B}`)],
 ];
 
 const BASE64_FRAGMENT = pyRegExp(String.raw`(?<![A-Za-z0-9+/])(?:[A-Za-z0-9+/]{24,}={0,2})(?![A-Za-z0-9+/=])`);

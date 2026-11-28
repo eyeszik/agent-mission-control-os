@@ -9,6 +9,7 @@ r_frame_rate=30/1
 avg_frame_rate=4628480/154271
 duration=30.131055
 nb_frames=904
+---
 codec_name=aac
 profile=LC
 sample_rate=44100
@@ -17,6 +18,8 @@ r_frame_rate=0/0
 avg_frame_rate=0/0
 duration=30.206009
 nb_frames=1302
+---
 format_name=mov,mp4,m4a,3gp,3g2,mj2
 duration=30.206009
-size=8377437
+size=8365719
+bit_rate=2215643
