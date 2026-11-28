@@ -21,6 +21,45 @@ def approval_run_id(mission_id: str) -> str:
     return "mission-" + canonical_hash({"mission": mission_id})[:24]
 
 
+# Upper bound on approval runs per mission; reaching it is refused rather than reusing a closed run.
+MAX_APPROVAL_RUNS_PER_MISSION = 1000
+
+
+def _run_reusable_by(run: dict, principal: Principal, tenant_id: str, project_id: str) -> bool:
+    """A run carries one requester and one open decision: reuse it only for that requester, in the same tenant
+    and project, while it is open."""
+    from services.langgraph.security.approval_authority import run_initiator
+
+    same_scope = run.get("tenant_id") == tenant_id and run.get("project_id") == project_id
+    return same_scope and run.get("status") == "needs_approval" and run_initiator(run) == principal.user_id
+
+
+def _approval_run_for(principal: Principal, mission_id: str, tenant_id: str, project_id: str) -> str:
+    """The mission's first run, or the first later slot that is free or still this requester's open run.
+
+    A rejected run cannot take another decision, and ``initiated_by`` is the separation-of-duties anchor, so a
+    request after a rejection, or by a different requester, gets a run of its own. The slot is deterministic,
+    so concurrent identical requests converge on one run.
+    """
+    from services.langgraph.core.errors import AMCError
+    from services.langgraph.persistence.runs import get_run_record
+
+    for generation in range(MAX_APPROVAL_RUNS_PER_MISSION):
+        run_id = approval_run_id(mission_id if generation == 0 else f"{mission_id}#{generation}")
+        run = get_run_record(run_id)
+        if run is None or _run_reusable_by(run, principal, tenant_id, project_id):
+            return run_id
+    raise AMCError("This mission has no approval run left for another request", code="APPROVAL_CONFLICT", status=409)
+
+
+def _same_mission(approval: dict, mission_id: str) -> bool:
+    from services.langgraph.persistence.runs import get_run_record
+
+    run = get_run_record(approval["run_id"]) or {}
+    same_scope = run.get("tenant_id") == approval.get("tenant_id") and run.get("project_id") == approval.get("project_id")
+    return same_scope and (run.get("metadata") or {}).get("mission_id") == mission_id
+
+
 def _is_unique_violation(exc: BaseException) -> bool:
     """A unique/primary-key violation from either driver (sqlite3.IntegrityError, psycopg UniqueViolation)."""
     sqlstate = getattr(exc, "sqlstate", None) or getattr(getattr(exc, "diag", None), "sqlstate", None)
@@ -91,15 +130,15 @@ def open_artifact_approval(
     from services.langgraph.persistence.projects import append_project_event
 
     _stale_superseded(project_id, artifact_id, version, content_hash)
-    run_id = approval_run_id(mission_id)
+    expected = (tenant_id, project_id, artifact_id, str(version), content_hash, subject_type, policy_version)
+    existing = _matching_pending(project_id, artifact_id, expected)
+    if existing is not None and _same_mission(existing, mission_id):
+        return existing
+    run_id = _approval_run_for(principal, mission_id, tenant_id, project_id)
     _ensure_approval_run(run_id, tenant_id, project_id, run_pipeline, {
         "initiated_by": principal.user_id, "mission_id": mission_id, "contract_hash": contract_hash,
         "artifact_id": artifact_id, "artifact_version": version, "artifact_hash": content_hash, **(metadata or {}),
     })
-    expected = (tenant_id, project_id, artifact_id, str(version), content_hash, subject_type, policy_version)
-    existing = _matching_pending(project_id, artifact_id, expected)
-    if existing is not None and existing.get("run_id") == run_id:
-        return existing
     try:
         approval = create_approval_request(
             run_id, tenant_id, project_id, reason, None, subject_type=subject_type, subject_ref=artifact_id,
