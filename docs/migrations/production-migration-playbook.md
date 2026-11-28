@@ -45,7 +45,7 @@ Each row keeps `state`, `present`, `expected` and `missing_examples`, and also c
 | `history_status`, `history_source` | `UNKNOWN`, `null` | `detect` reads no ledger. |
 | `has_data_effects` | bool | the file contains `UPDATE` / `INSERT` / `DELETE` |
 | `reconciliation` | `UNVERIFIABLE` while history is unknown | |
-| `blockers`, `eligibility` | `INELIGIBLE` / `UNVERIFIABLE` | With unknown history no row is ever `ELIGIBLE_FOR_APPROVAL_REVIEW`. A fully present, matching file is `INELIGIBLE` with `ALREADY_PRESENT` (no replay needed). |
+| `blockers`, `eligibility` | `INELIGIBLE` / `UNVERIFIABLE` | With unknown history no row is ever `ELIGIBLE_FOR_APPROVAL_REVIEW`. A fully present, matching file is `INELIGIBLE` with `ALREADY_PRESENT` (no replay needed). Every file after one that is not `APPLIED` with matching definitions is `INELIGIBLE` with `EARLIER_MIGRATION_NOT_APPLIED`, so at most the first missing file can be put up for review. |
 
 The command exits 0 whenever it completes; the exit status says nothing about any migration.
 

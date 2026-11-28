@@ -242,7 +242,7 @@ def readonly_snapshot(target_dsn: str) -> dict[str, list[tuple]]:
 # reachable only when an authoritative source shows the file NOT_APPLIED, and even then it means "may be put to a
 # human for approval", never "may be run". See docs/migrations/production-migration-playbook.md §0b.
 _HARD_BLOCKERS = {"UNDETECTABLE", "PARTIAL_EFFECTS", "DEFINITION_MISMATCH", "SEQUENCE_GAP", "HISTORY_CONFLICTING",
-                  "DIVERGENT", "DATA_EFFECT_UNPROVEN", "ALREADY_PRESENT"}
+                  "DIVERGENT", "DATA_EFFECT_UNPROVEN", "ALREADY_PRESENT", "EARLIER_MIGRATION_NOT_APPLIED"}
 
 
 def _definition_status(keys: set[tuple], present: set[tuple], expected: dict | None,
@@ -336,7 +336,24 @@ def detect_applied(signatures: dict[str, set[tuple]], target: dict[str, list[tup
     for row in report:
         _decide(row, signatures[row["migration"]], present, expected_definitions, target.get("definitions"),
                 (history or {}).get(row["migration"], "UNKNOWN"))
+    _require_applied_prefix(report)
     return report
+
+
+def _applied_and_matching(row: dict) -> bool:
+    """Playbook §0b: an earlier file counts only when it is APPLIED with matching definitions, uncontradicted."""
+    return (row["state"] == "APPLIED" and row["definition_status"] == "MATCH"
+            and row["reconciliation"] in ("CONSISTENT", "UNVERIFIABLE"))
+
+
+def _require_applied_prefix(report: list[dict]) -> None:
+    """A file is never eligible for review while any earlier file is not applied with matching definitions."""
+    prefix_ok = True
+    for row in report:
+        if not prefix_ok:
+            row["blockers"].append("EARLIER_MIGRATION_NOT_APPLIED")
+            row["eligibility"] = _eligibility(row["blockers"])
+        prefix_ok = prefix_ok and _applied_and_matching(row)
 
 
 # ----------------------------------------------------------------------------- rollback generation

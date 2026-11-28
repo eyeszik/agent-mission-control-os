@@ -12,7 +12,7 @@
 | Project id | `‹PROJECT›` | query 0.1 |
 | SOP | `‹F01…F08›` (one draft, newly written v0.1, not a recovered original) | `GET /brand-os/sops/‹SOP›` |
 | Pinned draft digest (`source_sha256`) | `‹64 hex›` | `data/brand_os_index.v1.json`, `GET /brand-os/sops/‹SOP›` and (once staged) the adoption `artifact_hash` all agree; query 0.4 shows which earlier decisions were for other digests |
-| SOP artifact id (`subject_ref`) | `art-‹PROJECT›-foundry-brand-os-‹f0n›` | `artifact_id` from `GET …/sops/‹SOP›/adoption` (use that exact value; do not build it by hand); query 0.4 |
+| SOP artifact id (`subject_ref`) | `art-‹PROJECT›-foundry-brand-os-‹f0n›` | `artifact_id` from `GET …/sops/‹SOP›/adoption` (use that exact value; do not build it by hand); query 0.4. If that GET returns `"state": "NOT_STAGED"` it has no `artifact_id`: record "not yet staged", take the id from the step 1 response, and use the first-adoption branch of step 0 |
 | **Requester**: name, Supabase user id | `‹name›`, `‹uuid›` | query 0.2 |
 | Requester role | one of `admin`, `operator`, `owner`, `approver` | query 0.2 |
 | **Independent approver**: name, Supabase user id | `‹name›`, `‹uuid›` (must differ from the requester) | query 0.3 |
@@ -48,16 +48,22 @@ select approval_id, status, decision, reviewer, created_at, decided_at,
    and subject_ref = '‹ARTIFACT_ID›'
  order by created_at, approval_id;
 -- An empty result is expected before the first request, and also when the SOP was never staged in this project.
--- Read each row against ‹digest›:
---   status = 'pending'                              -> a request is already open: stop, do not open another
---   decision = 'approve' and subject_hash = digest  -> already adopted: stop, nothing to do
---   decision = 'approve' and subject_hash <> digest -> approval of an EARLIER revision: it does not cover these bytes
---   decision = 'reject', or status = 'stale'        -> keep it in the record; it never counts as approval
+-- Read each row against ‹digest› and ‹VERSION› (the artifact_version from GET …/adoption):
+--   status = 'pending'                                     -> a request is already open: stop, do not open another
+--   status = 'resolved' and decision = 'approve' and subject_hash = digest
+--     and subject_version_ref = ‹VERSION›                  -> already adopted: stop, nothing to do
+--   decision = 'approve' and subject_hash <> digest        -> approval of an EARLIER revision: it does not cover these bytes
+--   decision = 'approve' and status = 'stale', or the same digest
+--     with another subject_version_ref                     -> an approval of an earlier stored version: it does not cover
+--                                                             the current artifact, even when the bytes were restored
+--   decision = 'reject', or status = 'stale'               -> keep it in the record; it never counts as approval
 ```
+
+**First adoption (`GET …/adoption` returns `NOT_STAGED`).** The SOP was never staged in this project, so no adoption approval can refer to it yet and query 0.4 has no `‹ARTIFACT_ID›` to bind. Do not construct the id. Complete 0.1 to 0.3, record the artifact id as "not yet staged", and go to step 1. Its `202` response carries `artifact_id`: run query 0.4 with that exact value straight after step 1 and expect exactly one row, the new `pending` request.
 
 The API's adoption state reads only the newest non-stale row (`list_approvals_for_subject_refs`), so it can hide older or stale decisions. That is why this query, not `GET …/adoption`, is the evidence of prior decisions.
 
-**Stop if:** any check fails; query 0.4 shows a pending row or an approval of the same digest; requester and approver are the same person; or either person holds a shared or service account. One human per identity.
+**Stop if:** any check fails; query 0.4 shows a pending row or a current (resolved, same digest, same `subject_version_ref`) approval; requester and approver are the same person; or either person holds a shared or service account. One human per identity.
 
 ## Step 1: the requester asks (requester's own session)
 
@@ -125,7 +131,7 @@ Store, with the adoption record above: these three result sets, the step 1 and s
 
 | State | Meaning and next step |
 |---|---|
-| `REJECTED` | A new request opens a new pending approval, but **it cannot currently be decided**: it reuses the artifact's anchor run, which the first decision moved out of `needs_approval`, so `/approvals/{id}/decide` returns 409. Stop and escalate; do not work around it. |
+| `REJECTED` | A new request (step 1 again) opens a new pending approval on a run of its own, with that request's requester as the separation-of-duties anchor, so it can be decided normally. Requires a backend that includes the per-request approval run fix (`test_approval_run_per_request.py`); on an older backend `/approvals/{id}/decide` returns 409 for it: stop and escalate, do not work around it. |
 | `STALE` or `REVISION_CHANGED` | The stored bytes changed. Do not rely on this approval; re-request. |
 | `STAGED_NO_APPROVAL` | Repeat step 1 once; it reuses the artifact and opens one approval. |
 

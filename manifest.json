@@ -668,7 +668,7 @@
     },
     {
       "path": "services/langgraph/agency/intake/release.py",
-      "git_blob_sha": "fea86a768193f236e852cafd0ac1073e86d4532f"
+      "git_blob_sha": "ae2c1878eb445216f6a04018dba434e57a5237d6"
     },
     {
       "path": "services/langgraph/agency/intake/resolver.py",
@@ -1516,7 +1516,7 @@
     },
     {
       "path": "scripts/db_migrations.py",
-      "git_blob_sha": "f6312654f6f9505629ee70b4d13d84bece6945ca"
+      "git_blob_sha": "3d4391a14a75cb097ddac5b07ed75e91e212b77d"
     },
     {
       "path": "services/langgraph/agency/sop/contracts.py",

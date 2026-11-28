@@ -124,3 +124,26 @@ def test_unknown_history_never_reaches_review_even_without_data_effects():
 def test_data_effects_are_read_from_the_migration_files():
     assert mig._has_data_effects(LAST) and mig._has_data_effects("20260824_amc_trust_kernel_v1.sql")
     assert not mig._has_data_effects("20261121_amc_tenant_rls_v1.sql")
+
+
+def test_a_later_file_is_never_eligible_while_an_earlier_one_is_not_applied_and_matching():
+    # An earlier file whose index exists with another definition (history APPLIED), then a missing file that
+    # history shows NOT_APPLIED: the playbook needs every earlier file applied with matching definitions.
+    earlier_idx = ("index", "amc.approvals", "idx_earlier")
+    sigs = {FIRST: {earlier_idx}, LAST: {IDX}}
+    expected = {"server_major": 16, "objects": {earlier_idx: GOOD, IDX: GOOD}}
+    target = _snap()
+    target["indexes"] = [earlier_idx[1:] + ("CREATE INDEX ...",)]
+    target["definitions"]["objects"] = {earlier_idx: BAD}
+    rows = _rows(target, sigs=sigs, expected=expected, history={FIRST: "APPLIED", LAST: "NOT_APPLIED"})
+    assert rows[FIRST]["definition_status"] == "MISMATCH" and rows[FIRST]["eligibility"] == "INELIGIBLE"
+    assert rows[LAST]["reconciliation"] == "PENDING"
+    assert "EARLIER_MIGRATION_NOT_APPLIED" in rows[LAST]["blockers"] and rows[LAST]["eligibility"] == "INELIGIBLE"
+
+
+def test_only_the_first_missing_file_can_be_eligible_when_several_are_missing():
+    middle = "20261121_amc_tenant_rls_v1.sql"  # no data effects
+    sigs = {FIRST: {TABLE}, middle: {("function", "amc.current_tenant_id()")}, LAST: {IDX}}
+    rows = _rows(_snap(), sigs=sigs, history={FIRST: "APPLIED", middle: "NOT_APPLIED", LAST: "NOT_APPLIED"})
+    assert rows[middle]["eligibility"] == "ELIGIBLE_FOR_APPROVAL_REVIEW"
+    assert rows[LAST]["eligibility"] == "INELIGIBLE" and "EARLIER_MIGRATION_NOT_APPLIED" in rows[LAST]["blockers"]
