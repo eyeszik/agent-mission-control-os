@@ -9,7 +9,7 @@ This is the ordered procedure for moving the AMC schema forward on the productio
 | Field-level mapping | `acceptance/migration_mapping.json`; summary in [`sqlite-to-postgres-mapping.md`](sqlite-to-postgres-mapping.md) |
 | Tooling | `scripts/db_migrations.py`. It refuses any host other than localhost, so it cannot point at production by mistake. |
 
-Production itself is applied by the deployment's own migration history. See [`docs/production-activation.md`](../production-activation.md) §1. This playbook does not change who runs that step or when; it adds the guards, the rollback and the evidence.
+This playbook does not change who runs the production migration step or when; it adds the guards, the rollback and the evidence. The repository does not define a production migration runner or ledger: [`docs/production-activation.md`](../production-activation.md) §1 covers the Vercel projects only, and AMC writes no ledger table. Until the owner names the runner that applied production and where it records history, that history is **UNKNOWN**. See §0b.
 
 ## 0. Preconditions (stop if any fails)
 
@@ -21,13 +21,51 @@ Production itself is applied by the deployment's own migration history. See [`do
 
 A paused project is never restored to find out. Restore only after the target is verified, as a decision of its own.
 
-**0b. Read its migration history, read only.** AMC keeps no ledger table, so history comes from the catalog:
+**0b. Observe the catalog and reconcile it with history, read only.** Four things are kept separate here, and none of them stands in for another:
+
+| Concept | Source | What it can show |
+|---|---|---|
+| Catalog observation | `scripts/db_migrations.py detect` (below) | which signature objects exist **by name** now |
+| Recorded history | the runner that applied production (owner names it). If the Supabase CLI was used, read `select * from supabase_migrations.schema_migrations` read only; check this, do not assume it | which files were run, and when |
+| Reconciliation | the operator, comparing the two above plus object definitions | consistent, divergent, partial or ambiguous |
+| Replay eligibility | §0b stop rules, then a separate approval | at most "eligible for approval review", never permission to run |
 
 ```bash
 python scripts/db_migrations.py detect --dsn postgresql://<user>@127.0.0.1:<port>/postgres --target "$READ_ONLY_TARGET_DSN"
 ```
 
-`--dsn` is a local, disposable server, which replays the migrations to learn each one's signature (the stable keys it adds that survive to the final migration). `--target` is queried inside a `READ ONLY` transaction and is never migrated. Each migration reports `APPLIED`, `PENDING` or `PARTIAL`; stop on any `PARTIAL`. `test_migration_detect.py` proves the result at several prefixes and that the target's catalog is unchanged.
+`--dsn` is a local, disposable server, which replays the migrations to learn each one's signature (the stable keys it adds that survive to the final migration). `--target` is queried inside a `READ ONLY` transaction and is never migrated. `test_migration_detect.py` proves the result at several prefixes and that the target's catalog is unchanged.
+
+Each row keeps `state`, `present`, `expected` and `missing_examples`, and also carries descriptive decision fields (tested in `test_migration_decision.py` and, natively, in `test_migration_detect.py`):
+
+| Field | Values | Meaning |
+|---|---|---|
+| `definition_status` | `MATCH` / `MISMATCH` / `PARTIAL` / `UNVERIFIABLE` | Present index (uniqueness, columns, operator classes, predicate, validity), policy (roles, command, permissiveness, `USING`, `WITH CHECK`) and function (result, security, volatility, config, definition digest) properties against the scratch replay. A different server major version is `UNVERIFIABLE`, never `MATCH`. |
+| `sequence_status` | `CONSISTENT` / `GAP` / `UNKNOWN` | `GAP`: not fully present while a later file is. AMC defines no out-of-order execution, so a gap is unexplained. |
+| `history_status`, `history_source` | `UNKNOWN`, `null` | `detect` reads no ledger. |
+| `has_data_effects` | bool | the file contains `UPDATE` / `INSERT` / `DELETE` |
+| `reconciliation` | `UNVERIFIABLE` while history is unknown | |
+| `blockers`, `eligibility` | `INELIGIBLE` / `UNVERIFIABLE` | With unknown history no row is ever `ELIGIBLE_FOR_APPROVAL_REVIEW`. A fully present, matching file is `INELIGIBLE` with `ALREADY_PRESENT` (no replay needed). |
+
+The command exits 0 whenever it completes; the exit status says nothing about any migration.
+
+What `detect` does **not** prove:
+
+- **It is not history.** A migration whose objects were dropped later reads `PENDING`, even though it was applied. For a single-object migration such as `20261122_amc_brand_os_pending_approval_unique_v1.sql`, one missing index gives `PENDING`, not `PARTIAL`.
+- **Names are not definitions.** Index, policy and function signatures are matched by name only. A same-name index that is not unique, has a different predicate or covers different columns still reads `APPLIED`. The same holds for an `amc_tenant_isolation` policy with a different `USING` clause, or a changed `amc.current_tenant_id()` body. Columns and constraints are compared with their definitions.
+- **It cannot see data changes.** No catalog read shows whether a migration's `UPDATE` ran. `20260824_amc_trust_kernel_v1.sql` and `20261122_…` both rewrite rows.
+
+**Stop, and do not select any file for replay, if any of these holds:**
+
+1. any migration is `PARTIAL` or `UNDETECTABLE`;
+2. the `APPLIED` rows are not one contiguous prefix (a `PENDING` file sits before an `APPLIED` one);
+3. recorded history is missing, unreadable or conflicting. Treat it as UNKNOWN, never as "not applied";
+4. history says a file was applied but `detect` says `PENDING` or `PARTIAL` (divergence: an object was dropped or never created);
+5. a `PENDING` file contains `UPDATE`/`INSERT`/`DELETE` and history cannot show it never ran on this database;
+6. an object of an `APPLIED` file has a definition that differs from a clean replay. Compare, read only, `pg_get_indexdef(indexrelid)`, `indisunique` and `pg_get_expr(indpred, indrelid)` from `pg_index`, `qual`/`with_check` from `pg_policies`, and `pg_get_functiondef` against the same values on the `--dsn` scratch replay. For 20261122, expect a **unique** index on `(tenant_id, project_id, subject_ref, subject_type)` with the `status = 'pending'` and Brand OS subject-type predicate;
+7. the target was not verified under §0a.
+
+A file passes these checks only when history shows it was never applied, `detect` shows `PENDING` and every earlier file is `APPLIED` with matching definitions. Even then, it is only *eligible for approval review*: the apply step in §1 still needs its own approval, and a clean `detect` result or exit code 0 never authorizes it.
 
 **0c. Read-only preflight for the pending files:**
 
@@ -47,7 +85,7 @@ select tenant_id, project_id, subject_ref, subject_type, count(*) as n
 
 ## 1. Expand (additive, online)
 
-Apply each pending file in order, one transaction per file, with bounded locks:
+Apply only the files that passed every §0b check and whose apply step was approved, in order, one transaction per file, with bounded locks. "`PENDING` in `detect`" on its own never qualifies a file:
 
 ```sql
 begin;
@@ -125,4 +163,4 @@ A rollback that restores a narrower `CHECK` constraint fails if rows already use
 1. `/ready` returns 200 (config valid and `ping_database()` succeeds).
 2. Run the PostgreSQL backend suite against a staging copy (`AMC_DATABASE_BACKEND=postgres`).
 3. Record the backup id, the applied files and the catalog digest from `acceptance/migration_mapping.json` in the release record.
-4. Re-run `scripts/db_migrations.py detect` against the target: every file must now be `APPLIED`.
+4. Re-run `scripts/db_migrations.py detect` against the target: every file must now be `APPLIED`. That is necessary, not sufficient: repeat the §0b definition comparison (check 6) and re-read recorded history. The apply command's exit status is not the postcondition.

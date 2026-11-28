@@ -1570,18 +1570,51 @@ def _ensure_approval_columns(conn: sqlite3.Connection) -> None:
 BRAND_OS_PENDING_SUBJECTS = ("BRAND_OS_SOP_ADOPTION", "BRAND_OS_SOURCE")
 
 
+_BRAND_OS_PENDING_COLUMNS = ["tenant_id", "project_id", "subject_ref", "subject_type"]
+_BRAND_OS_PENDING_PREDICATE = "WHERE status = 'pending' AND subject_type IN ('BRAND_OS_SOP_ADOPTION', 'BRAND_OS_SOURCE')"
+
+
+def _named_rows(conn: sqlite3.Connection, sql: str, params: tuple = ()) -> list[dict]:
+    cursor = conn.execute(sql, params)
+    names = [d[0] for d in cursor.description]
+    return [dict(zip(names, row)) for row in cursor.fetchall()]
+
+
+def brand_os_pending_index_problems(conn: sqlite3.Connection) -> list[str]:
+    """How idx_approvals_brand_os_pending differs from its definition: uniqueness, table, columns, predicate."""
+    listed = {r["name"]: r for r in _named_rows(conn, "PRAGMA index_list(approvals)")}
+    row = listed.get("idx_approvals_brand_os_pending")
+    if row is None:
+        return ["not an index on approvals"]
+    problems = [] if row["unique"] else ["not unique"]
+    columns = [r["name"] for r in _named_rows(conn, "PRAGMA index_info(idx_approvals_brand_os_pending)")]
+    problems += [] if columns == _BRAND_OS_PENDING_COLUMNS else [f"columns {columns}"]
+    sql = _named_rows(conn, "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = ?",
+                      ("idx_approvals_brand_os_pending",))[0]["sql"] or ""
+    where = sql.upper().find(" WHERE ")
+    predicate = " ".join(sql[where + 1:].split()) if where >= 0 else ""
+    problems += [] if row["partial"] and predicate == _BRAND_OS_PENDING_PREDICATE else [f"predicate {predicate or 'none'!r}"]
+    return problems
+
+
 def _ensure_brand_os_pending_unique(conn: sqlite3.Connection) -> None:
     """At most one pending Brand OS approval per (tenant, project, artifact, purpose), enforced by the database.
 
     Mirrors supabase/migrations/20261122_amc_brand_os_pending_approval_unique_v1.sql. It runs after
     ``_ensure_approval_columns`` because older databases gain the subject columns there. Duplicate
     pending rows already present are marked stale (never approved, never deleted); the earliest stays.
-    ``init_db`` runs on every transaction, so this is a read-only check once the index exists.
+    ``init_db`` runs on every transaction, so this is a read-only check once the index exists. An index of
+    that name with another definition is refused, never replaced: a non-unique or unscoped index would
+    silently re-open the duplicate-approval race.
     """
     exists = conn.execute(
         "SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'idx_approvals_brand_os_pending'"
     ).fetchone()
     if exists is not None:
+        problems = brand_os_pending_index_problems(conn)
+        if problems:
+            raise RuntimeError(f"idx_approvals_brand_os_pending exists with another definition ({', '.join(problems)}); "
+                               "it is not replaced automatically: inspect it and drop it by hand")
         return
     conn.execute(
         """

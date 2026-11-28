@@ -163,6 +163,11 @@ def _catalog_keys(snap: dict[str, list[tuple]]) -> set[tuple]:
 
 def migration_signatures(dsn: str) -> dict[str, set[tuple]]:
     """Replay every migration on a scratch database; each one's surviving added keys, in order."""
+    return replay_expectations(dsn)[0]
+
+
+def replay_expectations(dsn: str) -> tuple[dict[str, set[tuple]], dict]:
+    """Signatures plus the definitions a clean replay produces, from one scratch replay."""
     added: dict[str, set[tuple]] = {}
     with scratch_database(dsn) as db:
         run_sql(db, SHIM.read_text(encoding="utf-8"))
@@ -172,23 +177,149 @@ def migration_signatures(dsn: str) -> dict[str, set[tuple]]:
             after = _catalog_keys(snapshot(db))
             added[path.name] = after - before
             before = after
-    return {name: keys & before for name, keys in added.items()}
+        with psycopg.connect(db) as conn:
+            expected = _definitions(conn)
+    return {name: keys & before for name, keys in added.items()}, expected
+
+
+# Semantic definitions of the objects _catalog_keys identifies by name only. Structured fields, deparsed by the
+# server itself (no text normalisation here), so a same-name index, policy or function with different meaning
+# is a MISMATCH rather than APPLIED. Definitions are compared only when both servers have the same major version.
+_DEF_Q = {
+    "index": """select n.nspname||'.'||t.relname, i.relname, json_build_object(
+                    'unique', x.indisunique, 'primary', x.indisprimary, 'valid', x.indisvalid,
+                    'nulls_not_distinct', x.indnullsnotdistinct, 'method', am.amname, 'key_columns', x.indnkeyatts,
+                    'columns', (select array_agg(pg_get_indexdef(x.indexrelid, k, true) order by k)
+                                  from generate_series(1, x.indnatts) k),
+                    'opclasses', (select array_agg(oc.opcname order by u.ord)
+                                    from unnest(x.indclass::oid[]) with ordinality u(oid, ord)
+                                    join pg_opclass oc on oc.oid = u.oid),
+                    'predicate', pg_get_expr(x.indpred, x.indrelid))::text
+                  from pg_index x join pg_class i on i.oid=x.indexrelid join pg_class t on t.oid=x.indrelid
+                  join pg_namespace n on n.oid=t.relnamespace join pg_am am on am.oid=i.relam
+                 where n.nspname <> all(%s) and n.nspname not like 'pg\\_%%'""",
+    "policy": """select schemaname||'.'||tablename, policyname, json_build_object('permissive', permissive,
+                    'roles', roles, 'cmd', cmd, 'qual', qual, 'with_check', with_check)::text from pg_policies""",
+    "function": """select n.nspname||'.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')',
+                      json_build_object('result', pg_get_function_result(p.oid), 'security_definer', p.prosecdef,
+                        'volatility', p.provolatile, 'config', p.proconfig, 'definition_sha256',
+                        encode(sha256(convert_to(pg_get_functiondef(p.oid), 'UTF8')), 'hex'))::text
+                     from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+                    where n.nspname <> all(%s) and n.nspname not like 'pg\\_%%'""",
+}
+
+
+def _definitions(conn: psycopg.Connection) -> dict:
+    """{"server_major": int, "objects": {catalog key: definition json}} for indexes, policies and functions."""
+    objects: dict[tuple, str] = {}
+    for kind, query in _DEF_Q.items():
+        params = (list(SYSTEM_SCHEMAS),) if "%s" in query else None
+        for row in conn.execute(query, params).fetchall():
+            objects[(kind, *row[:-1])] = row[-1]
+    major = conn.execute("select current_setting('server_version_num')::int / 10000").fetchone()[0]
+    return {"server_major": major, "objects": objects}
 
 
 def readonly_snapshot(target_dsn: str) -> dict[str, list[tuple]]:
-    """``snapshot`` of a target inside a READ ONLY transaction: catalog reads only, nothing can be written."""
-    out: dict[str, list[tuple]] = {}
+    """``snapshot`` of a target inside a READ ONLY transaction: catalog reads only, nothing can be written.
+
+    Also carries ``definitions`` (see ``_definitions``), read in the same read-only transaction.
+    """
+    out: dict = {}
     with psycopg.connect(target_dsn) as conn:
         conn.execute("set transaction read only")
         for key, query in _Q.items():
             params = (list(SYSTEM_SCHEMAS),) if "%s" in query else None
             out[key] = sorted(tuple(row) for row in conn.execute(query, params).fetchall())
+        out["definitions"] = _definitions(conn)
         conn.rollback()
     return out
 
 
-def detect_applied(signatures: dict[str, set[tuple]], target: dict[str, list[tuple]]) -> list[dict]:
-    """APPLIED / PENDING / PARTIAL / UNDETECTABLE per migration, in order, with signature keys present."""
+# ----------------------------------------------------------------------------- replay decision (descriptive only)
+# The catalog is an observation, not history, and nothing here authorises running a migration. AMC records no
+# ledger, so history is UNKNOWN and the best possible eligibility is UNVERIFIABLE. ELIGIBLE_FOR_APPROVAL_REVIEW is
+# reachable only when an authoritative source shows the file NOT_APPLIED, and even then it means "may be put to a
+# human for approval", never "may be run". See docs/migrations/production-migration-playbook.md §0b.
+_HARD_BLOCKERS = {"UNDETECTABLE", "PARTIAL_EFFECTS", "DEFINITION_MISMATCH", "SEQUENCE_GAP", "HISTORY_CONFLICTING",
+                  "DIVERGENT", "DATA_EFFECT_UNPROVEN", "ALREADY_PRESENT"}
+
+
+def _definition_status(keys: set[tuple], present: set[tuple], expected: dict | None,
+                       target: dict | None) -> tuple[str, list[list]]:
+    """MATCH / MISMATCH / PARTIAL / UNVERIFIABLE for the signature keys a target holds."""
+    if expected is None or target is None or expected["server_major"] != target["server_major"]:
+        return "UNVERIFIABLE", []
+    compared = sorted(k for k in keys & present if k in expected["objects"])
+    mismatched = [list(k) for k in compared if expected["objects"][k] != target["objects"].get(k)]
+    if mismatched:
+        return "MISMATCH", mismatched
+    if not keys & present:
+        return "UNVERIFIABLE", []
+    return ("MATCH" if keys <= present else "PARTIAL"), []
+
+
+def _sequence_status(states: list[str]) -> list[str]:
+    """GAP for a migration that is not fully present while a later one is; UNKNOWN when undetectable."""
+    last = max((i for i, s in enumerate(states) if s in ("APPLIED", "PARTIAL")), default=-1)
+    return ["UNKNOWN" if s == "UNDETECTABLE" else ("GAP" if s in ("PENDING", "PARTIAL") and i < last else "CONSISTENT")
+            for i, s in enumerate(states)]
+
+
+def _reconciliation(state: str, definition: str, history: str) -> str:
+    if history == "UNKNOWN":
+        return "UNVERIFIABLE"
+    if history == "CONFLICTING":
+        return "AMBIGUOUS"
+    if history == "APPLIED":
+        return "CONSISTENT" if state == "APPLIED" and definition == "MATCH" else "DIVERGENT"
+    return "PENDING" if state == "PENDING" else "DIVERGENT"  # NOT_APPLIED with effects present
+
+
+def _blockers(row: dict, history: str) -> list[str]:
+    state, out = row["state"], []
+    out += ["UNDETECTABLE"] if state == "UNDETECTABLE" else []
+    out += ["PARTIAL_EFFECTS"] if state == "PARTIAL" else []
+    out += ["DEFINITION_MISMATCH"] if row["definition_status"] == "MISMATCH" else []
+    out += ["SEQUENCE_GAP"] if row["sequence_status"] == "GAP" else []
+    out += {"UNKNOWN": ["HISTORY_UNKNOWN"], "CONFLICTING": ["HISTORY_CONFLICTING"]}.get(history, [])
+    out += ["DIVERGENT"] if row["reconciliation"] == "DIVERGENT" else []
+    out += ["DATA_EFFECT_UNPROVEN"] if row["has_data_effects"] and state != "APPLIED" and history != "NOT_APPLIED" else []
+    out += ["DEFINITIONS_NOT_COMPARED"] if state == "APPLIED" and row["definition_status"] == "UNVERIFIABLE" else []
+    out += ["ALREADY_PRESENT"] if state == "APPLIED" and row["definition_status"] == "MATCH" else []
+    return out
+
+
+def _eligibility(blockers: list[str]) -> str:
+    if _HARD_BLOCKERS & set(blockers):
+        return "INELIGIBLE"
+    return "UNVERIFIABLE" if blockers else "ELIGIBLE_FOR_APPROVAL_REVIEW"
+
+
+def _has_data_effects(name: str) -> bool:
+    path = MIGRATIONS / name
+    return path.exists() and bool(DML.search(path.read_text(encoding="utf-8")))
+
+
+def _decide(row: dict, keys: set[tuple], present: set[tuple], expected: dict | None, target: dict | None,
+            history: str) -> None:
+    """Add the additive decision fields to one report row (existing fields are left exactly as they were)."""
+    row["definition_status"], row["definition_mismatches"] = _definition_status(keys, present, expected, target)
+    row["history_status"], row["history_source"] = history, None
+    row["has_data_effects"] = _has_data_effects(row["migration"])
+    row["reconciliation"] = _reconciliation(row["state"], row["definition_status"], history)
+    row["blockers"] = _blockers(row, history)
+    row["eligibility"] = _eligibility(row["blockers"])
+
+
+def detect_applied(signatures: dict[str, set[tuple]], target: dict[str, list[tuple]],
+                   expected_definitions: dict | None = None, history: dict[str, str] | None = None) -> list[dict]:
+    """APPLIED / PENDING / PARTIAL / UNDETECTABLE per migration, in order, with signature keys present.
+
+    Each row also carries descriptive decision fields (definition, sequence, history, reconciliation, blockers,
+    eligibility). ``history`` maps a migration to APPLIED / NOT_APPLIED / CONFLICTING from an authoritative
+    source; a migration it does not cover is UNKNOWN. No field, and no exit status, authorises a replay.
+    """
     present = _catalog_keys(target)
     report = []
     for name, keys in signatures.items():
@@ -200,6 +331,11 @@ def detect_applied(signatures: dict[str, set[tuple]], target: dict[str, list[tup
         missing = sorted(keys - present)[:5]
         report.append({"migration": name, "state": state, "present": found, "expected": len(keys),
                        "missing_examples": [list(k) for k in missing]})
+    for row, seq in zip(report, _sequence_status([r["state"] for r in report])):
+        row["sequence_status"] = seq
+    for row in report:
+        _decide(row, signatures[row["migration"]], present, expected_definitions, target.get("definitions"),
+                (history or {}).get(row["migration"], "UNKNOWN"))
     return report
 
 
@@ -652,7 +788,8 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "detect":
         if not args.target:
             raise SystemExit("detect needs --target")
-        print(json.dumps(detect_applied(migration_signatures(args.dsn), readonly_snapshot(args.target)), indent=1))
+        signatures, expected = replay_expectations(args.dsn)
+        print(json.dumps(detect_applied(signatures, readonly_snapshot(args.target), expected), indent=1))
     elif args.command == "apply":
         print(json.dumps(rollback_all(args.dsn) if args.down else apply_all(args.dsn)))
     else:
